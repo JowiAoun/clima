@@ -1,0 +1,186 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// The component catalogue behind `./run.sh --gallery`.
+//
+// One entry per component, grouped. An entry names the file to instantiate and
+// the properties to instantiate it with, so adding a component to the gallery
+// is a few lines here rather than a new QML file — and a component that is in
+// the tree but not in this list shows up as a gap you can see.
+//
+// `variants` renders the same component several times side by side. That is
+// what the gallery is for: a toggle you can only see switched off is a toggle
+// you have not checked, and the states no screen currently uses are exactly
+// the ones that rot.
+//
+// Fields:
+//   name     what to call it in the sidebar
+//   file     the .qml to instantiate; omit for a `kind` page
+//   kind     "palette" | "type" for the generated foundation pages
+//   blurb    one line, shown above the stage
+//   stage    { w, h } when the component has no implicit size of its own
+//   variants [{ label, props }]; omit for a single default instance
+.pragma library
+
+.import "theme.js" as Theme
+
+// A gentle curve for the series specimens, so the two chart primitives have
+// something to draw. Sample input for a catalogue, not weather.
+function _curve(n, w, h) {
+    var pts = [];
+    for (var i = 0; i < n; ++i) {
+        var t = i / (n - 1);
+        var y = 0.5 + 0.34 * Math.sin(t * Math.PI * 1.15 - 0.4);
+        pts.push({ x: t * w, y: h - y * h });
+    }
+    return pts;
+}
+
+var groups = [
+    {
+        name: "Foundations",
+        items: [
+            { name: "Colour", kind: "palette",
+              blurb: "Every token in theme.js, over the page gradient it is composited on." },
+            { name: "Type", kind: "type",
+              blurb: "The type scale. Sizes are tokens: a range is not a rule." }
+        ]
+    },
+    {
+        name: "Weather details",
+        items: [
+            { name: "Card shell", file: "DetailCard.qml",
+              blurb: "The anatomy the twelve share: title, visualisation slot, status line, context. Shown with the slot empty.",
+              variants: [
+                  { label: "with trend", props: { title: "Card title", status: "Status", body: "Two lines of context sit here, and the shell reserves both whether the sentence fills them or not.", trend: "up" } },
+                  { label: "no trend", props: { title: "Card title", status: "Status", body: "One line.", trend: "none" } }
+              ] },
+            { name: "Temperature",   file: "DetailTemperatureCard.qml",   blurb: "Twelve-hour sparkline; observed solid, forecast dimmed." },
+            { name: "Feels like",    file: "DetailFeelsLikeCard.qml",     blurb: "Two curves and the band between them — the card's subject is the distance." },
+            { name: "Cloud cover",   file: "DetailCloudCoverCard.qml",    blurb: "Dial, ramped off the cloud palette: clear reads sky-blue, overcast near-white." },
+            { name: "Precipitation", file: "DetailPrecipitationCard.qml", blurb: "The number says how much; the columns say when." },
+            { name: "Wind",          file: "DetailWindCard.qml",          blurb: "Compass rose: blunt end into the wind, reach scales with speed." },
+            { name: "Humidity",      file: "DetailHumidityCard.qml",      blurb: "Eight readings against full-height tracks." },
+            { name: "UV",            file: "DetailUvCard.qml",            blurb: "WHO bands are the palette, so the ring itself carries the reading." },
+            { name: "Air quality",   file: "DetailAirQualityCard.qml",    blurb: "The same dial as UV, on the European AQI bands." },
+            { name: "Visibility",    file: "DetailVisibilityCard.qml",    blurb: "A sight line down the long axis of the box." },
+            { name: "Pressure",      file: "DetailPressureCard.qml",      blurb: "Sparkline against a fixed 1005–1020 mb scale." },
+            { name: "Sun",           file: "DetailSunCard.qml",           blurb: "Altitude as a sinusoid; the horizon is zero, so daylight's width is the day length." },
+            { name: "Moon",          file: "DetailMoonCard.qml",          blurb: "The sun card's twin, on the night ramp." }
+        ]
+    },
+    {
+        name: "Screens",
+        items: [
+            { name: "Weather details grid", file: "WeatherDetails.qml", stage: { w: 1244, h: 532 },
+              blurb: "All twelve, responsive columns. Scrolls; its Flickable is layered so the charts stay inside it." },
+            { name: "Hourly overview", file: "HourlyOverview.qml", stage: { w: 1000, h: 430 },
+              blurb: "The chart panel: crossed gradients, no stroked line.",
+              variants: [
+                  { label: "overview", props: { metricId: "overview" } },
+                  { label: "wind",     props: { metricId: "wind" } },
+                  { label: "uv",       props: { metricId: "uv" } }
+              ] },
+            { name: "Hourly list", file: "HourlyList.qml", stage: { w: 1000, h: 330 },
+              blurb: "The same hours as rows, for scanning rather than shape-reading." },
+            { name: "Day strip", file: "DayStrip.qml", stage: { w: 1100, h: 130 },
+              blurb: "Seven days; the selected card abuts the panel below rather than overlapping it." },
+            { name: "Metric tab bar", file: "MetricTabBar.qml", stage: { w: 900, h: 38 },
+              blurb: "Metric pills and the chart/list switch." }
+        ]
+    },
+    {
+        name: "Controls",
+        items: [
+            { name: "Trend badge", file: "TrendBadge.qml",
+              blurb: "The arrow tracks the number, not whether the news is good.",
+              variants: [
+                  { label: "up",     props: { direction: "up",     badgeSize: 22 } },
+                  { label: "down",   props: { direction: "down",   badgeSize: 22 } },
+                  { label: "steady", props: { direction: "steady", badgeSize: 22 } },
+                  { label: "none",   props: { direction: "none",   badgeSize: 22 } }
+              ] },
+            { name: "Feels-like toggle", file: "FeelsLikeToggle.qml",
+              blurb: "Both states, because a switch you have only seen off is a switch you have not checked.",
+              variants: [
+                  { label: "off", props: { checked: false } },
+                  { label: "on",  props: { checked: true } }
+              ] },
+            { name: "Pager button", file: "PagerButton.qml",
+              blurb: "Floats over the chart, so it stays more opaque than a surface.",
+              variants: [
+                  { label: "left",     props: { pointsLeft: true,  enabledState: true } },
+                  { label: "right",    props: { pointsLeft: false, enabledState: true } },
+                  { label: "disabled", props: { pointsLeft: true,  enabledState: false } }
+              ] },
+            { name: "Tab fillet", file: "TabFillet.qml", stage: { w: 40, h: 40 },
+              blurb: "The concave corner where a selected tab meets its panel.",
+              variants: [
+                  { label: "left",  props: { filletRadius: 18, fillColor: "#33ffffff", mirrored: false } },
+                  { label: "right", props: { filletRadius: 18, fillColor: "#33ffffff", mirrored: true } }
+              ] }
+        ]
+    },
+    {
+        name: "Glyphs",
+        items: [
+            { name: "Weather glyph", file: "WeatherGlyph.qml",
+              blurb: "Condition icons, drawn rather than shipped as raster.",
+              variants: [
+                  { label: "clear-day",    props: { kind: "clear-day",    glyphSize: 44 } },
+                  { label: "clear-night",  props: { kind: "clear-night",  glyphSize: 44 } },
+                  { label: "partly-day",   props: { kind: "partly-day",   glyphSize: 44 } },
+                  { label: "partly-night", props: { kind: "partly-night", glyphSize: 44 } },
+                  { label: "cloudy",       props: { kind: "cloudy",       glyphSize: 44 } },
+                  { label: "rain",         props: { kind: "rain",         glyphSize: 44 } },
+                  { label: "rain-night",   props: { kind: "rain-night",   glyphSize: 44 } }
+              ] },
+            { name: "Day icon badge", file: "DayIconBadge.qml",
+              blurb: "The glyph on its pale day plate — clouds get a darker variant there or they vanish.",
+              variants: [
+                  { label: "day",   props: { kind: "partly-day",   night: false, badgeSize: 56 } },
+                  { label: "night", props: { kind: "partly-night", night: true,  badgeSize: 56 } }
+              ] },
+            { name: "Moon glyph", file: "MoonGlyph.qml",
+              blurb: "Illumination is a real parameter, not three fixed pictures.",
+              variants: [
+                  { label: "0.08", props: { illuminated: 0.08, glyphSize: 40 } },
+                  { label: "0.50", props: { illuminated: 0.50, glyphSize: 40 } },
+                  { label: "0.95", props: { illuminated: 0.95, glyphSize: 40 } }
+              ] },
+            { name: "Sun event glyph", file: "SunEventGlyph.qml",
+              blurb: "Sunrise and sunset, distinguished by the arrow rather than by colour alone.",
+              variants: [
+                  { label: "sunrise", props: { kind: "sunrise", glyphSize: 40 } },
+                  { label: "sunset",  props: { kind: "sunset",  glyphSize: 40 } }
+              ] },
+            { name: "Droplet", file: "DropletGlyph.qml",
+              blurb: "Precipitation marker.",
+              variants: [ { label: "", props: { glyphSize: 34 } } ] }
+        ]
+    },
+    {
+        name: "Chart parts",
+        items: [
+            { name: "Series area", file: "SeriesArea.qml", stage: { w: 480, h: 150 },
+              blurb: "Crossed gradients: colour across, alpha down. Sample curve, not weather.",
+              variants: [
+                  { label: "temperature", props: { points: _curve(13, 480, 150), baselineY: 150,
+                                                   gradientTop: 0, gradientBottom: 150,
+                                                   fillRamp: Theme.ramp.temp.fill, lineRamp: Theme.ramp.temp.line } },
+                  { label: "humidity",    props: { points: _curve(13, 480, 150), baselineY: 150,
+                                                   gradientTop: 0, gradientBottom: 150,
+                                                   fillRamp: Theme.ramp.humidity.fill, lineRamp: Theme.ramp.humidity.line } }
+              ] },
+            { name: "Series bars", file: "SeriesBars.qml", stage: { w: 480, h: 150 },
+              blurb: "For sums and bands. Sample values, not weather.",
+              variants: [
+                  { label: "cloud", props: { values: [12, 20, 34, 46, 58, 71, 66, 52, 44, 30], hourWidth: 48,
+                                             axisTop: 8, axisBottom: 142, minValue: 0, maxValue: 100,
+                                             ramp: Theme.ramp.cloud.fill } }
+              ] },
+            { name: "Precipitation strip", file: "PrecipitationStrip.qml", stage: { w: 480, h: 28 },
+              blurb: "One cell per label interval; past hours are hatched, not blank." },
+            { name: "Hatch", file: "HatchPattern.qml", stage: { w: 240, h: 90 },
+              blurb: "\"The past — there is no forecast here\", so absent data reads as deliberate." }
+        ]
+    }
+];

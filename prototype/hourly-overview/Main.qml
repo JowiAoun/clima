@@ -36,9 +36,12 @@ Window {
 
     // `--card Uv` renders one detail card on the page gradient and nothing
     // else, so a card can be built and checked without the rest of the screen
-    // in the way. `--details` renders the whole grid.
+    // in the way. `--details` renders the whole grid, `--gallery` the component
+    // library.
     property string previewCard: ""
     property bool previewGrid: false
+    property bool previewGallery: false
+    property string galleryPick: ""
 
     Loader {
         active: win.previewCard !== ""
@@ -59,10 +62,20 @@ Window {
         source: "WeatherDetails.qml"
     }
 
+    // The gallery gets the whole window with no margin: it paints its own rail
+    // to the edge, the way a tool window should.
+    Loader {
+        active: win.previewGallery
+        anchors.fill: parent
+        sourceComponent: Component {
+            Gallery { pick: win.galleryPick }
+        }
+    }
+
     Item {
         anchors.fill: parent
         anchors.margins: 22
-        visible: win.previewCard === "" && !win.previewGrid
+        visible: win.previewCard === "" && !win.previewGrid && !win.previewGallery
 
         MetricTabBar {
             id: tabs
@@ -131,6 +144,23 @@ Window {
 
         if (args.indexOf("--details") >= 0)
             win.previewGrid = true
+
+        var g = args.indexOf("--gallery")
+        if (g >= 0) {
+            // An optional component name may follow — every word of it up to
+            // the next flag, so `--gallery weather glyph` works without quotes.
+            var words = []
+            for (var w = g + 1; w < args.length && args[w].indexOf("--") !== 0; ++w)
+                words.push(args[w])
+
+            // Before previewGallery, not after: setting that activates the
+            // Loader synchronously, and a Gallery built with an empty pick has
+            // already chosen what to show by the time the pick arrives.
+            win.galleryPick = words.join(" ")
+            win.width = Math.max(win.width, 1500)
+            win.height = Math.max(win.height, 950)
+            win.previewGallery = true
+        }
 
         // --size 1340x900, so a headless grab can be tall enough to hold the
         // whole grid. Reviewing a grid through a viewport that cuts off its

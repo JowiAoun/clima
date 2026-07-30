@@ -4,8 +4,13 @@
 # Runs the hourly-overview prototype. There is no build step: it is pure QML,
 # executed by Qt 6's `qml` runtime.
 #
-#   ./run.sh                          open the window
-#   ./run.sh --grab shot.png          render one frame to a PNG and exit
+#   ./run.sh                          open the hourly screen
+#   ./run.sh --gallery                open the component library
+#   ./run.sh --gallery uv             …on a particular component
+#   ./run.sh --details                the weather-details grid
+#   ./run.sh --card Uv                one detail card, alone on the gradient
+#   ./run.sh --grab shot.png [...]    render one frame to a PNG and exit
+#   ./run.sh --size 1500x950 [...]    set the window size (headless review)
 #   CLIMA_QML=/path/to/qml ./run.sh   use a specific Qt
 #   QT_QPA_PLATFORM=xcb ./run.sh      force X11 if Wayland misbehaves
 

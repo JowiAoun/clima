@@ -21,12 +21,38 @@ The Chart/List switch works too:
 No build step. It is pure QML, executed by Qt 6's `qml` runtime.
 
 ```sh
-./run.sh                              # open the window
+./run.sh                              # open the hourly screen
+./run.sh --gallery                    # open the component library
+./run.sh --gallery uv                 # …on a particular component
+./run.sh --details                    # the weather-details grid
+./run.sh --card Uv                    # one detail card, alone on the gradient
 ./run.sh --grab shot.png              # render one frame headless and exit
 ./run.sh --grab shot.png --metric uv  # …with a given tab selected
 ./run.sh --grab shot.png --list       # …in list view
 ./run.sh --grab shot.png --day 3      # …with a given day card selected
+./run.sh --grab g.png --size 1500x950 # …at a given window size
 ```
+
+### The gallery
+
+`--gallery` is the component library: every component in the prototype, each on
+the page gradient it is actually composited over, with the states no current
+screen happens to use — a toggle switched on, a disabled pager, seven weather
+glyphs, a trend badge in all four directions. Arrow keys move; the filter box
+matches names and file names; `--gallery <name>` opens straight onto one.
+
+It also has two generated pages. **Colour** reads every token out of `theme.js`
+and **Type** reads every size, so a token added there appears in the gallery
+without anyone remembering to add it.
+
+Adding a component to it is an entry in `gallery.js` — file, blurb, optionally
+a stage size and a list of variants — rather than another QML file. A component
+in the tree but not in that list shows up as a gap you can see.
+
+The gallery is worth running after any change to a shared file. Staging
+`HourlyOverview` at 1000px wide is what surfaced its hour glyphs escaping the
+panel's clip; at the window's own width they escape past the window edge and
+nobody ever sees them.
 
 `run.sh` finds a `qml` binary on `PATH`, or falls back to the newest one in the Nix
 store, and wires up the environment those builds need. Overrides:
@@ -44,7 +70,15 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 
 | File | Role |
 |---|---|
-| `Main.qml` | Window; assembles tab bar → day strip → chart |
+| `Main.qml` | Window; assembles tab bar → day strip → chart, and routes `--gallery` / `--details` / `--card` |
+| `Gallery.qml` | The component library browser (`--gallery`) |
+| `gallery.js` | **The catalogue it browses — add a component here, not in QML** |
+| `Specimen.qml` | Builds one component from a file name and a property bag |
+| `WeatherDetails.qml` | The twelve-card weather-details grid |
+| `DetailCard.qml` | The shell all twelve detail cards are built in |
+| `Detail*Card.qml` | The twelve cards; only the visualisation differs |
+| `TrendBadge.qml` | The arrow beside a detail card's status line |
+| `detaildata.js` | Current conditions for the detail cards |
 | `MetricTabBar.qml` | Section title, metric pills, chart/list switch |
 | `DayStrip.qml` | Day cards; the selected one widens and merges into the chart below |
 | `HourlyOverview.qml` | The card: title, legend, and the chart/list body |

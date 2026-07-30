@@ -213,11 +213,23 @@ under about 85 characters or they elide mid-word, which reads as a bug.
 ## 10.9 Checking your work
 
 ```sh
+./run.sh --gallery                              # every component, one screen
+./run.sh --gallery uv                           # …opened on one of them
 ./run.sh --card Uv                              # one card, on the page gradient
 ./run.sh --grab shot.png --card Uv              # …headless, to look at pixels
 ./run.sh --grab g.png --details --size 1300x900 # the whole grid, all three rows
 ./run.sh                                        # the hourly screen
 ```
+
+`--gallery` is the component library: every component on the gradient it is
+composited over, including the states no current screen uses. Its **Colour**
+and **Type** pages are generated from `theme.js`, so a token added there shows
+up without anyone maintaining a list. Add a component to it in `gallery.js`.
+
+Stage a component at a size no screen currently gives it. `HourlyOverview` had
+its hour glyphs escaping the panel's clip — §10.8, again — and at the window's
+own width the escapees land off-window where nobody sees them. The gallery
+staged it at 1000 px and they were unmissable.
 
 Check a card in the grid, not only on its own. Every finding that mattered in
 the first pass — seven reading sizes, one card sitting 23 px low, two dials
