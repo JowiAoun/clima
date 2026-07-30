@@ -1,0 +1,22 @@
+# Build output
+/build/
+/build-*/
+/out/
+/install/
+CMakeUserPresets.json
+compile_commands.json
+.cache/
+
+# Editor / tooling state
+/.claude/
+/.vscode/
+/.idea/
+*.user
+*.autosave
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Mission Control Recall (project memory) — private, do not commit
+CLAUDE.local.md
