@@ -51,10 +51,10 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     color: parent.active ? Theme.color.switchActive : "transparent"
-                    topLeftRadius: index === 0 ? 6 : 0
-                    bottomLeftRadius: index === 0 ? 6 : 0
-                    topRightRadius: index === 1 ? 6 : 0
-                    bottomRightRadius: index === 1 ? 6 : 0
+                    topLeftRadius: index === 0 ? Theme.metric.controlRadius : 0
+                    bottomLeftRadius: index === 0 ? Theme.metric.controlRadius : 0
+                    topRightRadius: index === 1 ? Theme.metric.controlRadius : 0
+                    bottomRightRadius: index === 1 ? Theme.metric.controlRadius : 0
                     border.width: 1
                     border.color: parent.active ? Theme.color.switchBorder : "transparent"
                     Behavior on color { ColorAnimation { duration: 140 } }

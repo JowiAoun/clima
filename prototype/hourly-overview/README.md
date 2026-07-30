@@ -50,6 +50,7 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 | `HourlyOverview.qml` | The card: title, legend, and the chart/list body |
 | `HourlyList.qml` | The list alternative to the chart |
 | `DayIconBadge.qml` | Circular day/night icon badge used by the selected day card |
+| `TabFillet.qml` | The concave corner where the raised day card meets the panel |
 | `SeriesArea.qml` | Gradient-filled curve with an optional dashed overlay line |
 | `SeriesBars.qml` | One bar per hour, coloured by its own value |
 | `metrics.js` | **The metric registry — the tab bar and the chart are both driven from it** |
@@ -82,6 +83,12 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
   the card extends past the bottom of the strip and the chart card, declared after it,
   paints over the overhang and takes the card's bottom border with it. Nothing has to
   line up to the pixel, and it stays correct at any card position or window size.
+  The junction itself is **filleted, not squared**. A tab joined to a panel makes a
+  reflex corner — the fill wraps around the *outside* of the angle — so rounding it is
+  the inverse of rounding a normal corner: a quarter-disc is subtracted from the gap
+  beside the tab, and the fill bulges outward so the tab's side edge flows into the
+  panel's top edge. Squaring that corner is what makes a tab look pasted on rather than
+  grown out of the surface.
 - Selecting a card reveals its night condition beside the daytime one, each in a badge —
   pale for day, blue for night.
 - A list view with per-hour rows: condition, temperature, feels-like, precipitation

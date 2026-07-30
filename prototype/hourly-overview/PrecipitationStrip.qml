@@ -17,7 +17,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 5
+        radius: Theme.metric.controlRadius
         color: Theme.color.stripBg
     }
 
@@ -70,12 +70,12 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            radius: 5
+            radius: Theme.metric.controlRadius
             color: Theme.color.stripPast
         }
         Rectangle {                       // square off the right edge again
             anchors.right: parent.right
-            width: Math.min(5, parent.width)
+            width: Math.min(Theme.metric.controlRadius, parent.width)
             height: parent.height
             color: Theme.color.stripPast
         }

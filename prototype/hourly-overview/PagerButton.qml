@@ -19,7 +19,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: 5
+        radius: Theme.metric.controlRadius
         color: hover.hovered ? Theme.color.pagerBgHover : Theme.color.pagerBg
         opacity: 0.94
         Behavior on color { ColorAnimation { duration: 130 } }

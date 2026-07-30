@@ -63,18 +63,23 @@ var color = {
     badgeNightBottom:"#3f63bd"
 };
 
+// Radii are deliberately generous. The reference reads "soft" because almost
+// nothing in it meets at a hard edge, and the tab/panel junction is filleted
+// rather than squared — see TabFillet.qml.
 var metric = {
     hourWidth:        48,
     plotHeight:       252,
     axisTopPad:       12,
     headerBandHeight: 78,
     gutterWidth:      40,
-    stripHeight:      26,
-    stripGap:         10,
-    panelPadding:     12,
-    cardPadding:      20,
-    cardRadius:       10,
-    panelRadius:      8
+    stripHeight:      28,
+    stripGap:         12,
+    panelPadding:     14,
+    cardPadding:      22,
+    cardRadius:       14,
+    panelRadius:      12,
+    controlRadius:    8,
+    filletRadius:     18
 };
 
 var scale = {

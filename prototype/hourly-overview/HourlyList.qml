@@ -124,7 +124,7 @@ Item {
             Rectangle {
                 anchors.fill: parent
                 anchors.topMargin: 1
-                radius: 4
+                radius: Theme.metric.controlRadius
                 color: parent.isNow ? Theme.color.nowRowBg
                                     : (index % 2 === 0 ? "transparent" : Theme.color.listRowAlt)
             }

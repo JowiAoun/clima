@@ -14,6 +14,15 @@ Window {
     color: Theme.color.pageBg
     title: qsTr("Clima — Hourly (prototype)")
 
+    // The page background is painted as an item, not left to Window.color.
+    // grabToImage() captures contentItem, which does not include the window's
+    // clear colour — so every headless screenshot came out with a black page
+    // behind the cards, which is not what is on screen.
+    Rectangle {
+        anchors.fill: parent
+        color: Theme.color.pageBg
+    }
+
     Item {
         anchors.fill: parent
         anchors.margins: 22

@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+// A raindrop built from rectangles rather than a Shape.
+//
+// Qt Quick Shapes escape ancestor clipping, and this glyph lives inside a
+// horizontally scrolling Flickable — as a Shape, the droplet of the first
+// off-screen bucket drew outside the card entirely. A circle plus a rotated
+// square is a coarser teardrop, but it clips like everything else.
 import QtQuick
-import QtQuick.Shapes
 import "theme.js" as Theme
 
 Item {
@@ -9,37 +14,26 @@ Item {
     property real glyphSize: 11
     property color fillColor: Theme.color.droplet
 
-    implicitWidth: glyphSize * 0.75
+    implicitWidth: glyphSize * 0.78
     implicitHeight: glyphSize
     width: implicitWidth
     height: implicitHeight
 
-    Shape {
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
+    Rectangle {                       // tapered top
+        width: root.width * 0.74
+        height: width
+        radius: width * 0.2
+        x: (root.width - width) / 2
+        y: root.height * 0.06
+        rotation: 45
+        color: root.fillColor
+    }
 
-        ShapePath {
-            fillColor: root.fillColor
-            strokeColor: "transparent"
-            PathSvg {
-                path: {
-                    var w = root.width, h = root.height
-                    return "M " + (w * 0.5).toFixed(2) + " " + (h * 0.04).toFixed(2)
-                         + " C " + (w * 0.92).toFixed(2) + " " + (h * 0.40).toFixed(2)
-                         + " "   + (w * 1.00).toFixed(2) + " " + (h * 0.56).toFixed(2)
-                         + " "   + (w * 1.00).toFixed(2) + " " + (h * 0.68).toFixed(2)
-                         + " C " + (w * 1.00).toFixed(2) + " " + (h * 0.89).toFixed(2)
-                         + " "   + (w * 0.78).toFixed(2) + " " + (h * 1.00).toFixed(2)
-                         + " "   + (w * 0.50).toFixed(2) + " " + (h * 1.00).toFixed(2)
-                         + " C " + (w * 0.22).toFixed(2) + " " + (h * 1.00).toFixed(2)
-                         + " "   + (w * 0.00).toFixed(2) + " " + (h * 0.89).toFixed(2)
-                         + " "   + (w * 0.00).toFixed(2) + " " + (h * 0.68).toFixed(2)
-                         + " C " + (w * 0.00).toFixed(2) + " " + (h * 0.56).toFixed(2)
-                         + " "   + (w * 0.08).toFixed(2) + " " + (h * 0.40).toFixed(2)
-                         + " "   + (w * 0.50).toFixed(2) + " " + (h * 0.04).toFixed(2)
-                         + " Z"
-                }
-            }
-        }
+    Rectangle {                       // round body
+        width: root.width
+        height: root.width
+        radius: width / 2
+        y: root.height - height
+        color: root.fillColor
     }
 }

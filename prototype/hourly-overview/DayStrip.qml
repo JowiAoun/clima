@@ -10,6 +10,10 @@
 // this in Main.qml, so painted over it — covers that overhang, taking the card's
 // bottom border with it. Nothing has to line up to the pixel, and it stays correct
 // at any card position or window size.
+//
+// The junction itself is filleted, not squared: a TabFillet sits in the gap either
+// side of the raised card and curves its edge outward into the panel. Without them
+// the card reads as pasted on top of the panel rather than growing out of it.
 import QtQuick
 import "theme.js" as Theme
 import "mockdata.js" as Data
@@ -21,11 +25,12 @@ Item {
 
     readonly property real cardWidth: 172
     readonly property real selectedExtra: 72     // room for the second badge
-    readonly property real spacing: 8
+    readonly property real spacing: 14
     readonly property real mergeDepth: 8         // overhang into the chart card
-    readonly property real unselectedInset: 12   // how much shorter the others are
+    readonly property real unselectedInset: 20   // how much shorter the others are
+    readonly property real filletRadius: Theme.metric.filletRadius
 
-    implicitHeight: 128
+    implicitHeight: 130
     height: implicitHeight
 
     Flickable {
@@ -79,9 +84,10 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         color: card.selected ? Theme.color.cardBg : Theme.color.dayCardBg
-                        border.width: 1
-                        border.color: card.selected ? Theme.color.daySelectedBorder
-                                                    : Theme.color.cardBorder
+                        // No outline on the raised card: it is one surface with the
+                        // panel below, and an outline would draw a line across that.
+                        border.width: card.selected ? 0 : 1
+                        border.color: Theme.color.cardBorder
                         // Square at the bottom when selected: that edge is under the
                         // chart card and must not round away from it.
                         topLeftRadius: Theme.metric.cardRadius
@@ -89,6 +95,28 @@ Item {
                         bottomLeftRadius: card.selected ? 0 : Theme.metric.cardRadius
                         bottomRightRadius: card.selected ? 0 : Theme.metric.cardRadius
                         Behavior on color { ColorAnimation { duration: 160 } }
+                    }
+
+                    // The outward curves at the base of the raised card. They sit in
+                    // the gaps either side of it, above the chart card's top edge.
+                    TabFillet {
+                        visible: card.selected
+                        mirrored: false
+                        filletRadius: root.filletRadius
+                        extendBelow: root.mergeDepth
+                        fillColor: Theme.color.cardBg
+                        x: -root.filletRadius
+                        y: root.height - root.filletRadius
+                    }
+
+                    TabFillet {
+                        visible: card.selected
+                        mirrored: true
+                        filletRadius: root.filletRadius
+                        extendBelow: root.mergeDepth
+                        fillColor: Theme.color.cardBg
+                        x: card.width
+                        y: root.height - root.filletRadius
                     }
 
                     Text {

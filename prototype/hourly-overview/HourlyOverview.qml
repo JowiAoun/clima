@@ -178,11 +178,6 @@ Item {
             anchors.fill: parent
             radius: Theme.metric.panelRadius
             color: Theme.color.panelBg
-            // Qt Quick Shapes escape ancestor clipping — a precipitation droplet
-            // from an off-screen bucket drew past the card's right edge. A layer
-            // bounds the subtree; it goes on the panel rather than the Flickable
-            // because the panel has an opaque background to composite with.
-            layer.enabled: true
 
             // value axis, outside the scrolling region
             Item {
@@ -454,7 +449,7 @@ Item {
                         Rectangle {
                             id: readout
                             visible: probe.idx >= 0
-                            radius: 5
+                            radius: Theme.metric.controlRadius
                             color: "#e6111a2b"
                             border.width: 1
                             border.color: Theme.color.cardBorder
