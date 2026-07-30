@@ -16,6 +16,21 @@
 // §10.1 says never to build: the cards inside it would come out at 0.135 and
 // read as a lighter patch. Contrast against the page is what defines a surface
 // here, so a section that is not itself a surface has to be pure layout.
+//
+// ---- motion -----------------------------------------------------------------
+// The shell animates one thing: the scroll thumb's colour. That is the whole
+// budget, and the reason is that the page is not short of movement — it is a
+// container for four sections that each already move. The tab bar tints, the day
+// strip slides its selection, the chart crossfades to the list and blends its
+// feels-like series, the details grid arrives as a twelve-card wave. Motion
+// added at the shell level does not join that; it competes with it, and it does
+// so across the reader's whole viewport rather than inside one card.
+//
+// So the section-by-section entrance on load is rejected, and not only because
+// §10.6 forbids a component that is unreadable until its animation finishes.
+// Staggering four sections in means the headline — the one thing the app was
+// opened to read — is the thing being withheld, and the wave the details grid
+// already runs would then be a wave inside a wave.
 import QtQuick
 import "theme.js" as Theme
 
@@ -30,6 +45,12 @@ Item {
     property alias feelsLike: chart.feelsLike
 
     property alias contentY: scroll.contentY
+
+    // A real flick, not an assignment. Setting `contentY` goes through
+    // QQuickFlickable::setContentY(), which calls movementEnding() — so `moving`
+    // never becomes true and the scroll thumb's recolour, the only animation
+    // this shell has, could not be filmed at all. Driven by `--poke flick=`.
+    function flickBy(velocity) { scroll.flick(0, velocity) }
     readonly property real maxContentY: Math.max(0, scroll.contentHeight - scroll.height)
 
     readonly property real margin: Theme.metric.pageMargin
@@ -124,6 +145,24 @@ Item {
     // QtQuick.Shapes alone, with no QtQuick.Controls, so there is no ScrollBar
     // to reach for. It is also the whole affordance telling you the page has
     // more below it, so it should not be invisible until you already know.
+    //
+    // Which settles the one animation a page shell is always offered: the
+    // overlay-scrollbar fade, in on scroll and out again on idle. It is the
+    // obvious motion here and it is wrong here, because the thing it fades away
+    // is the only cue that there is a page below the fold — on a page this tall
+    // the indicator is never redundant, so there is never a moment it is right
+    // to hide. Keeping it and changing its weight says the same thing without
+    // taking the cue back.
+    //
+    // Its `visible` binding is left as a hard toggle, which is the second
+    // tempting animation and also wrong. The state does occur — at 900x2800 the
+    // whole page fits and the indicator correctly disappears — but the only
+    // thing that can reach it is a window resize, and what it is really
+    // reporting is whether the content still overflows the viewport. That makes
+    // it layout, and §10.6 is unambiguous that layout does not animate on
+    // resize: fading here would mean the indicator ghosting in and out under
+    // the cursor as a window drag crosses the threshold, which reads as the app
+    // struggling to keep up rather than as a transition.
     Rectangle {
         id: scrollTrack
         visible: root.maxContentY > 0
@@ -140,10 +179,33 @@ Item {
         Rectangle {
             width: parent.width
             radius: parent.radius
+
+            // The one state the shell has: the reader is moving the page, or
+            // is not. `moving` covers dragging, flicking and the wheel.
+            //
+            // No `--poke` reaches it, so this is the one animation here that
+            // film.sh cannot show: `--poke scroll=N` and `--scroll N` both
+            // assign `contentY`, and QQuickFlickable::setContentY() calls
+            // movementEnding() before it moves, so `moving` is false in every
+            // frame the harness can grab. A `--poke flick=<velocity>` calling
+            // `scroll.flick()` would make it reviewable; that is Main.qml.
             color: scroll.moving ? Theme.color.textMuted : Theme.color.trackLine
+
+            // Size and position are bound straight through, never animated.
+            // The thumb is a readout of where the page is, and a readout that
+            // eases is a readout that lies: during a flick it would trail the
+            // content it reports on, and on a window drag it would ease to a
+            // new height, which is §10.6's "layout does not animate on resize"
+            // wearing a different hat. Both are the affordance lagging the
+            // thing it exists to describe.
             height: Math.max(28, parent.height * scroll.height / Math.max(1, scroll.contentHeight))
             y: (parent.height - height) * (scroll.contentY / Math.max(1, root.maxContentY))
-            Behavior on color { ColorAnimation { duration: 160 } }
+
+            // Was a literal 160 — one of the eight durations for four jobs that
+            // §10.6 was written to stop. A weight change is a tint.
+            Behavior on color {
+                ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+            }
         }
     }
 }

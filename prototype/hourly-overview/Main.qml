@@ -133,7 +133,8 @@ Window {
     // ---- filming ----------------------------------------------------------
     // A still frame cannot show motion. `--grab` is enough to review a layout
     // and useless for reviewing a transition: it lands wherever the animation
-    // happened to be 1200 ms in, which is usually after it finished, so an
+    // happened to be when the grab timer fired, which is usually after it
+    // finished — deliberately so, since golden images want a settled frame. An
     // animation that is wrong — or missing entirely — grabs identically to one
     // that is right.
     //
@@ -164,6 +165,11 @@ Window {
             case "list":    page.listView = on; break
             case "feels":   page.feelsLike = on; break
             case "scroll":  page.contentY = parseFloat(v); break
+            // Negative velocity carries the content upward, i.e. scrolls down.
+            case "flick":
+                var vel = parseFloat(v)
+                page.flickBy(-Math.abs(isNaN(vel) || vel === 0 ? 1400 : vel))
+                break
             // Rebuilding the specimen replays whatever the component does on
             // mount, which for a detail card is the only animation it has —
             // the data behind these cards never changes while the app runs.

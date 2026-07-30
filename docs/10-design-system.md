@@ -203,8 +203,24 @@ Frame 00 is the state *before* the poke; every frame after it is the transition.
 — `remount`, which rebuilds the specimen and replays whatever it does on mount.
 
 If every frame on the sheet looks identical, either nothing is animating or the
-whole thing finished inside one interval. Turn `--every` down and look again
-before concluding it works.
+whole thing finished inside one interval.
+
+**`--every` has a floor of roughly 90 ms per frame offscreen**, whatever you ask
+for: `grabToImage` plus a PNG encode costs more than the interval you set, so
+`--every 20` and `--every 60` produce the same sheet. A `tint` at 150 ms is
+therefore about two usable frames, and anything shorter cannot be resolved by
+filming at all. For those, stretch the duration temporarily, film, and put it
+back — or sample the pixel directly and check the curve is monotonic.
+
+Two states are currently unreachable by `--poke`, so their transitions cannot be
+filmed as they stand:
+
+- **A pager fade.** `PagerButton.enabledState` derives from a Flickable's
+  `contentX`, which only a drag or a pager press changes.
+- **The page's scroll thumb.** `--poke scroll=` assigns `contentY`, and
+  `QQuickFlickable::setContentY()` calls `movementEnding()`, so `moving` never
+  becomes true. `--poke flick=` exists for this: it uses `flick()` so the view
+  really is in motion.
 
 ## 10.7 Weather-detail cards
 
@@ -286,7 +302,10 @@ under about 85 characters or they elide mid-word, which reads as a bug.
 - **Qt Quick Shapes escape ancestor clipping.** `clip: true` on a Flickable or
   ListView does not bound them: scroll `WeatherDetails.qml` without a layer and
   the card rectangles clip while their sparklines paint straight out over the
-  heading. `layer.enabled: true` on the *Flickable* fixes it, because a child
+  heading. It is worse than "does not bound them" — with `clip: true` and no
+  layer, a sparkline revealed by a travelling clip window **paints all twelve
+  hours for the first two frames** and the clip only starts biting part-way
+  through. An animation that works only once it is nearly over. `layer.enabled: true` on the *Flickable* fixes it, because a child
   outside the layer's texture is never drawn into it. Safe over a gradient even
   though every surface is translucent — source-over compositing is associative,
   so flattening a group and then laying it over the page gives the same pixels.
