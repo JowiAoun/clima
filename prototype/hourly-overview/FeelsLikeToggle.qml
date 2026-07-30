@@ -32,7 +32,7 @@ Item {
             radius: height / 2
             y: (parent.height - height) / 2
             x: root.checked ? parent.width - width - 3 : 3
-            color: root.checked ? Theme.color.cardBg : Theme.color.toggleKnob
+            color: root.checked ? Theme.color.onAccent : Theme.color.toggleKnob
             Behavior on x { NumberAnimation { duration: 170; easing.type: Easing.OutCubic } }
             Behavior on color { ColorAnimation { duration: 160 } }
         }

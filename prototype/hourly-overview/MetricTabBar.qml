@@ -148,7 +148,7 @@ Item {
                         id: pillLabel
                         text: pill.modelData.label
                         anchors.centerIn: parent
-                        color: pill.active ? Theme.color.cardBg : Theme.color.textMuted
+                        color: pill.active ? Theme.color.onAccent : Theme.color.textMuted
                         font.pixelSize: 13
                         font.bold: pill.active
                         Behavior on color { ColorAnimation { duration: 140 } }

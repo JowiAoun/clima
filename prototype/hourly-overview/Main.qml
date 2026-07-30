@@ -18,9 +18,20 @@ Window {
     // grabToImage() captures contentItem, which does not include the window's
     // clear colour — so every headless screenshot came out with a black page
     // behind the cards, which is not what is on screen.
+    //
+    // It is a gradient rather than a flat fill because every surface above it
+    // is translucent: the cards have no colour of their own, and take whatever
+    // the gradient is doing behind them. Flatten this and the whole page
+    // flattens with it.
     Rectangle {
         anchors.fill: parent
-        color: Theme.color.pageBg
+        gradient: Gradient {
+            GradientStop { position: 0.00; color: Theme.color.pageStop0 }
+            GradientStop { position: 0.06; color: Theme.color.pageStop1 }
+            GradientStop { position: 0.30; color: Theme.color.pageStop2 }
+            GradientStop { position: 0.60; color: Theme.color.pageStop3 }
+            GradientStop { position: 1.00; color: Theme.color.pageStop4 }
+        }
     }
 
     Item {

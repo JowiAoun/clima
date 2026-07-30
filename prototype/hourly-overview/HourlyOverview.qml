@@ -450,7 +450,7 @@ Item {
                             id: readout
                             visible: probe.idx >= 0
                             radius: Theme.metric.controlRadius
-                            color: "#e6111a2b"
+                            color: "#e6141d33"
                             border.width: 1
                             border.color: Theme.color.cardBorder
                             width: readoutText.implicitWidth + 16

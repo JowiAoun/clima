@@ -4,14 +4,56 @@
 // whole chart can be re-skinned without touching layout code.
 .pragma library
 
-var color = {
-    pageBg:        "#111a2b",
+// Surfaces are translucent, not painted.
+//
+// The reference has no opaque cards at all: the page is one vertical gradient
+// and every surface is a thin white wash over it, so a card's actual colour is
+// whatever the gradient is doing behind it at that scroll depth. Flat fills
+// cannot reproduce that — they are one colour everywhere, and the page stops
+// reading as a single lit surface with things resting on it.
+//
+// Alpha ladder, matching the reference's three levels: 0.05 recedes, 0.07 is
+// the default surface, 0.10 is raised or hovered. In #AARRGGBB those are 0d,
+// 12 and 1a.
+//
+// The reference also puts backdrop-blur(60px) under each card. That is
+// deliberately not reproduced: blurring a smooth vertical gradient returns
+// almost exactly the same gradient, so it would cost an offscreen pass and a
+// blur per card to change nothing. It earns its keep on their radar map, and
+// that is where to revisit it.
+var surfaceAlpha = {
+    recede: "#0d",   // 0.05
+    base:   "#12",   // 0.07
+    raised: "#1a"    // 0.10
+};
 
-    cardBg:        "#1a2440",
-    cardBorder:    "#2a3557",
-    panelBg:       "#1e2a48",
-    dayCardBg:     "#151d33",   // unselected day cards recede; the selected one
-                                // takes cardBg so it merges with the chart below
+var color = {
+    // Page gradient stops. Declared here, applied in Main.qml — QML cannot
+    // generate GradientStop elements from a Repeater, so they are written out.
+    pageStop0:     "#203580",   // 0.00
+    pageStop1:     "#443e73",   // 0.06
+    pageStop2:     "#443a66",   // 0.30
+    pageStop3:     "#27284f",   // 0.60
+    pageStop4:     "#171e44",   // 1.00
+    pageBg:        "#27284f",   // flat fallback, ~the gradient's midpoint
+
+    surfaceRecede: "#0dffffff",
+    surfaceBase:   "#12ffffff",
+    surfaceRaised: "#1affffff",
+
+    cardBg:        "#12ffffff",  // the card surface
+    cardBorder:    "#1affffff",
+    panelBg:       "transparent", // the chart sits directly on the card: a
+                                  // second wash inside the first would read as
+                                  // 0.135, a panel darker than anything in the
+                                  // reference
+    dayCardBg:     "#0dffffff",   // unselected day cards recede; the selected
+                                  // one takes cardBg and merges with the panel
+
+    // Ink for text sitting *on* the accent, which is a light yellow. This was
+    // previously cardBg — fine while cardBg was an opaque dark navy, invisible
+    // the moment it became a white wash.
+    onAccent:      "#141d33",
 
     textPrimary:   "#ffffff",
     textMuted:     "#98a4be",
@@ -27,23 +69,26 @@ var color = {
     listRowAlt:    "#0affffff",
     nowRowBg:      "#1fffd24a",
 
-    stripBg:       "#2d3d5e",
-    stripPast:     "#26324e",
+    stripBg:       "#1affffff",
+    stripPast:     "#0dffffff",
     stripDivider:  "#1affffff",
     droplet:       "#93c6f2",
 
-    accent:        "#ffd24a",
-    toggleTrack:   "#3b4767",
+    accent:        "#ffd02c",   // measured off the reference's selected pill
+    toggleTrack:   "#26ffffff",
     toggleKnob:    "#c6cede",
 
-    pillHover:          "#26ffffff",
-    switchActive:       "#2c3a59",
-    switchBorder:       "#445273",
-    daySelectedBorder:  "#39466b",
+    pillHover:          "#1affffff",
+    switchActive:       "#1affffff",
+    switchBorder:       "#33ffffff",
+    daySelectedBorder:  "#33ffffff",
 
-    pagerBg:       "#f0323f5e",
-    pagerBgHover:  "#f0455677",
-    pagerGlyph:    "#dde4f2",
+    // Pager buttons float over the chart, so they stay more opaque than a
+    // surface — but still tinted rather than painted, or they punch a flat
+    // hole in the gradient.
+    pagerBg:       "#99141d33",
+    pagerBgHover:  "#b3141d33",
+    pagerGlyph:    "#e8edf7",
 
     sunGlyphWarm:  "#ffd97a",
     sunGlyphCool:  "#f2952f",

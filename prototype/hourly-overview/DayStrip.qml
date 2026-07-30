@@ -26,7 +26,12 @@ Item {
     readonly property real cardWidth: 172
     readonly property real selectedExtra: 72     // room for the second badge
     readonly property real spacing: 14
-    readonly property real mergeDepth: 8         // overhang into the chart card
+    // The selected card used to overhang into the chart card, so the chart —
+    // painted after it — would cover the card's bottom border. There is no
+    // border to cover any more, and now that both surfaces are translucent an
+    // overhang is actively wrong: the overlap would take the wash twice and
+    // show as a lighter band across the junction. They abut instead.
+    readonly property real mergeDepth: 0
     readonly property real unselectedInset: 20   // how much shorter the others are
     readonly property real filletRadius: Theme.metric.filletRadius
 
