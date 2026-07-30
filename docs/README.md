@@ -51,6 +51,7 @@ macOS signing budget, and team shape. See [`08-risks.md`](08-risks.md) §8.2.
 | [`06-roadmap.md`](06-roadmap.md) | Eight milestones, effort, dates, exit criteria, and the concrete first week |
 | [`07-packaging.md`](07-packaging.md) | How it reaches users on each platform, and the CI that builds it |
 | [`08-risks.md`](08-risks.md) | Twelve risks, five decisions I need from you, six things I could not verify |
+| [`09-reference-capture.md`](09-reference-capture.md) | How we measure MSN instead of guessing at it, and what the first captures corrected |
 
 ## Non-negotiables
 
