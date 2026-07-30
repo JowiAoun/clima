@@ -55,6 +55,13 @@ Item {
     // together when the gallery moves to another component. Qt.callLater
     // dedupes by function identity, so four triggers in one pass build once
     // instead of four times.
+    // Bumped from outside to force a rebuild without changing anything about
+    // what is being built. A detail card's data never changes while the app
+    // runs, so the only motion it has is whatever it does on mount — and the
+    // only way to watch that twice is to mount it again.
+    property int remountToken: 0
+    onRemountTokenChanged: Qt.callLater(rebuild)
+
     onSourceChanged: Qt.callLater(rebuild)
     onPropsChanged: Qt.callLater(rebuild)
     onStageWidthChanged: Qt.callLater(rebuild)

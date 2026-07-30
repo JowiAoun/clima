@@ -130,11 +130,115 @@ Window {
         onTriggered: page.contentY = Math.min(target, page.maxContentY)
     }
 
+    // ---- filming ----------------------------------------------------------
+    // A still frame cannot show motion. `--grab` is enough to review a layout
+    // and useless for reviewing a transition: it lands wherever the animation
+    // happened to be 1200 ms in, which is usually after it finished, so an
+    // animation that is wrong — or missing entirely — grabs identically to one
+    // that is right.
+    //
+    //   --film <prefix> --frames N --every MS
+    //
+    // writes <prefix>-00.png … and quits. `film.sh` wraps this and tiles the
+    // frames into one contact sheet, which is the artefact you actually look at.
+    //
+    // What makes it show a *transition* rather than N copies of a resting state
+    // is `--poke`: frame 00 is grabbed, the poke is applied, and every frame
+    // after it is the component changing. See applyPokes().
+    property var pokes: []
+
+    function applyPokes() {
+        for (var i = 0; i < win.pokes.length; ++i) {
+            var eq = win.pokes[i].indexOf("=")
+            if (eq < 0) {
+                console.warn("--poke: expected target=value, got", win.pokes[i])
+                continue
+            }
+            var k = win.pokes[i].substring(0, eq)
+            var v = win.pokes[i].substring(eq + 1)
+            var on = (v === "true" || v === "1")
+
+            switch (k) {
+            case "metric":  page.metricId = v; break
+            case "day":     page.dayIndex = parseInt(v); break
+            case "list":    page.listView = on; break
+            case "feels":   page.feelsLike = on; break
+            case "scroll":  page.contentY = parseFloat(v); break
+            // Rebuilding the specimen replays whatever the component does on
+            // mount, which for a detail card is the only animation it has —
+            // the data behind these cards never changes while the app runs.
+            case "remount":
+                if (galleryLoader.item !== null)
+                    galleryLoader.item.remount()
+                else
+                    console.warn("--poke remount: only meaningful with --gallery")
+                break
+            default:
+                console.warn("--poke: unknown target", k)
+            }
+        }
+    }
+
+    Timer {
+        id: filmStart
+        interval: 900               // let first paint and any mount motion settle
+        onTriggered: filmTimer.start()
+    }
+
+    // --poke without --film: apply once the scene has settled, so a plain
+    // --grab can capture a poked *resting* state rather than a transition.
+    Timer {
+        id: pokeOnly
+        interval: 500
+        onTriggered: win.applyPokes()
+    }
+
+    Timer {
+        id: filmTimer
+        repeat: true
+        interval: 60
+        property string prefix: ""
+        property int total: 8
+        property int shot: 0
+        property int saved: 0
+
+        onTriggered: {
+            // On the second tick, so frame 00 is a settled "before" that has
+            // definitely rendered, and frame 01 is the first moment of change.
+            if (shot === 1)
+                win.applyPokes()
+
+            if (shot >= total) {
+                stop()              // saves are still in flight; the last one quits
+                return
+            }
+
+            var idx = shot
+            shot++
+            var name = filmTimer.prefix + "-" + (idx < 10 ? "0" : "") + idx + ".png"
+            var ok = win.contentItem.grabToImage(function (result) {
+                if (!result.saveToFile(name))
+                    console.warn("film: could not write", name)
+                filmTimer.saved++
+                if (filmTimer.saved >= filmTimer.total)
+                    Qt.quit()
+            })
+            if (!ok) {
+                console.warn("film: grabToImage refused")
+                Qt.quit()
+            }
+        }
+    }
+
     // Headless capture, for design review and CI golden images:
     //   qml Main.qml -- --grab shot.png [--metric wind]
     Timer {
         id: grabTimer
-        interval: 1200
+        // Long enough for the details grid's staggered reveal to finish: the
+        // last card starts a stagger-per-card into the wave and then takes a
+        // full reveal of its own. Grab before that lands and every golden image
+        // catches a different card mid-sweep.
+        interval: 1600
         property string target: ""
         onTriggered: {
             var ok = win.contentItem.grabToImage(function (result) {
@@ -228,6 +332,39 @@ Window {
             } else {
                 console.warn("--scroll: expected a distance >= 0, got", args[sc + 1])
             }
+        }
+
+        // --poke repeats: --poke metric=uv --poke day=3
+        var collected = []
+        for (var p = 0; p < args.length; ++p)
+            if (args[p] === "--poke" && p + 1 < args.length)
+                collected.push(args[p + 1])
+        win.pokes = collected
+
+        var fr = args.indexOf("--frames")
+        if (fr >= 0 && fr + 1 < args.length) {
+            var nf = parseInt(args[fr + 1])
+            if (!isNaN(nf) && nf > 0)
+                filmTimer.total = nf
+            else
+                console.warn("--frames: expected a count > 0, got", args[fr + 1])
+        }
+
+        var ev = args.indexOf("--every")
+        if (ev >= 0 && ev + 1 < args.length) {
+            var ms = parseInt(args[ev + 1])
+            if (!isNaN(ms) && ms > 0)
+                filmTimer.interval = ms
+            else
+                console.warn("--every: expected ms > 0, got", args[ev + 1])
+        }
+
+        var fm = args.indexOf("--film")
+        if (fm >= 0 && fm + 1 < args.length && args[fm + 1].indexOf("--") !== 0) {
+            filmTimer.prefix = args[fm + 1]
+            filmStart.start()
+        } else if (win.pokes.length > 0) {
+            pokeOnly.start()
         }
 
         var i = args.indexOf("--grab")

@@ -121,18 +121,90 @@ the card's words say whether that is good news.
 
 ## 10.6 Motion
 
-| | |
-|---|---|
-| Colour / fill change | 140–160 ms |
-| Size or position change | 190 ms, `Easing.OutCubic` |
-| View transitions | 340 ms, `Easing.OutCubic` |
+Durations are tokens in `theme.js` as `Theme.motion.*`. **Never write a literal
+duration in a component.** The first version of this section gave *ranges* —
+"140–160 ms" — and the eight components that animated at all came back with
+130, 140, 150, 160, 170, 190, 340 and 430 ms. Eight durations for four jobs.
+A range is not a rule; this is the same lesson §10.4 learned about type.
+
+| Job | Token | ms |
+|---|---|---|
+| A fill, a text colour, a border | `tint` | 150 |
+| Something moved or changed size | `move` | 190 |
+| One view becoming another | `view` | 340 |
+| A value finding its place | `reveal` | 520 |
+| Between one sibling's reveal and the next | `stagger` | 45 |
+
+**Easing is `Easing.OutCubic` unless you have a stated reason.** Things
+decelerate into place because they are arriving, not departing. It is written
+literally rather than tokenised because `Easing.OutCubic` is a QML enum and
+`theme.js` is a plain JS library — a name is not a magic number, and it greps.
 
 The reference uses `0.2s linear` for its selection fill. Ours is slightly
 faster and eased, which reads better at these sizes; that is a deliberate
 divergence, not drift.
 
-Never animate on a timer that runs when nothing is happening. Everything here
-is state-driven.
+### What must not animate
+
+Restraint is most of the work here. A page where everything moves is a page
+where nothing is legible, and every one of these has a specific failure mode.
+
+- **Nothing animates on a timer.** No pulsing, breathing, shimmering, drifting
+  or looping. If it moves while the user is doing nothing, it is wrong. This
+  also destroys golden-image tests, which are the only regression net this
+  prototype has.
+- **No reveal is ever re-triggered.** In particular, nothing fires on scrolling
+  into view. A grid that re-animates each time it passes the fold turns a page
+  of information into a slot machine, and makes scrolling back to re-read a
+  value actively unpleasant.
+- **Everything settles inside a second.** `--grab` waits 1600 ms; anything
+  still moving after that makes every golden image a coin toss.
+- **Text does not fly, fade or slide.** A reading may count up; a label may
+  change colour. Nothing else. A card whose title fades in is a card the reader
+  is waiting for.
+- **The reader can read it at rest position zero.** If a component is
+  meaningless until its animation finishes, the animation is load-bearing and
+  the component is broken. Titles, statuses and bodies are present immediately.
+- **No `Math.random`, anywhere, including in timing.** Determinism is not
+  negotiable.
+- **Layout does not animate on resize.** Reflow is not a transition; a window
+  drag that makes twelve cards ease to new positions reads as lag.
+
+### The reveal
+
+Detail cards have no interaction and no changing data — the provider values are
+fixed for the life of the process — so no card ever transitions between states.
+Their one honest piece of motion is *arrival*: a dial sweeping up to its
+reading, a bar growing off its baseline, a curve drawing itself in. It earns its
+place by showing where the value sits on its scale rather than merely asserting
+it.
+
+`DetailCard` provides the hook. `reveal` runs 0 → 1 once, shortly after the card
+is built, over `Theme.motion.reveal`; bind whatever should grow or sweep to it.
+`WeatherDetails` sets `revealDelay` per card so the grid arrives as one wave
+rather than twelve separate events.
+
+### Reviewing motion
+
+A still frame cannot show motion, and `--grab` lands wherever the animation
+happened to be — usually after it finished. **An animation that is missing
+grabs identically to one that is right.** `film.sh` is the tool:
+
+```sh
+./film.sh out.png -- --size 1000x700 --scroll 430 --poke feels=true
+./film.sh out.png --frames 12 --every 45 -- --gallery UV --poke remount=1
+./film.sh out.png -- --poke metric=uv
+./film.sh out.png -- --poke day=4
+```
+
+It films N frames and tiles them into one contact sheet, reading left to right.
+Frame 00 is the state *before* the poke; every frame after it is the transition.
+`--poke` drives `metric`, `day`, `list`, `feels`, `scroll` and — in the gallery
+— `remount`, which rebuilds the specimen and replays whatever it does on mount.
+
+If every frame on the sheet looks identical, either nothing is animating or the
+whole thing finished inside one interval. Turn `--every` down and look again
+before concluding it works.
 
 ## 10.7 Weather-detail cards
 

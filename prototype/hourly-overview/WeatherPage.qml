@@ -27,6 +27,7 @@ Item {
     property alias metricId: tabs.currentId
     property alias listView: tabs.listView
     property alias dayIndex: dayStrip.currentIndex
+    property alias feelsLike: chart.feelsLike
 
     property alias contentY: scroll.contentY
     readonly property real maxContentY: Math.max(0, scroll.contentHeight - scroll.height)

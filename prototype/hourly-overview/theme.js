@@ -196,6 +196,39 @@ var type = {
     heroLabel:   14    // a slug's label
 };
 
+// Motion, as tokens for exactly the reason type sizes are tokens: the first
+// pass at this gave *ranges* in a document — "140–160 ms", "190 ms" — and the
+// components that bothered to animate at all came back with 130, 140, 150, 160,
+// 170, 190, 340 and 430. Eight durations for four jobs. A range is not a rule.
+//
+// Easing is not in here because `Easing.OutCubic` is a QML enum and this is a
+// plain JS library. Write it literally; it is a name rather than a magic number,
+// and it greps. **OutCubic unless there is a stated reason** — things decelerate
+// into place because they are arriving, not departing.
+var motion = {
+    // A fill, a text colour, a border. Should feel instant rather than
+    // animated: you are meant to notice the new colour, not the crossfade.
+    tint:    150,
+
+    // Something moved or changed size. Long enough to follow, short enough
+    // that you are never waiting for it.
+    move:    190,
+
+    // One view becoming another — chart to list, a card opening.
+    view:    340,
+
+    // A value finding its place: a dial sweeping to its reading, a bar
+    // growing from its baseline, a curve drawing itself in. Slower than
+    // `move` on purpose, because the eye is meant to read the journey and
+    // not merely notice that something happened.
+    reveal:  520,
+
+    // Between one sibling's reveal and the next. Deliberately small: twelve
+    // cards at 45 ms is a 500 ms wave that reads as one gesture, where the
+    // same wave at 150 ms reads as twelve separate things going off.
+    stagger:  45
+};
+
 var scale = {
     tempMin:  0,
     tempMax:  40,

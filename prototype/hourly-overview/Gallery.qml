@@ -23,6 +23,11 @@ Item {
     // moon card instead of on whatever happens to be first.
     property string pick: ""
 
+    // Rebuild every specimen on the stage, replaying whatever they do on mount.
+    // Driven by `--poke remount=1`; see Main.qml.
+    property int remountToken: 0
+    function remount() { remountToken++ }
+
     readonly property real railWidth: 232
 
     // The catalogue, filtered. Groups that empty out drop away with their
@@ -404,6 +409,7 @@ Item {
                         props: parent.modelData.props ? parent.modelData.props : ({})
                         stageWidth: root.current.stage ? root.current.stage.w : 0
                         stageHeight: root.current.stage ? root.current.stage.h : 0
+                        remountToken: root.remountToken
                     }
 
                     Text {

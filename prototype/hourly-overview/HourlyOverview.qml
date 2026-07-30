@@ -21,6 +21,10 @@ Item {
 
     property string metricId: "overview"
     property bool listView: false
+
+    // Exposed so a headless film can drive the feels-like morph, which is
+    // otherwise reachable only by clicking the toggle.
+    property alias feelsLike: toggle.checked
     readonly property var metric: Metrics.byId(metricId)
     readonly property bool supportsFeelsLike: metric.id === "overview"
 

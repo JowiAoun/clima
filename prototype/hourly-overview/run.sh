@@ -89,9 +89,14 @@ fi
 # Without this, Qt decides stderr has no console and silently swallows QML errors.
 export QT_FORCE_STDERR_LOGGING="${QT_FORCE_STDERR_LOGGING:-1}"
 
-if [[ "${1:-}" == "--grab" ]]; then
-    export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
-fi
+# Any headless capture wants the offscreen platform, and --grab is not always
+# the first argument — scan for either.
+for _a in "$@"; do
+    if [[ "$_a" == "--grab" || "$_a" == "--film" ]]; then
+        export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
+        break
+    fi
+done
 
 # Which Qt got picked matters only when something is wrong with the pick, so
 # it is opt-in. CLIMA_VERBOSE=1 ./run.sh to see it.

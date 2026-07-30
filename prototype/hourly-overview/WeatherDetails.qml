@@ -47,7 +47,17 @@ Item {
 
             delegate: Loader {
                 required property string modelData
+                required property int index
                 source: "Detail" + modelData + "Card.qml"
+
+                // Stagger the reveal across the grid. Twelve cards at one
+                // stagger apart is a half-second wave that reads as a single
+                // gesture; the same wave three times slower reads as twelve
+                // separate things going off, which is a fidget rather than a
+                // reveal. Set here rather than in the card because only the
+                // grid knows where a card sits in the order.
+                onLoaded: if (item !== null)
+                    item.revealDelay = index * Theme.motion.stagger
                 // A card that fails to load leaves a hole rather than
                 // collapsing the grid, so the gap names the culprit.
                 onStatusChanged: if (status === Loader.Error)

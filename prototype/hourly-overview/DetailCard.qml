@@ -32,6 +32,48 @@ Item {
     // The visualisation. Anchor it to fill; it is already the right size.
     property Component content
 
+    // ---- the reveal --------------------------------------------------------
+    // These cards have no interaction and no changing data: the provider values
+    // are fixed for the life of the process, so nothing about a card ever
+    // transitions from one state to another. The one honest piece of motion
+    // available to them is the *arrival* — a dial sweeping up to its reading, a
+    // bar growing off its baseline, a curve drawing itself in — which is worth
+    // having because it shows the reader where the value sits on the scale
+    // rather than just asserting it.
+    //
+    // `reveal` runs 0 → 1 once, shortly after the card is built. Bind whatever
+    // should grow, sweep or draw to it:
+    //
+    //     PathAngleArc { sweepAngle: fullSweep * root.card.reveal }
+    //     Rectangle { height: barHeight * root.card.reveal }
+    //
+    // Three rules, and they are not negotiable:
+    //
+    //   - It is a **one-shot**. Nothing re-triggers it. In particular it must
+    //     never fire on scrolling into view: a grid that re-animates every time
+    //     it passes the fold turns a page of information into a slot machine.
+    //   - It must be **finished** well inside a second, or `--grab` starts
+    //     catching cards mid-sweep and every golden image becomes a coin toss.
+    //   - The card must be **readable at reveal = 0**. Titles, status lines and
+    //     bodies do not fade in. If the whole card assembles itself out of
+    //     nothing, the reader waits for a page they could already have read.
+    property real reveal: 0
+    property int revealDelay: 0        // set by the grid, to stagger the wave
+
+    Timer {
+        id: revealStart
+        interval: 60 + root.revealDelay
+        running: true
+        onTriggered: root.reveal = 1
+    }
+
+    Behavior on reveal {
+        NumberAnimation {
+            duration: Theme.motion.reveal
+            easing.type: Easing.OutCubic
+        }
+    }
+
     readonly property real contentWidth: card.width - Theme.metric.detailPadH * 2
     readonly property real contentHeight: contentArea.height
 
