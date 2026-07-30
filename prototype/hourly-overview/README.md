@@ -43,6 +43,30 @@ No build step. It is pure QML, executed by Qt 6's `qml` runtime.
 in, so a headless grab without it reviews the top third and silently signs off on
 everything below — which is where the twelve charts are.
 
+### Looking at motion
+
+A still frame cannot show motion, and `--grab` lands wherever the animation
+happened to be — usually after it finished. **An animation that is missing grabs
+identically to one that is right.** `film.sh` films a transition and tiles the
+frames into one contact sheet:
+
+```sh
+./film.sh out.png -- --size 1000x700 --scroll 430 --poke feels=true
+./film.sh out.png --frames 12 --every 45 -- --gallery UV --poke remount=1
+./film.sh out.png -- --poke metric=uv
+./film.sh out.png -- --poke day=4
+```
+
+Frames read left to right, top to bottom. Frame 00 is the state *before* the
+poke; everything after it is the transition. If all the frames look identical,
+either nothing is animating or the whole thing finished inside one interval —
+turn `--every` down before concluding it works.
+
+`--poke` drives `metric`, `day`, `list`, `feels`, `scroll`, and — in the gallery
+— `remount`, which rebuilds the specimen so whatever a component does on mount
+can be watched twice. That last one exists because the detail cards have no
+interaction and no changing data: arrival is the only motion they have.
+
 ### The gallery
 
 `--gallery` is the component library: every component in the prototype, each on
@@ -92,7 +116,8 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 
 | File | Role |
 |---|---|
-| `Main.qml` | Window; hosts the page and routes `--gallery` / `--details` / `--card` |
+| `Main.qml` | Window; hosts the page and routes `--gallery` / `--details` / `--card` / `--film` |
+| `film.sh` | **Films a transition and tiles the frames — the way to review motion** |
 | `WeatherPage.qml` | **The page — the four sections in one scrolling column** |
 | `LocationBar.qml` | Place name, disclosure chevron, home marker |
 | `CurrentConditions.qml` | The headline: glyph, temperature, condition, outlook, six slugs |
@@ -115,7 +140,7 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 | `SeriesBars.qml` | One bar per hour, coloured by its own value |
 | `metrics.js` | **The metric registry — the tab bar and the chart are both driven from it** |
 | `mockdata.js` | Stand-in for the Open-Meteo provider |
-| `theme.js` | Design tokens and the colour ramps |
+| `theme.js` | Design tokens — colour, geometry, type, and `motion` durations |
 | `chartmath.js` | Path generation, ramp sampling, moon phase |
 | `WeatherGlyph` · `SunEventGlyph` · `MoonGlyph` · `DropletGlyph` · `HatchPattern` · `PagerButton` · `FeelsLikeToggle` | Small procedural pieces |
 
