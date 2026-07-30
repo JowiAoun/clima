@@ -1,22 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Sun detail card — the day drawn as the sun's own path across the sky.
+// Moon detail card — DetailSunCard.qml's twin, and deliberately the same card.
 //
-// The curve is a sinusoid in altitude: zero at sunrise and sunset, one at solar
-// noon, negative outside. The horizon line is altitude zero, so the stretch
-// above it *is* the daylight and its width on the card *is* the day length.
-// Nothing here is a decorative bell — move riseMin or setMin and the crossings,
-// the sun mark and the warm stretch all move with them.
+// The curve is a sinusoid in altitude: zero at moonrise and moonset, one at the
+// moon's transit, negative outside. The horizon line is altitude zero, so the
+// stretch above it *is* the time the moon is up and its width on the card *is*
+// that duration, as a fraction of the twenty-four hours the box spans.
 //
-// The horizontal span is a full 24 hours centred on solar noon, which is why the
-// two crossings sit symmetrically about the middle of the box.
+// Two things are the moon's own, and only two:
 //
-// DetailMoonCard.qml is this card's twin and is deliberately the same card with
-// two things changed: a cool ramp instead of a warm one, and the moon at its
-// phase instead of a sun disc on the mark. Everything else — the band geometry,
-// the horizon, the crossing dots, the annotation under the span, the two clock
-// figures — is written the same way in both files on purpose. A geometry change
-// here belongs there too; the grid puts them side by side and they are read as a
-// pair.
+//   - the ramp is cool silver-blue rather than warm, so a glance at the grid
+//     tells the pair apart before either title is read;
+//   - the mark on the curve is the moon at its actual phase, drawn by
+//     ChartMath.moonPath from `illumination`, so a first quarter and a waning
+//     gibbous do not draw the same card.
+//
+// Everything else — band geometry, horizon, crossing dots, the annotation under
+// the span, the two clock figures — is written the same way as in the sun card
+// on purpose. A geometry change here belongs there too.
+//
+// Where the mark sits is the honest part. The moon set at 8:03 AM and does not
+// rise again until 9:25 PM, and it is 12:28 PM: it is *below* the horizon, about
+// a third of the way through that gap. So it is drawn low on the dim stretch
+// past moonset, not parked on the arc. The window wraps, which is what puts a
+// set-before-rise night on the same footing as the sun's rise-before-set day.
 import QtQuick
 import QtQuick.Shapes
 import "theme.js" as Theme
@@ -26,9 +32,9 @@ import "detaildata.js" as Detail
 DetailCard {
     id: root
 
-    readonly property var d: Detail.sun
+    readonly property var d: Detail.moon
 
-    title: qsTr("Sun")
+    title: qsTr("Moon")
     status: d.status
     trend: d.trend
     body: d.body
@@ -36,21 +42,24 @@ DetailCard {
     content: Item {
         id: viz
 
-        // The one thing this card owns that its twin does not: a warm ramp,
-        // keyed on altitude with p = 0 at the zenith and p = 1 at the horizon.
-        // The same three stops fill the arc and tint the mark, so the mark's
-        // colour reads as "how high the sun is" rather than as branding.
+        // The one thing this card owns that its twin does not: a cool ramp,
+        // keyed on altitude with p = 0 at the transit and p = 1 at the horizon.
+        // Silver overhead, cool blue where it meets the horizon.
         readonly property var skyRamp: [
-            { p: 0.00, c: "#ffe488" },
-            { p: 0.45, c: "#ffc63f" },
-            { p: 1.00, c: "#ef7526" }
+            { p: 0.00, c: "#eaf0ff" },
+            { p: 0.45, c: "#b6c8f0" },
+            { p: 1.00, c: "#7a97d8" }
         ]
+        // The unlit limb. Darker than MoonGlyph's, which sits on the hourly
+        // chart: at 14 px the shadowed side has to be well below the surface or
+        // the phase stops being visible at all.
+        readonly property color moonDark: "#222a4a"
 
         // ---- the cycle, in minutes -------------------------------------------
-        // Minutes up, taken modulo a day so a set-before-rise pair (which is what
-        // the moon hands its twin) measures the up-window rather than a negative
-        // number. tSet is the set expressed in the same continuous frame as the
-        // rise, so the arc can be walked straight through without wrapping.
+        // Minutes up, taken modulo a day, because the moon sets before it rises:
+        // 9:25 PM to 8:03 AM is 10 h 38 m up, not minus 13 h. tSet is the set
+        // expressed in the same continuous frame as the rise, so the arc can be
+        // walked straight through without wrapping.
         readonly property real upMin:
             ((root.d.setMin - root.d.riseMin) % 1440 + 1440) % 1440
         readonly property real tRise: root.d.riseMin
@@ -65,10 +74,10 @@ DetailCard {
 
         // ---- the band the arc is drawn in ------------------------------------
         // The mark rides the curve, so the band has to be inset by the mark's own
-        // radius at both ends or the ring hangs outside the content box — which
-        // is exactly what this card used to do at the top. The horizon is placed
-        // from the inset rather than from the curve's own extremes, so both cards
-        // in the pair put it at the same height whatever their tails do.
+        // radius at both ends or the ring hangs outside the content box. The
+        // horizon is placed from the inset rather than from the curve's own
+        // extremes, so both cards in the pair put it at the same height whatever
+        // their tails do.
         readonly property real markR: 7
         readonly property real padX: 5
         readonly property real bandH: figures.y
@@ -95,8 +104,9 @@ DetailCard {
 
             // Below the horizon: the same curve, at track weight. It is the
             // unfilled remainder of the day, which is what trackLine is for, and
-            // it is drawn because a bare daylight hump gives no sense of where in
-            // the whole twenty-four hours we are.
+            // it is drawn because a bare hump gives no sense of where in the
+            // whole twenty-four hours we are — which on this card is the whole
+            // answer, since the moon is down.
             ShapePath {
                 fillColor: "transparent"
                 strokeColor: Theme.color.trackLine
@@ -108,16 +118,16 @@ DetailCard {
                 }
             }
 
-            // Daylight, drawn as a ribbon because a ShapePath can gradient-fill
-            // but not gradient-stroke. Bright at the zenith, sunset-orange where
-            // it meets the horizon at either end.
+            // Above the horizon, drawn as a ribbon because a ShapePath can
+            // gradient-fill but not gradient-stroke. Silver at the transit, cool
+            // blue where it meets the horizon at either end.
             ShapePath {
                 strokeColor: "transparent"
                 fillGradient: LinearGradient {
                     x1: 0; y1: viz.horizonY - viz.amp; x2: 0; y2: viz.horizonY
-                    GradientStop { position: 0.00; color: "#ffe488" }
-                    GradientStop { position: 0.45; color: "#ffc63f" }
-                    GradientStop { position: 1.00; color: "#ef7526" }
+                    GradientStop { position: 0.00; color: "#eaf0ff" }
+                    GradientStop { position: 0.45; color: "#b6c8f0" }
+                    GradientStop { position: 1.00; color: "#7a97d8" }
                 }
                 PathSvg {
                     path: ChartMath.ribbonPath(viz.arcPoints(viz.tRise, viz.tSet, 28),
@@ -149,28 +159,66 @@ DetailCard {
             }
         }
 
-        // Now: 14 px, ringed, tinted by the altitude it sits at.
-        Rectangle {
-            width: 2 * viz.markR; height: width; radius: viz.markR
-            color: ChartMath.sampleRamp(viz.skyRamp,
-                                        1 - Math.max(0, viz.altAt(viz.tNow)))
-            border.width: 2.5
-            border.color: Theme.color.textPrimary
-            x: viz.xAt(viz.tNow) - width / 2
-            y: viz.yAt(viz.tNow) - height / 2
+        // Now: 14 px, ringed, and — this being the moon — showing the phase. The
+        // ring is drawn last so it sits over the glyph: without it the shadowed
+        // limb merges straight into the dim stretch the mark is standing on.
+        Item {
+            id: nowMark
+
+            width: 2 * viz.markR
+            height: width
+            x: viz.xAt(viz.tNow) - viz.markR
+            y: viz.yAt(viz.tNow) - viz.markR
+
+            Rectangle {
+                anchors.fill: parent
+                radius: width / 2
+                color: viz.moonDark
+            }
+
+            Shape {
+                anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
+
+                ShapePath {
+                    fillColor: Theme.color.moonGlyph
+                    strokeColor: "transparent"
+                    PathSvg {
+                        path: ChartMath.moonPath(viz.markR, viz.markR, viz.markR,
+                                                 root.d.illumination)
+                    }
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                radius: width / 2
+                color: "transparent"
+                border.width: 2.5
+                border.color: Theme.color.textPrimary
+            }
         }
 
-        // How long the sun is up, centred on the stretch of horizon it measures.
-        // It sits just under the horizon because that band is empty by
-        // construction — the arc is above it between the crossings — and the card
-        // is too short to spend a row of its own on the label.
+        // How long the moon is up, centred on the stretch of horizon it measures,
+        // and under it the one fact the status line below does not already carry.
+        // The status line says "Waning Gibbous"; printing that again here — which
+        // this card used to do — spends a line saying nothing.
         Text {
             id: spanLabel
-            text: root.d.dayLength
+            text: root.d.upLength
             color: Theme.color.textMuted
             font.pixelSize: Theme.type.axis
             x: Math.round((viz.xAt(viz.tRise) + viz.xAt(viz.tSet) - width) / 2)
             y: Math.round(viz.horizonY) + 3
+        }
+
+        Text {
+            id: litLabel
+            text: qsTr("%1% lit").arg(Math.round(root.d.illumination * 100))
+            color: Theme.color.textMuted
+            font.pixelSize: Theme.type.axis
+            x: Math.round((viz.xAt(viz.tRise) + viz.xAt(viz.tSet) - width) / 2)
+            y: spanLabel.y + spanLabel.height
         }
 
         // The two readings, co-equal, so both take the pair size. Each figure is
@@ -196,9 +244,9 @@ DetailCard {
             Repeater {
                 model: [
                     { figTime: root.d.riseLabel, figSuffix: root.d.riseSuffix,
-                      figName: qsTr("Sunrise") },
+                      figName: qsTr("Moonrise") },
                     { figTime: root.d.setLabel, figSuffix: root.d.setSuffix,
-                      figName: qsTr("Sunset") }
+                      figName: qsTr("Moonset") }
                 ]
 
                 delegate: Item {
