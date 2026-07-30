@@ -65,10 +65,28 @@ Window {
     // The gallery gets the whole window with no margin: it paints its own rail
     // to the edge, the way a tool window should.
     Loader {
+        id: galleryLoader
         active: win.previewGallery
         anchors.fill: parent
         sourceComponent: Component {
             Gallery { pick: win.galleryPick }
+        }
+    }
+
+    // `--walk N` steps the gallery N components on before grabbing, so a
+    // headless check can exercise *navigation* and not only first paint. Every
+    // gallery bug found by hand so far was a bug that only appears on the
+    // second component shown, which is exactly what picking one at startup
+    // never touches.
+    Timer {
+        id: walkTimer
+        interval: 400
+        property int steps: 0
+        onTriggered: {
+            if (galleryLoader.item === null)
+                return
+            for (var i = 0; i < steps; ++i)
+                galleryLoader.item.step(1)
         }
     }
 
@@ -160,6 +178,21 @@ Window {
             win.width = Math.max(win.width, 1500)
             win.height = Math.max(win.height, 950)
             win.previewGallery = true
+
+            var k = args.indexOf("--walk")
+            if (k >= 0 && k + 1 < args.length) {
+                // Validated before assigning: `steps` is an int property, so
+                // QML coerces a NaN from parseInt to 0 on the way in and the
+                // check would then be testing the coercion, not the input.
+                var n = parseInt(args[k + 1])
+                if (!isNaN(n) && n >= 0) {
+                    walkTimer.steps = n
+                    if (n > 0)
+                        walkTimer.start()
+                } else {
+                    console.warn("--walk: expected a count >= 0, got", args[k + 1])
+                }
+            }
         }
 
         // --size 1340x900, so a headless grab can be tall enough to hold the

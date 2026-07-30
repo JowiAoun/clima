@@ -81,6 +81,20 @@ Item {
     // scroll-to-selection. Item names are unique across the catalogue.
     readonly property string currentName: current ? current.name : ""
 
+    // Two component entries in a row share one sourceComponent, so the
+    // Loader does not reload and its onLoaded reset never fires. Scroll to
+    // the bottom of the hourly chart, arrow on to the droplet, and the pane
+    // is still scrolled past everything the droplet has.
+    onCurrentNameChanged: { pane.contentX = 0; pane.contentY = 0 }
+
+    // One shared fallback rather than a fresh `[{...}]` per evaluation, so a
+    // component with no declared variants keeps the *same* model object as the
+    // last one did and the Repeater reuses its delegate instead of destroying
+    // and rebuilding a specimen on every keystroke.
+    readonly property var singleVariant: [{ label: "", props: ({}) }]
+    readonly property var currentVariants: current
+        ? (current.variants ? current.variants : singleVariant) : []
+
     function select(name) {
         for (var i = 0; i < flat.length; ++i)
             if (flat[i].name === name) { cursor = i; return }
@@ -97,9 +111,15 @@ Item {
     Component.onCompleted: applyPick()
     onPickChanged: applyPick()
 
+    // Applied once per value: it is invoked from both Component.onCompleted and
+    // onPickChanged, since the pick can arrive before or after the object, and
+    // without this a name that matches nothing warns twice.
+    property string appliedPick: ""
+
     function applyPick() {
-        if (pick === "")
+        if (pick === "" || pick === appliedPick)
             return
+        appliedPick = pick
         var q = pick.toLowerCase()
         for (var i = 0; i < flat.length; ++i) {
             var it = flat[i]
@@ -167,6 +187,8 @@ Item {
                 clip: true
                 onTextChanged: root.cursor = 0
                 Keys.onEscapePressed: { text = ""; root.forceActiveFocus() }
+                Keys.onUpPressed: root.step(-1)
+                Keys.onDownPressed: root.step(1)
 
                 Text {
                     anchors.fill: parent
@@ -371,8 +393,7 @@ Item {
             Repeater {
                 // A component with no declared variants still gets one cell, so
                 // both cases go down the same path.
-                model: root.current.variants
-                       ? root.current.variants : [{ label: "", props: ({}) }]
+                model: root.currentVariants
 
                 delegate: Column {
                     required property var modelData

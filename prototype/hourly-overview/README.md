@@ -49,6 +49,18 @@ Adding a component to it is an entry in `gallery.js` — file, blurb, optionally
 a stage size and a list of variants — rather than another QML file. A component
 in the tree but not in that list shows up as a gap you can see.
 
+`--walk N` steps N components on before grabbing, so a headless check can
+exercise *navigation* rather than only first paint:
+
+```sh
+./run.sh --grab g.png --gallery Colour --walk 5
+```
+
+That flag exists because every gallery bug found so far only appeared on the
+*second* component shown — a specimen drawn on top of its predecessor, a
+rebuild firing on a torn-down delegate, a pane still scrolled from the last
+entry. Picking one component at startup never touches any of it.
+
 The gallery is worth running after any change to a shared file. Staging
 `HourlyOverview` at 1000px wide is what surfaced its hour glyphs escaping the
 panel's clip; at the window's own width they escape past the window edge and

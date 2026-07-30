@@ -215,6 +215,7 @@ under about 85 characters or they elide mid-word, which reads as a bug.
 ```sh
 ./run.sh --gallery                              # every component, one screen
 ./run.sh --gallery uv                           # …opened on one of them
+./run.sh --grab g.png --gallery Colour --walk 5 # …stepped 5 on, headless
 ./run.sh --card Uv                              # one card, on the page gradient
 ./run.sh --grab shot.png --card Uv              # …headless, to look at pixels
 ./run.sh --grab g.png --details --size 1300x900 # the whole grid, all three rows
@@ -230,6 +231,13 @@ Stage a component at a size no screen currently gives it. `HourlyOverview` had
 its hour glyphs escaping the panel's clip — §10.8, again — and at the window's
 own width the escapees land off-window where nobody sees them. The gallery
 staged it at 1000 px and they were unmissable.
+
+**Check the second screen, not just the first.** `--walk N` steps the gallery
+on before grabbing, because every bug the gallery itself has had appeared only
+on the component shown *after* another one: a specimen composited over its
+predecessor, a deferred rebuild firing on a torn-down delegate, a scroll
+position carried over from an entry three times taller. Rendering one thing
+from a cold start exercises none of that.
 
 Check a card in the grid, not only on its own. Every finding that mattered in
 the first pass — seven reading sizes, one card sitting 23 px low, two dials

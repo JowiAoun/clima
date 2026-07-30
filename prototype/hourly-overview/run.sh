@@ -7,6 +7,7 @@
 #   ./run.sh                          open the hourly screen
 #   ./run.sh --gallery                open the component library
 #   ./run.sh --gallery uv             …on a particular component
+#   ./run.sh --gallery x --walk 3     …then step 3 components on
 #   ./run.sh --details                the weather-details grid
 #   ./run.sh --card Uv                one detail card, alone on the gradient
 #   ./run.sh --grab shot.png [...]    render one frame to a PNG and exit

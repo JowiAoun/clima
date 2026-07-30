@@ -27,22 +27,62 @@ Item {
     property Item instance: null
     property string error: ""
 
-    implicitWidth: stageWidth > 0 ? stageWidth
+    // Everything this specimen has ever created, so nothing can be orphaned by
+    // a rebuild that lost track of it — which is exactly what happened: two
+    // cards ended up drawn on top of each other in one box.
+    property var built: []
+
+    // The failure box needs room for the message it exists to carry; at the
+    // placeholder size it would clip the very thing you need to read.
+    implicitWidth: error !== "" ? Math.max(stageWidth, 380)
+                 : stageWidth > 0 ? stageWidth
                                   : (instance ? Math.max(instance.width, 24) : 120)
-    implicitHeight: stageHeight > 0 ? stageHeight
+    implicitHeight: error !== "" ? Math.max(stageHeight, 130)
+                  : stageHeight > 0 ? stageHeight
                                     : (instance ? Math.max(instance.height, 24) : 40)
     width: implicitWidth
     height: implicitHeight
 
-    onSourceChanged: rebuild()
-    onPropsChanged: rebuild()
-    Component.onCompleted: rebuild()
+    // Scheduled, never called directly. Two reasons, both real:
+    //
+    // Re-entrancy — `createObject(root, props)` reads `props`, and reading a
+    // binding that has not been evaluated yet evaluates it and emits
+    // propsChanged, which lands back in rebuild() while the first one is still
+    // inside createObject. Both then finished, and neither had seen the other's
+    // instance to destroy it.
+    //
+    // Coalescing — source, props and the two stage dimensions all change
+    // together when the gallery moves to another component. Qt.callLater
+    // dedupes by function identity, so four triggers in one pass build once
+    // instead of four times.
+    onSourceChanged: Qt.callLater(rebuild)
+    onPropsChanged: Qt.callLater(rebuild)
+    onStageWidthChanged: Qt.callLater(rebuild)
+    onStageHeightChanged: Qt.callLater(rebuild)
+    Component.onCompleted: Qt.callLater(rebuild)
+
+    // A deferred rebuild outlives its specimen: moving from a component with
+    // two variants to one with a single variant makes the Repeater drop a
+    // delegate, and the callLater still fires — on an object whose QML context
+    // has gone, where Qt.createComponent fails with "Cannot create a component
+    // in an invalid context". Harmless to the render and noisy in the log, and
+    // it is the kind of message that trains you to ignore the log.
+    property bool alive: true
+    Component.onDestruction: alive = false
 
     function rebuild() {
-        if (instance) {
-            instance.destroy()
-            instance = null
-        }
+        if (!alive)
+            return
+        buildNow()
+    }
+
+    function buildNow() {
+        for (var i = 0; i < built.length; ++i)
+            if (built[i])
+                built[i].destroy()
+        built = []
+        instance = null
+
         error = ""
         if (source === "")
             return
@@ -58,6 +98,7 @@ Item {
             error = "createObject returned null for " + source
             return
         }
+        built.push(o)
 
         // Only override the size the component chose for itself when the
         // catalogue says it has none worth keeping.
