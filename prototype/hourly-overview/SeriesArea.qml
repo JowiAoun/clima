@@ -20,6 +20,32 @@ Item {
     property var lineRamp: []
     property real lineWidth: 2.4
 
+    // 0 = folded flat onto the baseline, 1 = drawn at full extent.
+    //
+    // A metric switch hands over *at the baseline*, which is the one place a
+    // temperature curve and a wind curve genuinely agree: the outgoing series
+    // folds onto it, the axis becomes a different axis while nothing is drawn,
+    // and the incoming series grows back off it. SeriesBars carries the same
+    // property under the same name, which is what lets area → bars read as one
+    // gesture instead of a cut — the two have nothing else in common.
+    //
+    // Geometry only. The gradient stays keyed to the axis, not to the fold, so
+    // the fill never claims a value the series is not at.
+    property real growth: 1
+
+    function folded(pts) {
+        if (growth >= 1 || !pts || pts.length === 0)
+            return pts
+        var out = []
+        for (var i = 0; i < pts.length; ++i)
+            out.push({ x: pts[i].x, y: baselineY + (pts[i].y - baselineY) * growth })
+        return out
+    }
+
+    // The points as drawn, as opposed to the points as given.
+    readonly property var drawnPoints: folded(points)
+    readonly property var drawnOverlay: folded(overlayPoints)
+
     function stopColor(which, i) {
         var r = which === "fill" ? fillRamp : lineRamp
         return (r && r[i]) ? r[i].c : "#00000000"
@@ -49,7 +75,7 @@ Item {
                 GradientStop { position: root.stopPos("fill", 6); color: root.stopColor("fill", 6) }
                 GradientStop { position: root.stopPos("fill", 7); color: root.stopColor("fill", 7) }
             }
-            PathSvg { path: ChartMath.areaPath(root.points, root.baselineY) }
+            PathSvg { path: ChartMath.areaPath(root.drawnPoints, root.baselineY) }
         }
 
         // ---- curve, as a gradient-fillable ribbon ------------------------
@@ -67,20 +93,20 @@ Item {
                 GradientStop { position: root.stopPos("line", 6); color: root.stopColor("line", 6) }
                 GradientStop { position: root.stopPos("line", 7); color: root.stopColor("line", 7) }
             }
-            PathSvg { path: ChartMath.ribbonPath(root.points, root.lineWidth / 2) }
+            PathSvg { path: ChartMath.ribbonPath(root.drawnPoints, root.lineWidth / 2) }
         }
 
         // ---- optional overlay line (dashed, no fill) ---------------------
         ShapePath {
             strokeColor: "#8cffffff"
-            strokeWidth: root.overlayPoints.length > 1 ? 1.4 : -1
+            strokeWidth: root.drawnOverlay.length > 1 ? 1.4 : -1
             strokeStyle: ShapePath.DashLine
             dashPattern: [4, 3]
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             PathSvg {
-                path: root.overlayPoints.length > 1
-                      ? ChartMath.smooth(root.overlayPoints, "M") : ""
+                path: root.drawnOverlay.length > 1
+                      ? ChartMath.smooth(root.drawnOverlay, "M") : ""
             }
         }
     }

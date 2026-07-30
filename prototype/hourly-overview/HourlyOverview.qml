@@ -25,7 +25,14 @@ Item {
     // Exposed so a headless film can drive the feels-like morph, which is
     // otherwise reachable only by clicking the toggle.
     property alias feelsLike: toggle.checked
-    readonly property var metric: Metrics.byId(metricId)
+
+    // What the chart is *drawing*, as opposed to what has been asked for. It
+    // lags `metricId` by the outgoing half of the handover below, so the axis
+    // bounds, the tick labels, the colour ramp, the header values, the legend,
+    // the card title and the series type all change in the single frame where
+    // there is nothing on the plot to contradict them.
+    property string shownMetricId: "overview"
+    readonly property var metric: Metrics.byId(shownMetricId)
     readonly property bool supportsFeelsLike: metric.id === "overview"
 
     // ---- scales and metrics ---------------------------------------------
@@ -66,8 +73,88 @@ Item {
 
     // 0 = the metric's own series, 1 = apparent temperature. Animated, so toggling
     // morphs the curve instead of cutting to it. Only meaningful on Overview.
+    //
+    // This is a genuine tween and not a crossfade: the points themselves are
+    // interpolated and the path is regenerated from them, so every intermediate
+    // frame is a curve the renderer could have been given as data. `view`,
+    // because it is one view of today becoming another — the same hours, read a
+    // second way — and deliberately the same token as the metric handover's
+    // incoming half, which is the other thing on this card that replaces the
+    // series without moving the frame around it. It was 430 ms, one of the eight
+    // strays §10.6 was written to end.
     property real feelsBlend: (supportsFeelsLike && toggle.checked) ? 1 : 0
-    Behavior on feelsBlend { NumberAnimation { duration: 430; easing.type: Easing.OutCubic } }
+    Behavior on feelsBlend {
+        // A metric handover already animates the series; feels-like is
+        // meaningless anywhere but Overview, so let it snap into place under
+        // cover of the handover rather than run a second tween through it.
+        enabled: !handover.running
+        NumberAnimation { duration: Theme.motion.view; easing.type: Easing.OutCubic }
+    }
+
+    // ---- metric handover --------------------------------------------------
+    // Switching metric is a view transition, not a tween.
+    //
+    // Temperature and wind are different quantities, on different axes, in
+    // different units. Morphing one curve into the other would claim they are
+    // the same measurement changing; sliding the axis from 40 °C to 40 km/h
+    // would put a tick label through numbers that mean nothing on either scale.
+    // And area → bars cannot be tweened at all — §10.7 makes bars and curves
+    // different *claims about the data*, so an in-between shape would be a
+    // claim we do not have.
+    //
+    // What every metric on this card does share is the axis baseline. So the
+    // outgoing series folds onto it, everything that names the metric changes
+    // at that instant — when the plot is empty and nothing can be misread — and
+    // the incoming series grows back off it. That is §10.6's own description of
+    // honest motion, "a bar growing off its baseline", applied to a switch
+    // rather than to an arrival, and it is the one gesture that serves a curve
+    // and a bar chart equally.
+    //
+    // The frame does not take part. The hour labels, the condition glyphs, the
+    // past veil, the now line, the sun markers and the precipitation strip are
+    // all functions of time, not of metric, and they stay exactly where they
+    // are so the reader keeps their place while the data underneath changes.
+    //
+    // 1 = the series at full extent, 0 = flat on the baseline.
+    property real seriesExtent: 1
+
+    // Set once the object is built, so properties handed in at construction —
+    // the gallery builds specimens with `metricId` already set — configure the
+    // chart instead of animating it.
+    property bool ready: false
+
+    SequentialAnimation {
+        id: handover
+
+        NumberAnimation {
+            target: root; property: "seriesExtent"; to: 0
+            duration: Theme.motion.move
+            // InCubic rather than the default, for exactly the reason §10.6
+            // gives for the default: things ease *into place* because they are
+            // arriving. This half is a departure, so it accelerates away.
+            easing.type: Easing.InCubic
+        }
+
+        ScriptAction { script: root.shownMetricId = root.metricId }
+
+        NumberAnimation {
+            target: root; property: "seriesExtent"; to: 1
+            duration: Theme.motion.view
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    onMetricIdChanged: {
+        if (!ready)
+            shownMetricId = metricId
+        else if (metricId !== shownMetricId)
+            handover.restart()
+    }
+
+    Component.onCompleted: {
+        shownMetricId = metricId
+        ready = true
+    }
 
     function xForIndex(i) { return i * hourWidth }
 
@@ -253,11 +340,15 @@ Item {
                 flickableDirection: Flickable.HorizontalFlick
                 boundsBehavior: Flickable.StopAtBounds
 
+                // A pager step is three quarters of the plot: one view of the day
+                // becoming another, hence `view`. A *drag* is not animated — the
+                // content tracks the finger, and interposing an easing between
+                // the two is what makes a scroll feel like it is on elastic.
                 NumberAnimation {
                     id: scrollAnim
                     target: flick
                     property: "contentX"
-                    duration: 340
+                    duration: Theme.motion.view
                     easing.type: Easing.OutCubic
                 }
 
@@ -361,6 +452,7 @@ Item {
                             anchors.fill: parent
                             points: visible ? root.curvePoints : []
                             overlayPoints: visible ? root.overlayPoints : []
+                            growth: root.seriesExtent
                             baselineY: root.yForValue(root.axisMin)
                             gradientTop: root.yForValue(root.axisMax)
                             gradientBottom: root.yForValue(root.axisMin)
@@ -372,6 +464,7 @@ Item {
                             visible: root.metric.kind === "bars"
                             anchors.fill: parent
                             values: visible ? root.seriesValues(root.metric) : []
+                            growth: root.seriesExtent
                             hourWidth: root.hourWidth
                             axisTop: root.yForValue(root.axisMax)
                             axisBottom: root.yForValue(root.axisMin)
@@ -455,19 +548,40 @@ Item {
                             acceptedButtons: Qt.NoButton      // let the Flickable drag
                             property int idx: -1
 
+                            // The last hour actually pointed at, held after the
+                            // pointer leaves so the crosshair can fade out where
+                            // it stood instead of flying off to index -1.
+                            property int heldIdx: 0
+
                             onPositionChanged: (mouse) => {
                                 var i = Math.round(mouse.x / root.hourWidth)
                                 idx = ChartMath.clamp(i, 0, Data.count - 1)
+                                heldIdx = idx
                             }
                             onExited: idx = -1
                         }
 
+                        // The crosshair fades in and out, and *snaps* between
+                        // hours. It is a cursor: it selects one hour, there is no
+                        // half-past-two on this chart, and easing a cursor
+                        // between samples both invents positions the series does
+                        // not have and makes the readout feel dragged behind the
+                        // pointer. Only its arrival and departure are motion.
                         Item {
-                            visible: probe.idx >= 0
-                            x: root.xForIndex(probe.idx)
+                            id: crosshair
+                            opacity: probe.idx >= 0 ? 1 : 0
+                            visible: opacity > 0
+                            x: root.xForIndex(probe.heldIdx)
                             y: 0
                             width: 1
                             height: plot.height
+
+                            Behavior on opacity {
+                                NumberAnimation {
+                                    duration: Theme.motion.tint
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
 
                             Rectangle {
                                 width: 1
@@ -482,10 +596,13 @@ Item {
                                 radius: 3.5
                                 color: Theme.color.textPrimary
                                 x: -3
-                                y: (probe.idx >= 0 ? root.curvePoints[probe.idx].y : 0) - 3.5
+                                y: (root.curvePoints.length > probe.heldIdx
+                                        ? root.curvePoints[probe.heldIdx].y : 0) - 3.5
                             }
                         }
 
+                        // Not faded with the crosshair: §10.6 rules out text that
+                        // fades, and this panel is nothing but a number.
                         Rectangle {
                             id: readout
                             visible: probe.idx >= 0
@@ -569,20 +686,33 @@ Item {
             Row {
                 spacing: 8
                 visible: !root.listView
+                // The swatch is the metric's colour identity, and a fill is what
+                // `tint` is for. It carries the ramp across the handover so the
+                // legend does not blink to a new colour on its own — the stops
+                // are bound through animatable properties because a Behavior
+                // cannot be attached to a GradientStop.
                 Rectangle {
+                    id: swatch
                     width: 11
                     height: 11
                     radius: 5.5
                     anchors.verticalCenter: parent.verticalCenter
+
+                    property color rampTop:
+                        ChartMath.sampleRamp(Theme.ramp[root.metric.ramp].fill, 0.15)
+                    property color rampBottom:
+                        ChartMath.sampleRamp(Theme.ramp[root.metric.ramp].fill, 0.85)
+
+                    Behavior on rampTop {
+                        ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+                    }
+                    Behavior on rampBottom {
+                        ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+                    }
+
                     gradient: Gradient {
-                        GradientStop {
-                            position: 0.0
-                            color: ChartMath.sampleRamp(Theme.ramp[root.metric.ramp].fill, 0.15)
-                        }
-                        GradientStop {
-                            position: 1.0
-                            color: ChartMath.sampleRamp(Theme.ramp[root.metric.ramp].fill, 0.85)
-                        }
+                        GradientStop { position: 0.0; color: swatch.rampTop }
+                        GradientStop { position: 1.0; color: swatch.rampBottom }
                     }
                 }
                 Text {

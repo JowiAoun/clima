@@ -21,6 +21,16 @@ Item {
     property real barFraction: 0.62     // of hourWidth
     property real minBarHeight: 2
 
+    // 0 = flat on the baseline, 1 = full height. The counterpart of
+    // SeriesArea.growth, so a metric switch between a curve and bars is one
+    // gesture across the axis baseline rather than a cut.
+    //
+    // Geometry only, deliberately: `norm`, and therefore the band colour, stays
+    // keyed to the bar's own value the whole way up. Scaling the *value* instead
+    // would walk each bar down through the ramp as it grew — a UV 9 bar coming
+    // up through green — and the colour here is the reading, not decoration.
+    property real growth: 1
+
     // Normalised axis position: 0 at the top of the axis, 1 at the bottom.
     function normalised(v) {
         var span = maxValue - minValue
@@ -38,12 +48,16 @@ Item {
             readonly property real barValue: root.values[index]
             readonly property real norm: root.normalised(barValue)
             readonly property real barTop: root.axisTop + (root.axisBottom - root.axisTop) * norm
+            readonly property real fullHeight: Math.max(root.minBarHeight,
+                                                        root.axisBottom - barTop)
 
             visible: barValue > root.minValue
             width: root.hourWidth * root.barFraction
             x: index * root.hourWidth - width / 2
-            y: Math.min(barTop, root.axisBottom - root.minBarHeight)
-            height: Math.max(root.minBarHeight, root.axisBottom - barTop)
+            // Grown off the baseline, not out of the middle: the bottom edge is
+            // where the value is measured from and it does not move.
+            height: Math.max(root.minBarHeight, fullHeight * root.growth)
+            y: root.axisBottom - height
             radius: Math.min(3, width / 2)
             color: ChartMath.sampleRamp(root.ramp, norm)
         }
