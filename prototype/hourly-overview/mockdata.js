@@ -64,6 +64,88 @@ function _buildApparent() {
     return out;
 }
 
+// ---------------------------------------------------------------------------
+// Derived series for the other metric tabs.
+//
+// Generated from temperature/cloud/hour rather than hand-typed, so they stay
+// internally coherent (humidity tracks temperature inversely, visibility drops in
+// rain, air quality peaks at rush hour and clears in wind). Deterministic on
+// purpose — no Math.random — so golden-image tests stay stable.
+// ---------------------------------------------------------------------------
+
+function _clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+function _round(v, d) { var m = Math.pow(10, d || 0); return Math.round(v * m) / m; }
+function _hourOfDay(i) { return (startHour + i) % 24; }
+
+function _build(fn) {
+    var out = [];
+    for (var i = 0; i < count; ++i)
+        out.push(fn(i));
+    return out;
+}
+
+var humidity = _build(function (i) {
+    return _round(_clamp(95 - (temperature[i] - 17) * 3.8 + Math.sin(i * 0.7) * 2.5, 32, 99), 0);
+});
+
+var windSpeed = _build(function (i) {
+    var h = _hourOfDay(i);
+    var diurnal = 10 + 7 * Math.sin((h - 9) / 24 * 2 * Math.PI);
+    return _round(_clamp(diurnal + 3 * Math.sin(i * 0.55) + cloud[i] * 0.04, 1, 39), 1);
+});
+
+var windGust = _build(function (i) {
+    return _round(windSpeed[i] * (1.5 + 0.22 * Math.sin(i * 0.9)), 1);
+});
+
+var windDirection = _build(function (i) {
+    return _round((215 + 45 * Math.sin(i * 0.28) + 360) % 360, 0);
+});
+
+var pressure = _build(function (i) {
+    return _round(1013 + 5.5 * Math.sin((i + 8) / 48 * 2 * Math.PI) - cloud[i] * 0.025, 1);
+});
+
+var uvIndex = _build(function (i) {
+    var h = _hourOfDay(i) + 0.5;
+    if (h < 6 || h > 20)
+        return 0;
+    var arc = Math.sin((h - 6) / 14 * Math.PI);
+    return _round(_clamp(arc * 9.2 * (1 - cloud[i] / 210), 0, 11), 1);
+});
+
+var visibility = _build(function (i) {
+    var v = 24 - cloud[i] * 0.11
+              - (precipMm[i] > 0 ? 9 : 0)
+              - (humidity[i] > 90 ? 6 : 0);
+    return _round(_clamp(v, 0.5, 25), 1);
+});
+
+// European AQI (0 good … 100+ extremely poor).
+var airQuality = _build(function (i) {
+    var h = _hourOfDay(i);
+    var rush = Math.exp(-Math.pow((h - 8) / 2.2, 2)) + Math.exp(-Math.pow((h - 18) / 2.6, 2));
+    var v = 17 + rush * 25 + (1 - windSpeed[i] / 32) * 13 - (precipMm[i] > 0 ? 8 : 0);
+    return _round(_clamp(v, 4, 100), 0);
+});
+
+// ---------------------------------------------------------------------------
+// Daily summaries for the day strip. Values match the reference screenshot.
+// ---------------------------------------------------------------------------
+var days = [
+    { date: 29, label: "Yesterday", high: 21, low: 18, icon: "cloudy",     nightIcon: "" },
+    { date: 30, label: "Today",     high: 26, low: 16, icon: "partly-day", nightIcon: "partly-night" },
+    { date: 31, label: "Fri",       high: 28, low: 19, icon: "clear-day",  nightIcon: "" },
+    { date:  1, label: "Sat",       high: 26, low: 19, icon: "rain",       nightIcon: "" },
+    { date:  2, label: "Sun",       high: 21, low: 15, icon: "rain",       nightIcon: "" },
+    { date:  3, label: "Mon",       high: 25, low: 14, icon: "clear-day",  nightIcon: "" },
+    { date:  4, label: "Tue",       high: 28, low: 16, icon: "clear-day",  nightIcon: "" },
+    { date:  5, label: "Wed",       high: 27, low: 17, icon: "partly-day", nightIcon: "" },
+    { date:  6, label: "Thu",       high: 24, low: 16, icon: "rain",       nightIcon: "" }
+];
+
+var todayIndex = 1;
+
 // Fractional indices, so a marker can sit between two samples.
 var sunEvents = [
     { index:  8.73, kind: "sunrise", text: "5:44 AM" },

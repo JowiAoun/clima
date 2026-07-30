@@ -7,20 +7,44 @@ Window {
     id: win
 
     visible: true
-    width: 1328
-    height: 560
-    minimumWidth: 640
-    minimumHeight: 460
+    width: 1340
+    height: 762
+    minimumWidth: 680
+    minimumHeight: 560
     color: Theme.color.pageBg
-    title: qsTr("Clima — Hourly overview (prototype)")
+    title: qsTr("Clima — Hourly (prototype)")
 
-    HourlyOverview {
+    Item {
         anchors.fill: parent
         anchors.margins: 22
+
+        MetricTabBar {
+            id: tabs
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+        }
+
+        DayStrip {
+            id: dayStrip
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: tabs.bottom
+            anchors.topMargin: 16
+        }
+
+        HourlyOverview {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: dayStrip.bottom
+            anchors.topMargin: -1        // meet the selected day card exactly
+            anchors.bottom: parent.bottom
+            metricId: tabs.currentId
+        }
     }
 
     // Headless capture, for design review and CI golden images:
-    //   qml Main.qml -- --grab shot.png
+    //   qml Main.qml -- --grab shot.png [--metric wind]
     Timer {
         id: grabTimer
         interval: 1200
@@ -42,6 +66,10 @@ Window {
 
     Component.onCompleted: {
         var args = Qt.application.arguments
+        var m = args.indexOf("--metric")
+        if (m >= 0 && m + 1 < args.length)
+            tabs.currentId = args[m + 1]
+
         var i = args.indexOf("--grab")
         if (i >= 0 && i + 1 < args.length) {
             grabTimer.target = args[i + 1]

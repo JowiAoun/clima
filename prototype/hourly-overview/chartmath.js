@@ -112,6 +112,47 @@ function hatchPath(width, height, spacing, slope) {
     return d.trim();
 }
 
+// Sample a colour ramp at normalised axis position p (0 = axis top, 1 = bottom).
+// Bars need one flat colour per value, so they cannot use the gradient path and
+// interpolate here instead. Ramp entries are "#aarrggbb".
+function sampleRamp(stops, p) {
+    if (!stops || stops.length === 0)
+        return "#ffffffff";
+    p = clamp(p, 0, 1);
+    if (p <= stops[0].p)
+        return stops[0].c;
+    if (p >= stops[stops.length - 1].p)
+        return stops[stops.length - 1].c;
+
+    for (var i = 0; i < stops.length - 1; ++i) {
+        var a = stops[i], b = stops[i + 1];
+        if (p >= a.p && p <= b.p) {
+            var t = (b.p - a.p) === 0 ? 0 : (p - a.p) / (b.p - a.p);
+            return _mixHex(a.c, b.c, t);
+        }
+    }
+    return stops[stops.length - 1].c;
+}
+
+function _mixHex(ca, cb, t) {
+    var a = _parseHex(ca), b = _parseHex(cb);
+    var out = "#";
+    for (var i = 0; i < 4; ++i) {
+        var v = Math.round(a[i] + (b[i] - a[i]) * t);
+        out += (v < 16 ? "0" : "") + v.toString(16);
+    }
+    return out;
+}
+
+// "#aarrggbb" or "#rrggbb" -> [a, r, g, b]
+function _parseHex(c) {
+    var s = c.charAt(0) === "#" ? c.substring(1) : c;
+    if (s.length === 6)
+        s = "ff" + s;
+    return [parseInt(s.substr(0, 2), 16), parseInt(s.substr(2, 2), 16),
+            parseInt(s.substr(4, 2), 16), parseInt(s.substr(6, 2), 16)];
+}
+
 // Lit limb of the moon, centred on (cx, cy), lit side to the left.
 // illum is the illuminated fraction: 0.5 = half, >0.5 = gibbous, <0.5 = crescent.
 function moonPath(cx, cy, r, illum) {

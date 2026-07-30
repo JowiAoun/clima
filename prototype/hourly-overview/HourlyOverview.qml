@@ -1,23 +1,30 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// The MSN Weather "Hourly → Overview" chart, rebuilt in Qt Quick.
+// The hourly chart card, driven by whichever metric the tab bar has selected.
 //
 // Layout, top to bottom inside the panel:
-//   header band  hour label + condition icon + temperature, scrolls with the plot
-//   plot         dotted value grid, past veil, temperature area, sun events
+//   header band  hour label + condition icon + the active metric's value
+//   plot         dotted value grid, past veil, series, sun events
 //   strip        precipitation probability per label interval
+//
+// Everything except the series renderer is metric-agnostic: axis, grid, header,
+// scrolling, crosshair and the past treatment are shared, and a metric chooses
+// only its range, its colour ramp and whether it draws as an area or as bars.
 import QtQuick
 import QtQuick.Shapes
 import "chartmath.js" as ChartMath
 import "theme.js" as Theme
 import "mockdata.js" as Data
+import "metrics.js" as Metrics
 
 Item {
     id: root
 
+    property string metricId: "overview"
+    readonly property var metric: Metrics.byId(metricId)
+    readonly property bool supportsFeelsLike: metric.id === "overview"
+
     // ---- scales and metrics ---------------------------------------------
     readonly property real hourWidth: Theme.metric.hourWidth
-    readonly property real tempMin: Theme.scale.tempMin
-    readonly property real tempMax: Theme.scale.tempMax
     readonly property real axisTopPad: Theme.metric.axisTopPad
     readonly property real headerBandHeight: Theme.metric.headerBandHeight
     readonly property real stripHeight: Theme.metric.stripHeight
@@ -28,39 +35,64 @@ Item {
 
     readonly property real contentW: (Data.count - 1) * hourWidth
     readonly property var labelIndices: Data.labelIndices()
-    readonly property var valueTicks: Data.valueTicks(tempMin, tempMax, Theme.scale.tickStep)
     readonly property real nowX: xForIndex(Data.nowIndex)
+
+    // Axis bounds come from the metric, except where it opts into auto-scaling.
+    readonly property real axisMin: metric.min
+    readonly property real axisMax: Metrics.axisMax(metric, seriesValues(metric))
+    readonly property var valueTicks: Metrics.axisTicks(metric, seriesValues(metric))
 
     readonly property real plotHeight: Math.max(
         170, panel.height - 2 * panelPadding - headerBandHeight - stripGap - stripHeight)
 
-    // 0 = dry-bulb temperature, 1 = apparent temperature. Animated, so toggling
-    // morphs the curve instead of cutting to it.
-    property real feelsBlend: toggle.checked ? 1 : 0
+    // 0 = the metric's own series, 1 = apparent temperature. Animated, so toggling
+    // morphs the curve instead of cutting to it. Only meaningful on Overview.
+    property real feelsBlend: (supportsFeelsLike && toggle.checked) ? 1 : 0
     Behavior on feelsBlend { NumberAnimation { duration: 430; easing.type: Easing.OutCubic } }
 
     function xForIndex(i) { return i * hourWidth }
 
-    function yForTemp(t) {
-        var span = tempMax - tempMin
+    function yForValue(v) {
+        var span = axisMax - axisMin
         if (span <= 0)
             return 0
-        return axisTopPad + (plotHeight - axisTopPad) * (tempMax - t) / span
+        return axisTopPad + (plotHeight - axisTopPad) * (axisMax - v) / span
     }
 
-    function valueAt(i, blend) {
-        return Data.temperature[i] * (1 - blend) + Data.apparent[i] * blend
+    function seriesValue(i, blend) {
+        if (supportsFeelsLike)
+            return Data.temperature[i] * (1 - blend) + Data.apparent[i] * blend
+        var arr = Data[metric.series]
+        return arr ? arr[i] : 0
+    }
+
+    function seriesValues(m) {
+        var arr = Data[m.series]
+        return arr ? arr : []
     }
 
     // Explicit arguments so the binding re-evaluates on every input that moves.
-    function buildPoints(blend, ph, hw) {
+    function buildPoints(blend, ph, hw, m) {
         var pts = []
         for (var i = 0; i < Data.count; ++i)
-            pts.push({ x: i * hw, y: yForTemp(valueAt(i, blend)) })
+            pts.push({ x: i * hw, y: yForValue(seriesValue(i, blend)) })
         return pts
     }
 
-    readonly property var curvePoints: buildPoints(feelsBlend, plotHeight, hourWidth)
+    function buildOverlay(ph, hw, m) {
+        if (!m.overlay)
+            return []
+        var arr = Data[m.overlay]
+        if (!arr)
+            return []
+        var pts = []
+        for (var i = 0; i < Data.count; ++i)
+            pts.push({ x: i * hw, y: yForValue(arr[i]) })
+        return pts
+    }
+
+    readonly property var curvePoints: buildPoints(feelsBlend, plotHeight, hourWidth, metric)
+    readonly property var overlayPoints: buildOverlay(plotHeight, hourWidth, metric)
 
     // ---- card ------------------------------------------------------------
     Rectangle {
@@ -73,7 +105,7 @@ Item {
 
     Text {
         id: title
-        text: qsTr("Overview")
+        text: root.metric.label
         color: Theme.color.textPrimary
         font.pixelSize: 15
         font.bold: true
@@ -83,6 +115,7 @@ Item {
 
     FeelsLikeToggle {
         id: toggle
+        visible: root.supportsFeelsLike
         anchors.right: parent.right
         anchors.rightMargin: root.cardPadding
         anchors.verticalCenter: title.verticalCenter
@@ -114,11 +147,11 @@ Item {
                 model: root.valueTicks
                 delegate: Text {
                     required property var modelData
-                    text: modelData + "°"
+                    text: root.metric.unit === "°" ? modelData + "°" : modelData
                     color: Theme.color.textDim
                     font.pixelSize: 11
                     x: gutter.width - width - 7
-                    y: root.yForTemp(modelData) - height / 2
+                    y: root.yForValue(modelData) - height / 2
                 }
             }
         }
@@ -188,7 +221,8 @@ Item {
                         }
 
                         Text {
-                            text: Math.round(root.valueAt(hourIndex, root.feelsBlend)) + "°"
+                            text: Metrics.format(root.metric,
+                                                 root.seriesValue(hourIndex, root.feelsBlend))
                             color: Theme.color.textPrimary
                             font.pixelSize: 13
                             font.bold: true
@@ -233,22 +267,36 @@ Item {
                             fillColor: "transparent"
                             PathSvg {
                                 path: ChartMath.gridPath(plot.width, root.valueTicks,
-                                                         root.yForTemp)
+                                                         root.yForValue)
                             }
                         }
                     }
 
-                    TemperatureArea {
+                    SeriesArea {
+                        visible: root.metric.kind === "area"
                         anchors.fill: parent
-                        points: root.curvePoints
-                        baselineY: root.yForTemp(root.tempMin)
-                        gradientTop: root.yForTemp(root.tempMax)
-                        gradientBottom: root.yForTemp(root.tempMin)
-                        tempMin: root.tempMin
-                        tempMax: root.tempMax
+                        points: visible ? root.curvePoints : []
+                        overlayPoints: visible ? root.overlayPoints : []
+                        baselineY: root.yForValue(root.axisMin)
+                        gradientTop: root.yForValue(root.axisMax)
+                        gradientBottom: root.yForValue(root.axisMin)
+                        fillRamp: Theme.ramp[root.metric.ramp].fill
+                        lineRamp: Theme.ramp[root.metric.ramp].line
                     }
 
-                    // The past, veiled and hatched *over* the curve: observed hours
+                    SeriesBars {
+                        visible: root.metric.kind === "bars"
+                        anchors.fill: parent
+                        values: visible ? root.seriesValues(root.metric) : []
+                        hourWidth: root.hourWidth
+                        axisTop: root.yForValue(root.axisMax)
+                        axisBottom: root.yForValue(root.axisMin)
+                        minValue: root.axisMin
+                        maxValue: root.axisMax
+                        ramp: Theme.ramp[root.metric.ramp].fill
+                    }
+
+                    // The past, veiled and hatched *over* the series: observed hours
                     // are still real data, so they stay visible, but they are visibly
                     // not forecast. Blanking them would read as a rendering bug.
                     Item {
@@ -277,22 +325,40 @@ Item {
                     Repeater {
                         model: Data.sunEvents
 
-                        delegate: Row {
+                        delegate: Item {
+                            id: sunMarker
                             required property var modelData
-                            spacing: 5
-                            x: root.xForIndex(modelData.index) - width / 2
-                            y: plot.height - height - 12
 
-                            SunEventGlyph {
-                                kind: modelData.kind
-                                glyphSize: 15
-                                anchors.verticalCenter: parent.verticalCenter
+                            width: sunRow.width + 14
+                            height: sunRow.height + 8
+                            x: root.xForIndex(modelData.index) - width / 2
+                            y: plot.height - height - 10
+
+                            // Markers sit over whatever the series happens to be, and
+                            // an orange AQI bar behind grey text is unreadable. The
+                            // scrim costs nothing and makes them legible everywhere.
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: height / 2
+                                color: "#99111a2b"
                             }
-                            Text {
-                                text: modelData.text
-                                color: Theme.color.textMuted
-                                font.pixelSize: 11
-                                anchors.verticalCenter: parent.verticalCenter
+
+                            Row {
+                                id: sunRow
+                                spacing: 5
+                                anchors.centerIn: parent
+
+                                SunEventGlyph {
+                                    kind: sunMarker.modelData.kind
+                                    glyphSize: 15
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: sunMarker.modelData.text
+                                    color: Theme.color.textMuted
+                                    font.pixelSize: 11
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
                             }
                         }
                     }
@@ -326,6 +392,7 @@ Item {
                         }
 
                         Rectangle {
+                            visible: root.metric.kind === "area"
                             width: 7
                             height: 7
                             radius: 3.5
@@ -347,7 +414,9 @@ Item {
                         x: ChartMath.clamp(root.xForIndex(probe.idx) - width / 2,
                                            0, plot.width - width)
                         y: ChartMath.clamp(
-                               (probe.idx >= 0 ? root.curvePoints[probe.idx].y : 0) - height - 12,
+                               (probe.idx >= 0 && root.metric.kind === "area"
+                                    ? root.curvePoints[probe.idx].y
+                                    : root.yForValue(root.axisMax)) - height - 12,
                                0, plot.height - height)
 
                         Text {
@@ -358,8 +427,8 @@ Item {
                             font.pixelSize: 11
                             text: probe.idx < 0 ? "" :
                                   Data.clockLabel(probe.idx) + "   "
-                                  + root.valueAt(probe.idx, root.feelsBlend).toFixed(1) + "°C"
-                                  + "   " + Data.precipProb[probe.idx] + "%"
+                                  + Metrics.format(root.metric,
+                                                   root.seriesValue(probe.idx, root.feelsBlend))
                         }
                     }
                 }
@@ -408,25 +477,53 @@ Item {
         height: 18
 
         Row {
-            spacing: 8
+            spacing: 16
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
 
-            Rectangle {
-                width: 11
-                height: 11
-                radius: 5.5
-                anchors.verticalCenter: parent.verticalCenter
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#d9c08f" }
-                    GradientStop { position: 1.0; color: "#69b294" }
+            Row {
+                spacing: 8
+                Rectangle {
+                    width: 11
+                    height: 11
+                    radius: 5.5
+                    anchors.verticalCenter: parent.verticalCenter
+                    gradient: Gradient {
+                        GradientStop {
+                            position: 0.0
+                            color: ChartMath.sampleRamp(Theme.ramp[root.metric.ramp].fill, 0.15)
+                        }
+                        GradientStop {
+                            position: 1.0
+                            color: ChartMath.sampleRamp(Theme.ramp[root.metric.ramp].fill, 0.85)
+                        }
+                    }
+                }
+                Text {
+                    text: root.supportsFeelsLike && toggle.checked
+                          ? qsTr("Feels like") : root.metric.legend
+                    color: Theme.color.textMuted
+                    font.pixelSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
                 }
             }
-            Text {
-                text: toggle.checked ? qsTr("Feels like") : qsTr("Temperature")
-                color: Theme.color.textMuted
-                font.pixelSize: 12
-                anchors.verticalCenter: parent.verticalCenter
+
+            Row {
+                spacing: 8
+                visible: root.metric.overlay !== undefined
+                Rectangle {
+                    width: 14
+                    height: 2
+                    radius: 1
+                    color: "#8cffffff"
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                Text {
+                    text: root.metric.overlayLegend ? root.metric.overlayLegend : ""
+                    color: Theme.color.textMuted
+                    font.pixelSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
             }
         }
 
