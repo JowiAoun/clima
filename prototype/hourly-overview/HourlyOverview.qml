@@ -207,7 +207,15 @@ Item {
                 anchors.rightMargin: 8
                 anchors.topMargin: root.panelPadding
                 anchors.bottomMargin: root.panelPadding
+                // `clip` bounds the rectangles and the text; it does not bound
+                // Qt Quick Shapes (docs/10-design-system.md §10.8), and the hour
+                // glyphs are Shapes. Off the right of a 1340-wide window the
+                // escapees land outside the window and are never seen — the
+                // component gallery, which stages this panel at 1000, is where
+                // they showed up: cloud and sun glyphs floating in open page
+                // 300px past the panel edge.
                 clip: true
+                layer.enabled: true
                 contentWidth: root.contentW
                 contentHeight: height
                 flickableDirection: Flickable.HorizontalFlick
