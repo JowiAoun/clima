@@ -8,6 +8,11 @@ in that app), and the twelve-card weather-details grid — in one scrolling page
 
 ![The page](screenshot.png)
 
+The chart says *when* it will rain, not only how much — the wet hours are washed
+and rained on, on every metric tab:
+
+![Rain on the chart](screenshot-rain.png)
+
 Scroll down for the details grid, twelve cards on one measurable each:
 
 ![Weather details](screenshot-details.png)
@@ -138,6 +143,9 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 | `TabFillet.qml` | The concave corner where the raised day card meets the panel |
 | `SeriesArea.qml` | Gradient-filled curve with an optional dashed overlay line |
 | `SeriesBars.qml` | One bar per hour, coloured by its own value |
+| `PrecipBands.qml` | **The wash that says when it rains** — under the series |
+| `PrecipField.qml` | Rain, snow, sleet, hail falling over it, and the spell's name |
+| `precip.js` | **Thresholds, spells and the deterministic particle field** |
 | `metrics.js` | **The metric registry — the tab bar and the chart are both driven from it** |
 | `mockdata.js` | Stand-in for the Open-Meteo provider |
 | `theme.js` | Design tokens — colour, geometry, type, and `motion` durations |
@@ -177,6 +185,43 @@ and a list view that had the chart painting through it on `main`. See
 | **Overlay series** | Wind draws gusts as a dashed line over the speed area |
 | **The past** | Veiled and hatched *over* the series. Observed hours are real data so they stay visible, but they are visibly not forecast |
 | **Feels like** | On Overview, toggling *morphs* the curve — the path is regenerated from interpolated points each frame, so it is a genuine tween rather than a crossfade |
+| **Precipitation** | The one variable people ask *when* about rather than *how much*, so it gets a second encoding on every tab: the wet hours are washed, rained on and named. See below |
+
+**Precipitation**
+
+Three layers, each carrying a different part of the reading. A **wash** under the
+series, edge to edge of the spell, says *when*. A **field** of falling particles
+over it says *what* and *how hard*. A **caption** on any spell wide enough to
+hold one says it in words.
+
+The wash goes under the series and the field over it, which is why they are two
+components. A fill's colour on this chart is its value, and on UV and air quality
+those colours are a published scale — a blue wash laid over a UV bar would be
+stating a different number. Underneath it still reads, because every fill here is
+translucent, and the reference turns out to do exactly the same thing: measured
+off a capture, its rainy stretch shifts the empty plot about three times as much
+as it shifts the area fill.
+
+Ten levels come off one particle model rather than ten drawings:
+
+| | |
+|---|---|
+| **Type picks the shape** | rain and drizzle fall as streaks, snow drifts as flakes with a sway, hail comes down as fast pellets, sleet is a mix of streaks and pellets because drawn as short rain it just reads as rain in a hurry, thunderstorms are heavy rain plus a band that flashes |
+| **Intensity scales it** | light / moderate / heavy is the same field with twice the drops, longer and faster — which is what heavier weather looks like out of a window |
+| **Thresholds are published ones** | US NWS bands for rain; a third of them for snow, because the same water arrives as ten times the depth |
+| **Spells split on type, not intensity** | rain easing off is still the same rain. The spell is labelled by its peak: "heavy rain, 2 to 6" is what you would say out loud about a spell with one heavy hour in it |
+| **Both edges are drawn** | a wash says roughly when; a line on its first and last minute says exactly when |
+| **Deterministic** | every drop is a hash of its hour and its index in that hour — no `Math.random`, so `--grab` is still a golden image. Two consecutive grabs are byte-identical |
+
+Motion is one clock for the whole field, and it does not run when there is no
+precipitation, when the chart is behind the list view, or under `--grab` — which
+freezes the field at a deterministic frame rather than emptying it. The cost is
+proportional to the weather rather than to the chart: the mock's four spells come
+to 54 drops and 20 splashes across 48 hours, and a dry forecast draws nothing.
+
+At 18–28 °C the page can only ever show rain, so the six levels anyone would name
+first — and the four extras — live in the gallery, under *Precipitation wash* and
+*Precipitation field*.
 
 **Around it**
 
@@ -209,12 +254,25 @@ and a list view that had the chart painting through it on `main`. See
 `libclima`'s forecast provider will return: parallel per-hour arrays plus derived
 helpers, with no formatting decisions baked in.
 
-Temperature, precipitation probability and cloud cover are hand-tuned so the labelled
-hours match the MSN reference exactly (19, 19, 18, 18, 18, 19, 22, 24, 25, 26, 25, 23 and
-18, 18, 20, 10, 6, 4, 9, 22, 30, 13). The other series are *derived* from those rather
-than hand-typed, so they stay internally coherent — humidity tracks temperature
-inversely, visibility drops in rain, air quality peaks at rush hour and clears in wind.
-All of it is deterministic, with no `Math.random`, so golden-image tests stay stable.
+Temperature is hand-tuned so the labelled hours match the MSN reference exactly
+(19, 19, 18, 18, 18, 19, 22, 24, 25, 26, 25, 23). The other series are *derived* from
+temperature, cloud and the hour rather than hand-typed, so they stay internally
+coherent — humidity tracks temperature inversely, visibility drops in rain, air
+quality peaks at rush hour and clears in wind. All of it is deterministic, with no
+`Math.random`, so golden-image tests stay stable.
+
+**Precipitation probability and cloud cover diverge from the reference at the wet
+hours, deliberately.** The reference's forecast is dry, so a mock copied from it can
+only demonstrate a precipitation effect by not having any — and once the mock has
+weather, the numbers around it have to agree with it. A 4 % chance of 8.6 mm, or heavy
+rain out of a half-clear sky, is the more embarrassing thing to ship than a divergence
+from a screenshot. Away from those hours both series are still the reference's.
+
+The forecast is now four spells: last night's rain still drizzling out as the page
+opens, an afternoon band that climbs light → moderate → heavy and back, its tail, and a
+light band after tomorrow's sunrise. `detaildata.js` moved with it — the precipitation
+card reads 21 mm and "heavy rain expected" rather than nought, and the headline's
+outlook sentence says so too.
 
 ## Deliberately not done yet
 
@@ -224,6 +282,10 @@ All of it is deterministic, with no `Math.random`, so golden-image tests stay st
   under the chart, where it shares the same time axis.
 - **Selecting a different day** changes the strip but not the chart — there is only one
   day of hourly data behind it.
+- **A weather code from the provider.** Precipitation type is inferred from temperature
+  here, which is a fair fallback and cannot ever produce thunder or hail — those two
+  exist in `precip.js` and in the gallery but never on the page. Open-Meteo sends a WMO
+  code per hour; `Precip.cells` already takes one as its third argument.
 - **Shipped icons.** Icons are drawn procedurally to keep this a single `qml` invocation.
   Production uses Meteocons (MIT) converted with `svgtoqml`, which ships with
   qtdeclarative and is present in this Qt, so the pipeline is confirmed available.
@@ -252,6 +314,9 @@ All of it is deterministic, with no `Math.random`, so golden-image tests stay st
   Flatpak Qt has a consistent GTK stack and keeps the integration.
 - `Shape.CurveRenderer` gives visibly better antialiasing on the GPU and falls back
   cleanly under the software backend, so it is safe to leave on.
+- **Qt only antialiases a rounded `Rectangle` when asked.** At the two or three pixels
+  a snowflake is drawn at, `radius: width / 2` without `antialiasing: true` is a
+  square — and it is a square at every size, just less obviously.
 - **Qt Quick Shapes escape ancestor clipping.** `clip: true` on a Flickable or ListView
   does not bound them: condition glyphs from out-of-view list rows drew over the header,
   and a precipitation droplet from an off-screen bucket drew past the card's edge.

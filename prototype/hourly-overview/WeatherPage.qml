@@ -43,6 +43,7 @@ Item {
     property alias listView: tabs.listView
     property alias dayIndex: dayStrip.currentIndex
     property alias feelsLike: chart.feelsLike
+    property alias animated: chart.animated
 
     property alias contentY: scroll.contentY
 

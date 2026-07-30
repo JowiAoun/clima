@@ -122,6 +122,51 @@ var color = {
     badgeNightBottom:"#3f63bd"
 };
 
+// Precipitation effect. Two layers: a `wash` under the chart marking the hours
+// it falls in, and `drop`/`splash` particles over it saying what is falling.
+//
+// Opaque colours with the alpha applied at use, unlike everything above, and
+// for a reason: six types times three intensities is eighteen washes, and
+// eighteen hand-written #AARRGGBB literals is a table nobody can check. Type
+// chooses the hue, intensity chooses the alpha, and the two are independent —
+// which is the actual design, so it is what the tokens should say.
+//
+// The rain hue and its mid alpha are measured off the reference: its rainy
+// stretch composites to #394e77 over a #333659 plot, which is #4f9ad4 at 0.20.
+var precip = {
+    wash: {
+        drizzle: "#4f9ad4",
+        rain:    "#4f9ad4",
+        sleet:   "#7ba6cf",
+        snow:    "#a9c8e8",
+        hail:    "#b8d2ec",
+        thunder: "#5d7ed0"
+    },
+
+    // Deliberately a narrow ladder. The wash answers "is it raining here",
+    // which must read the same at every level; how hard it is raining is the
+    // field's job, and it has far more range to say it with.
+    washAlpha: { light: 0.13, moderate: 0.20, heavy: 0.27 },
+
+    // A wash tells you roughly when. A line on its first and last minute tells
+    // you exactly, and "exactly when" is the whole point of the feature.
+    edge: "#3dbcd9f2",
+
+    drop: {
+        drizzle: "#cfe2f5",
+        rain:    "#d8e8f8",
+        sleet:   "#e6f1fd",
+        snow:    "#f6faff",
+        hail:    "#ffffff",
+        thunder: "#dcecfd"
+    },
+    splash: "#c6dcf2",
+
+    // Lightning: the storm band brightening for a frame, not a drawn bolt. A
+    // bolt at this size is four pixels of noise; a flash is unmistakable.
+    flash:  "#e8f0ff"
+};
+
 // Radii are deliberately generous. The reference reads "soft" because almost
 // nothing in it meets at a hard edge, and the tab/panel junction is filleted
 // rather than squared — see TabFillet.qml.

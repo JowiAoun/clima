@@ -170,6 +170,16 @@ where nothing is legible, and every one of these has a specific failure mode.
 - **Layout does not animate on resize.** Reflow is not a transition; a window
   drag that makes twelve cards ease to new positions reads as lag.
 
+**One exception, and it is a real one: precipitation** (§10.11). Rain is not a
+transition between two states, it is a state, and the only honest way to draw it
+is moving. So the rule is kept everywhere it can be — the clock does not run
+when there is no precipitation, when the chart is behind the list view, or under
+`--grab`, and one clock drives the whole field however heavy the weather gets.
+The golden images survive it because nothing calls `Math.random`: every drop is
+seeded from its hour, so a frozen frame is a deterministic one rather than an
+empty one. Anything else wanting a standing animation has to make the same
+argument.
+
 ### The reveal
 
 Detail cards have no interaction and no changing data — the provider values are
@@ -427,3 +437,76 @@ Worth recording, because none of it was visible in any single component:
 Three of the four are of one kind: a decision that was correct in the context it
 was made in and wrong once something else changed. That is what a page is for —
 it is the only place the contexts meet.
+
+## 10.11 Precipitation
+
+Everything else on this chart answers *how much*. Precipitation is the one
+variable people mostly ask *when* about — the question is nearly always "can I
+leave at four", not "how many millimetres" — and a column of millimetres answers
+that only after you have read an axis. So it gets a second encoding, on top of
+the bars it already has and on every metric tab: the hours it falls in are
+washed and textured.
+
+Three layers, and each carries a different piece of the reading:
+
+| Layer | Says | Where |
+|---|---|---|
+| **Wash** | *when* — a tinted band edge to edge of the spell | `PrecipBands.qml`, under the series |
+| **Field** | *what and how hard* — falling particles | `PrecipField.qml`, over the series |
+| **Caption** | the words, for spells wide enough | `PrecipField.qml` |
+
+### Rules
+
+- **The wash goes under the series; the field goes over it.** This is why they
+  are two components rather than one, and it is not a layering preference. A
+  fill's colour on this chart *is* its value (§10.5), and on the banded metrics
+  those colours are a published scale — a blue wash over a UV bar would be
+  stating a different number. Underneath, the wash still reads, because every
+  fill here is translucent. The reference does the same thing and it is
+  measurable in a capture: its rainy stretch shifts the empty plot by about
+  three times what it shifts the area fill.
+- **An hour is an interval, not an instant.** Providers report the amount for
+  the hour *starting* at a timestamp, so hour *i* occupies `[i, i+1)` and the
+  wash is drawn on that. Centring it on the sample would claim rain for the half
+  hour before it starts — which is the half hour someone is deciding in.
+- **Type picks the hue, intensity picks the alpha, and the ladder is narrow**
+  (0.13 / 0.20 / 0.27). "Is it raining here" has to read the same at every
+  level; how hard it is raining is the field's job, and the field has far more
+  range to say it with.
+- **Spells split on type, not on intensity.** Rain easing off is still the same
+  rain; cutting the band at every step change would draw four events where there
+  is one. The spell is labelled by its peak, because "heavy rain, 2 to 6" is
+  what you would say out loud about a spell with one heavy hour in it.
+- **Both edges, always.** A wash says roughly when. A line on its first and last
+  minute says exactly when, and exactly when is the entire point.
+- **Six named levels are six points on a continuum.** `precip.js` crosses a type
+  with an intensity and scales one particle model — count, size, speed. There is
+  no switch statement with six pictures in it to keep in sync, which is also how
+  sleet, hail and thunderstorms came for free.
+- **Nothing calls `Math.random`.** Every drop is a hash of its hour and its index
+  in that hour, so the same forecast draws the same rain on every run and
+  `--grab` is still a golden image. Two consecutive grabs are byte-identical;
+  that is the check.
+- **The loop wraps seamlessly or it is a glitch you will blame on something
+  else.** One clock runs `0 → LOOP` and every particle's progress is
+  `(clock × rate + offset) mod 1`, which is only continuous across the wrap
+  where `LOOP × rate` is whole — so `precip.js` quantises every rate to `LOOP`
+  steps. Without that the entire field jumps at once, once a minute.
+
+### Notes
+
+- **Rectangles, not Shapes.** A streak is a thin rounded rectangle, a flake a
+  round one, a splash four of them. Shapes escape ancestor clipping (§10.8) and
+  would each need a layer to bound; rectangles are batched, and the Flickable
+  that already clips the chart clips them too.
+- **`antialiasing: true` is not optional at this size.** Qt only antialiases a
+  rounded rectangle when asked, and every snowflake on the chart is a little
+  square without it.
+- **The cost is proportional to the weather, not to the chart.** Particles are
+  generated per wet hour, so a dry forecast draws nothing. The mock's four
+  spells come to 54 drops and 20 splashes across 48 hours.
+- **A splash is four rectangles and the arrangement matters.** Puddle line,
+  rebound jet, and two droplets thrown clear of it. Left at the jet's own height
+  and leaning the same few degrees, the three resolve into one downward arrow —
+  a rendering that says the opposite of what a splash is. This is only visible
+  at 4× on a capture, which is where it was found.

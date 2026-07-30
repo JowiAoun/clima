@@ -22,6 +22,11 @@ Item {
     property string metricId: "overview"
     property bool listView: false
 
+    // Ambient motion — currently the precipitation field, which is the only
+    // thing here that moves when nothing has changed. Off under `--grab`, so a
+    // headless frame is the same frame every time.
+    property bool animated: true
+
     // Exposed so a headless film can drive the feels-like morph, which is
     // otherwise reachable only by clicking the toggle.
     property alias feelsLike: toggle.checked
@@ -111,9 +116,13 @@ Item {
     // and a bar chart equally.
     //
     // The frame does not take part. The hour labels, the condition glyphs, the
-    // past veil, the now line, the sun markers and the precipitation strip are
-    // all functions of time, not of metric, and they stay exactly where they
-    // are so the reader keeps their place while the data underneath changes.
+    // past veil, the now line, the sun markers, the precipitation strip and the
+    // precipitation wash and field are all functions of time, not of metric,
+    // and they stay exactly where they are so the reader keeps their place
+    // while the data underneath changes. The rain in particular has to: it
+    // falls in the same hours whichever metric is plotted, so folding it onto
+    // the baseline with the series would say the weather changed when only the
+    // question did.
     //
     // 1 = the series at full extent, 0 = flat on the baseline.
     property real seriesExtent: 1
@@ -447,6 +456,17 @@ Item {
                             }
                         }
 
+                        // Precipitation, under the series: the hours it falls
+                        // in, washed. Under and not over, because the series'
+                        // own colour is a value and a wash laid over it would
+                        // be stating a different one — see PrecipBands.qml.
+                        PrecipBands {
+                            anchors.fill: parent
+                            cells: Data.precipCells
+                            hourWidth: root.hourWidth
+                            contentWidth: root.contentW
+                        }
+
                         SeriesArea {
                             visible: root.metric.kind === "area"
                             anchors.fill: parent
@@ -471,6 +491,21 @@ Item {
                             minValue: root.axisMin
                             maxValue: root.axisMax
                             ramp: Theme.ramp[root.metric.ramp].fill
+                        }
+
+                        // …and the falling half over it. Declared before the past
+                        // veil so observed rain is veiled along with everything
+                        // else: it fell, and nothing here should imply the
+                        // forecast is still promising it.
+                        PrecipField {
+                            anchors.fill: parent
+                            cells: Data.precipCells
+                            hourWidth: root.hourWidth
+                            contentWidth: root.contentW
+                            // Nothing worth animating behind the list view, and
+                            // --grab wants a frame it can hold against a golden
+                            // image rather than whichever one it happened to catch.
+                            animated: root.animated && !root.listView
                         }
 
                         // The past, veiled and hatched *over* the series: observed hours

@@ -375,6 +375,13 @@ Window {
 
         var i = args.indexOf("--grab")
         if (i >= 0 && i + 1 < args.length) {
+            // The precipitation field is the one thing on this page that moves
+            // without being asked, so a grab of it would otherwise catch a
+            // different frame every run and no two golden images would agree.
+            // Frozen, it still draws rain — precip.js seeds every drop from its
+            // hour, so the frozen frame is a deterministic one rather than an
+            // empty one.
+            page.animated = false
             grabTimer.target = args[i + 1]
             grabTimer.start()
         }

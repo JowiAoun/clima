@@ -8,6 +8,8 @@
 // helpers, no formatting decisions baked in.
 .pragma library
 
+.import "precip.js" as Precip
+
 var startHour       = 21;   // index 0 is 21:00 on day 0
 var nowIndex        = 3;    // 00:00
 var firstLabelIndex = 1;    // label every 2 h from 22:00, so the curve starts
@@ -20,34 +22,72 @@ var temperature = [
     25.6, 26.6, 27.4, 28.0, 28.2, 27.6, 26.6, 25.4, 24.2, 23.0, 22.2, 21.4
 ];
 
+// Chance of precipitation. This was hand-tuned to the MSN screenshot like the
+// two series around it, and it no longer is at the wet hours — deliberately,
+// and the divergence is the point. The reference forecast is dry, so a mock
+// copied from it can only ever demonstrate a precipitation effect by not
+// having any. The wet hours below carry the probability their amounts imply;
+// everywhere else these are still the reference's numbers.
+//
+// A 4 % chance of 8.6 mm would have been the more embarrassing thing to ship.
 var precipProb = [
-    24, 22, 18, 18, 16, 18, 14, 20, 12, 10,  8,  6,
-     4,  3,  4,  9,  7, 22, 18, 30, 24, 13, 10,  8,
-     6,  5,  4,  3,  5,  8, 12, 10, 14, 20, 26, 22,
-    18, 12,  9,  6,  4,  3,  2,  4,  7, 11, 16, 14
+    62, 55, 46, 40, 34, 20, 14, 12, 10,  8,  6,  5,
+     6,  9, 14, 22, 34, 55, 72, 88, 80, 62, 45, 30,
+    18, 12,  8,  6,  8, 12, 16, 20, 26, 34, 48, 58,
+    50, 32, 20, 12,  8,  6,  5,  7, 10, 14, 18, 16
 ];
 
+// Overcast where it rains, because it cannot rain out of a half-clear sky and
+// the Cloud cover tab is one tab away from the wash that says it is raining.
+// Elsewhere these are still the reference's numbers.
 var cloud = [
-    88, 90, 84, 78, 68, 46, 42, 38, 32, 30, 26, 34,
-    32, 36, 40, 38, 44, 46, 52, 56, 50, 44, 26, 20,
-    30, 36, 40, 44, 48, 52, 46, 40, 34, 28, 44, 58,
-    52, 40, 32, 26, 22, 28, 36, 44, 52, 60, 66, 70
+    88, 90, 84, 78, 74, 46, 42, 38, 32, 30, 26, 34,
+    32, 36, 40, 38, 52, 84, 92, 96, 94, 88, 76, 66,
+    40, 36, 40, 44, 48, 52, 46, 40, 34, 46, 78, 88,
+    80, 46, 32, 26, 22, 28, 36, 44, 52, 60, 66, 70
 ];
 
 var count = temperature.length;
 
-// Observed rain in the first few hours — this is why the past region is hatched
-// and the leading icons are showers rather than cloud.
+// Millimetres in the hour *starting* at each index — the convention every
+// provider uses, and the one the wash under the chart is drawn on.
+//
+// Four spells, chosen to be a day someone would actually plan around rather
+// than to exercise a switch statement: last night's rain still drizzling out
+// as the page opens, a thunder-free but genuinely heavy band through the
+// afternoon that climbs light → moderate → heavy → moderate and back, its own
+// tail, and a light band after tomorrow's sunrise. Sleet, snow and hail cannot
+// occur at these temperatures and so are not here; the gallery is where those
+// live, which is what the gallery is for.
 var precipMm = _buildPrecipMm();
 
 function _buildPrecipMm() {
     var out = [];
     for (var i = 0; i < count; ++i)
         out.push(0);
-    out[0] = 0.4; out[1] = 0.6; out[2] = 0.3; out[3] = 0.2; out[4] = 0.1;
-    out[34] = 0.2; out[35] = 0.3;
+
+    // 21:00 – 01:00, easing off. Straddles `nowIndex`, so the effect has to be
+    // right on both sides of the now line on first paint.
+    out[0]  = 0.35; out[1]  = 0.30; out[2]  = 0.22; out[3] = 0.15; out[4] = 0.11;
+
+    // 14:00 – 18:00, the event of the day.
+    out[17] = 0.6;  out[18] = 2.9;  out[19] = 8.6;  out[20] = 5.1; out[21] = 1.4;
+    out[22] = 0.3;  out[23] = 0.15;
+
+    // 07:00 – 09:00 the next morning.
+    out[34] = 0.6;  out[35] = 1.1;  out[36] = 0.7;
     return out;
 }
+
+// The same hours, classified: type and intensity per hour, null where dry.
+// Derived rather than typed, so the amounts above stay the single source of
+// truth and no hour can be drizzling in the chart and pouring in the strip.
+//
+// Type falls out of temperature here because the mock has no weather codes.
+// Open-Meteo sends a WMO code per hour and it is strictly better — it is the
+// only way to know thunder or hail is involved — so `Precip.cells` takes one
+// as its third argument, ready for the provider that has it.
+var precipCells = Precip.cells(precipMm, temperature);
 
 // Apparent temperature: humidity pushes the warm hours up, night wind pulls the
 // cool hours down. Real values come from Open-Meteo's apparent_temperature.

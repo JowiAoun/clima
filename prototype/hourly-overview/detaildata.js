@@ -36,7 +36,7 @@ var location = {
 var current = {
     conditionKind: "clear-day",
     unitLabel: "°C",
-    summary: "Expect sunny skies. The high will be 29°."
+    summary: "Sunny now, with heavy rain from 2 p.m. The high will be 29°."
 };
 
 // Twelve hours of context, oldest first, for the cards that draw a sparkline.
@@ -62,20 +62,26 @@ var feelsLike = {
 var cloudCover = {
     value: 8, unit: "%",
     condition: "Sunny",
-    trend: "steady", status: "Sunny",
-    body: "Steady with clear sky at 12:28 p.m. Clear sky expected in the evening."
+    trend: "up", status: "Sunny",
+    body: "Clear sky at 12:28 p.m. Clouding over from 2 p.m. as the rain arrives."
 };
 
 var precipitation = {
-    value: 0, unit: "mm", window: "In next 24h",
-    // 10 mm in twenty-four hours is a thoroughly wet day: the ceiling a card
+    value: 21, unit: "mm", window: "In next 24h",
+    // 25 mm in twenty-four hours is a thoroughly wet day: the ceiling a card
     // draws the amount against. Here rather than in the card because it decides
     // what the reader sees, which makes it data and not styling.
-    scaleMax: 10,
-    // Probability per hour, for cards that want a small distribution.
-    series: [0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 20, 35],
-    trend: "steady", status: "No precipitation",
-    body: "Similar to yesterday so far. Rain expected Saturday night."
+    //
+    // This was 10, which is a wet day by the standards of the reference's
+    // forecast and not by the standards of ours — the afternoon band alone is
+    // 18 mm, so a 10 mm ceiling would have drawn every wet day as full.
+    scaleMax: 25,
+    // Probability per hour, for cards that want a small distribution. The same
+    // hours mockdata.js has around noon, so the card and the chart cannot
+    // disagree about an afternoon they are both describing.
+    series: [8, 6, 5, 6, 9, 14, 22, 34, 55, 72, 88, 80],
+    trend: "up", status: "Heavy rain expected",
+    body: "Dry now. Rain from 2 p.m., heaviest around 4 p.m."
 };
 
 var wind = {

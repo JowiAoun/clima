@@ -21,6 +21,7 @@
 .pragma library
 
 .import "theme.js" as Theme
+.import "precip.js" as Precip
 
 // A gentle curve for the series specimens, so the two chart primitives have
 // something to draw. Sample input for a catalogue, not weather.
@@ -32,6 +33,41 @@ function _curve(n, w, h) {
         pts.push({ x: t * w, y: h - y * h });
     }
     return pts;
+}
+
+// Precipitation levels, as specimens. The page can only ever show the weather
+// its mock data has, and at 18–28 °C that is rain — so every frozen level below
+// exists solely here, which is the argument for having a gallery at all.
+//
+// `hours` wide of one level, with a dry hour at each end so the wash has an
+// edge to draw and you can see where it decided the spell begins.
+function _spell(type, intensity, hours) {
+    var cells = [null];
+    var wet = Precip.uniform(hours, type, intensity);
+    for (var i = 0; i < wet.length; ++i)
+        cells.push(wet[i]);
+    cells.push(null);
+    return cells;
+}
+
+function _levels(hours) {
+    var out = [];
+    // The six levels anyone would name first, then the four that only exist
+    // because the model is a type crossed with an intensity rather than ten
+    // hand-drawn pictures.
+    var levels = [
+        ["drizzle", "light"],
+        ["rain", "light"], ["rain", "moderate"], ["rain", "heavy"],
+        ["snow", "light"], ["snow", "moderate"], ["snow", "heavy"],
+        ["sleet", "moderate"], ["hail", "moderate"], ["thunder", "heavy"]
+    ];
+    for (var i = 0; i < levels.length; ++i)
+        out.push({
+            label: Precip.label(levels[i][0], levels[i][1]),
+            props: { cells: _spell(levels[i][0], levels[i][1], hours),
+                     hourWidth: 48, contentWidth: 48 * (hours + 2) }
+        });
+    return out;
 }
 
 var groups = [
@@ -198,6 +234,12 @@ var groups = [
               ] },
             { name: "Precipitation strip", file: "PrecipitationStrip.qml", stage: { w: 480, h: 28 },
               blurb: "One cell per label interval; past hours are hatched, not blank." },
+            { name: "Precipitation wash", file: "PrecipBands.qml", stage: { w: 480, h: 120 },
+              blurb: "When it falls. Hue is the type, alpha the intensity — a narrow ladder on purpose, because \"is it raining here\" has to read the same at every level.",
+              variants: _levels(8) },
+            { name: "Precipitation field", file: "PrecipField.qml", stage: { w: 480, h: 200 },
+              blurb: "What is falling, and how hard. Ten levels off one particle model: type picks the shape, intensity scales the count, size and speed. Shown without the wash it normally sits over.",
+              variants: _levels(8) },
             { name: "Hatch", file: "HatchPattern.qml", stage: { w: 240, h: 90 },
               blurb: "\"The past — there is no forecast here\", so absent data reads as deliberate." }
         ]
