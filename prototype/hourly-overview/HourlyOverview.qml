@@ -46,6 +46,20 @@ Item {
     readonly property real plotHeight: Math.max(
         170, body.height - 2 * panelPadding - headerBandHeight - stripGap - stripHeight)
 
+    // The card takes whatever height it is given and hands the remainder to the
+    // plot. That works when it fills a window and does nothing at all in a
+    // scrolling column, where an item has to say how tall it wants to be — so
+    // this is the same relation solved the other way round: the height at which
+    // the plot comes out at its preferred size.
+    //
+    // `Theme.metric.plotHeight` had been sitting in the token table unused.
+    // This is the one place that knows what it means.
+    readonly property real preferredBodyHeight: Theme.metric.plotHeight
+        + 2 * panelPadding + headerBandHeight + stripGap + stripHeight
+
+    implicitHeight: cardPadding + title.height + 14 + preferredBodyHeight + 14
+                    + legend.height + cardPadding - 4
+
     // 0 = the metric's own series, 1 = apparent temperature. Animated, so toggling
     // morphs the curve instead of cutting to it. Only meaningful on Overview.
     property real feelsBlend: (supportsFeelsLike && toggle.checked) ? 1 : 0
@@ -157,9 +171,23 @@ Item {
         // Cost is a chart that stays built while the list is shown. Revisit when
         // the C++ port lands (decision D3) — this smells like a Qt scene-graph bug
         // that a QSGGeometryNode implementation may simply not trip.
+        // …but staying loaded is not the same as staying *visible*, and that
+        // distinction went missing. While every surface was an opaque navy fill
+        // the list's own panel hid the chart behind it and nobody noticed the
+        // chart was still being painted. Surfaces then became translucent
+        // washes, and from that change onward the chart has shown straight
+        // through the list: hour labels, gridlines and the area fill interleaved
+        // with the rows. It is on `main` today and it took assembling the page
+        // to see it, because nothing re-checked list view afterwards.
+        //
+        // opacity, not visible: `visible: false` on this subtree is the thing
+        // that corrupts clipping for unrelated nodes. Zero alpha leaves the
+        // scene graph exactly as it was and only stops it painting.
         Loader {
             anchors.fill: parent
             active: true
+            opacity: root.listView ? 0 : 1
+            enabled: !root.listView
             sourceComponent: chartPanel
         }
 

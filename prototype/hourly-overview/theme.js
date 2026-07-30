@@ -148,7 +148,14 @@ var metric = {
     detailRadius:     12,
     detailPadH:       20,
     detailPadV:       16,
-    detailGap:        16
+    detailGap:        16,
+
+    // Between two sections of the page — the hero and the hourly block, the
+    // hourly block and the details grid. Wider than any gap inside a section,
+    // which is what makes them read as separate things without a rule between
+    // them.
+    sectionGap:       30,
+    pageMargin:       22
 };
 
 // Type sizes, as tokens rather than as a table in a document, because twelve
@@ -158,6 +165,11 @@ var metric = {
 // `font.pixelSize` is an int in Qt. A fractional value fails object creation and
 // Qt reports it only as `Type X unavailable` from the *parent* file.
 var type = {
+    // A section heading on the page: "Hourly", "Weather details". One token,
+    // because the two sections had picked 18 and 15 independently and nobody
+    // saw it until they were stacked on one page.
+    sectionTitle: 18,
+
     cardTitle:   15,
     detailTitle: 14,
 
@@ -171,7 +183,17 @@ var type = {
     status:      14,
     body:        12,
     label:       12,
-    axis:        11
+    axis:        11,
+
+    // The page headline, in the current-conditions card. Deliberately far above
+    // `reading`: a detail card's number is one of twelve competing for a sweep
+    // of the eye, this one is the answer to the question the page was opened to
+    // ask, and it should be readable across a room.
+    heroReading: 64,
+    heroUnit:    34,   // the degree suffix riding on it
+    heroCaption: 32,   // the condition beside it
+    heroDetail:  18,   // the outlook sentence, and each value in the slug row
+    heroLabel:   14    // a slug's label
 };
 
 var scale = {

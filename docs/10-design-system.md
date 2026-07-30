@@ -78,6 +78,7 @@ reads as twelve authors rather than as one set. A range is not a rule.
 
 | Role | Token | Size | Weight | Colour |
 |---|---|---|---|---|
+| Section heading | `sectionTitle` | 18 | bold | `textPrimary` |
 | Card title | `cardTitle` | 15 | bold | `textPrimary` |
 | Detail card title | `detailTitle` | 14 | normal | `textPrimary` |
 | Reading (the big number) | `reading` | 34 | bold | `textPrimary` |
@@ -86,6 +87,21 @@ reads as twelve authors rather than as one set. A range is not a rule.
 | Body / description | `body` | 12 | normal | `textMuted` |
 | Label beside a reading | `label` | 12 | normal | `textMuted` |
 | Axis and tick labels | `axis` | 11 | normal | `textDim` |
+
+The current-conditions card is the page headline and has its own five, none of
+which appear anywhere else:
+
+| Role | Token | Size | Weight |
+|---|---|---|---|
+| The temperature | `heroReading` | 64 | **normal** |
+| Its degree suffix | `heroUnit` | 34 | normal |
+| The condition beside it | `heroCaption` | 32 | bold |
+| Outlook sentence, slug values | `heroDetail` | 18 | normal |
+| Slug labels | `heroLabel` | 14 | normal |
+
+`heroReading` is set in book weight, not bold. It is the one deliberate
+exception to "a reading is bold": at 64 px bold stops reading as a number and
+starts reading as a shout, and the reference agrees — its own is weight 400.
 
 `readingPair` is for a card whose subject is genuinely two co-equal numbers —
 sunrise *and* sunset, speed *and* gust. It is not a licence to shrink a reading
@@ -203,6 +219,13 @@ under about 85 characters or they elide mid-word, which reads as a bug.
   though every surface is translucent — source-over compositing is associative,
   so flattening a group and then laying it over the page gives the same pixels.
   Do not layer a rounded opaque item, where it notches the corners.
+- **`visible: false` and `opacity: 0` are not interchangeable here.** Hiding the
+  chart subtree corrupts clip state for unrelated nodes — that is why the chart
+  stays loaded underneath the list. But *loaded* was silently taken to mean
+  *painted*, and once surfaces went translucent the chart started showing
+  through the list rows. `opacity: 0` leaves the scene graph untouched and only
+  stops it painting, which is what was wanted all along. Pair it with
+  `enabled: false` or the invisible thing still takes clicks.
 - QML cannot produce `GradientStop` or path elements from a `Repeater`.
   Gradients are declared statically; paths are generated as strings in JS and
   handed to `PathSvg`.
@@ -213,14 +236,20 @@ under about 85 characters or they elide mid-word, which reads as a bug.
 ## 10.9 Checking your work
 
 ```sh
+./run.sh                                        # the page
+./run.sh --grab p.png --scroll 800              # …scrolled down, headless
 ./run.sh --gallery                              # every component, one screen
 ./run.sh --gallery uv                           # …opened on one of them
 ./run.sh --grab g.png --gallery Colour --walk 5 # …stepped 5 on, headless
 ./run.sh --card Uv                              # one card, on the page gradient
 ./run.sh --grab shot.png --card Uv              # …headless, to look at pixels
 ./run.sh --grab g.png --details --size 1300x900 # the whole grid, all three rows
-./run.sh                                        # the hourly screen
 ```
+
+**Scroll before you grab.** The page is taller than any window it runs in, so a
+grab of the first screenful reviews maybe a third of it — and the sections below
+the fold are the ones with twelve charts in them. `--scroll` exists for the same
+reason `--walk` does.
 
 `--gallery` is the component library: every component on the gradient it is
 composited over, including the states no current screen uses. Its **Colour**
@@ -249,3 +278,61 @@ card in that row stays unnoticed.
 Render it and look at it. Every defect found in this prototype so far was found
 by rendering and looking — several of them were invisible in the code and
 obvious in the image.
+
+## 10.10 The page
+
+`WeatherPage.qml` stacks four sections in one scrolling column:
+
+| | |
+|---|---|
+| Location bar | where this is for |
+| Current conditions | the headline |
+| Hourly | metric tabs → day strip → chart or list |
+| Weather details | twelve cards, one per measurable |
+
+The order is the reference's and it is an argument rather than a habit: what is
+it doing now, what will it do today, tell me about one thing in particular.
+Each section asks a narrower question than the one above it.
+
+### Rules
+
+- **A section is not a surface.** Sections are separated by `sectionGap` and
+  nothing else — no rules, no wrapper panels. A panel around a section would be
+  a wash containing washes, so every card inside it would composite to 0.135 and
+  the whole block would read as a lighter patch. Contrast against the page is
+  what defines a surface here (§10.1), which leaves a section as pure layout.
+- **One thing scrolls.** The page owns the scroll; nothing inside it scrolls
+  vertically. Two nested vertical scroll areas give the reader two things to
+  drag and no way to predict which one they get. Horizontal scrolling inside a
+  section — the day strip, the chart — does not conflict and is fine.
+- **A section reports its height.** Every component on the page has an
+  `implicitHeight`; none is anchored to the bottom of anything. A component that
+  derives its layout from the height it is handed cannot go in a column, and
+  `HourlyOverview` had to be given the inverse relation before it could.
+- **The page's Flickable carries the layer.** Not the sections. One layer bounds
+  every Shape on the page (§10.8); a layer per section is that many offscreen
+  textures for the same result.
+- **Two headings on one page must be the same heading.** They were 18 and 15,
+  set independently, and neither author was wrong on their own. `sectionTitle`
+  and `SectionHeader.qml` exist so it cannot happen again.
+- **The headline reads its numbers from the cards' own data.** The hero shows
+  the temperature, the condition and the feels-like that `detaildata.js` gives
+  the detail cards three sections below. A hero carrying its own copy is a hero
+  that will eventually contradict the card it is summarising.
+
+### What assembling it found
+
+Worth recording, because none of it was visible in any single component:
+
+- The sun glyph's "soft halo" was a flat disc at 16 % alpha — an edge you can
+  trace, which §10.1 defines as a stacked wash rather than a glow. At the 26 px
+  the glyph is normally drawn at, the edge is two pixels and invisible. At the
+  72 px the hero draws it at, it is a hard-rimmed ring.
+- The list view had the chart painting through it, on `main`, since the day
+  surfaces became translucent. See §10.8.
+- The two section headings disagreed by 3 px.
+- `Theme.metric.plotHeight` had been in the token table the whole time, unused.
+
+Three of the four are of one kind: a decision that was correct in the context it
+was made in and wrong once something else changed. That is what a page is for —
+it is the only place the contexts meet.

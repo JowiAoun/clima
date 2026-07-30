@@ -12,7 +12,7 @@ Window {
     minimumWidth: 680
     minimumHeight: 560
     color: Theme.color.pageBg
-    title: qsTr("Clima — Hourly (prototype)")
+    title: qsTr("Clima (prototype)")
 
     // The page background is painted as an item, not left to Window.color.
     // grabToImage() captures contentItem, which does not include the window's
@@ -55,11 +55,28 @@ Window {
         }
     }
 
+    // The grid lays out in full and does not scroll itself — the page owns that.
+    // Shown on its own it still needs somewhere to scroll and something to bound
+    // its cards' Shapes, so the preview supplies both.
     Loader {
         active: win.previewGrid
         anchors.fill: parent
         anchors.margins: 22
-        source: "WeatherDetails.qml"
+        sourceComponent: Component {
+            Flickable {
+                clip: true
+                layer.enabled: true
+                contentWidth: width
+                contentHeight: gridItem.height
+                flickableDirection: Flickable.VerticalFlick
+                boundsBehavior: Flickable.StopAtBounds
+
+                WeatherDetails {
+                    id: gridItem
+                    width: parent.width
+                }
+            }
+        }
     }
 
     // The gallery gets the whole window with no margin: it paints its own rail
@@ -90,36 +107,27 @@ Window {
         }
     }
 
-    Item {
+    // The app itself. Every preview flag above is a way of looking at one piece
+    // of this in isolation; with none of them set, this is the product.
+    WeatherPage {
+        id: page
         anchors.fill: parent
-        anchors.margins: 22
         visible: win.previewCard === "" && !win.previewGrid && !win.previewGallery
+    }
 
-        MetricTabBar {
-            id: tabs
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-        }
-
-        DayStrip {
-            id: dayStrip
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: tabs.bottom
-            anchors.topMargin: 16
-        }
-
-        // Declared after the day strip on purpose: it paints over the selected
-        // card's overhang, which is what makes the two read as one surface.
-        HourlyOverview {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: dayStrip.bottom
-            anchors.bottom: parent.bottom
-            metricId: tabs.currentId
-            listView: tabs.listView
-        }
+    // --scroll N drops the page N pixels down before grabbing. The details grid
+    // is below the fold at every window size that fits on a laptop, so without
+    // this a headless review of the page can only ever see its top third — and
+    // the sections it cannot see are the ones with twelve charts in them.
+    //
+    // Deferred for the same reason the walk is: contentHeight is still 0 during
+    // Component.onCompleted, and a contentY assigned against it is clamped
+    // straight back to zero.
+    Timer {
+        id: scrollTimer
+        interval: 400
+        property real target: 0
+        onTriggered: page.contentY = Math.min(target, page.maxContentY)
     }
 
     // Headless capture, for design review and CI golden images:
@@ -147,14 +155,14 @@ Window {
         var args = Qt.application.arguments
         var m = args.indexOf("--metric")
         if (m >= 0 && m + 1 < args.length)
-            tabs.currentId = args[m + 1]
+            page.metricId = args[m + 1]
 
         var d = args.indexOf("--day")
         if (d >= 0 && d + 1 < args.length)
-            dayStrip.currentIndex = parseInt(args[d + 1])
+            page.dayIndex = parseInt(args[d + 1])
 
         if (args.indexOf("--list") >= 0)
-            tabs.listView = true
+            page.listView = true
 
         var c = args.indexOf("--card")
         if (c >= 0 && c + 1 < args.length)
@@ -206,6 +214,19 @@ Window {
                 win.height = parseInt(wh[1])
             } else {
                 console.warn("--size: expected WxH, got", args[s + 1])
+            }
+        }
+
+        var sc = args.indexOf("--scroll")
+        if (sc >= 0 && sc + 1 < args.length) {
+            // Validated before assigning, so a typo warns instead of quietly
+            // scrolling to the top and looking like the flag does nothing.
+            var y = parseFloat(args[sc + 1])
+            if (!isNaN(y) && y >= 0) {
+                scrollTimer.target = y
+                scrollTimer.start()
+            } else {
+                console.warn("--scroll: expected a distance >= 0, got", args[sc + 1])
             }
         }
 

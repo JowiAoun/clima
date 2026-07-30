@@ -174,7 +174,61 @@ alone. Ours animates fill, width and height together over 0.16–0.19 s.
   `--accent-*`). They are the *site chrome's* system, not the weather cards' —
   worth mining for the type ramp, not for the chart palette.
 
-## 9.6 Working rule
+## 9.6 Third capture: `overview`, and the whole page
+
+Two captures: the current-conditions card on its own (Seattle, 620×310 CSS at
+DPR 4), and a full-page crawl (Toronto, 72 components over 12 239 px) that
+finally answers what order the sections go in.
+
+### Page order
+
+| | Component | Size |
+|---|---|---|
+| | site header, location carousel | full bleed |
+| | location name | 1260×24 |
+| | **current conditions** + mini radar map | 620×310 + 300×270 |
+| | **hourly**: tabs → day cards → trend chart | 940×666 |
+| | **weather details**: 13 cards | 940×1412 |
+| | radar, monthly calendar, historical trends, news | 940×… |
+
+The main content column is 940 px. We reproduce the three bolded sections and
+stop: the rest is a radar map, a calendar and a news feed, none of which we have
+data or components for, and two of which are not weather.
+
+**The details grid is 3 × 300×250 cards with a 20 px gutter**, which is where
+`detailCardWidth`/`Height` came from and confirms them against a second city.
+Ours uses a 16 px gutter and picks its column count from the width available.
+
+### The current-conditions card
+
+Card inset 16 px. Sections at y = 56 (label), 102 (headline), 179 (sentence),
+253 (slug row), card ending at 310.
+
+| | Measured |
+|---|---|
+| Label / update time | 22 px and 16 px line boxes, stacked |
+| Condition icon | 72 × 72 |
+| Temperature | **64 px, weight 400** — book, not bold |
+| Degree suffix | ~34 px, riding at the top of the digits |
+| Condition caption | 32 px, weight 600 |
+| "Feels like" / its value | 14 px / 18 px |
+| Outlook sentence | 18 px |
+| Slug label / value | 14 px / 18 px, row 38 px tall |
+| Slugs | air quality (with band dot), wind (with bearing arrow), humidity, visibility, pressure, dew point |
+
+18 px is the page's workhorse size — 70 of the crawl's text nodes use it, split
+evenly between weight 400 and 600. Our `heroDetail` and `sectionTitle` are both
+18 for that reason.
+
+### Where we diverge, and why
+
+The reference fills the space to the right of the temperature with a mini radar
+map. We have nothing to draw there, and a card that wide with an empty right
+half reads as a layout that ran out of content — so ours puts today's high and
+low there instead. They are the two numbers the outlook sentence gestures at
+("the high will be 29°") without stating as data.
+
+## 9.7 Working rule
 
 Capture → measure → decide → implement. The capture is evidence, not a target:
 we are matching MSN's *quality*, not cloning its output, and where we think it

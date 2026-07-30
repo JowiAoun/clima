@@ -19,11 +19,14 @@ Item {
     implicitHeight: 38
     height: implicitHeight
 
+    // The title is inline with the pills rather than on its own row, so this is
+    // not a SectionHeader — but it is the same *role*, and it takes the same
+    // token. The two used to disagree by 3 px.
     Text {
         id: heading
         text: root.title
         color: Theme.color.textPrimary
-        font.pixelSize: 18
+        font.pixelSize: Theme.type.sectionTitle
         font.bold: true
         anchors.verticalCenter: parent.verticalCenter
         x: 0

@@ -14,6 +14,31 @@
 
 var observedAt = "12:28 PM";
 
+// Where the forecast is for. Here rather than in mockdata.js because it
+// describes the observation rather than the hourly series.
+var location = {
+    name: "Toronto",
+    region: "Ontario",
+    label: "Toronto, Ontario",
+    isHome: true
+};
+
+// The page headline.
+//
+// Every number it shows already lives in one of the per-measurable blocks below
+// and is read from there — the temperature from `temperature`, the condition
+// from `cloudCover`, the apparent temperature from `feelsLike`. Copying 27° into
+// a second place is how a page ends up disagreeing with itself, and a hero that
+// contradicts the card three rows down is worse than no hero.
+//
+// What is genuinely only the headline's: which glyph to draw, the unit it is
+// labelled with, and the one-sentence outlook.
+var current = {
+    conditionKind: "clear-day",
+    unitLabel: "°C",
+    summary: "Expect sunny skies. The high will be 29°."
+};
+
 // Twelve hours of context, oldest first, for the cards that draw a sparkline.
 // Index 6 is "now".
 var nowIndex = 6;

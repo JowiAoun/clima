@@ -1,11 +1,16 @@
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
-# Prototype — Hourly screen
+# Prototype — Weather page
 
-A Qt Quick rebuild of MSN Weather's **Hourly** screen: the metric tab bar, the day
-strip, and the chart card that is the most-liked thing in that app.
+A Qt Quick rebuild of MSN Weather's forecast page: current conditions, the hourly
+section (metric tab bar, day strip, and the chart card that is the most-liked thing
+in that app), and the twelve-card weather-details grid — in one scrolling page.
 
-![Overview metric](screenshot.png)
+![The page](screenshot.png)
+
+Scroll down for the details grid, twelve cards on one measurable each:
+
+![Weather details](screenshot-details.png)
 
 Every metric tab is live, and the chart re-scales, re-colours and changes series type
 to match:
@@ -21,17 +26,22 @@ The Chart/List switch works too:
 No build step. It is pure QML, executed by Qt 6's `qml` runtime.
 
 ```sh
-./run.sh                              # open the hourly screen
+./run.sh                              # open the page
 ./run.sh --gallery                    # open the component library
 ./run.sh --gallery uv                 # …on a particular component
-./run.sh --details                    # the weather-details grid
+./run.sh --details                    # the weather-details grid on its own
 ./run.sh --card Uv                    # one detail card, alone on the gradient
 ./run.sh --grab shot.png              # render one frame headless and exit
+./run.sh --grab shot.png --scroll 900 # …scrolled down first
 ./run.sh --grab shot.png --metric uv  # …with a given tab selected
 ./run.sh --grab shot.png --list       # …in list view
 ./run.sh --grab shot.png --day 3      # …with a given day card selected
 ./run.sh --grab g.png --size 1500x950 # …at a given window size
 ```
+
+`--scroll` matters more than it sounds. The page is taller than any window it runs
+in, so a headless grab without it reviews the top third and silently signs off on
+everything below — which is where the twelve charts are.
 
 ### The gallery
 
@@ -82,7 +92,11 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 
 | File | Role |
 |---|---|
-| `Main.qml` | Window; assembles tab bar → day strip → chart, and routes `--gallery` / `--details` / `--card` |
+| `Main.qml` | Window; hosts the page and routes `--gallery` / `--details` / `--card` |
+| `WeatherPage.qml` | **The page — the four sections in one scrolling column** |
+| `LocationBar.qml` | Place name, disclosure chevron, home marker |
+| `CurrentConditions.qml` | The headline: glyph, temperature, condition, outlook, six slugs |
+| `SectionHeader.qml` | A section title and its timestamp, so two sections cannot disagree |
 | `Gallery.qml` | The component library browser (`--gallery`) |
 | `gallery.js` | **The catalogue it browses — add a component here, not in QML** |
 | `Specimen.qml` | Builds one component from a file name and a property bag |
@@ -106,6 +120,24 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 | `WeatherGlyph` · `SunEventGlyph` · `MoonGlyph` · `DropletGlyph` · `HatchPattern` · `PagerButton` · `FeelsLikeToggle` | Small procedural pieces |
 
 ## What it does
+
+**The page**
+
+Four sections in one scrolling column — location, current conditions, hourly,
+weather details — in the reference's order, which is an argument and not a habit:
+what is it doing now, what will it do today, tell me about one thing in particular.
+
+Sections are separated by space and nothing else. No rules, no wrapper panels: every
+surface here is a translucent wash, so a panel around a section would make the cards
+inside it composite to 0.135 and the whole block would read as a lighter patch. The
+page owns the vertical scroll and nothing inside it scrolls vertically, which means
+every section has to report an `implicitHeight` rather than fill what it is given —
+`HourlyOverview` needed the inverse of its plot-height relation before it could.
+
+Assembling it is what surfaced four defects that were invisible component by
+component, including a sun glyph whose "halo" was a flat disc with a traceable edge
+and a list view that had the chart painting through it on `main`. See
+`docs/10-design-system.md` §10.10.
 
 **Chart**
 
@@ -201,6 +233,13 @@ All of it is deterministic, with no `Math.random`, so golden-image tests stay st
   `layer.enabled: true` on an ancestor *does* bound them — but put it on an item with an
   opaque background. On the Flickable itself the layer composited black over the panel;
   on the panel, which has its own fill, it composites correctly.
+- **`visible: false` and `opacity: 0` are not the same tool.** The chart has to stay
+  in the scene while the list is shown (see the next note), but *loaded* was quietly
+  taken to mean *painted*: once cards became translucent washes the chart began
+  showing through the list rows, and it shipped that way. `opacity: 0` leaves the
+  scene graph exactly as it was and only stops the painting, which is what was
+  wanted; `visible: false` is the thing that breaks other nodes. Pair it with
+  `enabled: false` or the invisible chart still takes the clicks.
 - **Removing the chart subtree from the scene stopped unrelated text from painting.**
   With the chart unloaded, the tab bar's section heading and the "Chart" switch label
   both vanished, while reporting as entirely healthy at runtime — right text, size,

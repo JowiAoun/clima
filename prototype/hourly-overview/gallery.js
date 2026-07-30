@@ -70,8 +70,12 @@ var groups = [
     {
         name: "Screens",
         items: [
-            { name: "Weather details grid", file: "WeatherDetails.qml", stage: { w: 1244, h: 532 },
-              blurb: "All twelve, responsive columns. Scrolls; its Flickable is layered so the charts stay inside it." },
+            { name: "Weather page", file: "WeatherPage.qml", stage: { w: 1300, h: 740 },
+              blurb: "The whole thing: location, current conditions, hourly, details. Scrolls — its Flickable is layered, which is what keeps every chart on it inside the viewport." },
+            { name: "Current conditions", file: "CurrentConditions.qml", stage: { w: 1244, h: 0 },
+              blurb: "The page headline. Every number on it is read from the same place the detail card for that measurable reads from, so the two cannot drift." },
+            { name: "Weather details grid", file: "WeatherDetails.qml", stage: { w: 1244, h: 0 },
+              blurb: "All twelve, responsive columns. Lays out in full and reports its height; the page it sits on owns the scrolling." },
             { name: "Hourly overview", file: "HourlyOverview.qml", stage: { w: 1000, h: 430 },
               blurb: "The chart panel: crossed gradients, no stroked line.",
               variants: [
@@ -90,6 +94,18 @@ var groups = [
     {
         name: "Controls",
         items: [
+            { name: "Location bar", file: "LocationBar.qml",
+              blurb: "Sits on the page gradient rather than on a surface — there is nothing here to lift off the background.",
+              variants: [
+                  { label: "home",     props: { label: "Toronto, Ontario", isHome: true } },
+                  { label: "not home", props: { label: "Reykjavík, Iceland", isHome: false } }
+              ] },
+            { name: "Section header", file: "SectionHeader.qml", stage: { w: 420, h: 0 },
+              blurb: "One token for every section title on the page. The hourly and details sections had picked 18 and 15 independently.",
+              variants: [
+                  { label: "with stamp", props: { title: "Weather details", stamp: "12:28 PM" } },
+                  { label: "plain",      props: { title: "Hourly" } }
+              ] },
             { name: "Trend badge", file: "TrendBadge.qml",
               blurb: "The arrow tracks the number, not whether the news is good.",
               variants: [
