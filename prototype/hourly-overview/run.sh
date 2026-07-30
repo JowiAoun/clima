@@ -86,6 +86,10 @@ if [[ "${1:-}" == "--grab" ]]; then
     export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
 fi
 
-echo "qml runtime: $qml_bin ($("$qml_bin" --version 2>&1 | head -n1))" >&2
+# Which Qt got picked matters only when something is wrong with the pick, so
+# it is opt-in. CLIMA_VERBOSE=1 ./run.sh to see it.
+if [[ -n "${CLIMA_VERBOSE:-}" ]]; then
+    echo "qml runtime: $qml_bin ($("$qml_bin" --version 2>&1 | head -n1))" >&2
+fi
 
 exec "$qml_bin" "$here/Main.qml" -- "$@"
