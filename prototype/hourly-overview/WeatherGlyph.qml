@@ -36,13 +36,56 @@ Item {
         x: root.kind === "clear-day" ? (root.width - width) / 2 : root.width * 0.04
         y: root.kind === "clear-day" ? (root.height - height) / 2 : root.height * 0.06
 
-        Rectangle {                             // soft halo
+        // A glow, not a disc.
+        //
+        // This was a flat circle of `sunGlyphWarm` at 16 %, 1.28x the sun's
+        // diameter. A flat circle has an edge you can trace, which is §10.1's
+        // test for a stacked wash rather than a glow — and at the 26 px this
+        // glyph is normally drawn at, the edge is a couple of pixels and nobody
+        // ever saw it. Staged at 72 px on the current-conditions card it is an
+        // unmistakable hard-rimmed ring around the sun.
+        //
+        // Fading to zero alpha at the rim is what it was always meant to be.
+        Shape {
+            id: halo
             anchors.centerIn: parent
-            width: parent.width * 1.28
+            width: parent.width * 1.9
             height: width
-            radius: width / 2
-            color: Theme.color.sunGlyphWarm
-            opacity: 0.16
+            preferredRendererType: Shape.CurveRenderer
+
+            readonly property color tint: Theme.color.sunGlyphWarm
+
+            ShapePath {
+                strokeColor: "transparent"
+                fillGradient: RadialGradient {
+                    centerX: halo.width / 2
+                    centerY: halo.height / 2
+                    centerRadius: halo.width / 2
+                    focalX: centerX
+                    focalY: centerY
+                    // Flat out to the sun's own rim, then away to nothing.
+                    GradientStop {
+                        position: 0.0
+                        color: Qt.rgba(halo.tint.r, halo.tint.g, halo.tint.b, 0.20)
+                    }
+                    GradientStop {
+                        position: 0.52
+                        color: Qt.rgba(halo.tint.r, halo.tint.g, halo.tint.b, 0.18)
+                    }
+                    GradientStop {
+                        position: 1.0
+                        color: Qt.rgba(halo.tint.r, halo.tint.g, halo.tint.b, 0.0)
+                    }
+                }
+                PathAngleArc {
+                    centerX: halo.width / 2
+                    centerY: halo.height / 2
+                    radiusX: halo.width / 2
+                    radiusY: halo.height / 2
+                    startAngle: 0
+                    sweepAngle: 360
+                }
+            }
         }
         Rectangle {
             anchors.fill: parent
