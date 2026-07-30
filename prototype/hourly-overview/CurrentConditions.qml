@@ -13,6 +13,37 @@
 //   glyph, reading, unit  the headline, with the condition and feels-like beside
 //   summary               one sentence of outlook
 //   slug row              six measurables, each also a card further down
+//
+// ---- motion: none, and that is the decision rather than an omission ----------
+//
+// This card has no interaction and no changing data, so it has no state to
+// transition between. That leaves arrival, and §10.7 is precise about what
+// earns an arrival: a reveal has to show where a value sits on its scale
+// rather than merely assert it. This card draws no scale. It asserts a number,
+// a condition, a sentence and six readings, and an assertion is instant — there
+// is no journey for the eye to read, so animating one would be inventing one.
+//
+// The two ideas that come up every time, and why neither survives:
+//
+//   The temperature counting up from zero. §10.6's "the reader can read it at
+//   rest position zero" is exactly this case, and this is the worst component
+//   on the page to break it in: a hero that reads 0° for half a second is not
+//   revealing the temperature, it is briefly reporting the wrong one, and it is
+//   the single number the app was opened to answer. A count-up also has to be
+//   re-triggered to be seen, and §10.6 forbids re-triggering a reveal.
+//
+//   The wind slug's bearing arrow rotating to its heading. This is the one
+//   element here that genuinely is a value's position on a scale, so it is the
+//   only tempting case — but it is a 16 px glyph, and sweeping it into place
+//   would put the page's slowest motion on its smallest element while the 64 px
+//   number beside it sits still. DetailWindCard is where a bearing gets to be
+//   drawn at a size worth watching; this row is the glance, that card is the
+//   answer.
+//
+// Nothing responds to resize either, and deliberately: the slug grid re-columns
+// 6 → 3 → 2 and the high/low pair drops out below 620 px. Both pop, because
+// §10.6 is clear that reflow is not a transition — a window drag that made this
+// card ease between column counts would read as lag, not as a layout.
 import QtQuick
 import QtQuick.Shapes
 import "theme.js" as Theme

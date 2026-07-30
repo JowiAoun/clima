@@ -72,7 +72,10 @@ var groups = [
         items: [
             { name: "Weather page", file: "WeatherPage.qml", stage: { w: 1300, h: 740 },
               blurb: "The whole thing: location, current conditions, hourly, details. Scrolls — its Flickable is layered, which is what keeps every chart on it inside the viewport." },
-            { name: "Current conditions", file: "CurrentConditions.qml", stage: { w: 1244, h: 0 },
+            // 980, not the page's own 1244: the gallery's rail takes 232 px, so a
+            // full-width stage runs off the right of a default window and clips
+            // the dew-point slug and the high/low — the two things furthest right.
+            { name: "Current conditions", file: "CurrentConditions.qml", stage: { w: 980, h: 0 },
               blurb: "The page headline. Every number on it is read from the same place the detail card for that measurable reads from, so the two cannot drift." },
             { name: "Weather details grid", file: "WeatherDetails.qml", stage: { w: 1244, h: 0 },
               blurb: "All twelve, responsive columns. Lays out in full and reports its height; the page it sits on owns the scrolling." },
@@ -163,7 +166,7 @@ var groups = [
                   { label: "0.95", props: { illuminated: 0.95, glyphSize: 40 } }
               ] },
             { name: "Sun event glyph", file: "SunEventGlyph.qml",
-              blurb: "Sunrise and sunset, distinguished by the arrow rather than by colour alone.",
+              blurb: "Sunrise and sunset: the half-disc sits above or below the horizon line, so the two differ in shape and not only in colour.",
               variants: [
                   { label: "sunrise", props: { kind: "sunrise", glyphSize: 40 } },
                   { label: "sunset",  props: { kind: "sunset",  glyphSize: 40 } }

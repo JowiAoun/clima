@@ -7,6 +7,31 @@
 //
 // The past is dimmed rather than hidden, and "now" is marked, so the same rule the
 // chart follows holds here: observed hours are real data, just not forecast.
+//
+// ---- motion -----------------------------------------------------------------
+// One animation: the row under the pointer tints. Everything else here is
+// deliberately still, and the reasons are worth writing down because "add an
+// arrival" is the obvious thing to reach for and every version of it is wrong:
+//
+//   * A staggered row reveal delays the one thing the reader just asked for.
+//     They pressed "List" to read 3 AM's numbers; making them watch 48 rows
+//     arrive is charging admission for data that was already on screen.
+//   * It would fire on scroll. ListView builds delegates as they come into
+//     view — `cacheBuffer: 0`, so exactly as they come into view — and §10.6
+//     forbids a reveal that re-triggers, "nothing fires on scrolling into
+//     view" in particular. A per-delegate animation is that bug by
+//     construction, not by accident.
+//   * It would replay on every toggle. `HourlyOverview` loads this file with
+//     `active: root.listView`, so the whole list is rebuilt each time the
+//     switch is flipped, and an on-create reveal replays chart→list→chart.
+//   * Every cell in here is text, and §10.6 says text does not fly, fade or
+//     slide.
+//
+// The list also has no state to transition between: it is metric-agnostic and
+// day-agnostic, `nowIndex` is fixed for the life of the process, and the past
+// dimming never changes. Arrival is the switch's motion and the switch belongs
+// to `HourlyOverview`, which is the only place that can sequence it against the
+// chart underneath.
 import QtQuick
 import "theme.js" as Theme
 import "mockdata.js" as Data
@@ -111,7 +136,20 @@ Item {
         boundsBehavior: Flickable.StopAtBounds
         currentIndex: Data.nowIndex
 
+        // Open on "now", explicitly.
+        //
+        // `currentIndex` alone does not decide where the view rests: nothing is
+        // bound to it — the now row draws off `index === Data.nowIndex`, not off
+        // being current — so all it does is make Qt track that delegate, and
+        // where tracking lands depends on the view's height when the delegate
+        // happened to be created. That is why the same list opened on 9 PM
+        // inside the page and on "now" in the gallery. Positioning explicitly
+        // makes it the same list in both, and "now" is the answer: the past is
+        // dimmed context you can scroll back to, not the thing you came for.
+        Component.onCompleted: positionViewAtIndex(Data.nowIndex, ListView.Beginning)
+
         delegate: Item {
+            id: hourRow
             required property int index
 
             readonly property bool isNow: index === Data.nowIndex
@@ -121,16 +159,44 @@ Item {
             height: root.rowHeight
             opacity: isPast ? 0.5 : 1
 
+            // A reading aid, not an affordance. Seven columns spread over a
+            // metre of screen and the eye loses the line somewhere around
+            // Wind; the pointer's row lifting to the raised wash gives it a
+            // rail to run along. No `cursorShape` — nothing in this list is
+            // clickable and a pointing hand would promise that it is.
+            HoverHandler { id: rowHover }
+
             Rectangle {
                 anchors.fill: parent
                 anchors.topMargin: 1
                 radius: Theme.metric.controlRadius
-                color: parent.isNow ? Theme.color.nowRowBg
-                                    : (index % 2 === 0 ? "transparent" : Theme.color.listRowAlt)
+
+                // One rectangle changing colour, not a hover panel laid over
+                // the stripe: two washes stack to a patch lighter than either
+                // (§10.1), and the seam is exactly what you would notice.
+                //
+                // The now row is exempt. Its fill *is* the mark — swapping the
+                // yellow for a neutral wash would blank the one row the reader
+                // came to find, the moment they point at it.
+                color: hourRow.isNow ? Theme.color.nowRowBg
+                                     : (rowHover.hovered
+                                        ? Theme.color.surfaceRaised
+                                        : (hourRow.index % 2 === 0 ? "transparent"
+                                                                   : Theme.color.listRowAlt))
+
+                // Behaviors do not fire for a property's initial binding, so a
+                // delegate built as it scrolls into view arrives at its stripe
+                // colour rather than fading up to it.
+                Behavior on color {
+                    ColorAnimation {
+                        duration: Theme.motion.tint
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
 
             Rectangle {
-                visible: parent.isNow
+                visible: hourRow.isNow
                 width: 3
                 height: parent.height - 10
                 radius: 1.5
@@ -147,10 +213,10 @@ Item {
                     height: parent.height
                     verticalAlignment: Text.AlignVCenter
                     leftPadding: 12
-                    text: Data.hourLabel(index)
+                    text: Data.hourLabel(hourRow.index)
                     color: Theme.color.textPrimary
                     font.pixelSize: 12
-                    font.bold: parent.parent.isNow
+                    font.bold: hourRow.isNow
                 }
 
                 Item {

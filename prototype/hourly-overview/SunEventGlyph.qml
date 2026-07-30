@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Sunrise / sunset marker: half-disc over a horizon line, with the direction of
-// travel implied by a small chevron.
+// Sunrise / sunset marker: a half-disc and a horizon line. Direction of travel is
+// carried by which side of the line the disc is on — risen above it for sunrise,
+// dropped below it for sunset — not by colour, and not by an arrow. An earlier
+// comment here promised a chevron that has never been drawn; the shapes below are
+// the whole glyph.
 import QtQuick
 import QtQuick.Shapes
 import "theme.js" as Theme

@@ -37,6 +37,10 @@ Item {
         }
 
         // ---- disclosure chevron ------------------------------------------
+        // It does not rotate. A disclosure chevron flips when something is
+        // disclosed, and `changeRequested()` opens a place picker that this
+        // prototype does not have — a chevron that turns over and reveals
+        // nothing is an animation making a promise the app cannot keep.
         Item {
             width: 14
             height: 14
@@ -48,6 +52,12 @@ Item {
                 ShapePath {
                     strokeColor: chevronHover.hovered ? Theme.color.textPrimary
                                                       : Theme.color.textMuted
+                    // Hover is colour only (§10.6), and the stroke was the one
+                    // hover on this bar that snapped while the ring beside it
+                    // faded.
+                    Behavior on strokeColor {
+                        ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+                    }
                     strokeWidth: 1.6
                     fillColor: "transparent"
                     capStyle: ShapePath.RoundCap
@@ -74,7 +84,15 @@ Item {
                 color: homeHover.hovered ? Theme.color.surfaceRaised : "transparent"
                 border.width: 1
                 border.color: root.isHome ? Theme.color.switchBorder : Theme.color.gridLine
-                Behavior on color { ColorAnimation { duration: 140 } }
+                Behavior on color {
+                    ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+                }
+                // The marker is a toggle — `homeToggled()` is its whole reason
+                // for having a tap target — so the ring must not snap between
+                // states while the wash behind it fades.
+                Behavior on border.color {
+                    ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+                }
             }
 
             Shape {
@@ -84,6 +102,9 @@ Item {
                 preferredRendererType: Shape.CurveRenderer
                 ShapePath {
                     fillColor: root.isHome ? Theme.color.textPrimary : Theme.color.textMuted
+                    Behavior on fillColor {
+                        ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+                    }
                     strokeColor: "transparent"
                     PathSvg {
                         path: "M 7 2.4 L 12.8 7.6 L 11.3 7.6 L 11.3 12.4 "

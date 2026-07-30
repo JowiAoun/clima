@@ -3,6 +3,27 @@
 //
 // Rising, falling and steady are the three things a reading can be doing, and
 // the badge says which at a glance without spending a word on it.
+//
+// ---- this component deliberately does not animate --------------------------
+//
+// `direction` never changes on a live badge, anywhere in this prototype:
+//
+//   - On the page, `DetailCard` binds it to a card's `trend`, which comes from
+//     `detaildata.js`. Those values are fixed for the life of the process
+//     (§10.6), so no badge ever transitions from up to down.
+//   - In the gallery, the four arrows on the "Trend badge" page are four
+//     separate specimens with four fixed props, not one badge cycling. A
+//     remount destroys and rebuilds them; it does not change anyone's mind.
+//
+// So a direction transition — the arrow swinging, the disc cross-fading between
+// trendUp and trendDown — would be motion built for a state that does not
+// exist, tested only by the developer who wrote it.
+//
+// Nor does it animate on arrival. The badge is punctuation on the status line,
+// and §10.6 requires the status to be legible at rest position zero; the card's
+// one piece of arrival motion is its visualisation sweeping to its reading,
+// which `DetailCard.reveal` already drives. A 16 px disc popping in beside a
+// bold word is the twelve-cards-at-once flicker that rule exists to prevent.
 import QtQuick
 import QtQuick.Shapes
 import "theme.js" as Theme

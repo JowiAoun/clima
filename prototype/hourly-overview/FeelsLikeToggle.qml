@@ -23,7 +23,9 @@ Item {
         radius: height / 2
         anchors.verticalCenter: parent.verticalCenter
         color: root.checked ? Theme.color.accent : Theme.color.toggleTrack
-        Behavior on color { ColorAnimation { duration: 160 } }
+        Behavior on color {
+            ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+        }
 
         Rectangle {
             id: knob
@@ -33,8 +35,17 @@ Item {
             y: (parent.height - height) / 2
             x: root.checked ? parent.width - width - 3 : 3
             color: root.checked ? Theme.color.onAccent : Theme.color.toggleKnob
-            Behavior on x { NumberAnimation { duration: 170; easing.type: Easing.OutCubic } }
-            Behavior on color { ColorAnimation { duration: 160 } }
+
+            // The knob travels, so it takes `move`; everything else here is a
+            // recolour and takes `tint`. The knob landing a beat after the
+            // track has finished changing colour is the point — it is the one
+            // part of the control that actually goes somewhere.
+            Behavior on x {
+                NumberAnimation { duration: Theme.motion.move; easing.type: Easing.OutCubic }
+            }
+            Behavior on color {
+                ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+            }
         }
     }
 
@@ -45,7 +56,9 @@ Item {
         font.pixelSize: 12
         anchors.verticalCenter: parent.verticalCenter
         x: track.width + root.gap
-        Behavior on color { ColorAnimation { duration: 160 } }
+        Behavior on color {
+            ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+        }
     }
 
     MouseArea {
