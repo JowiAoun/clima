@@ -10,6 +10,12 @@
 // The horizontal span is a full 24 hours centred on solar noon, which is why the
 // two crossings sit symmetrically about the middle of the box.
 //
+// The arrival is a single gesture with a single origin: sunrise. The curve grows
+// outward from that crossing in both directions while the sun leaves it and
+// walks the arc to where it actually is now, so the distance the mark covers is
+// how far through the day we are. Nothing moves afterwards — see the `reveal`
+// block below.
+//
 // DetailMoonCard.qml is this card's twin and is deliberately the same card with
 // two things changed: a cool ramp instead of a warm one, and the moon at its
 // phase instead of a sun disc on the mark. Everything else — the band geometry,
@@ -89,6 +95,38 @@ DetailCard {
             return out
         }
 
+        // ---- the arrival -----------------------------------------------------
+        // Two pens and a mark, all three leaving the rise crossing together and
+        // all three driven by the card's one-shot `reveal`. The curve draws
+        // itself outward from the rise — right toward the set and on down the
+        // far tail, left back into the night before — and the mark walks the
+        // same curve from the rise to now.
+        //
+        // Sunrise is the origin because it is the only instant on this card that
+        // means anything on its own: the mark's journey is then literally how far
+        // through the day we are, which is the reading the card exists to give.
+        // It also settles the ordering question for free. `now` is inside the
+        // drawn window by construction, so it is always nearer the rise than the
+        // pen is, and the mark can never end up standing on curve that has not
+        // been drawn yet. Both cards in the pair move exactly this way.
+        readonly property real tPenL: tRise - (tRise - tMin) * root.reveal
+        readonly property real tPenR: tRise + (tMax - tRise) * root.reveal
+        readonly property real tMark: tRise + (tNow - tRise) * root.reveal
+
+        // Sub-minute spans are dropped rather than drawn: a zero-length subpath
+        // under a round cap paints a bead the width of the stroke, which at
+        // reveal 0 would put three of them on the horizon before the curve
+        // exists at all.
+        function segment(t0, t1, n) {
+            return (t1 - t0) > 0.5 ? ChartMath.smooth(arcPoints(t0, t1, n), "M") : ""
+        }
+
+        function ribbonTo(t1) {
+            return (t1 - tRise) > 0.5
+                ? ChartMath.ribbonPath(arcPoints(tRise, t1, 28), strokeW / 2)
+                : ""
+        }
+
         Shape {
             anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
@@ -103,8 +141,8 @@ DetailCard {
                 strokeWidth: viz.strokeW
                 capStyle: ShapePath.RoundCap
                 PathSvg {
-                    path: ChartMath.smooth(viz.arcPoints(viz.tMin, viz.tRise, 12), "M")
-                        + " " + ChartMath.smooth(viz.arcPoints(viz.tSet, viz.tMax, 12), "M")
+                    path: (viz.segment(viz.tPenL, viz.tRise, 12) + " "
+                         + viz.segment(viz.tSet, viz.tPenR, 12)).trim()
                 }
             }
 
@@ -120,8 +158,7 @@ DetailCard {
                     GradientStop { position: 1.00; color: "#ef7526" }
                 }
                 PathSvg {
-                    path: ChartMath.ribbonPath(viz.arcPoints(viz.tRise, viz.tSet, 28),
-                                               viz.strokeW / 2)
+                    path: viz.ribbonTo(Math.min(viz.tPenR, viz.tSet))
                 }
             }
         }
@@ -144,20 +181,28 @@ DetailCard {
                 required property var modelData
                 width: 8; height: 8; radius: 4
                 color: Theme.color.textPrimary
+                // Uncovered as the pen reaches it, so a crossing is never marked
+                // on curve that has not been drawn. The rise is where the pen
+                // starts, so that one is there from the first frame. Opacity
+                // rather than `visible` — §10.8.
+                opacity: viz.tPenR >= modelData ? 1 : 0
                 x: viz.xAt(modelData) - width / 2
                 y: viz.horizonY - height / 2
             }
         }
 
-        // Now: 14 px, ringed, tinted by the altitude it sits at.
+        // Now: 14 px, ringed, tinted by the altitude it sits at. On its way it
+        // rides `tMark`, so the tint tracks the altitude it is passing through
+        // and reads as "how high the sun is" for the whole journey, not only at
+        // the end.
         Rectangle {
             width: 2 * viz.markR; height: width; radius: viz.markR
             color: ChartMath.sampleRamp(viz.skyRamp,
-                                        1 - Math.max(0, viz.altAt(viz.tNow)))
+                                        1 - Math.max(0, viz.altAt(viz.tMark)))
             border.width: 2.5
             border.color: Theme.color.textPrimary
-            x: viz.xAt(viz.tNow) - width / 2
-            y: viz.yAt(viz.tNow) - height / 2
+            x: viz.xAt(viz.tMark) - width / 2
+            y: viz.yAt(viz.tMark) - height / 2
         }
 
         // How long the sun is up, centred on the stretch of horizon it measures.

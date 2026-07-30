@@ -19,6 +19,14 @@
 // morning. The frame is horizontal instead — the 0% baseline the columns stand
 // on, and the labelled 100% ceiling that makes 35% a third rather than merely
 // the tall one.
+//
+// On arrival the columns grow off that baseline in hour order, so the wave runs
+// along the axis the chart is drawn on and the rain reads as arriving. The
+// frame does not grow with them: the baseline and the now-rule are what the
+// columns are measured against and are there from the first frame. The eight
+// dry hours have nothing to grow and so grow nothing — the wave crosses them
+// silently and the strip fills in from the far end, which is where the day's
+// only chance of rain is.
 import QtQuick
 import "theme.js" as Theme
 import "detaildata.js" as Detail
@@ -60,6 +68,37 @@ DetailCard {
         readonly property real baseY: Math.max(ceilY + 10, reading.y - 2)
         readonly property real plotH: baseY - ceilY
 
+        // ---- the arrival wave ----------------------------------------------
+        // A column growing is a change of size, so it takes `move`; the gap
+        // between one column and the next is `stagger`, the token the grid
+        // staggers whole cards by.
+        //
+        // The wave steps once per column that has something to draw, not once
+        // per hour. Stepping over the eight dry hours as well left the strip
+        // empty for a quarter of a second after the rest of the card had
+        // arrived — filmed, it reads as a chart that failed to load — and it
+        // bought nothing, because the four hours that do draw are consecutive
+        // and would have rippled either way. Skipping the gaps keeps the wave
+        // running along the time axis; the hours with nothing to say simply do
+        // not take a turn.
+        function drawnRank(i) {
+            var r = 0
+            for (var k = 0; k < i && k < count; ++k)
+                if (series[k] > 0) r++
+            return r
+        }
+        readonly property int drawnCount: drawnRank(count)
+
+        // Tightened when a long enough run of wet hours would push the last
+        // column past the card's own reveal, so however the forecast falls the
+        // last column has landed within `Theme.motion.reveal` of the first
+        // starting — a card that ripples still arrives on the grid's wave
+        // rather than trailing a third of a second behind it.
+        readonly property int growSpan: Theme.motion.move
+        readonly property int growStep: Math.round(Math.min(
+            Theme.motion.stagger,
+            (Theme.motion.reveal - growSpan) / Math.max(1, drawnCount - 1)))
+
         // What the columns are, and what they are a fraction of: one at each
         // end of the line they are measured against.
         Text {
@@ -86,20 +125,41 @@ DetailCard {
             model: viz.series
 
             delegate: Rectangle {
+                id: bar
+
                 required property int index
                 required property var modelData
 
                 readonly property real barValue: modelData        // 0–100 %
                 readonly property bool barIsForecast: index > Detail.nowIndex
 
+                // 0 → 1 once, this column's turn into the card's reveal. A value
+                // source rather than a binding on `root.reveal`: the card's
+                // reveal is one eased ramp, and slicing an eased ramp into
+                // twelve windows gives twelve differently-eased columns crushed
+                // into its first third. Nothing restarts it — the card's reveal
+                // only ever goes 0 → 1, so the guard latches.
+                property real barGrow: 0
+
+                SequentialAnimation on barGrow {
+                    running: root.reveal > 0
+                    PauseAnimation { duration: viz.drawnRank(bar.index) * viz.growStep }
+                    NumberAnimation {
+                        to: 1
+                        duration: viz.growSpan
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
                 // A floor of 2px so a 5% hour is a mark rather than a rounding
                 // error, and still visibly half the 10% beside it — but only
                 // for hours that have a chance at all. A stub on a 0% hour
-                // would print a zero as the something it is not.
+                // would print a zero as the something it is not, and would give
+                // the arrival eight columns of nothing to grow.
                 visible: barValue > 0
                 x: viz.xAt(index)
                 width: viz.barW
-                height: Math.max(2, viz.plotH * barValue / 100)
+                height: Math.max(2, viz.plotH * barValue / 100) * bar.barGrow
                 y: viz.baseY - height
                 radius: 3
                 color: barIsForecast ? viz.forecastInk : Theme.color.rainDrop

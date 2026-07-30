@@ -18,6 +18,11 @@
 // rather than against the series' own extremes. A curve auto-fitted to a 5 mb
 // wobble would fill the box and claim a swing the weather did not have; held
 // against the real range, a slow rise looks like a slow rise.
+//
+// On arrival it draws itself in from the left, the same gesture and the same
+// token as the other two sparkline cards — three cards that agree about their
+// marker and their fill and then arrive three different ways are still three
+// chart libraries sharing a grid.
 import QtQuick
 import QtQuick.Shapes
 import "theme.js" as Theme
@@ -82,62 +87,95 @@ DetailCard {
         readonly property real nowX: xAt(nowIndex)
         readonly property real nowY: yAt(series[nowIndex])
 
-        Shape {
-            anchors.fill: parent
-            preferredRendererType: Shape.CurveRenderer
+        // Where "now" falls along the sweep. The drawing edge is at
+        // `width * reveal`, so comparing `reveal` against this is the same
+        // instant the line reaches the mark.
+        readonly property real nowP: width > 0 ? nowX / width : 1
 
-            // Area under the curve, fading out downward so it reads as weight
-            // beneath the line rather than as a second shape with an edge.
-            ShapePath {
-                strokeColor: "transparent"
-                fillGradient: LinearGradient {
-                    x1: 0; y1: viz.lineTop; x2: 0; y2: viz.lineBottom
-                    GradientStop { position: 0.0; color: root.washTop }
-                    GradientStop { position: 1.0; color: root.washFoot }
+        // The sweep: a window over the chart whose right edge travels left to
+        // right on `reveal`, so the ribbon, its wash and the dimmed forecast
+        // all appear in the order the hours did.
+        //
+        // A clip rather than a regenerated path — re-splining a growing subset
+        // of the points would shift the control points of the stretch already
+        // drawn, and the ribbon (two offset copies of the curve) would wriggle
+        // twice over. `layer.enabled` is what makes the clip bite: Shapes
+        // escape ancestor clipping (docs/10-design-system.md §10.8), and a
+        // child outside the layer's texture is never drawn into it.
+        Item {
+            id: sweep
+
+            // Never zero: a layer with no area is a texture Qt has to complain
+            // about, and at 1 px nothing of the curve is inside it anyway.
+            width: Math.max(1, viz.width * root.reveal)
+            height: viz.height
+            clip: true
+            layer.enabled: true
+
+            Shape {
+                width: viz.width
+                height: viz.height
+                preferredRendererType: Shape.CurveRenderer
+
+                // Area under the curve, fading out downward so it reads as weight
+                // beneath the line rather than as a second shape with an edge.
+                ShapePath {
+                    strokeColor: "transparent"
+                    fillGradient: LinearGradient {
+                        x1: 0; y1: viz.lineTop; x2: 0; y2: viz.lineBottom
+                        GradientStop { position: 0.0; color: root.washTop }
+                        GradientStop { position: 1.0; color: root.washFoot }
+                    }
+                    PathSvg { path: ChartMath.areaPath(viz.pts, viz.lineBottom) }
                 }
-                PathSvg { path: ChartMath.areaPath(viz.pts, viz.lineBottom) }
+
+                // Forecast first, so the "now" dot lands on top of its blunt start.
+                ShapePath {
+                    fillColor: "transparent"
+                    strokeColor: root.lineAhead
+                    strokeWidth: viz.halfW * 2
+                    capStyle: ShapePath.RoundCap
+                    joinStyle: ShapePath.RoundJoin
+                    PathSvg { path: ChartMath.smooth(viz.pts.slice(viz.nowIndex), "M") }
+                }
+
+                // The observed stretch. ShapePath cannot gradient-*stroke*, so the
+                // line is a thin closed ribbon around the curve, filled with the
+                // blue-to-violet ramp along its length.
+                ShapePath {
+                    strokeColor: "transparent"
+                    fillGradient: LinearGradient {
+                        x1: viz.xAt(0); y1: 0; x2: viz.nowX; y2: 0
+                        GradientStop { position: 0.0; color: root.lineStart }
+                        GradientStop { position: 1.0; color: root.lineEnd }
+                    }
+                    PathSvg {
+                        path: ChartMath.ribbonPath(viz.pts.slice(0, viz.nowIndex + 1),
+                                                   viz.halfW)
+                    }
+                }
             }
 
-            // Forecast first, so the "now" dot lands on top of its blunt start.
-            ShapePath {
-                fillColor: "transparent"
-                strokeColor: root.lineAhead
-                strokeWidth: viz.halfW * 2
-                capStyle: ShapePath.RoundCap
-                joinStyle: ShapePath.RoundJoin
-                PathSvg { path: ChartMath.smooth(viz.pts.slice(viz.nowIndex), "M") }
+            // The ribbon has square ends; this is the round cap the oldest hour
+            // would have had if the stroke could carry the gradient itself. It
+            // belongs to the line, so it is inside the sweep and arrives with it
+            // rather than sitting on an empty chart waiting to be joined.
+            Rectangle {
+                width: viz.halfW * 2
+                height: width
+                radius: width / 2
+                color: root.lineStart
+                x: viz.xAt(0) - width / 2
+                y: viz.yAt(viz.series[0]) - height / 2
             }
-
-            // The observed stretch. ShapePath cannot gradient-*stroke*, so the
-            // line is a thin closed ribbon around the curve, filled with the
-            // blue-to-violet ramp along its length.
-            ShapePath {
-                strokeColor: "transparent"
-                fillGradient: LinearGradient {
-                    x1: viz.xAt(0); y1: 0; x2: viz.nowX; y2: 0
-                    GradientStop { position: 0.0; color: root.lineStart }
-                    GradientStop { position: 1.0; color: root.lineEnd }
-                }
-                PathSvg {
-                    path: ChartMath.ribbonPath(viz.pts.slice(0, viz.nowIndex + 1),
-                                               viz.halfW)
-                }
-            }
-        }
-
-        // The ribbon has square ends; this is the round cap the oldest hour
-        // would have had if the stroke could carry the gradient itself.
-        Rectangle {
-            width: viz.halfW * 2
-            height: width
-            radius: width / 2
-            color: root.lineStart
-            x: viz.xAt(0) - width / 2
-            y: viz.yAt(viz.series[0]) - height / 2
         }
 
         // "Now", ringed so it stays visible wherever the line puts it. 14 with
         // a 2.5 ring — the one mark every card in the grid uses.
+        //
+        // Outside the sweep, and grown in when the drawing edge passes it: a
+        // mark sitting there before the line arrives is pointing at nothing,
+        // and one inside the window gets sliced in half on the way past.
         Rectangle {
             width: 14; height: 14; radius: 7
             color: root.lineEnd
@@ -145,6 +183,14 @@ DetailCard {
             border.color: Theme.color.textPrimary
             x: viz.nowX - width / 2
             y: viz.nowY - height / 2
+
+            scale: root.reveal >= viz.nowP ? 1 : 0
+            Behavior on scale {
+                NumberAnimation {
+                    duration: Theme.motion.move
+                    easing.type: Easing.OutCubic
+                }
+            }
         }
 
         Text {

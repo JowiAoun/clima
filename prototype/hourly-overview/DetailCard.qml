@@ -44,8 +44,11 @@ Item {
     // `reveal` runs 0 → 1 once, shortly after the card is built. Bind whatever
     // should grow, sweep or draw to it:
     //
-    //     PathAngleArc { sweepAngle: fullSweep * root.card.reveal }
-    //     Rectangle { height: barHeight * root.card.reveal }
+    // A card is a `DetailCard { id: root }`, so from inside the content slot the
+    // hook is `root.reveal`:
+    //
+    //     PathAngleArc { sweepAngle: fullSweep * root.reveal }
+    //     Rectangle { height: barHeight * root.reveal }
     //
     // Three rules, and they are not negotiable:
     //

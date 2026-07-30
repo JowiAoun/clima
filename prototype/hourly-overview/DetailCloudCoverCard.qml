@@ -42,20 +42,33 @@ DetailCard {
         readonly property real markSize: 14
         readonly property real rim: markSize / 2 + 1
 
-        readonly property real cover: ChartMath.clamp(root.d.value / 100, 0, 1)
+        readonly property real reading: ChartMath.clamp(root.d.value / 100, 0, 1)
 
-        // Held as a plain property rather than computed at the path, so a
-        // changing reading sweeps to its new value instead of jumping (§10.6).
-        property real t: cover
-        Behavior on t {
-            NumberAnimation { duration: 190; easing.type: Easing.OutCubic }
-        }
+        // The head of the paint, running 0 → `reading` once on mount off the
+        // shell's `reveal` hook, over `Theme.motion.reveal` — the same two
+        // lines as the UV and air-quality dials, which is the point: three
+        // rings with one geometry that arrived three different ways would read
+        // as three authors. The long version of why is in DetailUvCard.qml.
+        //
+        // This replaces a `Behavior on t` at a literal 190 ms. That was not the
+        // arrival and it was not anything else either: `reading` is computed
+        // from provider data that is fixed for the life of the process, so the
+        // Behavior could never once fire. It was a transition written for a
+        // state change this card does not have, at a duration that was not a
+        // token. An 8% ring drawing itself in is the motion that was wanted.
+        readonly property real t: reading * root.reveal
 
         // Ring colour comes off the cloud ramp, so it is the reading and not a
         // decoration: p = 0 is the top of the value axis, so a clear sky picks
         // up the deep sky-blue end and an overcast one the near-white end.
+        //
+        // Sampled at the reading, not at the sweeping head. The band dials
+        // change colour along their arc because their colour *is* the scale;
+        // here it is a property of the one value being drawn, and a ring that
+        // shifted hue while it grew would be animating a number that is not
+        // changing.
         readonly property color coverInk:
-            ChartMath.sampleRamp(Theme.ramp.cloud.line, 1 - t)
+            ChartMath.sampleRamp(Theme.ramp.cloud.line, 1 - reading)
 
         // The dial reaches a full radius above its centre but only sin(115°)
         // below, because of the mouth. Fit the shape it actually is.

@@ -15,8 +15,10 @@
 //     gibbous do not draw the same card.
 //
 // Everything else — band geometry, horizon, crossing dots, the annotation under
-// the span, the two clock figures — is written the same way as in the sun card
-// on purpose. A geometry change here belongs there too.
+// the span, the two clock figures, and the arrival — is written the same way as
+// in the sun card on purpose. A geometry change here belongs there too, and so
+// does a change to the motion: the pair is read side by side and two twins that
+// arrive differently stop being twins.
 //
 // Where the mark sits is the honest part. The moon set at 8:03 AM and does not
 // rise again until 9:25 PM, and it is 12:28 PM: it is *below* the horizon, about
@@ -98,6 +100,36 @@ DetailCard {
             return out
         }
 
+        // ---- the arrival -----------------------------------------------------
+        // The sun card's arrival, unchanged, because the pair has to move alike.
+        // Two pens and a mark leave the rise crossing together on the card's
+        // one-shot `reveal`: the curve draws itself outward from moonrise, and
+        // the mark walks that curve from moonrise to now. Here the walk is the
+        // whole answer — the moon climbs, transits, sets, and keeps going down
+        // the dim tail, which is how it ends up parked below the horizon at
+        // half past twelve in the afternoon.
+        //
+        // `now` is inside the drawn window by construction, so it is always
+        // nearer the rise than the pen is and the mark can never stand on curve
+        // that has not been drawn yet.
+        readonly property real tPenL: tRise - (tRise - tMin) * root.reveal
+        readonly property real tPenR: tRise + (tMax - tRise) * root.reveal
+        readonly property real tMark: tRise + (tNow - tRise) * root.reveal
+
+        // Sub-minute spans are dropped rather than drawn: a zero-length subpath
+        // under a round cap paints a bead the width of the stroke, which at
+        // reveal 0 would put three of them on the horizon before the curve
+        // exists at all.
+        function segment(t0, t1, n) {
+            return (t1 - t0) > 0.5 ? ChartMath.smooth(arcPoints(t0, t1, n), "M") : ""
+        }
+
+        function ribbonTo(t1) {
+            return (t1 - tRise) > 0.5
+                ? ChartMath.ribbonPath(arcPoints(tRise, t1, 28), strokeW / 2)
+                : ""
+        }
+
         Shape {
             anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
@@ -113,8 +145,8 @@ DetailCard {
                 strokeWidth: viz.strokeW
                 capStyle: ShapePath.RoundCap
                 PathSvg {
-                    path: ChartMath.smooth(viz.arcPoints(viz.tMin, viz.tRise, 12), "M")
-                        + " " + ChartMath.smooth(viz.arcPoints(viz.tSet, viz.tMax, 12), "M")
+                    path: (viz.segment(viz.tPenL, viz.tRise, 12) + " "
+                         + viz.segment(viz.tSet, viz.tPenR, 12)).trim()
                 }
             }
 
@@ -130,8 +162,7 @@ DetailCard {
                     GradientStop { position: 1.00; color: "#7a97d8" }
                 }
                 PathSvg {
-                    path: ChartMath.ribbonPath(viz.arcPoints(viz.tRise, viz.tSet, 28),
-                                               viz.strokeW / 2)
+                    path: viz.ribbonTo(Math.min(viz.tPenR, viz.tSet))
                 }
             }
         }
@@ -154,6 +185,11 @@ DetailCard {
                 required property var modelData
                 width: 8; height: 8; radius: 4
                 color: Theme.color.textPrimary
+                // Uncovered as the pen reaches it, so a crossing is never marked
+                // on curve that has not been drawn. The rise is where the pen
+                // starts, so that one is there from the first frame. Opacity
+                // rather than `visible` — §10.8.
+                opacity: viz.tPenR >= modelData ? 1 : 0
                 x: viz.xAt(modelData) - width / 2
                 y: viz.horizonY - height / 2
             }
@@ -167,8 +203,8 @@ DetailCard {
 
             width: 2 * viz.markR
             height: width
-            x: viz.xAt(viz.tNow) - viz.markR
-            y: viz.yAt(viz.tNow) - viz.markR
+            x: viz.xAt(viz.tMark) - viz.markR
+            y: viz.yAt(viz.tMark) - viz.markR
 
             Rectangle {
                 anchors.fill: parent

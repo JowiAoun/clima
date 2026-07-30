@@ -55,6 +55,26 @@ DetailCard {
         // when you can see to the ceiling. Colour and length move together.
         readonly property color litColor: ChartMath.sampleRamp(Detail.bands.visibility, frac)
 
+        // ---- the arrival ---------------------------------------------------
+        // The sight line extends from where you are standing out to the
+        // reading. A distance is read along its length, so pushing it out
+        // lengthwise is the same movement the eye makes over it — where a bar
+        // "growing" off a baseline would be the wrong axis entirely.
+        //
+        // The taper behind it does not extend: it is the whole 0–20 km scale,
+        // the thing the lit stretch is a fraction of (§10.7), and revealing it
+        // alongside the reading would leave the first frames with a lit length
+        // and nothing to judge it against.
+        //
+        // The colour does not sweep either. It is sampled once, at the reading;
+        // a colour climbing the band ramp during the arrival would be painting
+        // the murky greens of readings nobody took. Length is the reveal;
+        // colour is the reading.
+        //
+        // No stagger and no second clock: there is one shape, so the card's own
+        // reveal is the whole animation, and it is eased by `DetailCard`.
+        readonly property real litFrac: frac * root.reveal
+
         // The sight line lives above the reading and uses the width it is given.
         // Thickness is perspective, not data: near ground fills more of the view
         // than far ground does, which is what makes a horizontal bar read as a
@@ -68,7 +88,7 @@ DetailCard {
         // exactly on the edges of the content box instead of hanging outside it.
         readonly property real x0: hNear
         readonly property real x1: Math.max(x0 + 1, width - hFar)
-        readonly property real xVal: x0 + frac * (x1 - x0)
+        readonly property real xVal: x0 + litFrac * (x1 - x0)
 
         function halfAt(x) {
             return hNear + (hFar - hNear) * (x - x0) / (x1 - x0)
@@ -121,7 +141,7 @@ DetailCard {
                         color: Qt.rgba(viz.litColor.r, viz.litColor.g, viz.litColor.b, 0)
                     }
                 }
-                PathSvg { path: viz.frac > 0.005 ? viz.sightPath(viz.x0, viz.xVal) : "" }
+                PathSvg { path: viz.litFrac > 0.005 ? viz.sightPath(viz.x0, viz.xVal) : "" }
             }
         }
 

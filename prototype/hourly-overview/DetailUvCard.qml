@@ -58,7 +58,32 @@ DetailCard {
         readonly property real cy: rim + radius
 
         // The reading, normalised over the card's own range (7 of 11).
-        readonly property real t: ChartMath.clamp(root.d.value / root.d.max, 0, 1)
+        readonly property real reading: ChartMath.clamp(root.d.value / root.d.max, 0, 1)
+
+        // ---- the arrival ---------------------------------------------------
+        // `t` is the head of the paint, not the reading: it runs 0 → `reading`
+        // once on mount, over `Theme.motion.reveal`, off the shell's `reveal`
+        // hook. The scale is what a UV index means, and a band sweeping up it
+        // from 0 shows *where on the scale* 7 lands instead of asserting a
+        // colour and leaving the reader to place it.
+        //
+        // Everything downstream of the paint is derived from `t` and so travels
+        // with it for free: the untouched remainder of the track starts where
+        // the paint stops, and the mark sits on the head, taking the colour of
+        // the band it is currently crossing. One property, one gesture — and
+        // the same pair of properties in the air-quality and cloud-cover dials,
+        // because three rings sharing one geometry should share one arrival.
+        //
+        // What does *not* move is the number in the middle. §10.6 permits a
+        // reading to count up; it is wrong here. The digit is the answer, and a
+        // dial that spends half a second saying 0, 2, 4, 6 is a dial that is
+        // briefly lying about the UV index — while the arc beside it is already
+        // telling the true story. A counted reading also re-centres itself the
+        // frame it grows a second digit, which is the air-quality dial's 25
+        // sliding sideways under its own ring, and §10.6 does not allow text to
+        // slide. The arc carries the journey; the number carries the value.
+        readonly property real t: reading * root.reveal
+
         readonly property real markAngle: startAngle + t * sweepAngle
         readonly property color markColor: ChartMath.sampleRamp(Detail.bands.uv, t)
 
@@ -79,7 +104,13 @@ DetailCard {
         // rather than at the nearest segment boundary. Rounding to a boundary
         // left the paint up to half a segment past the mark, which a 20px mark
         // covered and a 14px one does not.
-        readonly property int splitSeg: Math.ceil(t * segments)
+        //
+        // Counted off the reading rather than off the sweeping head, so the
+        // model is a fixed-length array. A JS-array model that changes length
+        // resets the whole Repeater, which during a sweep would tear down and
+        // rebuild every Shape on the ring thirty times over. The segments exist
+        // from the first frame; each one is *clipped* to the head instead.
+        readonly property int splitSeg: Math.ceil(reading * segments)
         readonly property var reachedSegs: {
             var a = []
             for (var i = 0; i < splitSeg; ++i) a.push(i)
@@ -96,8 +127,21 @@ DetailCard {
 
                 required property int modelData
                 readonly property real segFrom: modelData / viz.segments
-                readonly property real segTo: Math.min((modelData + 1) / viz.segments, viz.t)
-                readonly property real segMid: (segFrom + segTo) / 2
+                readonly property real segEnd: Math.min((modelData + 1) / viz.segments, viz.reading)
+                // The band this segment stands for is a fixed position on the
+                // scale, so it is sampled off `segEnd` and not off the head:
+                // the run grows, the colours under it do not shift.
+                readonly property real segMid: (segFrom + segEnd) / 2
+
+                // Clipped to the sweeping head. Clamped at `segFrom` because an
+                // arc that ends before it starts is not an empty arc — SVG
+                // takes the long way round and paints 300° of it.
+                readonly property real segTo: Math.max(segFrom, Math.min(segEnd, viz.t))
+                // Nothing to draw yet. `opacity`, not `visible`: hiding part of
+                // a chart subtree corrupts clip state for its neighbours
+                // (§10.8), and this is a binding rather than a fade — there is
+                // no Behavior on it and it never lands between 0 and 1.
+                opacity: segTo > segFrom ? 1 : 0
 
                 ShapePath {
                     fillColor: "transparent"
@@ -109,7 +153,10 @@ DetailCard {
             }
         }
 
-        // The unfilled remainder, in the gauge track colour.
+        // The unfilled remainder, in the gauge track colour. Anchored at the
+        // head, so during the arrival it gives ground to the paint rather than
+        // being overdrawn by it: the ring is a complete scale in every frame,
+        // including the first one, and the two ends always meet exactly.
         //
         // One arc rather than a run of segments, which is what a flat colour
         // buys: there is no ramp left to sample per segment, so the stretch can

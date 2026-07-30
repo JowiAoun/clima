@@ -69,9 +69,17 @@ DetailCard {
         // The reading, as a fraction of the scale the data declares. Clamped, so
         // an index past the top of the scale fills the ring rather than running
         // off the end of it.
-        readonly property real frac: ChartMath.clamp(root.d.value / root.d.max, 0, 1)
-        readonly property real markAngle: startAngle + frac * sweepAngle
-        readonly property color markColor: ChartMath.sampleRamp(Detail.bands.aqi, frac)
+        readonly property real reading: ChartMath.clamp(root.d.value / root.d.max, 0, 1)
+
+        // The head of the paint, running 0 → `reading` once on mount off the
+        // shell's `reveal` hook, over `Theme.motion.reveal`. The same two lines
+        // as the UV and cloud-cover dials, because the three share a geometry
+        // and should not arrive three different ways; the long version of why
+        // is in DetailUvCard.qml. The number in the middle does not count up.
+        readonly property real t: reading * root.reveal
+
+        readonly property real markAngle: startAngle + t * sweepAngle
+        readonly property color markColor: ChartMath.sampleRamp(Detail.bands.aqi, t)
 
         function dialX(deg, r) { return cx + r * Math.cos(deg * Math.PI / 180) }
         function dialY(deg, r) { return cy + r * Math.sin(deg * Math.PI / 180) }
@@ -92,15 +100,21 @@ DetailCard {
         // end exactly under the marker rather than at the nearest segment
         // boundary, so the dot sits on the end of the paint and not a few pixels
         // past it.
+        //
+        // Cut off the reading and not off the sweeping head, so the array is a
+        // fixed length: a JS-array model that grows resets the whole Repeater,
+        // which would tear down and rebuild every Shape on the ring on every
+        // frame of the arrival. The segments are all there from the start and
+        // each is clipped to the head instead.
         readonly property var litSegs: {
             var out = []
-            if (frac <= 0.005)
+            if (reading <= 0.005)
                 return out
-            var n = Math.max(4, Math.round(frac * segments))
+            var n = Math.max(4, Math.round(reading * segments))
             for (var i = 0; i < n; ++i)
-                out.push({ from: frac * i / n,
-                           to:   frac * (i + 1) / n,
-                           mid:  frac * (i + 0.5) / n })
+                out.push({ from: reading * i / n,
+                           to:   reading * (i + 1) / n,
+                           mid:  reading * (i + 0.5) / n })
             return out
         }
 
@@ -131,12 +145,23 @@ DetailCard {
 
                 required property var modelData
 
+                // Clipped to the head of the sweep, and clamped at its own
+                // start: an arc asked to end before it begins is not empty —
+                // SVG goes the long way round and paints most of the ring.
+                readonly property real segTo: Math.max(modelData.from,
+                                                       Math.min(modelData.to, viz.t))
+                // Not reached yet. `opacity` rather than `visible`, per §10.8;
+                // it is a plain binding with no Behavior, so nothing fades.
+                opacity: segTo > modelData.from ? 1 : 0
+
                 ShapePath {
                     fillColor: "transparent"
+                    // Sampled at the segment's own place on the scale, which
+                    // does not move: the run grows, the bands stay put.
                     strokeColor: ChartMath.sampleRamp(Detail.bands.aqi, seg.modelData.mid)
                     strokeWidth: viz.ringWidth
                     capStyle: ShapePath.RoundCap
-                    PathSvg { path: viz.arcSeg(seg.modelData.from, seg.modelData.to) }
+                    PathSvg { path: viz.arcSeg(seg.modelData.from, seg.segTo) }
                 }
             }
         }

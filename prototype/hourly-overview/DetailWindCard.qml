@@ -17,6 +17,11 @@
 //   - the green arc on the ring is the gust band, centred on the bearing and
 //     widened by how far the gusts run ahead of the mean. Gusty air is air
 //     whose direction is not settled, so a gustier hour gets a wider band.
+//
+// All three arrive rather than appear: the vane swings off north onto the
+// bearing, the wedge grows out to its reach, and the gust band opens to its
+// width — one gesture on the card's one-shot `reveal`. The two numbers do not
+// move. A speed is a reading and a reading is legible from the first frame.
 import QtQuick
 import QtQuick.Shapes
 import "theme.js" as Theme
@@ -41,6 +46,23 @@ DetailCard {
 
         readonly property real dirDeg: root.d.directionDeg
 
+        // ---- the arrival -----------------------------------------------------
+        // Where the vane swings *from* is the whole question, and north is the
+        // only answer that carries meaning: a bearing is degrees from north, so
+        // north is the reading's own zero and starting anywhere else would be
+        // decoration dressed as data.
+        //
+        // It takes the short way round — 66° anticlockwise for a WNW wind, not
+        // 294° the other way. A vane settles onto the wind; a near-full
+        // revolution in half a second reads as a spinner, which is the one thing
+        // an arrival on this page must not look like. `dirDelta` is the signed
+        // turn, folded into (-180, 180].
+        readonly property real dirDelta: ((dirDeg + 180) % 360) - 180
+        readonly property real vaneDeg: {
+            var a = dirDelta * root.reveal
+            return (a % 360 + 360) % 360
+        }
+
         // The cardinal labels sit *on* the ring, so the radius has to leave
         // half a line of type above N and below S.
         readonly property real ringR: Math.max(24, Math.min(48, height / 2 - 9))
@@ -52,19 +74,27 @@ DetailCard {
         readonly property real gapHalf: 12
 
         // Gust band. Half-width grows with the gusts' excess over the mean:
-        // 24 against 13 km/h is a 46% excess, giving roughly ±22°.
+        // 24 against 13 km/h is a 46% excess, giving roughly ±22°. It opens from
+        // nothing over the reveal, so the band widens as the vane settles rather
+        // than dragging a finished arc around the ring ahead of it.
         readonly property real gustHalf: {
             var g = root.d.gust, s = root.d.speed
             var excess = g > 0 ? Math.max(0, g - s) / g : 0
-            return 8 + 30 * Math.min(excess, 1)
+            return (8 + 30 * Math.min(excess, 1)) * root.reveal
         }
 
         // Wedge reach downwind, against the working ceiling in detaildata.js —
         // a ceiling that decides what the reader sees is data, not styling. At
         // 30 km/h it puts 13 km/h a little past halfway out, and anything at or
         // above the ceiling stops just short of the ring.
+        //
+        // Only the speed's share of the reach is revealed. 0.46 is the scale's
+        // own zero — where a dead calm leaves the wedge — so the reach grows off
+        // that the way a bar grows off its baseline, rather than swelling out of
+        // a point that means nothing.
         readonly property real wedgeApexR:
-            ringR * (0.46 + 0.42 * Math.min(root.d.speed / root.d.scaleMax, 1))
+            ringR * (0.46 + 0.42 * Math.min(root.d.speed / root.d.scaleMax, 1)
+                                 * root.reveal)
         readonly property real wedgeBaseR: ringR * 0.40
         readonly property real wedgeHalfW: ringR * 0.25
 
@@ -92,15 +122,17 @@ DetailCard {
         }
 
         // The gust band is trimmed at any label break it would otherwise run
-        // through, so the ring's four gaps stay four gaps.
+        // through, so the ring's four gaps stay four gaps. Trimmed against the
+        // vane's current angle, not the bearing: the gaps are fixed to the ring,
+        // so a band that swings has to be re-trimmed as it goes.
         readonly property string gustPath: {
-            var a0 = dirDeg - gustHalf
-            var a1 = dirDeg + gustHalf
+            var a0 = vaneDeg - gustHalf
+            var a1 = vaneDeg + gustHalf
             for (var k = -1; k <= 5; ++k) {
                 var c = 90 * k
-                if (c + gapHalf <= dirDeg && c + gapHalf > a0)
+                if (c + gapHalf <= vaneDeg && c + gapHalf > a0)
                     a0 = c + gapHalf
-                if (c - gapHalf >= dirDeg && c - gapHalf < a1)
+                if (c - gapHalf >= vaneDeg && c - gapHalf < a1)
                     a1 = c - gapHalf
             }
             return arcPath(a0, a1, ringR)
@@ -110,7 +142,7 @@ DetailCard {
         // downwind. Sides bow out very slightly so the tip reads as a taper
         // rather than as a triangle.
         readonly property string wedgePath: {
-            var t = dirDeg * Math.PI / 180
+            var t = vaneDeg * Math.PI / 180
             var ux = Math.sin(t), uy = -Math.cos(t)      // toward where it blows from
             var px = -uy, py = ux                        // across that axis
 
