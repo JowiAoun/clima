@@ -102,7 +102,7 @@ var visibility = {
     scaleMax: 20,
     band: "Excellent", peak: 45, peakAt: "1:00 p.m.",
     trend: "up", status: "Excellent",
-    body: "Improving to a peak of 45 km at 1:00 p.m."
+    body: "Improving through the afternoon; clearest around 1:00 p.m."
 };
 
 var pressure = {
@@ -126,7 +126,7 @@ var sun = {
 var moon = {
     riseMin: 21 * 60 + 25, setMin: 8 * 60 + 3, nowMin: 12 * 60 + 28,
     riseLabel: "9:25", riseSuffix: "PM", setLabel: "8:03", setSuffix: "AM",
-    upLength: "10 hrs 37 mins",
+    upLength: "10 hrs 38 mins",
     phase: "Waning Gibbous", illumination: 0.72,
     trend: "none", status: "Waning Gibbous",
     body: "The moon is 72% illuminated and rises at 9:25 p.m. tonight."
