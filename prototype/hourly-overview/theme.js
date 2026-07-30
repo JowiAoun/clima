@@ -90,6 +90,10 @@ var color = {
     pagerBgHover:  "#b3141d33",
     pagerGlyph:    "#e8edf7",
 
+    trendUp:       "#ff9d5c",
+    trendDown:     "#7fb6e8",
+    trendSteady:   "#c6cede",
+
     sunGlyphWarm:  "#ffd97a",
     sunGlyphCool:  "#f2952f",
     moonGlyph:     "#f2e3b8",
@@ -124,7 +128,17 @@ var metric = {
     cardRadius:       14,
     panelRadius:      12,
     controlRadius:    8,
-    filletRadius:     18
+    filletRadius:     18,
+
+    // Weather-detail grid, measured off the reference: a 300x250 card with a
+    // 12px radius and 16/20 padding, giving every visualisation the same
+    // 260-wide box to work in.
+    detailCardWidth:  300,
+    detailCardHeight: 250,
+    detailRadius:     12,
+    detailPadH:       20,
+    detailPadV:       16,
+    detailGap:        16
 };
 
 var scale = {

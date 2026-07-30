@@ -1,0 +1,134 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Current-conditions data for the weather-detail cards.
+//
+// Stand-in for the provider, shaped the way `libclima` will return it: plain
+// values plus the short series a card needs to draw a trend. No formatting
+// decisions — units, rounding and wording belong to the card.
+//
+// The numbers deliberately match the captured reference for the same location
+// and hour, so a card can be held against `reference/msn/…` and compared
+// directly rather than approximately.
+//
+// Deterministic: no Math.random anywhere, so golden-image tests stay stable.
+.pragma library
+
+var observedAt = "12:28 PM";
+
+// Twelve hours of context, oldest first, for the cards that draw a sparkline.
+// Index 6 is "now".
+var nowIndex = 6;
+
+var temperature = {
+    value: 27, unit: "°",
+    series: [21, 22, 23, 24, 25, 26, 27, 28, 29, 28, 26, 24],
+    high: 29, low: 17, peakAt: "3:00 p.m.", lowAt: "5:00 a.m.",
+    trend: "up", status: "Rising",
+    body: "Rising with a peak of 29° at 3:00 p.m. Overnight low of 17° at 5:00 a.m."
+};
+
+var feelsLike = {
+    value: 30, actual: 27, unit: "°",
+    series: [23, 24, 25, 26, 28, 29, 30, 31, 32, 31, 28, 26],
+    dominantFactor: "humidity",
+    trend: "up", status: "Slightly Warm",
+    body: "Feels warmer than the actual temperature due to the humidity."
+};
+
+var cloudCover = {
+    value: 8, unit: "%",
+    condition: "Sunny",
+    trend: "steady", status: "Sunny (8%)",
+    body: "Steady with clear sky at 12:28 p.m. Clear sky expected in the evening."
+};
+
+var precipitation = {
+    value: 0, unit: "mm", window: "In next 24h",
+    // Probability per hour, for cards that want a small distribution.
+    series: [0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 20, 35],
+    trend: "steady", status: "No Precipitation",
+    body: "Rain expected on Saturday night. Today has seen similar precipitation as yesterday until now."
+};
+
+var wind = {
+    speed: 13, gust: 24, unit: "km/h",
+    directionDeg: 294, directionLabel: "WNW",
+    beaufort: 3, beaufortName: "Gentle Breeze",
+    trend: "steady", status: "Force: 3 (Gentle Breeze)",
+    body: "Steady with averages holding at 8 km/h (gusts to 12) expected from NNW through the evening."
+};
+
+var humidity = {
+    value: 45, unit: "%", dewPoint: 14, dewUnit: "°",
+    // Eight columns, matching the reference's bar array.
+    series: [38, 41, 44, 46, 45, 43, 42, 40],
+    trend: "down", status: "Normal",
+    body: "Decreasing with a low of 42% at 1:00 p.m."
+};
+
+var uv = {
+    value: 7, max: 11,
+    // WHO bands: low 0-2, moderate 3-5, high 6-7, very high 8-10, extreme 11+
+    band: "High", peakAt: "2:00 p.m.",
+    trend: "up", status: "High",
+    body: "Maximum UV exposure for today will be high, expected at 2:00 p.m."
+};
+
+var airQuality = {
+    value: 25, max: 100,
+    band: "Good", pollutant: "PM2.5", pollutantValue: 4.4, pollutantUnit: "µg/m³",
+    trend: "down", status: "Good",
+    body: "Deteriorating air quality with primary pollutant: PM2.5 4.4 µg/m³."
+};
+
+var visibility = {
+    value: 16, unit: "km", max: 45,
+    band: "Excellent", peak: 45, peakAt: "1:00 p.m.",
+    trend: "up", status: "Excellent",
+    body: "Improving with a peak visibility distance of 45 km expected at 1:00 p.m."
+};
+
+var pressure = {
+    value: 1014, unit: "mb", at: "12:28 PM (Now)",
+    series: [1009, 1010, 1010, 1011, 1012, 1013, 1014, 1014, 1013, 1012, 1012, 1011],
+    min: 1005, max: 1020,
+    trend: "up", status: "Rising slowly",
+    body: "Rising slowly in the last 3 hours. Expected to fall slowly in the next 3 hours."
+};
+
+// Times as minutes past midnight, so a card can place them on an arc without
+// parsing anything.
+var sun = {
+    riseMin: 6 * 60 + 4, setMin: 20 * 60 + 43, nowMin: 12 * 60 + 28,
+    riseLabel: "6:04", riseSuffix: "AM", setLabel: "8:43", setSuffix: "PM",
+    dayLength: "14 hrs 39 mins",
+    trend: "none", status: "Daylight",
+    body: "The sun is up for 14 hours and 39 minutes today, setting at 8:43 p.m."
+};
+
+var moon = {
+    riseMin: 21 * 60 + 25, setMin: 8 * 60 + 3, nowMin: 12 * 60 + 28,
+    riseLabel: "9:25", riseSuffix: "PM", setLabel: "8:03", setSuffix: "AM",
+    upLength: "10 hrs 37 mins",
+    phase: "Waning Gibbous", illumination: 0.72,
+    trend: "none", status: "Waning Gibbous",
+    body: "The moon is 72% illuminated and rises at 9:25 p.m. tonight."
+};
+
+// Fixed order for the grid, so the layout does not depend on object key order.
+var order = ["temperature", "feelsLike", "cloudCover", "precipitation",
+             "wind", "humidity", "uv", "airQuality", "visibility",
+             "pressure", "sun", "moon"];
+
+// Colour bands published by the relevant authority, for the cards that show a
+// scale rather than a single value. Positions are normalised over the card's
+// own range.
+var bands = {
+    uv:  [{ p: 0.00, c: "#5ec18a" }, { p: 0.27, c: "#e8c73c" },
+          { p: 0.50, c: "#f5a02f" }, { p: 0.72, c: "#d6484e" },
+          { p: 1.00, c: "#8b5fc4" }],
+    aqi: [{ p: 0.00, c: "#4ec3c8" }, { p: 0.25, c: "#5cc79a" },
+          { p: 0.50, c: "#e8c93f" }, { p: 0.75, c: "#f08a45" },
+          { p: 1.00, c: "#c03050" }],
+    visibility: [{ p: 0.00, c: "#5f8f78" }, { p: 0.50, c: "#6fbf95" },
+                 { p: 1.00, c: "#8fe0b4" }]
+};

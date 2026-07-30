@@ -34,9 +34,35 @@ Window {
         }
     }
 
+    // `--card Uv` renders one detail card on the page gradient and nothing
+    // else, so a card can be built and checked without the rest of the screen
+    // in the way. `--details` renders the whole grid.
+    property string previewCard: ""
+    property bool previewGrid: false
+
+    Loader {
+        active: win.previewCard !== ""
+        anchors.centerIn: parent
+        sourceComponent: Component {
+            Loader {
+                source: "Detail" + win.previewCard + "Card.qml"
+                onStatusChanged: if (status === Loader.Error)
+                    console.warn("preview: no such card —", source)
+            }
+        }
+    }
+
+    Loader {
+        active: win.previewGrid
+        anchors.fill: parent
+        anchors.margins: 22
+        source: "WeatherDetails.qml"
+    }
+
     Item {
         anchors.fill: parent
         anchors.margins: 22
+        visible: win.previewCard === "" && !win.previewGrid
 
         MetricTabBar {
             id: tabs
@@ -98,6 +124,13 @@ Window {
 
         if (args.indexOf("--list") >= 0)
             tabs.listView = true
+
+        var c = args.indexOf("--card")
+        if (c >= 0 && c + 1 < args.length)
+            win.previewCard = args[c + 1]
+
+        if (args.indexOf("--details") >= 0)
+            win.previewGrid = true
 
         var i = args.indexOf("--grab")
         if (i >= 0 && i + 1 < args.length) {
