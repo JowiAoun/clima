@@ -14,6 +14,7 @@ Item {
 
     property string kind: "clear-day"
     property real glyphSize: 26
+    property bool onLightBackground: false
 
     implicitWidth: glyphSize
     implicitHeight: glyphSize
@@ -86,8 +87,16 @@ Item {
             fillGradient: LinearGradient {
                 x1: 0; y1: root.height * (root.soloCloud ? 0.24 : 0.42)
                 x2: 0; y2: root.height * (root.soloCloud ? 0.80 : 0.92)
-                GradientStop { position: 0.0; color: Theme.color.cloudTop }
-                GradientStop { position: 1.0; color: Theme.color.cloudBottom }
+                GradientStop {
+                    position: 0.0
+                    color: root.onLightBackground ? Theme.color.cloudTopOnLight
+                                                  : Theme.color.cloudTop
+                }
+                GradientStop {
+                    position: 1.0
+                    color: root.onLightBackground ? Theme.color.cloudBottomOnLight
+                                                  : Theme.color.cloudBottom
+                }
             }
             PathSvg { path: root.cloudPath(root.width, root.height, root.soloCloud) }
         }

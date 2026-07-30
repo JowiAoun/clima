@@ -12,6 +12,10 @@ to match:
 
 ![UV metric](screenshot-uv.png)
 
+The Chart/List switch works too:
+
+![List view](screenshot-list.png)
+
 ## Run it
 
 No build step. It is pure QML, executed by Qt 6's `qml` runtime.
@@ -20,6 +24,8 @@ No build step. It is pure QML, executed by Qt 6's `qml` runtime.
 ./run.sh                              # open the window
 ./run.sh --grab shot.png              # render one frame headless and exit
 ./run.sh --grab shot.png --metric uv  # …with a given tab selected
+./run.sh --grab shot.png --list       # …in list view
+./run.sh --grab shot.png --day 3      # …with a given day card selected
 ```
 
 `run.sh` finds a `qml` binary on `PATH`, or falls back to the newest one in the Nix
@@ -41,7 +47,9 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 | `Main.qml` | Window; assembles tab bar → day strip → chart |
 | `MetricTabBar.qml` | Section title, metric pills, chart/list switch |
 | `DayStrip.qml` | Day cards; the selected one widens and merges into the chart below |
-| `HourlyOverview.qml` | The chart card: axis, grid, header band, past treatment, crosshair |
+| `HourlyOverview.qml` | The card: title, legend, and the chart/list body |
+| `HourlyList.qml` | The list alternative to the chart |
+| `DayIconBadge.qml` | Circular day/night icon badge used by the selected day card |
 | `SeriesArea.qml` | Gradient-filled curve with an optional dashed overlay line |
 | `SeriesBars.qml` | One bar per hour, coloured by its own value |
 | `metrics.js` | **The metric registry — the tab bar and the chart are both driven from it** |
@@ -68,8 +76,17 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 
 **Around it**
 
-- Day cards with per-day icons and highs/lows; the selected card widens to fit a second
-  (night) icon and squares off its bottom edge to merge with the chart card below.
+- Day cards with per-day icons and highs/lows. The selected card behaves like a browser
+  tab: lighter, wider, and *taller* than its neighbours, with its fill running straight
+  into the chart card below. That merge is done by **overhang**, not by drawing a join —
+  the card extends past the bottom of the strip and the chart card, declared after it,
+  paints over the overhang and takes the card's bottom border with it. Nothing has to
+  line up to the pixel, and it stays correct at any card position or window size.
+- Selecting a card reveals its night condition beside the daytime one, each in a badge —
+  pale for day, blue for night.
+- A list view with per-hour rows: condition, temperature, feels-like, precipitation
+  probability, wind and humidity. The past is dimmed rather than hidden and "now" is
+  marked, so the same rule the chart follows holds there too.
 - Metric pills generated from the registry, with a chart/list view switch.
 - Horizontal flick + drag and animated pager buttons on both the day strip and the chart,
   disabling at the bounds.
@@ -92,11 +109,11 @@ All of it is deterministic, with no `Math.random`, so golden-image tests stay st
 ## Deliberately not done yet
 
 - **Real data.** No network layer; that is milestone M1.
-- **The list view.** The Chart/List switch changes state but there is no list yet.
-- **Selecting a different day** re-renders nothing — there is one day of hourly data.
 - **A secondary axis.** Precipitation *probability* belongs on the precipitation tab as a
   percentage line, but that needs a second axis; for now probability lives in the strip
   under the chart, where it shares the same time axis.
+- **Selecting a different day** changes the strip but not the chart — there is only one
+  day of hourly data behind it.
 - **Shipped icons.** Icons are drawn procedurally to keep this a single `qml` invocation.
   Production uses Meteocons (MIT) converted with `svgtoqml`, which ships with
   qtdeclarative and is present in this Qt, so the pipeline is confirmed available.
@@ -125,3 +142,18 @@ All of it is deterministic, with no `Math.random`, so golden-image tests stay st
   Flatpak Qt has a consistent GTK stack and keeps the integration.
 - `Shape.CurveRenderer` gives visibly better antialiasing on the GPU and falls back
   cleanly under the software backend, so it is safe to leave on.
+- **Qt Quick Shapes escape ancestor clipping.** `clip: true` on a Flickable or ListView
+  does not bound them: condition glyphs from out-of-view list rows drew over the header,
+  and a precipitation droplet from an off-screen bucket drew past the card's edge.
+  `layer.enabled: true` on an ancestor *does* bound them — but put it on an item with an
+  opaque background. On the Flickable itself the layer composited black over the panel;
+  on the panel, which has its own fill, it composites correctly.
+- **Removing the chart subtree from the scene stopped unrelated text from painting.**
+  With the chart unloaded, the tab bar's section heading and the "Chart" switch label
+  both vanished, while reporting as entirely healthy at runtime — right text, size,
+  colour, `visible: true`, `opacity: 1`. So the scene was correct and only the render was
+  wrong. Ruled out by bisection: text `renderType`, `Shape.CurveRenderer`, the list's own
+  content (an empty list reproduces it), scene-graph layer isolation, grab timing, and
+  whole-window versus single-item capture. The chart is therefore kept loaded underneath
+  the list rather than unloaded. Worth retrying after the C++ port (decision D3) — this
+  looks like a scene-graph bug that a `QSGGeometryNode` implementation may not trip.

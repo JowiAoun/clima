@@ -24,6 +24,9 @@ var color = {
     pastHatch:     "#1effffff",
     nowLine:       "#59ffffff",
 
+    listRowAlt:    "#0affffff",
+    nowRowBg:      "#1fffd24a",
+
     stripBg:       "#2d3d5e",
     stripPast:     "#26324e",
     stripDivider:  "#1affffff",
@@ -47,7 +50,17 @@ var color = {
     moonGlyph:     "#f2e3b8",
     cloudTop:      "#ffffff",
     cloudBottom:   "#c1cddf",
-    rainDrop:      "#7fb6e8"
+    rainDrop:      "#7fb6e8",
+
+    // Clouds are drawn white, which vanishes on the pale day badge — this variant
+    // keeps them readable there without changing them everywhere else.
+    cloudTopOnLight:    "#fbfdff",
+    cloudBottomOnLight: "#9db0cc",
+
+    badgeDayTop:     "#fdfefe",
+    badgeDayBottom:  "#dde5f0",
+    badgeNightTop:   "#6d9ae8",
+    badgeNightBottom:"#3f63bd"
 };
 
 var metric = {

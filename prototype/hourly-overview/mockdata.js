@@ -132,16 +132,18 @@ var airQuality = _build(function (i) {
 // ---------------------------------------------------------------------------
 // Daily summaries for the day strip. Values match the reference screenshot.
 // ---------------------------------------------------------------------------
+// Every day carries both a daytime and a night-time condition. Unselected cards
+// show only the daytime one; selecting a card reveals the pair.
 var days = [
-    { date: 29, label: "Yesterday", high: 21, low: 18, icon: "cloudy",     nightIcon: "" },
+    { date: 29, label: "Yesterday", high: 21, low: 18, icon: "cloudy",     nightIcon: "cloudy" },
     { date: 30, label: "Today",     high: 26, low: 16, icon: "partly-day", nightIcon: "partly-night" },
-    { date: 31, label: "Fri",       high: 28, low: 19, icon: "clear-day",  nightIcon: "" },
-    { date:  1, label: "Sat",       high: 26, low: 19, icon: "rain",       nightIcon: "" },
-    { date:  2, label: "Sun",       high: 21, low: 15, icon: "rain",       nightIcon: "" },
-    { date:  3, label: "Mon",       high: 25, low: 14, icon: "clear-day",  nightIcon: "" },
-    { date:  4, label: "Tue",       high: 28, low: 16, icon: "clear-day",  nightIcon: "" },
-    { date:  5, label: "Wed",       high: 27, low: 17, icon: "partly-day", nightIcon: "" },
-    { date:  6, label: "Thu",       high: 24, low: 16, icon: "rain",       nightIcon: "" }
+    { date: 31, label: "Fri",       high: 28, low: 19, icon: "clear-day",  nightIcon: "partly-night" },
+    { date:  1, label: "Sat",       high: 26, low: 19, icon: "rain",       nightIcon: "rain-night" },
+    { date:  2, label: "Sun",       high: 21, low: 15, icon: "rain",       nightIcon: "rain-night" },
+    { date:  3, label: "Mon",       high: 25, low: 14, icon: "clear-day",  nightIcon: "clear-night" },
+    { date:  4, label: "Tue",       high: 28, low: 16, icon: "clear-day",  nightIcon: "clear-night" },
+    { date:  5, label: "Wed",       high: 27, low: 17, icon: "partly-day", nightIcon: "partly-night" },
+    { date:  6, label: "Thu",       high: 24, low: 16, icon: "rain",       nightIcon: "rain-night" }
 ];
 
 var todayIndex = 1;
@@ -171,6 +173,19 @@ function conditionFor(i) {
     if (cloud[i] > 25)
         return night ? "partly-night" : "partly-day";
     return night ? "clear-night" : "clear-day";
+}
+
+function conditionText(i) {
+    switch (conditionFor(i)) {
+    case "rain":         return "Rain showers";
+    case "rain-night":   return "Rain showers";
+    case "cloudy":       return "Cloudy";
+    case "partly-day":   return "Partly sunny";
+    case "partly-night": return "Partly cloudy";
+    case "clear-day":    return "Sunny";
+    case "clear-night":  return "Clear";
+    }
+    return "—";
 }
 
 function hourLabel(i) {

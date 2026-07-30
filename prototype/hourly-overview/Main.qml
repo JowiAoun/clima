@@ -33,13 +33,15 @@ Window {
             anchors.topMargin: 16
         }
 
+        // Declared after the day strip on purpose: it paints over the selected
+        // card's overhang, which is what makes the two read as one surface.
         HourlyOverview {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: dayStrip.bottom
-            anchors.topMargin: -1        // meet the selected day card exactly
             anchors.bottom: parent.bottom
             metricId: tabs.currentId
+            listView: tabs.listView
         }
     }
 
@@ -69,6 +71,13 @@ Window {
         var m = args.indexOf("--metric")
         if (m >= 0 && m + 1 < args.length)
             tabs.currentId = args[m + 1]
+
+        var d = args.indexOf("--day")
+        if (d >= 0 && d + 1 < args.length)
+            dayStrip.currentIndex = parseInt(args[d + 1])
+
+        if (args.indexOf("--list") >= 0)
+            tabs.listView = true
 
         var i = args.indexOf("--grab")
         if (i >= 0 && i + 1 < args.length) {
