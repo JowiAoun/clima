@@ -14,6 +14,13 @@ compile_commands.json
 *.user
 *.autosave
 
+# Reference captures of third-party UIs (tools/refcap).
+# Someone else's pixels and markup: fine to study locally, not ours to
+# redistribute. What belongs in git is the distilled measurements —
+# see docs/09-reference-capture.md.
+/reference/
+/tools/refcap/node_modules
+
 # OS cruft
 .DS_Store
 Thumbs.db

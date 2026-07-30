@@ -1,0 +1,8 @@
+{
+  "name": "clima-refcap",
+  "private": true,
+  "type": "module",
+  "description": "Reference-capture harness for UI replication work",
+  "scripts": { "postinstall": "playwright install chromium" },
+  "dependencies": { "playwright": "^1.62.0" }
+}

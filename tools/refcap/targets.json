@@ -1,0 +1,64 @@
+{
+  "hourly-chart": {
+    "description": "Metric tab bar + gradient hourly chart (the card we rebuilt first)",
+    "url": "https://www.msn.com/en-us/weather/hourlyforecast/in-Seattle,Washington?loc={loc}&weadegreetype={units}",
+    "selector": "[class*=\"hourlyChart-DS\"]",
+    "pad": 8,
+    "settleMs": 7000,
+    "states": {
+      "precipitation": { "click": "[class*=\"hourlyChartTabWrapper-DS\"] >> text=Precipitation" },
+      "uv":            { "click": "[class*=\"hourlyChartTabWrapper-DS\"] >> text=UV" },
+      "humidity":      { "click": "[class*=\"hourlyChartTabWrapper-DS\"] >> text=Humidity" },
+      "wind":          { "click": "[class*=\"hourlyChartTabWrapper-DS\"] >> text=Wind" },
+      "scrub":         { "hover": "#weathersvgchart", "settleMs": 900 }
+    }
+  },
+
+  "day-carousel": {
+    "description": "Day cards strip on its own",
+    "url": "https://www.msn.com/en-us/weather/hourlyforecast/in-Seattle,Washington?loc={loc}&weadegreetype={units}",
+    "selector": "[class*=\"carousel-DS\"]",
+    "pad": 12,
+    "settleMs": 7000
+  },
+
+  "day-junction": {
+    "description": "Day strip meeting the panel below it — the tab/panel seam",
+    "url": "https://www.msn.com/en-us/weather/hourlyforecast/in-Seattle,Washington?loc={loc}&weadegreetype={units}",
+    "selector": "[class*=\"carousel-DS\"]",
+    "pad": { "top": 12, "right": 12, "bottom": 120, "left": 12 },
+    "settleMs": 7000
+  },
+
+  "hourly-list": {
+    "description": "Per-hour rows with the expanded row's detail grid",
+    "url": "https://www.msn.com/en-us/weather/hourlyforecast/in-Seattle,Washington?loc={loc}&weadegreetype={units}",
+    "selector": "[class*=\"hourlyTable-DS\"]",
+    "pad": 8,
+    "settleMs": 7000
+  },
+
+  "daily-forecast": {
+    "description": "Daily forecast block on the forecast page",
+    "url": "https://www.msn.com/en-us/weather/forecast/in-Seattle,Washington?loc={loc}&weadegreetype={units}",
+    "selector": "[class*=\"weatherDailyForecastContainer-DS\"]",
+    "pad": 8,
+    "settleMs": 8000
+  },
+
+  "trend-chart": {
+    "description": "Multi-day trend chart — a second, differently-built chart worth comparing",
+    "url": "https://www.msn.com/en-us/weather/forecast/in-Seattle,Washington?loc={loc}&weadegreetype={units}",
+    "selector": "[class*=\"trendChartContainer-DS\"]",
+    "pad": 8,
+    "settleMs": 8000
+  },
+
+  "overview": {
+    "description": "Current-conditions overview card",
+    "url": "https://www.msn.com/en-us/weather/forecast/in-Seattle,Washington?loc={loc}&weadegreetype={units}",
+    "selector": "[class*=\"weatherOverview_root-DS\"]",
+    "pad": 12,
+    "settleMs": 8000
+  }
+}
