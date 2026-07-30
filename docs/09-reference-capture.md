@@ -63,8 +63,13 @@ Per component: `shot.png` (clipped, DPR solved so it is never downscaled),
 `tokens.json` (the site's CSS custom properties), `meta.json` (provenance).
 
 Location, units, timezone, locale, theme and viewport are pinned; ads and
-telemetry are blocked; animation is paused before the shutter. Two runs of the
-same target agree.
+telemetry are blocked; animation is paused before the shutter.
+
+That makes the *design* reproducible — layout, styles, geometry and palette
+agree between runs. It does not make the capture byte-identical, because the
+weather underneath it is live: the curve, the axis range and the day labels all
+move. Treat geometry and styles as stable, and chart data as a sample. If you
+need a fixed series to diff against, save the capture directory by hand.
 
 Pinning location also reaches states we cannot see locally: `--city phoenix` for
 an extreme-UV axis, `--city reykjavik` for sub-zero, `--city singapore` for

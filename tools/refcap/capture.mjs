@@ -146,6 +146,8 @@ function parseArgs(argv) {
         out[k] = n;
     }
     if (!['dark', 'light'].includes(out.theme)) throw new Error('--theme must be dark or light');
+    out.units = String(out.units).toUpperCase();
+    if (!['C', 'F'].includes(out.units)) throw new Error('--units must be C or F');
     return out;
 }
 
