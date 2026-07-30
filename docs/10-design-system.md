@@ -148,7 +148,15 @@ under about 85 characters or they elide mid-word, which reads as a bug.
 
 - **The reading sits at the bottom-left of the content box**, at
   `Theme.type.reading`. Not centred, not right-aligned; the grid has a left
-  rhythm and one card breaking it is the one you notice.
+  rhythm and one card breaking it is the one you notice. **One exception:** a
+  dial puts its reading in the middle of the ring, because the ring is a scale
+  drawn *around* the number and setting the number off to one side leaves the
+  ring circling nothing. All three dials — UV, air quality, cloud cover — take
+  it, and they share one geometry: 310° of arc from 115°, a 7 px stroke, a
+  `trackLine` remainder, and the mark where the paint stops.
+- **A card with a side-by-side layout still bottom-anchors its readout.**
+  Centring the right-hand column vertically instead is what left row 2 of the
+  grid with no baseline while rows 1 and 3 had one.
 - **The content box is exactly `contentWidth` × `contentHeight`.** No negative
   margins to borrow a few pixels from the card's padding. If a visualisation
   needs more height, it needs to be simpler, not to hang outside its box.
