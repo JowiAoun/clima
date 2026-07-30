@@ -42,7 +42,15 @@ Item {
         id: flick
         anchors.fill: parent
         anchors.bottomMargin: -root.mergeDepth   // room for the overhang to draw into
+
+        // clip bounds the cards; the layer bounds the condition glyphs, which are
+        // Shapes and ignore ancestor clipping entirely (§10.8). Without it the
+        // glyphs from cards scrolled out of view keep painting to the right of
+        // the strip. Every window this ran in was narrow enough that they landed
+        // off-window, so it looked fine until the page capped its content column
+        // and left visible background beside it.
         clip: true
+        layer.enabled: true
         contentWidth: row.width
         contentHeight: height
         flickableDirection: Flickable.HorizontalFlick
