@@ -65,6 +65,18 @@ if [[ "$qml_bin" == /nix/store/* ]]; then
     else
         export QT_PLUGIN_PATH="${QT_PLUGIN_PATH:-$qtd/lib/qt-6/plugins}"
     fi
+
+    # On a GNOME session Qt picks its gtk3 platform theme, which initialises the
+    # host GTK inside our process. A Nix-store Qt links its own GTK against a
+    # different module path, so GNOME's gtk-modules (canberra) cannot be found and
+    # GTK prints "Failed to load module canberra-gtk-module" on every launch.
+    # Harmless, but noisy. The generic theme avoids loading host GTK at all.
+    #
+    # Scoped to Nix-store Qt deliberately: a distro or Flatpak Qt has a consistent
+    # GTK stack, so it should keep gtk3 and the desktop integration that comes with
+    # it. The real app gets font/dark-mode/dialog integration through portals
+    # instead — see docs/04-architecture.md §4.9.
+    export QT_QPA_PLATFORMTHEME="${QT_QPA_PLATFORMTHEME:-generic}"
 fi
 
 # Without this, Qt decides stderr has no console and silently swallows QML errors.
