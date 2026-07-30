@@ -132,6 +132,20 @@ Window {
         if (args.indexOf("--details") >= 0)
             win.previewGrid = true
 
+        // --size 1340x900, so a headless grab can be tall enough to hold the
+        // whole grid. Reviewing a grid through a viewport that cuts off its
+        // last row is how a misaligned card in that row stays unnoticed.
+        var s = args.indexOf("--size")
+        if (s >= 0 && s + 1 < args.length) {
+            var wh = args[s + 1].split("x")
+            if (wh.length === 2 && parseInt(wh[0]) > 0 && parseInt(wh[1]) > 0) {
+                win.width = parseInt(wh[0])
+                win.height = parseInt(wh[1])
+            } else {
+                console.warn("--size: expected WxH, got", args[s + 1])
+            }
+        }
+
         var i = args.indexOf("--grab")
         if (i >= 0 && i + 1 < args.length) {
             grabTimer.target = args[i + 1]

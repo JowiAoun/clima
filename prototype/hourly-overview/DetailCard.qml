@@ -35,6 +35,24 @@ Item {
     readonly property real contentWidth: card.width - Theme.metric.detailPadH * 2
     readonly property real contentHeight: contentArea.height
 
+    // Two lines of body are reserved whether the sentence fills them or not.
+    // Everything above is positioned off this reserve rather than off the text's
+    // own height: measure the text and a card with a one-line body pulls its
+    // status line 15px down and gets a 15px taller chart than its neighbours.
+    // In a grid of twelve that misalignment is the first thing the eye finds.
+    // Measured rather than computed: line spacing is not `pixelSize * lineHeight`,
+    // and an arithmetic guess that comes out a few pixels short makes every body
+    // in the grid elide to one line — which is exactly what it did.
+    readonly property real bodyReserve: bodyProbe.height
+
+    Text {
+        id: bodyProbe
+        visible: false
+        text: "X\nX"
+        font: bodyText.font
+        lineHeight: bodyText.lineHeight
+    }
+
     implicitWidth: Theme.metric.detailCardWidth
     implicitHeight: Theme.metric.detailCardHeight
     width: implicitWidth
@@ -51,7 +69,7 @@ Item {
         id: titleText
         text: root.title
         color: Theme.color.textPrimary
-        font.pixelSize: 14
+        font.pixelSize: Theme.type.detailTitle
         x: Theme.metric.detailPadH
         y: Theme.metric.detailPadV
         width: root.contentWidth
@@ -78,12 +96,12 @@ Item {
         id: statusRow
         spacing: 6
         x: Theme.metric.detailPadH
-        y: root.height - Theme.metric.detailPadV - bodyText.height - height - 4
+        y: root.height - Theme.metric.detailPadV - root.bodyReserve - height - 4
 
         Text {
             text: root.status
             color: Theme.color.textPrimary
-            font.pixelSize: 14
+            font.pixelSize: Theme.type.status
             font.bold: true
         }
 
@@ -97,13 +115,17 @@ Item {
         id: bodyText
         text: root.body
         color: Theme.color.textMuted
-        font.pixelSize: 12
+        font.pixelSize: Theme.type.body
         lineHeight: 1.25
         wrapMode: Text.WordWrap
         maximumLineCount: 2
         elide: Text.ElideRight
         x: Theme.metric.detailPadH
-        y: root.height - Theme.metric.detailPadV - height
+        // Positioned off the reserve, sized by its own content: a one-line body
+        // leaves the slack at the bottom of the card rather than dragging the
+        // status line down with it. Giving it an explicit height instead makes
+        // Qt elide to whatever fits, which is not what the reserve is for.
+        y: root.height - Theme.metric.detailPadV - root.bodyReserve
         width: root.contentWidth
     }
 }

@@ -66,6 +66,16 @@ var color = {
     pastHatch:     "#1effffff",
     nowLine:       "#59ffffff",
 
+    // A forecast stretch is the same line as the observed one, drawn with less
+    // certainty. Same value as nowLine and deliberately a separate name: they
+    // mean different things and will not always want the same alpha.
+    forecastDim:   "#59ffffff",
+
+    // The unfilled part of a gauge — a dial track, a bar's empty remainder. It
+    // has to be present enough that the filled part reads as a fraction of
+    // something, which gridLine at 0.11 is not.
+    trackLine:     "#2effffff",
+
     listRowAlt:    "#0affffff",
     nowRowBg:      "#1fffd24a",
 
@@ -139,6 +149,29 @@ var metric = {
     detailPadH:       20,
     detailPadV:       16,
     detailGap:        16
+};
+
+// Type sizes, as tokens rather than as a table in a document, because twelve
+// independently-written cards produced seven different sizes for the same role
+// when the only thing binding them was prose.
+//
+// `font.pixelSize` is an int in Qt. A fractional value fails object creation and
+// Qt reports it only as `Type X unavailable` from the *parent* file.
+var type = {
+    cardTitle:   15,
+    detailTitle: 14,
+
+    // The reading: the one number a card exists to show. A card carrying two
+    // co-equal readings — sunrise and sunset, speed and gust — uses the pair
+    // size for both. There is no third option: a card wanting one is really
+    // asking for a different layout.
+    reading:     34,
+    readingPair: 26,
+
+    status:      14,
+    body:        12,
+    label:       12,
+    axis:        11
 };
 
 var scale = {

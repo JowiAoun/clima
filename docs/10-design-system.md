@@ -28,6 +28,10 @@ Three consequences, all of which have bitten already:
 - **Washes stack.** Two 0.07 surfaces overlapping give 0.135 — a patch visibly
   lighter than either. Never nest a surface inside a surface, and never overlap
   them to hide a seam. If two surfaces must read as one, make them *abut*.
+  A dial face, a disc behind a number, a panel behind a chart: these are all
+  surfaces, whatever they are called and whatever colour they are tinted. The
+  test is whether it has an edge. A shape that fades to zero alpha at its rim
+  is a glow and is fine; one you can trace the outline of is a stacked wash.
 - **A white wash is not a colour you can put text on.** Ink for anything
   sitting on the accent is `onAccent`, never a surface token.
 - **Borders are usually wrong.** A 1px outline across a junction is exactly the
@@ -67,14 +71,26 @@ Sizes are integers. **`font.pixelSize` is an int in Qt** — assigning `12.5`
 fails object creation and Qt reports it only as `Type X unavailable` from the
 *parent* file, which is a miserable hour to lose.
 
-| Role | Size | Weight | Colour |
-|---|---|---|---|
-| Card title | 15 | bold | `textPrimary` |
-| Detail card title | 14 | normal | `textPrimary` |
-| Reading (the big number) | 30–34 | bold | `textPrimary` |
-| Status line | 14 | bold | `textPrimary` |
-| Body / description | 12 | normal | `textMuted` |
-| Axis and tick labels | 11–12 | normal | `textMuted` / `textDim` |
+Sizes live in `theme.js` as `Theme.type.*`, not as literals. The first pass at
+this document gave a *range* for the reading, and twelve independently-written
+cards came back with seven different sizes for it — 18 to 34 — which in a grid
+reads as twelve authors rather than as one set. A range is not a rule.
+
+| Role | Token | Size | Weight | Colour |
+|---|---|---|---|---|
+| Card title | `cardTitle` | 15 | bold | `textPrimary` |
+| Detail card title | `detailTitle` | 14 | normal | `textPrimary` |
+| Reading (the big number) | `reading` | 34 | bold | `textPrimary` |
+| Reading, when there are two | `readingPair` | 26 | bold | `textPrimary` |
+| Status line | `status` | 14 | bold | `textPrimary` |
+| Body / description | `body` | 12 | normal | `textMuted` |
+| Label beside a reading | `label` | 12 | normal | `textMuted` |
+| Axis and tick labels | `axis` | 11 | normal | `textDim` |
+
+`readingPair` is for a card whose subject is genuinely two co-equal numbers —
+sunrise *and* sunset, speed *and* gust. It is not a licence to shrink a reading
+that does not fit: if a single reading does not fit at 34, the layout around it
+is what is wrong.
 
 ## 10.5 Colour meaning
 
@@ -124,10 +140,39 @@ invent numbers and do not format them in the data file.
 
 `DetailTemperatureCard.qml` is the worked example. Follow its shape.
 
+The shell reserves two lines for the body whether the sentence fills them or
+not, so all twelve status lines and content boxes line up. Keep body sentences
+under about 85 characters or they elide mid-word, which reads as a bug.
+
+### The anatomy is fixed
+
+- **The reading sits at the bottom-left of the content box**, at
+  `Theme.type.reading`. Not centred, not right-aligned; the grid has a left
+  rhythm and one card breaking it is the one you notice.
+- **The content box is exactly `contentWidth` × `contentHeight`.** No negative
+  margins to borrow a few pixels from the card's padding. If a visualisation
+  needs more height, it needs to be simpler, not to hang outside its box.
+- **The status line owns the word; the visualisation owns the number.** Never
+  both. `Sunny` in the status line and `8%` in the dial — not `Sunny (8%)` in
+  the status line and `Sunny` again in the dial.
+- **One visualisation per card.** A card with two charts in it has neither the
+  room to draw either properly nor a single answer to give.
+- **The "now" mark is one thing everywhere**: a 14 px disc with a 2.5 px
+  `textPrimary` ring. Not 12, not 20, and not a rule dangling below it.
+
 ### Rules for a visualisation
 
 - **Draw the reading, not a decoration.** If the shape would look the same for
-  a different value, it is not a visualisation.
+  a different value, it is not a visualisation. A dial whose arc is a fixed
+  grey ring with a coloured dot on it has drawn a scale and left the reading
+  to the dot; fill the traversed arc and the ring itself carries the value.
+- **A gauge needs a visible track.** The unfilled remainder is `trackLine` —
+  the reading only means something as a fraction of something.
+- **Scales are data.** A ceiling that decides what the reader sees (`scaleMax`
+  for precipitation, wind, visibility) belongs in `detaildata.js`, not as a
+  literal in the card. And check what a field *means* before scaling against
+  it: `visibility.peak` is today's best, so dividing by it drew "Excellent" as
+  a third of a bar.
 - **Distinguish observed from forecast.** Observed is solid; forecast is the
   same line at lower contrast. The past is real data and stays visible.
 - **Bars for sums and bands, curves for continuous quantities.** Drawing
@@ -143,9 +188,13 @@ invent numbers and do not format them in the data file.
   `readonly property real top` in a delegate fails with *Cannot override FINAL
   property*. Prefix delegate locals: `barTop`, `barValue`.
 - **Qt Quick Shapes escape ancestor clipping.** `clip: true` on a Flickable or
-  ListView does not bound them. `layer.enabled: true` on an ancestor does — but
-  only put a layer on an item with an opaque background, and never on a rounded
-  one, where it notches the corners.
+  ListView does not bound them: scroll `WeatherDetails.qml` without a layer and
+  the card rectangles clip while their sparklines paint straight out over the
+  heading. `layer.enabled: true` on the *Flickable* fixes it, because a child
+  outside the layer's texture is never drawn into it. Safe over a gradient even
+  though every surface is translucent — source-over compositing is associative,
+  so flattening a group and then laying it over the page gives the same pixels.
+  Do not layer a rounded opaque item, where it notches the corners.
 - QML cannot produce `GradientStop` or path elements from a `Repeater`.
   Gradients are declared statically; paths are generated as strings in JS and
   handed to `PathSvg`.
@@ -156,11 +205,18 @@ invent numbers and do not format them in the data file.
 ## 10.9 Checking your work
 
 ```sh
-./run.sh --card Uv                    # one detail card, on the page gradient
-./run.sh --grab shot.png --card Uv    # …headless, for a look at the pixels
-./run.sh --details                    # the whole grid
-./run.sh                              # the hourly screen
+./run.sh --card Uv                              # one card, on the page gradient
+./run.sh --grab shot.png --card Uv              # …headless, to look at pixels
+./run.sh --grab g.png --details --size 1300x900 # the whole grid, all three rows
+./run.sh                                        # the hourly screen
 ```
+
+Check a card in the grid, not only on its own. Every finding that mattered in
+the first pass — seven reading sizes, one card sitting 23 px low, two dials
+that disagreed about what a track means — was invisible in a single card and
+obvious the moment twelve sat side by side. `--size` exists so the last row is
+in the frame; reviewing through a viewport that cuts it off is how a broken
+card in that row stays unnoticed.
 
 Render it and look at it. Every defect found in this prototype so far was found
 by rendering and looking — several of them were invisible in the code and

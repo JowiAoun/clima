@@ -76,7 +76,7 @@ DetailCard {
             // The forecast stretch, dimmed: same line, less certainty.
             ShapePath {
                 fillColor: "transparent"
-                strokeColor: "#59ffffff"
+                strokeColor: Theme.color.forecastDim
                 strokeWidth: 3
                 capStyle: ShapePath.RoundCap
                 PathSvg { path: ChartMath.smooth(viz.pts.slice(Detail.nowIndex), "M") }
@@ -96,9 +96,11 @@ DetailCard {
         Text {
             text: root.d.value + root.d.unit
             color: Theme.color.textPrimary
-            font.pixelSize: 34
+            font.pixelSize: Theme.type.reading
             font.bold: true
-            anchors.right: parent.right
+            // Bottom-left, which is where the other eleven put their reading.
+            // This card had it bottom-right and was the only one that did.
+            anchors.left: parent.left
             anchors.bottom: parent.bottom
         }
     }

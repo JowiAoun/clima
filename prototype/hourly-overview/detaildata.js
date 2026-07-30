@@ -30,31 +30,41 @@ var feelsLike = {
     value: 30, actual: 27, unit: "°",
     series: [23, 24, 25, 26, 28, 29, 30, 31, 32, 31, 28, 26],
     dominantFactor: "humidity",
-    trend: "up", status: "Slightly Warm",
+    trend: "up", status: "Slightly warm",
     body: "Feels warmer than the actual temperature due to the humidity."
 };
 
 var cloudCover = {
     value: 8, unit: "%",
     condition: "Sunny",
-    trend: "steady", status: "Sunny (8%)",
+    trend: "steady", status: "Sunny",
     body: "Steady with clear sky at 12:28 p.m. Clear sky expected in the evening."
 };
 
 var precipitation = {
     value: 0, unit: "mm", window: "In next 24h",
+    // 10 mm in twenty-four hours is a thoroughly wet day: the ceiling a card
+    // draws the amount against. Here rather than in the card because it decides
+    // what the reader sees, which makes it data and not styling.
+    scaleMax: 10,
     // Probability per hour, for cards that want a small distribution.
     series: [0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 20, 35],
-    trend: "steady", status: "No Precipitation",
-    body: "Rain expected on Saturday night. Today has seen similar precipitation as yesterday until now."
+    trend: "steady", status: "No precipitation",
+    body: "Similar to yesterday so far. Rain expected Saturday night."
 };
 
 var wind = {
     speed: 13, gust: 24, unit: "km/h",
+    // Beaufort 5 — a fresh breeze, when loose paper starts blowing about. Above
+    // this a card can clamp; below it the scale would compress every ordinary
+    // day into the first third.
+    scaleMax: 30,
     directionDeg: 294, directionLabel: "WNW",
-    beaufort: 3, beaufortName: "Gentle Breeze",
-    trend: "steady", status: "Force: 3 (Gentle Breeze)",
-    body: "Steady with averages holding at 8 km/h (gusts to 12) expected from NNW through the evening."
+    beaufort: 3, beaufortName: "Gentle breeze",
+    trend: "steady", status: "Gentle breeze",
+    // The reference's sentence is about the *evening*, not now — it only looked
+    // like it contradicted the 13 km/h reading because it elided mid-qualifier.
+    body: "Evening averages near 8 km/h, gusting to 12, from the NNW."
 };
 
 var humidity = {
@@ -76,15 +86,23 @@ var uv = {
 var airQuality = {
     value: 25, max: 100,
     band: "Good", pollutant: "PM2.5", pollutantValue: 4.4, pollutantUnit: "µg/m³",
-    trend: "down", status: "Good",
-    body: "Deteriorating air quality with primary pollutant: PM2.5 4.4 µg/m³."
+    // Up, because the *index* is rising — which for air quality is the bad
+    // direction. The trend tracks the number; the body says whether that is
+    // good news. See docs/10-design-system.md §10.5.
+    trend: "up", status: "Good",
+    body: "Deteriorating, with PM2.5 the primary pollutant."
 };
 
 var visibility = {
-    value: 16, unit: "km", max: 45,
+    value: 16, unit: "km",
+    // As far as a public forecast bothers to distinguish: past 20 km the answer
+    // is just "you can see". `peak` below is today's best, which is a reading,
+    // not a ceiling — scaling 16 km against 45 made an "Excellent" card draw a
+    // third of a bar.
+    scaleMax: 20,
     band: "Excellent", peak: 45, peakAt: "1:00 p.m.",
     trend: "up", status: "Excellent",
-    body: "Improving with a peak visibility distance of 45 km expected at 1:00 p.m."
+    body: "Improving to a peak of 45 km at 1:00 p.m."
 };
 
 var pressure = {
