@@ -41,7 +41,11 @@ Item {
     readonly property bool supportsFeelsLike: metric.id === "overview"
 
     // ---- scales and metrics ---------------------------------------------
-    readonly property real hourWidth: Theme.metric.hourWidth
+    // Settable, not readonly: the mobile shell runs this same card at 362 px,
+    // where the token's 48 px column leaves room for six hours and a gutter.
+    // It is still the token by default — a caller overriding it is stating a
+    // width the token cannot know about, not disagreeing with it.
+    property real hourWidth: Theme.metric.hourWidth
     readonly property real axisTopPad: Theme.metric.axisTopPad
     readonly property real headerBandHeight: Theme.metric.headerBandHeight
     readonly property real stripHeight: Theme.metric.stripHeight
@@ -70,7 +74,15 @@ Item {
     //
     // `Theme.metric.plotHeight` had been sitting in the token table unused.
     // This is the one place that knows what it means.
-    readonly property real preferredBodyHeight: Theme.metric.plotHeight
+    //
+    // Settable for the same reason `hourWidth` is. A 252 px plot plus its
+    // header band and strip is 398 px of card, which on a 390x844 phone is
+    // half the screen for one of five things on it — and the plot is the part
+    // that can afford to give: the header band and the strip are fixed-height
+    // rows that would become illegible rather than merely shorter.
+    property real preferredPlotHeight: Theme.metric.plotHeight
+
+    readonly property real preferredBodyHeight: preferredPlotHeight
         + 2 * panelPadding + headerBandHeight + stripGap + stripHeight
 
     implicitHeight: cardPadding + title.height + 14 + preferredBodyHeight + 14

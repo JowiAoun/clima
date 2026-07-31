@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Window
 import "theme.js" as Theme
+import "viewports.js" as Viewports
 
 Window {
     id: win
@@ -9,10 +10,26 @@ Window {
     visible: true
     width: 1340
     height: 762
-    minimumWidth: 680
-    minimumHeight: 560
+
+    // A phone is 390 px wide, so the old 680 floor would have made the layout
+    // this window exists to show unreachable by dragging. The floor now only
+    // has to keep the narrowest screen readable.
+    minimumWidth: 360
+    minimumHeight: 480
     color: Theme.color.pageBg
     title: qsTr("Clima (prototype)")
+
+    // ---- which shell -------------------------------------------------------
+    // The window's width decides, and viewports.js owns the thresholds so the
+    // gallery frames a specimen at exactly the width the app would switch at.
+    //
+    // `--viewport mobile` pins it and resizes the window to the preset, which
+    // is what a headless grab needs: a shell chosen from a width that a
+    // screenshot flag then changes is a shell chosen from the wrong width.
+    property string forcedViewport: ""
+    readonly property string viewportClass:
+        forcedViewport !== "" ? forcedViewport : Viewports.classOf(win.width)
+    readonly property bool mobile: Viewports.usesMobileShell(viewportClass)
 
     // The page background is painted as an item, not left to Window.color.
     // grabToImage() captures contentItem, which does not include the window's
@@ -109,11 +126,46 @@ Window {
 
     // The app itself. Every preview flag above is a way of looking at one piece
     // of this in isolation; with none of them set, this is the product.
-    WeatherPage {
-        id: page
+    //
+    // Two shells, one product. `WeatherPage` is the desktop's single scrolling
+    // column; `MobileShell` is the phone's five tabs under a nav bar. Which one
+    // runs is a function of the window width and nothing else — there is no
+    // "mobile build".
+    //
+    // A Loader rather than both in the tree with one hidden. Keeping both would
+    // build five phone screens on every desktop launch to show none of them,
+    // and the shells share no state that survives the swap anyway: `page`
+    // below is whichever one is live.
+    Loader {
+        id: shellLoader
         anchors.fill: parent
         visible: win.previewCard === "" && !win.previewGrid && !win.previewGallery
+        active: visible
+        sourceComponent: win.mobile ? mobileShell : desktopShell
     }
+
+    Component {
+        id: desktopShell
+        WeatherPage { }
+    }
+
+    Component {
+        id: mobileShell
+        MobileShell { tab: win.startTab }
+    }
+
+    // Whichever shell is live. Every flag and poke below goes through this, so
+    // `--metric wind` means the same thing on a phone as on a desktop.
+    //
+    // Guarded at every call site rather than here: during `--gallery` the
+    // Loader is inactive and there is no shell at all, and a poke arriving then
+    // should warn rather than throw.
+    readonly property Item page: shellLoader.item
+
+    // The tab the mobile shell opens on. Read at construction rather than
+    // assigned afterwards, because assigning it later would rebuild the page
+    // that has just finished laying itself out.
+    property string startTab: "today"
 
     // --scroll N drops the page N pixels down before grabbing. The details grid
     // is below the fold at every window size that fits on a laptop, so without
@@ -127,7 +179,8 @@ Window {
         id: scrollTimer
         interval: 400
         property real target: 0
-        onTriggered: page.contentY = Math.min(target, page.maxContentY)
+        onTriggered: if (win.page)
+                         win.page.contentY = Math.min(target, win.page.maxContentY)
     }
 
     // ---- filming ----------------------------------------------------------
@@ -159,16 +212,33 @@ Window {
             var v = win.pokes[i].substring(eq + 1)
             var on = (v === "true" || v === "1")
 
+            // Every target below lives on the shell, and under `--gallery`
+            // there is no shell. Warning beats throwing: a poke that cannot
+            // land should say so, not abort the rest of the list.
+            if (k !== "remount" && win.page === null) {
+                console.warn("--poke", k + ":", "no shell is running")
+                continue
+            }
+
             switch (k) {
-            case "metric":  page.metricId = v; break
-            case "day":     page.dayIndex = parseInt(v); break
-            case "list":    page.listView = on; break
-            case "feels":   page.feelsLike = on; break
-            case "scroll":  page.contentY = parseFloat(v); break
+            case "metric":  win.page.metricId = v; break
+            case "day":     win.page.dayIndex = parseInt(v); break
+            case "list":    win.page.listView = on; break
+            case "feels":   win.page.feelsLike = on; break
+            case "scroll":  win.page.contentY = parseFloat(v); break
+            // Only the mobile shell has tabs. On the desktop this is the one
+            // poke that is genuinely meaningless rather than merely ignored,
+            // so it says so.
+            case "tab":
+                if (win.mobile)
+                    win.page.tab = v
+                else
+                    console.warn("--poke tab: only the mobile shell has tabs")
+                break
             // Negative velocity carries the content upward, i.e. scrolls down.
             case "flick":
                 var vel = parseFloat(v)
-                page.flickBy(-Math.abs(isNaN(vel) || vel === 0 ? 1400 : vel))
+                win.page.flickBy(-Math.abs(isNaN(vel) || vel === 0 ? 1400 : vel))
                 break
             // Rebuilding the specimen replays whatever the component does on
             // mount, which for a detail card is the only animation it has —
@@ -263,16 +333,60 @@ Window {
 
     Component.onCompleted: {
         var args = Qt.application.arguments
+
+        // ---- viewport and size, before anything else -----------------------
+        // Both of these change the window width, and the window width decides
+        // which shell is loaded. A `--metric wind` applied to the desktop page
+        // and *then* resized to a phone is applied to a shell that is
+        // destroyed a moment later, and the flag looks like it does nothing.
+        //
+        // --viewport also sets the size, so `--viewport mobile` is one flag
+        // rather than a pin and a matching --size that can drift apart.
+        var vp = args.indexOf("--viewport")
+        if (vp >= 0 && vp + 1 < args.length) {
+            var preset = Viewports.byId(args[vp + 1])
+            if (preset !== null) {
+                win.forcedViewport = preset.id
+                win.width = preset.w
+                win.height = preset.h
+            } else {
+                console.warn("--viewport: expected one of",
+                             Viewports.ids().join(", "), "— got", args[vp + 1])
+            }
+        }
+
+        // --size 1340x900, so a headless grab can be tall enough to hold the
+        // whole grid. Reviewing a grid through a viewport that cuts off its
+        // last row is how a misaligned card in that row stays unnoticed.
+        //
+        // After --viewport on purpose: the preset is a starting point and this
+        // is the override, so `--viewport mobile --size 390x1600` grabs a tall
+        // phone rather than fighting over the window.
+        var s = args.indexOf("--size")
+        if (s >= 0 && s + 1 < args.length) {
+            var wh = args[s + 1].split("x")
+            if (wh.length === 2 && parseInt(wh[0]) > 0 && parseInt(wh[1]) > 0) {
+                win.width = parseInt(wh[0])
+                win.height = parseInt(wh[1])
+            } else {
+                console.warn("--size: expected WxH, got", args[s + 1])
+            }
+        }
+
+        var t = args.indexOf("--tab")
+        if (t >= 0 && t + 1 < args.length)
+            win.startTab = args[t + 1]
+
         var m = args.indexOf("--metric")
-        if (m >= 0 && m + 1 < args.length)
-            page.metricId = args[m + 1]
+        if (m >= 0 && m + 1 < args.length && win.page)
+            win.page.metricId = args[m + 1]
 
         var d = args.indexOf("--day")
-        if (d >= 0 && d + 1 < args.length)
-            page.dayIndex = parseInt(args[d + 1])
+        if (d >= 0 && d + 1 < args.length && win.page)
+            win.page.dayIndex = parseInt(args[d + 1])
 
-        if (args.indexOf("--list") >= 0)
-            page.listView = true
+        if (args.indexOf("--list") >= 0 && win.page)
+            win.page.listView = true
 
         var c = args.indexOf("--card")
         if (c >= 0 && c + 1 < args.length)
@@ -293,8 +407,16 @@ Window {
             // Loader synchronously, and a Gallery built with an empty pick has
             // already chosen what to show by the time the pick arrives.
             win.galleryPick = words.join(" ")
-            win.width = Math.max(win.width, 1500)
-            win.height = Math.max(win.height, 950)
+
+            // The gallery wants room for its rail plus a stage, but only when
+            // nobody said otherwise. `--size` is now parsed before this — it
+            // has to be, since the width decides which shell runs — so this
+            // has to ask rather than simply enlarging, or `--gallery --size
+            // 900x600` would silently come back at 1500x950.
+            if (args.indexOf("--size") < 0) {
+                win.width = Math.max(win.width, 1500)
+                win.height = Math.max(win.height, 950)
+            }
             win.previewGallery = true
 
             var k = args.indexOf("--walk")
@@ -310,20 +432,6 @@ Window {
                 } else {
                     console.warn("--walk: expected a count >= 0, got", args[k + 1])
                 }
-            }
-        }
-
-        // --size 1340x900, so a headless grab can be tall enough to hold the
-        // whole grid. Reviewing a grid through a viewport that cuts off its
-        // last row is how a misaligned card in that row stays unnoticed.
-        var s = args.indexOf("--size")
-        if (s >= 0 && s + 1 < args.length) {
-            var wh = args[s + 1].split("x")
-            if (wh.length === 2 && parseInt(wh[0]) > 0 && parseInt(wh[1]) > 0) {
-                win.width = parseInt(wh[0])
-                win.height = parseInt(wh[1])
-            } else {
-                console.warn("--size: expected WxH, got", args[s + 1])
             }
         }
 

@@ -174,19 +174,107 @@ var airQuality = _build(function (i) {
 // ---------------------------------------------------------------------------
 // Every day carries both a daytime and a night-time condition. Unselected cards
 // show only the daytime one; selecting a card reveals the pair.
+//
+// `month` is carried on every entry because the list crosses one: the desktop
+// day strip never needed to know, and the moment a calendar screen existed
+// "the 1st" stopped being unambiguous. `precip` is the daily probability the
+// mobile ten-day strip shows under each column.
+//
+// Ten days forward of today, plus yesterday. Ten because that is what the
+// screen it feeds is called, and the desktop strip — which only ever showed
+// what fitted and paged the rest — gets the extra columns for free.
+// `weekday` is carried rather than derived because `label` is not one: the
+// first two entries are "Yesterday" and "Today", and the mobile week strip
+// needs the actual day of the week under both of them.
 var days = [
-    { date: 29, label: "Yesterday", high: 21, low: 18, icon: "cloudy",     nightIcon: "cloudy" },
-    { date: 30, label: "Today",     high: 26, low: 16, icon: "partly-day", nightIcon: "partly-night" },
-    { date: 31, label: "Fri",       high: 28, low: 19, icon: "clear-day",  nightIcon: "partly-night" },
-    { date:  1, label: "Sat",       high: 26, low: 19, icon: "rain",       nightIcon: "rain-night" },
-    { date:  2, label: "Sun",       high: 21, low: 15, icon: "rain",       nightIcon: "rain-night" },
-    { date:  3, label: "Mon",       high: 25, low: 14, icon: "clear-day",  nightIcon: "clear-night" },
-    { date:  4, label: "Tue",       high: 28, low: 16, icon: "clear-day",  nightIcon: "clear-night" },
-    { date:  5, label: "Wed",       high: 27, low: 17, icon: "partly-day", nightIcon: "partly-night" },
-    { date:  6, label: "Thu",       high: 24, low: 16, icon: "rain",       nightIcon: "rain-night" }
+    { date: 29, month: 7, weekday: "Wed", label: "Yesterday", high: 21, low: 18, precip: 55, icon: "cloudy",     nightIcon: "cloudy" },
+    { date: 30, month: 7, weekday: "Thu", label: "Today",     high: 26, low: 16, precip: 30, icon: "partly-day", nightIcon: "partly-night" },
+    { date: 31, month: 7, weekday: "Fri", label: "Fri",       high: 28, low: 19, precip:  9, icon: "clear-day",  nightIcon: "partly-night" },
+    { date:  1, month: 8, weekday: "Sat", label: "Sat",       high: 26, low: 19, precip: 62, icon: "rain",       nightIcon: "rain-night" },
+    { date:  2, month: 8, weekday: "Sun", label: "Sun",       high: 21, low: 15, precip: 71, icon: "rain",       nightIcon: "rain-night" },
+    { date:  3, month: 8, weekday: "Mon", label: "Mon",       high: 25, low: 14, precip:  6, icon: "clear-day",  nightIcon: "clear-night" },
+    { date:  4, month: 8, weekday: "Tue", label: "Tue",       high: 28, low: 16, precip:  4, icon: "clear-day",  nightIcon: "clear-night" },
+    { date:  5, month: 8, weekday: "Wed", label: "Wed",       high: 27, low: 17, precip: 18, icon: "partly-day", nightIcon: "partly-night" },
+    { date:  6, month: 8, weekday: "Thu", label: "Thu",       high: 24, low: 16, precip: 48, icon: "rain",       nightIcon: "rain-night" },
+    { date:  7, month: 8, weekday: "Fri", label: "Fri",       high: 23, low: 15, precip: 35, icon: "partly-day", nightIcon: "partly-night" },
+    { date:  8, month: 8, weekday: "Sat", label: "Sat",       high: 26, low: 16, precip: 12, icon: "clear-day",  nightIcon: "clear-night" }
 ];
 
 var todayIndex = 1;
+
+// ---------------------------------------------------------------------------
+// The month, for the calendar screen.
+// ---------------------------------------------------------------------------
+// July 2026: 31 days, the 1st a Wednesday, today the 30th. The weekday of the
+// 1st is the only calendar fact here — everything else follows from it, so
+// moving the month is one number rather than thirty-one.
+//
+// Days that also appear in `days` take their values from there rather than
+// generating their own. A ten-day strip and a calendar that disagree about
+// Friday's high is the same defect as a hero that disagrees with the card
+// three rows down, and it is much harder to see: the two are never on screen
+// together.
+var month = {
+    name: "July",
+    year: 2026,
+    number: 7,
+    length: 31,
+    firstWeekday: 3,        // 0 = Sunday, so the 1st is a Wednesday
+    today: 30
+};
+
+var weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function weekdayOf(date) {
+    return (month.firstWeekday + date - 1) % 7;
+}
+
+// The entry in `days` for a date in this month, or null.
+function dayFor(date, monthNumber) {
+    for (var i = 0; i < days.length; ++i)
+        if (days[i].date === date && days[i].month === monthNumber)
+            return days[i];
+    return null;
+}
+
+// One cell per day of the month.
+//
+// Deterministic and not random: the same seasonal shape every run, so a golden
+// image of this screen means something. `Math.sin` of the date is a cheap
+// spread that no reader will read as a pattern at four columns wide.
+var monthDays = _buildMonth();
+
+function _buildMonth() {
+    var out = [];
+    for (var d = 1; d <= month.length; ++d) {
+        var known = dayFor(d, month.number);
+        if (known !== null) {
+            out.push({ date: d, weekday: weekdayNames[weekdayOf(d)],
+                       high: known.high, low: known.low, icon: known.icon,
+                       isToday: d === month.today });
+            continue;
+        }
+
+        // A month that warms into its middle and cools out of it, with a
+        // two-day wobble on top so consecutive days are not a ramp.
+        var seasonal = 25 + 4 * Math.sin((d - 8) / month.length * Math.PI);
+        var wobble = 2.6 * Math.sin(d * 1.7) + 1.4 * Math.sin(d * 0.6);
+        var high = Math.round(seasonal + wobble);
+        var spread = 7 + Math.round(2 * Math.sin(d * 1.1));
+
+        // Wet days are the cool ones, which is the relation a reader will
+        // check against the numbers beside it.
+        var icon = wobble < -1.6 ? "rain"
+                 : wobble < 0.2 ? "cloudy"
+                 : wobble < 2.0 ? "partly-day"
+                                : "clear-day";
+
+        out.push({ date: d, weekday: weekdayNames[weekdayOf(d)],
+                   high: high, low: high - spread, icon: icon,
+                   isToday: d === month.today });
+    }
+    return out;
+}
 
 // Fractional indices, so a marker can sit between two samples.
 var sunEvents = [

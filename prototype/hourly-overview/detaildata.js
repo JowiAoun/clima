@@ -163,6 +163,45 @@ var moon = {
     body: "The moon is 72% illuminated and rises at 9:25 p.m. tonight."
 };
 
+// The observation, written out. The hourly screen states the day it is
+// forecasting under the reading, because on a phone that screen is reached
+// from a tab rather than from a page that already said so.
+var observedOn = "Thursday, 30 July 2026";
+
+// ---------------------------------------------------------------------------
+// Two cards the phone has and the desktop grid does not.
+//
+// Both are *verdicts* rather than measurements, which is why neither is a
+// DetailCard: there is no scale to place a reading on, so there is nothing for
+// a visualisation to show. What they carry is a band and a sentence, and the
+// honest shape for that is a list.
+//
+// `tone` is one of good | caution | poor and maps to the three status tokens.
+// Three levels, not five: a fourth would make it a scale, and a scale wants a
+// ramp and an axis — see §10.5.
+// ---------------------------------------------------------------------------
+
+var pollen = {
+    band: "Moderate",
+    tone: "caution",
+    main: "Grass",
+    body: "Grass pollen is the main allergen today. Moderate risk for sensitive individuals.",
+    // `level` is normalised 0–1 for the ring; `label` is what the ring says.
+    items: [
+        { name: "Grass",  label: "Moderate", tone: "caution", level: 0.58 },
+        { name: "Tree",   label: "Low",      tone: "good",    level: 0.18 },
+        { name: "Weed",   label: "Low",      tone: "good",    level: 0.12 }
+    ]
+};
+
+var activities = [
+    { name: "Outdoors",  status: "Good",       tone: "good" },
+    { name: "Clothing",  status: "Light wear", tone: "good" },
+    { name: "Heat",      status: "Caution",    tone: "caution" },
+    { name: "Umbrella",  status: "No need",    tone: "good" },
+    { name: "UV index",  status: "High",       tone: "poor" }
+];
+
 // Fixed order for the grid, so the layout does not depend on object key order.
 var order = ["temperature", "feelsLike", "cloudCover", "precipitation",
              "wind", "humidity", "uv", "airQuality", "visibility",

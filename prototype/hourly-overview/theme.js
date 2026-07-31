@@ -119,7 +119,40 @@ var color = {
     badgeDayTop:     "#fdfefe",
     badgeDayBottom:  "#dde5f0",
     badgeNightTop:   "#6d9ae8",
-    badgeNightBottom:"#3f63bd"
+    badgeNightBottom:"#3f63bd",
+
+    // ---- mobile shell ----------------------------------------------------
+    // The bottom nav floats over a page that scrolls underneath it, so it is
+    // the same exception the pager buttons are: tinted and mostly opaque
+    // rather than a 0.07 wash. A wash here would let the chart the reader is
+    // scrolling slide visibly through the labels, which is the one place on a
+    // phone where "every surface is translucent" costs more than it buys.
+    navBg:         "#f2101832",
+    navHairline:   "#1affffff",
+    navGlyph:      "#98a4be",
+    navGlyphOn:    "#141d33",
+    navPill:       "#ffd02c",
+
+    // A menu is the same exception for the same reason: it is drawn over
+    // content it must not let through. More opaque than the nav, because the
+    // nav sits at a screen edge with a hairline holding it down and a menu
+    // floats in the middle of the page with nothing but its own weight.
+    menuBg:        "#f71c2450",
+    menuBorder:    "#26ffffff",
+
+    // A status that is a verdict rather than a number: pollen bands, the
+    // activity list's good/caution/poor dots. Three, because a fourth level is
+    // a scale and a scale wants a ramp — see §10.5.
+    statusGood:    "#4ec98a",
+    statusCaution: "#e8c93f",
+    statusPoor:    "#f0654f",
+
+    // Something the prototype has not built yet, drawn so it cannot be
+    // mistaken for something it has. Deliberately off-palette: the map
+    // placeholder must read as scaffolding at a glance, and a placeholder in
+    // the house colours reads as a finished screen with no content.
+    placeholderInk:    "#8f9dbb",
+    placeholderStroke: "#4d6a8fd8"
 };
 
 // Precipitation effect. Two layers: a `wash` under the chart marking the hours
@@ -200,7 +233,33 @@ var metric = {
     // which is what makes them read as separate things without a rule between
     // them.
     sectionGap:       30,
-    pageMargin:       22
+    pageMargin:       22,
+
+    // ---- mobile shell ----------------------------------------------------
+    // A phone has no room for the desktop page's 22 px gutter on both sides:
+    // at 390 px that is 11 % of the screen spent on nothing, and the hourly
+    // strip loses a whole column to it. 14 is the narrowest inset that still
+    // keeps a card's corner radius clear of the screen edge.
+    mobileMargin:     14,
+    mobileGap:        14,
+
+    // A mobile card's inset. Its own tokens rather than the detail card's,
+    // which are named for the twelve-card grid and measured off it — sharing
+    // them would mean a change to that grid silently re-padding every screen
+    // on the phone.
+    mobileCardPadH:   16,
+    mobileCardPadV:   14,
+
+    // The bottom nav. 58 is the bar itself; `navSafeArea` is the strip below
+    // it that a phone's gesture bar occupies, drawn as part of the nav so the
+    // page's bottom padding is one number rather than two that must agree.
+    navHeight:        58,
+    navSafeArea:      12,
+
+    // Where the content column stops growing on a tablet. The mobile shell
+    // runs at 834 px too, and a hero row stretched that wide puts the
+    // temperature and the condition at opposite ends of the screen.
+    mobileContentMax: 620
 };
 
 // Type sizes, as tokens rather than as a table in a document, because twelve
