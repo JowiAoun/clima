@@ -44,6 +44,18 @@ Item {
     property int dayIndex: 1
     property bool feelsLike: false
 
+    // Ambient motion, forwarded the same way. The precipitation field behind
+    // the hourly chart is the only thing under this shell that moves when
+    // nothing has changed, and `--grab` clears this so a headless frame is the
+    // same frame every run — frozen it still draws rain, because precip.js
+    // seeds every drop from its hour.
+    //
+    // It travels with the four above rather than being reached for directly
+    // from Main, and for the same reason they do: the screen that owns the
+    // chart is destroyed and rebuilt on every tab change, so the shell is the
+    // only thing here that a flag parsed once at startup can still address.
+    property bool animated: true
+
     // Scrolling, forwarded to the current page.
     //
     // Write-only, deliberately. Main assigns `contentY` to place the view for
@@ -112,12 +124,14 @@ Item {
         if (page.listView !== undefined)  page.listView = root.listView
         if (page.dayIndex !== undefined)  page.dayIndex = root.dayIndex
         if (page.feelsLike !== undefined) page.feelsLike = root.feelsLike
+        if (page.animated !== undefined)  page.animated = root.animated
     }
 
     onMetricIdChanged: push(pageLoader.item)
     onListViewChanged: push(pageLoader.item)
     onDayIndexChanged: push(pageLoader.item)
     onFeelsLikeChanged: push(pageLoader.item)
+    onAnimatedChanged: push(pageLoader.item)
 
     // A card header's link is a request to go somewhere, not a scroll. The
     // page emits it and the shell is the only thing that knows the tab bar

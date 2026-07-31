@@ -34,6 +34,11 @@ MobilePage {
     property alias dayIndex: week.currentIndex
     property alias feelsLike: chart.feelsLike
 
+    // The one screen under the mobile shell with an animatable chart on it, so
+    // it is the one that has to accept `--grab`'s freeze. Same alias the
+    // desktop page carries, onto the same component.
+    property alias animated: chart.animated
+
     // The shell owns both, so a metric picked here survives a trip to the map
     // and back. See MobileShell's note on why these travel as requests rather
     // than as bindings.

@@ -544,7 +544,17 @@ Window {
             // Frozen, it still draws rain — precip.js seeds every drop from its
             // hour, so the frozen frame is a deterministic one rather than an
             // empty one.
-            page.animated = false
+            //
+            // Offered rather than assigned, which is MobileShell.push()'s rule
+            // and is here for the same reason: under `--gallery` there is no
+            // shell at all, and a shell whose current screen has no chart has
+            // no such property. Assigning one an object does not have throws,
+            // and a throw here takes the rest of this block with it — the two
+            // lines below included. That is how three of the four capture
+            // paths came to print one error and then hang forever, having
+            // never started the timer that both writes the file and quits.
+            if (win.page !== null && win.page.animated !== undefined)
+                win.page.animated = false
             grabTimer.target = args[i + 1]
             grabTimer.start()
         }
