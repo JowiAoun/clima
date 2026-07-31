@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The wash that says *when* it precipitates: one tinted band per contiguous
 // spell, edge to edge of the hours it covers.

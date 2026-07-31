@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Diagonal hatch. Used wherever the chart means "the past — there is no forecast
 // here", so the absence of data reads as intentional rather than as a rendering bug.

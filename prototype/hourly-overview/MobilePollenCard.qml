@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Pollen: a band, a sentence, and the three sources broken out.
 //

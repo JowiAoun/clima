@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Moon phase disc for the legend: unlit body plus the illuminated limb.
 import QtQuick

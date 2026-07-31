@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+
 # Clima — Plan Index
 
 Planning baseline: **2026-07-30**.

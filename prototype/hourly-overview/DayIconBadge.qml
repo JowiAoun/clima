@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The circular icon badge the selected day card uses: a pale disc for the daytime
 // condition, a blue disc for the night one. Unselected cards show a bare glyph, so

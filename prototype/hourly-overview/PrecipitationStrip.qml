@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Precipitation-probability strip beneath the plot. One cell per label interval,
 // value = the max probability in that interval. Hours already in the past are

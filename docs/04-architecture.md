@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+
 # 04 — Architecture
 
 ## 4.1 Design principles
@@ -98,8 +101,15 @@ clima/
 
 ## 4.4 Provider interfaces (sketch)
 
+<!-- The sketch below is libclima source, not documentation prose, so it carries -->
+<!-- the engine's licence rather than this document's. REUSE snippet tags scope   -->
+<!-- that to the fence: the file stays CC-BY-SA-4.0, the code inside is MPL-2.0.  -->
+<!-- SPDX-SnippetBegin -->
+<!-- SPDX-SnippetCopyrightText: 2026 Jowi Aoun -->
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+
 ```cpp
-// libclima/providers/iforecastprovider.h — SPDX-License-Identifier: MPL-2.0
+// libclima/providers/iforecastprovider.h
 namespace clima {
 
 struct ForecastRequest {
@@ -126,6 +136,8 @@ public:
 
 } // namespace clima
 ```
+
+<!-- SPDX-SnippetEnd -->
 
 `ProviderRegistry` resolves a request to an ordered chain:
 

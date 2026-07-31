@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+
 # 03 — Tech Stack and Key Decisions
 
 ## 3.0 First, a correction to the premise

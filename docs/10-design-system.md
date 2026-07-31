@@ -1,3 +1,4 @@
+<!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
 # 10 — Design system

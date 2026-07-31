@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Hand-rolled switch so the prototype needs nothing beyond QtQuick + Shapes.
 import QtQuick

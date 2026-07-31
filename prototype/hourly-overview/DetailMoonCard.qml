@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Moon detail card — DetailSunCard.qml's twin, and deliberately the same card.
 //

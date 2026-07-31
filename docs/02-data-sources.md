@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+
 # 02 — Data Sources, Licensing and Attribution
 
 This is the most important research document in the repo. Data availability — not Qt,

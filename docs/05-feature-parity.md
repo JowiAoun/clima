@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+
 # 05 — MSN Weather Parity Matrix
 
 The stated goal is "up to par with MSN Weather, other than the predictions". This document

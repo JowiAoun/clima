@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The falling half of the precipitation effect: what is coming down, and how
 // hard. Drawn over the series — the wash it belongs with is drawn under it, see

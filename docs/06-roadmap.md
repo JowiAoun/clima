@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+
 # 06 — Roadmap
 
 **Planning baseline: 2026-07-30.** Calendar dates assume one focused developer working

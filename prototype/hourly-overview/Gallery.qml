@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The component gallery: every component in the prototype, on one screen, on
 // the gradient it is actually composited over.

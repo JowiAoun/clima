@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+
 # 07 — Packaging, Distribution and CI
 
 Distribution *is* a feature. An app that only exists as a `git clone` will never displace
