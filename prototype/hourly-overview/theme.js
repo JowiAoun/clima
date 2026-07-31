@@ -203,6 +203,42 @@ var precip = {
 // Radii are deliberately generous. The reference reads "soft" because almost
 // nothing in it meets at a hard edge, and the tab/panel junction is filleted
 // rather than squared — see TabFillet.qml.
+// The sky, by time of day.
+//
+// Five stops each, the same five positions PageBackdrop declares — QML cannot
+// generate GradientStop elements from a Repeater, so the *positions* are
+// written out there and only the colours come from here.
+//
+// **Every phase is dark.** That is the constraint the whole palette is built
+// on and it is not a stylistic preference: §10.1's surfaces are white washes
+// at 0.05–0.10, and a wash is only a surface if there is something darker
+// behind it. A literal daylight sky would make every card on every screen
+// invisible at once. So "day" is a clean deep blue rather than a bright one —
+// the difference between phases is hue and clarity, not lightness, and it
+// reads as time of day because the four are seen against each other.
+//
+// `dusk` is the palette this prototype has always had, and `pageStop0…4`
+// remain aliases of it. The desktop page is dusk permanently, so nothing about
+// it changes; the phone is the screen that follows the clock.
+var sky = {
+    night: { stops: ["#0c1738", "#141f4a", "#1a2350", "#131a3e", "#0a0f2c"], stars: 1.00 },
+    dawn:  { stops: ["#132352", "#33386e", "#5a4470", "#3a3560", "#1b1f45"], stars: 0.45 },
+    day:   { stops: ["#1d3d80", "#2a4f96", "#31568f", "#2a4070", "#1c2c50"], stars: 0.00 },
+    dusk:  { stops: ["#203580", "#443e73", "#443a66", "#27284f", "#171e44"], stars: 0.50 }
+};
+
+var star = {
+    ink:  "#ffffff",
+    // The figures are drawn fainter than their own vertices: a constellation
+    // is stars first and a line second, and a line that competes with them
+    // turns a sky into a diagram.
+    //
+    // 0.13, and it was 0.24 first. At that weight the Plough drew a visible
+    // line straight through "Expect sunny skies" — the sky is the one thing on
+    // the screen that has to lose every contest it enters.
+    line: "#22c8d8ff"
+};
+
 var metric = {
     hourWidth:        48,
     plotHeight:       252,

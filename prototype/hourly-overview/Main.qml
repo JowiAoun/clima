@@ -3,6 +3,8 @@ import QtQuick
 import QtQuick.Window
 import "theme.js" as Theme
 import "viewports.js" as Viewports
+import "sky.js" as Sky
+import "detaildata.js" as Detail
 
 Window {
     id: win
@@ -31,15 +33,44 @@ Window {
         forcedViewport !== "" ? forcedViewport : Viewports.classOf(win.width)
     readonly property bool mobile: Viewports.usesMobileShell(viewportClass)
 
+    // ---- the sky -----------------------------------------------------------
+    // The phone's background follows the clock: a deep blue by day, a starred
+    // indigo at night, warmed at the two crossings. The desktop stays at
+    // `dusk`, which is the palette this prototype has always had.
+    //
+    // That split is deliberate and it is not timidity. The desktop page is a
+    // 1340 px window that is mostly cards — the background is a rim around
+    // them and a wash under them, and the reader never sees enough of it for a
+    // constellation to be anything but noise behind a chart. A phone is the
+    // opposite: the hero sits directly on the sky with no card at all, and
+    // there is a screen's worth of it above the fold.
+    //
+    // `--sky night|day|dawn|dusk` forces a phase and turns the field on
+    // anywhere, because the one thing the mock data cannot do is be a
+    // different time of day.
+    //
+    // ---- which clock -------------------------------------------------------
+    // detaildata.sun, not mockdata's sun events, and the two currently
+    // disagree: the hourly series puts "Now" at midnight while the observation
+    // says 12:28 PM, so `mockdata.isNight(nowIndex)` is true while the hero
+    // draws a sun. That disagreement predates this file. The observation wins
+    // here because the hero is what the sky is behind — a night sky under a
+    // sun glyph and a 27° reading would be the page contradicting itself in
+    // the largest possible type.
+    property string forcedSky: ""
+    readonly property string skyPhase:
+        forcedSky !== "" ? forcedSky
+      : (win.mobile ? Sky.phaseAt(Detail.sun.nowMin, Detail.sun.riseMin, Detail.sun.setMin)
+                    : "dusk")
+
     // The page background is painted as an item, not left to Window.color.
     // grabToImage() captures contentItem, which does not include the window's
     // clear colour — so every headless screenshot came out with a black page
     // behind the cards, which is not what is on screen.
-    //
-    // The gradient itself lives in PageBackdrop, because the gallery needs to
-    // paint the same thing inside a device frame.
     PageBackdrop {
         anchors.fill: parent
+        phase: win.skyPhase
+        stars: win.mobile || win.forcedSky !== ""
     }
 
     // `--card Uv` renders one detail card on the page gradient and nothing
@@ -102,6 +133,13 @@ Window {
             Gallery {
                 pick: win.galleryPick
                 viewport: win.galleryViewport
+                // Whatever the app would be showing at this hour, so a
+                // component framed as a phone is reviewed on the sky the phone
+                // would actually give it — stars included.
+                skyPhase: win.forcedSky !== ""
+                          ? win.forcedSky
+                          : Sky.phaseAt(Detail.sun.nowMin, Detail.sun.riseMin,
+                                        Detail.sun.setMin)
             }
         }
     }
@@ -383,6 +421,15 @@ Window {
         var t = args.indexOf("--tab")
         if (t >= 0 && t + 1 < args.length)
             win.startTab = args[t + 1]
+
+        var sky = args.indexOf("--sky")
+        if (sky >= 0 && sky + 1 < args.length) {
+            var phase = args[sky + 1]
+            if (Theme.sky[phase] !== undefined)
+                win.forcedSky = phase
+            else
+                console.warn("--sky: expected night, dawn, day or dusk — got", phase)
+        }
 
         var m = args.indexOf("--metric")
         if (m >= 0 && m + 1 < args.length && win.page)

@@ -42,6 +42,11 @@ Item {
     // is legible.
     property string viewport: ""
 
+    // The sky a mobile or tablet frame is painted with. Desktop frames and
+    // free mode stay at `dusk` — the palette the desktop page runs on — for
+    // the same reason the app does.
+    property string skyPhase: "dusk"
+
     readonly property var preset: viewport === "" ? null : Viewports.byId(viewport)
     readonly property bool framed: preset !== null
 
@@ -575,6 +580,12 @@ Item {
                             visible: root.framed
                             anchors.fill: parent
                             radius: 6
+
+                            readonly property bool onPhone:
+                                root.framed && Viewports.usesMobileShell(root.preset.id)
+
+                            phase: onPhone ? root.skyPhase : "dusk"
+                            stars: onPhone
                         }
 
                         Specimen {
