@@ -3,12 +3,14 @@
 //
 // The entry point.
 //
-// Three things happen here and their order is the only interesting thing about
-// the file: identity, then the command line, then the engine. Each one is a
-// precondition of the next.
+// Four things happen here and their order is the only interesting thing about
+// the file: identity, then storage, then the command line, then the engine.
+// Each one is a precondition of the next, and each of the three ways to get it
+// wrong is silent.
 
 #include "appoptions.h"
 #include "climaconfig.h"
+#include "settings.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -33,7 +35,15 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
     QGuiApplication::setDesktopFileName(QStringLiteral(CLIMA_APP_ID));
 
-    // ---- 2. the command line -----------------------------------------------
+    // ---- 2. storage --------------------------------------------------------
+    // Before anything constructs a QSettings, because the format is decided at
+    // construction and never revisited: a QSettings built before this line
+    // reads the Windows registry while every later one reads an INI file, and
+    // nothing complains — the preferences simply do not stick. Also the moment
+    // a superseded config directory gets copied forward. See settings.h.
+    Settings::prepareStorage();
+
+    // ---- 3. the command line -----------------------------------------------
     // Before the engine loads anything, because Main.qml reads AppOptions at
     // construction: --viewport and --size choose the window's width, and the
     // window's width chooses which shell is built.
@@ -42,7 +52,7 @@ int main(int argc, char *argv[])
     // value.
     AppOptions::parseCommandLine(app);
 
-    // ---- 3. the engine -----------------------------------------------------
+    // ---- 4. the engine -----------------------------------------------------
     QQmlApplicationEngine engine;
 
     // A QML file that fails to construct its root object leaves the engine

@@ -164,6 +164,8 @@ qt_add_executable(clima
 set(clima_cpp_sources
     appoptions.h
     appoptions.cpp
+    settings.h
+    settings.cpp
 )
 
 qt_add_qml_module(clima
