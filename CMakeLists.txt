@@ -67,13 +67,21 @@ option(CLIMA_BUILD_TESTS  "Build the test suite"                                
 include(ClimaLicenceGuard)
 include(ClimaEngineGuard)
 
-# Network and Sql are libclima's, not the app's: the engine fetches and the
-# engine caches, and app/ reaches both through it. They are asked for here
-# rather than in libclima/CMakeLists.txt because find_package is a global
-# operation and one call is easier to audit than two.
-clima_guard_qt_components(Core Gui Quick Network Sql)
+# Network and Sql are libclima's, not the app's. Test is the test suite's, and
+# it is Qt Test rather than Catch2 or GoogleTest on purpose: D8 in
+# docs/03-tech-stack.md rules out Conan and vcpkg so that a distribution
+# packager can build this from what their distribution already ships, and a
+# test framework fetched at configure time is exactly the dependency that rules
+# out. Qt Test comes with the Qt they already have, and QSignalSpy and
+# QTRY_COMPARE are the two shapes an asynchronous network client is tested with.
+set(clima_qt_components Core Gui Quick Network Sql)
+if(CLIMA_BUILD_TESTS)
+    list(APPEND clima_qt_components Test)
+endif()
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick Network Sql)
+clima_guard_qt_components(${clima_qt_components})
+
+find_package(Qt6 6.8 REQUIRED COMPONENTS ${clima_qt_components})
 qt_standard_project_setup(REQUIRES 6.8)
 
 # Where qt_add_qml_module lays out its module directories. This is not a tidiness
@@ -107,4 +115,13 @@ add_subdirectory(app)
 # It depends on `climaqml`, which app/ defines, so it is entered second.
 if(CLIMA_BUILD_GALLERY)
     add_subdirectory(gallery)
+endif()
+
+# enable_testing() has to be called from the top-level directory or `ctest
+# --test-dir build/dev` finds no tests at all and says so in a way that reads
+# like the tests failed to build. It is guarded by the same option as the
+# directory below so that a packaging build asks for neither.
+if(CLIMA_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
 endif()
