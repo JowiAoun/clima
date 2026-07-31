@@ -92,13 +92,57 @@ AppEngine::AppEngine()
 
 AppEngine::~AppEngine()
 {
-    delete m_reverse;
+    // Normally a no-op: the post routine registered in instance() has already
+    // run, from inside ~QCoreApplication. This covers the case where there was
+    // never an application to hang it off.
+    releaseQtResources();
 }
 
 AppEngine *AppEngine::instance()
 {
     static AppEngine engine;
+
+    // ---- why the teardown is not simply ~AppEngine -------------------------
+    //
+    // `engine` is a function-local static, so its destructor runs during
+    // static destruction — after main() has returned and therefore after the
+    // QGuiApplication that lived on main()'s stack is already gone. Everything
+    // Qt-owned that AppEngine holds is then released into an application that
+    // no longer exists, and QSqlDatabase says so out loud on every single run:
+    //
+    //     QSqlDatabase requires a QCoreApplication
+    //
+    // Today that is one line of noise on exit. It is also the shape of a real
+    // fault: removeDatabase() on a torn-down driver registry is not a
+    // guaranteed no-op, and the moment the cache does anything on close that
+    // needs an event loop — a WAL checkpoint, a pending write — this becomes a
+    // corrupt cache rather than a warning.
+    //
+    // qAddPostRoutine runs the callback from ~QCoreApplication, which is early
+    // enough that the application is still fully alive. So the resources go
+    // back in the order they were taken, and ~AppEngine is left with nothing
+    // to do but the plain C++ members.
+    static bool teardownRegistered = false;
+    if (!teardownRegistered && QCoreApplication::instance()) {
+        teardownRegistered = true;
+        qAddPostRoutine([] { AppEngine::instance()->releaseQtResources(); });
+    }
+
     return &engine;
+}
+
+// Idempotent, because it is reachable twice: once from the post routine and
+// once from ~AppEngine on the paths where no QCoreApplication was ever built
+// (a unit test constructing the engine directly, say).
+void AppEngine::releaseQtResources()
+{
+    delete m_reverse;
+    m_reverse = nullptr;
+
+    m_registry.reset();
+    m_http.reset();
+    m_cache.reset();   // closes the connection while QSqlDatabase still has a registry
+    m_clock.reset();
 }
 
 AppEngine *AppEngine::create(QQmlEngine *, QJSEngine *)

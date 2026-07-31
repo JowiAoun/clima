@@ -153,6 +153,13 @@ public:
     static AppEngine *instance();
     static AppEngine *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 
+    // Drops everything that needs a live QCoreApplication to be released
+    // cleanly — the cache's SQLite connection above all. Registered as a
+    // qAddPostRoutine from instance(), so it runs inside ~QCoreApplication
+    // rather than during static destruction, which is far too late. Idempotent
+    // and safe to call again from ~AppEngine.
+    void releaseQtResources();
+
     // Builds the clock, the cache, the client, the providers and the models,
     // then publishes the first snapshot from cache. Call once from main()
     // before the QML engine loads anything, because Main.qml's first frame
