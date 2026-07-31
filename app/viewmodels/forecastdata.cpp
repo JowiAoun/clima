@@ -65,11 +65,46 @@ QString twelveHour(const QDateTime &local)
          + (hour < 12 ? ForecastData::tr("AM") : ForecastData::tr("PM"));
 }
 
+// ---- the two maps, and why only they need this ------------------------------
+//
+// Almost everything this class publishes is a QVariantList or an int, and both
+// are well formed empty: an empty array answers `.length` with 0 and a Repeater
+// bound to it draws nothing. A QVariantMap is not. `Data.moonPhase.illuminated`
+// on an empty map is `undefined`, which is a failed assignment to a real
+// property and one line of console on every start that has to fetch.
+//
+// app/viewmodels/conditionsdata.cpp carries the full argument — this is the same
+// rule applied to the two maps on this side of the boundary.
+QVariantMap neutralMonth()
+{
+    return QVariantMap{
+        { QStringLiteral("name"), QString() },
+        { QStringLiteral("year"), 0 },
+        { QStringLiteral("number"), 0 },
+        { QStringLiteral("length"), 0 },
+        { QStringLiteral("firstWeekday"), 0 },
+        { QStringLiteral("today"), 0 },
+    };
+}
+
+QVariantMap neutralMoonPhase()
+{
+    return QVariantMap{
+        { QStringLiteral("name"), QString() },
+        { QStringLiteral("illuminated"), 0.0 },
+    };
+}
+
 } // namespace
 
 ForecastData::ForecastData(QObject *parent)
     : QObject(parent)
 {
+    // Born with the shape. `Data.moonPhase` is read while HourlyOverview is
+    // being constructed, which precedes the first snapshot on any start that
+    // has to fetch one.
+    clear();
+
     // Everything on screen that carries a unit is rebuilt when a preference
     // changes. Cheaper would be to convert lazily in the getters; that would
     // also mean nothing notifies, and a settings screen whose effect appears
@@ -131,9 +166,15 @@ void ForecastData::clear()
     m_airQuality.clear(); m_precipTypes.clear();
     m_hasApparent = false;
     m_days.clear(); m_todayIndex = 0;
-    m_month.clear(); m_monthDays.clear();
-    m_sunEvents.clear(); m_moonPhase.clear();
+    m_monthDays.clear();
+    m_sunEvents.clear();
     m_labelIndices.clear(); m_precipBuckets.clear();
+
+    // Reset to a shape rather than emptied, for the reason the two functions
+    // give. buildMonth() and buildSunEvents() overwrite these keys in place, so
+    // the neutral values survive only until there is a forecast to replace them.
+    m_month     = neutralMonth();
+    m_moonPhase = neutralMoonPhase();
 }
 
 void ForecastData::setSnapshot(const Forecast &forecast, const AirQuality &airQuality,

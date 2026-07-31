@@ -91,6 +91,36 @@ clima_add_test(tst_geocoding)
 clima_add_test(tst_reversegeocode)
 clima_add_test(tst_places)
 
+# ---- the one test that links app/ -------------------------------------------
+#
+# Registered by hand rather than through clima_add_test(), because it is the one
+# test whose subject is a VIEW MODEL and not the engine. `Detail` is
+# app/viewmodels/conditionsdata.h: GPL-3.0-or-later, not MPL-2.0, read by QML and
+# therefore allowed to depend on it. clima_forbid_gui() is deliberately not
+# applied — it would refuse the link, and refusing it here would be enforcing
+# libclima's promise against something that never made it.
+#
+# The promise itself is untouched. `engine_has_no_gui` below asks the question of
+# tst_httpclient, which links the engine and nothing else, and that is still the
+# binary the guarantee is read off.
+#
+# What it is for: the neutral shape those maps are born with has to stay in step
+# with what the build functions produce, and nothing else would notice when it
+# does not. The file's own header has the argument.
+add_executable(tst_conditionsdata tst_conditionsdata.cpp)
+
+target_link_libraries(tst_conditionsdata PRIVATE climaqml clima_testsupport Qt6::Test)
+target_compile_definitions(tst_conditionsdata PRIVATE
+    CLIMA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME tst_conditionsdata COMMAND tst_conditionsdata)
+
+set_tests_properties(tst_conditionsdata PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
+    TIMEOUT 60
+)
+
 # ---- the binary-level no-GUI check ------------------------------------------
 #
 # cmake/ClimaEngineGuard.cmake refuses at configure time if libclima's target

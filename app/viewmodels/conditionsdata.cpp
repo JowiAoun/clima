@@ -16,6 +16,7 @@
 #include <QQmlEngine>
 
 #include <cmath>
+#include <limits>
 
 using namespace clima;
 
@@ -197,11 +198,306 @@ QVariantMap stop(double p, const QString &colour)
     return QVariantMap{ { QStringLiteral("p"), p }, { QStringLiteral("c"), colour } };
 }
 
+// ---- the shape a block has before there is any weather in it ----------------
+//
+// Every map below is published through a Q_PROPERTY that QML binds while its
+// component is being constructed, and there are starts where construction
+// genuinely precedes the data: a first run with a cold cache, a saved place
+// whose forecast has expired, a network still opening its socket. A map with no
+// keys in it answers `undefined` to every one of those bindings, so `d.status`
+// fails to assign to a string, `d.series.length` throws, and the launch prints
+// several hundred lines of console before the snapshot lands and it all
+// silently resolves.
+//
+// The fix is not sixty `|| {}` guards in the QML. docs/10-design-system.md keeps
+// the components declarative and a model owes its readers a shape, so it is
+// these: the same key set the matching build function produces, with every value
+// at its nothing. `clear()` installs them, the constructor calls `clear()`, and
+// a binding evaluated before the first snapshot reads a defined value of the
+// right type instead of a hole.
+//
+// ---- what "nothing" is, and what it is not ----------------------------------
+//
+// Empty strings, empty lists, zeroes. Never a plausible reading. A card that
+// says 20° for one frame and 31° for the rest has told the reader something
+// false, and docs/README.md ranks not fabricating above everything else this app
+// does — a brief lie is still the thing that rule is about.
+//
+// Nor is it the em dash. `readingOf()` answers "—" and that is a different
+// sentence: "we asked the provider and it carries no value here". Before the
+// first snapshot nobody has asked, and a card has not earned the right to say
+// so. Absent, here, is silent.
+//
+// Three fields are not zero, and each is the vocabulary something downstream
+// already reads:
+//
+//   trend        "none". The word buildSunMoon() already publishes for a
+//                reading that is not doing anything, and the one value
+//                TrendBadge.qml makes itself invisible on rather than drawing
+//                an arrow that points nowhere.
+//
+//   riseMin, setMin, nowMin
+//                minutesFromLocalMidnight()'s own absent value. Zero is not
+//                nothing here, it is midnight — DetailSunCard would draw a day
+//                that begins and ends at it, with the sun mark sitting on the
+//                crossing.
+//
+//   directionDeg -1, which is exactly what CurrentConditions.qml's
+//                `visible: arrow >= 0` tests for. Zero is due north, and a
+//                bearing is a claim.
+//
+// tests/tst_conditionsdata.cpp asserts that each of these key sets equals the
+// set the build function produces from a real fixture, because the failure mode
+// of this block is a key added to a builder and forgotten here — which is
+// invisible until it is several hundred lines of console again.
+
+// minutesFromLocalMidnight()'s "there is no such instant". See timeaxis.h.
+constexpr int kNoMinute = std::numeric_limits<int>::min();
+
+QString noTrend() { return QStringLiteral("none"); }
+
+QVariantMap neutralLocation()
+{
+    return QVariantMap{
+        { QStringLiteral("name"), QString() },
+        { QStringLiteral("region"), QString() },
+        { QStringLiteral("label"), QString() },
+        { QStringLiteral("isHome"), false },
+    };
+}
+
+QVariantMap neutralCurrent()
+{
+    return QVariantMap{
+        { QStringLiteral("conditionKind"), QString() },
+        { QStringLiteral("unitLabel"), QString() },
+        { QStringLiteral("summary"), QString() },
+    };
+}
+
+QVariantMap neutralTemperature()
+{
+    return QVariantMap{
+        { QStringLiteral("value"), 0 },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("unit"), QString() },
+        { QStringLiteral("series"), QVariantList() },
+        { QStringLiteral("high"), 0 },
+        { QStringLiteral("low"), 0 },
+        { QStringLiteral("peakAt"), QString() },
+        { QStringLiteral("lowAt"), QString() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralFeelsLike()
+{
+    return QVariantMap{
+        { QStringLiteral("value"), 0 },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("actual"), 0 },
+        { QStringLiteral("unit"), QString() },
+        { QStringLiteral("series"), QVariantList() },
+        { QStringLiteral("dominantFactor"), QString() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralCloudCover()
+{
+    return QVariantMap{
+        { QStringLiteral("value"), 0 },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("unit"), QString() },
+        { QStringLiteral("condition"), QString() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralPrecipitation()
+{
+    return QVariantMap{
+        { QStringLiteral("value"), 0 },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("unit"), QString() },
+        { QStringLiteral("window"), QString() },
+        { QStringLiteral("scaleMax"), 0.0 },
+        { QStringLiteral("series"), QVariantList() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralWind()
+{
+    return QVariantMap{
+        { QStringLiteral("speed"), 0 },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("gustReading"), QString() },
+        { QStringLiteral("gust"), 0 },
+        { QStringLiteral("unit"), QString() },
+        { QStringLiteral("scaleMax"), 0 },
+        { QStringLiteral("directionDeg"), -1 },
+        { QStringLiteral("directionLabel"), QString() },
+        { QStringLiteral("beaufort"), 0 },
+        { QStringLiteral("beaufortName"), QString() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralHumidity()
+{
+    return QVariantMap{
+        { QStringLiteral("value"), 0 },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("dewReading"), QString() },
+        { QStringLiteral("unit"), QString() },
+        { QStringLiteral("dewPoint"), 0 },
+        { QStringLiteral("dewUnit"), QString() },
+        { QStringLiteral("series"), QVariantList() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralUv()
+{
+    return QVariantMap{
+        { QStringLiteral("value"), 0 },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("max"), 0 },
+        { QStringLiteral("band"), QString() },
+        { QStringLiteral("peakAt"), QString() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralAirQuality()
+{
+    return QVariantMap{
+        { QStringLiteral("value"), 0 },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("max"), 0 },
+        { QStringLiteral("band"), QString() },
+        { QStringLiteral("pollutant"), QString() },
+        { QStringLiteral("pollutantValue"), 0.0 },
+        { QStringLiteral("pollutantUnit"), QString() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralVisibility()
+{
+    return QVariantMap{
+        { QStringLiteral("value"), 0 },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("unit"), QString() },
+        { QStringLiteral("scaleMax"), 0 },
+        { QStringLiteral("band"), QString() },
+        { QStringLiteral("peak"), 0 },
+        { QStringLiteral("peakAt"), QString() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralPressure()
+{
+    return QVariantMap{
+        // A string, like the built one: buildPressure() formats to the unit's
+        // own decimals rather than handing QML a number to round.
+        { QStringLiteral("value"), QString() },
+        { QStringLiteral("reading"), QString() },
+        { QStringLiteral("unit"), QString() },
+        { QStringLiteral("at"), QString() },
+        { QStringLiteral("series"), QVariantList() },
+        { QStringLiteral("min"), 0 },
+        { QStringLiteral("max"), 0 },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralSun()
+{
+    return QVariantMap{
+        { QStringLiteral("riseMin"), kNoMinute },
+        { QStringLiteral("setMin"), kNoMinute },
+        { QStringLiteral("nowMin"), kNoMinute },
+        { QStringLiteral("riseLabel"), QString() },
+        { QStringLiteral("riseSuffix"), QString() },
+        { QStringLiteral("setLabel"), QString() },
+        { QStringLiteral("setSuffix"), QString() },
+        { QStringLiteral("dayLength"), QString() },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+QVariantMap neutralMoon()
+{
+    return QVariantMap{
+        { QStringLiteral("riseMin"), kNoMinute },
+        { QStringLiteral("setMin"), kNoMinute },
+        { QStringLiteral("nowMin"), kNoMinute },
+        { QStringLiteral("riseLabel"), QString() },
+        { QStringLiteral("riseSuffix"), QString() },
+        { QStringLiteral("setLabel"), QString() },
+        { QStringLiteral("setSuffix"), QString() },
+        { QStringLiteral("upLength"), QString() },
+        { QStringLiteral("phase"), QString() },
+        { QStringLiteral("illumination"), 0.0 },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+// `available` false rather than absent, because it is the one field the pollen
+// card is gated on and "we do not know yet" and "not a product here" both mean
+// the card does not draw. buildPollen() fills the rest in place, so these five
+// are what a European coordinate shows between the forecast landing and the air
+// quality arriving behind it.
+QVariantMap neutralPollen()
+{
+    return QVariantMap{
+        { QStringLiteral("available"), false },
+        { QStringLiteral("band"), QString() },
+        { QStringLiteral("tone"), QString() },
+        { QStringLiteral("main"), QString() },
+        { QStringLiteral("items"), QVariantList() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
 } // namespace
 
 ConditionsData::ConditionsData(QObject *parent)
     : QObject(parent)
 {
+    // Born with the shape, not with fifteen empty maps. QML binds `Detail.wind`
+    // and everything under it while its component is constructed, which on a
+    // start with nothing cached happens before any snapshot exists — see the
+    // neutral block above for what the alternative sounded like.
+    clear();
+
     connect(Units::instance(), &Units::changed, this, [this]() {
         if (!m_forecast.isEmpty())
             setSnapshot(m_forecast, m_air, m_now, m_place, m_hasPollen);
@@ -236,12 +532,31 @@ void ConditionsData::clear()
     m_nowIndex = kContextBefore;
     m_observedAt.clear();
     m_observedOn.clear();
-    m_current.clear();
-    m_temperature.clear(); m_feelsLike.clear(); m_cloudCover.clear();
-    m_precipitation.clear(); m_wind.clear(); m_humidity.clear();
-    m_uv.clear(); m_airQuality.clear(); m_visibility.clear();
-    m_pressure.clear(); m_sun.clear(); m_moon.clear();
-    m_pollen.clear(); m_activities.clear();
+
+    // Reset to the neutral shape rather than emptied. An empty map is a map
+    // whose every key is `undefined`, and this function runs at construction and
+    // again at the head of every setSnapshot() — which is to say at both of the
+    // moments a binding can be evaluated with no weather behind it.
+    m_location      = neutralLocation();
+    m_current       = neutralCurrent();
+    m_temperature   = neutralTemperature();
+    m_feelsLike     = neutralFeelsLike();
+    m_cloudCover    = neutralCloudCover();
+    m_precipitation = neutralPrecipitation();
+    m_wind          = neutralWind();
+    m_humidity      = neutralHumidity();
+    m_uv            = neutralUv();
+    m_airQuality    = neutralAirQuality();
+    m_visibility    = neutralVisibility();
+    m_pressure      = neutralPressure();
+    m_sun           = neutralSun();
+    m_moon          = neutralMoon();
+    m_pollen        = neutralPollen();
+
+    // The one member that needs no neutral shape: a QVariantList is already a
+    // JavaScript array, so an empty one answers `.length` with 0 and a Repeater
+    // bound to it draws nothing. It is the maps that had holes in them.
+    m_activities.clear();
 }
 
 void ConditionsData::setSnapshot(const Forecast &forecast, const AirQuality &airQuality,
