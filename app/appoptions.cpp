@@ -134,6 +134,11 @@ QStringList AppOptions::skyPhases()
              QStringLiteral("day"), QStringLiteral("dusk") };
 }
 
+QStringList AppOptions::schemes()
+{
+    return { QStringLiteral("dark"), QStringLiteral("light") };
+}
+
 void AppOptions::parseCommandLine(const QCoreApplication &app)
 {
     AppOptions *self = instance();
@@ -225,6 +230,15 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
             .arg(skyPhases().join(QStringLiteral(", "))),
         QStringLiteral("phase"));
     parser.addOption(skyOption);
+
+    const QCommandLineOption schemeOption(
+        QStringLiteral("scheme"),
+        QStringLiteral("Force the colour scheme rather than following the desktop: %1. "
+                       "Every capture needs this, because a screenshot that follows whichever "
+                       "theme the machine happened to be in is not a screenshot of anything.")
+            .arg(schemes().join(QStringLiteral(", "))),
+        QStringLiteral("name"));
+    parser.addOption(schemeOption);
 
     const QCommandLineOption metricOption(
         QStringLiteral("metric"), QStringLiteral("Select a chart metric, e.g. wind or uv."),
@@ -367,6 +381,14 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
             fail(QStringLiteral("--sky: expected one of %1 — got \"%2\"")
                      .arg(skyPhases().join(QStringLiteral(", ")), phase));
         self->m_sky = phase;
+    }
+
+    if (parser.isSet(schemeOption)) {
+        const QString name = parser.value(schemeOption);
+        if (!schemes().contains(name))
+            fail(QStringLiteral("--scheme: expected one of %1 — got \"%2\"")
+                     .arg(schemes().join(QStringLiteral(", ")), name));
+        self->m_scheme = name;
     }
 
     if (parser.isSet(metricOption))

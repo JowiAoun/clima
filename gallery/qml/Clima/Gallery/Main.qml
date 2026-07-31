@@ -40,6 +40,7 @@ Window {
     minimumWidth: 360
     minimumHeight: 480
     color: Theme.page.bg
+
     title: qsTr("Clima — components")
 
     // --card and --details each show one thing on its own; the catalogue is
@@ -158,6 +159,14 @@ Window {
     }
 
     Component.onCompleted: {
+        // Same rule as the app, and first for the same reason: the scheme
+        // decides what everything below paints with, and a still capture holds
+        // still so the palette page compares byte for byte between runs.
+        if (GalleryOptions.scheme !== "")
+            Theme.scheme = GalleryOptions.scheme
+        if (GalleryOptions.grab !== "" && GalleryOptions.film === "")
+            Theme.stillness = true
+
         if (GalleryOptions.hasSize) {
             win.width = GalleryOptions.sizeWidth
             win.height = GalleryOptions.sizeHeight

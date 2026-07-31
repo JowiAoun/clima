@@ -58,6 +58,7 @@ class GalleryOptions : public QObject
     // to 390 px would leave 158 px of stage beside a 232 px rail.
     Q_PROPERTY(QString viewport READ viewport CONSTANT)
     Q_PROPERTY(QString sky      READ sky      CONSTANT)
+    Q_PROPERTY(QString scheme   READ scheme   CONSTANT)
     Q_PROPERTY(QString pick     READ pick     CONSTANT)
 
     // ---- the two other ways of looking at one component --------------------
@@ -90,6 +91,7 @@ public:
     int         sizeHeight() const { return m_sizeHeight; }
     QString     viewport()   const { return m_viewport; }
     QString     sky()        const { return m_sky; }
+    QString     scheme()     const { return m_scheme; }
     QString     pick()       const { return m_pick; }
     QString     card()       const { return m_card; }
     bool        details()    const { return m_details; }
@@ -107,6 +109,7 @@ private:
     int         m_sizeHeight = 0;
     QString     m_viewport;
     QString     m_sky;
+    QString     m_scheme;
     QString     m_pick;
     QString     m_card;
     bool        m_details    = false;

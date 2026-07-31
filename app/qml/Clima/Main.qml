@@ -53,6 +53,13 @@ Window {
         AppOptions.sky !== "" ? AppOptions.sky
                               : (win.mobile ? Clock.skyPhase : "dusk")
 
+    // The colour scheme is pushed into the Theme singleton rather than read out
+    // of it, because Theme is where every component already looks and adding a
+    // second place to ask would mean two answers. --scheme wins outright: a
+    // capture that followed whichever theme the machine happened to be in would
+    // not be a capture of anything in particular, and every golden image and
+    // every README screenshot depends on that not being true.
+
     // The page background is painted as an item, not left to Window.color.
     // grabToImage() captures contentItem, which does not include the window's
     // clear colour — so every headless screenshot came out with a black page
@@ -136,6 +143,17 @@ Window {
         !AppOptions.capturing && !win.geometryFromFlags
 
     Component.onCompleted: {
+        // First, before any of the geometry work: the scheme decides what every
+        // component below paints with, and a frame drawn dark and then repainted
+        // light is a frame a capture can catch halfway.
+        if (AppOptions.scheme !== "")
+            Theme.scheme = AppOptions.scheme
+
+        // A still capture holds still. --film is the exception, because a
+        // contact sheet of eight identical frames is not a review of anything.
+        if (AppOptions.grab !== "" && AppOptions.film === "")
+            Theme.stillness = true
+
         if (win.geometryRemembered && Settings.hasWindowSize) {
             // Size only. Position is stored, and restoring it is a lie on
             // Wayland — the compositor places windows, and a client that

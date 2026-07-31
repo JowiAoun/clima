@@ -122,6 +122,16 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("phase"));
     parser.addOption(skyOption);
 
+    // Mirrors clima's own --scheme, and for the same reason: the gallery is
+    // where a palette is reviewed, and a palette cannot be reviewed in whichever
+    // theme the machine happens to be in.
+    const QCommandLineOption schemeOption(
+        QStringLiteral("scheme"),
+        QStringLiteral("Force the colour scheme: %1.")
+            .arg(AppOptions::schemes().join(QStringLiteral(", "))),
+        QStringLiteral("name"));
+    parser.addOption(schemeOption);
+
     const QCommandLineOption cardOption(
         QStringLiteral("card"),
         QStringLiteral("Render one detail card alone on the page gradient, e.g. Uv. No rail, "
@@ -208,6 +218,14 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
             fail(QStringLiteral("--sky: expected one of %1 — got \"%2\"")
                      .arg(AppOptions::skyPhases().join(QStringLiteral(", ")), phase));
         self->m_sky = phase;
+    }
+
+    if (parser.isSet(schemeOption)) {
+        const QString name = parser.value(schemeOption);
+        if (!AppOptions::schemes().contains(name))
+            fail(QStringLiteral("--scheme: expected one of %1 — got \"%2\"")
+                     .arg(AppOptions::schemes().join(QStringLiteral(", ")), name));
+        self->m_scheme = name;
     }
 
     if (parser.isSet(cardOption))
