@@ -1,0 +1,14 @@
+{
+    "recordedAt": "2026-07-31T04:28:00Z",
+    "description": "Kampala, 07:28 local, with one isolated wet hour: 0.40 mm stamped 10:00, which is the hour starting at 09:00. The whole fixture is a ruler held against the precipitation shift.",
+    "place": {
+        "geonamesId": 232422,
+        "name": "Kampala",
+        "admin1": "Central Region",
+        "country": "Uganda",
+        "countryCode": "UG",
+        "timezone": "Africa/Kampala",
+        "latitude": 0.3152,
+        "longitude": 32.5816
+    }
+}

@@ -162,6 +162,46 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "Open-Meteo (https://open-meteo.com)"
 SPDX-License-Identifier = "CC-BY-4.0"
 
+# The fixtures the SHIPPED BINARY carries, as distinct from the ones the tests
+# read. Same service, same licence, and a separate block because the obligation
+# is a different one: these bytes are compiled into `clima` and are redistributed
+# with it, so CC-BY 4.0 attaches to the release rather than to the repository.
+#
+# The app discharges the credit at run time — Engine.sources is generated from
+# the provider registry and the recorded provider's attribution() returns
+# Open-Meteo's exact credit line plus a note saying which afternoon it is. See
+# libclima/providers/fixture/data/README.md for what each one is evidence of.
+#
+# `kampala/forecast.json` is byte-identical to
+# tests/fixtures/openmeteo/kampala-precip-spike.json, deliberately: the adapter
+# test and the app's own precipitation-hour proof are assertions about the same
+# 0.40 mm, one at the parser and one at the chart.
+[[annotations]]
+path = [
+    "libclima/providers/fixture/data/berlin/airquality.json",
+    "libclima/providers/fixture/data/berlin/forecast.json",
+    "libclima/providers/fixture/data/kampala/forecast.json",
+    "libclima/providers/fixture/data/toronto/airquality.json",
+    "libclima/providers/fixture/data/toronto/forecast.json",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Open-Meteo (https://open-meteo.com)"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The manifests beside them are ours: a place, a description and the instant the
+# FrozenClock is set to. Not Open-Meteo's data, and JSON has nowhere to put a
+# header comment — the same reason every other JSON file in this repository is
+# annotated here rather than inline.
+[[annotations]]
+path = [
+    "libclima/providers/fixture/data/berlin/fixture.json",
+    "libclima/providers/fixture/data/kampala/fixture.json",
+    "libclima/providers/fixture/data/toronto/fixture.json",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Jowi Aoun"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
 [[annotations]]
 path = [
     "tests/fixtures/metno/toronto.json",

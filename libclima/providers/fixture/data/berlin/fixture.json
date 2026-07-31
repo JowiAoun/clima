@@ -1,0 +1,14 @@
+{
+    "recordedAt": "2026-07-31T10:28:00Z",
+    "description": "Berlin, 12:28 PM local. Inside the CAMS European domain, so this is the fixture where the pollen card is drawn rather than hidden.",
+    "place": {
+        "geonamesId": 2950159,
+        "name": "Berlin",
+        "admin1": "Berlin",
+        "country": "Germany",
+        "countryCode": "DE",
+        "timezone": "Europe/Berlin",
+        "latitude": 52.52,
+        "longitude": 13.405
+    }
+}

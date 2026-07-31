@@ -82,6 +82,8 @@ add_library(libclima STATIC
     providers/geocoding/offlinereversegeocoder.cpp
     providers/geocoding/openmeteogeocoder.h
     providers/geocoding/openmeteogeocoder.cpp
+    providers/fixture/fixtureprovider.h
+    providers/fixture/fixtureprovider.cpp
     providers/openmeteo/openmeteoadapter.h
     providers/openmeteo/openmeteoadapter.cpp
     providers/openmeteo/openmeteoforecastprovider.h
@@ -139,6 +141,40 @@ qt_add_resources(libclima "clima_geonames"
     PREFIX "/clima"
     BASE providers/geocoding/data
     FILES providers/geocoding/data/cities15000.cgx
+)
+
+# ---- the recorded fixtures --------------------------------------------------
+#
+# Three recorded afternoons, compiled in. `--fixture toronto` has to work from
+# an installed binary on a machine with no source tree, because the whole point
+# of it is that a reviewer, a CI runner and a golden-image test all see the same
+# pixels — and "check out the repository first" is not a property those three
+# have in common.
+#
+# The data is Open-Meteo's, under CC BY 4.0, and REUSE.toml declares it that way
+# with Open-Meteo as the copyright holder. Same distinction as the bundled
+# typeface and the GeoNames index: three things in this repository that are not
+# ours.
+#
+# BASE strips the source path so a fixture lands at `:/clima/fixtures/<name>/`.
+# fixtureprovider.cpp lists the catalogue by running QDir over that prefix, so
+# the directory name IS the fixture name and there is no second list to keep in
+# step — adding a fixture is four lines here and nothing anywhere else.
+#
+# 116 kB of JSON before compression, against the <15 MB budget in
+# docs/03-tech-stack.md §3.4.
+qt_add_resources(libclima "clima_fixtures"
+    PREFIX "/clima/fixtures"
+    BASE providers/fixture/data
+    FILES
+        providers/fixture/data/toronto/fixture.json
+        providers/fixture/data/toronto/forecast.json
+        providers/fixture/data/toronto/airquality.json
+        providers/fixture/data/berlin/fixture.json
+        providers/fixture/data/berlin/forecast.json
+        providers/fixture/data/berlin/airquality.json
+        providers/fixture/data/kampala/fixture.json
+        providers/fixture/data/kampala/forecast.json
 )
 
 # ---- optional: Qt Positioning -----------------------------------------------
