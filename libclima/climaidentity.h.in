@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
+// SPDX-License-Identifier: MPL-2.0
+//
+// Generated from libclima/climaidentity.h.in by CMake. Do not edit the copy in
+// the build directory; edit this template.
+//
+// Who we are, as far as a weather service is concerned.
+//
+// Every one of these strings is a CMake variable rather than a literal, and
+// that is the whole point of the file. The User-Agent Clima sends carries its
+// version, and the version has to be the release's version — a hardcoded string
+// here would drift from the tag on the first release nobody remembered to grep
+// for, and the failure mode is not a build error but a client that lies about
+// itself to MET Norway. `@PROJECT_VERSION@` comes from the same `project()`
+// call that app/climaconfig.h.in reads, so the two cannot disagree.
+//
+// ---- the contact is a licence obligation, not politeness --------------------
+//
+// docs/02-data-sources.md §2.9 records what MET Norway asks for:
+// `Clima/<version> (+https://…; contact@…)`, and states plainly that a generic
+// User-Agent gets a 403. api.weather.gov is the same story and is stricter in
+// practice — an empty User-Agent is refused today, verified against the live
+// service. So this is a compliance string, and CLIMA_CONTACT is a cache
+// variable so that a distribution rebuilding Clima can point it at a channel
+// *they* actually read. A fork that keeps our issue tracker in its User-Agent
+// is a fork whose rate-limit complaints arrive in the wrong inbox.
+#pragma once
+
+#define CLIMA_ENGINE_VERSION "@PROJECT_VERSION@"
+#define CLIMA_PROJECT_URL    "@PROJECT_HOMEPAGE_URL@"
+#define CLIMA_CONTACT        "@CLIMA_CONTACT@"

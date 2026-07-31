@@ -261,6 +261,29 @@ endif()
 # arrives — see cmake/ClimaLicenceGuard.cmake.
 target_link_libraries(climaqml PUBLIC Qt6::Quick)
 
+# The engine. Nothing in app/ calls into it yet — the view models that will are
+# W4 — and it is linked now anyway, for two reasons that are both about the
+# link line rather than about the code.
+#
+# The first is that the direction of the dependency is the architecture. app/
+# may include libclima's headers; libclima may not include app's, and the CMake
+# graph is where that is stated. Declaring it on the day the library appears
+# means the first view model is a `#include` rather than a build-system change
+# reviewed at the same time as a feature.
+#
+# The second is that it costs nothing to be wrong about. A static archive
+# contributes only the objects something references, so an unused libclima adds
+# no bytes to `clima`; measured before and after this line, the stripped binary
+# moved by 0 bytes against the <15 MB budget in docs/03-tech-stack.md §3.4. What
+# it does add is libQt6Sql.so.6 to the app's DT_NEEDED list — Qt6::Network was
+# already there, arriving through QtQml — which is a runtime dependency a
+# packager has to satisfy, and which the app genuinely will need.
+#
+# PUBLIC so that both the QML module's C++ and main.cpp can reach it. It is not
+# a QML-visible dependency: libclima declares no QML types and never will, which
+# is the same GUI-free promise cmake/ClimaEngineGuard.cmake enforces.
+target_link_libraries(climaqml PUBLIC libclima)
+
 clima_guard_target(climaqml)
 
 # ---- the executable ---------------------------------------------------------

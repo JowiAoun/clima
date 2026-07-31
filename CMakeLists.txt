@@ -36,6 +36,21 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CLIMA_APP_ID "io.github.JowiAoun.Clima" CACHE STRING
     "Reverse-DNS application ID: desktop file, AppStream, D-Bus, icon name")
 
+# Where a weather service can reach a human about our traffic.
+#
+# This goes in the User-Agent every request carries, and it is an obligation
+# rather than a courtesy: docs/02-data-sources.md §2.9 records MET Norway's
+# requirement for an identifying User-Agent with a contact, and notes that a
+# generic one gets 403. api.weather.gov enforces the same thing today — an empty
+# User-Agent is refused outright.
+#
+# A cache variable, and this is the one that a downstream packager genuinely
+# should override. A distribution shipping a rebuilt Clima will be the source of
+# that traffic, and a rate-limit complaint about it should arrive in an inbox
+# they read rather than in ours.
+set(CLIMA_CONTACT "https://github.com/JowiAoun/clima/issues" CACHE STRING
+    "Contact channel in the outbound User-Agent. Packagers: point this at yours")
+
 # ---- options ----------------------------------------------------------------
 # Declared now, wired up as each lands. An option that appears the same day as
 # the feature it guards is an option nobody remembered to check for, so they go
@@ -50,9 +65,15 @@ option(CLIMA_BUILD_TESTS  "Build the test suite"                                
 # for nothing, and — more to the point here — a chance to pull in a module whose
 # licence we cannot accept. See cmake/ClimaLicenceGuard.cmake.
 include(ClimaLicenceGuard)
-clima_guard_qt_components(Core Gui Quick)
+include(ClimaEngineGuard)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick)
+# Network and Sql are libclima's, not the app's: the engine fetches and the
+# engine caches, and app/ reaches both through it. They are asked for here
+# rather than in libclima/CMakeLists.txt because find_package is a global
+# operation and one call is easier to audit than two.
+clima_guard_qt_components(Core Gui Quick Network Sql)
+
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Gui Quick Network Sql)
 qt_standard_project_setup(REQUIRES 6.8)
 
 # Where qt_add_qml_module lays out its module directories. This is not a tidiness
@@ -68,6 +89,11 @@ qt_standard_project_setup(REQUIRES 6.8)
 # Without it those three fail in three different and individually confusing
 # ways. Do not remove it.
 set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
+
+# The engine first, because app/ links it. It is also the only directory here
+# whose sources are MPL-2.0 rather than GPL-3.0-or-later — see D6, and
+# libclima/CMakeLists.txt, which explains why the build file itself is not.
+add_subdirectory(libclima)
 
 add_subdirectory(app)
 
