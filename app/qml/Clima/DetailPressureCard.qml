@@ -36,17 +36,17 @@ DetailCard {
     // Measured off the reference's PressureCardGradient: the observed stretch
     // runs pale blue at the oldest hour into violet at "now". These belong to
     // this one visualisation, so they live here and not in theme.js.
-    readonly property color lineStart: "#96c6fa"
-    readonly property color lineEnd:   "#a375ff"
+    readonly property color lineStart: Theme.isLight ? "#3f7fc4" : "#96c6fa"
+    readonly property color lineEnd:   Theme.isLight ? "#6b3fc4" : "#a375ff"
     // The forecast stretch — the same line with the certainty taken out of it.
-    readonly property color lineAhead: "#59c3b4f2"
+    readonly property color lineAhead: Theme.isLight ? "#595a4fa8" : "#59c3b4f2"
     // The wash, mid-way between the two ends of the line so it belongs to the
     // whole curve rather than to either half of it. Carried at a higher alpha
     // than the exemplar's because it is a cool wash on a cool page: at the
     // exemplar's 0.30 the same fill measured the same but read half as present
     // as its warm orange does against this gradient.
-    readonly property color washTop:   "#669d9dfd"
-    readonly property color washFoot:  "#009d9dfd"
+    readonly property color washTop:   Theme.isLight ? "#666a6ad6" : "#669d9dfd"
+    readonly property color washFoot:  Theme.isLight ? "#006a6ad6" : "#009d9dfd"
 
     title: qsTr("Pressure")
     status: d.status

@@ -49,7 +49,10 @@ DetailCard {
         // The forecast stretch of the rain blue: same colour, less certainty
         // (design system §10.7). It belongs to this card alone, so it lives
         // here rather than in theme.js.
-        readonly property color forecastInk: "#b37fb6e8"
+        // Pale blue at 70% is a forecast dash you can see over navy and one you
+        // cannot see over a light card, so light mode takes the same hue down
+        // rather than up.
+        readonly property color forecastInk: Theme.isLight ? "#b33d7fb8" : "#b37fb6e8"
 
         readonly property real barW: 14
         readonly property real barGap: count > 1

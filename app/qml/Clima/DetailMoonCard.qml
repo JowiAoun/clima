@@ -46,15 +46,32 @@ DetailCard {
         // The one thing this card owns that its twin does not: a cool ramp,
         // keyed on altitude with p = 0 at the transit and p = 1 at the horizon.
         // Silver overhead, cool blue where it meets the horizon.
-        readonly property var skyRamp: [
-            { p: 0.00, c: "#eaf0ff" },
-            { p: 0.45, c: "#b6c8f0" },
-            { p: 1.00, c: "#7a97d8" }
-        ]
-        // The unlit limb. Darker than MoonGlyph's, which sits on the hourly
-        // chart: at 14 px the shadowed side has to be well below the surface or
-        // the phase stops being visible at all.
-        readonly property color moonDark: "#222a4a"
+        // Light mode is not a tint of this. Silver-to-cool-blue is a range that
+        // exists above a dark card; over a pale one the whole ramp sits within a
+        // few percent of the surface and the arc disappears, which is what the
+        // first light render showed — the Sun card beside it kept its arc,
+        // because saturated gold survives either ground, and the Moon's did not.
+        // So the light ramp keeps the hue relationship and moves the range down.
+        readonly property var skyRamp: Theme.isLight
+            ? [
+                { p: 0.00, c: "#8fa3c9" },
+                { p: 0.45, c: "#5f7bb0" },
+                { p: 1.00, c: "#3d5a94" }
+              ]
+            : [
+                { p: 0.00, c: "#eaf0ff" },
+                { p: 0.45, c: "#b6c8f0" },
+                { p: 1.00, c: "#7a97d8" }
+              ]
+
+        // The unlit limb, and it inverts outright rather than shifting. In dark
+        // the shadowed side is below the surface it sits on; in light it has to
+        // be above the lit side, or the phase reads inside out.
+        //
+        // Darker than MoonGlyph's in either theme, which sits on the hourly
+        // chart: at 14 px the shadowed side has to be well clear of the surface
+        // or the phase stops being visible at all.
+        readonly property color moonDark: Theme.isLight ? "#c4cde0" : "#222a4a"
 
         // ---- the cycle, in minutes -------------------------------------------
         // Minutes up, taken modulo a day, because the moon sets before it rises:

@@ -36,9 +36,13 @@ DetailCard {
     // Local to this visualisation, so they stay out of theme.js.
     readonly property color feelsStroke:     "#dc626d"   // measured, reference
     readonly property color feelsStrokeDim:  "#59dc626d" // forecast: same line, less certainty
-    readonly property color feelsInk:        "#eda2ab"   // the line's hue, at label contrast
-    readonly property color actualStroke:    "#b3c8d2e6" // the temperature being compared against
-    readonly property color actualStrokeDim: "#4dc8d2e6"
+    // The line's hue at label contrast — which on a light card means darker
+    // than the line rather than paler.
+    readonly property color feelsInk:        Theme.isLight ? "#a83744" : "#eda2ab"
+    // The temperature being compared against: deliberately quieter than the
+    // feels-like line in both themes, but quieter has to mean darker here.
+    readonly property color actualStroke:    Theme.isLight ? "#b3566985" : "#b3c8d2e6"
+    readonly property color actualStrokeDim: Theme.isLight ? "#4d566985" : "#4dc8d2e6"
     readonly property color gapObserved:     "#80dc626d"
     readonly property color gapForecast:     "#2edc626d"
 
