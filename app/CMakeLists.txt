@@ -110,6 +110,7 @@ set(clima_js_files
     qml/Clima/precip.js
     qml/Clima/sky.js
     qml/Clima/theme.js
+    qml/Clima/themelight.js
 )
 
 # ---- singletons -------------------------------------------------------------

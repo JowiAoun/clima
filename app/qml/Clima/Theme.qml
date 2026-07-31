@@ -80,9 +80,51 @@ pragma Singleton
 
 import QtQuick
 import "theme.js" as Tokens
+import "themelight.js" as LightTokens
 
 QtObject {
     id: theme
+
+    // ---- the active scheme -------------------------------------------------
+    //
+    // The one writable property on this singleton, and the whole of the theme
+    // switch. Everything below reads it exactly once, at the point each group
+    // is instantiated, and hands the chosen table down; nothing else in the
+    // tree ever asks which theme is running.
+    //
+    // The groups are QObjects whose identity never changes — only the `src`
+    // they read from does — so a switch re-evaluates the bindings inside them
+    // and destroys none of them. That is the property `.pragma library` could
+    // not offer and the reason Theme became a singleton in the first place: a
+    // JS library value produces no change notification, so
+    // `color: Theme.ink.primary` was evaluated once and never again.
+    //
+    // Default dark, deliberately. It is where this design system started, it is
+    // what every committed screenshot shows, and it is the answer when the
+    // desktop has no preference to report.
+    property string scheme: "dark"
+    readonly property bool isLight: scheme === "light"
+
+    // Startup shape check, because the failure it catches is silent. The light
+    // table is a separate file carrying the same key set, so a key added to one
+    // and not the other is a binding that quietly resolves to undefined — which
+    // in QML is a transparent colour, not an error. One pass at construction
+    // costs nothing and turns that into a line on stderr naming the key.
+    Component.onCompleted: {
+        for (var i = 0; i < colorRoles.length; ++i) {
+            var role = colorRoles[i]
+            var dark = Tokens[role]
+            var lit  = LightTokens[role]
+            if (lit === undefined) {
+                console.warn("Theme: themelight.js has no '" + role + "' group")
+                continue
+            }
+            for (var key in dark) {
+                if (lit[key] === undefined)
+                    console.warn("Theme: themelight.js is missing " + role + "." + key)
+            }
+        }
+    }
 
     // The token names in a group, in declaration order.
     //
@@ -119,11 +161,16 @@ QtObject {
     // uses — and they stay exported because they are the ladder the design
     // system quotes, not a leftover.
     component SurfaceAlphaTokens: QtObject {
-        readonly property string recede: Tokens.surfaceAlpha.recede
-        readonly property string base:   Tokens.surfaceAlpha.base
-        readonly property string raised: Tokens.surfaceAlpha.raised
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string recede: src.recede
+        readonly property string base:   src.base
+        readonly property string raised: src.raised
     }
-    readonly property SurfaceAlphaTokens surfaceAlpha: SurfaceAlphaTokens { }
+    readonly property SurfaceAlphaTokens surfaceAlpha: SurfaceAlphaTokens { src: theme.isLight ? LightTokens.surfaceAlpha : Tokens.surfaceAlpha }
 
     // ---- colour ------------------------------------------------------------
     // Eleven roles. Every one of them is declared `string` rather than `color`,
@@ -136,47 +183,67 @@ QtObject {
 
     // The ground everything is composited on. The gradient itself is `sky`.
     component PageTokens: QtObject {
-        readonly property string bg: Tokens.page.bg
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string bg: src.bg
     }
-    readonly property PageTokens page: PageTokens { }
+    readonly property PageTokens page: PageTokens { src: theme.isLight ? LightTokens.page : Tokens.page }
 
     // §10.1's three-rung ladder, plus §10.12's opaque exceptions.
     component SurfaceTokens: QtObject {
-        readonly property string recede: Tokens.surface.recede
-        readonly property string base:   Tokens.surface.base
-        readonly property string raised: Tokens.surface.raised
-        readonly property string panel:  Tokens.surface.panel
-        readonly property string rowAlt: Tokens.surface.rowAlt
-        readonly property string rowNow: Tokens.surface.rowNow
-        readonly property string nav:    Tokens.surface.nav
-        readonly property string menu:   Tokens.surface.menu
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string recede: src.recede
+        readonly property string base:   src.base
+        readonly property string raised: src.raised
+        readonly property string panel:  src.panel
+        readonly property string rowAlt: src.rowAlt
+        readonly property string rowNow: src.rowNow
+        readonly property string nav:    src.nav
+        readonly property string menu:   src.menu
     }
-    readonly property SurfaceTokens surface: SurfaceTokens { }
+    readonly property SurfaceTokens surface: SurfaceTokens { src: theme.isLight ? LightTokens.surface : Tokens.surface }
 
     // Text. Ink for anything on the accent is `accent.ink`.
     component InkTokens: QtObject {
-        readonly property string primary: Tokens.ink.primary
-        readonly property string muted:   Tokens.ink.muted
-        readonly property string dim:     Tokens.ink.dim
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string primary: src.primary
+        readonly property string muted:   src.muted
+        readonly property string dim:     src.dim
     }
-    readonly property InkTokens ink: InkTokens { }
+    readonly property InkTokens ink: InkTokens { src: theme.isLight ? LightTokens.ink : Tokens.ink }
 
     // Anything a pixel wide: it measures, it separates, or it is the unfilled
     // remainder of a gauge.
     component LineTokens: QtObject {
-        readonly property string grid:     Tokens.line.grid
-        readonly property string gridWeak: Tokens.line.gridWeak
-        readonly property string track:    Tokens.line.track
-        readonly property string now:      Tokens.line.now
-        readonly property string forecast: Tokens.line.forecast
-        readonly property string series:   Tokens.line.series
-        readonly property string card:     Tokens.line.card
-        readonly property string divider:  Tokens.line.divider
-        readonly property string nav:      Tokens.line.nav
-        readonly property string menu:     Tokens.line.menu
-        readonly property string control:  Tokens.line.control
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string grid:     src.grid
+        readonly property string gridWeak: src.gridWeak
+        readonly property string track:    src.track
+        readonly property string now:      src.now
+        readonly property string forecast: src.forecast
+        readonly property string series:   src.series
+        readonly property string card:     src.card
+        readonly property string divider:  src.divider
+        readonly property string nav:      src.nav
+        readonly property string menu:     src.menu
+        readonly property string control:  src.control
     }
-    readonly property LineTokens line: LineTokens { }
+    readonly property LineTokens line: LineTokens { src: theme.isLight ? LightTokens.line : Tokens.line }
 
     // The one saturated colour, and the only ink legible on it.
     //
@@ -202,74 +269,109 @@ QtObject {
     // `fill` and `ink` say what they are for, they sit together because they are
     // one decision, and neither of them starts with "on".
     component AccentTokens: QtObject {
-        readonly property string fill: Tokens.accent.fill
-        readonly property string ink:  Tokens.accent.ink
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string fill: src.fill
+        readonly property string ink:  src.ink
     }
-    readonly property AccentTokens accent: AccentTokens { }
+    readonly property AccentTokens accent: AccentTokens { src: theme.isLight ? LightTokens.accent : Tokens.accent }
 
     // Interactive chrome that carries its own colour rather than a surface's.
     component ControlTokens: QtObject {
-        readonly property string toggleTrack:    Tokens.control.toggleTrack
-        readonly property string toggleKnob:     Tokens.control.toggleKnob
-        readonly property string pagerFill:      Tokens.control.pagerFill
-        readonly property string pagerFillHover: Tokens.control.pagerFillHover
-        readonly property string pagerGlyph:     Tokens.control.pagerGlyph
-        readonly property string navGlyph:       Tokens.control.navGlyph
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string toggleTrack:    src.toggleTrack
+        readonly property string toggleKnob:     src.toggleKnob
+        readonly property string pagerFill:      src.pagerFill
+        readonly property string pagerFillHover: src.pagerFillHover
+        readonly property string pagerGlyph:     src.pagerGlyph
+        readonly property string navGlyph:       src.navGlyph
     }
-    readonly property ControlTokens control: ControlTokens { }
+    readonly property ControlTokens control: ControlTokens { src: theme.isLight ? LightTokens.control : Tokens.control }
 
     // Drawn over content it must not let through.
     component OverlayTokens: QtObject {
-        readonly property string past:      Tokens.overlay.past
-        readonly property string pastHatch: Tokens.overlay.pastHatch
-        readonly property string hatch:     Tokens.overlay.hatch
-        readonly property string caption:   Tokens.overlay.caption
-        readonly property string readout:   Tokens.overlay.readout
-        readonly property string scrim:     Tokens.overlay.scrim
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string past:      src.past
+        readonly property string pastHatch: src.pastHatch
+        readonly property string hatch:     src.hatch
+        readonly property string caption:   src.caption
+        readonly property string readout:   src.readout
+        readonly property string scrim:     src.scrim
     }
-    readonly property OverlayTokens overlay: OverlayTokens { }
+    readonly property OverlayTokens overlay: OverlayTokens { src: theme.isLight ? LightTokens.overlay : Tokens.overlay }
 
     // Colour as a verdict rather than as a value (§10.5).
     component StateTokens: QtObject {
-        readonly property string trendUp:     Tokens.state.trendUp
-        readonly property string trendDown:   Tokens.state.trendDown
-        readonly property string trendSteady: Tokens.state.trendSteady
-        readonly property string good:        Tokens.state.good
-        readonly property string caution:     Tokens.state.caution
-        readonly property string poor:        Tokens.state.poor
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string trendUp:     src.trendUp
+        readonly property string trendDown:   src.trendDown
+        readonly property string trendSteady: src.trendSteady
+        readonly property string good:        src.good
+        readonly property string caution:     src.caution
+        readonly property string poor:        src.poor
     }
-    readonly property StateTokens state: StateTokens { }
+    readonly property StateTokens state: StateTokens { src: theme.isLight ? LightTokens.state : Tokens.state }
 
     // The paints a weather glyph is drawn in, shared by six screens.
     component GlyphTokens: QtObject {
-        readonly property string sunWarm:            Tokens.glyph.sunWarm
-        readonly property string sunCool:            Tokens.glyph.sunCool
-        readonly property string moon:               Tokens.glyph.moon
-        readonly property string moonShade:          Tokens.glyph.moonShade
-        readonly property string cloudTop:           Tokens.glyph.cloudTop
-        readonly property string cloudBottom:        Tokens.glyph.cloudBottom
-        readonly property string cloudTopOnLight:    Tokens.glyph.cloudTopOnLight
-        readonly property string cloudBottomOnLight: Tokens.glyph.cloudBottomOnLight
-        readonly property string rain:               Tokens.glyph.rain
-        readonly property string droplet:            Tokens.glyph.droplet
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string sunWarm:            src.sunWarm
+        readonly property string sunCool:            src.sunCool
+        readonly property string moon:               src.moon
+        readonly property string moonShade:          src.moonShade
+        readonly property string cloudTop:           src.cloudTop
+        readonly property string cloudBottom:        src.cloudBottom
+        readonly property string cloudTopOnLight:    src.cloudTopOnLight
+        readonly property string cloudBottomOnLight: src.cloudBottomOnLight
+        readonly property string rain:               src.rain
+        readonly property string droplet:            src.droplet
     }
-    readonly property GlyphTokens glyph: GlyphTokens { }
+    readonly property GlyphTokens glyph: GlyphTokens { src: theme.isLight ? LightTokens.glyph : Tokens.glyph }
 
     // The disc a day's glyph sits on in the ten-day strip.
     component BadgeTokens: QtObject {
-        readonly property string dayTop:      Tokens.badge.dayTop
-        readonly property string dayBottom:   Tokens.badge.dayBottom
-        readonly property string nightTop:    Tokens.badge.nightTop
-        readonly property string nightBottom: Tokens.badge.nightBottom
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string dayTop:      src.dayTop
+        readonly property string dayBottom:   src.dayBottom
+        readonly property string nightTop:    src.nightTop
+        readonly property string nightBottom: src.nightBottom
     }
-    readonly property BadgeTokens badge: BadgeTokens { }
+    readonly property BadgeTokens badge: BadgeTokens { src: theme.isLight ? LightTokens.badge : Tokens.badge }
 
     // Deliberately off-palette: something not built yet.
     component ScaffoldTokens: QtObject {
-        readonly property string ink:    Tokens.scaffold.ink
-        readonly property string stroke: Tokens.scaffold.stroke
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property string ink:    src.ink
+        readonly property string stroke: src.stroke
     }
-    readonly property ScaffoldTokens scaffold: ScaffoldTokens { }
+    readonly property ScaffoldTokens scaffold: ScaffoldTokens { src: theme.isLight ? LightTokens.scaffold : Tokens.scaffold }
 
     // ---- precipitation -----------------------------------------------------
     // Three tokens and three tables in one group. `edge`, `splash` and `flash`
@@ -277,21 +379,26 @@ QtObject {
     // precipitation type and intensity, which is data, and every read of them
     // in the tree is already a dynamic lookup.
     component PrecipTokens: QtObject {
-        readonly property var    wash:      Tokens.precip.wash
-        readonly property var    washAlpha: Tokens.precip.washAlpha
-        readonly property var    drop:      Tokens.precip.drop
-        readonly property string edge:      Tokens.precip.edge
-        readonly property string splash:    Tokens.precip.splash
-        readonly property string flash:     Tokens.precip.flash
+        // The group's values for the active scheme, handed in rather than
+        // looked up: an inline component cannot see the enclosing file's id,
+        // so the choice is made once at the instantiation below.
+        required property var src
+
+        readonly property var    wash:      src.wash
+        readonly property var    washAlpha: src.washAlpha
+        readonly property var    drop:      src.drop
+        readonly property string edge:      src.edge
+        readonly property string splash:    src.splash
+        readonly property string flash:     src.flash
     }
-    readonly property PrecipTokens precip: PrecipTokens { }
+    readonly property PrecipTokens precip: PrecipTokens { src: theme.isLight ? LightTokens.precip : Tokens.precip }
 
     // ---- the sky -----------------------------------------------------------
     // A table keyed by phase — `night`, `dawn`, `day`, `dusk` — because that is
     // how it is read: `Theme.sky[phase]`, with the phase computed from the
     // clock. Main.qml also leans on a miss returning `undefined`, which is how
     // `--sky nonsense` is rejected rather than obeyed.
-    readonly property var sky: Tokens.sky
+    readonly property var sky: theme.isLight ? LightTokens.sky : Tokens.sky
 
     // `glow` is four gradient stops rather than one colour, so it is a `var`
     // for the same reason a ramp is: PageBackdrop indexes it.
@@ -410,16 +517,44 @@ QtObject {
     // cannot live in a plain JS library, so the house rule — **OutCubic unless
     // there is a stated reason** — is written literally at some sixty call sites
     // and enforced by nothing. A singleton can hold it.
+    // ---- motion ------------------------------------------------------------
+    //
+    // Every duration collapses to zero when `stillness` is set, and that one
+    // switch serves two callers that turn out to want exactly the same thing.
+    //
+    // A READER who has asked their desktop for reduced motion. docs/04 requires
+    // honouring it, and §10.11's standing precipitation field — the only
+    // infinite animation in the product — is the first thing such a reader wants
+    // stopped.
+    //
+    // A CAPTURE. --grab waits a fixed interval and photographs whatever has
+    // settled by then, which works until something has not settled. PagerButton
+    // fades its opacity over `tint`; when the shutter and the fade land at the
+    // same moment the chevron is caught mid-fade, and the result is a handful of
+    // pixels a shade out. That surfaced as two alternating outputs for one
+    // command, 35 pixels apart on a 1340x900 frame — invisible to look at, and
+    // fatal to a golden image, which compares bytes.
+    //
+    // A longer settle would have made it rarer rather than impossible: it is a
+    // race, and races lose eventually. Zero durations remove the race instead of
+    // outrunning it, for every animated property at once rather than for the one
+    // that happened to be caught.
+    //
+    // --film is deliberately exempt: it exists to photograph motion.
+    property bool stillness: false
+
     component MotionTokens: QtObject {
-        readonly property int tint:    Tokens.motion.tint
-        readonly property int move:    Tokens.motion.move
-        readonly property int view:    Tokens.motion.view
-        readonly property int reveal:  Tokens.motion.reveal
-        readonly property int stagger: Tokens.motion.stagger
+        required property bool still
+
+        readonly property int tint:    still ? 0 : Tokens.motion.tint
+        readonly property int move:    still ? 0 : Tokens.motion.move
+        readonly property int view:    still ? 0 : Tokens.motion.view
+        readonly property int reveal:  still ? 0 : Tokens.motion.reveal
+        readonly property int stagger: still ? 0 : Tokens.motion.stagger
 
         readonly property int easing:  Easing.OutCubic
     }
-    readonly property MotionTokens motion: MotionTokens { }
+    readonly property MotionTokens motion: MotionTokens { still: theme.stillness }
 
     component ScaleTokens: QtObject {
         readonly property int tempMin:  Tokens.scale.tempMin
@@ -435,5 +570,5 @@ QtObject {
     // straight out of theme.js — a `.pragma library` cannot import a QML
     // singleton, which is the other half of why theme.js is still the file the
     // values live in.
-    readonly property var ramp: Tokens.ramp
+    readonly property var ramp: theme.isLight ? LightTokens.ramp : Tokens.ramp
 }
