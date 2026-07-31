@@ -70,3 +70,15 @@ qt_standard_project_setup(REQUIRES 6.8)
 set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
 
 add_subdirectory(app)
+
+# The component gallery is a separate executable and not a mode of the app, so
+# `CLIMA_BUILD_GALLERY=OFF` is a directory that is never entered rather than a
+# preprocessor symbol threaded through the product. That is the whole point of
+# it having moved: a storybook shipping inside a weather app is wrong on
+# principle, and it also costs about eleven hundred lines against the <15 MB
+# budget in docs/03-tech-stack.md §3.4.
+#
+# It depends on `climaqml`, which app/ defines, so it is entered second.
+if(CLIMA_BUILD_GALLERY)
+    add_subdirectory(gallery)
+endif()

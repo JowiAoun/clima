@@ -56,6 +56,20 @@
 // of it. The ten golden scenes are stable on both sides.
 #pragma once
 
+// ---- why it does not read the command line ----------------------------------
+// It did, once: every value below was an `AppOptions::instance()->...` call
+// three frames deep in a private slot. That was fine while there was one
+// executable, and it stopped being fine the moment there were two —
+// `clima-gallery` parses its own flags into its own GalleryOptions, and a
+// harness that reaches for the weather app's singleton would have read an
+// AppOptions nobody ever filled and quietly photographed nothing.
+//
+// So the inputs are bound, like `window` and `shell` always were. What this
+// class knows is "photograph that window, having first done these things to
+// that item"; which flag asked for it is the caller's business. Both Main.qml
+// and Clima.Gallery's Main.qml are that caller, and neither has to explain
+// itself twice.
+//
 // QQuickItem and QQuickWindow are included rather than forward-declared: moc
 // registers a pointer property's type as a metatype, and a metatype for a
 // pointer to an incomplete type is a static_assert with three screens of
@@ -65,6 +79,7 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QString>
+#include <QStringList>
 #include <QVariant>
 
 class QPauseAnimation;
@@ -80,7 +95,7 @@ class ScreenshotController : public QObject
     // item and not a Window.color in the first place.
     Q_PROPERTY(QQuickWindow *window READ window WRITE setWindow NOTIFY windowChanged)
 
-    // Whichever shell is live, or null. Null is normal — under --gallery there
+    // Whichever shell is live, or null. Null is normal — in the gallery there
     // is no shell at all — and every use of it below says so rather than
     // throwing, because a poke that cannot land should report that and let the
     // rest of the list through.
@@ -93,6 +108,31 @@ class ScreenshotController : public QObject
     // is meaningless rather than merely ignored on the desktop, and this is how
     // it knows to say so.
     Q_PROPERTY(bool mobile READ mobile WRITE setMobile NOTIFY mobileChanged)
+
+    // ---- what to capture ---------------------------------------------------
+    //
+    // MEMBER rather than the READ/WRITE pairs above, and that is a judgement
+    // about what these are: write-once inputs assigned by one binding each and
+    // read once, in start(). A hand-written setter per line would be ten
+    // identical setters, and moc's generated one already compares before it
+    // emits. The four properties above keep their accessors because C++ reads
+    // them too.
+    Q_PROPERTY(QString grab   MEMBER m_grab   NOTIFY grabChanged)
+    Q_PROPERTY(QString film   MEMBER m_film   NOTIFY filmChanged)
+    Q_PROPERTY(int     frames MEMBER m_frames NOTIFY framesChanged)
+    Q_PROPERTY(int     every  MEMBER m_every  NOTIFY everyChanged)
+
+    // ---- what to do to the scene first -------------------------------------
+    //
+    // Declared in every build, like AppOptions' are and for the same reason:
+    // only their *use* is behind CLIMA_DEV_TOOLS, so a packaged build still
+    // loads a Main.qml that binds them. See appoptions.h.
+    Q_PROPERTY(QStringList pokes  MEMBER m_pokes  NOTIFY pokesChanged)
+    Q_PROPERTY(int         walk   MEMBER m_walk   NOTIFY walkChanged)
+    Q_PROPERTY(qreal       scroll MEMBER m_scroll NOTIFY scrollChanged)
+    Q_PROPERTY(QString     metric MEMBER m_metric NOTIFY metricChanged)
+    Q_PROPERTY(int         day    MEMBER m_day    NOTIFY dayChanged)
+    Q_PROPERTY(bool        list   MEMBER m_list   NOTIFY listChanged)
 
 public:
     explicit ScreenshotController(QObject *parent = nullptr);
@@ -122,6 +162,16 @@ Q_SIGNALS:
     void shellChanged();
     void galleryChanged();
     void mobileChanged();
+    void grabChanged();
+    void filmChanged();
+    void framesChanged();
+    void everyChanged();
+    void pokesChanged();
+    void walkChanged();
+    void scrollChanged();
+    void metricChanged();
+    void dayChanged();
+    void listChanged();
 
 private:
     // Grabs contentItem, writes it, quits. Quitting is the point as much as the
@@ -148,11 +198,30 @@ private:
     QQuickItem   *m_shell   = nullptr;
     QQuickItem   *m_gallery = nullptr;
     bool          m_mobile  = false;
-    QString       m_grabFile;
+
+    QString       m_grab;
+    QString       m_film;
+    // The two filming defaults are the ones the QML Timer carried before any of
+    // this was C++: eight frames, one every 60 ms. They are duplicated in
+    // AppOptions because --frames and --every are only ever a way of overriding
+    // them, and a caller that does not offer those flags — the gallery does, a
+    // future test harness might not — still gets a working reel.
+    int           m_frames  = 8;
+    int           m_every   = 60;
+
+    QStringList   m_pokes;
+    int           m_walk    = 0;
+    // Every "unset" here is a value the corresponding flag could not legally
+    // produce, so nothing needs a second has-it boolean: -1 px of scroll is not
+    // a scroll and day -1 is not a day.
+    qreal         m_scroll  = -1;
+    QString       m_metric;
+    int           m_day     = -1;
+    bool          m_list    = false;
 
 #ifdef CLIMA_DEV_TOOLS
-    // The state flags — --metric, --day, --list — applied as soon as there is a
-    // shell to apply them to.
+    // The state flags — metric, day, list — applied as soon as there is a shell
+    // to apply them to.
     void applyOpeningState();
 
     // --poke target=value, applied either at 500 ms (a settled poked frame for
@@ -166,7 +235,6 @@ private:
     void onFilmTick();
 
     QPauseAnimation *m_filmTicker = nullptr;
-    int m_walkSteps  = 0;
     int m_filmShot   = 0;
     int m_filmSaved  = 0;
 #endif

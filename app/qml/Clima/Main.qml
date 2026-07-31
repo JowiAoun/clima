@@ -10,8 +10,6 @@
 // backdrop, a shell, and the two rules that choose the shell.
 import QtQuick
 import QtQuick.Window
-import "sky.js" as Sky
-import "detaildata.js" as Detail
 
 Window {
     id: win
@@ -47,12 +45,13 @@ Window {
     // constellation to be anything but noise behind a chart. A phone is the
     // opposite: the hero sits directly on the sky with no card at all.
     //
-    // detaildata.sun is the clock, because it is the one that carries minutes,
-    // and dawn and dusk are the seventy minutes either side of a crossing.
+    // Clock owns what time it is and which of the four phases that falls in, so
+    // that the component gallery's window — which paints this same backdrop —
+    // reads the hour from the same place rather than from its own copy of the
+    // same three arguments.
     readonly property string skyPhase:
         AppOptions.sky !== "" ? AppOptions.sky
-      : (win.mobile ? Sky.phaseAt(Detail.sun.nowMin, Detail.sun.riseMin, Detail.sun.setMin)
-                    : "dusk")
+                              : (win.mobile ? Clock.skyPhase : "dusk")
 
     // The page background is painted as an item, not left to Window.color.
     // grabToImage() captures contentItem, which does not include the window's
@@ -62,12 +61,6 @@ Window {
         anchors.fill: parent
         phase: win.skyPhase
         stars: win.mobile || AppOptions.sky !== ""
-    }
-
-    // --card, --details and --gallery. Inactive unless one of them was passed.
-    DevPreviews {
-        id: previews
-        anchors.fill: parent
     }
 
     // The app itself. Two shells, one product: `WeatherPage` is the desktop's
@@ -80,8 +73,6 @@ Window {
     Loader {
         id: shellLoader
         anchors.fill: parent
-        visible: !previews.active
-        active: visible
         sourceComponent: win.mobile ? mobileShell : desktopShell
     }
 
@@ -100,32 +91,47 @@ Window {
         }
     }
 
-    // The shutters. Everything it needs is bound, so it still points at the
-    // right shell after `--viewport mobile` has swapped one for the other.
+    // The shutters. Everything it needs is bound — the scene it photographs and
+    // the flags that say what to photograph — so it still points at the right
+    // shell after `--viewport mobile` has swapped one for the other, and so it
+    // does not have to know that AppOptions is where this app's flags happen to
+    // live. clima-gallery binds the same properties off a different parser.
+    //
+    // `gallery` is left unbound: there is no gallery in this executable any
+    // more, which is the whole point of the commit that moved it out.
     ScreenshotController {
         id: capture
         window: win
         shell: shellLoader.item as Item
-        gallery: previews.gallery
         mobile: win.mobile
+
+        grab:   AppOptions.grab
+        film:   AppOptions.film
+        frames: AppOptions.frames
+        every:  AppOptions.every
+
+        pokes:  AppOptions.pokes
+        scroll: AppOptions.scroll
+        metric: AppOptions.metric
+        day:    AppOptions.day
+        list:   AppOptions.list
     }
 
     // ---- window geometry ---------------------------------------------------
-    // Four sources, and the order between them is the whole design:
+    // Three sources, and the order between them is the whole design:
     //
     //   1. a remembered size, weakest, and only when nothing else spoke
     //   2. --viewport's preset
     //   3. --size, which overrides the preset so `--viewport mobile --size
     //      390x1600` grabs a tall phone rather than fighting over the window
-    //   4. the gallery's floor, which asks rather than insists
     //
     // A capture restores nothing at all. A golden image whose size depends on
     // where the developer last left the window is not a golden image, and the
     // symmetry matters as much as the rule: a run that did not restore does not
-    // save either, so `--grab` and `--gallery` cannot quietly rewrite the size
-    // the reader will get next time they open the app.
+    // save either, so `--grab` cannot quietly rewrite the size the reader will
+    // get next time they open the app.
     readonly property bool geometryFromFlags:
-        AppOptions.hasSize || AppOptions.viewport !== "" || AppOptions.gallery
+        AppOptions.hasSize || AppOptions.viewport !== ""
     readonly property bool geometryRemembered:
         !AppOptions.capturing && !win.geometryFromFlags
 
@@ -139,11 +145,11 @@ Window {
         }
 
         var preset = AppOptions.viewport !== "" ? Viewports.byId(AppOptions.viewport) : null
-        if (preset !== null && !AppOptions.gallery) {
+        if (preset !== null) {
             win.forcedViewport = preset.id
             win.width = preset.w
             win.height = preset.h
-        } else if (preset === null && AppOptions.viewport !== "") {
+        } else if (AppOptions.viewport !== "") {
             // The parser accepted an id Viewports has never heard of, which
             // means the two lists have drifted. Say so here rather than opening
             // a desktop window and letting the flag look inert.
@@ -153,13 +159,6 @@ Window {
         if (AppOptions.hasSize) {
             win.width = AppOptions.sizeWidth
             win.height = AppOptions.sizeHeight
-        }
-
-        if (AppOptions.gallery && !AppOptions.hasSize) {
-            // Room for the rail plus a stage, but only when nobody said
-            // otherwise — hence Math.max and not an assignment.
-            win.width = Math.max(win.width, 1500)
-            win.height = Math.max(win.height, 950)
         }
 
         // Last, and that is the point: every flag above can change which shell

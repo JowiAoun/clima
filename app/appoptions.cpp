@@ -23,12 +23,14 @@ namespace {
 // gets a screenshot: the issue template says "attach `clima --grab bug.png`",
 // and a user cannot do that with a flag that only exists in a developer build.
 //
-// Everything else is CLIMA_DEV_TOOLS-only. --film, --poke, --walk and --scroll
-// drive the capture harness; --sky, --metric, --day, --list and --tab put the
-// app into a state a screenshot wants to catch; --gallery, --card and --details
-// open one of the three preview modes, and those three are on their way out of
-// this executable entirely — the component gallery becomes its own binary, at
-// which point they leave with it.
+// Everything else is CLIMA_DEV_TOOLS-only. --film, --poke and --scroll drive
+// the capture harness; --sky, --metric, --day, --list and --tab put the app
+// into a state a screenshot wants to catch.
+//
+// --gallery, --card and --details are gone rather than conditional. They opened
+// the three preview modes, the preview modes are `clima-gallery` now, and a
+// weather app that still answered to `--gallery` by opening a component library
+// would be the same mistake in a smaller font.
 //
 // The properties on AppOptions exist in every build regardless; see the header.
 
@@ -44,12 +46,17 @@ namespace {
     std::exit(EXIT_FAILURE);
 }
 
+#ifdef CLIMA_DEV_TOOLS
 // Every numeric flag in this parser wants the same three things: the value has
 // to be a whole number, it has to clear a floor, and a failure has to name the
 // flag rather than the number. Written once because it was written five times
 // in the QML and two of the five got the NaN check subtly wrong — parseInt()
 // coerces to 0 on the way into an int property, so a check made after the
 // assignment was testing the coercion rather than the input.
+//
+// Guarded, because every flag that takes a number — --frames, --every, --day —
+// is a dev-tools flag, so a packaged build compiles this to nothing and would
+// otherwise carry an unused-function warning for it.
 int requireInt(const QCommandLineParser &parser, const QCommandLineOption &option,
                int minimum, const char *what)
 {
@@ -61,6 +68,7 @@ int requireInt(const QCommandLineParser &parser, const QCommandLineOption &optio
                  .arg(option.names().constFirst(), QString::fromUtf8(what), raw));
     return value;
 }
+#endif // CLIMA_DEV_TOOLS
 
 AppOptions *g_instance = nullptr;
 
@@ -160,7 +168,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     const QCommandLineOption pokeOption(
         QStringLiteral("poke"),
         QStringLiteral("Apply <target>=<value> once the scene has settled; repeatable. "
-                       "Targets: metric, day, list, feels, scroll, tab, flick, remount."),
+                       "Targets: metric, day, list, feels, scroll, tab, flick."),
         QStringLiteral("target=value"));
     parser.addOption(pokeOption);
 
@@ -199,35 +207,6 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("px"));
     parser.addOption(scrollOption);
 
-    // ---- previews ----------------------------------------------------------
-    const QCommandLineOption galleryOption(
-        QStringLiteral("gallery"),
-        QStringLiteral("Open the component library instead of the app. A component name may "
-                       "follow, unquoted."));
-    parser.addOption(galleryOption);
-
-    const QCommandLineOption walkOption(
-        QStringLiteral("walk"),
-        QStringLiteral("With --gallery: step <n> components on before grabbing, so a headless "
-                       "check exercises navigation and not only first paint."),
-        QStringLiteral("n"));
-    parser.addOption(walkOption);
-
-    const QCommandLineOption cardOption(
-        QStringLiteral("card"),
-        QStringLiteral("Render one detail card alone on the page gradient, e.g. Uv."),
-        QStringLiteral("name"));
-    parser.addOption(cardOption);
-
-    const QCommandLineOption detailsOption(
-        QStringLiteral("details"), QStringLiteral("Render the weather-details grid on its own."));
-    parser.addOption(detailsOption);
-
-    parser.addPositionalArgument(QStringLiteral("component"),
-                                 QStringLiteral("With --gallery: which component to show. Every "
-                                                "word up to the next flag, so `--gallery weather "
-                                                "glyph` works without quotes."),
-                                 QStringLiteral("[component…]"));
 #endif // CLIMA_DEV_TOOLS
 
     // Handles --help and --version, and exits on an unknown flag. That last one
@@ -308,23 +287,18 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         self->m_scroll = distance;
     }
 
-    // ---- previews ----------------------------------------------------------
-    if (parser.isSet(cardOption))
-        self->m_card = parser.value(cardOption);
-    self->m_details = parser.isSet(detailsOption);
-    self->m_gallery = parser.isSet(galleryOption);
-
-    if (parser.isSet(walkOption))
-        self->m_walk = requireInt(parser, walkOption, 0, "a count >= 0");
-
-    // The only positional arguments this program takes are the gallery's, so a
-    // stray word without --gallery is a typo — most likely a flag that lost its
-    // dashes. Saying so beats opening the forecast and ignoring it.
-    const QStringList words = parser.positionalArguments();
-    if (!words.isEmpty() && !self->m_gallery)
-        fail(QStringLiteral("unexpected argument \"%1\" — a component name is only "
-                            "meaningful with --gallery")
-                 .arg(words.constFirst()));
-    self->m_galleryPick = words.join(QLatin1Char(' '));
 #endif // CLIMA_DEV_TOOLS
+
+    // This program takes no positional arguments at all — it took one, and that
+    // one was the gallery's component name, which left with the gallery. A
+    // stray word is therefore a typo, most likely a flag that lost its dashes,
+    // and saying so beats opening the forecast and ignoring it.
+    //
+    // Outside the CLIMA_DEV_TOOLS block because it is not a dev-tools rule: a
+    // packaged `clima Toronto` should be told that this is not how you pick a
+    // location either.
+    const QStringList words = parser.positionalArguments();
+    if (!words.isEmpty())
+        fail(QStringLiteral("unexpected argument \"%1\" — clima takes options, not arguments")
+                 .arg(words.constFirst()));
 }

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// The component catalogue behind `./run.sh --gallery`.
+// The component catalogue behind `clima-gallery`.
 //
 // One entry per component, grouped. An entry names the file to instantiate and
 // the properties to instantiate it with, so adding a component to the gallery
@@ -30,8 +30,18 @@
 // has none either.
 .pragma library
 
-.import "theme.js" as Theme
-.import "precip.js" as Precip
+// One directory up, because that is where the Clima module is: this file is in
+// Clima.Gallery, which maps to `qrc:/qt/qml/Clima/Gallery/`, and theme.js and
+// precip.js are part of Clima at `qrc:/qt/qml/Clima/`. There is no
+// module-qualified spelling of a JavaScript import in QML — `.import Clima 1.0`
+// would bring in the module's *types*, and a `.pragma library` cannot reach a
+// QML singleton anyway, which is the reason theme.js still exists as a data
+// file at all (see Theme.qml).
+//
+// So it is a relative URL, and the relationship it encodes is the real one: a
+// submodule's parent module is one directory up.
+.import "../theme.js" as Theme
+.import "../precip.js" as Precip
 
 // A gentle curve for the series specimens, so the two chart primitives have
 // something to draw. Sample input for a catalogue, not weather.

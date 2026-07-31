@@ -1,17 +1,22 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// The component gallery: every component in the prototype, on one screen, on
-// the gradient it is actually composited over.
+// The component gallery: every component in the app, on one screen, on the
+// gradient it is actually composited over.
 //
-// It exists because almost every defect found in this prototype so far was
+// It exists because almost every defect found in this design so far was
 // invisible in the code and obvious in a render — and because a component is
 // easiest to get wrong in the states no current screen happens to use. The
 // catalogue is gallery.js; this file is only the browser around it.
 //
-//   ./run.sh --gallery              open it
-//   ./run.sh --gallery uv           open it on a particular component
-//   ./run.sh --grab g.png --gallery --size 1500x950
+//   clima-gallery                        open it
+//   clima-gallery uv                     open it on a particular component
+//   clima-gallery --grab g.png --size 1500x950
+//
+// `import Clima` is what makes the components on the stage the app's components
+// rather than a copy of them: Theme, Viewports and PageBackdrop come from it
+// here, and every specimen comes from it in Specimen.qml.
 import QtQuick
+import Clima
 import "gallery.js" as Catalogue
 
 Item {
@@ -589,7 +594,7 @@ Item {
 
                         Specimen {
                             id: spec
-                            source: root.current.file
+                            file: root.current.file
                             props: cell.modelData.props ? cell.modelData.props : ({})
                             stageWidth: root.stageW(root.current)
                             stageHeight: root.stageH(root.current)

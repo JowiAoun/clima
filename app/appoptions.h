@@ -30,6 +30,19 @@
 // message listing what is accepted, which is a loud failure rather than a
 // quiet one.
 //
+// gallery/galleryoptions.cpp calls viewportIds() and skyPhases() rather than
+// writing the words out again. Two binaries in one repository that disagree
+// about whether `tablet` is a viewport is a bug report nobody can reproduce,
+// and the whole argument for a vocabulary living in one place applies twice as
+// hard once there are two parsers reading from it.
+//
+// ---- what this file is *not* any more ---------------------------------------
+// `--gallery`, `--card` and `--details` used to be here. They are the component
+// gallery's flags and the component gallery is `clima-gallery` now, so they
+// went with it: the weather app rejects all three, and rejects them by name
+// rather than ignoring them, which is what QCommandLineParser does with a flag
+// it was never told about.
+//
 // ---- every property is declared unconditionally ------------------------------
 // Half these flags are CLIMA_DEV_TOOLS-only (see the FLAG DISPOSITION comment
 // in the .cpp). Only their *registration with the parser* is conditional: the
@@ -77,13 +90,6 @@ class AppOptions : public QObject
     Q_PROPERTY(bool    list   READ list   CONSTANT)
     Q_PROPERTY(qreal   scroll READ scroll CONSTANT)
 
-    // ---- previews (dev tools; moving to their own executable) --------------
-    Q_PROPERTY(QString card        READ card        CONSTANT)
-    Q_PROPERTY(bool    details     READ details     CONSTANT)
-    Q_PROPERTY(bool    gallery     READ gallery     CONSTANT)
-    Q_PROPERTY(QString galleryPick READ galleryPick CONSTANT)
-    Q_PROPERTY(int     walk        READ walk        CONSTANT)
-
 public:
     // Parses argv into the process-wide instance. Call from main() *before*
     // the QML engine loads anything, because Main.qml reads these at
@@ -126,11 +132,6 @@ public:
     int         day()         const { return m_day; }
     bool        list()        const { return m_list; }
     qreal       scroll()      const { return m_scroll; }
-    QString     card()        const { return m_card; }
-    bool        details()     const { return m_details; }
-    bool        gallery()     const { return m_gallery; }
-    QString     galleryPick() const { return m_galleryPick; }
-    int         walk()        const { return m_walk; }
 
 private:
     // Private, and that is not tidiness — it is what makes create() run.
@@ -164,9 +165,4 @@ private:
     int         m_day         = -1;
     bool        m_list        = false;
     qreal       m_scroll      = -1;
-    QString     m_card;
-    bool        m_details     = false;
-    bool        m_gallery     = false;
-    QString     m_galleryPick;
-    int         m_walk        = 0;
 };

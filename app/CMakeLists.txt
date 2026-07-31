@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Jowi Aoun
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# The application: one executable, one QML module.
+# The application: one QML module, and one executable that loads it.
 #
 # The module is flat on purpose. Splitting it into views/, components/ and
 # theme/ is a good idea and it is a separate commit — this one already moves 73
@@ -28,6 +28,7 @@ configure_file(climaconfig.h.in climaconfig.h @ONLY)
 set(clima_qml_files
     qml/Clima/BottomNav.qml
     qml/Clima/ChevronGlyph.qml
+    qml/Clima/Clock.qml
     qml/Clima/CurrentConditions.qml
     qml/Clima/DayIconBadge.qml
     qml/Clima/DayStrip.qml
@@ -44,10 +45,8 @@ set(clima_qml_files
     qml/Clima/DetailUvCard.qml
     qml/Clima/DetailVisibilityCard.qml
     qml/Clima/DetailWindCard.qml
-    qml/Clima/DevPreviews.qml
     qml/Clima/DropletGlyph.qml
     qml/Clima/FeelsLikeToggle.qml
-    qml/Clima/Gallery.qml
     qml/Clima/HatchPattern.qml
     qml/Clima/HourlyList.qml
     qml/Clima/HourlyOverview.qml
@@ -83,7 +82,6 @@ set(clima_qml_files
     qml/Clima/SeriesArea.qml
     qml/Clima/SeriesBars.qml
     qml/Clima/SkyArc.qml
-    qml/Clima/Specimen.qml
     qml/Clima/SunEventGlyph.qml
     qml/Clima/TabFillet.qml
     qml/Clima/Theme.qml
@@ -103,7 +101,6 @@ set(clima_qml_files
 set(clima_js_files
     qml/Clima/chartmath.js
     qml/Clima/detaildata.js
-    qml/Clima/gallery.js
     qml/Clima/metrics.js
     qml/Clima/mobiletabs.js
     qml/Clima/mockdata.js
@@ -125,6 +122,7 @@ set(clima_js_files
 # clima_qml_files. Check `build/dev/qml/Clima/qmldir` if a singleton comes back
 # undefined; the word `singleton` is either on its line or it is not.
 set_source_files_properties(
+    qml/Clima/Clock.qml
     qml/Clima/Theme.qml
     qml/Clima/Viewports.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
@@ -144,21 +142,34 @@ set_source_files_properties(
 # and its qmldir entries all read `qml/Clima/Foo.qml`.
 #
 # Aliasing each file to its bare name puts the module where its URI says it is.
+# gallery/CMakeLists.txt does the same thing for the same reason, and the two
+# together are what make `../theme.js` mean what it says from inside
+# Clima.Gallery.
 foreach(clima_file IN LISTS clima_qml_files clima_js_files)
     get_filename_component(clima_file_name "${clima_file}" NAME)
     set_source_files_properties("${clima_file}"
         PROPERTIES QT_RESOURCE_ALIAS "${clima_file_name}")
 endforeach()
 
-qt_add_executable(clima
-    main.cpp
-)
+# ---- the module is a library ------------------------------------------------
+#
+# Not a module baked straight into the executable, which is what this was until
+# the gallery moved out. The reason is one directory over: `gallery/` builds a
+# second executable whose entire job is to instantiate the types below, and a
+# QML module that lives inside `clima` is a module only `clima` can import.
+#
+# STATIC rather than SHARED. There is one repository, one release, and two
+# consumers that are always built together; a .so would buy nothing here but an
+# RPATH to get wrong and a second file for a packager to place. Note that this
+# is about *our* code — Qt itself is still linked dynamically, which is not a
+# preference but LGPLv3 (risk R3, docs/08-risks.md).
+qt_add_library(climaqml STATIC)
 
 # ---- the C++ that QML can see -----------------------------------------------
 #
-# These go in SOURCES rather than in qt_add_executable, and the difference is
-# not cosmetic: qmltyperegistrar only scans what the *module* was told about, so
-# a header carrying QML_ELEMENT that is listed on the executable instead
+# These go in SOURCES rather than on the library, and the difference is not
+# cosmetic: qmltyperegistrar only scans what the *module* was told about, so a
+# header carrying QML_ELEMENT that is listed as an ordinary source instead
 # compiles fine, links fine, and then does not exist as a QML type. The failure
 # names the QML file that used it.
 #
@@ -175,7 +186,7 @@ set(clima_cpp_sources
     devtools/screenshotcontroller.cpp
 )
 
-qt_add_qml_module(clima
+qt_add_qml_module(climaqml
     URI Clima
     VERSION 1.0
     QML_FILES
@@ -185,13 +196,17 @@ qt_add_qml_module(clima
         ${clima_cpp_sources}
 )
 
-# The binary dir is where configure_file put climaconfig.h. The other two are
-# for a file nobody writes: qmltyperegistrar generates
-# clima_qmltyperegistrations.cpp with an `#include <screenshotcontroller.h>` —
-# basename only, no directory — so every directory holding a QML_ELEMENT header
-# has to be reachable that way or the generated file names a type that "was not
-# declared in this scope".
-target_include_directories(clima PRIVATE
+# PUBLIC, all three, and each for its own reason.
+#
+# The binary dir is where configure_file put climaconfig.h, and both executables
+# print the version it carries. The source dir is what lets the gallery reuse
+# AppOptions' viewport and sky vocabularies rather than keeping a second copy of
+# two lists that must not disagree. The devtools dir is for a file nobody
+# writes: qmltyperegistrar generates clima_qmltyperegistrations.cpp with an
+# `#include <screenshotcontroller.h>` — basename only, no directory — so every
+# directory holding a QML_ELEMENT header has to be reachable that way or the
+# generated file names a type that "was not declared in this scope".
+target_include_directories(climaqml PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/devtools
@@ -199,17 +214,38 @@ target_include_directories(clima PRIVATE
 
 # The option has existed since the CMake skeleton landed; this is where it
 # starts meaning something. OFF compiles out --film, --poke, --walk, --scroll,
-# --sky, --metric, --day, --list, --tab and the three preview flags, leaving
-# --grab, --size and --viewport.
+# --sky, --metric, --day, --list and --tab, leaving --grab, --size and
+# --viewport.
+#
+# PUBLIC because it changes the shape of ScreenshotController — a member the
+# library was compiled with and a consumer was not is an ODR violation that
+# links cleanly and corrupts memory at runtime.
 if(CLIMA_DEV_TOOLS)
-    target_compile_definitions(clima PRIVATE CLIMA_DEV_TOOLS)
+    target_compile_definitions(climaqml PUBLIC CLIMA_DEV_TOOLS)
 endif()
 
 # Qt6::Quick and nothing else, because QtQuick and QtQuick.Shapes are the only
 # two modules the QML imports (QtQuick.Window ships inside Quick) and both come
 # from this one target. Adding a component "in case" is how a banned module
 # arrives — see cmake/ClimaLicenceGuard.cmake.
-target_link_libraries(clima PRIVATE Qt6::Quick)
+target_link_libraries(climaqml PUBLIC Qt6::Quick)
+
+clima_guard_target(climaqml)
+
+# ---- the executable ---------------------------------------------------------
+#
+# Both targets, and neither is redundant. qt_add_qml_module generates
+# `climaqmlplugin` beside the backing library, and the plugin is what registers
+# the module with the engine — link only `climaqml` and the app builds, links,
+# and comes up against an engine that has never heard of `Clima`. But the plugin
+# links its backing library privately, so its usage requirements — Qt6::Quick,
+# and the three include directories below — stop there. Link only the plugin and
+# main.cpp cannot find <QQmlEngine>.
+qt_add_executable(clima
+    main.cpp
+)
+
+target_link_libraries(clima PRIVATE climaqml climaqmlplugin)
 
 clima_guard_target(clima)
 

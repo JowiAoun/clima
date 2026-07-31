@@ -3,13 +3,13 @@
 
 #include "devtools/screenshotcontroller.h"
 
-#include "appoptions.h"
-
 #include <QCoreApplication>
 #include <QPauseAnimation>
 #include <QQuickItem>
 #include <QQuickItemGrabResult>
 #include <QQuickWindow>
+
+#include <utility>
 
 namespace {
 
@@ -104,31 +104,32 @@ bool ScreenshotController::offer(QQuickItem *item, const char *property, const Q
 
 void ScreenshotController::start()
 {
-    const AppOptions *options = AppOptions::instance();
-
 #ifdef CLIMA_DEV_TOOLS
     // Order matters here in exactly one way and it is worth naming: the state
     // flags go on before the capture timers start, so a --grab of a --metric is
     // a grab of the metric and not of the moment before it.
     applyOpeningState();
 
-    if (options->gallery() && options->walk() > 0) {
-        m_walkSteps = options->walk();
+    // Scheduled on the count alone and not on "is there a gallery yet". There
+    // may not be: `gallery` is bound to a Loader's item, and whether that
+    // binding has run by the time a Window's Component.onCompleted calls start()
+    // is not something to depend on. onWalk asks again when it fires, which is
+    // 400 ms later and certain.
+    if (m_walk > 0)
         after(when::placement, &ScreenshotController::onWalk);
-    }
 
-    if (options->scroll() >= 0)
+    if (m_scroll >= 0)
         after(when::placement, &ScreenshotController::onScroll);
 
-    if (!options->film().isEmpty())
+    if (!m_film.isEmpty())
         after(when::film, &ScreenshotController::startFilming);
-    else if (!options->pokes().isEmpty())
+    else if (!m_pokes.isEmpty())
         // --poke without --film: apply once the scene has settled, so a plain
         // --grab captures a poked *resting* state rather than a transition.
         after(when::poke, &ScreenshotController::applyPokes);
 #endif
 
-    if (options->grab().isEmpty())
+    if (m_grab.isEmpty())
         return;
 
     // The precipitation field is the one thing on this page that moves without
@@ -138,10 +139,9 @@ void ScreenshotController::start()
     // deterministic one rather than an empty one.
     //
     // Offered rather than assigned, which is MobileShell.push()'s rule and is
-    // here for the same reason: under --gallery there is no shell at all.
+    // here for the same reason: in the gallery there is no shell at all.
     offer(m_shell, "animated", false);
 
-    m_grabFile = options->grab();
     after(when::grab, &ScreenshotController::onGrab);
 }
 
@@ -179,7 +179,7 @@ void ScreenshotController::grabTo(const QString &file, bool quitWhenSaved)
                     // when the last shutter fires. Saves are asynchronous and
                     // quitting on the shutter loses the tail of the reel.
                     ++m_filmSaved;
-                    if (m_filmSaved >= AppOptions::instance()->frames())
+                    if (m_filmSaved >= m_frames)
                         QCoreApplication::quit();
                     return;
                 }
@@ -190,32 +190,32 @@ void ScreenshotController::grabTo(const QString &file, bool quitWhenSaved)
 
 void ScreenshotController::onGrab()
 {
-    grabTo(m_grabFile, true);
+    grabTo(m_grab, true);
 }
 
 #ifdef CLIMA_DEV_TOOLS
 
 void ScreenshotController::applyOpeningState()
 {
-    const AppOptions *options = AppOptions::instance();
-
     // --tab is not here: it is the shell's own opening state rather than
     // something done to a running shell, so Main.qml hands it to MobileShell at
     // construction. Assigning it from out here would rebuild the page that has
     // just finished laying itself out.
-    if (!options->metric().isEmpty())
-        offer(m_shell, "metricId", options->metric());
-    if (options->day() >= 0)
-        offer(m_shell, "dayIndex", options->day());
-    if (options->list())
+    if (!m_metric.isEmpty())
+        offer(m_shell, "metricId", m_metric);
+    if (m_day >= 0)
+        offer(m_shell, "dayIndex", m_day);
+    if (m_list)
         offer(m_shell, "listView", true);
 }
 
 void ScreenshotController::onWalk()
 {
-    if (m_gallery == nullptr)
+    if (m_gallery == nullptr) {
+        qWarning("--walk: only meaningful in the component gallery");
         return;
-    for (int i = 0; i < m_walkSteps; ++i)
+    }
+    for (int i = 0; i < m_walk; ++i)
         QMetaObject::invokeMethod(m_gallery, "step", Q_ARG(QVariant, QVariant(1)));
 }
 
@@ -223,22 +223,20 @@ void ScreenshotController::onScroll()
 {
     if (m_shell == nullptr)
         return;
-    const qreal target = AppOptions::instance()->scroll();
-    const qreal limit  = m_shell->property("maxContentY").toReal();
-    offer(m_shell, "contentY", qMin(target, limit));
+    const qreal limit = m_shell->property("maxContentY").toReal();
+    offer(m_shell, "contentY", qMin(m_scroll, limit));
 }
 
 void ScreenshotController::applyPokes()
 {
-    const QStringList pokes = AppOptions::instance()->pokes();
-    for (const QString &poke : pokes) {
+    for (const QString &poke : std::as_const(m_pokes)) {
         const qsizetype split = poke.indexOf(QLatin1Char('='));
         const QString target  = poke.left(split);
         const QString value   = poke.mid(split + 1);
         const bool on         = value == QLatin1String("true") || value == QLatin1String("1");
 
-        // Every target below except `remount` lives on the shell, and under
-        // --gallery there is no shell. Warning beats throwing: a poke that
+        // Every target below except `remount` lives on the shell, and in
+        // clima-gallery there is no shell. Warning beats throwing: a poke that
         // cannot land should say so, not abort the rest of the list.
         if (target != QLatin1String("remount") && m_shell == nullptr) {
             qWarning("--poke %s: no shell is running", qPrintable(target));
@@ -277,7 +275,7 @@ void ScreenshotController::applyPokes()
             if (m_gallery != nullptr)
                 QMetaObject::invokeMethod(m_gallery, "remount");
             else
-                qWarning("--poke remount: only meaningful with --gallery");
+                qWarning("--poke remount: only meaningful in the component gallery");
         } else {
             qWarning("--poke: unknown target %s", qPrintable(target));
         }
@@ -289,7 +287,7 @@ void ScreenshotController::startFilming()
     // Looping rather than restarted, which is how a QML Timer with repeat:true
     // behaves: the loop boundary is the tick, so the interval cannot drift by
     // however long the previous tick's work took.
-    m_filmTicker = new QPauseAnimation(AppOptions::instance()->every(), this);
+    m_filmTicker = new QPauseAnimation(m_every, this);
     m_filmTicker->setLoopCount(-1);
     connect(m_filmTicker, &QAbstractAnimation::currentLoopChanged, this,
             &ScreenshotController::onFilmTick);
@@ -298,14 +296,12 @@ void ScreenshotController::startFilming()
 
 void ScreenshotController::onFilmTick()
 {
-    const AppOptions *options = AppOptions::instance();
-
     // On the second tick, so frame 00 is a settled "before" that has definitely
     // rendered and frame 01 is the first moment of change.
     if (m_filmShot == 1)
         applyPokes();
 
-    if (m_filmShot >= options->frames()) {
+    if (m_filmShot >= m_frames) {
         // Stop the ticker but not the process: the saves are still in flight,
         // and the last one to land is what quits.
         m_filmTicker->stop();
@@ -314,7 +310,7 @@ void ScreenshotController::onFilmTick()
 
     const int index = m_filmShot++;
     const QString name = QStringLiteral("%1-%2.png")
-                             .arg(options->film(), QString::number(index).rightJustified(2, u'0'));
+                             .arg(m_film, QString::number(index).rightJustified(2, u'0'));
     grabTo(name, false);
 }
 

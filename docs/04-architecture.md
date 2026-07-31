@@ -90,6 +90,7 @@ clima/
 │   ├── qml/
 │   │   ├── views/  components/  theme/
 │   └── assets/                   # Meteocons → generated QML
+├── gallery/                      # `clima-gallery` — every component on one screen, ships nowhere
 ├── cli/                          # `clima-cli` — scriptable forecast output
 ├── platform/
 │   ├── linux/                    # desktop file, appstream, portals, tray, Plasma applet
