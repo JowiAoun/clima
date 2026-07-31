@@ -22,7 +22,6 @@
 // grounds that chrome around a placeholder is a mock of a mock.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 
 Item {
     id: root

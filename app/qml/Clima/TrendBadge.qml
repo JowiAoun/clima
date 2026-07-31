@@ -27,7 +27,6 @@
 // bold word is the twelve-cards-at-once flicker that rule exists to prevent.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 
 Item {
     id: root

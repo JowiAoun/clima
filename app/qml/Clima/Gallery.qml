@@ -12,9 +12,7 @@
 //   ./run.sh --gallery uv           open it on a particular component
 //   ./run.sh --grab g.png --gallery --size 1500x950
 import QtQuick
-import "theme.js" as Theme
 import "gallery.js" as Catalogue
-import "viewports.js" as Viewports
 
 Item {
     id: root
@@ -646,9 +644,13 @@ Item {
             width: pane.width
 
             Repeater {
-                // Read off theme.js rather than transcribed, so a token added
+                // Read off the theme rather than transcribed, so a token added
                 // there appears here without anyone remembering to add it.
-                model: Object.keys(Theme.color)
+                // Theme.names() and not Object.keys(): a token group is a
+                // QObject now, and Object.keys() on one of those hands back
+                // `objectName` and a change signal per token alongside the
+                // names anybody wanted.
+                model: Theme.names(Theme.color)
 
                 delegate: Column {
                     required property var modelData
@@ -685,7 +687,7 @@ Item {
             width: pane.width
 
             Repeater {
-                model: Object.keys(Theme.type)
+                model: Theme.names(Theme.type)
 
                 delegate: Row {
                     required property var modelData

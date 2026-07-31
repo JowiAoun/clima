@@ -13,7 +13,6 @@
 import QtQuick
 import QtQuick.Shapes
 import "chartmath.js" as ChartMath
-import "theme.js" as Theme
 import "mockdata.js" as Data
 import "metrics.js" as Metrics
 

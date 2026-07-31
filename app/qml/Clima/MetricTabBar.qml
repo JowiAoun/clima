@@ -15,7 +15,6 @@
 // has no position and a switch with one indicator does.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "metrics.js" as Metrics
 
 Item {

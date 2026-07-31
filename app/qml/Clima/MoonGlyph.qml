@@ -3,7 +3,6 @@
 // Moon phase disc for the legend: unlit body plus the illuminated limb.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 
 Item {

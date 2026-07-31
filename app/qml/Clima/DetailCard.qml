@@ -20,7 +20,6 @@
 //       content: MyVisualisation { anchors.fill: parent }
 //   }
 import QtQuick
-import "theme.js" as Theme
 
 Item {
     id: root

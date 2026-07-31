@@ -8,7 +8,6 @@
 // aligned panel rather than as two things.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "detaildata.js" as Detail
 
 Item {

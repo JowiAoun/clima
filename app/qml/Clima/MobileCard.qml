@@ -24,7 +24,6 @@
 // needs it: its shaded band is a horizon that runs edge to edge, and a band
 // with 16 px of card showing either side of it stops reading as one.
 import QtQuick
-import "theme.js" as Theme
 
 Item {
     id: root

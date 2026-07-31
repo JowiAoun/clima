@@ -28,7 +28,6 @@
 // set-before-rise night on the same footing as the sun's rise-before-set day.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 import "detaildata.js" as Detail
 

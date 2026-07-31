@@ -47,7 +47,6 @@
 // card ease between column counts would read as lag, not as a layout.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 import "detaildata.js" as Detail
 

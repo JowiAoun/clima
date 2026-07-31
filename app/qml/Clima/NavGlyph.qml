@@ -18,7 +18,6 @@
 // difference between the two screens, and two unrelated pictures would hide it.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 
 Item {
     id: root

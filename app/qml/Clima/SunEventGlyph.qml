@@ -7,7 +7,6 @@
 // the whole glyph.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 
 Item {
     id: root

@@ -22,7 +22,6 @@
 // there is one day of hourly data behind it. The strip is wired, the data is
 // not; when a provider arrives, this is one binding.
 import QtQuick
-import "theme.js" as Theme
 import "detaildata.js" as Detail
 import "mockdata.js" as Data
 

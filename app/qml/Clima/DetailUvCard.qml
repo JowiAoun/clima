@@ -15,7 +15,6 @@
 // the dot — the coloured arc is carrying the value, not decorating it.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 import "detaildata.js" as Detail
 

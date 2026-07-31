@@ -18,7 +18,6 @@
 // that arrived with its fill would leave the first frames with eight bars and
 // nothing to judge them by.
 import QtQuick
-import "theme.js" as Theme
 import "detaildata.js" as Detail
 
 DetailCard {

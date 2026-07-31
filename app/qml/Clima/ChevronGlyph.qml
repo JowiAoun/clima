@@ -12,7 +12,6 @@
 // and disclosure is the caller's business, not the glyph's.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 
 Item {
     id: root

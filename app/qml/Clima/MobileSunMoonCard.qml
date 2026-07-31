@@ -17,7 +17,6 @@
 // arcs side by side sweeping on their own timers reads as a race, and there is
 // nothing about the sun and the moon that makes one arrive before the other.
 import QtQuick
-import "theme.js" as Theme
 import "detaildata.js" as Detail
 
 Item {

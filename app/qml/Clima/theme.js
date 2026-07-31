@@ -3,6 +3,18 @@
 // Design tokens for the hourly overview prototype.
 // These become the real Clima design system later; keep them in one place so the
 // whole chart can be re-skinned without touching layout code.
+//
+// **Nothing in the tree reads this file directly any more — read Theme.qml.**
+// This is the table; Theme.qml is the singleton that republishes it as QML
+// properties, which is what lets a binding on a token be re-evaluated when the
+// token changes. A `.pragma library` is evaluated once per engine and never
+// notifies anyone of anything, so a colour read out of here is a colour decided
+// at first paint and never revisited.
+//
+// It stays a plain library for one reason: gallery.js is a `.pragma library`
+// too, it reads `ramp` from here, and a `.pragma library` cannot import a QML
+// singleton. Every value and every argument for a value belongs here; the
+// declarations that make them observable belong there.
 .pragma library
 
 // Surfaces are translucent, not painted.
@@ -343,9 +355,12 @@ var type = {
 // 170, 190, 340 and 430. Eight durations for four jobs. A range is not a rule.
 //
 // Easing is not in here because `Easing.OutCubic` is a QML enum and this is a
-// plain JS library. Write it literally; it is a name rather than a magic number,
-// and it greps. **OutCubic unless there is a stated reason** — things decelerate
-// into place because they are arriving, not departing.
+// plain JS library. **OutCubic unless there is a stated reason** — things
+// decelerate into place because they are arriving, not departing.
+//
+// Theme.qml can hold the enum and now does, as `Theme.motion.easing`. The sixty
+// call sites that spell it out are still spelling it out: sweeping them is a
+// commit of its own, not a rider on the one that made the tokens observable.
 var motion = {
     // A fill, a text colour, a border. Should feel instant rather than
     // animated: you are meant to notice the new colour, not the crossfade.

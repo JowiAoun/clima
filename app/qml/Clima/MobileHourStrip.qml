@@ -21,7 +21,6 @@
 // tap away and it has all four. A strip that grew them would be a worse copy
 // of the screen it exists to preview.
 import QtQuick
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 import "mockdata.js" as Data
 

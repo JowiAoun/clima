@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import QtQuick
 import QtQuick.Window
-import "theme.js" as Theme
-import "viewports.js" as Viewports
 import "sky.js" as Sky
 import "detaildata.js" as Detail
 

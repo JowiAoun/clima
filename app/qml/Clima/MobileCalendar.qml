@@ -19,7 +19,6 @@
 // surface §10.1 exists to prevent — and this is the case its note about
 // borders allows for: nothing else will do.
 import QtQuick
-import "theme.js" as Theme
 import "mockdata.js" as Data
 
 Item {

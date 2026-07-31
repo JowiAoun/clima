@@ -20,7 +20,6 @@
 // Shapes, and Shapes ignore ancestor clipping entirely — see §10.8. Without it
 // the hourly strip paints straight over the nav bar as the page scrolls.
 import QtQuick
-import "theme.js" as Theme
 
 Item {
     id: root

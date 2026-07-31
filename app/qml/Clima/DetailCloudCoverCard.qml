@@ -14,7 +14,6 @@
 // straight on to the card, and the review that found it was right.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 import "detaildata.js" as Detail
 

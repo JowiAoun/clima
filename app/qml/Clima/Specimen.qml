@@ -11,7 +11,6 @@
 // nothing. A gallery that silently omits what it cannot load is worse than no
 // gallery: it reports health it has not checked.
 import QtQuick
-import "theme.js" as Theme
 
 Item {
     id: root

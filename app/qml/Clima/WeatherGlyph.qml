@@ -7,7 +7,6 @@
 // Meteocons (MIT) converted to Qt Quick Shapes via svgtoqml — decision D10.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 
 Item {

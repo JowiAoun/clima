@@ -12,7 +12,6 @@
 // on, and measurably so: its rainy stretch shifts the area fill by about a
 // third of what it shifts the empty plot above it.
 import QtQuick
-import "theme.js" as Theme
 import "precip.js" as Precip
 
 Item {

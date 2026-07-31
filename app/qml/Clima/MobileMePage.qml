@@ -14,7 +14,6 @@
 // and the provider chooser. All three are M2 and all three need state that
 // lives above the shell.
 import QtQuick
-import "theme.js" as Theme
 import "detaildata.js" as Detail
 
 MobilePage {

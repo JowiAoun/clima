@@ -21,7 +21,6 @@
 // then it is, and the fade is what stops it appearing to have been there all
 // along. Nothing else moves — no slide, no scale, no stagger down the rows.
 import QtQuick
-import "theme.js" as Theme
 import "metrics.js" as Metrics
 
 Item {

@@ -13,7 +13,6 @@
 // is worse than one that is simply there.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 import "detaildata.js" as Detail
 

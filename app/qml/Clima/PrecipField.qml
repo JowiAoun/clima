@@ -18,7 +18,6 @@
 // there is no precipitation, when the chart is behind the list view, or under
 // `--grab`, and there is exactly one of it however heavy the weather gets.
 import QtQuick
-import "theme.js" as Theme
 import "precip.js" as Precip
 
 Item {

@@ -4,7 +4,6 @@
 // condition, a blue disc for the night one. Unselected cards show a bare glyph, so
 // the badge is part of how selection reads rather than decoration.
 import QtQuick
-import "theme.js" as Theme
 
 Item {
     id: root

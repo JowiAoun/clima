@@ -21,7 +21,6 @@
 // carry no link; a header chevron that opens nothing is the affordance
 // LocationBar's chevron note is about.
 import QtQuick
-import "theme.js" as Theme
 
 MobilePage {
     id: root

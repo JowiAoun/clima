@@ -22,7 +22,6 @@
 // stay dumb; a fillet that animated itself would animate in the gallery too,
 // where nothing is selecting anything.
 import QtQuick
-import "theme.js" as Theme
 import "mockdata.js" as Data
 
 Item {

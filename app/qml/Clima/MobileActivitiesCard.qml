@@ -11,7 +11,6 @@
 // dots down the left edge would be the strongest thing on the card and would
 // be read before the labels that say what each one is about.
 import QtQuick
-import "theme.js" as Theme
 import "detaildata.js" as Detail
 
 Item {

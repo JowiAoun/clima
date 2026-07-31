@@ -4,7 +4,6 @@
 // value = the max probability in that interval. Hours already in the past are
 // hatched rather than blank, so "no forecast here" reads as deliberate.
 import QtQuick
-import "theme.js" as Theme
 import "mockdata.js" as Data
 
 Item {

@@ -85,7 +85,9 @@ set(clima_qml_files
     qml/Clima/Specimen.qml
     qml/Clima/SunEventGlyph.qml
     qml/Clima/TabFillet.qml
+    qml/Clima/Theme.qml
     qml/Clima/TrendBadge.qml
+    qml/Clima/Viewports.qml
     qml/Clima/WeatherDetails.qml
     qml/Clima/WeatherGlyph.qml
     qml/Clima/WeatherPage.qml
@@ -107,7 +109,24 @@ set(clima_js_files
     qml/Clima/precip.js
     qml/Clima/sky.js
     qml/Clima/theme.js
-    qml/Clima/viewports.js
+)
+
+# ---- singletons -------------------------------------------------------------
+#
+# `pragma Singleton` in the file is necessary and not sufficient. Without this
+# property the generated qmldir lists the type as an ordinary component —
+# `Theme 1.0 Theme.qml` rather than `singleton Theme 1.0 Theme.qml` — and every
+# use of it fails at runtime with `Value is undefined`, naming the file that
+# read the token rather than the file that failed to become a singleton. There
+# is no build-time complaint of any kind.
+#
+# So: a file with `pragma Singleton` at the top belongs here as well as in
+# clima_qml_files. Check `build/dev/qml/Clima/qmldir` if a singleton comes back
+# undefined; the word `singleton` is either on its line or it is not.
+set_source_files_properties(
+    qml/Clima/Theme.qml
+    qml/Clima/Viewports.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 
 # ---- flattening the resource path -------------------------------------------

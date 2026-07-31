@@ -33,7 +33,6 @@
 // opened to read — is the thing being withheld, and the wave the details grid
 // already runs would then be a wave inside a wave.
 import QtQuick
-import "theme.js" as Theme
 
 Item {
     id: root

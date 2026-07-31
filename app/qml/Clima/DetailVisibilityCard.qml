@@ -29,7 +29,6 @@
 // card puts it except the three dials, which centre theirs inside the ring.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 import "detaildata.js" as Detail
 

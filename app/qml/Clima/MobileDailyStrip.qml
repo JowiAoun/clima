@@ -13,7 +13,6 @@
 // scanning ten columns for "when does it get hot" should be able to follow one
 // row of numbers without the other competing.
 import QtQuick
-import "theme.js" as Theme
 import "mockdata.js" as Data
 
 Item {

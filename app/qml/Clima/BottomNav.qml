@@ -26,7 +26,6 @@
 // glyphs and labels tint at `tint`. Nothing else moves, and nothing moves on a
 // timer — the bar is at rest until it is touched.
 import QtQuick
-import "theme.js" as Theme
 import "mobiletabs.js" as Tabs
 
 Item {

@@ -34,7 +34,6 @@
 // to `HourlyOverview`, which is the only place that can sequence it against the
 // chart underneath.
 import QtQuick
-import "theme.js" as Theme
 import "mockdata.js" as Data
 
 Item {

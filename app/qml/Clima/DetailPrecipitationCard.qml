@@ -29,7 +29,6 @@
 // silently and the strip fills in from the far end, which is where the day's
 // only chance of rain is.
 import QtQuick
-import "theme.js" as Theme
 import "detaildata.js" as Detail
 
 DetailCard {

@@ -7,7 +7,6 @@
 // off-screen bucket drew outside the card entirely. A circle plus a rotated
 // square is a coarser teardrop, but it clips like everything else.
 import QtQuick
-import "theme.js" as Theme
 
 Item {
     id: root

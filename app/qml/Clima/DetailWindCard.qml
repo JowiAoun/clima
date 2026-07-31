@@ -25,7 +25,6 @@
 // move. A speed is a reading and a reading is legible from the first frame.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "detaildata.js" as Detail
 
 DetailCard {

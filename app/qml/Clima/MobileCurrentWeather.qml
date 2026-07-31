@@ -27,7 +27,6 @@
 // wrong temperature on the one screen the app exists to show.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "chartmath.js" as ChartMath
 import "detaildata.js" as Detail
 

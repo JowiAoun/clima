@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Hand-rolled switch so the prototype needs nothing beyond QtQuick + Shapes.
 import QtQuick
-import "theme.js" as Theme
 
 Item {
     id: root

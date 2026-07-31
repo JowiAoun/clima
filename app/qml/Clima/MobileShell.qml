@@ -26,7 +26,6 @@
 // now at the second. The page underneath is not a transition, it is a
 // destination.
 import QtQuick
-import "theme.js" as Theme
 import "mobiletabs.js" as Tabs
 
 Item {

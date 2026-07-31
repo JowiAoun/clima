@@ -40,7 +40,6 @@
 // would still put drifting pinpoints behind a chart being read.
 import QtQuick
 import QtQuick.Shapes
-import "theme.js" as Theme
 import "sky.js" as Sky
 
 Rectangle {

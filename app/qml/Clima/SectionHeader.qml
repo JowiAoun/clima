@@ -10,7 +10,6 @@
 // The timestamp sits on the title's baseline rather than under it: it qualifies
 // the heading ("details, as of 12:28") rather than introducing the section.
 import QtQuick
-import "theme.js" as Theme
 
 Item {
     id: root
