@@ -368,6 +368,38 @@ void AppEngine::fetch(bool cachedOnly)
     if (!cachedOnly)
         setInFlight(+2);
 
+    // ---- why an already-finished future still has to be pumped -------------
+    //
+    // A QFutureWatcher does not call you back from setFuture(). It POSTS its
+    // call-outs to itself — QFutureWatcherBase::postCallOutEvent is a
+    // QCoreApplication::postEvent — and it does that even when the future it is
+    // handed has already finished. The `finished` signal is then delivered on
+    // the next pass of the event loop, which before exec() means "not yet, and
+    // not for a while".
+    //
+    // That is the whole of the ordering bug this function used to have, and it
+    // contradicted two comments written a metre apart. main.cpp's step 5 puts
+    // configure() ahead of the QML engine precisely so the first frame has data
+    // in it, and load() below says step 1 "is synchronous in practice — a cache
+    // hit resolves its future inside fetch()". The future did resolve inside
+    // fetch(). The ANSWER did not: it sat in the event queue while
+    // loadFromModule() built and evaluated the entire scene, so every binding in
+    // twelve detail cards was evaluated against the empty snapshot, and a
+    // fixture run — where both futures are finished before setFuture() returns —
+    // printed 469 lines of `undefined` before settling on the right numbers.
+    //
+    // sendPostedEvents() delivers what is already queued for this one watcher,
+    // now, on this stack. Nothing else is touched: a future that has not
+    // finished has posted nothing, so the live network path is exactly as it
+    // was, and the deleteLater() the handler issues is not honoured here —
+    // deferred deletes posted outside an event loop are held until one starts,
+    // which is what makes calling this from inside the handler's own call chain
+    // safe.
+    const auto deliverIfReady = [](QObject *watcher, const auto &future) {
+        if (future.isFinished())
+            QCoreApplication::sendPostedEvents(watcher, 0);
+    };
+
     // ---- forecast ----------------------------------------------------------
     auto *forecastWatcher = new QFutureWatcher<Result<ForecastAnswer>>(this);
     connect(forecastWatcher, &QFutureWatcherBase::finished, this,
@@ -400,7 +432,9 @@ void AppEngine::fetch(bool cachedOnly)
                 applyForecast(result.value().value, result.value().servedBy,
                               result.value().fromFallback);
             });
-    forecastWatcher->setFuture(m_registry->fetchForecast(request));
+    const QFuture<Result<ForecastAnswer>> forecastFuture = m_registry->fetchForecast(request);
+    forecastWatcher->setFuture(forecastFuture);
+    deliverIfReady(forecastWatcher, forecastFuture);
 
     // ---- air quality -------------------------------------------------------
     auto *airWatcher = new QFutureWatcher<Result<AirQualityAnswer>>(this);
@@ -422,7 +456,9 @@ void AppEngine::fetch(bool cachedOnly)
                 }
                 applyAirQuality(result.value().value);
             });
-    airWatcher->setFuture(m_registry->fetchAirQuality(request));
+    const QFuture<Result<AirQualityAnswer>> airFuture = m_registry->fetchAirQuality(request);
+    airWatcher->setFuture(airFuture);
+    deliverIfReady(airWatcher, airFuture);
 }
 
 void AppEngine::applyForecast(const Forecast &forecast, const QString &servedBy, bool fromFallback)
