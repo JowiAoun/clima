@@ -10,8 +10,20 @@
 // The dot is the last thing on the row, not the first. A column of coloured
 // dots down the left edge would be the strongest thing on the card and would
 // be read before the labels that say what each one is about.
+//
+// ---- these are OURS, and the card says so -----------------------------------
+//
+// Nobody publishes "do you need an umbrella". There is no such product at
+// Open-Meteo, at MET Norway or anywhere else in docs/02-data-sources.md, so
+// every verdict here is a rule Clima applies to numbers that are already on
+// this screen — the rules are written out in
+// app/viewmodels/conditionsdata.cpp's buildActivities().
+//
+// Hence the footnote. docs/08-risks.md R9 is about not fabricating, and a
+// derived verdict is not a fabrication — but a derived verdict presented in the
+// same voice as a measurement is, whether or not the arithmetic is sound. One
+// line is what the difference costs.
 import QtQuick
-import "detaildata.js" as Detail
 
 Item {
     id: root
@@ -24,7 +36,7 @@ Item {
                                   : Theme.color.statusGood
     }
 
-    implicitHeight: list.height
+    implicitHeight: list.height + note.height + 10
     height: implicitHeight
 
     Column {
@@ -84,5 +96,17 @@ Item {
                 }
             }
         }
+    }
+
+    Text {
+        id: note
+        anchors.top: list.bottom
+        anchors.topMargin: 10
+        width: parent.width
+        text: qsTr("Worked out by Clima from the forecast above — not a published forecast "
+                 + "product.")
+        color: Theme.color.textDim
+        font.pixelSize: Theme.type.label
+        wrapMode: Text.WordWrap
     }
 }

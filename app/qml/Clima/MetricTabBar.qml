@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Section title, metric pills, and the chart/list view switch.
 //
-// The pills are generated from metrics.js, so a metric is added by editing data.
+// The pills are generated from the Metrics singleton, so a metric is added by
+// editing one list.
 // In the real app that registry is populated from provider capabilities, and a tab
 // that the active provider cannot supply for this location simply never appears.
 //
@@ -15,7 +16,6 @@
 // has no position and a switch with one indicator does.
 import QtQuick
 import QtQuick.Shapes
-import "metrics.js" as Metrics
 
 Item {
     id: root

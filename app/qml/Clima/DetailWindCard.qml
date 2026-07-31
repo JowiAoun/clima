@@ -25,7 +25,6 @@
 // move. A speed is a reading and a reading is legible from the first frame.
 import QtQuick
 import QtQuick.Shapes
-import "detaildata.js" as Detail
 
 DetailCard {
     id: root
@@ -83,7 +82,7 @@ DetailCard {
             return (8 + 30 * Math.min(excess, 1)) * root.reveal
         }
 
-        // Wedge reach downwind, against the working ceiling in detaildata.js —
+        // Wedge reach downwind, against the working ceiling `Detail.wind` carries —
         // a ceiling that decides what the reader sees is data, not styling. At
         // 30 km/h it puts 13 km/h a little past halfway out, and anything at or
         // above the ceiling stops just short of the ring.
@@ -264,7 +263,7 @@ DetailCard {
                 spacing: 7
 
                 Text {
-                    text: root.d.gust
+                    text: root.d.gustReading
                     color: Theme.color.textPrimary
                     font.pixelSize: Theme.type.readingPair
                     font.bold: true

@@ -70,6 +70,13 @@ class AppOptions : public QObject
     Q_PROPERTY(QString grab      READ grab      CONSTANT)
     Q_PROPERTY(bool    capturing READ capturing CONSTANT)
 
+    // ---- data source (ships) -----------------------------------------------
+    //
+    // Ships, and it has to. --grab ships, --grab defaults to a fixture, and a
+    // flag whose default a user cannot see or override is not a default, it is
+    // a secret.
+    Q_PROPERTY(QString fixture READ fixture CONSTANT)
+
     // ---- geometry (ships) --------------------------------------------------
     Q_PROPERTY(bool    hasSize    READ hasSize    CONSTANT)
     Q_PROPERTY(int     sizeWidth  READ sizeWidth  CONSTANT)
@@ -83,6 +90,7 @@ class AppOptions : public QObject
     Q_PROPERTY(QStringList pokes  READ pokes  CONSTANT)
 
     // ---- opening state (dev tools) -----------------------------------------
+    Q_PROPERTY(QString place  READ place  CONSTANT)
     Q_PROPERTY(QString tab    READ tab    CONSTANT)
     Q_PROPERTY(QString sky    READ sky    CONSTANT)
     Q_PROPERTY(QString metric READ metric CONSTANT)
@@ -116,6 +124,23 @@ public:
     static QStringList viewportIds();
     static QStringList skyPhases();
 
+    // Which recorded fixture this run replays, or empty for the live network.
+    //
+    // Resolved rather than stored, because three things can decide it and the
+    // order between them is the interesting part:
+    //
+    //   1. --fixture <name>, or --fixture off, which always wins
+    //   2. CLIMA_FIXTURE in the environment, which is how CI says it once for
+    //      a whole job rather than on every command
+    //   3. a capture — --grab or --film — which defaults to the fixture,
+    //      because a screenshot taken from the live network is a screenshot of
+    //      a different afternoon every time it is taken
+    //
+    // and nothing else. An ordinary launch with no flags is live, which is the
+    // one case where a user is asking about the weather rather than about the
+    // app.
+    QString fixture() const;
+
     QString     grab()        const { return m_grab; }
     bool        capturing()   const { return !m_grab.isEmpty() || !m_film.isEmpty(); }
     bool        hasSize()     const { return m_sizeWidth > 0 && m_sizeHeight > 0; }
@@ -126,6 +151,7 @@ public:
     int         frames()      const { return m_frames; }
     int         every()       const { return m_every; }
     QStringList pokes()       const { return m_pokes; }
+    QString     place()       const { return m_place; }
     QString     tab()         const { return m_tab; }
     QString     sky()         const { return m_sky; }
     QString     metric()      const { return m_metric; }
@@ -156,6 +182,8 @@ private:
     int         m_frames      = 8;
     int         m_every       = 60;
     QStringList m_pokes;
+    QString     m_fixture;
+    QString     m_place;
     QString     m_tab;
     QString     m_sky;
     QString     m_metric;

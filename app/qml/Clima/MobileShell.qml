@@ -55,6 +55,13 @@ Item {
     // only thing here that a flag parsed once at startup can still address.
     property bool animated: true
 
+    // The place picker, opened by the location bar's chevron and by
+    // `--poke picker=1`. On the shell rather than on the page because the sheet
+    // has to cover the nav bar too — see the PlacePicker at the bottom of this
+    // file.
+    property bool pickerOpen: false
+    onPickerOpenChanged: picker.open = pickerOpen
+
     // Scrolling, forwarded to the current page.
     //
     // Write-only, deliberately. Main assigns `contentY` to place the view for
@@ -114,11 +121,14 @@ Item {
             page.metricRequested.connect(function (id) { root.metricId = id })
         if (page.dayRequested !== undefined)
             page.dayRequested.connect(function (i) { root.dayIndex = i })
+        if (page.pickerRequested !== undefined)
+            page.pickerRequested.connect(function () { picker.open = !picker.open })
     }
 
     function push(page) {
         if (page === null)
             return
+        if (page.pickerOpen !== undefined) page.pickerOpen = picker.open
         if (page.metricId !== undefined)  page.metricId = root.metricId
         if (page.listView !== undefined)  page.listView = root.listView
         if (page.dayIndex !== undefined)  page.dayIndex = root.dayIndex
@@ -138,6 +148,18 @@ Item {
     function go(id) {
         if (Tabs.indexOf(id) >= 0)
             root.tab = id
+    }
+
+    // Over the nav bar as well as over the page, and that is the reason it is
+    // here rather than on the page: a picker that a tab bar could be tapped
+    // through is a picker that can be left half-open behind another screen.
+    PlacePicker {
+        id: picker
+        onDismissed: open = false
+        onOpenChanged: {
+            root.pickerOpen = open
+            root.push(pageLoader.item)
+        }
     }
 
     BottomNav {

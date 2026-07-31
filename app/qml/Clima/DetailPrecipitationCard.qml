@@ -29,7 +29,6 @@
 // silently and the strip fills in from the far end, which is where the day's
 // only chance of rain is.
 import QtQuick
-import "detaildata.js" as Detail
 
 DetailCard {
     id: root
@@ -199,7 +198,7 @@ DetailCard {
 
             Text {
                 id: valueText
-                text: root.d.value + " " + root.d.unit
+                text: root.d.reading
                 color: Theme.color.textPrimary
                 font.pixelSize: Theme.type.reading
                 font.bold: true

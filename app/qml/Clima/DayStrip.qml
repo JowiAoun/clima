@@ -22,7 +22,6 @@
 // stay dumb; a fillet that animated itself would animate in the gallery too,
 // where nothing is selecting anything.
 import QtQuick
-import "mockdata.js" as Data
 
 Item {
     id: root
@@ -281,14 +280,14 @@ Item {
                         y: 56
 
                         Text {
-                            text: card.modelData.high + "°"
+                            text: Units.formatDisplay(Units.Temperature, card.modelData.high)
                             color: Theme.color.textPrimary
                             font.pixelSize: 17
                             font.bold: true
                             anchors.right: parent.right
                         }
                         Text {
-                            text: card.modelData.low + "°"
+                            text: Units.formatDisplay(Units.Temperature, card.modelData.low)
                             color: Theme.color.textMuted
                             font.pixelSize: 15
                             anchors.right: parent.right

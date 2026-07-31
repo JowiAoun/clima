@@ -75,6 +75,7 @@ set(clima_qml_files
     qml/Clima/NavGlyph.qml
     qml/Clima/PageBackdrop.qml
     qml/Clima/PagerButton.qml
+    qml/Clima/PlacePicker.qml
     qml/Clima/PrecipBands.qml
     qml/Clima/PrecipField.qml
     qml/Clima/PrecipitationStrip.qml
@@ -98,12 +99,14 @@ set(clima_qml_files
 # resource at first use — and it is what makes `.import "precip.js" as Precip`
 # inside mockdata.js resolve, because the import is resolved against the
 # importing file's own URL and both files are then at the same qrc directory.
+# `mockdata.js`, `detaildata.js` and `metrics.js` used to be here. All three are
+# app/viewmodels/ now — see forecastdata.h, conditionsdata.h and metrics.h, each
+# of which quotes the header of the file it replaced. What is left in JavaScript
+# is the four libraries that compute rather than describe: chart geometry, the
+# precipitation model, the sky phase table and the colour ramps.
 set(clima_js_files
     qml/Clima/chartmath.js
-    qml/Clima/detaildata.js
-    qml/Clima/metrics.js
     qml/Clima/mobiletabs.js
-    qml/Clima/mockdata.js
     qml/Clima/precip.js
     qml/Clima/sky.js
     qml/Clima/theme.js
@@ -189,14 +192,22 @@ set(clima_cpp_sources
 
     # ---- the view models ----------------------------------------------------
     #
-    # docs/04-architecture.md §4.2's middle layer, beginning. `Units` is the one
-    # place in the program that knows a conversion factor and `Metrics` is the
-    # registry that metrics.js will become.
+    # docs/04-architecture.md §4.2's middle layer, arrived. `Engine` owns
+    # libclima and the offline-first loop; `Data` and `Detail` are the two
+    # shapes the QML already reads, which is why almost no QML file changed
+    # when live data landed; `Units` is the one place a conversion factor is
+    # written down and `Metrics` is the registry that used to be metrics.js.
     #
-    # QML_SINGLETONs, so they are in SOURCES rather than on the library for the
-    # reason the block above gives: qmltyperegistrar only scans what the module
-    # was told about, and a QML_ELEMENT header listed as an ordinary source
-    # compiles, links, and then does not exist as a QML type.
+    # All four are QML_SINGLETONs, so they are in SOURCES rather than on the
+    # library for the reason the block above gives: qmltyperegistrar only scans
+    # what the module was told about, and a QML_ELEMENT header listed as an
+    # ordinary source compiles, links, and then does not exist as a QML type.
+    viewmodels/appengine.h
+    viewmodels/appengine.cpp
+    viewmodels/conditionsdata.h
+    viewmodels/conditionsdata.cpp
+    viewmodels/forecastdata.h
+    viewmodels/forecastdata.cpp
     viewmodels/metrics.h
     viewmodels/metrics.cpp
     viewmodels/units.h

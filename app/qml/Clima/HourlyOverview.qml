@@ -13,8 +13,7 @@
 import QtQuick
 import QtQuick.Shapes
 import "chartmath.js" as ChartMath
-import "mockdata.js" as Data
-import "metrics.js" as Metrics
+import "precip.js" as Precip
 
 Item {
     id: root
@@ -38,7 +37,10 @@ Item {
     // there is nothing on the plot to contradict them.
     property string shownMetricId: "overview"
     readonly property var metric: Metrics.byId(shownMetricId)
-    readonly property bool supportsFeelsLike: metric.id === "overview"
+    // The toggle is offered only where there is a second series to show. A
+    // "Feels like" switch that redraws the temperature curve is a control that
+    // lies about what it did, which is worse than one that is not there.
+    readonly property bool supportsFeelsLike: metric.id === "overview" && Data.hasApparent
 
     // ---- scales and metrics ---------------------------------------------
     // Settable, not readonly: the mobile shell runs this same card at 362 px,
@@ -55,7 +57,7 @@ Item {
     readonly property real gutterWidth: Theme.metric.gutterWidth
 
     readonly property real contentW: (Data.count - 1) * hourWidth
-    readonly property var labelIndices: Data.labelIndices()
+    readonly property var labelIndices: Data.labelIndices
     readonly property real nowX: xForIndex(Data.nowIndex)
 
     // Axis bounds come from the metric, except where it opts into auto-scaling.
@@ -186,16 +188,33 @@ Item {
         return axisTopPad + (plotHeight - axisTopPad) * (axisMax - v) / span
     }
 
+    // ---- canonical in, display out ----------------------------------------
+    // `Data` holds one series per metric in the engine's own units, and the
+    // axis above is in the reader's. Everything that reaches a pixel goes
+    // through Metrics, which is the only thing here that knows which is which —
+    // a curve plotted in millimetres against an axis in inches draws perfectly
+    // and is off by a factor of twenty-five.
     function seriesValue(i, blend) {
-        if (supportsFeelsLike)
-            return Data.temperature[i] * (1 - blend) + Data.apparent[i] * blend
+        if (supportsFeelsLike) {
+            var t = Data.temperature[i]
+            var a = Data.apparent[i]
+            // MET Norway carries no apparent temperature. `t * 1 + NaN * 0` is
+            // NaN in JavaScript, so a blend of ZERO over an absent series erased
+            // a temperature curve that was completely intact — an empty chart
+            // under a hero reading 28°. Seen the first time the fallback served.
+            if (isNaN(a))
+                return Metrics.display(metric, t)
+            if (isNaN(t))
+                return Metrics.display(metric, a)
+            return Metrics.display(metric, t * (1 - blend) + a * blend)
+        }
         var arr = Data[metric.series]
-        return arr ? arr[i] : 0
+        return arr ? Metrics.display(metric, arr[i]) : 0
     }
 
     function seriesValues(m) {
         var arr = Data[m.series]
-        return arr ? arr : []
+        return arr ? Metrics.displayAll(m, arr) : []
     }
 
     // Explicit arguments so the binding re-evaluates on every input that moves.
@@ -212,11 +231,19 @@ Item {
         var arr = Data[m.overlay]
         if (!arr)
             return []
+        var shown = Metrics.displayAll(m, arr)
         var pts = []
         for (var i = 0; i < Data.count; ++i)
-            pts.push({ x: i * hw, y: yForValue(arr[i]) })
+            pts.push({ x: i * hw, y: yForValue(shown[i]) })
         return pts
     }
+
+    // The wash and the field, classified where the thresholds live. `Data`
+    // supplies the millimetres — canonical, always, because these bands are
+    // statements about millimetres — and the type per hour, which comes off the
+    // provider's WMO code and is the only way to know that an hour is thunder
+    // rather than heavy rain.
+    readonly property var precipCells: Precip.cellsTyped(Data.precipMm, Data.precipTypes)
 
     readonly property var curvePoints: buildPoints(feelsBlend, plotHeight, hourWidth, metric)
     readonly property var overlayPoints: buildOverlay(plotHeight, hourWidth, metric)
@@ -451,7 +478,7 @@ Item {
                             }
 
                             Text {
-                                text: Metrics.format(root.metric,
+                                text: Metrics.formatDisplay(root.metric,
                                                      root.seriesValue(hourIndex, root.feelsBlend))
                                 color: Theme.color.textPrimary
                                 font.pixelSize: 13
@@ -508,7 +535,7 @@ Item {
                         // be stating a different one — see PrecipBands.qml.
                         PrecipBands {
                             anchors.fill: parent
-                            cells: Data.precipCells
+                            cells: root.precipCells
                             hourWidth: root.hourWidth
                             contentWidth: root.contentW
                         }
@@ -545,7 +572,7 @@ Item {
                         // forecast is still promising it.
                         PrecipField {
                             anchors.fill: parent
-                            cells: Data.precipCells
+                            cells: root.precipCells
                             hourWidth: root.hourWidth
                             contentWidth: root.contentW
                             // Nothing worth animating behind the list view, and
@@ -709,7 +736,7 @@ Item {
                                 font.pixelSize: 11
                                 text: probe.idx < 0 ? "" :
                                       Data.clockLabel(probe.idx) + "   "
-                                      + Metrics.format(root.metric,
+                                      + Metrics.formatDisplay(root.metric,
                                                        root.seriesValue(probe.idx, root.feelsBlend))
                             }
                         }

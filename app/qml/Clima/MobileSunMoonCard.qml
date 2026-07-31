@@ -17,7 +17,6 @@
 // arcs side by side sweeping on their own timers reads as a race, and there is
 // nothing about the sun and the moon that makes one arrive before the other.
 import QtQuick
-import "detaildata.js" as Detail
 
 Item {
     id: root
@@ -50,7 +49,7 @@ Item {
         Repeater {
             model: [
                 { glyph: "uv",   label: qsTr("UV index"),
-                  value: Detail.uv.value + " · " + Detail.uv.band },
+                  value: Detail.uv.reading + " · " + Detail.uv.band },
                 { glyph: "moon", label: qsTr("Moon phase"),
                   value: Detail.moon.phase }
             ]

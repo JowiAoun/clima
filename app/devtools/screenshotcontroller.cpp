@@ -251,6 +251,13 @@ void ScreenshotController::applyPokes()
             offer(m_shell, "listView", on);
         } else if (target == QLatin1String("feels")) {
             offer(m_shell, "feelsLike", on);
+        } else if (target == QLatin1String("picker")) {
+            // The place picker is a sheet the shell owns, and it is the one
+            // piece of UI in this app that is otherwise reachable only by
+            // clicking. Without this poke it could be reviewed by a person and
+            // by nothing else — which for a screen with a search field, a saved
+            // list and a failure state is the wrong side of the line.
+            offer(m_shell, "pickerOpen", on);
         } else if (target == QLatin1String("scroll")) {
             offer(m_shell, "contentY", value.toDouble());
         } else if (target == QLatin1String("tab")) {

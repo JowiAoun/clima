@@ -10,8 +10,10 @@
 // `direction` never changes on a live badge, anywhere in this prototype:
 //
 //   - On the page, `DetailCard` binds it to a card's `trend`, which comes from
-//     `detaildata.js`. Those values are fixed for the life of the process
-//     (§10.6), so no badge ever transitions from up to down.
+//     `Detail`. A refresh replaces the whole snapshot at once and rebuilds the
+//     card with it, so a badge is constructed with its direction rather than
+//     watched changing its mind — and under `--fixture` the clock is frozen and
+//     the value cannot move at all (§10.6).
 //   - In the gallery, the four arrows on the "Trend badge" page are four
 //     separate specimens with four fixed props, not one badge cycling. A
 //     remount destroys and rebuilds them; it does not change anyone's mind.

@@ -6,10 +6,13 @@
 // Not the system clock. `Date.now()` appears nowhere in this tree and is not
 // going to: §10.6 of the design system says determinism is not negotiable, and
 // a background whose gradient depends on when the screenshot was taken makes
-// every golden image of every mobile screen a different picture. The time here
-// is detaildata.js's — 12:28 PM, observed, fixed for the life of the process —
-// and when live data lands this is the file that starts reading it, with the
-// same two properties on the outside.
+// every golden image of every mobile screen a different picture.
+//
+// Live data has landed and this file did not change shape, which was the point
+// of it. `Detail.sun` is now the real sun at the real place, and the instant it
+// is measured against is the engine's injected clock — a SystemClock in the
+// product and a FrozenClock under `--fixture`, so the sky over a recorded
+// afternoon is that afternoon's sky on every machine, for ever.
 //
 // ---- why it is a singleton and not two lines in a window --------------------
 //
@@ -27,11 +30,12 @@ pragma Singleton
 
 import QtQuick
 import "sky.js" as Sky
-import "detaildata.js" as Detail
 
 QtObject {
-    // Minutes past midnight. detaildata.sun is the clock rather than any of the
-    // other mock tables because it is the one that carries minutes.
+    // Minutes past midnight. `Detail.sun` is the clock rather than anything else
+    // on the page because it is the block that carries minutes — and it carries
+    // them counted from one reference midnight, which is what keeps the phase
+    // sane on a day the sun does not set (libclima/domain/timeaxis.h).
     readonly property int nowMin: Detail.sun.nowMin
 
     // Which of the four the sky is in: night, dawn, day, dusk. Dawn and dusk are

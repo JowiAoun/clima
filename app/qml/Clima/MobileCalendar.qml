@@ -19,7 +19,6 @@
 // surface §10.1 exists to prevent — and this is the case its note about
 // borders allows for: nothing else will do.
 import QtQuick
-import "mockdata.js" as Data
 
 Item {
     id: root
@@ -88,21 +87,27 @@ Item {
                     y: dateRow.y + dateRow.height + 6
                 }
 
+                // A day beyond the forecast horizon draws its date and nothing
+                // else. The mock generated a plausible seasonal high for the
+                // 29th and it looked completely convincing, which is exactly
+                // the objection: a number nobody forecast is a number somebody
+                // will plan around. docs/08-risks.md R9.
                 Column {
+                    visible: cell.modelData.known
                     spacing: 0
                     anchors.left: cellGlyph.right
                     anchors.leftMargin: 6
                     anchors.verticalCenter: cellGlyph.verticalCenter
 
                     Text {
-                        text: cell.modelData.high + "°"
+                        text: Units.formatDisplay(Units.Temperature, cell.modelData.high)
                         color: Theme.color.textPrimary
                         font.pixelSize: Theme.type.label
                         font.bold: true
                     }
 
                     Text {
-                        text: cell.modelData.low + "°"
+                        text: Units.formatDisplay(Units.Temperature, cell.modelData.low)
                         color: Theme.color.textMuted
                         font.pixelSize: Theme.type.label
                     }

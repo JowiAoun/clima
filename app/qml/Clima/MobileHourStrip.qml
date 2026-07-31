@@ -22,7 +22,6 @@
 // of the screen it exists to preview.
 import QtQuick
 import "chartmath.js" as ChartMath
-import "mockdata.js" as Data
 
 Item {
     id: root
@@ -185,7 +184,7 @@ Item {
                     // a label chasing a shallow curve wanders by a few pixels
                     // per column and reads as misalignment.
                     Text {
-                        text: Math.round(Data.temperature[column.hourIndex]) + "°"
+                        text: Units.formatDisplay(Units.Temperature, Data.temperature[column.hourIndex])
                         color: Theme.color.textPrimary
                         font.pixelSize: Theme.type.status
                         font.bold: column.isNow

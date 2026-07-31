@@ -14,7 +14,6 @@
 // at the top of the screen reads as a card that failed to draw rather than as
 // a selection.
 import QtQuick
-import "mockdata.js" as Data
 
 Item {
     id: root

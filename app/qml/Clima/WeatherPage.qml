@@ -47,6 +47,10 @@ Item {
 
     property alias contentY: scroll.contentY
 
+    // Same name as the mobile shell's, so `--poke picker=1` reaches whichever
+    // one is loaded without knowing which it is.
+    property alias pickerOpen: picker.open
+
     // A real flick, not an assignment. Setting `contentY` goes through
     // QQuickFlickable::setContentY(), which calls movementEnding() — so `moving`
     // never becomes true and the scroll thumb's recolour, the only animation
@@ -91,7 +95,11 @@ Item {
                 width: parent.width
                 spacing: 14
 
-                LocationBar { }
+                LocationBar {
+                    disclosed: picker.open
+                    onChangeRequested: picker.open = !picker.open
+                    onHomeToggled: Engine.toggleHome(Engine.places.currentIndex)
+                }
 
                 CurrentConditions { width: parent.width }
             }
@@ -139,6 +147,15 @@ Item {
                 width: parent.width
             }
         }
+    }
+
+    // The picker is a sheet over the whole page, so it is a sibling of the
+    // Flickable rather than a child of the column the bar sits in — a panel
+    // inside a scrolling column would scroll away from the chevron that opened
+    // it.
+    PlacePicker {
+        id: picker
+        onDismissed: open = false
     }
 
     // ---- scroll indicator --------------------------------------------------

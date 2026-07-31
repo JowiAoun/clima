@@ -405,7 +405,7 @@ QtObject {
 
     // ---- ramps -------------------------------------------------------------
     // A table keyed by ramp name, which is a metric's choice and not a token:
-    // the chart reads `Theme.ramp[root.metric.ramp].fill` and metrics.js is
+    // the chart reads `Theme.ramp[root.metric.ramp].fill` and the registry is
     // what decides the key. gallery.js reads this table too, and it reads it
     // straight out of theme.js — a `.pragma library` cannot import a QML
     // singleton, which is the other half of why theme.js is still the file the

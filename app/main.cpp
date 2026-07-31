@@ -8,6 +8,7 @@
 // then the engine. Each one is a precondition of the next, and each of the four
 // ways to get it wrong is silent.
 
+#include "appengine.h"
 #include "appfont.h"
 #include "appoptions.h"
 #include "climaconfig.h"
@@ -66,7 +67,24 @@ int main(int argc, char *argv[])
     // value.
     AppOptions::parseCommandLine(app);
 
-    // ---- 5. the engine -----------------------------------------------------
+    // ---- 5. the weather ----------------------------------------------------
+    // Before the QML engine, and that is the whole reason this line is here
+    // rather than in a Component.onCompleted. `Data` and `Detail` are read
+    // while Main.qml's first objects are being constructed, so the snapshot has
+    // to exist by then — and it can, because docs/04-architecture.md §4.1's
+    // first step is a cache read that opens no socket and returns inside this
+    // call. A window that came up empty and filled in a frame later would be
+    // the "renders from cache" promise kept in spirit and broken in the one
+    // frame anybody photographs.
+    //
+    // AppOptions::fixture() decides where the data comes from: a recording at a
+    // frozen clock, or the live network. Nothing after this line knows which.
+    AppEngine::instance()->configure(AppOptions::instance()->fixture());
+
+    if (!AppOptions::instance()->place().isEmpty())
+        AppEngine::instance()->selectByQuery(AppOptions::instance()->place());
+
+    // ---- 6. the QML engine -------------------------------------------------
     QQmlApplicationEngine engine;
 
     // A QML file that fails to construct its root object leaves the engine

@@ -26,35 +26,17 @@
 // nobody would call light.
 
 var TRACE         = 0.1;    // below this the hour is dry
-var DRIZZLE_MAX   = 0.4;    // above this it is rain rather than drizzle
 var RAIN_MODERATE = 2.5;
 var RAIN_HEAVY    = 7.6;
 var SNOW_MODERATE = 0.8;
 var SNOW_HEAVY    = 2.5;
 
-// Phase boundaries. Real providers send a weather code and we would use it;
-// these are the fallback for a provider that sends only an amount.
-var SNOW_MAX_C  = 0.0;
-var SLEET_MAX_C = 2.5;
-
 // Types are the visual vocabulary, not a meteorological taxonomy: two kinds of
 // falling water that look different get two entries, and two that look the same
-// share one. `thunder` and `hail` cannot be derived from an amount and a
-// temperature — they come from the provider's weather code.
+// share one. `thunder` and `hail` are in the list and were never derivable from
+// an amount and a temperature — they come from the provider's weather code.
 var TYPES = ["drizzle", "rain", "sleet", "snow", "hail", "thunder"];
 var LEVELS = ["light", "moderate", "heavy"];
-
-function typeFor(mm, tempC, code) {
-    if (!(mm >= TRACE))
-        return "";
-    if (code)
-        return code;
-    if (tempC <= SNOW_MAX_C)
-        return "snow";
-    if (tempC <= SLEET_MAX_C)
-        return "sleet";
-    return mm < DRIZZLE_MAX ? "drizzle" : "rain";
-}
 
 function intensityFor(type, mm) {
     var mod = type === "snow" ? SNOW_MODERATE : RAIN_MODERATE;
@@ -62,19 +44,38 @@ function intensityFor(type, mm) {
     return mm >= hi ? "heavy" : (mm >= mod ? "moderate" : "light");
 }
 
-function cellFor(mm, tempC, code) {
-    var t = typeFor(mm, tempC, code);
-    return t === "" ? null : { type: t, intensity: intensityFor(t, mm), mm: mm };
-}
-
 // One entry per hour, null where it is dry. This is the shape everything below
-// takes, and the shape a provider adapter has to produce.
-function cells(mmArr, tempArr, codeArr) {
+// takes, and the shape the view model produces the inputs for.
+//
+// ---- where the type comes from now -----------------------------------------
+//
+// This file used to derive it, from the amount and the temperature, with a
+// `code` argument sitting unused for the day a provider sent one. That day has
+// arrived: `libclima/domain/weathercode.h` maps the WMO code to exactly these
+// six names, and `Data.precipTypes` is the result, one per hour, empty where
+// the hour is dry.
+//
+// The old fallback is gone rather than kept as a backstop, and deliberately.
+// Guessing snow from a sub-zero temperature was defensible when nothing better
+// existed; beside a code that says 71 it is a second answer to a question that
+// already has one, and the two disagree on exactly the hours that matter —
+// freezing rain, and a thunderstorm at 24 °C that the fallback calls ordinary
+// rain. An hour with an amount and no code is dry here, which reads as "we do
+// not know what was falling", because we do not.
+//
+// Intensity stays. It is a statement about MILLIMETRES PER HOUR — the NWS
+// bands above — so `mmArr` must be millimetres whatever unit the reader has
+// asked for, and app/viewmodels/forecastdata.h keeps `precipMm` canonical for
+// this reason and this reason only.
+function cellsTyped(mmArr, typeArr) {
     var out = [];
-    for (var i = 0; i < mmArr.length; ++i)
-        out.push(cellFor(mmArr[i],
-                         tempArr ? tempArr[i] : 20,
-                         codeArr ? codeArr[i] : ""));
+    for (var i = 0; i < mmArr.length; ++i) {
+        var type = typeArr && typeArr[i] ? typeArr[i] : "";
+        var mm = mmArr[i];
+        out.push(type === "" || !(mm >= TRACE)
+                     ? null
+                     : { type: type, intensity: intensityFor(type, mm), mm: mm });
+    }
     return out;
 }
 
@@ -177,7 +178,7 @@ function bandW(span, hourWidth, maxX) {
 // ---------------------------------------------------------------------------
 // Every drop's position, size and timing is a hash of its hour and its index
 // within that hour. Nothing here calls Math.random, so the same forecast draws
-// the same rain on every run — the promise mockdata.js already makes, and the
+// the same rain on every run — the promise the view models already make, and the
 // one that lets a headless grab be a golden image.
 
 function _hash(x) {

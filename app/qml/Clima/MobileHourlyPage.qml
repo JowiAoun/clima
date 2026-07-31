@@ -22,8 +22,6 @@
 // there is one day of hourly data behind it. The strip is wired, the data is
 // not; when a provider arrives, this is one binding.
 import QtQuick
-import "detaildata.js" as Detail
-import "mockdata.js" as Data
 
 MobilePage {
     id: root
@@ -45,6 +43,14 @@ MobilePage {
     signal dayRequested(int index)
 
     onDayIndexChanged: root.dayRequested(dayIndex)
+
+    // The selected day, guarded. A live series is as long as the provider sent
+    // and the shell remembers a selection across tab changes, so the index can
+    // outlive the row it pointed at — MET Norway serves nine and a half days
+    // where Open-Meteo serves sixteen, and a fallback that shortened the strip
+    // under a selection of 12 would take the page down with it.
+    readonly property var day:
+        (root.dayIndex >= 0 && root.dayIndex < Data.days.length) ? Data.days[root.dayIndex] : null
 
     MobileWeekStrip {
         id: week
@@ -72,7 +78,7 @@ MobilePage {
 
         Text {
             id: nowTemp
-            text: Math.round(Data.temperature[Data.nowIndex]) + "°"
+            text: Units.formatDisplay(Units.Temperature, Data.temperature[Data.nowIndex])
             color: Theme.color.textPrimary
             font.pixelSize: Theme.type.heroCaption
             anchors.left: nowGlyph.right
@@ -81,7 +87,7 @@ MobilePage {
         }
 
         Text {
-            text: qsTr("Feels like %1°").arg(Math.round(Data.apparent[Data.nowIndex]))
+            text: qsTr("Feels like %1").arg(Units.formatDisplay(Units.Temperature, Data.apparent[Data.nowIndex]))
             color: Theme.color.textMuted
             font.pixelSize: Theme.type.label
             anchors.left: nowTemp.right
@@ -135,14 +141,14 @@ MobilePage {
 
             WeatherGlyph {
                 id: summaryGlyph
-                kind: Data.days[root.dayIndex].icon
+                kind: root.day ? root.day.icon : ""
                 glyphSize: 34
                 anchors.left: parent.left
             }
 
             Text {
                 id: summaryHigh
-                text: Data.days[root.dayIndex].high + "°"
+                text: root.day ? Units.formatDisplay(Units.Temperature, root.day.high) : "—"
                 color: Theme.color.textPrimary
                 font.pixelSize: Theme.type.readingPair
                 font.bold: true
@@ -162,7 +168,7 @@ MobilePage {
             }
 
             Text {
-                text: Data.days[root.dayIndex].low + "°"
+                text: root.day ? Units.formatDisplay(Units.Temperature, root.day.low) : "—"
                 color: Theme.color.textMuted
                 font.pixelSize: Theme.type.readingPair
                 anchors.left: divider.right

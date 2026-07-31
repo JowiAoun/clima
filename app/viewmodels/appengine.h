@@ -1,0 +1,294 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Where libclima is assembled, and where the offline-first loop lives.
+//
+// ============================================================================
+// THE LOOP, WHICH IS THE WHOLE FILE
+//
+// docs/04-architecture.md §4.1 principle 1: "the UI renders from cache, then
+// reconciles with the network. The app must never show an empty screen because
+// an API is down — the documented failure mode of the current best Linux
+// weather app."
+//
+// Three steps, in this order, every time a place is selected:
+//
+//   1. ask for a CACHED answer only. No socket is opened. If there is one, it
+//      is published immediately — inside the same call stack, before the first
+//      frame — carrying the timestamp it was originally fetched at, so the UI
+//      says "updated 40 minutes ago" and means it.
+//
+//   2. ask again, normally. The provider revalidates, or serves from a fresh
+//      cache entry without asking, or falls through to MET Norway.
+//
+//   3. publish whatever came back. A failure at this step does NOT clear what
+//      step 1 published: the screen keeps the stale forecast and gains a line
+//      saying the refresh failed. That is the sentence in §4.1 made into
+//      control flow — there is no path here that replaces data with a spinner.
+//
+// Step 1 is why ForecastRequest has a `cachedOnly` flag. Without it the choice
+// is between a synchronous cache read the view model does not have access to,
+// and a second cache in app/ holding a second copy of the same forecast in some
+// other shape — and two caches is how the two disagree.
+//
+// ============================================================================
+// WHAT MAKES A RUN DETERMINISTIC
+//
+// One decision, taken in configure(): which Clock, and which providers.
+//
+//     live      SystemClock + Open-Meteo → MET Norway + Open-Meteo air quality
+//     fixture   FrozenClock at the recording's instant + FixtureForecastProvider
+//
+// Nothing downstream of that line branches on which one happened. The TTL
+// table, the backoff, the "now" marker, the past veil, the sky phase and the
+// "updated N minutes ago" line all read the clock they were handed and behave
+// identically — which is the argument libclima/core/clock.h makes at length and
+// this class is the place it pays off.
+//
+// Fixture is the DEFAULT under `--grab`, under `--film`, in clima-gallery and
+// in CI. Not because those are tests but because those are the four situations
+// where a picture is going to be compared against another picture.
+//
+// ============================================================================
+// ONE ENGINE, THREE SINGLETONS
+//
+// QML sees `Engine`, `Data` and `Detail`. They are three views of one snapshot
+// and not three sources: this class owns the Forecast and the AirQuality, and
+// the other two are formatters over them that this class pushes into. A
+// component reading `Data.temperature[i]` and one reading
+// `Detail.temperature.value` are reading the same number through two shapes,
+// which is the property the prototype's mockdata.js and detaildata.js had to
+// maintain by hand — and got wrong twice, which is what the comments at the top
+// of both files are about.
+
+#pragma once
+
+#include "libclima/domain/airquality.h"
+#include "libclima/domain/forecast.h"
+#include "libclima/domain/place.h"
+#include "libclima/providers/fixture/fixtureprovider.h"
+
+#include <QObject>
+#include <QQmlEngine>
+#include <QString>
+#include <QVariantList>
+
+#include <memory>
+
+class ConditionsData;
+class ForecastData;
+
+namespace clima {
+class CacheStore;
+class Clock;
+class DeviceLocator;
+class FixtureAirQualityProvider;
+class FixtureForecastProvider;
+class HttpClient;
+class LocationController;
+class MetNoForecastProvider;
+class OfflineReverseGeocoder;
+class OpenMeteoAirQualityProvider;
+class OpenMeteoForecastProvider;
+class OpenMeteoGeocoder;
+class PlaceSearchModel;
+class ProviderRegistry;
+} // namespace clima
+
+class AppEngine : public QObject
+{
+    Q_OBJECT
+    QML_NAMED_ELEMENT(Engine)
+    QML_SINGLETON
+
+    // ---- where -------------------------------------------------------------
+    Q_PROPERTY(QObject *places READ placesModel CONSTANT)
+    Q_PROPERTY(QObject *search READ searchModel CONSTANT)
+    Q_PROPERTY(QString placeLabel READ placeLabel NOTIFY placeChanged)
+    Q_PROPERTY(QString placeRegion READ placeRegion NOTIFY placeChanged)
+    Q_PROPERTY(bool placeIsHome READ placeIsHome NOTIFY placeChanged)
+    Q_PROPERTY(bool hasPlace READ hasPlace NOTIFY placeChanged)
+
+    // ---- how it is going ---------------------------------------------------
+    Q_PROPERTY(bool hasData READ hasData NOTIFY forecastChanged)
+    Q_PROPERTY(bool loading READ isLoading NOTIFY loadingChanged)
+
+    // "Updated 12 minutes ago". The §4.5 affordance, and the reason
+    // `Forecast::fetchedAt` is a field rather than a detail.
+    Q_PROPERTY(QString updatedLabel READ updatedLabel NOTIFY forecastChanged)
+
+    // True once the data on screen is older than its TTL. Not an error state:
+    // a stale forecast is the right thing to be showing, it just has to say so.
+    Q_PROPERTY(bool stale READ isStale NOTIFY forecastChanged)
+
+    // Empty on the common path. A sentence when the last refresh failed, shown
+    // *beside* the data rather than instead of it.
+    Q_PROPERTY(QString problem READ problem NOTIFY forecastChanged)
+
+    // ---- who answered ------------------------------------------------------
+    Q_PROPERTY(QString sourceName READ sourceName NOTIFY forecastChanged)
+    Q_PROPERTY(bool fromFallback READ isFromFallback NOTIFY forecastChanged)
+
+    // ---- what this build is doing ------------------------------------------
+    Q_PROPERTY(bool fixtureMode READ isFixtureMode CONSTANT)
+    Q_PROPERTY(QString fixtureName READ fixtureName CONSTANT)
+
+    // Every registered provider's credit, generated. docs/08-risks.md R12: the
+    // About screen is built from the registry so it cannot go stale.
+    Q_PROPERTY(QVariantList sources READ sources CONSTANT)
+
+    // ---- what may be drawn here --------------------------------------------
+    //
+    // Three-valued underneath (see iforecastprovider.h) and collapsed to two
+    // here on purpose: a card asks "do I draw", and "not yet" and "no" are both
+    // "not now". What the third value buys is that `pollenKnownAbsent` below is
+    // false while the answer is unknown, so nothing pops in.
+    Q_PROPERTY(bool hasPollen READ hasPollen NOTIFY forecastChanged)
+    Q_PROPERTY(bool pollenUndetermined READ isPollenUndetermined NOTIFY forecastChanged)
+    Q_PROPERTY(bool hasAirQuality READ hasAirQuality NOTIFY forecastChanged)
+
+public:
+    ~AppEngine() override;
+
+    static AppEngine *instance();
+    static AppEngine *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
+
+    // Builds the clock, the cache, the client, the providers and the models,
+    // then publishes the first snapshot from cache. Call once from main()
+    // before the QML engine loads anything, because Main.qml's first frame
+    // reads Data and Detail.
+    //
+    // `fixtureName` empty means live. An unknown name is a hard error rather
+    // than a fallback to live: a CI job that asked for a fixture and silently
+    // got the internet is a CI job whose golden images drift.
+    void configure(const QString &fixtureName);
+
+    // Resolves a query through the geocoder and selects the first result. For
+    // `--place`, which exists so that a headless capture can be taken of
+    // somewhere other than the saved place. Blocks the calling thread on the
+    // geocoder's future, which is acceptable in exactly one situation — before
+    // the window exists — and nowhere else.
+    void selectByQuery(const QString &query, int timeoutMs = 15000);
+
+    [[nodiscard]] QObject *placesModel() const;
+    [[nodiscard]] QObject *searchModel() const;
+
+    [[nodiscard]] QString placeLabel() const;
+    [[nodiscard]] QString placeRegion() const;
+    [[nodiscard]] bool    placeIsHome() const;
+    [[nodiscard]] bool    hasPlace() const;
+
+    [[nodiscard]] bool    hasData() const;
+    [[nodiscard]] bool    isLoading() const { return m_inFlight > 0; }
+    [[nodiscard]] QString updatedLabel() const;
+    [[nodiscard]] bool    isStale() const;
+    [[nodiscard]] QString problem() const { return m_problem; }
+    [[nodiscard]] QString sourceName() const { return m_sourceName; }
+    [[nodiscard]] bool    isFromFallback() const { return m_fromFallback; }
+
+    [[nodiscard]] bool isFixtureMode() const { return m_fixture.isValid(); }
+    [[nodiscard]] QString fixtureName() const { return m_fixture.name; }
+
+    [[nodiscard]] QVariantList sources() const;
+
+    [[nodiscard]] bool hasPollen() const;
+    [[nodiscard]] bool isPollenUndetermined() const;
+    [[nodiscard]] bool hasAirQuality() const;
+
+    // ---- what the UI calls -------------------------------------------------
+
+    Q_INVOKABLE void refresh();
+
+    // Row in the saved-places model.
+    Q_INVOKABLE void selectPlace(int row);
+
+    // Row in the *search* model. Saves it if it is new, selects it either way,
+    // and clears the query — which is what "tapping a search result" means.
+    Q_INVOKABLE void chooseSearchResult(int row);
+
+    Q_INVOKABLE void removePlace(int row);
+    Q_INVOKABLE void toggleHome(int row);
+
+    // Asks the platform where we are, then names the coordinate with the
+    // bundled offline index. Both halves can fail and both say so through
+    // `locationFailed`.
+    Q_INVOKABLE void useMyLocation();
+
+    [[nodiscard]] Q_INVOKABLE bool locationAvailable() const;
+
+    // For the C++ side of the app: the current snapshot, canonical units.
+    [[nodiscard]] const clima::Forecast   &forecast() const { return m_forecast; }
+    [[nodiscard]] const clima::AirQuality &airQuality() const { return m_airQuality; }
+    [[nodiscard]] clima::Place             place() const;
+    [[nodiscard]] clima::Clock            *clock() const { return m_clock.get(); }
+
+    [[nodiscard]] ForecastData   *forecastData() const { return m_forecastData; }
+    [[nodiscard]] ConditionsData *conditionsData() const { return m_conditionsData; }
+
+Q_SIGNALS:
+    void placeChanged();
+    void forecastChanged();
+    void loadingChanged();
+
+    // "Location services are unavailable", "Permission denied". A sentence for
+    // a human; the picker shows it inline rather than in a dialog.
+    void locationFailed(const QString &reason);
+
+private:
+    AppEngine();
+
+    void buildLiveProviders();
+    void buildFixtureProviders();
+    void registerProviders();
+
+    // The three steps of the loop. `load` runs step 1 and then step 2.
+    void load();
+    void fetch(bool cachedOnly);
+
+    void applyForecast(const clima::Forecast &forecast, const QString &servedBy, bool fromFallback);
+    void applyAirQuality(const clima::AirQuality &airQuality);
+    void publish();
+
+    void setInFlight(int delta);
+
+    std::unique_ptr<clima::Clock>       m_clock;
+    std::unique_ptr<clima::CacheStore>  m_cache;
+    std::unique_ptr<clima::HttpClient>  m_http;
+    std::unique_ptr<clima::ProviderRegistry> m_registry;
+
+    // Live. Null in fixture mode, and vice versa: the two sets are never both
+    // registered, because a chain containing a fixture and a network provider
+    // would fall through from one to the other and produce a screen that is
+    // half recorded and half not.
+    clima::OpenMeteoForecastProvider   *m_openMeteo   = nullptr;
+    clima::MetNoForecastProvider       *m_metNo       = nullptr;
+    clima::OpenMeteoAirQualityProvider *m_openMeteoAq = nullptr;
+
+    clima::FixtureForecastProvider   *m_fixtureForecast = nullptr;
+    clima::FixtureAirQualityProvider *m_fixtureAq       = nullptr;
+
+    clima::OpenMeteoGeocoder      *m_geocoder = nullptr;
+    clima::OfflineReverseGeocoder *m_reverse  = nullptr;
+    clima::LocationController     *m_places   = nullptr;
+    clima::PlaceSearchModel       *m_search   = nullptr;
+    clima::DeviceLocator          *m_locator  = nullptr;
+
+    clima::Fixture m_fixture;
+
+    clima::Forecast   m_forecast;
+    clima::AirQuality m_airQuality;
+
+    QString m_sourceName;
+    QString m_problem;
+    bool    m_fromFallback = false;
+    int     m_inFlight     = 0;
+
+    // Bumped on every place change. An answer carrying an older number is an
+    // answer about somewhere the user has left, and is dropped — the same rule
+    // PlaceSearchModel applies to out-of-order geocoder replies, for the same
+    // reason.
+    quint64 m_generation = 0;
+
+    ForecastData   *m_forecastData   = nullptr;
+    ConditionsData *m_conditionsData = nullptr;
+};

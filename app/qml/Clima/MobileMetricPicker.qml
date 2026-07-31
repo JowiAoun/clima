@@ -12,7 +12,7 @@
 //
 // So the phone trades visibility for reach: one button that says what is
 // selected, and a list that shows all ten when asked. It is the same registry
-// behind both — metrics.js — so a metric added there appears in both controls.
+// behind both — the Metrics singleton — so a metric added there appears in both.
 //
 // ---- motion ------------------------------------------------------------------
 // The list fades at `tint`. §10.6's "text does not fade" is about a component
@@ -21,7 +21,6 @@
 // then it is, and the fade is what stops it appearing to have been there all
 // along. Nothing else moves — no slide, no scale, no stagger down the rows.
 import QtQuick
-import "metrics.js" as Metrics
 
 Item {
     id: root

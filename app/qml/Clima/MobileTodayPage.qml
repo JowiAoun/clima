@@ -29,6 +29,13 @@ MobilePage {
     // listens; the page has no idea a nav bar exists.
     signal navigate(string tabId)
 
+    // Same shape, for the picker. The page cannot own the sheet: MobilePage is
+    // a scrolling column inside a shell, and a panel parented into it would
+    // scroll and would be clipped by the nav bar. So the request goes up and
+    // the shell puts the sheet over everything, including the nav.
+    signal pickerRequested()
+    property bool pickerOpen: false
+
     Item {
         width: parent.width
         height: 30
@@ -36,6 +43,9 @@ MobilePage {
         LocationBar {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
+            disclosed: root.pickerOpen
+            onChangeRequested: root.pickerRequested()
+            onHomeToggled: Engine.toggleHome(Engine.places.currentIndex)
         }
     }
 
@@ -67,7 +77,16 @@ MobilePage {
         content: MobileSunMoonCard { }
     }
 
+    // Pollen exists in Europe and nowhere else — CAMS produces it for its
+    // European domain only — so outside that domain the card is ABSENT rather
+    // than empty. `hasPollen` is Capability::Pollen at this coordinate, learned
+    // from the payload rather than from a bounding box we typed in, and it is
+    // false both where pollen is known-absent and where the answer is not yet
+    // known. The second half is what stops the card popping in two seconds
+    // after Berlin opens: undetermined draws nothing and then draws the card,
+    // which is one appearance, not an appearance and a correction.
     MobileCard {
+        visible: Engine.hasPollen
         width: parent.width
         title: qsTr("Pollen")
         content: MobilePollenCard { }

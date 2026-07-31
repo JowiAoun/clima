@@ -15,7 +15,6 @@
 import QtQuick
 import QtQuick.Shapes
 import "chartmath.js" as ChartMath
-import "detaildata.js" as Detail
 
 DetailCard {
     id: root
@@ -134,7 +133,7 @@ DetailCard {
 
         // In the middle of the dial — see the note in the air-quality card.
         Text {
-            text: root.d.value + root.d.unit
+            text: root.d.reading
             color: Theme.color.textPrimary
             font.pixelSize: Theme.type.reading
             font.bold: true

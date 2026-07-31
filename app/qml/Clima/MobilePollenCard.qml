@@ -13,7 +13,6 @@
 // unfilled remainder you can see, which is what `trackLine` is for.
 import QtQuick
 import QtQuick.Shapes
-import "detaildata.js" as Detail
 
 Item {
     id: root

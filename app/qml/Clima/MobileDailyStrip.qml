@@ -13,7 +13,6 @@
 // scanning ten columns for "when does it get hot" should be able to follow one
 // row of numbers without the other competing.
 import QtQuick
-import "mockdata.js" as Data
 
 Item {
     id: root
@@ -91,7 +90,7 @@ Item {
                         }
 
                         Text {
-                            text: day.modelData.high + "°"
+                            text: Units.formatDisplay(Units.Temperature, day.modelData.high)
                             color: Theme.color.textPrimary
                             font.pixelSize: Theme.type.status
                             font.bold: true
@@ -99,7 +98,7 @@ Item {
                         }
 
                         Text {
-                            text: day.modelData.low + "°"
+                            text: Units.formatDisplay(Units.Temperature, day.modelData.low)
                             color: Theme.color.textMuted
                             font.pixelSize: Theme.type.status
                             anchors.horizontalCenter: parent.horizontalCenter

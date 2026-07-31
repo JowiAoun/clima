@@ -18,7 +18,6 @@
 // that arrived with its fill would leave the first frames with eight bars and
 // nothing to judge them by.
 import QtQuick
-import "detaildata.js" as Detail
 
 DetailCard {
     id: root
@@ -160,7 +159,7 @@ DetailCard {
                 width: parent.width
 
                 Text {
-                    text: root.d.value + root.d.unit
+                    text: root.d.reading
                     color: Theme.color.textPrimary
                     font.pixelSize: Theme.type.readingPair
                     font.bold: true
@@ -180,7 +179,7 @@ DetailCard {
                 width: parent.width
 
                 Text {
-                    text: root.d.dewPoint + root.d.dewUnit
+                    text: root.d.dewReading
                     color: Theme.color.textPrimary
                     font.pixelSize: Theme.type.readingPair
                     font.bold: true

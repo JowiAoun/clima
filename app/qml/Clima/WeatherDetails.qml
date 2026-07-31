@@ -13,7 +13,6 @@
 // they got. The page owns the scrolling, and with it the layer that keeps these
 // cards' Shapes inside the viewport — see docs/10-design-system.md §10.8.
 import QtQuick
-import "detaildata.js" as Detail
 
 Item {
     id: root

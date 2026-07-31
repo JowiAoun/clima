@@ -6,7 +6,7 @@
 // allowed to be loud in a way nothing else on the page is: a 64 px number, a
 // 72 px glyph, and a plain-language sentence. Everything below it is detail.
 //
-// It reads every number from detaildata.js rather than carrying its own, so the
+// It reads every number from `Detail` rather than carrying its own, so the
 // headline and the detail card for the same measurable cannot drift apart.
 //
 // Anatomy, top to bottom:
@@ -48,7 +48,6 @@
 import QtQuick
 import QtQuick.Shapes
 import "chartmath.js" as ChartMath
-import "detaildata.js" as Detail
 
 Item {
     id: root
@@ -62,17 +61,17 @@ Item {
     // is meaningless without its band, and a wind speed without a bearing is
     // half a reading.
     readonly property var slugs: [
-        { label: qsTr("Air quality"), value: String(Detail.airQuality.value),
+        { label: qsTr("Air quality"), value: Detail.airQuality.reading,
           dot: true,  arrow: -1 },
-        { label: qsTr("Wind"),        value: Detail.wind.speed + " " + Detail.wind.unit,
+        { label: qsTr("Wind"),        value: Detail.wind.reading,
           dot: false, arrow: Detail.wind.directionDeg },
-        { label: qsTr("Humidity"),    value: Detail.humidity.value + Detail.humidity.unit,
+        { label: qsTr("Humidity"),    value: Detail.humidity.reading,
           dot: false, arrow: -1 },
-        { label: qsTr("Visibility"),  value: Detail.visibility.value + " " + Detail.visibility.unit,
+        { label: qsTr("Visibility"),  value: Detail.visibility.reading,
           dot: false, arrow: -1 },
-        { label: qsTr("Pressure"),    value: Detail.pressure.value + " " + Detail.pressure.unit,
+        { label: qsTr("Pressure"),    value: Detail.pressure.reading,
           dot: false, arrow: -1 },
-        { label: qsTr("Dew point"),   value: Detail.humidity.dewPoint + Detail.humidity.dewUnit,
+        { label: qsTr("Dew point"),   value: Detail.humidity.dewReading,
           dot: false, arrow: -1 }
     ]
 
@@ -101,10 +100,36 @@ Item {
         y: root.pad
     }
 
+    // ---- how old this is, and where it came from ---------------------------
+    //
+    // docs/04-architecture.md §4.5 asks for "a subtle 'updated 25 min ago'" on
+    // every row it ticks stale-while-revalidate for, and this is it. Three
+    // facts share one line because they answer one question — how much should I
+    // trust this:
+    //
+    //   the observation's own time      12:28 PM
+    //   how long ago we fetched it      Updated 4 minutes ago
+    //   who answered, when it was not   via MET Norway
+    //       the primary
+    //
+    // The third appears only when the fallback served, because "via Open-Meteo"
+    // on every screen is noise that trains the reader to stop seeing the line
+    // the one day it matters.
+    //
+    // A failed refresh does not blank any of this. It appends a sentence and
+    // tints the line, which is the §4.1 rule made visible: stale with a
+    // timestamp, never a spinner and never an empty screen.
     Text {
         id: stamp
-        text: Detail.observedAt
-        color: Theme.color.textMuted
+        text: [Detail.observedAt,
+              Engine.updatedLabel,
+              Engine.fromFallback ? qsTr("via %1").arg(Engine.sourceName) : "",
+              Engine.problem].filter(function (s) { return s !== "" }).join("  ·  ")
+        color: Engine.stale || Engine.problem !== "" ? Theme.color.statusCaution
+                                                     : Theme.color.textMuted
+        Behavior on color {
+            ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+        }
         font.pixelSize: Theme.type.body
         anchors.left: heading.left
         anchors.top: heading.bottom
@@ -179,7 +204,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 Text {
-                    text: Detail.feelsLike.value + Detail.feelsLike.unit
+                    text: Detail.feelsLike.reading
                     color: Theme.color.textPrimary
                     font.pixelSize: Theme.type.heroDetail
                     anchors.verticalCenter: parent.verticalCenter

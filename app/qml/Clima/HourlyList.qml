@@ -29,12 +29,11 @@
 //     slide.
 //
 // The list also has no state to transition between: it is metric-agnostic and
-// day-agnostic, `nowIndex` is fixed for the life of the process, and the past
+// day-agnostic, `nowIndex` moves only when a whole new snapshot arrives, and the past
 // dimming never changes. Arrival is the switch's motion and the switch belongs
 // to `HourlyOverview`, which is the only place that can sequence it against the
 // chart underneath.
 import QtQuick
-import "mockdata.js" as Data
 
 Item {
     id: root
@@ -238,10 +237,13 @@ Item {
                     font.pixelSize: 12
                 }
 
-                Cell { cellWidth: cols.temp;     text: Math.round(Data.temperature[index]) + "°" ; font.bold: true }
-                Cell { cellWidth: cols.feels;    text: Math.round(Data.apparent[index]) + "°" ; color: Theme.color.textMuted }
+                Cell { cellWidth: cols.temp;     text: Units.formatDisplay(Units.Temperature, Data.temperature[index]) ; font.bold: true }
+                Cell { cellWidth: cols.feels;    text: Units.formatDisplay(Units.Temperature, Data.apparent[index]) ; color: Theme.color.textMuted }
                 Cell { cellWidth: cols.precip;   text: Data.precipProb[index] + "%" ; color: Theme.color.droplet }
-                Cell { cellWidth: cols.wind;     text: Math.round(Data.windSpeed[index]) + " km/h" ; color: Theme.color.textMuted }
+                // Through Units, not with " km/h" written out: the reader may
+                // have asked for mph, and a column headed one unit carrying
+                // numbers in another is the quietest possible way to be wrong.
+                Cell { cellWidth: cols.wind;     text: Units.format(Units.Wind, Data.windSpeed[index]) ; color: Theme.color.textMuted }
                 Cell { cellWidth: cols.humidity; text: Data.humidity[index] + "%" ; color: Theme.color.textMuted }
             }
         }

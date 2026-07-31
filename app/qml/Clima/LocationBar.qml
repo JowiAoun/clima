@@ -8,13 +8,18 @@
 // aligned panel rather than as two things.
 import QtQuick
 import QtQuick.Shapes
-import "detaildata.js" as Detail
 
 Item {
     id: root
 
     property string label: Detail.location.label
     property bool isHome: Detail.location.isHome
+
+    // Whether the picker this bar opens is currently up. Bound from outside —
+    // the picker is a sheet over the whole page and the bar is inside it, so
+    // the bar cannot own it — and read here for one thing only: which way the
+    // chevron points.
+    property bool disclosed: false
 
     signal changeRequested()
     signal homeToggled()
@@ -37,10 +42,21 @@ Item {
         }
 
         // ---- disclosure chevron ------------------------------------------
-        // It does not rotate. A disclosure chevron flips when something is
-        // disclosed, and `changeRequested()` opens a place picker that this
-        // prototype does not have — a chevron that turns over and reveals
-        // nothing is an animation making a promise the app cannot keep.
+        // It rotates now, and for most of this prototype's life it deliberately
+        // did not: `changeRequested()` went nowhere, and a chevron that turns
+        // over and reveals nothing is an animation making a promise the app
+        // cannot keep.
+        //
+        // The promise is kept. The signal opens PlacePicker — search, saved
+        // places, use my location — so the chevron is doing what a disclosure
+        // chevron means: pointing at the thing it opened, and pointing back
+        // when it closes. `disclosed` is bound from whichever page owns the
+        // sheet, so the arrow is a readout of the picker's state rather than a
+        // toggle of its own, and it cannot end up upside down over a closed
+        // panel.
+        //
+        // `Theme.motion.move` and not `view`: the chevron is one small object
+        // travelling, not a screenful arriving.
         Item {
             width: 14
             height: 14
@@ -48,6 +64,10 @@ Item {
 
             Shape {
                 anchors.fill: parent
+                rotation: root.disclosed ? 180 : 0
+                Behavior on rotation {
+                    NumberAnimation { duration: Theme.motion.move; easing.type: Easing.OutCubic }
+                }
                 preferredRendererType: Shape.CurveRenderer
                 ShapePath {
                     strokeColor: chevronHover.hovered ? Theme.color.textPrimary

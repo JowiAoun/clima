@@ -3,7 +3,10 @@
 
 #include "appoptions.h"
 
+#include "libclima/providers/fixture/fixtureprovider.h"
+
 #include <QCommandLineOption>
+#include <QProcessEnvironment>
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QRegularExpression>
@@ -133,6 +136,16 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("file"));
     parser.addOption(grabOption);
 
+    const QCommandLineOption fixtureOption(
+        QStringLiteral("fixture"),
+        QStringLiteral("Replay a recorded forecast at the instant it was recorded, instead of "
+                       "fetching one: %1. Use \"off\" to force the live network. Defaults to "
+                       "\"%2\" under --grab and --film, and to the live network otherwise; "
+                       "CLIMA_FIXTURE sets it for a whole session.")
+            .arg(clima::fixtures::names().join(QStringLiteral(", ")), clima::fixtures::defaultName()),
+        QStringLiteral("name"));
+    parser.addOption(fixtureOption);
+
     const QCommandLineOption sizeOption(
         QStringLiteral("size"),
         QStringLiteral("Open the window at <WxH> pixels, e.g. 1340x900."),
@@ -173,6 +186,13 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     parser.addOption(pokeOption);
 
     // ---- opening state -----------------------------------------------------
+    const QCommandLineOption placeOption(
+        QStringLiteral("place"),
+        QStringLiteral("Look <query> up in the geocoder and open on the first match, e.g. "
+                       "\"Kigali\". Saves it like the picker would."),
+        QStringLiteral("query"));
+    parser.addOption(placeOption);
+
     const QCommandLineOption tabOption(
         QStringLiteral("tab"), QStringLiteral("Open the mobile shell on a given tab."),
         QStringLiteral("id"));
@@ -218,6 +238,15 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(grabOption))
         self->m_grab = parser.value(grabOption);
 
+    if (parser.isSet(fixtureOption)) {
+        const QString name = parser.value(fixtureOption);
+        if (name != QLatin1String("off") && !clima::fixtures::exists(name)) {
+            fail(QStringLiteral("unknown fixture \"%1\" — try one of: %2, or \"off\"")
+                     .arg(name, clima::fixtures::names().join(QStringLiteral(", "))));
+        }
+        self->m_fixture = name;
+    }
+
     if (parser.isSet(sizeOption)) {
         // Anchored, so 1340x900x2 and 1340xfoo are rejected rather than
         // half-read. The QML this replaces used parseInt(), which stops at the
@@ -261,6 +290,8 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     }
 
     // ---- opening state -----------------------------------------------------
+    if (parser.isSet(placeOption))
+        self->m_place = parser.value(placeOption);
     if (parser.isSet(tabOption))
         self->m_tab = parser.value(tabOption);
 
@@ -301,4 +332,34 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     if (!words.isEmpty())
         fail(QStringLiteral("unexpected argument \"%1\" — clima takes options, not arguments")
                  .arg(words.constFirst()));
+}
+
+// ---- which data this run uses ---------------------------------------------------
+//
+// The resolution order is in the header. It is three lines of code and the
+// reason it is not inlined at the call site is that there are two call sites —
+// app/main.cpp and gallery/main.cpp — and a gallery that resolved it differently
+// would review components against data the app never shows.
+QString AppOptions::fixture() const
+{
+    if (m_fixture == QLatin1String("off"))
+        return {};
+    if (!m_fixture.isEmpty())
+        return m_fixture;
+
+    const QString fromEnvironment =
+        QProcessEnvironment::systemEnvironment().value(QStringLiteral("CLIMA_FIXTURE"));
+    if (fromEnvironment == QLatin1String("off"))
+        return {};
+    if (!fromEnvironment.isEmpty() && clima::fixtures::exists(fromEnvironment))
+        return fromEnvironment;
+
+    // A capture defaults to the recording. Not because a capture is a test, but
+    // because a capture is a picture that will be compared with another picture,
+    // and two pictures of two different afternoons compare as a diff in every
+    // pixel.
+    if (capturing())
+        return clima::fixtures::defaultName();
+
+    return {};
 }

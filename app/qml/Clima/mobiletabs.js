@@ -4,7 +4,7 @@
 //
 // One list, read by two things that must not disagree: `BottomNav` draws it,
 // and `MobileShell` loads `page` for whichever id is current. Same argument as
-// metrics.js — adding a screen is a line of data, and a screen that exists in
+// the metric registry — adding a screen is a line of data, and a screen that exists in
 // the tree but not in this list shows up as a tab that is missing rather than
 // as a page nobody can reach.
 //

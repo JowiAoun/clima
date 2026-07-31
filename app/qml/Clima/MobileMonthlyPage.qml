@@ -9,7 +9,6 @@
 // When the provider arrives it is a dropdown next to the heading and a
 // `monthDays` that takes an argument.
 import QtQuick
-import "mockdata.js" as Data
 
 MobilePage {
     id: root

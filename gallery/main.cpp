@@ -15,6 +15,7 @@
 // of the app's own module, and a review of them in a different typeface is a
 // review of something the product does not ship.
 
+#include "appengine.h"
 #include "appfont.h"
 #include "galleryoptions.h"
 
@@ -46,6 +47,19 @@ int main(int argc, char *argv[])
     // Does not return for --help, --version, an unknown flag or a malformed
     // value.
     GalleryOptions::parseCommandLine(app);
+
+    // ---- always a fixture, never the network -------------------------------
+    //
+    // The gallery reviews components, and a component reviewed against
+    // whatever the weather happens to be doing is a component reviewed against
+    // a different specimen every time. It is also the tool most likely to be
+    // opened on a train.
+    //
+    // So there is no live mode here and no flag for one: the recorded Toronto
+    // afternoon at its frozen clock, always, which is the same data
+    // `clima --fixture toronto` shows — so a card that looks right on the stage
+    // looks the same in the product.
+    AppEngine::instance()->configure(clima::fixtures::defaultName());
 
     QQmlApplicationEngine engine;
 

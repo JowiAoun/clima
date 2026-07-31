@@ -30,7 +30,6 @@
 import QtQuick
 import QtQuick.Shapes
 import "chartmath.js" as ChartMath
-import "detaildata.js" as Detail
 
 DetailCard {
     id: root
