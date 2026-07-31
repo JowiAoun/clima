@@ -691,8 +691,28 @@ Item {
             spacing: 18
             width: pane.width
 
+            // The face, named, because it is now a decision the app makes rather
+            // than something fontconfig decides on the way past. Every row below
+            // is set in it, so a page that showed the sizes and not the family
+            // would be answering the smaller half of "what does our type look
+            // like".
+            Text {
+                text: qsTr("family · %1").arg(Theme.type.family)
+                color: Theme.color.textDim
+                font.pixelSize: Theme.type.axis
+            }
+
             Repeater {
-                model: Theme.names(Theme.type)
+                // Sizes only. `family` is a token in the same group and a string,
+                // and a string in `font.pixelSize` is a Text with no height —
+                // which on this page reads as a row that silently went missing
+                // rather than as an error. Filtering on the type of the value
+                // keeps the page generated rather than transcribed: the next
+                // non-numeric token added to the group drops out of the ladder on
+                // its own, and gets its own line above when someone writes one.
+                model: Theme.names(Theme.type).filter(function (token) {
+                    return typeof Theme.type[token] === "number"
+                })
 
                 delegate: Row {
                     required property var modelData

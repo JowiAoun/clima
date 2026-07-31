@@ -316,6 +316,47 @@ QtObject {
     // Declaring these `int` here turns that into a value that was rounded on
     // the way in rather than a component that silently does not exist.
     component TypeTokens: QtObject {
+        // The face, and the second token in this file that does not come from
+        // theme.js. `easing` is there because a QML enum cannot live in a plain
+        // JS library; this one is there because the *right* answer is not a
+        // string at all — it is a question, asked of the running application.
+        //
+        // app/appfont.cpp registers the bundled Inter faces and makes the family
+        // they declare the application font. That is what every one of the 158
+        // Text items in the tree already renders in, without one of them naming
+        // a family, and it is what a settings surface would change when D9's
+        // "use the system UI font" arrives: one call to QGuiApplication::setFont
+        // and the whole tree follows, because that is where a Text resolves its
+        // family from.
+        //
+        // Reading it back here rather than writing "Inter" into theme.js means
+        // there is one spelling of the family in the project and it is the one
+        // inside the font file. The failure the duplicate would have caused is
+        // quiet and slow: swap the bundled face, C++ picks up the new family
+        // automatically, theme.js still says the old one, and every component
+        // that referenced the token falls back to the host's font — half the
+        // screen in the right face and half in the wrong one.
+        //
+        // Nothing in the tree needs to set `font.family` today; the application
+        // font covers it. The token is for the cases that are coming: text drawn
+        // into a Canvas or a QPainter, which take a font by name and inherit
+        // nothing, and any surface that has to opt back out to the platform.
+        //
+        // Not live, one caveat. This is read once when the singleton is created,
+        // and Qt.application.font has no change notification we can rely on, so
+        // a runtime font switch will need this to become a property on a C++
+        // singleton with a NOTIFY of its own. That is W3's problem, and the call
+        // sites do not change when it is solved.
+        //
+        // The suppression is a gap in qmllint's type data rather than a gap in
+        // Qt: `Qt.application.font` is documented and works — the gallery's Type
+        // page prints "family · Inter" off this very property — but the QML type
+        // description for QQmlApplication does not list `font`, so the linter
+        // reports a member that is there. Scoped to the one line, because
+        // `missing-property` is the category that catches real typos in a token
+        // name and it should keep doing that everywhere else in this file.
+        readonly property string family: Qt.application.font.family // qmllint disable missing-property
+
         readonly property int sectionTitle: Tokens.type.sectionTitle
         readonly property int cardTitle:    Tokens.type.cardTitle
         readonly property int detailTitle:  Tokens.type.detailTitle

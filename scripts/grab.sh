@@ -125,12 +125,36 @@ export QT_FORCE_STDERR_LOGGING=1
 
 # ---- what this does NOT pin -------------------------------------------------
 #
-# The fonts. Qt renders text with whatever fontconfig hands it, so two machines
-# with different font packages installed produce different pixels no matter how
-# many variables are exported above. That is the known gap between "reproducible
-# here" and "reproducible everywhere", and closing it means shipping the font
-# files with the tests and pointing QT_QPA_FONTDIR at them. Until then, golden
-# images are only comparable against captures from the same image.
+# The font *face* used to be the headline here: nothing in the QML named a
+# family, so Qt rendered every string in whatever fontconfig picked and two
+# machines with different font packages produced different pixels no matter how
+# many variables this file exported. That is closed. The app ships Inter and
+# installs it as the application font before the engine loads anything — see
+# app/appfont.cpp — so the glyphs come out of the binary. Proof, if it is ever
+# in doubt: run a capture with FONTCONFIG_FILE pointing at a config with no
+# font directories in it, so the host has no fonts at all, and the page still
+# renders in Inter.
+#
+# What is left is how those glyphs are *rasterised*. Hinting, antialiasing and
+# subpixel order are fontconfig's to decide, per host, and Qt asks it — with no
+# platform theme and no QFont::setHintingPreference from us, the answer arrives
+# through QFontconfigDatabase all the same. Measured with the same binary and
+# the same font, host fontconfig against an empty one:
+#
+#     Inter 12 px, one 60-character line
+#       host   advance 341.266   line height 14.5156   ascent 11.625
+#       empty  advance 336       line height 15        ascent 12
+#
+# Fractional against integer: one machine is positioning glyphs at subpixel
+# offsets and the other is snapping them to the grid, which moves wrap points
+# and shifts a whole page by a pixel or two. Same code, same face, different
+# pixels.
+#
+# So golden images remain comparable only against captures from the same image,
+# and the remaining fix is a fontconfig file in the repo with hintstyle,
+# antialias and rgba stated outright, exported from here as FONTCONFIG_FILE.
+# That is a change to what every recorded image looks like, so it belongs with
+# the commit that records the first ones rather than ahead of it.
 #
 # And the clock. Measured on the plain `--size 1340x900` scene: 20 captures in a
 # row are byte-identical on an idle machine, and roughly one in ten differs on a

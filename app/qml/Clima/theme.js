@@ -317,6 +317,12 @@ var metric = {
 //
 // `font.pixelSize` is an int in Qt. A fractional value fails object creation and
 // Qt reports it only as `Type X unavailable` from the *parent* file.
+//
+// Sizes only. `Theme.type.family` — the face these sizes are set in — exists and
+// is deliberately not here: the name of the bundled typeface is already written
+// down inside the font file, and a second copy in this table is a copy that can
+// disagree with it. Theme.qml reads it off the running application instead, and
+// says why at more length.
 var type = {
     // A section heading on the page: "Hourly", "Weather details". One token,
     // because the two sections had picked 18 and 15 independently and nobody

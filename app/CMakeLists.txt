@@ -178,6 +178,8 @@ qt_add_library(climaqml STATIC)
 # `clima --grab bug.png`" — so the file that implements it has to ship too, and
 # the rest of it is compiled out from the inside. See its header.
 set(clima_cpp_sources
+    appfont.h
+    appfont.cpp
     appoptions.h
     appoptions.cpp
     settings.h
@@ -186,12 +188,41 @@ set(clima_cpp_sources
     devtools/screenshotcontroller.cpp
 )
 
+# ---- the typeface -----------------------------------------------------------
+#
+# Vendored, third-party, and the one thing in this repository that is not ours:
+# Inter 4.1 by The Inter Project Authors, under the SIL Open Font License 1.1.
+# REUSE.toml carries the attribution — it must say 2016 The Inter Project
+# Authors and not 2026 Jowi Aoun — and LICENSES/OFL-1.1.txt carries the terms.
+# The files are unmodified, which matters for more than tidiness: the OFL is
+# satisfied by the copyright notice and licence travelling with the font, and
+# each file's own `name` table already holds both (name ID 0 and name ID 13), so
+# the notice survives into a stripped binary that ships no text files at all.
+#
+# RESOURCES rather than QML_FILES. QML_FILES runs its arguments through
+# qmlcachegen, which has opinions about what a .qml or .js file contains and
+# none about a TTF; RESOURCES embeds bytes. They land at
+# `:/qt/qml/Clima/fonts/…` — the module prefix plus the path relative to this
+# file — and app/appfont.cpp opens them there. Not flattened by the loop above,
+# because that loop exists to make the module directory match its URI for
+# qmllint's benefit, and a font is not a QML type.
+#
+# On climaqml, not on `clima`, so that the gallery gets the same bytes from the
+# same place. Reviewing a component in a typeface the app does not use is
+# reviewing something else.
+set(clima_font_files
+    fonts/Inter-Regular.ttf
+    fonts/Inter-Bold.ttf
+)
+
 qt_add_qml_module(climaqml
     URI Clima
     VERSION 1.0
     QML_FILES
         ${clima_qml_files}
         ${clima_js_files}
+    RESOURCES
+        ${clima_font_files}
     SOURCES
         ${clima_cpp_sources}
 )

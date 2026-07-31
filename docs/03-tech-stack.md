@@ -146,6 +146,13 @@ reduced-motion, font DPI — and uses native styles only for standard dialogs an
 settings surface. FluentWinUI3 remains available for Windows chrome; note it is still
 under development with several unsupported controls.
 
+The **typeface** is the one platform signal we deliberately do not read by default: the app
+bundles Inter and installs it as the application font, because "whatever the host picks"
+means different metrics, different wrap points and a layout that only fits on the machine it
+was designed on — and golden images that cannot be compared across machines at all. Font DPI
+is still the platform's to decide, and `Theme.type.family` is a live read of the application
+font rather than a constant, so a settings toggle can hand the choice back.
+
 ### D10 — Icons: Meteocons (MIT), converted to QML at build time
 Meteocons ships 200+ hand-crafted animated weather icons under **MIT**, as animated SVG
 and Lottie JSON, in fill/flat/line/monochrome styles. We consume the **SVG** variants and
@@ -162,6 +169,7 @@ is a backup for glyph-style needs.
 | maplibre-native-qt | ≥ 3.x | BSD-2 | Map rendering | Vendored via FetchContent (upstream packaging is thin) |
 | SQLite | via Qt Sql or system | Public domain | Cache + history store | System |
 | Meteocons | 2.1+ | MIT | Weather icons | Vendored, converted at build |
+| Inter | 4.1 | OFL-1.1 | UI typeface | Vendored, Regular + Bold, in the binary |
 | Catch2 or Qt Test | — | BSL-1.0 / LGPL | Unit tests | Test-only |
 | `libcap` CAP parsing | — | — | Use Qt XML — **no new dependency** | — |
 

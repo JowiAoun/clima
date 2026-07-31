@@ -1,15 +1,21 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The gallery's entry point. Three things happen, and the interesting one is
-// the thing that does not.
+// The gallery's entry point. Four things happen, and the interesting one is the
+// thing that does not.
 //
 // app/main.cpp calls Settings::prepareStorage() before anything else, because
 // the weather app remembers its window size and its units. This does not, and
 // that is a rule rather than an omission: a developer tool has no business
 // writing to the config directory the product reads. Open the gallery at
 // 1500x950 and the app must still open where the reader last left it.
+//
+// AppFont::install() is the opposite case — the one piece of app/main.cpp this
+// file must copy. The specimens on the stage are the app's own components out
+// of the app's own module, and a review of them in a different typeface is a
+// review of something the product does not ship.
 
+#include "appfont.h"
 #include "galleryoptions.h"
 
 #include "climaconfig.h"
@@ -27,6 +33,11 @@ int main(int argc, char *argv[])
     // config directory here to key.
     QGuiApplication::setApplicationName(QStringLiteral("clima-gallery"));
     QGuiApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
+
+    // Before the engine, for the reason app/main.cpp gives at the same line: a
+    // Text item resolves its family from the application font when it is
+    // created, and never again.
+    AppFont::install();
 
     // Before the engine, because Main.qml reads these at construction: the
     // window sizes itself from --size, and the stage frames itself from

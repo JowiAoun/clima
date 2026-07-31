@@ -68,6 +68,28 @@ in it meets at a hard edge.
 
 ## 10.4 Type
 
+The face is **Inter**, bundled. Two static files — `app/fonts/Inter-Regular.ttf`
+and `app/fonts/Inter-Bold.ttf`, Inter 4.1 under the SIL Open Font License 1.1 —
+registered in `main()` and made the application font, so every `Text` in the tree
+gets it without naming it. `Theme.type.family` reads the family back off the
+running application for the cases that have to name one: text drawn into a Canvas
+or a QPainter, and any surface that opts back out to the platform.
+
+This is not a preference, it is the difference between a product and a
+screenshot. Before it, nothing in the QML named a family, which does not mean
+"the default font" — it means fontconfig chose on Linux, DirectWrite on Windows
+and CoreText on macOS. Different metrics, so different wrap points, so a body
+that fits its card on one machine overflows it on another; and golden images that
+cannot be compared across machines at all, because text is most of the pixels.
+
+Two static faces rather than the one variable file, and the reason is `font.bold`.
+Qt's font database registers a variable font's default instance and does not
+expand its named instances, so `Inter Variable` arrives with exactly one style and
+`font.bold: true` — which 58 lines in the tree set — synthesises a bold instead of
+selecting one. Synthetic bold is the real face's weight in the wrong face's
+spacing: at 34 px it measures 654.875 px where Inter Bold measures 674.297.
+`app/appfont.cpp` has the measurements and the longer argument.
+
 Sizes are integers. **`font.pixelSize` is an int in Qt** — assigning `12.5`
 fails object creation and Qt reports it only as `Type X unavailable` from the
 *parent* file, which is a miserable hour to lose.

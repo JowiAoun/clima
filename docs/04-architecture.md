@@ -89,6 +89,7 @@ clima/
 │   ├── charts/                   # ClimaCharts scene-graph items
 │   ├── qml/
 │   │   ├── views/  components/  theme/
+│   ├── fonts/                    # Inter, OFL-1.1 — the UI face, bundled
 │   └── assets/                   # Meteocons → generated QML
 ├── gallery/                      # `clima-gallery` — every component on one screen, ships nowhere
 ├── cli/                          # `clima-cli` — scriptable forecast output
