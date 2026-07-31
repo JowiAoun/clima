@@ -83,6 +83,34 @@ match, and `--size 400x800` gets you the phone layout just as well.
 in, so a headless grab without it reviews the top third and silently signs off on
 everything below — which is where the twelve charts are.
 
+### The images above
+
+Every screenshot in this file is a `--grab`, and this is the command that made
+it. They are checked in, so they go stale the moment the data or the layout
+moves — regenerate the whole set rather than the one you changed, or the page
+ends up illustrated by two different builds:
+
+```sh
+./run.sh --grab screenshot.png                 --size 1340x860
+./run.sh --grab screenshot-rain.png            --size 1340x860 --scroll 250
+./run.sh --grab screenshot-uv.png              --size 1340x860 --scroll 250 --metric uv
+./run.sh --grab screenshot-list.png            --size 1340x860 --scroll 250 --list
+./run.sh --grab screenshot-details.png         --size 1340x860 --scroll 900
+./run.sh --grab screenshot-mobile.png          --viewport mobile --size 390x1180
+./run.sh --grab screenshot-mobile-tabs.png     --viewport mobile --tab hourly
+./run.sh --grab screenshot-mobile-night.png    --viewport mobile --size 390x900 --sky night
+./run.sh --grab screenshot-gallery-viewport.png --gallery Today screen --viewport mobile
+```
+
+The two mobile sizes are taller than the 390x844 preset on purpose: a phone
+screen's worth of a scrolling page is not what a reader of a README wants to be
+shown. `--sky night` forces the backdrop and not the data, which is the only way
+to photograph the star field — the mock cannot be a different time of day.
+
+Run any of them twice and `cmp` the results. They are byte-identical, and if one
+is not, something in the prototype has started reading a clock or a random
+number generator and the golden images are worth nothing.
+
 ### Looking at motion
 
 A still frame cannot show motion, and `--grab` lands wherever the animation
