@@ -44,6 +44,7 @@ set(clima_qml_files
     qml/Clima/DetailUvCard.qml
     qml/Clima/DetailVisibilityCard.qml
     qml/Clima/DetailWindCard.qml
+    qml/Clima/DevPreviews.qml
     qml/Clima/DropletGlyph.qml
     qml/Clima/FeelsLikeToggle.qml
     qml/Clima/Gallery.qml
@@ -161,11 +162,17 @@ qt_add_executable(clima
 # compiles fine, links fine, and then does not exist as a QML type. The failure
 # names the QML file that used it.
 #
+# screenshotcontroller is here unconditionally even though most of what it does
+# is CLIMA_DEV_TOOLS-only. `--grab` ships — the issue template says "attach
+# `clima --grab bug.png`" — so the file that implements it has to ship too, and
+# the rest of it is compiled out from the inside. See its header.
 set(clima_cpp_sources
     appoptions.h
     appoptions.cpp
     settings.h
     settings.cpp
+    devtools/screenshotcontroller.h
+    devtools/screenshotcontroller.cpp
 )
 
 qt_add_qml_module(clima
@@ -178,15 +185,16 @@ qt_add_qml_module(clima
         ${clima_cpp_sources}
 )
 
-# The binary dir is where configure_file put climaconfig.h. The source dir is
+# The binary dir is where configure_file put climaconfig.h. The other two are
 # for a file nobody writes: qmltyperegistrar generates
-# clima_qmltyperegistrations.cpp with an `#include <appoptions.h>` — basename
-# only, no directory — so every directory holding a QML_ELEMENT header has to be
-# reachable that way or the generated file names a type that "was not declared
-# in this scope".
+# clima_qmltyperegistrations.cpp with an `#include <screenshotcontroller.h>` —
+# basename only, no directory — so every directory holding a QML_ELEMENT header
+# has to be reachable that way or the generated file names a type that "was not
+# declared in this scope".
 target_include_directories(clima PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/devtools
 )
 
 # The option has existed since the CMake skeleton landed; this is where it
