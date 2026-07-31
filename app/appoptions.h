@@ -139,6 +139,29 @@ public:
     // and nothing else. An ordinary launch with no flags is live, which is the
     // one case where a user is asking about the weather rather than about the
     // app.
+    //
+    // ---- except that --place names a place, and a fixture cannot answer -----
+    //
+    // A fixture is one recorded place. It answers with that place's weather
+    // whatever coordinate it is handed — that is what makes it reproducible.
+    // So `--place Reykjavik --grab out.png` used to take rule 3, fetch nothing,
+    // and write a PNG with "Reykjavik, Capital Region" in the location bar over
+    // Toronto's recorded afternoon: 26 °C, high 28, low 16, on a day Reykjavik
+    // reached 16.
+    //
+    // That is not a silent default, it is a mislabelled forecast, and it is
+    // worse than it sounds because the output is a file — the warning would
+    // scroll past in a terminal while the picture goes into a bug report or a
+    // README.
+    //
+    // So an implied fixture yields to a named place: rule 3 and rule 2 both
+    // check `--place` and step aside, saying so on stderr, and the run goes
+    // live. Rule 1 does not, because `--fixture <name> --place <query>` is two
+    // explicit and incompatible instructions — that combination is rejected in
+    // parseCommandLine rather than silently resolved either way.
+    //
+    // `--grab` with no `--place` is untouched, which is the property every
+    // committed screenshot depends on.
     QString fixture() const;
 
     QString     grab()        const { return m_grab; }

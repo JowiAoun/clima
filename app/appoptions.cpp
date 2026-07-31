@@ -50,6 +50,26 @@ namespace {
 }
 
 #ifdef CLIMA_DEV_TOOLS
+// Not an error: the run continues and does something reasonable. Said out loud
+// anyway, because the thing it is reporting is a flag NOT taking effect, and a
+// default that quietly declines to apply is indistinguishable from one that was
+// never there.
+//
+// stderr rather than qWarning, to match fail() above: these two are the file's
+// whole diagnostic vocabulary and they should look alike, and neither should be
+// filterable by a logging category that nobody has configured.
+//
+// Guarded, because the only caller is the --place reconciliation and --place is
+// a dev-tools flag; a packaged build compiles this to nothing and would
+// otherwise carry an unused-function warning for it.
+void note(const QString &message)
+{
+    std::fprintf(stderr, "%s: %s\n", qPrintable(QCoreApplication::applicationName()),
+                 qPrintable(message));
+}
+#endif // CLIMA_DEV_TOOLS
+
+#ifdef CLIMA_DEV_TOOLS
 // Every numeric flag in this parser wants the same three things: the value has
 // to be a whole number, it has to clear a floor, and a failure has to name the
 // flag rather than the number. Written once because it was written five times
@@ -295,6 +315,52 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(tabOption))
         self->m_tab = parser.value(tabOption);
 
+    // ---- --place against the fixture rules ---------------------------------
+    //
+    // A fixture is one recorded place and answers with that place's weather
+    // whatever coordinate it is handed. So a fixture and a named place are two
+    // answers to the same question, and the header on fixture() sets out which
+    // one wins where. Two of the three cases are settled here, at parse time,
+    // because this is where both values are known and where saying something
+    // still reaches a human.
+    if (!self->m_place.isEmpty()) {
+        // Both stated outright. There is no reading of this that gives the user
+        // both things they asked for, and picking one silently is how the
+        // original bug worked. Refused, with the two ways to say what was
+        // probably meant.
+        if (!self->m_fixture.isEmpty() && self->m_fixture != QLatin1String("off")) {
+            fail(QStringLiteral("--place %1 and --fixture %2 ask for two different forecasts: "
+                                "a fixture replays one recorded place and cannot answer for "
+                                "another.\n"
+                                "Drop --fixture to fetch %1 live, or drop --place to replay "
+                                "the recording.")
+                     .arg(self->m_place, self->m_fixture));
+        }
+
+        // Implied rather than stated, so the place wins — but the capture that
+        // results is a live one, which means it is a picture of this afternoon
+        // and will not compare against another taken tomorrow. That is worth a
+        // line, because reproducibility is the entire reason the default exists.
+        if (self->m_fixture.isEmpty()) {
+            const QString session =
+                QProcessEnvironment::systemEnvironment().value(QStringLiteral("CLIMA_FIXTURE"));
+            const bool sessionFixture =
+                !session.isEmpty() && session != QLatin1String("off")
+                && clima::fixtures::exists(session);
+
+            if (sessionFixture) {
+                note(QStringLiteral("--place %1 overrides CLIMA_FIXTURE=%2 for this run; "
+                                    "fetching live.")
+                         .arg(self->m_place, session));
+            } else if (self->capturing()) {
+                note(QStringLiteral("--place %1 is a live fetch, so this capture is not "
+                                    "reproducible. Drop --place for the recorded forecast "
+                                    "that --grab and --film default to.")
+                         .arg(self->m_place));
+            }
+        }
+    }
+
     if (parser.isSet(skyOption)) {
         const QString phase = parser.value(skyOption);
         if (!skyPhases().contains(phase))
@@ -342,24 +408,31 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
 // would review components against data the app never shows.
 QString AppOptions::fixture() const
 {
+    // Rule 1. Explicit, and it wins outright. A --place alongside it was
+    // rejected at parse time, so there is no conflict left to resolve here.
     if (m_fixture == QLatin1String("off"))
         return {};
     if (!m_fixture.isEmpty())
         return m_fixture;
+
+    // Rules 2 and 3 are both *implied* fixtures, and an implied fixture loses
+    // to a named place — see the header. The place is the more specific
+    // instruction and the only one of the two that a recording cannot honour.
+    const bool named = !m_place.isEmpty();
 
     const QString fromEnvironment =
         QProcessEnvironment::systemEnvironment().value(QStringLiteral("CLIMA_FIXTURE"));
     if (fromEnvironment == QLatin1String("off"))
         return {};
     if (!fromEnvironment.isEmpty() && clima::fixtures::exists(fromEnvironment))
-        return fromEnvironment;
+        return named ? QString() : fromEnvironment;
 
     // A capture defaults to the recording. Not because a capture is a test, but
     // because a capture is a picture that will be compared with another picture,
     // and two pictures of two different afternoons compare as a diff in every
     // pixel.
     if (capturing())
-        return clima::fixtures::defaultName();
+        return named ? QString() : clima::fixtures::defaultName();
 
     return {};
 }
