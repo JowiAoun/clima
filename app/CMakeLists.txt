@@ -186,6 +186,21 @@ set(clima_cpp_sources
     settings.cpp
     devtools/screenshotcontroller.h
     devtools/screenshotcontroller.cpp
+
+    # ---- the view models ----------------------------------------------------
+    #
+    # docs/04-architecture.md §4.2's middle layer, beginning. `Units` is the one
+    # place in the program that knows a conversion factor and `Metrics` is the
+    # registry that metrics.js will become.
+    #
+    # QML_SINGLETONs, so they are in SOURCES rather than on the library for the
+    # reason the block above gives: qmltyperegistrar only scans what the module
+    # was told about, and a QML_ELEMENT header listed as an ordinary source
+    # compiles, links, and then does not exist as a QML type.
+    viewmodels/metrics.h
+    viewmodels/metrics.cpp
+    viewmodels/units.h
+    viewmodels/units.cpp
 )
 
 # ---- the typeface -----------------------------------------------------------
@@ -241,6 +256,7 @@ target_include_directories(climaqml PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/devtools
+    ${CMAKE_CURRENT_SOURCE_DIR}/viewmodels
 )
 
 # The option has existed since the CMake skeleton landed; this is where it
