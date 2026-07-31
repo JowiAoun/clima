@@ -11,8 +11,25 @@
 
 .import "precip.js" as Precip
 
+// `nowIndex` is the one number in this file that has to agree with another
+// file. detaildata.js observes at 12:28 PM, and two stand-ins describing the
+// same forecast for the same place have to describe the same instant or the
+// page contradicts itself: for a while this said index 3, which is midnight,
+// and the hourly strip drew moon glyphs under a hero showing a sun and 27°.
+//
+// Index 15 is 12:00 — the hour that observation falls in — and it is the index
+// detaildata.js was already written against. Its twelve-hour context window is
+// `precipProb[9..20]` verbatim, and its own `nowIndex` of 6 lands exactly here.
+// So this is the marker being moved to where the rest of the data already
+// thought it was, not a new position chosen for it.
+//
+// Moving the marker rather than the series is what keeps the arrays below
+// worth comparing to the reference: every value stays at the clock hour it was
+// authored for, and the labelled hours are still MSN's, column for column.
+// Fifteen observed hours is a lot of past to carry, and it is the honest
+// amount — the series starts at 21:00 the evening before.
 var startHour       = 21;   // index 0 is 21:00 on day 0
-var nowIndex        = 3;    // 00:00
+var nowIndex        = 15;   // 12:00, the hour detaildata.js observes
 var firstLabelIndex = 1;    // label every 2 h from 22:00, so the curve starts
 var labelStep       = 2;    // before the first label — as it does in MSN
 
@@ -54,12 +71,14 @@ var count = temperature.length;
 // provider uses, and the one the wash under the chart is drawn on.
 //
 // Four spells, chosen to be a day someone would actually plan around rather
-// than to exercise a switch statement: last night's rain still drizzling out
-// as the page opens, a thunder-free but genuinely heavy band through the
-// afternoon that climbs light → moderate → heavy → moderate and back, its own
-// tail, and a light band after tomorrow's sunrise. Sleet, snow and hail cannot
-// occur at these temperatures and so are not here; the gallery is where those
-// live, which is what the gallery is for.
+// than to exercise a switch statement: last night's rain, over by 01:00 and
+// behind the now line by the time the page opens, a thunder-free but genuinely
+// heavy band through the afternoon that climbs light → moderate → heavy →
+// moderate and back, its own tail, and a light band after tomorrow's sunrise.
+// The afternoon band begins two hours after "now", which is what lets
+// detaildata.js say "dry now, rain from 2 p.m." and be right. Sleet, snow and
+// hail cannot occur at these temperatures and so are not here; the gallery is
+// where those live, which is what the gallery is for.
 var precipMm = _buildPrecipMm();
 
 function _buildPrecipMm() {
@@ -67,8 +86,10 @@ function _buildPrecipMm() {
     for (var i = 0; i < count; ++i)
         out.push(0);
 
-    // 21:00 – 01:00, easing off. Straddles `nowIndex`, so the effect has to be
-    // right on both sides of the now line on first paint.
+    // 21:00 – 01:00, easing off. Entirely behind `nowIndex`, so the wash and
+    // the past veil are composited over each other on first paint — which is
+    // the one pair of layers here that can be got wrong and stay unnoticed,
+    // since neither is ever seen over the other anywhere else.
     out[0]  = 0.35; out[1]  = 0.30; out[2]  = 0.22; out[3] = 0.15; out[4] = 0.11;
 
     // 14:00 – 18:00, the event of the day.
@@ -278,11 +299,21 @@ function _buildMonth() {
 }
 
 // Fractional indices, so a marker can sit between two samples.
+//
+// The times are detaildata.js's — 6:04 and 8:43, its `sun.riseMin` and
+// `sun.setMin` to the minute — because the same sun cannot rise at two
+// different times on one page. These had been 5:44 and 8:33, which is some
+// other date's sun and put `isNight()` twenty minutes out from the arc on the
+// Sun card at one end and ten at the other. Tomorrow's pair moves the way a
+// real one does in late July: a minute later up, a minute earlier down.
+//
+// Index = the clock hour minus `startHour`, so 6:04 AM on day 1 is
+// 6 + 4/60 − 21 + 24 = 9.07.
 var sunEvents = [
-    { index:  8.73, kind: "sunrise", text: "5:44 AM" },
-    { index: 23.55, kind: "sunset",  text: "8:33 PM" },
-    { index: 32.75, kind: "sunrise", text: "5:45 AM" },
-    { index: 47.53, kind: "sunset",  text: "8:32 PM" }
+    { index:  9.07, kind: "sunrise", text: "6:04 AM" },
+    { index: 23.72, kind: "sunset",  text: "8:43 PM" },
+    { index: 33.08, kind: "sunrise", text: "6:05 AM" },
+    { index: 47.70, kind: "sunset",  text: "8:42 PM" }
 ];
 
 var moonPhase = { name: "Waning Gibbous", illuminated: 0.74 };

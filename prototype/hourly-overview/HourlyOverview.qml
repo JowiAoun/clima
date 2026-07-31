@@ -362,6 +362,40 @@ Item {
                 flickableDirection: Flickable.HorizontalFlick
                 boundsBehavior: Flickable.StopAtBounds
 
+                // Open on now, not on the start of the series.
+                //
+                // The series begins at 21:00 the evening before, so at midday
+                // fifteen of its forty-eight hours have already happened —
+                // which is the shape a provider hands over, not an artefact of
+                // the mock. Opening at contentX 0 therefore opens the section
+                // called *Hourly* on last night. `HourlyList` has scrolled to
+                // now on mount since it was written; this is the same rule for
+                // the other half of the same card, and the two views of one
+                // series disagreeing about where they start was only invisible
+                // while "now" was three columns in.
+                //
+                // Observed hours are kept on screen rather than none. The past
+                // treatment is a reading — those hours happened, and the veil
+                // and the hatch are what say so — and a chart that opens
+                // exactly on the now line never shows it at all.
+                //
+                // How many is not a taste: it is one label interval, put one
+                // column inside the left edge. The header band draws an entry
+                // per labelled hour, so landing on a label rather than between
+                // two is the difference between opening with a legible column
+                // and opening with half a glyph and "AM" sliced off by the
+                // clip. `nowIndex` is itself a labelled index — it has to be,
+                // or "Now" would never be drawn — so stepping back by
+                // `labelStep` lands on the label before it.
+                //
+                // Assigned on completion rather than bound: this is where the
+                // chart opens, not where it has to stay, and a binding would
+                // haul the reader back here after every flick.
+                Component.onCompleted:
+                    contentX = ChartMath.clamp(
+                        root.xForIndex(Data.nowIndex - Data.labelStep) - root.hourWidth,
+                        0, Math.max(0, contentWidth - width))
+
                 // A pager step is three quarters of the plot: one view of the day
                 // becoming another, hence `view`. A *drag* is not animated — the
                 // content tracks the finger, and interposing an easing between

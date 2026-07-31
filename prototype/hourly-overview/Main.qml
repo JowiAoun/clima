@@ -51,13 +51,13 @@ Window {
     // different time of day.
     //
     // ---- which clock -------------------------------------------------------
-    // detaildata.sun, not mockdata's sun events, and the two currently
-    // disagree: the hourly series puts "Now" at midnight while the observation
-    // says 12:28 PM, so `mockdata.isNight(nowIndex)` is true while the hero
-    // draws a sun. That disagreement predates this file. The observation wins
-    // here because the hero is what the sky is behind — a night sky under a
-    // sun glyph and a 27° reading would be the page contradicting itself in
-    // the largest possible type.
+    // detaildata.sun, because it is the clock that carries minutes. The two
+    // mock files now agree about the instant — `mockdata.nowIndex` is 12:00,
+    // the hour this observation falls in, and both take the same sunrise and
+    // sunset — so this is a choice of resolution and not a choice of source.
+    // The resolution is the whole point: dawn and dusk are the seventy minutes
+    // either side of a crossing, and an hour index cannot say where in that
+    // band it is.
     property string forcedSky: ""
     readonly property string skyPhase:
         forcedSky !== "" ? forcedSky

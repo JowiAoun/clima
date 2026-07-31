@@ -304,7 +304,7 @@ and a list view that had the chart painting through it on `main`. See
 | **Gradient curve** | `ShapePath` can gradient-*fill* but not gradient-*stroke*, so the line is a thin closed ribbon around the curve, filled with the same ramp |
 | **Auto-scaling axis** | Opt-in per metric. Precipitation uses it: a fixed 0–4 mm axis renders a drizzle as a flat line, which reads as "no data" rather than "a little rain" |
 | **Overlay series** | Wind draws gusts as a dashed line over the speed area |
-| **The past** | Veiled and hatched *over* the series. Observed hours are real data so they stay visible, but they are visibly not forecast |
+| **The past** | Veiled and hatched *over* the series. Observed hours are real data so they stay visible, but they are visibly not forecast. The chart opens on "now" with one label interval of them still to its left — a section called *Hourly* that opens on last night is not showing the hours anyone came for, and one that opens exactly on the now line never shows the past treatment at all |
 | **Feels like** | On Overview, toggling *morphs* the curve — the path is regenerated from interpolated points each frame, so it is a genuine tween rather than a crossfade |
 | **Precipitation** | The one variable people ask *when* about rather than *how much*, so it gets a second encoding on every tab: the wet hours are washed, rained on and named. See below |
 
@@ -389,11 +389,25 @@ weather, the numbers around it have to agree with it. A 4 % chance of 8.6 mm, or
 rain out of a half-clear sky, is the more embarrassing thing to ship than a divergence
 from a screenshot. Away from those hours both series are still the reference's.
 
-The forecast is now four spells: last night's rain still drizzling out as the page
-opens, an afternoon band that climbs light → moderate → heavy and back, its tail, and a
-light band after tomorrow's sunrise. `detaildata.js` moved with it — the precipitation
-card reads 21 mm and "heavy rain expected" rather than nought, and the headline's
-outlook sentence says so too.
+The forecast is four spells: last night's rain, over by 01:00 and behind the now line
+by the time the page opens, an afternoon band that climbs light → moderate → heavy and
+back, its tail, and a light band after tomorrow's sunrise. `detaildata.js` moved with
+it — the precipitation card reads 21 mm and "heavy rain expected" rather than nought,
+and the headline's outlook sentence says so too.
+
+**Both mock files describe one instant.** `mockdata.js` puts "Now" at index 15, which
+is 12:00, and `detaildata.js` observes at 12:28 PM on Thursday 30 July 2026; both take
+the same sunrise (6:04 AM) and the same sunset (8:43 PM), so `mockdata.isNight()` and
+the sky behind the hero cannot disagree. That agreement is not a coincidence anyone has
+to maintain by hand — `detaildata.js`'s twelve-hour context window *is*
+`mockdata.precipProb[9..20]`, and its own `nowIndex` of 6 lands on index 15. The two
+files were always written against the same series; only the now marker was in the wrong
+place, and for a while it put moon glyphs under a hero drawing a sun.
+
+Fifteen of the forty-eight hours have therefore already happened when the page opens,
+which is the shape a provider hands over at midday rather than an artefact of the mock:
+Open-Meteo's hourly forecast starts at 00:00 today. The chart opens on "now" with the
+last label interval of observed hours still to its left, for exactly that reason.
 
 ## Deliberately not done yet
 
@@ -403,13 +417,15 @@ outlook sentence says so too.
   state in the house colours is exactly what a *finished* screen with no data
   looks like, and six weeks later somebody files a bug about the map not
   loading. Real one is MapLibre Native, decision D4.
-- **The two mock clocks disagree.** `mockdata.js` puts "Now" at midnight —
-  index 3 of a series starting at 21:00 — while `detaildata.js` says the
-  observation is 12:28 PM. So the hourly strip opens on moon glyphs under a
-  hero drawing a sun. This predates the mobile shell and is visible on the
-  desktop page too; the sky phase reads `detaildata.sun`, on the grounds that
-  the hero is what it is drawn behind. Worth reconciling when a provider
-  replaces both.
+- **The hero's numbers and the chart's come from two different panels of the
+  reference.** The two mock files now agree about *when* — one instant, one
+  sunrise, one sunset — and they still differ about *how warm*: at that hour
+  the chart reads 24° and today's high as 26°, while the hero reads 27° and
+  29°. Each is the reference's own number for the panel it was traced from, so
+  reconciling them means re-tuning one against the other rather than against
+  the capture, and the capture is the only thing here that can settle an
+  argument. Worth doing when a provider replaces both, which is when the
+  numbers stop being traced at all.
 - **A month picker** on the Monthly tab. There is one month of data behind it,
   so a picker would open a list with one thing in it.
 - **A tablet layout.** Tablet runs the phone's shell with the content column
