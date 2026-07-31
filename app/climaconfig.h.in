@@ -1,0 +1,17 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Generated from app/climaconfig.h.in by CMake. Do not edit the copy in the
+// build directory; edit this template.
+//
+// The build's identity, reachable from C++. Every one of these strings also
+// appears in a file that is not C++ — the desktop entry, the AppStream
+// metainfo, the Flatpak manifest — and all of them are generated from the same
+// CMake variables. That is the whole reason this file exists: the app ID has to
+// be one string, and a string duplicated across five formats is a string that
+// will eventually disagree with itself.
+#pragma once
+
+#define CLIMA_APP_ID      "@CLIMA_APP_ID@"
+#define CLIMA_VERSION     "@PROJECT_VERSION@"
+#define CLIMA_APP_NAME    "@PROJECT_NAME@"

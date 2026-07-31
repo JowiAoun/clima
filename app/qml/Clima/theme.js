@@ -1,0 +1,476 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Design tokens for the hourly overview prototype.
+// These become the real Clima design system later; keep them in one place so the
+// whole chart can be re-skinned without touching layout code.
+.pragma library
+
+// Surfaces are translucent, not painted.
+//
+// The reference has no opaque cards at all: the page is one vertical gradient
+// and every surface is a thin white wash over it, so a card's actual colour is
+// whatever the gradient is doing behind it at that scroll depth. Flat fills
+// cannot reproduce that — they are one colour everywhere, and the page stops
+// reading as a single lit surface with things resting on it.
+//
+// Alpha ladder, matching the reference's three levels: 0.05 recedes, 0.07 is
+// the default surface, 0.10 is raised or hovered. In #AARRGGBB those are 0d,
+// 12 and 1a.
+//
+// The reference also puts backdrop-blur(60px) under each card. That is
+// deliberately not reproduced: blurring a smooth vertical gradient returns
+// almost exactly the same gradient, so it would cost an offscreen pass and a
+// blur per card to change nothing. It earns its keep on their radar map, and
+// that is where to revisit it.
+var surfaceAlpha = {
+    recede: "#0d",   // 0.05
+    base:   "#12",   // 0.07
+    raised: "#1a"    // 0.10
+};
+
+var color = {
+    // Page gradient stops. Declared here, applied in Main.qml — QML cannot
+    // generate GradientStop elements from a Repeater, so they are written out.
+    pageStop0:     "#203580",   // 0.00
+    pageStop1:     "#443e73",   // 0.06
+    pageStop2:     "#443a66",   // 0.30
+    pageStop3:     "#27284f",   // 0.60
+    pageStop4:     "#171e44",   // 1.00
+    pageBg:        "#27284f",   // flat fallback, ~the gradient's midpoint
+
+    surfaceRecede: "#0dffffff",
+    surfaceBase:   "#12ffffff",
+    surfaceRaised: "#1affffff",
+
+    cardBg:        "#12ffffff",  // the card surface
+    cardBorder:    "#1affffff",
+    panelBg:       "transparent", // the chart sits directly on the card: a
+                                  // second wash inside the first would read as
+                                  // 0.135, a panel darker than anything in the
+                                  // reference
+    dayCardBg:     "#0dffffff",   // unselected day cards recede; the selected
+                                  // one takes cardBg and merges with the panel
+
+    // Ink for text sitting *on* the accent, which is a light yellow. This was
+    // previously cardBg — fine while cardBg was an opaque dark navy, invisible
+    // the moment it became a white wash.
+    onAccent:      "#141d33",
+
+    textPrimary:   "#ffffff",
+    textMuted:     "#98a4be",
+    textDim:       "#7a86a2",
+
+    gridLine:      "#1cffffff",
+    gridLineWeak:  "#10ffffff",
+
+    pastVeil:      "#14ffffff",
+    pastHatch:     "#1effffff",
+    nowLine:       "#59ffffff",
+
+    // A forecast stretch is the same line as the observed one, drawn with less
+    // certainty. Same value as nowLine and deliberately a separate name: they
+    // mean different things and will not always want the same alpha.
+    forecastDim:   "#59ffffff",
+
+    // The unfilled part of a gauge — a dial track, a bar's empty remainder. It
+    // has to be present enough that the filled part reads as a fraction of
+    // something, which gridLine at 0.11 is not.
+    trackLine:     "#2effffff",
+
+    listRowAlt:    "#0affffff",
+    nowRowBg:      "#1fffd24a",
+
+    stripBg:       "#1affffff",
+    stripPast:     "#0dffffff",
+    stripDivider:  "#1affffff",
+    droplet:       "#93c6f2",
+
+    accent:        "#ffd02c",   // measured off the reference's selected pill
+    toggleTrack:   "#26ffffff",
+    toggleKnob:    "#c6cede",
+
+    pillHover:          "#1affffff",
+    switchActive:       "#1affffff",
+    switchBorder:       "#33ffffff",
+    daySelectedBorder:  "#33ffffff",
+
+    // Pager buttons float over the chart, so they stay more opaque than a
+    // surface — but still tinted rather than painted, or they punch a flat
+    // hole in the gradient.
+    pagerBg:       "#99141d33",
+    pagerBgHover:  "#b3141d33",
+    pagerGlyph:    "#e8edf7",
+
+    trendUp:       "#ff9d5c",
+    trendDown:     "#7fb6e8",
+    trendSteady:   "#c6cede",
+
+    sunGlyphWarm:  "#ffd97a",
+    sunGlyphCool:  "#f2952f",
+    moonGlyph:     "#f2e3b8",
+    cloudTop:      "#ffffff",
+    cloudBottom:   "#c1cddf",
+    rainDrop:      "#7fb6e8",
+
+    // Clouds are drawn white, which vanishes on the pale day badge — this variant
+    // keeps them readable there without changing them everywhere else.
+    cloudTopOnLight:    "#fbfdff",
+    cloudBottomOnLight: "#9db0cc",
+
+    badgeDayTop:     "#fdfefe",
+    badgeDayBottom:  "#dde5f0",
+    badgeNightTop:   "#6d9ae8",
+    badgeNightBottom:"#3f63bd",
+
+    // ---- mobile shell ----------------------------------------------------
+    // The bottom nav floats over a page that scrolls underneath it, so it is
+    // the same exception the pager buttons are: tinted and mostly opaque
+    // rather than a 0.07 wash. A wash here would let the chart the reader is
+    // scrolling slide visibly through the labels, which is the one place on a
+    // phone where "every surface is translucent" costs more than it buys.
+    navBg:         "#f2101832",
+    navHairline:   "#1affffff",
+    navGlyph:      "#98a4be",
+    navGlyphOn:    "#141d33",
+    navPill:       "#ffd02c",
+
+    // A menu is the same exception for the same reason: it is drawn over
+    // content it must not let through. More opaque than the nav, because the
+    // nav sits at a screen edge with a hairline holding it down and a menu
+    // floats in the middle of the page with nothing but its own weight.
+    menuBg:        "#f71c2450",
+    menuBorder:    "#26ffffff",
+
+    // A status that is a verdict rather than a number: pollen bands, the
+    // activity list's good/caution/poor dots. Three, because a fourth level is
+    // a scale and a scale wants a ramp — see §10.5.
+    statusGood:    "#4ec98a",
+    statusCaution: "#e8c93f",
+    statusPoor:    "#f0654f",
+
+    // Something the prototype has not built yet, drawn so it cannot be
+    // mistaken for something it has. Deliberately off-palette: the map
+    // placeholder must read as scaffolding at a glance, and a placeholder in
+    // the house colours reads as a finished screen with no content.
+    placeholderInk:    "#8f9dbb",
+    placeholderStroke: "#4d6a8fd8"
+};
+
+// Precipitation effect. Two layers: a `wash` under the chart marking the hours
+// it falls in, and `drop`/`splash` particles over it saying what is falling.
+//
+// Opaque colours with the alpha applied at use, unlike everything above, and
+// for a reason: six types times three intensities is eighteen washes, and
+// eighteen hand-written #AARRGGBB literals is a table nobody can check. Type
+// chooses the hue, intensity chooses the alpha, and the two are independent —
+// which is the actual design, so it is what the tokens should say.
+//
+// The rain hue and its mid alpha are measured off the reference: its rainy
+// stretch composites to #394e77 over a #333659 plot, which is #4f9ad4 at 0.20.
+var precip = {
+    wash: {
+        drizzle: "#4f9ad4",
+        rain:    "#4f9ad4",
+        sleet:   "#7ba6cf",
+        snow:    "#a9c8e8",
+        hail:    "#b8d2ec",
+        thunder: "#5d7ed0"
+    },
+
+    // Deliberately a narrow ladder. The wash answers "is it raining here",
+    // which must read the same at every level; how hard it is raining is the
+    // field's job, and it has far more range to say it with.
+    washAlpha: { light: 0.13, moderate: 0.20, heavy: 0.27 },
+
+    // A wash tells you roughly when. A line on its first and last minute tells
+    // you exactly, and "exactly when" is the whole point of the feature.
+    edge: "#3dbcd9f2",
+
+    drop: {
+        drizzle: "#cfe2f5",
+        rain:    "#d8e8f8",
+        sleet:   "#e6f1fd",
+        snow:    "#f6faff",
+        hail:    "#ffffff",
+        thunder: "#dcecfd"
+    },
+    splash: "#c6dcf2",
+
+    // Lightning: the storm band brightening for a frame, not a drawn bolt. A
+    // bolt at this size is four pixels of noise; a flash is unmistakable.
+    flash:  "#e8f0ff"
+};
+
+// Radii are deliberately generous. The reference reads "soft" because almost
+// nothing in it meets at a hard edge, and the tab/panel junction is filleted
+// rather than squared — see TabFillet.qml.
+// The sky, by time of day.
+//
+// Five stops each, the same five positions PageBackdrop declares — QML cannot
+// generate GradientStop elements from a Repeater, so the *positions* are
+// written out there and only the colours come from here.
+//
+// **Every phase is dark.** That is the constraint the whole palette is built
+// on and it is not a stylistic preference: §10.1's surfaces are white washes
+// at 0.05–0.10, and a wash is only a surface if there is something darker
+// behind it. A literal daylight sky would make every card on every screen
+// invisible at once. So "day" is a clean deep blue rather than a bright one —
+// the difference between phases is hue and clarity, not lightness, and it
+// reads as time of day because the four are seen against each other.
+//
+// `dusk` is the palette this prototype has always had, and `pageStop0…4`
+// remain aliases of it. The desktop page is dusk permanently, so nothing about
+// it changes; the phone is the screen that follows the clock.
+var sky = {
+    night: { stops: ["#0c1738", "#141f4a", "#1a2350", "#131a3e", "#0a0f2c"], stars: 1.00 },
+    dawn:  { stops: ["#132352", "#33386e", "#5a4470", "#3a3560", "#1b1f45"], stars: 0.45 },
+    day:   { stops: ["#1d3d80", "#2a4f96", "#31568f", "#2a4070", "#1c2c50"], stars: 0.00 },
+    dusk:  { stops: ["#203580", "#443e73", "#443a66", "#27284f", "#171e44"], stars: 0.50 }
+};
+
+var star = {
+    ink:  "#ffffff",
+    // The figures are drawn fainter than their own vertices: a constellation
+    // is stars first and a line second, and a line that competes with them
+    // turns a sky into a diagram.
+    //
+    // 0.13, and it was 0.24 first. At that weight the Plough drew a visible
+    // line straight through "Expect sunny skies" — the sky is the one thing on
+    // the screen that has to lose every contest it enters.
+    line: "#22c8d8ff"
+};
+
+var metric = {
+    hourWidth:        48,
+    plotHeight:       252,
+    axisTopPad:       12,
+    headerBandHeight: 78,
+    gutterWidth:      40,
+    stripHeight:      28,
+    stripGap:         12,
+    panelPadding:     14,
+    cardPadding:      22,
+    cardRadius:       14,
+    panelRadius:      12,
+    controlRadius:    8,
+    filletRadius:     18,
+
+    // Weather-detail grid, measured off the reference: a 300x250 card with a
+    // 12px radius and 16/20 padding, giving every visualisation the same
+    // 260-wide box to work in.
+    detailCardWidth:  300,
+    detailCardHeight: 250,
+    detailRadius:     12,
+    detailPadH:       20,
+    detailPadV:       16,
+    detailGap:        16,
+
+    // Between two sections of the page — the hero and the hourly block, the
+    // hourly block and the details grid. Wider than any gap inside a section,
+    // which is what makes them read as separate things without a rule between
+    // them.
+    sectionGap:       30,
+    pageMargin:       22,
+
+    // ---- mobile shell ----------------------------------------------------
+    // A phone has no room for the desktop page's 22 px gutter on both sides:
+    // at 390 px that is 11 % of the screen spent on nothing, and the hourly
+    // strip loses a whole column to it. 14 is the narrowest inset that still
+    // keeps a card's corner radius clear of the screen edge.
+    mobileMargin:     14,
+    mobileGap:        14,
+
+    // A mobile card's inset. Its own tokens rather than the detail card's,
+    // which are named for the twelve-card grid and measured off it — sharing
+    // them would mean a change to that grid silently re-padding every screen
+    // on the phone.
+    mobileCardPadH:   16,
+    mobileCardPadV:   14,
+
+    // The bottom nav. 58 is the bar itself; `navSafeArea` is the strip below
+    // it that a phone's gesture bar occupies, drawn as part of the nav so the
+    // page's bottom padding is one number rather than two that must agree.
+    navHeight:        58,
+    navSafeArea:      12,
+
+    // Where the content column stops growing on a tablet. The mobile shell
+    // runs at 834 px too, and a hero row stretched that wide puts the
+    // temperature and the condition at opposite ends of the screen.
+    mobileContentMax: 620
+};
+
+// Type sizes, as tokens rather than as a table in a document, because twelve
+// independently-written cards produced seven different sizes for the same role
+// when the only thing binding them was prose.
+//
+// `font.pixelSize` is an int in Qt. A fractional value fails object creation and
+// Qt reports it only as `Type X unavailable` from the *parent* file.
+var type = {
+    // A section heading on the page: "Hourly", "Weather details". One token,
+    // because the two sections had picked 18 and 15 independently and nobody
+    // saw it until they were stacked on one page.
+    sectionTitle: 18,
+
+    cardTitle:   15,
+    detailTitle: 14,
+
+    // The reading: the one number a card exists to show. A card carrying two
+    // co-equal readings — sunrise and sunset, speed and gust — uses the pair
+    // size for both. There is no third option: a card wanting one is really
+    // asking for a different layout.
+    reading:     34,
+    readingPair: 26,
+
+    status:      14,
+    body:        12,
+    label:       12,
+    axis:        11,
+
+    // The page headline, in the current-conditions card. Deliberately far above
+    // `reading`: a detail card's number is one of twelve competing for a sweep
+    // of the eye, this one is the answer to the question the page was opened to
+    // ask, and it should be readable across a room.
+    heroReading: 64,
+    heroUnit:    34,   // the degree suffix riding on it
+    heroCaption: 32,   // the condition beside it
+    heroDetail:  18,   // the outlook sentence, and each value in the slug row
+    heroLabel:   14    // a slug's label
+};
+
+// Motion, as tokens for exactly the reason type sizes are tokens: the first
+// pass at this gave *ranges* in a document — "140–160 ms", "190 ms" — and the
+// components that bothered to animate at all came back with 130, 140, 150, 160,
+// 170, 190, 340 and 430. Eight durations for four jobs. A range is not a rule.
+//
+// Easing is not in here because `Easing.OutCubic` is a QML enum and this is a
+// plain JS library. Write it literally; it is a name rather than a magic number,
+// and it greps. **OutCubic unless there is a stated reason** — things decelerate
+// into place because they are arriving, not departing.
+var motion = {
+    // A fill, a text colour, a border. Should feel instant rather than
+    // animated: you are meant to notice the new colour, not the crossfade.
+    tint:    150,
+
+    // Something moved or changed size. Long enough to follow, short enough
+    // that you are never waiting for it.
+    move:    190,
+
+    // One view becoming another — chart to list, a card opening.
+    view:    340,
+
+    // A value finding its place: a dial sweeping to its reading, a bar
+    // growing from its baseline, a curve drawing itself in. Slower than
+    // `move` on purpose, because the eye is meant to read the journey and
+    // not merely notice that something happened.
+    reveal:  520,
+
+    // Between one sibling's reveal and the next. Deliberately small: twelve
+    // cards at 45 ms is a 500 ms wave that reads as one gesture, where the
+    // same wave at 150 ms reads as twelve separate things going off.
+    stagger:  45
+};
+
+var scale = {
+    tempMin:  0,
+    tempMax:  40,
+    tickStep: 10
+};
+
+// Colour ramps, keyed by *normalised axis position*: p = 0 at the top of the value
+// axis, p = 1 at the bottom. Keying on position rather than on a unit is what lets
+// one gradient implementation serve °C, %, km/h and hPa alike.
+//
+// The idea itself is the good part of MSN's design: colour encodes the absolute
+// value, so a 19° hour reads green and a 27° hour reads tan at the same place on
+// the same chart. Alpha falls off downward so the gridlines stay legible through
+// the fill.
+//
+// Every ramp has exactly eight stops, because QML cannot generate GradientStop
+// elements from a Repeater and the gradient is therefore declared statically.
+var ramp = {
+    temp: {
+        fill: [{ p: 0.00, c: "#cce0764f" }, { p: 0.20, c: "#ccd59a5e" },
+               { p: 0.35, c: "#ccbba083" }, { p: 0.45, c: "#c2a2ab82" },
+               { p: 0.55, c: "#b886ab80" }, { p: 0.70, c: "#a05f9670" },
+               { p: 0.85, c: "#88508a66" }, { p: 1.00, c: "#6e497f5f" }],
+        line: [{ p: 0.00, c: "#f0f5a283" }, { p: 0.20, c: "#f0efc08f" },
+               { p: 0.35, c: "#f0decbae" }, { p: 0.45, c: "#f0c8d0a9" },
+               { p: 0.55, c: "#f0b1d3a9" }, { p: 0.70, c: "#f094cb9d" },
+               { p: 0.85, c: "#f082c391" }, { p: 1.00, c: "#f076b988" }]
+    },
+    wind: {
+        fill: [{ p: 0.00, c: "#cce2684f" }, { p: 0.18, c: "#ccd98a55" },
+               { p: 0.34, c: "#ccc9a664" }, { p: 0.48, c: "#c2a8ae76" },
+               { p: 0.62, c: "#b88aa48e" }, { p: 0.74, c: "#a06098a0" },
+               { p: 0.88, c: "#88528ea6" }, { p: 1.00, c: "#6e4a83a4" }],
+        line: [{ p: 0.00, c: "#f0f59a84" }, { p: 0.18, c: "#f0efb78e" },
+               { p: 0.34, c: "#f0e2cf9d" }, { p: 0.48, c: "#f0c8d3b2" },
+               { p: 0.62, c: "#f0aad0c6" }, { p: 0.74, c: "#f092c8d4" },
+               { p: 0.88, c: "#f083c0da" }, { p: 1.00, c: "#f078b6d8" }]
+    },
+    humidity: {
+        fill: [{ p: 0.00, c: "#cc4f8ed6" }, { p: 0.18, c: "#cc5893cf" },
+               { p: 0.34, c: "#cc6699c6" }, { p: 0.48, c: "#c2789fb9" },
+               { p: 0.62, c: "#b88fa5aa" }, { p: 0.74, c: "#a0a1a79c" },
+               { p: 0.88, c: "#88b0a58c" }, { p: 1.00, c: "#6ebc9f7c" }],
+        line: [{ p: 0.00, c: "#f08fbdee" }, { p: 0.18, c: "#f097c0e9" },
+               { p: 0.34, c: "#f0a2c4e2" }, { p: 0.48, c: "#f0b0c8d9" },
+               { p: 0.62, c: "#f0c0cbce" }, { p: 0.74, c: "#f0cdccc3" },
+               { p: 0.88, c: "#f0d8cbb6" }, { p: 1.00, c: "#f0e0c8aa" }]
+    },
+    cloud: {
+        fill: [{ p: 0.00, c: "#ccb9c4d6" }, { p: 0.18, c: "#ccaabbd0" },
+               { p: 0.34, c: "#cc99b1c9" }, { p: 0.48, c: "#c286a6c2" },
+               { p: 0.62, c: "#b8749bbc" }, { p: 0.74, c: "#a06390b6" },
+               { p: 0.88, c: "#885585b0" }, { p: 1.00, c: "#6e4a7bab" }],
+        line: [{ p: 0.00, c: "#f0e2e9f4" }, { p: 0.18, c: "#f0d6e0f0" },
+               { p: 0.34, c: "#f0c8d7ec" }, { p: 0.48, c: "#f0b9cee8" },
+               { p: 0.62, c: "#f0a9c5e4" }, { p: 0.74, c: "#f09abce0" },
+               { p: 0.88, c: "#f08cb3dc" }, { p: 1.00, c: "#f080abd8" }]
+    },
+    pressure: {
+        fill: [{ p: 0.00, c: "#cc9b86d8" }, { p: 0.18, c: "#cc9089d4" },
+               { p: 0.34, c: "#cc848ccf" }, { p: 0.48, c: "#c2788fc9" },
+               { p: 0.62, c: "#b86d92c4" }, { p: 0.74, c: "#a06395bf" },
+               { p: 0.88, c: "#885a97ba" }, { p: 1.00, c: "#6e5299b6" }],
+        line: [{ p: 0.00, c: "#f0cbbdef" }, { p: 0.18, c: "#f0c3c0ec" },
+               { p: 0.34, c: "#f0bbc3e9" }, { p: 0.48, c: "#f0b3c6e6" },
+               { p: 0.62, c: "#f0abc9e3" }, { p: 0.74, c: "#f0a4cce0" },
+               { p: 0.88, c: "#f09dcedd" }, { p: 1.00, c: "#f096d0da" }]
+    },
+    visibility: {
+        fill: [{ p: 0.00, c: "#cc74b8d8" }, { p: 0.18, c: "#cc78b2ce" },
+               { p: 0.34, c: "#cc7fabc2" }, { p: 0.48, c: "#c288a4b5" },
+               { p: 0.62, c: "#b8939ca8" }, { p: 0.74, c: "#a09e949a" },
+               { p: 0.88, c: "#88a88c8d" }, { p: 1.00, c: "#6eb08581" }],
+        line: [{ p: 0.00, c: "#f0aadcf0" }, { p: 0.18, c: "#f0aed7e9" },
+               { p: 0.34, c: "#f0b4d1e0" }, { p: 0.48, c: "#f0bacbd7" },
+               { p: 0.62, c: "#f0c1c5ce" }, { p: 0.74, c: "#f0c8bfc4" },
+               { p: 0.88, c: "#f0ceb9bb" }, { p: 1.00, c: "#f0d4b4b2" }]
+    },
+    // Bar ramps. Sampled per value rather than used as a gradient, so the stops
+    // are the category boundaries of the published scale where one exists.
+    precip: {
+        fill: [{ p: 0.00, c: "#ff3f6fd8" }, { p: 0.18, c: "#ff4879d9" },
+               { p: 0.34, c: "#ff5285db" }, { p: 0.48, c: "#ff5d91dd" },
+               { p: 0.62, c: "#ff699edf" }, { p: 0.74, c: "#ff77abe2" },
+               { p: 0.88, c: "#ff86b8e5" }, { p: 1.00, c: "#ff96c5e8" }],
+        line: [{ p: 0.00, c: "#ff6f9be8" }, { p: 1.00, c: "#ffb4d8f2" }]
+    },
+    // European AQI bands: good, fair, moderate, poor, very poor.
+    aqi: {
+        fill: [{ p: 0.00, c: "#ff8c1e4b" }, { p: 0.20, c: "#ffc03050" },
+               { p: 0.40, c: "#ffe85a50" }, { p: 0.55, c: "#fff08a45" },
+               { p: 0.70, c: "#ffe8c93f" }, { p: 0.82, c: "#ffa8d15a" },
+               { p: 0.92, c: "#ff5cc79a" }, { p: 1.00, c: "#ff4ec3c8" }],
+        line: [{ p: 0.00, c: "#ffb04a70" }, { p: 1.00, c: "#ff8fd8dc" }]
+    },
+    // WHO UV bands: low, moderate, high, very high, extreme.
+    uv: {
+        fill: [{ p: 0.00, c: "#ff8b5fc4" }, { p: 0.17, c: "#ffa155bd" },
+               { p: 0.33, c: "#ffd6484e" }, { p: 0.50, c: "#fff07038" },
+               { p: 0.63, c: "#fff5a02f" }, { p: 0.75, c: "#ffe8c73c" },
+               { p: 0.88, c: "#ffa9cf55" }, { p: 1.00, c: "#ff5ec18a" }],
+        line: [{ p: 0.00, c: "#ffb98ede" }, { p: 1.00, c: "#ff8fd4ac" }]
+    }
+};

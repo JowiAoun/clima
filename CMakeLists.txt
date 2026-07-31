@@ -68,3 +68,5 @@ qt_standard_project_setup(REQUIRES 6.8)
 # Without it those three fail in three different and individually confusing
 # ways. Do not remove it.
 set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
+
+add_subdirectory(app)
