@@ -510,3 +510,112 @@ Three layers, and each carries a different piece of the reading:
   and leaning the same few degrees, the three resolve into one downward arrow —
   a rendering that says the opposite of what a splash is. This is only visible
   at 4× on a capture, which is where it was found.
+
+## 10.12 Viewports
+
+`prototype/hourly-overview/viewports.js` is the single source of truth for what
+counts as a phone. Both the app and the component gallery read it, and they must
+not disagree: a gallery that frames a component at 390 px while the app switches
+shells at 420 is reviewing a layout the app never renders.
+
+| Class | From | Shell |
+|---|---|---|
+| `mobile` | 0 | `MobileShell` — five tabs under a bottom nav |
+| `tablet` | 600 | `MobileShell`, content column capped at `mobileContentMax` |
+| `desktop` | 1024 | `WeatherPage` — four sections in one scrolling column |
+
+**There is no mobile build.** The window width picks the shell and nothing else
+in the app knows which one is running. `--viewport <id>` pins a class and
+resizes to match; it is a review convenience, not a mode.
+
+**Tablet is not a third layout.** Ask `usesMobileShell()` rather than testing the
+id, so the day it does diverge there is one place that decides it.
+
+### What changes on a phone, and what does not
+
+Everything in §10.1 through §10.9 applies unchanged. Surfaces are still washes,
+durations are still tokens, nothing still animates on a timer. What the phone
+gets is a different *arrangement*, and each difference has to be a consequence of
+the width rather than a restyling. The five that exist:
+
+- **The page splits into tabs.** Scrolling is not navigation. The desktop column
+  at 390 px is roughly eight screens deep.
+- **The hero loses its card.** It sits on the page gradient. On the desktop a
+  wash separates it from the three sections around it; at the top of a phone
+  screen there is nothing above it to be separated from.
+- **A control that does not fit becomes a disclosure.** Ten metric pills become
+  one button and a list. The test is whether the row still shows every option at
+  rest — a horizontally scrolling row of controls above a horizontally scrolling
+  chart is two things that move sideways under the same thumb.
+- **A grid re-columns to a count that divides its content.** Six slugs go 3 × 2,
+  never 5 + 1. The calendar goes to four columns because a forecast is scanned
+  for warm stretches rather than looked up by weekday.
+- **Chrome that floats over content may be opaque.** The bottom nav and the
+  metric menu use `navBg` and `menuBg` rather than a 0.07 wash, and the nav
+  carries a hairline along its top edge. This is the same exception the pager
+  buttons already had: §10.1's ban on borders is about seams a junction exists
+  to hide, and this is not a junction — it is the edge where a floating bar
+  stops and scrolling content begins, and it is the only cue that the content
+  continues behind it.
+
+### Two more surfaces to defend
+
+The temptations here are specific enough to name:
+
+- **A lighter strip behind a row of hour labels.** The reference tints it. Inside
+  a card that is 0.07 over 0.07 — the stacked wash §10.1 exists to prevent. A
+  hairline separates an axis from a plot without claiming to be a surface.
+- **A raised cell for today in the calendar.** Same arithmetic, 0.165. This is
+  the case §10.1's note about borders allows for: a 1 px accent outline and the
+  date in `accent`, because nothing else will do.
+
+### The sky
+
+`PageBackdrop` takes a `phase` — `night`, `dawn`, `day` or `dusk` — and paints
+five gradient stops from `Theme.sky`. The phone follows the clock; the desktop is
+`dusk` permanently, which is the palette the prototype has always had, and its
+render is unchanged to the byte.
+
+Two rules, and both are the general rules applied here rather than new ones:
+
+- **Every phase is dark.** Surfaces are white washes at 0.05–0.10 and a wash is
+  only a surface if something darker is behind it, so a literal daylight sky
+  would make every card on every screen invisible at once. The phases differ in
+  hue and clarity, not lightness. This is the hard constraint on any future
+  theme: the surface ladder decides the background, not the other way round.
+- **Nothing in it moves.** §10.6's one standing exception is precipitation
+  (§10.11), which is weather rather than decoration, and a twinkling star field
+  is the worst possible place to make a second: it would run forever, behind
+  every screen, while the reader
+  is trying to read a number off a chart — and it would make every golden image
+  of every mobile screen a coin toss. `sky.js` therefore contains no
+  `Math.random`, in positions, sizes or brightness.
+
+The stars do not scroll with the page either. That would be motion tied to a
+scroll rather than to a timer, which is a different rule — but it would still put
+drifting pinpoints behind a chart being read.
+
+## 10.13 Reviewing at a width
+
+The gallery stages any component inside a device-sized frame: **Free**, **Mobile**,
+**Tablet**, **Desktop**, from the rail or from `--viewport <id>` alongside
+`--gallery`. The page gradient — and on a phone frame, the sky — is painted
+*inside* the frame, because a specimen composited over the wrong slice of a
+window-sized gradient is a specimen reviewed on a background it never gets.
+
+What a specimen is given depends on what the catalogue declares:
+
+| Entry declares | In a frame it gets |
+|---|---|
+| `fills: true` | the whole device — screens and shells |
+| `stage: { w, … }` | the width that viewport's shell would hand it |
+| neither | its natural size, centred, inset by the page margin |
+
+A stage width was only ever a stand-in for a host that was not there, so when a
+frame is there the frame wins.
+
+**Review every new component at the narrowest class it will run in.** Almost
+every layout defect this prototype has had was a component that was fine at the
+width its author happened to try and wrong at the width the app gives it — the
+hour glyphs escaping the panel's clip were found exactly that way. A frame makes
+that width something you choose rather than something you inherit.

@@ -26,14 +26,42 @@ The Chart/List switch works too:
 
 ![List view](screenshot-list.png)
 
+## The phone
+
+Narrow the window past 1024 px and the same app runs a different shell: five
+destinations under a bottom nav, because the desktop page at 390 px is about
+eight screens deep and the fourth of them is unreachable in any sense that
+matters.
+
+![The phone](screenshot-mobile.png)
+
+Today, Hourly, Monthly, Maps and Me. The chart on the Hourly tab is the
+desktop's card, not a rewrite of it — the ten metric pills become one button
+and a list, which is the only part of it that does not survive the width:
+
+![Hourly on a phone](screenshot-mobile-tabs.png)
+
+The background follows the clock. Four phases, and a static star field with
+three constellations after dark:
+
+![Night](screenshot-mobile-night.png)
+
+There is no map component, so the Maps tab says so in a way a screenshot
+cannot hide — see `MapPlaceholder.qml`.
+
 ## Run it
 
 No build step. It is pure QML, executed by Qt 6's `qml` runtime.
 
 ```sh
 ./run.sh                              # open the page
+./run.sh --viewport mobile            # …as a phone, 390x844
+./run.sh --viewport tablet            # …as a tablet, 834x1112
+./run.sh --viewport mobile --tab maps # …on a given tab
+./run.sh --sky night                  # force the time-of-day background
 ./run.sh --gallery                    # open the component library
 ./run.sh --gallery uv                 # …on a particular component
+./run.sh --gallery --viewport mobile  # …with every specimen in a phone frame
 ./run.sh --details                    # the weather-details grid on its own
 ./run.sh --card Uv                    # one detail card, alone on the gradient
 ./run.sh --grab shot.png              # render one frame headless and exit
@@ -43,6 +71,12 @@ No build step. It is pure QML, executed by Qt 6's `qml` runtime.
 ./run.sh --grab shot.png --day 3      # …with a given day card selected
 ./run.sh --grab g.png --size 1500x950 # …at a given window size
 ```
+
+Which shell runs is a function of the window width and nothing else —
+`viewports.js` owns the thresholds, and both the app and the gallery read
+them, so the gallery cannot review a width the app never renders. There is no
+mobile build and no mobile flag: `--viewport` pins a class and resizes to
+match, and `--size 400x800` gets you the phone layout just as well.
 
 `--scroll` matters more than it sounds. The page is taller than any window it runs
 in, so a headless grab without it reviews the top third and silently signs off on
@@ -88,6 +122,36 @@ Adding a component to it is an entry in `gallery.js` — file, blurb, optionally
 a stage size and a list of variants — rather than another QML file. A component
 in the tree but not in that list shows up as a gap you can see.
 
+### Viewports
+
+The rail has a viewport control: **Free**, **Mobile**, **Tablet**, **Desktop**
+(left and right arrow keys step through them, `--viewport <id>` alongside
+`--gallery` picks one on the command line). Anything but Free stages the
+specimen inside a device-sized box with the page gradient — and, on a phone
+frame, the sky — painted *inside* it:
+
+![A component in a phone frame](screenshot-gallery-viewport.png)
+
+The width is the point. Almost every layout defect found in this prototype so
+far was a component that was fine at the width its author happened to try and
+wrong at the width the app gives it; the hour glyphs escaping the panel's clip
+were found exactly that way, by staging `HourlyOverview` at 1000 px. A frame
+makes that width something you choose rather than something you inherit from
+whatever size the gallery window happens to be.
+
+What a specimen is given inside a frame depends on what the catalogue declares:
+
+| Entry declares | In a frame it gets |
+|---|---|
+| `fills: true` | the whole device — screens and shells |
+| `stage: { w, … }` | the width that viewport's shell would hand it, not the catalogue's number |
+| neither | its natural size, centred, inset by the page margin |
+
+A stage width was only ever a stand-in for a host that was not there, so when a
+frame *is* there the frame wins. Frames are not scaled to fit: a desktop frame
+overflows the pane and the pane scrolls, because a half-size preview of an
+11 px axis label tells you nothing about whether it is legible.
+
 `--walk N` steps N components on before grabbing, so a headless check can
 exercise *navigation* rather than only first paint:
 
@@ -121,9 +185,12 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 
 | File | Role |
 |---|---|
-| `Main.qml` | Window; hosts the page and routes `--gallery` / `--details` / `--card` / `--film` |
+| `Main.qml` | Window; picks a shell by width and routes `--gallery` / `--details` / `--card` / `--film` |
+| `viewports.js` | **Viewport classes and the widths that separate them — the app and the gallery both read it** |
+| `PageBackdrop.qml` | The gradient every surface is composited over, plus the star field |
+| `sky.js` | Which phase of the day it is, and where the stars and constellations go |
 | `film.sh` | **Films a transition and tiles the frames — the way to review motion** |
-| `WeatherPage.qml` | **The page — the four sections in one scrolling column** |
+| `WeatherPage.qml` | **The desktop page — the four sections in one scrolling column** |
 | `LocationBar.qml` | Place name, disclosure chevron, home marker |
 | `CurrentConditions.qml` | The headline: glyph, temperature, condition, outlook, six slugs |
 | `SectionHeader.qml` | A section title and its timestamp, so two sections cannot disagree |
@@ -150,9 +217,62 @@ pulls in a GPL-only module (see `docs/03-tech-stack.md` §3.1).
 | `mockdata.js` | Stand-in for the Open-Meteo provider |
 | `theme.js` | Design tokens — colour, geometry, type, and `motion` durations |
 | `chartmath.js` | Path generation, ramp sampling, moon phase |
-| `WeatherGlyph` · `SunEventGlyph` · `MoonGlyph` · `DropletGlyph` · `HatchPattern` · `PagerButton` · `FeelsLikeToggle` | Small procedural pieces |
+| `WeatherGlyph` · `SunEventGlyph` · `MoonGlyph` · `DropletGlyph` · `HatchPattern` · `PagerButton` · `FeelsLikeToggle` · `ChevronGlyph` · `NavGlyph` | Small procedural pieces |
+
+The phone shell:
+
+| File | Role |
+|---|---|
+| `MobileShell.qml` | **The five destinations under a bottom nav; owns the state a page outlives** |
+| `mobiletabs.js` | The list of destinations — add a screen here, not in QML |
+| `BottomNav.qml` | The nav bar. The pill slides; the page behind it does not transition |
+| `MobilePage.qml` | The scrolling container all five screens are built in |
+| `MobileCard.qml` | The card shell they are filled with — grows to its body, unlike `DetailCard` |
+| `MobileTodayPage.qml` | Headline, hourly strip, ten days, sun & moon, pollen, activities |
+| `MobileHourlyPage.qml` | Week strip, reading, metric picker, the desktop's chart, daily summary |
+| `MobileMonthlyPage.qml` · `MobileCalendar.qml` | A month of forecasts, four days to a row |
+| `MobileMapsPage.qml` · `MapPlaceholder.qml` | **There is no map. This says so** |
+| `MobileMePage.qml` | Units, places, attribution — the one screen that is a proposal |
+| `MobileCurrentWeather.qml` | The headline, on the sky rather than on a card |
+| `MobileHourStrip.qml` · `MobileDailyStrip.qml` | The two horizontal strips on Today |
+| `MobileSunMoonCard.qml` · `SkyArc.qml` | Rise-to-set progress, twice, on one reveal |
+| `MobilePollenCard.qml` · `MobileActivitiesCard.qml` | A band and three rings; five verdicts |
+| `MobileWeekStrip.qml` · `MobileMetricPicker.qml` | The Hourly tab's two controls |
 
 ## What it does
+
+**Two shells, one product**
+
+There is no mobile build. `viewports.js` says a window under 600 px is a
+phone, under 1024 a tablet, and anything wider a desktop; `Main.qml` loads
+`WeatherPage` or `MobileShell` accordingly and nothing else in the app knows
+which is running. Tablet deliberately runs the phone's shell with the content
+column capped rather than stretched — it is not a third layout and should not
+become one without a reason.
+
+What the phone changes, and why each one is a consequence of the width rather
+than a restyling:
+
+| | |
+|---|---|
+| **The page splits** | Four sections become five tabs. The desktop column at 390 px is eight screens deep, and scrolling is not navigation |
+| **The hero loses its card** | It sits on the sky. On the desktop a wash separates it from the three sections around it; here there is nothing above it to be separated from |
+| **Ten pills become a button** | A scrolling row of controls directly above a scrolling chart is two things that move sideways under the same thumb |
+| **The chart keeps everything else** | Same `HourlyOverview`, at 40 px columns and a 180 px plot. Both are now properties on it |
+| **Six slugs wrap 3 × 2** | Six across needs about 790 px |
+| **The calendar is four columns, not seven** | A forecast is scanned for warm stretches, not looked up by weekday. Seven columns on a phone is 52 px a day, which fits a date and nothing else |
+| **The background follows the clock** | Four phases and a star field. The desktop stays at `dusk` — its background is a rim around cards nobody looks at |
+
+Every sky phase is dark, and that is a constraint rather than a preference:
+surfaces here are white washes at 0.05–0.10, and a wash is only a surface if
+something darker is behind it. A literal daylight sky would make every card on
+every screen invisible at once. The phases differ in hue and clarity.
+
+Nothing in the sky animates. §10.6 forbids anything that moves on a timer, and
+a twinkling star field breaks that rule harder than anything else here: it
+would run forever, behind every screen, while the reader is trying to read a
+number off a chart — and it would make every golden image of every mobile
+screen a coin toss. `sky.js` has no `Math.random` in it for the same reason.
 
 **The page**
 
@@ -277,6 +397,24 @@ outlook sentence says so too.
 ## Deliberately not done yet
 
 - **Real data.** No network layer; that is milestone M1.
+- **A map.** The Maps tab is a placeholder and is drawn to be unmistakable
+  about it — hatched, dash-outlined and labelled in words. A tasteful empty
+  state in the house colours is exactly what a *finished* screen with no data
+  looks like, and six weeks later somebody files a bug about the map not
+  loading. Real one is MapLibre Native, decision D4.
+- **The two mock clocks disagree.** `mockdata.js` puts "Now" at midnight —
+  index 3 of a series starting at 21:00 — while `detaildata.js` says the
+  observation is 12:28 PM. So the hourly strip opens on moon glyphs under a
+  hero drawing a sun. This predates the mobile shell and is visible on the
+  desktop page too; the sky phase reads `detaildata.sun`, on the grounds that
+  the hero is what it is drawn behind. Worth reconciling when a provider
+  replaces both.
+- **A month picker** on the Monthly tab. There is one month of data behind it,
+  so a picker would open a list with one thing in it.
+- **A tablet layout.** Tablet runs the phone's shell with the content column
+  capped at 620 px. That is a deliberate first pass, not a finished answer — a
+  834 px screen could carry two columns of cards, and `viewports.js`'s
+  `usesMobileShell()` is the one place that would have to change.
 - **A secondary axis.** Precipitation *probability* belongs on the precipitation tab as a
   percentage line, but that needs a second axis; for now probability lives in the strip
   under the chart, where it shares the same time axis.
@@ -304,6 +442,21 @@ outlook sentence says so too.
 - `Item` declares some obvious names — `top` among them — as FINAL. A
   `readonly property real top` in a delegate fails with `Cannot override FINAL property`.
   Prefix delegate locals (`barTop`, `barValue`) to stay clear of them.
+- **`palette` is one of those names, and it does not fail — it warns.**
+  `property var palette` on an Item-derived type builds fine and prints
+  `Member palette … overrides a member of the base object` at runtime, leaving
+  a property that quietly means two things. `PageBackdrop` calls its
+  `skyPalette`.
+- **`parent` inside a `RadialGradient` is the `ShapePath`, not the item.** So
+  `centerRadius: parent.width / 2` is `NaN`, and a NaN radius renders as a flat
+  disc of the first stop's colour rather than as nothing — nine hard white
+  blobs sitting on top of a card, from code that reads correctly. Reference an
+  `id` from the item you actually mean. The same applies to `centerX`/`centerY`.
+- **A `Column` skips a child with `visible: false`.** It does not leave a gap.
+  Hiding the date under "Today" in the ten-day strip therefore pulled that
+  column's icon, high and low 20 px above the nine beside them. If a row has to
+  align across cells, every cell needs the same children — give the odd one out
+  an empty string, not `visible: false`.
 - Qt suppresses QML error output entirely when it decides stderr has no console.
   `QT_FORCE_STDERR_LOGGING=1` (which `run.sh` sets) is the difference between a useful
   error and the useless `qml: Did not load any objects, exiting.`

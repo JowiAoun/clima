@@ -5,9 +5,14 @@
 # executed by Qt 6's `qml` runtime.
 #
 #   ./run.sh                          open the page
+#   ./run.sh --viewport mobile        …as a phone: five tabs under a nav bar
+#   ./run.sh --viewport tablet        …at 834x1112, same shell
+#   ./run.sh --tab monthly [...]      open the mobile shell on a given tab
+#   ./run.sh --sky night [...]        force the time-of-day background
 #   ./run.sh --gallery                open the component library
 #   ./run.sh --gallery uv             …on a particular component
 #   ./run.sh --gallery x --walk 3     …then step 3 components on
+#   ./run.sh --gallery --viewport mobile   …with every specimen in a phone frame
 #   ./run.sh --details                the weather-details grid on its own
 #   ./run.sh --card Uv                one detail card, alone on the gradient
 #   ./run.sh --grab shot.png [...]    render one frame to a PNG and exit
@@ -15,6 +20,10 @@
 #   ./run.sh --size 1500x950 [...]    set the window size (headless review)
 #   CLIMA_QML=/path/to/qml ./run.sh   use a specific Qt
 #   QT_QPA_PLATFORM=xcb ./run.sh      force X11 if Wayland misbehaves
+#
+# Which shell runs is a function of the window width alone — see viewports.js.
+# --viewport pins it and resizes to match; --size on its own works too, so
+# `--size 400x800` gets you the phone layout.
 
 set -euo pipefail
 
