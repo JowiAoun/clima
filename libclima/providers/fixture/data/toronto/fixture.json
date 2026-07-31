@@ -1,6 +1,6 @@
 {
-    "recordedAt": "2026-07-30T16:28:00Z",
-    "description": "Toronto on a clear July afternoon. The default: the instant the prototype's mock data always described, 12:28 PM local, recorded from the live service.",
+    "recordedAt": "2026-07-31T16:28:00Z",
+    "description": "Toronto on a clear July afternoon. The default: the instant the prototype's mock data always described, 12:28 PM local, recorded from the live service. The date has to be the payload's own — forecast.json spans 2026-07-29 to 08-13 and its daily arrays put 07-31 third — because a manifest that names a different day than the recording silently re-labels the whole day strip: today's card draws yesterday's high, and every label from Yesterday to Tomorrow slides one place along. Nothing errors, the page just quietly describes a different day. Re-record the payload and this moves with it.",
     "place": {
         "geonamesId": 6167865,
         "name": "Toronto",
