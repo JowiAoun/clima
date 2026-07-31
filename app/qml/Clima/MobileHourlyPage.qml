@@ -79,7 +79,7 @@ MobilePage {
         Text {
             id: nowTemp
             text: Units.formatDisplay(Units.Temperature, Data.temperature[Data.nowIndex])
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.heroCaption
             anchors.left: nowGlyph.right
             anchors.leftMargin: 8
@@ -88,7 +88,7 @@ MobilePage {
 
         Text {
             text: qsTr("Feels like %1").arg(Units.formatDisplay(Units.Temperature, Data.apparent[Data.nowIndex]))
-            color: Theme.color.textMuted
+            color: Theme.ink.muted
             font.pixelSize: Theme.type.label
             anchors.left: nowTemp.right
             anchors.leftMargin: 10
@@ -110,7 +110,7 @@ MobilePage {
     Text {
         width: parent.width
         text: Detail.observedAt + ", " + Detail.observedOn
-        color: Theme.color.textMuted
+        color: Theme.ink.muted
         font.pixelSize: Theme.type.label
         elide: Text.ElideRight
     }
@@ -149,7 +149,7 @@ MobilePage {
             Text {
                 id: summaryHigh
                 text: root.day ? Units.formatDisplay(Units.Temperature, root.day.high) : "—"
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.readingPair
                 font.bold: true
                 anchors.left: summaryGlyph.right
@@ -161,7 +161,7 @@ MobilePage {
                 id: divider
                 width: 1
                 height: 20
-                color: Theme.color.gridLine
+                color: Theme.line.grid
                 anchors.left: summaryHigh.right
                 anchors.leftMargin: 12
                 anchors.verticalCenter: summaryGlyph.verticalCenter
@@ -169,7 +169,7 @@ MobilePage {
 
             Text {
                 text: root.day ? Units.formatDisplay(Units.Temperature, root.day.low) : "—"
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.readingPair
                 anchors.left: divider.right
                 anchors.leftMargin: 12
@@ -179,7 +179,7 @@ MobilePage {
             Text {
                 id: summaryText
                 text: Detail.temperature.body
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.body
                 wrapMode: Text.WordWrap
                 width: parent.width

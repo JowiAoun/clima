@@ -66,11 +66,11 @@ Item {
                     anchors.fill: parent
                     visible: parent.status === Loader.Error
                     radius: Theme.metric.detailRadius
-                    color: Theme.color.surfaceRecede
+                    color: Theme.surface.recede
                     Text {
                         anchors.centerIn: parent
                         text: parent.parent.modelData
-                        color: Theme.color.textDim
+                        color: Theme.ink.dim
                         font.pixelSize: Theme.type.body
                     }
                 }

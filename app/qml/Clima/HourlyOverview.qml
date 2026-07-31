@@ -255,13 +255,13 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.cardRadius
-        color: Theme.color.cardBg
+        color: Theme.surface.base
     }
 
     Text {
         id: title
         text: root.metric.label
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: 15
         font.bold: true
         x: root.cardPadding
@@ -344,7 +344,7 @@ Item {
             id: panel
             anchors.fill: parent
             radius: Theme.metric.panelRadius
-            color: Theme.color.panelBg
+            color: Theme.surface.panel
 
             // value axis, outside the scrolling region
             Item {
@@ -359,7 +359,7 @@ Item {
                     delegate: Text {
                         required property var modelData
                         text: root.metric.unit === "°" ? modelData + "°" : modelData
-                        color: Theme.color.textDim
+                        color: Theme.ink.dim
                         font.pixelSize: 11
                         x: gutter.width - width - 7
                         y: root.yForValue(modelData) - height / 2
@@ -463,7 +463,7 @@ Item {
 
                             Text {
                                 text: Data.hourLabel(hourIndex)
-                                color: parent.isNow ? Theme.color.textPrimary : Theme.color.textMuted
+                                color: parent.isNow ? Theme.ink.primary : Theme.ink.muted
                                 font.pixelSize: 12
                                 font.bold: parent.isNow
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -480,7 +480,7 @@ Item {
                             Text {
                                 text: Metrics.formatDisplay(root.metric,
                                                      root.seriesValue(hourIndex, root.feelsBlend))
-                                color: Theme.color.textPrimary
+                                color: Theme.ink.primary
                                 font.pixelSize: 13
                                 font.bold: true
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -501,7 +501,7 @@ Item {
                             anchors.fill: parent
                             preferredRendererType: Shape.CurveRenderer
                             ShapePath {
-                                strokeColor: Theme.color.gridLineWeak
+                                strokeColor: Theme.line.gridWeak
                                 strokeWidth: 1
                                 fillColor: "transparent"
                                 PathSvg {
@@ -516,7 +516,7 @@ Item {
                             anchors.fill: parent
                             preferredRendererType: Shape.CurveRenderer
                             ShapePath {
-                                strokeColor: Theme.color.gridLine
+                                strokeColor: Theme.line.grid
                                 strokeWidth: 1
                                 strokeStyle: ShapePath.DashLine
                                 dashPattern: [1, 5]
@@ -589,12 +589,12 @@ Item {
                             height: plot.height
                             Rectangle {
                                 anchors.fill: parent
-                                color: Theme.color.pastVeil
+                                color: Theme.overlay.past
                             }
                             HatchPattern {
                                 anchors.fill: parent
                                 spacing: 11
-                                lineColor: Theme.color.pastHatch
+                                lineColor: Theme.overlay.pastHatch
                             }
                         }
 
@@ -603,7 +603,7 @@ Item {
                             x: root.nowX
                             width: 1
                             height: plot.height
-                            color: Theme.color.nowLine
+                            color: Theme.line.now
                         }
 
                         // sunrise / sunset
@@ -625,7 +625,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: height / 2
-                                    color: "#99111a2b"
+                                    color: Theme.overlay.caption
                                 }
 
                                 Row {
@@ -640,7 +640,7 @@ Item {
                                     }
                                     Text {
                                         text: sunMarker.modelData.text
-                                        color: Theme.color.textMuted
+                                        color: Theme.ink.muted
                                         font.pixelSize: 11
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
@@ -691,10 +691,14 @@ Item {
                                 }
                             }
 
+                            // The same rule the "now" mark is drawn with, and
+                            // deliberately the same token: both answer "which
+                            // hour is this", and a chart with two whites for
+                            // that reads as one of them being a mistake.
                             Rectangle {
                                 width: 1
                                 height: parent.height
-                                color: "#59ffffff"
+                                color: Theme.line.now
                             }
 
                             Rectangle {
@@ -702,7 +706,7 @@ Item {
                                 width: 7
                                 height: 7
                                 radius: 3.5
-                                color: Theme.color.textPrimary
+                                color: Theme.ink.primary
                                 x: -3
                                 y: (root.curvePoints.length > probe.heldIdx
                                         ? root.curvePoints[probe.heldIdx].y : 0) - 3.5
@@ -715,9 +719,9 @@ Item {
                             id: readout
                             visible: probe.idx >= 0
                             radius: Theme.metric.controlRadius
-                            color: "#e6141d33"
+                            color: Theme.overlay.readout
                             border.width: 1
-                            border.color: Theme.color.cardBorder
+                            border.color: Theme.line.card
                             width: readoutText.implicitWidth + 16
                             height: readoutText.implicitHeight + 10
                             x: ChartMath.clamp(root.xForIndex(probe.idx) - width / 2,
@@ -732,7 +736,7 @@ Item {
                                 id: readoutText
                                 anchors.centerIn: parent
                                 horizontalAlignment: Text.AlignHCenter
-                                color: Theme.color.textPrimary
+                                color: Theme.ink.primary
                                 font.pixelSize: 11
                                 text: probe.idx < 0 ? "" :
                                       Data.clockLabel(probe.idx) + "   "
@@ -826,7 +830,7 @@ Item {
                 Text {
                     text: root.supportsFeelsLike && toggle.checked
                           ? qsTr("Feels like") : root.metric.legend
-                    color: Theme.color.textMuted
+                    color: Theme.ink.muted
                     font.pixelSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -839,12 +843,12 @@ Item {
                     width: 14
                     height: 2
                     radius: 1
-                    color: "#8cffffff"
+                    color: Theme.line.series
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 Text {
                     text: root.metric.overlayLegend ? root.metric.overlayLegend : ""
-                    color: Theme.color.textMuted
+                    color: Theme.ink.muted
                     font.pixelSize: 12
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -864,7 +868,7 @@ Item {
             Text {
                 textFormat: Text.StyledText
                 text: qsTr("Moon phase: ") + "<b>" + Data.moonPhase.name + "</b>"
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: 12
                 anchors.verticalCenter: parent.verticalCenter
             }

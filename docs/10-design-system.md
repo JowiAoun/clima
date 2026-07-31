@@ -6,11 +6,46 @@
 The rules every Clima component follows. Measured off the reference where a
 number was worth copying, decided on purpose where it was not.
 
-`prototype/hourly-overview/theme.js` is the single source of truth for values.
+`app/qml/Clima/theme.js` is the single source of truth for values, and
+`Theme.qml` republishes it as the singleton every component reads.
 **Never hard-code a token's value in a component** — if a colour or radius is
 missing from `theme.js`, that is a change to `theme.js`, not a literal in a QML
 file. The exception is a colour that belongs to one visualisation and one only
 (a UV band, a wind rose needle); those live with their component.
+
+### Colour tokens are named for their role
+
+A token's name says what job it does, not what it looks like. `surface.raised`
+is the third rung of the wash ladder; that it is currently `#1affffff` is an
+answer, not the question. This is the difference between a palette that can be
+re-valued and one that cannot: the old names described a white-over-dark
+rendering — `surfaceRaised`, `textDim`, `pastVeil` — so half the table was not a
+decision but a description of a decision made somewhere else, and no light
+values could be written into it.
+
+| Role | What belongs in it |
+|---|---|
+| `page` | the ground everything else is composited on |
+| `surface` | the §10.1 wash ladder, plus the opaque exceptions §10.12 allows |
+| `ink` | text |
+| `line` | anything a pixel wide that separates or measures |
+| `accent` | the one saturated colour, and the only ink legible on it |
+| `control` | interactive chrome: toggles, pagers, nav glyphs |
+| `overlay` | drawn *over* content it must not let through |
+| `state` | a verdict — a trend direction, a good/caution/poor band |
+| `glyph` | the paints a weather glyph is drawn in |
+| `badge` | the day/night disc behind a glyph |
+| `scaffold` | deliberately off-palette: something not built yet |
+
+`metric`, `type`, `motion` and `scale` are theme-invariant — a 14 px radius is
+14 px in any palette — so they are not roles and are read as before.
+
+Two tokens with the same value are not thereby the same token. `line.card` and
+`surface.raised` are both `#1affffff` today and stay separate, because a light
+theme darkens a line and keeps a surface a wash. What was folded together in the
+role pass was the reverse case: six names — `cardBg`, `dayCardBg`, `stripBg`,
+`stripPast`, `pillHover`, `switchActive` — for three rungs of one ladder, each
+naming the *place* a wash was used rather than the level it sits at.
 
 ## 10.1 Surfaces
 
@@ -20,9 +55,9 @@ doing behind it at that height.
 
 | Level | Token | Alpha | Use |
 |---|---|---|---|
-| Recede | `surfaceRecede` | 0.05 | Unselected, inactive, backgrounded |
-| Base | `surfaceBase` | 0.07 | The default card and panel |
-| Raised | `surfaceRaised` | 0.10 | Hover, selection, emphasis |
+| Recede | `surface.recede` | 0.05 | Unselected, inactive, backgrounded |
+| Base | `surface.base` | 0.07 | The default card and panel |
+| Raised | `surface.raised` | 0.10 | Hover, selection, emphasis |
 
 Three consequences, all of which have bitten already:
 
@@ -34,7 +69,7 @@ Three consequences, all of which have bitten already:
   test is whether it has an edge. A shape that fades to zero alpha at its rim
   is a glow and is fine; one you can trace the outline of is a stacked wash.
 - **A white wash is not a colour you can put text on.** Ink for anything
-  sitting on the accent is `onAccent`, never a surface token.
+  sitting on the accent is `accent.ink`, never a surface token.
 - **Borders are usually wrong.** A 1px outline across a junction is exactly the
   seam the junction exists to avoid. Contrast against the page defines a card;
   reach for a border only when nothing else will do.
@@ -45,9 +80,16 @@ would earn its keep over the radar map, and nowhere else we have built.
 
 ## 10.2 Page gradient
 
-Five stops, in `theme.js` as `pageStop0`…`pageStop4`, applied in `Main.qml`.
-QML cannot generate `GradientStop` elements from a `Repeater`, so they are
-written out — if you add a stop, add it in both places.
+Five stops, in `theme.js` as `sky.<phase>.stops`, applied in `PageBackdrop.qml`
+— see §10.12's *The sky* for the phases and why every one of them is dark.
+QML cannot generate `GradientStop` elements from a `Repeater`, so the five
+*positions* are written out in the file that draws them and only the colours
+come from the table; if you add a stop, add it in both places.
+
+`page.bg` is the flat fallback for the one case that cannot take a gradient. It
+is not a sixth stop. There used to be a `pageStop0`…`pageStop4` group here as
+well, a second copy of `sky.dusk.stops` left from when dusk was the only sky
+there was; nothing read it and it is gone.
 
 ## 10.3 Geometry
 
@@ -101,15 +143,15 @@ reads as twelve authors rather than as one set. A range is not a rule.
 
 | Role | Token | Size | Weight | Colour |
 |---|---|---|---|---|
-| Section heading | `sectionTitle` | 18 | bold | `textPrimary` |
-| Card title | `cardTitle` | 15 | bold | `textPrimary` |
-| Detail card title | `detailTitle` | 14 | normal | `textPrimary` |
-| Reading (the big number) | `reading` | 34 | bold | `textPrimary` |
-| Reading, when there are two | `readingPair` | 26 | bold | `textPrimary` |
-| Status line | `status` | 14 | bold | `textPrimary` |
-| Body / description | `body` | 12 | normal | `textMuted` |
-| Label beside a reading | `label` | 12 | normal | `textMuted` |
-| Axis and tick labels | `axis` | 11 | normal | `textDim` |
+| Section heading | `sectionTitle` | 18 | bold | `ink.primary` |
+| Card title | `cardTitle` | 15 | bold | `ink.primary` |
+| Detail card title | `detailTitle` | 14 | normal | `ink.primary` |
+| Reading (the big number) | `reading` | 34 | bold | `ink.primary` |
+| Reading, when there are two | `readingPair` | 26 | bold | `ink.primary` |
+| Status line | `status` | 14 | bold | `ink.primary` |
+| Body / description | `body` | 12 | normal | `ink.muted` |
+| Label beside a reading | `label` | 12 | normal | `ink.muted` |
+| Axis and tick labels | `axis` | 11 | normal | `ink.dim` |
 
 The current-conditions card is the page headline and has its own five, none of
 which appear anywhere else:
@@ -138,7 +180,7 @@ WHO for UV, European AQI — the bands *are* the palette, and they are
 categorical, so they get flat colours rather than a gradient. `detaildata.js`
 carries them in `bands`.
 
-Trend colours are fixed: `trendUp` warm, `trendDown` cool, `trendSteady`
+Trend colours are fixed: `state.trendUp` warm, `state.trendDown` cool, `state.trendSteady`
 neutral. A rising temperature and a rising pressure use the same up colour;
 the card's words say whether that is good news.
 
@@ -290,7 +332,7 @@ under about 85 characters or they elide mid-word, which reads as a bug.
   drawn *around* the number and setting the number off to one side leaves the
   ring circling nothing. All three dials — UV, air quality, cloud cover — take
   it, and they share one geometry: 310° of arc from 115°, a 7 px stroke, a
-  `trackLine` remainder, and the mark where the paint stops.
+  `line.track` remainder, and the mark where the paint stops.
 - **A card with a side-by-side layout still bottom-anchors its readout.**
   Centring the right-hand column vertically instead is what left row 2 of the
   grid with no baseline while rows 1 and 3 had one.
@@ -303,7 +345,7 @@ under about 85 characters or they elide mid-word, which reads as a bug.
 - **One visualisation per card.** A card with two charts in it has neither the
   room to draw either properly nor a single answer to give.
 - **The "now" mark is one thing everywhere**: a 14 px disc with a 2.5 px
-  `textPrimary` ring. Not 12, not 20, and not a rule dangling below it.
+  `ink.primary` ring. Not 12, not 20, and not a rule dangling below it.
 
 ### Rules for a visualisation
 
@@ -311,7 +353,7 @@ under about 85 characters or they elide mid-word, which reads as a bug.
   a different value, it is not a visualisation. A dial whose arc is a fixed
   grey ring with a coloured dot on it has drawn a scale and left the reading
   to the dot; fill the traversed arc and the ring itself carries the value.
-- **A gauge needs a visible track.** The unfilled remainder is `trackLine` —
+- **A gauge needs a visible track.** The unfilled remainder is `line.track` —
   the reading only means something as a fraction of something.
 - **Scales are data.** A ceiling that decides what the reader sees (`scaleMax`
   for precipitation, wind, visibility) belongs in `detaildata.js`, not as a
@@ -574,7 +616,7 @@ the width rather than a restyling. The five that exist:
   never 5 + 1. The calendar goes to four columns because a forecast is scanned
   for warm stretches rather than looked up by weekday.
 - **Chrome that floats over content may be opaque.** The bottom nav and the
-  metric menu use `navBg` and `menuBg` rather than a 0.07 wash, and the nav
+  metric menu use `surface.nav` and `surface.menu` rather than a 0.07 wash, and the nav
   carries a hairline along its top edge. This is the same exception the pager
   buttons already had: §10.1's ban on borders is about seams a junction exists
   to hide, and this is not a junction — it is the edge where a floating bar
@@ -590,7 +632,7 @@ The temptations here are specific enough to name:
   hairline separates an axis from a plot without claiming to be a surface.
 - **A raised cell for today in the calendar.** Same arithmetic, 0.165. This is
   the case §10.1's note about borders allows for: a 1 px accent outline and the
-  date in `accent`, because nothing else will do.
+  date in `accent.fill`, because nothing else will do.
 
 ### The sky
 

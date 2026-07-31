@@ -24,7 +24,13 @@ Item {
     property real filletRadius: 14
     property real extendBelow: 0      // straight skirt under the arc
     property bool mirrored: false     // false = left of the tab, true = right
-    property color fillColor: "#1a2440"
+    // No default worth having. A fillet is the tab's own fill continued around
+    // the corner, so the only correct value is whatever the caller painted the
+    // tab with — and both callers pass it. The old default was an opaque navy,
+    // which in a system with no opaque cards (§10.1) would have been wrong
+    // wherever it landed; it never landed anywhere, and transparent says that
+    // out loud instead of hiding it behind a plausible colour.
+    property color fillColor: "transparent"
 
     width: filletRadius
     height: filletRadius + extendBelow

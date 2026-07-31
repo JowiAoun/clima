@@ -24,7 +24,7 @@ Item {
     Text {
         id: titleText
         text: root.title
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.sectionTitle
         font.bold: true
         anchors.verticalCenter: parent.verticalCenter
@@ -34,7 +34,7 @@ Item {
         id: stampText
         text: root.stamp
         visible: root.stamp !== ""
-        color: Theme.color.textMuted
+        color: Theme.ink.muted
         font.pixelSize: Theme.type.heroLabel
         anchors.left: titleText.right
         anchors.leftMargin: 10

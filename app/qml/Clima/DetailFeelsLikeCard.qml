@@ -231,7 +231,7 @@ DetailCard {
                 width: 14; height: 14; radius: 7
                 color: root.feelsStroke
                 border.width: 2.5
-                border.color: Theme.color.textPrimary
+                border.color: Theme.ink.primary
                 x: chart.xAt(viz.nowIndex) - width / 2
                 y: chart.yAt(viz.feels[viz.nowIndex]) - height / 2
 
@@ -264,7 +264,7 @@ DetailCard {
             Text {
                 id: feelsValue
                 text: root.d.reading
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.readingPair
                 font.bold: true
                 anchors.left: parent.left
@@ -286,7 +286,7 @@ DetailCard {
             Text {
                 id: actualValue
                 text: root.d.actual + root.d.unit
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.readingPair
                 font.bold: true
                 anchors.left: feelsLabel.right
@@ -297,7 +297,7 @@ DetailCard {
             Text {
                 id: actualLabel
                 text: qsTr("Actual")
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.label
                 anchors.left: actualValue.right
                 anchors.leftMargin: 6

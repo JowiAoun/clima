@@ -92,7 +92,7 @@ DetailCard {
             // something.
             ShapePath {
                 fillColor: "transparent"
-                strokeColor: Theme.color.trackLine
+                strokeColor: Theme.line.track
                 strokeWidth: viz.ringWidth
                 capStyle: ShapePath.RoundCap
                 PathAngleArc {
@@ -126,7 +126,7 @@ DetailCard {
             width: viz.markSize; height: viz.markSize; radius: width / 2
             color: viz.coverInk
             border.width: 2.5
-            border.color: Theme.color.textPrimary
+            border.color: Theme.ink.primary
             x: viz.dialX(viz.markAngle, viz.radius) - width / 2
             y: viz.dialY(viz.markAngle, viz.radius) - height / 2
         }
@@ -134,7 +134,7 @@ DetailCard {
         // In the middle of the dial — see the note in the air-quality card.
         Text {
             text: root.d.reading
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.reading
             font.bold: true
             x: viz.cx - width / 2

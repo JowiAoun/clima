@@ -60,7 +60,7 @@ Item {
                     anchors.fill: parent
                     preferredRendererType: Shape.CurveRenderer
                     ShapePath {
-                        strokeColor: Theme.color.textMuted
+                        strokeColor: Theme.ink.muted
                         strokeWidth: 1.4
                         fillColor: "transparent"
                         capStyle: ShapePath.RoundCap
@@ -72,7 +72,7 @@ Item {
             Text {
                 id: segLabel
                 text: seg.caption
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: 12
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -88,7 +88,7 @@ Item {
     Text {
         id: heading
         text: root.title
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.sectionTitle
         font.bold: true
         anchors.verticalCenter: parent.verticalCenter
@@ -128,9 +128,9 @@ Item {
             width: seat.width
             height: parent.height
             radius: Theme.metric.controlRadius
-            color: Theme.color.switchActive
+            color: Theme.surface.raised
             border.width: 1
-            border.color: Theme.color.switchBorder
+            border.color: Theme.line.control
 
             // Both halves are labelled, and "Chart" is wider than "List", so the
             // indicator changes size as well as position. One duration for both,
@@ -216,8 +216,8 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: height / 2
-                        color: pill.active ? Theme.color.accent
-                                           : (pillHover.hovered ? Theme.color.pillHover : "transparent")
+                        color: pill.active ? Theme.accent.fill
+                                           : (pillHover.hovered ? Theme.surface.raised : "transparent")
                         Behavior on color {
                             ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                         }
@@ -227,7 +227,7 @@ Item {
                         id: pillLabel
                         text: pill.modelData.label
                         anchors.centerIn: parent
-                        color: pill.active ? Theme.color.onAccent : Theme.color.textMuted
+                        color: pill.active ? Theme.accent.ink : Theme.ink.muted
                         font.pixelSize: 13
                         font.bold: pill.active
                         Behavior on color {

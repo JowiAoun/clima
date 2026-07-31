@@ -49,7 +49,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.cardRadius
-        color: Theme.color.cardBg
+        color: Theme.surface.base
     }
 
     // ---- header ------------------------------------------------------------
@@ -63,7 +63,7 @@ Item {
         Text {
             id: headerTitle
             text: root.title
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.cardTitle
             font.bold: true
             anchors.left: parent.left
@@ -87,7 +87,7 @@ Item {
             Text {
                 id: linkText
                 text: root.link
-                color: linkHover.hovered ? Theme.color.textPrimary : Theme.color.textMuted
+                color: linkHover.hovered ? Theme.ink.primary : Theme.ink.muted
                 font.pixelSize: Theme.type.status
                 anchors.verticalCenter: parent.verticalCenter
 
@@ -125,7 +125,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: header.bottom
-        color: Theme.color.gridLineWeak
+        color: Theme.line.gridWeak
     }
 
     Loader {

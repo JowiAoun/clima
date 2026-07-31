@@ -31,7 +31,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.controlRadius
-        color: hover.hovered ? Theme.color.pagerBgHover : Theme.color.pagerBg
+        color: hover.hovered ? Theme.control.pagerFillHover : Theme.control.pagerFill
         opacity: 0.94
         Behavior on color {
             ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
@@ -43,7 +43,7 @@ Item {
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
-            strokeColor: Theme.color.pagerGlyph
+            strokeColor: Theme.control.pagerGlyph
             strokeWidth: 1.6
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap

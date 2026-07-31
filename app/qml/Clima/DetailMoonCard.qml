@@ -140,7 +140,7 @@ DetailCard {
             // answer, since the moon is down.
             ShapePath {
                 fillColor: "transparent"
-                strokeColor: Theme.color.trackLine
+                strokeColor: Theme.line.track
                 strokeWidth: viz.strokeW
                 capStyle: ShapePath.RoundCap
                 PathSvg {
@@ -156,9 +156,13 @@ DetailCard {
                 strokeColor: "transparent"
                 fillGradient: LinearGradient {
                     x1: 0; y1: viz.horizonY - viz.amp; x2: 0; y2: viz.horizonY
-                    GradientStop { position: 0.00; color: "#eaf0ff" }
-                    GradientStop { position: 0.45; color: "#b6c8f0" }
-                    GradientStop { position: 1.00; color: "#7a97d8" }
+                    // The same three stops the arc and the mark are ramped off,
+                    // read out of `skyRamp` rather than written again — see the
+                    // twin in DetailSunCard.qml, which had the identical pair of
+                    // copies a hundred lines apart.
+                    GradientStop { position: viz.skyRamp[0].p; color: viz.skyRamp[0].c }
+                    GradientStop { position: viz.skyRamp[1].p; color: viz.skyRamp[1].c }
+                    GradientStop { position: viz.skyRamp[2].p; color: viz.skyRamp[2].c }
                 }
                 PathSvg {
                     path: viz.ribbonTo(Math.min(viz.tPenR, viz.tSet))
@@ -172,7 +176,7 @@ DetailCard {
             y: Math.round(viz.horizonY) - height / 2
             width: viz.width
             height: 1
-            color: Theme.color.gridLine
+            color: Theme.line.grid
         }
 
         // The two crossings the two readings below name. Flat and small on
@@ -183,7 +187,7 @@ DetailCard {
             delegate: Rectangle {
                 required property var modelData
                 width: 8; height: 8; radius: 4
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 // Uncovered as the pen reaches it, so a crossing is never marked
                 // on curve that has not been drawn. The rise is where the pen
                 // starts, so that one is there from the first frame. Opacity
@@ -216,7 +220,7 @@ DetailCard {
                 preferredRendererType: Shape.CurveRenderer
 
                 ShapePath {
-                    fillColor: Theme.color.moonGlyph
+                    fillColor: Theme.glyph.moon
                     strokeColor: "transparent"
                     PathSvg {
                         path: ChartMath.moonPath(viz.markR, viz.markR, viz.markR,
@@ -230,7 +234,7 @@ DetailCard {
                 radius: width / 2
                 color: "transparent"
                 border.width: 2.5
-                border.color: Theme.color.textPrimary
+                border.color: Theme.ink.primary
             }
         }
 
@@ -241,7 +245,7 @@ DetailCard {
         Text {
             id: spanLabel
             text: root.d.upLength
-            color: Theme.color.textMuted
+            color: Theme.ink.muted
             font.pixelSize: Theme.type.axis
             x: Math.round((viz.xAt(viz.tRise) + viz.xAt(viz.tSet) - width) / 2)
             y: Math.round(viz.horizonY) + 3
@@ -250,7 +254,7 @@ DetailCard {
         Text {
             id: litLabel
             text: qsTr("%1% lit").arg(Math.round(root.d.illumination * 100))
-            color: Theme.color.textMuted
+            color: Theme.ink.muted
             font.pixelSize: Theme.type.axis
             x: Math.round((viz.xAt(viz.tRise) + viz.xAt(viz.tSet) - width) / 2)
             y: spanLabel.y + spanLabel.height
@@ -295,7 +299,7 @@ DetailCard {
                     Text {
                         id: figClock
                         text: modelData.figTime
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.readingPair
                         font.bold: true
                         anchors.left: parent.left
@@ -309,12 +313,12 @@ DetailCard {
 
                         Text {
                             text: modelData.figSuffix
-                            color: Theme.color.textMuted
+                            color: Theme.ink.muted
                             font.pixelSize: Theme.type.label
                         }
                         Text {
                             text: modelData.figName
-                            color: Theme.color.textMuted
+                            color: Theme.ink.muted
                             font.pixelSize: Theme.type.label
                         }
                     }

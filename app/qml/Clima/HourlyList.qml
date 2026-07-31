@@ -43,7 +43,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.panelRadius
-        color: Theme.color.panelBg
+        color: Theme.surface.panel
     }
 
     // Column geometry lives in one place so the header and the rows cannot drift.
@@ -62,7 +62,7 @@ Item {
     component Cell: Text {
         property real cellWidth: 80
         width: cellWidth
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: 12
         horizontalAlignment: Text.AlignRight
         verticalAlignment: Text.AlignVCenter
@@ -72,7 +72,7 @@ Item {
     component HeaderCell: Text {
         property real cellWidth: 80
         width: cellWidth
-        color: Theme.color.textDim
+        color: Theme.ink.dim
         font.pixelSize: 11
         horizontalAlignment: Text.AlignRight
         verticalAlignment: Text.AlignVCenter
@@ -111,7 +111,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: 1
-            color: Theme.color.gridLine
+            color: Theme.line.grid
         }
     }
 
@@ -177,11 +177,11 @@ Item {
                 // The now row is exempt. Its fill *is* the mark — swapping the
                 // yellow for a neutral wash would blank the one row the reader
                 // came to find, the moment they point at it.
-                color: hourRow.isNow ? Theme.color.nowRowBg
+                color: hourRow.isNow ? Theme.surface.rowNow
                                      : (rowHover.hovered
-                                        ? Theme.color.surfaceRaised
+                                        ? Theme.surface.raised
                                         : (hourRow.index % 2 === 0 ? "transparent"
-                                                                   : Theme.color.listRowAlt))
+                                                                   : Theme.surface.rowAlt))
 
                 // Behaviors do not fire for a property's initial binding, so a
                 // delegate built as it scrolls into view arrives at its stripe
@@ -200,7 +200,7 @@ Item {
                 height: parent.height - 10
                 radius: 1.5
                 anchors.verticalCenter: parent.verticalCenter
-                color: Theme.color.accent
+                color: Theme.accent.fill
             }
 
             Row {
@@ -213,7 +213,7 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     leftPadding: 12
                     text: Data.hourLabel(hourRow.index)
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: 12
                     font.bold: hourRow.isNow
                 }
@@ -233,18 +233,18 @@ Item {
                     height: parent.height
                     verticalAlignment: Text.AlignVCenter
                     text: Data.conditionText(index)
-                    color: Theme.color.textMuted
+                    color: Theme.ink.muted
                     font.pixelSize: 12
                 }
 
                 Cell { cellWidth: cols.temp;     text: Units.formatDisplay(Units.Temperature, Data.temperature[index]) ; font.bold: true }
-                Cell { cellWidth: cols.feels;    text: Units.formatDisplay(Units.Temperature, Data.apparent[index]) ; color: Theme.color.textMuted }
-                Cell { cellWidth: cols.precip;   text: Data.precipProb[index] + "%" ; color: Theme.color.droplet }
+                Cell { cellWidth: cols.feels;    text: Units.formatDisplay(Units.Temperature, Data.apparent[index]) ; color: Theme.ink.muted }
+                Cell { cellWidth: cols.precip;   text: Data.precipProb[index] + "%" ; color: Theme.glyph.droplet }
                 // Through Units, not with " km/h" written out: the reader may
                 // have asked for mph, and a column headed one unit carrying
                 // numbers in another is the quietest possible way to be wrong.
-                Cell { cellWidth: cols.wind;     text: Units.format(Units.Wind, Data.windSpeed[index]) ; color: Theme.color.textMuted }
-                Cell { cellWidth: cols.humidity; text: Data.humidity[index] + "%" ; color: Theme.color.textMuted }
+                Cell { cellWidth: cols.wind;     text: Units.format(Units.Wind, Data.windSpeed[index]) ; color: Theme.ink.muted }
+                Cell { cellWidth: cols.humidity; text: Data.humidity[index] + "%" ; color: Theme.ink.muted }
             }
         }
     }

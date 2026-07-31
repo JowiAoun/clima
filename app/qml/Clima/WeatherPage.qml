@@ -186,7 +186,7 @@ Item {
         visible: root.maxContentY > 0
         width: 4
         radius: 2
-        color: Theme.color.gridLineWeak
+        color: Theme.line.gridWeak
         anchors.right: parent.right
         anchors.rightMargin: 5
         anchors.top: parent.top
@@ -207,7 +207,7 @@ Item {
             // movementEnding() before it moves, so `moving` is false in every
             // frame the harness can grab. A `--poke flick=<velocity>` calling
             // `scroll.flick()` would make it reviewable; that is Main.qml.
-            color: scroll.moving ? Theme.color.textMuted : Theme.color.trackLine
+            color: scroll.moving ? Theme.ink.muted : Theme.line.track
 
             // Size and position are bound straight through, never animated.
             // The thumb is a readout of where the page is, and a readout that

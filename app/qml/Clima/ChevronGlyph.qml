@@ -18,7 +18,7 @@ Item {
 
     property string direction: "right"       // "right" | "left" | "down" | "up"
     property real glyphSize: 14
-    property color tint: Theme.color.textMuted
+    property color tint: Theme.ink.muted
     property real weight: 1.6
 
     implicitWidth: glyphSize

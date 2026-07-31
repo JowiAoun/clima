@@ -66,7 +66,7 @@ Item {
                         // label on the screen.
                         Text {
                             text: day.isToday ? qsTr("Today") : day.modelData.label
-                            color: Theme.color.textPrimary
+                            color: Theme.ink.primary
                             font.pixelSize: Theme.type.label
                             font.bold: day.isToday
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -78,7 +78,7 @@ Item {
                         // low all rode 20 px above the nine beside them.
                         Text {
                             text: String(day.modelData.date)
-                            color: Theme.color.textMuted
+                            color: Theme.ink.muted
                             font.pixelSize: Theme.type.axis
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
@@ -91,7 +91,7 @@ Item {
 
                         Text {
                             text: Units.formatDisplay(Units.Temperature, day.modelData.high)
-                            color: Theme.color.textPrimary
+                            color: Theme.ink.primary
                             font.pixelSize: Theme.type.status
                             font.bold: true
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -99,7 +99,7 @@ Item {
 
                         Text {
                             text: Units.formatDisplay(Units.Temperature, day.modelData.low)
-                            color: Theme.color.textMuted
+                            color: Theme.ink.muted
                             font.pixelSize: Theme.type.status
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
@@ -115,7 +115,7 @@ Item {
 
                             Text {
                                 text: day.modelData.precip + "%"
-                                color: Theme.color.textMuted
+                                color: Theme.ink.muted
                                 font.pixelSize: Theme.type.axis
                                 anchors.verticalCenter: parent.verticalCenter
                             }

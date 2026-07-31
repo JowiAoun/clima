@@ -29,12 +29,12 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.cardRadius
-        color: Theme.color.surfaceRecede
+        color: Theme.surface.recede
 
         HatchPattern {
             anchors.fill: parent
             anchors.margins: 1
-            lineColor: Theme.color.placeholderStroke
+            lineColor: Theme.scaffold.stroke
             spacing: 14
             lineWidth: 1
         }
@@ -47,7 +47,7 @@ Item {
 
         ShapePath {
             fillColor: "transparent"
-            strokeColor: Theme.color.placeholderStroke
+            strokeColor: Theme.scaffold.stroke
             strokeWidth: 2
             strokeStyle: ShapePath.DashLine
             dashPattern: [6, 4]
@@ -74,7 +74,7 @@ Item {
             NavGlyph {
                 kind: "maps"
                 glyphSize: 72
-                tint: Theme.color.placeholderInk
+                tint: Theme.scaffold.ink
                 anchors.centerIn: parent
             }
 
@@ -91,7 +91,7 @@ Item {
                 preferredRendererType: Shape.CurveRenderer
                 ShapePath {
                     fillColor: "transparent"
-                    strokeColor: Theme.color.placeholderInk
+                    strokeColor: Theme.scaffold.ink
                     strokeWidth: 5
                     capStyle: ShapePath.RoundCap
                     PathSvg { path: "M 6 86 L 86 6" }
@@ -101,7 +101,7 @@ Item {
 
         Text {
             text: qsTr("No map component yet")
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.cardTitle
             font.bold: true
             anchors.horizontalCenter: parent.horizontalCenter
@@ -112,7 +112,7 @@ Item {
                      + "MapLibre Native over a vector basemap — decision D4 in "
                      + "docs/03-tech-stack.md — and this panel stands in for it "
                      + "so the shell can be reviewed with all five tabs present.")
-            color: Theme.color.textMuted
+            color: Theme.ink.muted
             font.pixelSize: Theme.type.body
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
@@ -127,13 +127,13 @@ Item {
             radius: 12
             color: "transparent"
             border.width: 1
-            border.color: Theme.color.placeholderStroke
+            border.color: Theme.scaffold.stroke
             anchors.horizontalCenter: parent.horizontalCenter
 
             Text {
                 id: chip
                 text: qsTr("PLACEHOLDER")
-                color: Theme.color.placeholderInk
+                color: Theme.scaffold.ink
                 font.pixelSize: Theme.type.axis
                 font.bold: true
                 font.letterSpacing: 1.2

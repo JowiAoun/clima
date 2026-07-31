@@ -22,7 +22,7 @@ Item {
         height: 20
         radius: height / 2
         anchors.verticalCenter: parent.verticalCenter
-        color: root.checked ? Theme.color.accent : Theme.color.toggleTrack
+        color: root.checked ? Theme.accent.fill : Theme.control.toggleTrack
         Behavior on color {
             ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
         }
@@ -34,7 +34,7 @@ Item {
             radius: height / 2
             y: (parent.height - height) / 2
             x: root.checked ? parent.width - width - 3 : 3
-            color: root.checked ? Theme.color.onAccent : Theme.color.toggleKnob
+            color: root.checked ? Theme.accent.ink : Theme.control.toggleKnob
 
             // The knob travels, so it takes `move`; everything else here is a
             // recolour and takes `tint`. The knob landing a beat after the
@@ -52,7 +52,7 @@ Item {
     Text {
         id: caption
         text: root.label
-        color: root.checked ? Theme.color.textPrimary : Theme.color.textMuted
+        color: root.checked ? Theme.ink.primary : Theme.ink.muted
         font.pixelSize: 12
         anchors.verticalCenter: parent.verticalCenter
         x: track.width + root.gap

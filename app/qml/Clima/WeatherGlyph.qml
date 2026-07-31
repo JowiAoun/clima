@@ -53,7 +53,7 @@ Item {
             height: width
             preferredRendererType: Shape.CurveRenderer
 
-            readonly property color tint: Theme.color.sunGlyphWarm
+            readonly property color tint: Theme.glyph.sunWarm
 
             ShapePath {
                 strokeColor: "transparent"
@@ -91,8 +91,8 @@ Item {
             anchors.fill: parent
             radius: width / 2
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Theme.color.sunGlyphWarm }
-                GradientStop { position: 1.0; color: Theme.color.sunGlyphCool }
+                GradientStop { position: 0.0; color: Theme.glyph.sunWarm }
+                GradientStop { position: 1.0; color: Theme.glyph.sunCool }
             }
         }
     }
@@ -105,7 +105,7 @@ Item {
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
-            fillColor: Theme.color.moonGlyph
+            fillColor: Theme.glyph.moon
             strokeColor: "transparent"
             // Crescent sits centred when alone, upper-left when a cloud is in front.
             PathSvg {
@@ -132,13 +132,13 @@ Item {
                 x2: 0; y2: root.height * (root.soloCloud ? 0.80 : 0.92)
                 GradientStop {
                     position: 0.0
-                    color: root.onLightBackground ? Theme.color.cloudTopOnLight
-                                                  : Theme.color.cloudTop
+                    color: root.onLightBackground ? Theme.glyph.cloudTopOnLight
+                                                  : Theme.glyph.cloudTop
                 }
                 GradientStop {
                     position: 1.0
-                    color: root.onLightBackground ? Theme.color.cloudBottomOnLight
-                                                  : Theme.color.cloudBottom
+                    color: root.onLightBackground ? Theme.glyph.cloudBottomOnLight
+                                                  : Theme.glyph.cloudBottom
                 }
             }
             PathSvg { path: root.cloudPath(root.width, root.height, root.soloCloud) }
@@ -153,7 +153,7 @@ Item {
             width: Math.max(1.8, root.width * 0.07)
             height: root.height * 0.22
             radius: width / 2
-            color: Theme.color.rainDrop
+            color: Theme.glyph.rain
             x: root.width * (0.25 + index * 0.21)
             y: root.height * (0.74 + (index === 1 ? 0.07 : 0))
             transform: Rotation { angle: 12 }

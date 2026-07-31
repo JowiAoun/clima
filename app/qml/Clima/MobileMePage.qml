@@ -58,7 +58,7 @@ MobilePage {
             anchors.leftMargin: -8
             anchors.rightMargin: -8
             radius: Theme.metric.controlRadius
-            color: rowHover.hovered ? Theme.color.surfaceRaised : "transparent"
+            color: rowHover.hovered ? Theme.surface.raised : "transparent"
             Behavior on color {
                 ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
             }
@@ -66,7 +66,7 @@ MobilePage {
 
         Text {
             text: settingRow.text
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.status
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
@@ -74,7 +74,7 @@ MobilePage {
 
         Text {
             text: settingRow.value
-            color: Theme.color.textMuted
+            color: Theme.ink.muted
             font.pixelSize: Theme.type.status
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
@@ -86,7 +86,7 @@ MobilePage {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             height: 1
-            color: Theme.color.gridLineWeak
+            color: Theme.line.gridWeak
         }
 
         HoverHandler {
@@ -113,7 +113,7 @@ MobilePage {
 
     Text {
         text: qsTr("Me")
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.sectionTitle
         font.bold: true
     }
@@ -204,7 +204,7 @@ MobilePage {
                         // required wording, when that provider lands, is a
                         // sentence nobody would guess.
                         text: modelData.creditLine
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.status
                         width: parent.width
                         wrapMode: Text.WordWrap
@@ -212,7 +212,7 @@ MobilePage {
 
                     Text {
                         text: modelData.licenceName + "  ·  " + modelData.homepage
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.label
                         width: parent.width
                         elide: Text.ElideRight
@@ -224,7 +224,7 @@ MobilePage {
                         // would drop.
                         visible: modelData.upstream.length > 0
                         text: qsTr("Models: ") + modelData.upstream.join(", ")
-                        color: Theme.color.textDim
+                        color: Theme.ink.dim
                         font.pixelSize: Theme.type.label
                         width: parent.width
                         wrapMode: Text.WordWrap
@@ -233,7 +233,7 @@ MobilePage {
                     Text {
                         visible: modelData.note !== ""
                         text: modelData.note
-                        color: Theme.color.textDim
+                        color: Theme.ink.dim
                         font.pixelSize: Theme.type.label
                         width: parent.width
                         wrapMode: Text.WordWrap
@@ -252,7 +252,7 @@ MobilePage {
         visible: Engine.fixtureMode
         text: qsTr("Showing the recorded “%1” fixture at its frozen clock. "
                  + "No network request was made for this forecast.").arg(Engine.fixtureName)
-        color: Theme.color.textDim
+        color: Theme.ink.dim
         font.pixelSize: Theme.type.body
         wrapMode: Text.WordWrap
     }

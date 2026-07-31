@@ -127,7 +127,7 @@ Item {
                     Rectangle {
                         id: surface
                         anchors.fill: parent
-                        color: card.selected ? Theme.color.cardBg : Theme.color.dayCardBg
+                        color: card.selected ? Theme.surface.base : Theme.surface.recede
                         // No outline on the raised card: it is one surface with the
                         // panel below, and an outline would draw a line across that.
                         // It is faded out rather than switched off — the width stays
@@ -136,7 +136,7 @@ Item {
                         // Qt draws the border band in place of the fill rather than
                         // over it, so this is one wash and not two (§10.1).
                         border.width: 1
-                        border.color: card.selected ? Theme.color.cardBg : Theme.color.cardBorder
+                        border.color: card.selected ? Theme.surface.base : Theme.line.card
                         // Square at the bottom when selected: that edge is under the
                         // chart card and must not round away from it.
                         topLeftRadius: Theme.metric.cardRadius
@@ -181,7 +181,7 @@ Item {
 
                     Text {
                         text: card.modelData.date
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: 15
                         font.bold: true
                         x: 16
@@ -193,7 +193,7 @@ Item {
                         // A label may change colour (§10.6) and this one is part of
                         // how selection reads, so it goes over on the same beat as
                         // the fill rather than snapping while the card eases.
-                        color: card.selected ? Theme.color.textPrimary : Theme.color.textMuted
+                        color: card.selected ? Theme.ink.primary : Theme.ink.muted
                         Behavior on color {
                             ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                         }
@@ -281,14 +281,14 @@ Item {
 
                         Text {
                             text: Units.formatDisplay(Units.Temperature, card.modelData.high)
-                            color: Theme.color.textPrimary
+                            color: Theme.ink.primary
                             font.pixelSize: 17
                             font.bold: true
                             anchors.right: parent.right
                         }
                         Text {
                             text: Units.formatDisplay(Units.Temperature, card.modelData.low)
-                            color: Theme.color.textMuted
+                            color: Theme.ink.muted
                             font.pixelSize: 15
                             anchors.right: parent.right
                         }

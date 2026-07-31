@@ -31,9 +31,9 @@ Item {
     readonly property real rowHeight: 40
 
     function toneColor(tone) {
-        return tone === "poor" ? Theme.color.statusPoor
-             : tone === "caution" ? Theme.color.statusCaution
-                                  : Theme.color.statusGood
+        return tone === "poor" ? Theme.state.poor
+             : tone === "caution" ? Theme.state.caution
+                                  : Theme.state.good
     }
 
     implicitHeight: list.height + note.height + 10
@@ -56,7 +56,7 @@ Item {
 
                 Text {
                     text: row.modelData.name
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: Theme.type.status
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
@@ -69,7 +69,7 @@ Item {
 
                     Text {
                         text: row.modelData.status
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.status
                         anchors.verticalCenter: parent.verticalCenter
                     }
@@ -92,7 +92,7 @@ Item {
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
                     height: 1
-                    color: Theme.color.gridLineWeak
+                    color: Theme.line.gridWeak
                 }
             }
         }
@@ -105,7 +105,7 @@ Item {
         width: parent.width
         text: qsTr("Worked out by Clima from the forecast above — not a published forecast "
                  + "product.")
-        color: Theme.color.textDim
+        color: Theme.ink.dim
         font.pixelSize: Theme.type.label
         wrapMode: Text.WordWrap
     }

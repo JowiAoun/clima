@@ -221,13 +221,13 @@ Item {
             // The same scrim the sun markers use. A caption sits over whatever
             // the series happens to be doing, and grey text over an orange AQI
             // bar is not text.
-            color: "#99111a2b"
+            color: Theme.overlay.caption
 
             Text {
                 id: captionText
                 anchors.centerIn: parent
                 text: caption.modelData.label
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.axis
             }
         }

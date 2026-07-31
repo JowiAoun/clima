@@ -52,7 +52,7 @@ Item {
                     radius: Theme.metric.controlRadius
                     color: "transparent"
                     border.width: cell.modelData.isToday ? 1 : 0
-                    border.color: Theme.color.accent
+                    border.color: Theme.accent.fill
                 }
 
                 Row {
@@ -63,8 +63,8 @@ Item {
 
                     Text {
                         text: String(cell.modelData.date)
-                        color: cell.modelData.isToday ? Theme.color.accent
-                                                      : Theme.color.textPrimary
+                        color: cell.modelData.isToday ? Theme.accent.fill
+                                                      : Theme.ink.primary
                         font.pixelSize: Theme.type.status
                         font.bold: true
                         anchors.bottom: parent.bottom
@@ -72,7 +72,7 @@ Item {
 
                     Text {
                         text: cell.modelData.weekday
-                        color: Theme.color.textDim
+                        color: Theme.ink.dim
                         font.pixelSize: Theme.type.axis
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 1
@@ -101,14 +101,14 @@ Item {
 
                     Text {
                         text: Units.formatDisplay(Units.Temperature, cell.modelData.high)
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.label
                         font.bold: true
                     }
 
                     Text {
                         text: Units.formatDisplay(Units.Temperature, cell.modelData.low)
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.label
                     }
                 }

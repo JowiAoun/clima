@@ -86,14 +86,14 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.cardRadius
-        color: Theme.color.cardBg
+        color: Theme.surface.base
     }
 
     // ---- label and timestamp ---------------------------------------------
     Text {
         id: heading
         text: qsTr("Current weather")
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.cardTitle
         font.bold: true
         x: root.pad
@@ -125,8 +125,8 @@ Item {
               Engine.updatedLabel,
               Engine.fromFallback ? qsTr("via %1").arg(Engine.sourceName) : "",
               Engine.problem].filter(function (s) { return s !== "" }).join("  ·  ")
-        color: Engine.stale || Engine.problem !== "" ? Theme.color.statusCaution
-                                                     : Theme.color.textMuted
+        color: Engine.stale || Engine.problem !== "" ? Theme.state.caution
+                                                     : Theme.ink.muted
         Behavior on color {
             ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
         }
@@ -169,7 +169,7 @@ Item {
         Text {
             id: reading
             text: Engine.hasData ? String(Detail.temperature.value) : ""
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.heroReading
             anchors.left: glyph.right
             anchors.leftMargin: 16
@@ -181,7 +181,7 @@ Item {
         Text {
             id: unit
             text: Detail.current.unitLabel
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.heroUnit
             anchors.left: reading.right
             anchors.leftMargin: 2
@@ -198,7 +198,7 @@ Item {
 
             Text {
                 text: Detail.cloudCover.condition
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.heroCaption
                 font.bold: true
             }
@@ -207,13 +207,13 @@ Item {
                 spacing: 8
                 Text {
                     text: qsTr("Feels like")
-                    color: Theme.color.textMuted
+                    color: Theme.ink.muted
                     font.pixelSize: Theme.type.heroLabel
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 Text {
                     text: Detail.feelsLike.reading
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: Theme.type.heroDetail
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -243,14 +243,14 @@ Item {
 
                     Text {
                         text: modelData.label
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.heroLabel
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
                     Text {
                         // Same rule as the hero above: no forecast, no figure.
                         text: Engine.hasData ? modelData.value + Detail.temperature.unit : ""
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.heroCaption
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
@@ -263,7 +263,7 @@ Item {
     Text {
         id: outlook
         text: Detail.current.summary
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.heroDetail
         elide: Text.ElideRight
         anchors.left: parent.left
@@ -309,7 +309,7 @@ Item {
                 Text {
                     id: slugLabel
                     text: slug.modelData.label
-                    color: Theme.color.textMuted
+                    color: Theme.ink.muted
                     font.pixelSize: Theme.type.heroLabel
                     elide: Text.ElideRight
                     width: parent.width - 8
@@ -332,7 +332,7 @@ Item {
 
                     Text {
                         text: slug.modelData.value
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.heroDetail
                         anchors.verticalCenter: parent.verticalCenter
                     }
@@ -355,7 +355,7 @@ Item {
                             preferredRendererType: Shape.CurveRenderer
                             rotation: slug.modelData.arrow + 180
                             ShapePath {
-                                fillColor: Theme.color.textPrimary
+                                fillColor: Theme.ink.primary
                                 strokeColor: "transparent"
                                 PathSvg { path: "M 8 0.6 L 12.3 15.4 L 8 12.1 L 3.7 15.4 Z" }
                             }

@@ -25,7 +25,7 @@ Item {
 
         // sun, clipped by the horizon: risen above it, or setting below it
         ShapePath {
-            fillColor: Theme.color.sunGlyphWarm
+            fillColor: Theme.glyph.sunWarm
             strokeColor: "transparent"
             PathSvg {
                 path: {
@@ -45,7 +45,7 @@ Item {
 
         // horizon
         ShapePath {
-            strokeColor: Theme.color.sunGlyphCool
+            strokeColor: Theme.glyph.sunCool
             strokeWidth: 1.5
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap

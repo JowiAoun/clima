@@ -9,7 +9,11 @@ import "chartmath.js" as ChartMath
 Item {
     id: root
 
-    property color lineColor: "#16ffffff"
+    // A default rather than a required property: the gallery stages this on its
+    // own, with nothing to tell it what it is hatching. Every caller in the app
+    // says — `overlay.pastHatch` for the chart's past, `scaffold.stroke` for the
+    // map placeholder — so this value is only ever the specimen's.
+    property color lineColor: Theme.overlay.hatch
     property real lineWidth: 1
     property real spacing: 8
     property real slope: 0.7        // dx per dy

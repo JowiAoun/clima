@@ -50,7 +50,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: Theme.color.navBg
+        color: Theme.surface.nav
     }
 
     Rectangle {
@@ -58,7 +58,7 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
         height: 1
-        color: Theme.color.navHairline
+        color: Theme.line.nav
     }
 
     // The selection, drawn once and moved, rather than one pill per cell
@@ -70,7 +70,7 @@ Item {
         width: root.pillWidth
         height: root.pillHeight
         radius: height / 2
-        color: Theme.color.navPill
+        color: Theme.accent.fill
         y: 6
         x: Math.max(0, Tabs.indexOf(root.currentId)) * root.cellWidth
            + (root.cellWidth - width) / 2
@@ -99,14 +99,14 @@ Item {
                     id: glyph
                     kind: cell.modelData.glyph
                     glyphSize: 21
-                    tint: cell.isCurrent ? Theme.color.navGlyphOn : Theme.color.navGlyph
+                    tint: cell.isCurrent ? Theme.accent.ink : Theme.control.navGlyph
                     anchors.horizontalCenter: parent.horizontalCenter
                     y: 6 + (root.pillHeight - height) / 2
                 }
 
                 Text {
                     text: cell.modelData.label
-                    color: cell.isCurrent ? Theme.color.textPrimary : Theme.color.textMuted
+                    color: cell.isCurrent ? Theme.ink.primary : Theme.ink.muted
                     font.pixelSize: Theme.type.axis
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: glyph.bottom

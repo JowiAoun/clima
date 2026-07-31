@@ -103,7 +103,7 @@ DetailCard {
         Text {
             id: caption
             text: qsTr("Chance of rain")
-            color: Theme.color.textDim
+            color: Theme.ink.dim
             font.pixelSize: Theme.type.axis
             anchors.left: parent.left
             y: viz.ceilY - height / 2
@@ -161,7 +161,7 @@ DetailCard {
                 height: Math.max(2, viz.plotH * barValue / 100) * bar.barGrow
                 y: viz.baseY - height
                 radius: 3
-                color: barIsForecast ? viz.forecastInk : Theme.color.rainDrop
+                color: barIsForecast ? viz.forecastInk : Theme.glyph.rain
             }
         }
 
@@ -172,7 +172,7 @@ DetailCard {
             y: viz.baseY
             width: viz.width
             height: 1
-            color: Theme.color.gridLine
+            color: Theme.line.grid
         }
 
         // Now, as the vertical rule the rest of the prototype uses. The hours
@@ -186,7 +186,7 @@ DetailCard {
             y: viz.ceilY
             width: 1
             height: viz.plotH
-            color: Theme.color.gridLine
+            color: Theme.line.grid
         }
 
         Item {
@@ -199,7 +199,7 @@ DetailCard {
             Text {
                 id: valueText
                 text: root.d.reading
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.reading
                 font.bold: true
             }
@@ -208,7 +208,7 @@ DetailCard {
             Text {
                 id: windowText
                 text: root.d.window
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.label
                 anchors.left: valueText.right
                 anchors.leftMargin: 10

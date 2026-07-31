@@ -23,11 +23,11 @@ Item {
         gradient: Gradient {
             GradientStop {
                 position: 0.0
-                color: root.night ? Theme.color.badgeNightTop : Theme.color.badgeDayTop
+                color: root.night ? Theme.badge.nightTop : Theme.badge.dayTop
             }
             GradientStop {
                 position: 1.0
-                color: root.night ? Theme.color.badgeNightBottom : Theme.color.badgeDayBottom
+                color: root.night ? Theme.badge.nightBottom : Theme.badge.dayBottom
             }
         }
     }

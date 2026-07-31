@@ -179,7 +179,7 @@ DetailCard {
             width: 14; height: 14; radius: 7
             color: root.lineEnd
             border.width: 2.5
-            border.color: Theme.color.textPrimary
+            border.color: Theme.ink.primary
             x: viz.nowX - width / 2
             y: viz.nowY - height / 2
 
@@ -195,7 +195,7 @@ DetailCard {
         Text {
             id: valueText
             text: root.d.value
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.reading
             font.bold: true
             // Bottom-left, where the other eleven put their reading.
@@ -209,7 +209,7 @@ DetailCard {
         // twelve cards, and "now" is what the ringed mark on the curve says.
         Text {
             text: root.d.unit
-            color: Theme.color.textMuted
+            color: Theme.ink.muted
             font.pixelSize: Theme.type.label
             anchors.left: valueText.right
             anchors.leftMargin: 6

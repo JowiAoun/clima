@@ -130,13 +130,17 @@ Rectangle {
                             centerRadius: beacon.width / 2
                             focalX: centerX
                             focalY: centerY
-                            // Never fully white. These sit behind cards, and a
-                            // star that reaches full opacity behind a 0.07
-                            // wash reads as a rendering fault in the card.
-                            GradientStop { position: 0.00; color: "#d9ffffff" }
-                            GradientStop { position: 0.18; color: "#66ffffff" }
-                            GradientStop { position: 0.50; color: "#1affffff" }
-                            GradientStop { position: 1.00; color: "#00ffffff" }
+                            // Positions here, colours in theme.js, for the same
+                            // reason the sky's five stops are split that way:
+                            // QML cannot generate GradientStop elements from a
+                            // Repeater, so the positions have to be written out
+                            // in the file that draws them — but a colour is a
+                            // token wherever it is used. theme.js says why these
+                            // never reach full white.
+                            GradientStop { position: 0.00; color: Theme.star.glow[0] }
+                            GradientStop { position: 0.18; color: Theme.star.glow[1] }
+                            GradientStop { position: 0.50; color: Theme.star.glow[2] }
+                            GradientStop { position: 1.00; color: Theme.star.glow[3] }
                         }
                         PathAngleArc {
                             centerX: beacon.width / 2

@@ -185,7 +185,7 @@ Item {
                     // per column and reads as misalignment.
                     Text {
                         text: Units.formatDisplay(Units.Temperature, Data.temperature[column.hourIndex])
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.status
                         font.bold: column.isNow
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -211,7 +211,7 @@ Item {
 
                         Text {
                             text: Data.precipProb[column.hourIndex] + "%"
-                            color: Theme.color.textMuted
+                            color: Theme.ink.muted
                             font.pixelSize: Theme.type.axis
                             anchors.verticalCenter: parent.verticalCenter
                         }
@@ -219,7 +219,7 @@ Item {
 
                     Text {
                         text: Data.hourLabel(column.hourIndex)
-                        color: column.isNow ? Theme.color.textPrimary : Theme.color.textMuted
+                        color: column.isNow ? Theme.ink.primary : Theme.ink.muted
                         font.pixelSize: Theme.type.label
                         font.bold: column.isNow
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -241,6 +241,6 @@ Item {
         anchors.right: parent.right
         y: root.tempRowHeight + root.bandHeight
         height: 1
-        color: Theme.color.gridLineWeak
+        color: Theme.line.gridWeak
     }
 }

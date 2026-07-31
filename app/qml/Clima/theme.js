@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Design tokens for the hourly overview prototype.
-// These become the real Clima design system later; keep them in one place so the
-// whole chart can be re-skinned without touching layout code.
+// Design tokens for Clima, named by the role they play rather than by what they
+// happen to look like today. Keep them in one place so the whole app can be
+// re-skinned without touching layout code.
 //
 // **Nothing in the tree reads this file directly any more — read Theme.qml.**
 // This is the table; Theme.qml is the singleton that republishes it as QML
@@ -15,6 +15,39 @@
 // too, it reads `ramp` from here, and a `.pragma library` cannot import a QML
 // singleton. Every value and every argument for a value belongs here; the
 // declarations that make them observable belong there.
+//
+// ---- why the colour groups are roles and not one flat list -------------------
+//
+// There used to be a single `color` group of 67 tokens, and its names described
+// *appearance*: `surfaceRaised` was literally "#1affffff", a white wash. 24 of
+// the 67 were `#XXffffff` and three more were `#XX141d33` dark tints, so the
+// "white over dark" assumption was baked into the value and the name agreed with
+// it. A light theme cannot be produced by re-valuing a table like that, because
+// half of it is not a decision — it is a description of the decision that was
+// already made somewhere else.
+//
+// §10.1's constraint is the one to design against: *the surface ladder decides
+// the background, not the other way round*. So the groups below name jobs —
+// what is a surface, what is ink, what is a line, what is a control, what is
+// drawn over content — and the values are answers to those questions. Swapping
+// the answers is now a change to this file and nothing else.
+//
+// The groups, and what belongs in each:
+//
+//   page       the ground everything else is composited on
+//   surface    the §10.1 wash ladder, plus the opaque exceptions §10.12 allows
+//   ink        text
+//   line       anything one pixel wide that separates or measures
+//   accent     the one saturated colour, and the only ink legible on it
+//   control    interactive chrome: toggles, pagers, nav glyphs
+//   overlay    drawn *over* content it must not let through
+//   state      a verdict — a trend direction, a good/caution/poor band
+//   glyph      the paints a weather glyph is drawn in
+//   badge      the day/night disc behind a glyph
+//   scaffold   deliberately off-palette: something not built yet
+//
+// `metric`, `type`, `motion` and `scale` are theme-invariant — a 14 px radius is
+// 14 px in any palette — so they are not roles and did not move.
 .pragma library
 
 // Surfaces are translucent, not painted.
@@ -40,132 +73,234 @@ var surfaceAlpha = {
     raised: "#1a"    // 0.10
 };
 
-var color = {
-    // Page gradient stops. Declared here, applied in Main.qml — QML cannot
-    // generate GradientStop elements from a Repeater, so they are written out.
-    pageStop0:     "#203580",   // 0.00
-    pageStop1:     "#443e73",   // 0.06
-    pageStop2:     "#443a66",   // 0.30
-    pageStop3:     "#27284f",   // 0.60
-    pageStop4:     "#171e44",   // 1.00
-    pageBg:        "#27284f",   // flat fallback, ~the gradient's midpoint
+// ---- page --------------------------------------------------------------------
+// The ground. The gradient itself is `sky`, five stops keyed by phase; this is
+// the flat fallback for the one case that cannot take a gradient.
+//
+// There used to be `pageStop0…4` here as well, a second copy of `sky.dusk.stops`
+// left over from when dusk was the only sky there was. Nothing read them — the
+// desktop page and the phone both go through `PageBackdrop`, which reads
+// `sky[phase].stops` — so they were deleted rather than renamed. A palette with
+// two spellings of the same five colours is a palette that will eventually
+// disagree with itself.
+var page = {
+    bg: "#27284f"    // ~the dusk gradient's midpoint
+};
 
-    surfaceRecede: "#0dffffff",
-    surfaceBase:   "#12ffffff",
-    surfaceRaised: "#1affffff",
+// ---- surface -----------------------------------------------------------------
+// The §10.1 ladder, and the three surfaces that are allowed not to be on it.
+//
+// `recede`, `base` and `raised` are the whole ladder. A card is `base`; an
+// unselected day is `recede`; hover, selection and emphasis are `raised`. There
+// were five more names for exactly these three values — `cardBg`, `dayCardBg`,
+// `stripBg`, `stripPast`, `pillHover`, `switchActive` — each naming the *place*
+// a wash was used rather than the level it sits at, which is how a ladder with
+// three rungs grows nine names and then drifts apart one rung at a time.
+//
+// `nav` and `menu` are §10.12's exception: chrome that floats over scrolling
+// content may be opaque, because a wash there lets the chart the reader is
+// scrolling slide visibly through the labels. `rowNow` is the accent showing
+// through a surface, which is what marks the current hour in a list.
+var surface = {
+    recede: "#0dffffff",
+    base:   "#12ffffff",
+    raised: "#1affffff",
 
-    cardBg:        "#12ffffff",  // the card surface
-    cardBorder:    "#1affffff",
-    panelBg:       "transparent", // the chart sits directly on the card: a
-                                  // second wash inside the first would read as
-                                  // 0.135, a panel darker than anything in the
-                                  // reference
-    dayCardBg:     "#0dffffff",   // unselected day cards recede; the selected
-                                  // one takes cardBg and merges with the panel
+    // The chart sits directly on the card: a second wash inside the first
+    // would composite to 0.135, a panel darker than anything in the reference.
+    panel:  "transparent",
 
-    // Ink for text sitting *on* the accent, which is a light yellow. This was
-    // previously cardBg — fine while cardBg was an opaque dark navy, invisible
-    // the moment it became a white wash.
-    onAccent:      "#141d33",
+    rowAlt: "#0affffff",
+    rowNow: "#1fffd24a",
 
-    textPrimary:   "#ffffff",
-    textMuted:     "#98a4be",
-    textDim:       "#7a86a2",
+    nav:    "#f2101832",
+    menu:   "#f71c2450"   // more opaque than the nav: the nav sits at a screen
+                          // edge with a hairline holding it down, a menu floats
+                          // in the middle of the page with only its own weight
+};
 
-    gridLine:      "#1cffffff",
-    gridLineWeak:  "#10ffffff",
+// ---- ink ---------------------------------------------------------------------
+// Text, in three weights of presence. Ink for anything sitting *on* the accent
+// is `accent.ink` and lives with the fill it has to be legible on — see there
+// for why the two are one pair rather than two tokens in two groups.
+var ink = {
+    primary: "#ffffff",
+    muted:   "#98a4be",
+    dim:     "#7a86a2"
+};
 
-    pastVeil:      "#14ffffff",
-    pastHatch:     "#1effffff",
-    nowLine:       "#59ffffff",
-
-    // A forecast stretch is the same line as the observed one, drawn with less
-    // certainty. Same value as nowLine and deliberately a separate name: they
-    // mean different things and will not always want the same alpha.
-    forecastDim:   "#59ffffff",
+// ---- line --------------------------------------------------------------------
+// Everything a pixel wide. Three jobs, and they are not interchangeable:
+// gridlines *measure*, dividers and hairlines *separate*, and `track` is the
+// unfilled remainder of a gauge — which is a reading, not a decoration (§10.7).
+//
+// These are the same white washes the surfaces are, at today's palette, and they
+// are deliberately not the same tokens. A light theme darkens a line and keeps a
+// surface a wash; sharing a value now would mean unpicking them then.
+var line = {
+    grid:     "#1cffffff",
+    gridWeak: "#10ffffff",
 
     // The unfilled part of a gauge — a dial track, a bar's empty remainder. It
     // has to be present enough that the filled part reads as a fraction of
-    // something, which gridLine at 0.11 is not.
-    trackLine:     "#2effffff",
+    // something, which `grid` at 0.11 is not.
+    track:    "#2effffff",
 
-    listRowAlt:    "#0affffff",
-    nowRowBg:      "#1fffd24a",
+    // The rule marking the present hour, and the same rule the crosshair
+    // follows: both answer "which hour is this", and a chart with two different
+    // whites for that is a chart with a bug in it.
+    now:      "#59ffffff",
 
-    stripBg:       "#1affffff",
-    stripPast:     "#0dffffff",
-    stripDivider:  "#1affffff",
-    droplet:       "#93c6f2",
+    // A forecast stretch is the same line as the observed one, drawn with less
+    // certainty. Same value as `now` and deliberately a separate name: they
+    // mean different things and will not always want the same alpha.
+    forecast: "#59ffffff",
 
-    accent:        "#ffd02c",   // measured off the reference's selected pill
-    toggleTrack:   "#26ffffff",
-    toggleKnob:    "#c6cede",
+    // The dashed comparison line a metric may draw over its own series — gust
+    // over wind, apparent over actual. The series proper is a ramp rather than
+    // a token, which is why only its companion is here.
+    series:   "#8cffffff",
 
-    pillHover:          "#1affffff",
-    switchActive:       "#1affffff",
-    switchBorder:       "#33ffffff",
-    daySelectedBorder:  "#33ffffff",
+    card:     "#1affffff",
+    divider:  "#1affffff",
+    nav:      "#1affffff",
+    menu:     "#26ffffff",
 
-    // Pager buttons float over the chart, so they stay more opaque than a
-    // surface — but still tinted rather than painted, or they punch a flat
-    // hole in the gradient.
-    pagerBg:       "#99141d33",
-    pagerBgHover:  "#b3141d33",
-    pagerGlyph:    "#e8edf7",
+    // The outline that says a control is live: a selected tab, a focused field,
+    // the home pill, a device frame in the gallery. §10.1 bans borders at a
+    // junction; this is not a junction, it is a state.
+    control:  "#33ffffff"
+};
 
-    trendUp:       "#ff9d5c",
-    trendDown:     "#7fb6e8",
-    trendSteady:   "#c6cede",
+// ---- accent ------------------------------------------------------------------
+// The one saturated colour in the palette, and the only ink that is legible on
+// it. They are one group because they are one decision: `ink` was once set to
+// the card background, which was fine while a card was opaque navy and invisible
+// the moment it became a white wash. A fill that can change without its ink
+// changing with it is that bug waiting to be reintroduced.
+//
+// Naming it `ink` here rather than `onAccent` in the ink group also removes a
+// QML trap that cost a day: a member called `onAccent` on an object that also
+// has `accent` is parsed as a signal handler, binds silently to nothing, and
+// paints black. Theme.qml carried a `Binding` by name to work around it. Roles
+// made the workaround unnecessary rather than tidier.
+var accent = {
+    fill: "#ffd02c",   // measured off the reference's selected pill
+    ink:  "#141d33"
+};
 
-    sunGlyphWarm:  "#ffd97a",
-    sunGlyphCool:  "#f2952f",
-    moonGlyph:     "#f2e3b8",
-    cloudTop:      "#ffffff",
-    cloudBottom:   "#c1cddf",
-    rainDrop:      "#7fb6e8",
+// ---- control -----------------------------------------------------------------
+// Interactive chrome that is neither a surface nor a line: the parts of a
+// control that carry its own colour.
+//
+// The pager buttons float over the chart, so they stay more opaque than a
+// surface — but still tinted rather than painted, or they punch a flat hole in
+// the gradient. `navGlyph` is an inactive tab icon; it is the same value as
+// `ink.muted` today and stays its own token, because a tab bar and a paragraph
+// are not obliged to dim by the same amount in every palette.
+var control = {
+    toggleTrack:    "#26ffffff",
+    toggleKnob:     "#c6cede",
 
-    // Clouds are drawn white, which vanishes on the pale day badge — this variant
-    // keeps them readable there without changing them everywhere else.
+    pagerFill:      "#99141d33",
+    pagerFillHover: "#b3141d33",
+    pagerGlyph:     "#e8edf7",
+
+    navGlyph:       "#98a4be"
+};
+
+// ---- overlay -----------------------------------------------------------------
+// Drawn *over* content, and opaque enough to survive whatever is under it. Each
+// of these exists because something legible had to sit on something arbitrary.
+var overlay = {
+    // The past, on the chart: veiled, then hatched, so "there is no forecast
+    // here" reads as deliberate rather than as a rendering fault.
+    past:      "#14ffffff",
+    pastHatch: "#1effffff",
+
+    // HatchPattern's own default, for an instance nobody has told what it is
+    // hatching — which today is the gallery specimen and nothing else. A caller
+    // that means the chart's past passes `pastHatch`.
+    hatch:     "#16ffffff",
+
+    // The scrim behind a small label on the plot: a sun-event marker, a
+    // precipitation caption. A caption sits over whatever the series happens to
+    // be doing, and grey text over an orange AQI bar is not text.
+    caption:   "#99111a2b",
+
+    // The crosshair's value panel. Heavier than `caption` because it carries a
+    // reading rather than a word, and a reading has to be exact at a glance.
+    readout:   "#e6141d33",
+
+    // A modal dim over the whole window — the place picker. Darker and cooler
+    // than anything else here on purpose: it is the one overlay whose job is to
+    // put the page *away* rather than to keep something on it readable.
+    scrim:     "#99060b18"
+};
+
+// ---- state -------------------------------------------------------------------
+// Colour as a verdict rather than as a value (§10.5).
+//
+// Trend colours are fixed: up is warm, down is cool, steady is neutral. A rising
+// temperature and a rising pressure use the same up colour; the card's words say
+// whether that is good news.
+//
+// `good`, `caution` and `poor` are pollen bands and the activity list's dots.
+// Three, because a fourth level is a scale and a scale wants a ramp.
+var state = {
+    trendUp:     "#ff9d5c",
+    trendDown:   "#7fb6e8",
+    trendSteady: "#c6cede",
+
+    good:        "#4ec98a",
+    caution:     "#e8c93f",
+    poor:        "#f0654f"
+};
+
+// ---- glyph -------------------------------------------------------------------
+// The paints a weather glyph is drawn in. Not a per-visualisation palette: these
+// are shared by the hero, the hourly chart, the day strip and four mobile cards,
+// which is exactly the case §10's "a colour that belongs to one visualisation"
+// exception does *not* cover.
+var glyph = {
+    sunWarm:   "#ffd97a",
+    sunCool:   "#f2952f",
+
+    moon:      "#f2e3b8",
+    // The unlit limb, on the small glyph. DetailMoonCard draws its own, darker,
+    // because at 14 px the shadowed side has to be well below the surface or the
+    // phase stops being visible at all.
+    moonShade: "#38425e",
+
+    cloudTop:    "#ffffff",
+    cloudBottom: "#c1cddf",
+    // Clouds are drawn white, which vanishes on the pale day badge — these keep
+    // them readable there without changing them everywhere else.
     cloudTopOnLight:    "#fbfdff",
     cloudBottomOnLight: "#9db0cc",
 
-    badgeDayTop:     "#fdfefe",
-    badgeDayBottom:  "#dde5f0",
-    badgeNightTop:   "#6d9ae8",
-    badgeNightBottom:"#3f63bd",
+    rain:      "#7fb6e8",
+    droplet:   "#93c6f2"
+};
 
-    // ---- mobile shell ----------------------------------------------------
-    // The bottom nav floats over a page that scrolls underneath it, so it is
-    // the same exception the pager buttons are: tinted and mostly opaque
-    // rather than a 0.07 wash. A wash here would let the chart the reader is
-    // scrolling slide visibly through the labels, which is the one place on a
-    // phone where "every surface is translucent" costs more than it buys.
-    navBg:         "#f2101832",
-    navHairline:   "#1affffff",
-    navGlyph:      "#98a4be",
-    navGlyphOn:    "#141d33",
-    navPill:       "#ffd02c",
+// ---- badge -------------------------------------------------------------------
+// The disc a day's glyph sits on in the ten-day strip: pale for a day, deep blue
+// for a night, so the strip reads as a row of days before it reads as weather.
+var badge = {
+    dayTop:      "#fdfefe",
+    dayBottom:   "#dde5f0",
+    nightTop:    "#6d9ae8",
+    nightBottom: "#3f63bd"
+};
 
-    // A menu is the same exception for the same reason: it is drawn over
-    // content it must not let through. More opaque than the nav, because the
-    // nav sits at a screen edge with a hairline holding it down and a menu
-    // floats in the middle of the page with nothing but its own weight.
-    menuBg:        "#f71c2450",
-    menuBorder:    "#26ffffff",
-
-    // A status that is a verdict rather than a number: pollen bands, the
-    // activity list's good/caution/poor dots. Three, because a fourth level is
-    // a scale and a scale wants a ramp — see §10.5.
-    statusGood:    "#4ec98a",
-    statusCaution: "#e8c93f",
-    statusPoor:    "#f0654f",
-
-    // Something the prototype has not built yet, drawn so it cannot be
-    // mistaken for something it has. Deliberately off-palette: the map
-    // placeholder must read as scaffolding at a glance, and a placeholder in
-    // the house colours reads as a finished screen with no content.
-    placeholderInk:    "#8f9dbb",
-    placeholderStroke: "#4d6a8fd8"
+// ---- scaffold ----------------------------------------------------------------
+// Something the app has not built yet, drawn so it cannot be mistaken for
+// something it has. Deliberately off-palette: the map placeholder must read as
+// scaffolding at a glance, and a placeholder in the house colours reads as a
+// finished screen with no content.
+var scaffold = {
+    ink:    "#8f9dbb",
+    stroke: "#4d6a8fd8"
 };
 
 // Precipitation effect. Two layers: a `wash` under the chart marking the hours
@@ -213,9 +348,6 @@ var precip = {
     flash:  "#e8f0ff"
 };
 
-// Radii are deliberately generous. The reference reads "soft" because almost
-// nothing in it meets at a hard edge, and the tab/panel junction is filleted
-// rather than squared — see TabFillet.qml.
 // The sky, by time of day.
 //
 // Five stops each, the same five positions PageBackdrop declares — QML cannot
@@ -230,9 +362,9 @@ var precip = {
 // the difference between phases is hue and clarity, not lightness, and it
 // reads as time of day because the four are seen against each other.
 //
-// `dusk` is the palette this prototype has always had, and `pageStop0…4`
-// remain aliases of it. The desktop page is dusk permanently, so nothing about
-// it changes; the phone is the screen that follows the clock.
+// `dusk` is the palette this prototype has always had. The desktop page is dusk
+// permanently, so nothing about it changes; the phone is the screen that follows
+// the clock.
 var sky = {
     night: { stops: ["#0c1738", "#141f4a", "#1a2350", "#131a3e", "#0a0f2c"], stars: 1.00 },
     dawn:  { stops: ["#132352", "#33386e", "#5a4470", "#3a3560", "#1b1f45"], stars: 0.45 },
@@ -249,7 +381,19 @@ var star = {
     // 0.13, and it was 0.24 first. At that weight the Plough drew a visible
     // line straight through "Expect sunny skies" — the sky is the one thing on
     // the screen that has to lose every contest it enters.
-    line: "#22c8d8ff"
+    line: "#22c8d8ff",
+
+    // The halo on the handful of brightest stars, as four stops of a radial
+    // gradient. PageBackdrop writes the *positions* out, for the same reason
+    // the sky above does; only the colours are here.
+    //
+    // Never fully white. These sit behind cards, and a star that reaches full
+    // opacity behind a 0.07 wash reads as a rendering fault in the card.
+    //
+    // Dark-theme values, and the only tokens in this file that a light theme
+    // may reasonably answer with nothing at all: there are no stars in a
+    // daylight sky, and `sky.day.stars` is already 0.
+    glow: ["#d9ffffff", "#66ffffff", "#1affffff", "#00ffffff"]
 };
 
 var metric = {

@@ -17,7 +17,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.controlRadius
-        color: Theme.color.stripBg
+        color: Theme.surface.raised
     }
 
     Repeater {
@@ -38,7 +38,7 @@ Item {
                 width: 1
                 height: parent.height * 0.5
                 anchors.verticalCenter: parent.verticalCenter
-                color: Theme.color.stripDivider
+                color: Theme.line.divider
             }
 
             Row {
@@ -53,7 +53,7 @@ Item {
 
                 Text {
                     text: modelData.prob + "%"
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: 11
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -70,18 +70,18 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: Theme.metric.controlRadius
-            color: Theme.color.stripPast
+            color: Theme.surface.recede
         }
         Rectangle {                       // square off the right edge again
             anchors.right: parent.right
             width: Math.min(Theme.metric.controlRadius, parent.width)
             height: parent.height
-            color: Theme.color.stripPast
+            color: Theme.surface.recede
         }
         HatchPattern {
             anchors.fill: parent
             spacing: 7
-            lineColor: Theme.color.pastHatch
+            lineColor: Theme.overlay.pastHatch
         }
     }
 }

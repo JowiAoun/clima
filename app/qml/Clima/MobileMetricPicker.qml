@@ -43,10 +43,10 @@ Item {
         width: label.width + chevron.width + 26
         height: 34
         radius: Theme.metric.controlRadius
-        color: root.open || hover.hovered ? Theme.color.surfaceRaised
-                                          : Theme.color.surfaceBase
+        color: root.open || hover.hovered ? Theme.surface.raised
+                                          : Theme.surface.base
         border.width: 1
-        border.color: root.open ? Theme.color.accent : Theme.color.switchBorder
+        border.color: root.open ? Theme.accent.fill : Theme.line.control
 
         Behavior on color {
             ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
@@ -58,7 +58,7 @@ Item {
         Text {
             id: label
             text: root.metric.label
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.status
             x: 11
             anchors.verticalCenter: parent.verticalCenter
@@ -70,7 +70,7 @@ Item {
             // this one discloses something the app actually has.
             direction: root.open ? "up" : "down"
             glyphSize: 14
-            tint: Theme.color.textMuted
+            tint: Theme.ink.muted
             anchors.left: label.right
             anchors.leftMargin: 5
             anchors.verticalCenter: parent.verticalCenter
@@ -89,9 +89,9 @@ Item {
         width: 190
         height: menuColumn.height + 10
         radius: Theme.metric.panelRadius
-        color: Theme.color.menuBg
+        color: Theme.surface.menu
         border.width: 1
-        border.color: Theme.color.menuBorder
+        border.color: Theme.line.menu
 
         anchors.right: button.right
         anchors.top: button.bottom
@@ -124,7 +124,7 @@ Item {
 
                     width: menuColumn.width
                     height: 38
-                    color: optionHover.hovered ? Theme.color.surfaceRaised : "transparent"
+                    color: optionHover.hovered ? Theme.surface.raised : "transparent"
 
                     Behavior on color {
                         ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
@@ -132,7 +132,7 @@ Item {
 
                     Text {
                         text: option.modelData.label
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.status
                         font.bold: option.isCurrent
                         x: 14
@@ -146,7 +146,7 @@ Item {
                     Text {
                         visible: option.isCurrent
                         text: "✓"
-                        color: Theme.color.accent
+                        color: Theme.accent.fill
                         font.pixelSize: Theme.type.status
                         font.bold: true
                         anchors.right: parent.right

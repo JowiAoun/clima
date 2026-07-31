@@ -58,7 +58,7 @@ Item {
                     anchors.fill: parent
                     anchors.margins: 2
                     radius: Theme.metric.controlRadius
-                    color: cell.isCurrent ? Theme.color.surfaceRaised : "transparent"
+                    color: cell.isCurrent ? Theme.surface.raised : "transparent"
 
                     Behavior on color {
                         ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
@@ -74,14 +74,14 @@ Item {
                     // under it is not optional.
                     Text {
                         text: cell.modelData.weekday.charAt(0)
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.axis
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
 
                     Text {
                         text: String(cell.modelData.date)
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.status
                         font.bold: cell.isCurrent
                         anchors.horizontalCenter: parent.horizontalCenter

@@ -115,7 +115,7 @@ DetailCard {
                 // The forecast stretch, dimmed: same line, less certainty.
                 ShapePath {
                     fillColor: "transparent"
-                    strokeColor: Theme.color.forecastDim
+                    strokeColor: Theme.line.forecast
                     strokeWidth: 3
                     capStyle: ShapePath.RoundCap
                     PathSvg { path: ChartMath.smooth(viz.pts.slice(Detail.nowIndex), "M") }
@@ -132,7 +132,7 @@ DetailCard {
             width: 14; height: 14; radius: 7
             color: "#ff5c4a"
             border.width: 2.5
-            border.color: Theme.color.textPrimary
+            border.color: Theme.ink.primary
             x: viz.nowX - width / 2
             y: viz.nowY - height / 2
 
@@ -147,7 +147,7 @@ DetailCard {
 
         Text {
             text: root.d.reading
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.reading
             font.bold: true
             // Bottom-left, which is where the other eleven put their reading.

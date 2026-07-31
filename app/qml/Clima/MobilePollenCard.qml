@@ -34,9 +34,9 @@ Item {
     // One place that turns a tone into a colour, so the headline word, the
     // rings and the activity list below cannot end up with three greens.
     function toneColor(tone) {
-        return tone === "poor" ? Theme.color.statusPoor
-             : tone === "caution" ? Theme.color.statusCaution
-                                  : Theme.color.statusGood
+        return tone === "poor" ? Theme.state.poor
+             : tone === "caution" ? Theme.state.caution
+                                  : Theme.state.good
     }
 
     implicitHeight: rings.y + rings.height
@@ -53,7 +53,7 @@ Item {
     Text {
         id: main
         text: qsTr("Main allergen: %1").arg(root.d.main)
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.status
         anchors.top: band.bottom
         anchors.topMargin: 8
@@ -62,7 +62,7 @@ Item {
     Text {
         id: blurb
         text: root.d.body
-        color: Theme.color.textMuted
+        color: Theme.ink.muted
         font.pixelSize: Theme.type.body
         wrapMode: Text.WordWrap
         width: parent.width
@@ -76,7 +76,7 @@ Item {
         anchors.topMargin: 16
         width: parent.width
         height: 1
-        color: Theme.color.gridLineWeak
+        color: Theme.line.gridWeak
     }
 
     Row {
@@ -110,7 +110,7 @@ Item {
                         // no track is a fraction with no denominator.
                         ShapePath {
                             fillColor: "transparent"
-                            strokeColor: Theme.color.trackLine
+                            strokeColor: Theme.line.track
                             strokeWidth: 4
                             PathAngleArc {
                                 centerX: 23; centerY: 23
@@ -139,14 +139,14 @@ Item {
 
                 Text {
                     text: source.modelData.name
-                    color: Theme.color.textMuted
+                    color: Theme.ink.muted
                     font.pixelSize: Theme.type.label
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
 
                 Text {
                     text: source.modelData.label
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: Theme.type.label
                     font.bold: true
                     anchors.horizontalCenter: parent.horizontalCenter

@@ -99,7 +99,7 @@ Item {
 
         // ---- optional overlay line (dashed, no fill) ---------------------
         ShapePath {
-            strokeColor: "#8cffffff"
+            strokeColor: Theme.line.series
             strokeWidth: root.drawnOverlay.length > 1 ? 1.4 : -1
             strokeStyle: ShapePath.DashLine
             dashPattern: [4, 3]

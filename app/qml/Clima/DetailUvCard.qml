@@ -173,7 +173,7 @@ DetailCard {
 
             ShapePath {
                 fillColor: "transparent"
-                strokeColor: Theme.color.trackLine
+                strokeColor: Theme.line.track
                 strokeWidth: viz.ringWidth
                 capStyle: ShapePath.RoundCap
                 PathAngleArc {
@@ -199,14 +199,14 @@ DetailCard {
             radius: width / 2
             color: viz.markColor
             border.width: 2.5
-            border.color: Theme.color.textPrimary
+            border.color: Theme.ink.primary
             x: viz.dialX(viz.markAngle, viz.radius) - width / 2
             y: viz.dialY(viz.markAngle, viz.radius) - height / 2
         }
 
         Text {
             text: root.d.value
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.reading
             font.bold: true
             x: viz.cx - width / 2

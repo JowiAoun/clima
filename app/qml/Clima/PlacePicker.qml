@@ -74,7 +74,7 @@ Item {
     // ---- the scrim ---------------------------------------------------------
     Rectangle {
         anchors.fill: parent
-        color: "#99060b18"
+        color: Theme.overlay.scrim
         TapHandler { onTapped: root.dismissed() }
     }
 
@@ -95,9 +95,9 @@ Item {
         // than as a panel — the place names come out interleaved with the
         // temperature behind them. A sheet is the one thing that has to hide
         // what it covers.
-        color: Theme.color.pageBg
+        color: Theme.page.bg
         border.width: 1
-        border.color: Theme.color.cardBorder
+        border.color: Theme.line.card
 
         // The panel swallows taps so that hitting it does not dismiss through
         // the scrim underneath.
@@ -115,9 +115,9 @@ Item {
                 width: parent.width
                 height: 38
                 radius: Theme.metric.controlRadius
-                color: Theme.color.surfaceRaised
+                color: Theme.surface.raised
                 border.width: 1
-                border.color: field.activeFocus ? Theme.color.switchBorder : Theme.color.gridLine
+                border.color: field.activeFocus ? Theme.line.control : Theme.line.grid
 
                 Behavior on border.color {
                     ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
@@ -129,7 +129,7 @@ Item {
                     anchors.leftMargin: 12
                     anchors.rightMargin: 12
                     verticalAlignment: Text.AlignVCenter
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: Theme.type.status
                     selectByMouse: true
                     clip: true
@@ -144,7 +144,7 @@ Item {
                     Text {
                         visible: field.text === ""
                         text: qsTr("Search for a town or city")
-                        color: Theme.color.textDim
+                        color: Theme.ink.dim
                         font.pixelSize: Theme.type.status
                         anchors.verticalCenter: parent.verticalCenter
                     }
@@ -176,7 +176,7 @@ Item {
                             anchors.fill: parent
                             anchors.margins: -6
                             radius: Theme.metric.controlRadius
-                            color: resultHover.hovered ? Theme.color.surfaceRaised : "transparent"
+                            color: resultHover.hovered ? Theme.surface.raised : "transparent"
                             Behavior on color {
                                 ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                             }
@@ -187,12 +187,12 @@ Item {
                             spacing: 2
                             Text {
                                 text: result.label
-                                color: Theme.color.textPrimary
+                                color: Theme.ink.primary
                                 font.pixelSize: Theme.type.status
                             }
                             Text {
                                 text: result.region
-                                color: Theme.color.textMuted
+                                color: Theme.ink.muted
                                 font.pixelSize: Theme.type.label
                             }
                         }
@@ -216,7 +216,7 @@ Item {
                 visible: field.text.length >= 2 && Engine.search.count === 0
                          && !Engine.search.searching
                 text: qsTr("No places match “%1”.").arg(field.text)
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.body
                 wrapMode: Text.WordWrap
             }
@@ -224,7 +224,7 @@ Item {
             Rectangle {
                 width: parent.width
                 height: 1
-                color: Theme.color.gridLineWeak
+                color: Theme.line.gridWeak
                 visible: Engine.places.count > 0
             }
 
@@ -250,7 +250,7 @@ Item {
                             anchors.fill: parent
                             anchors.margins: -6
                             radius: Theme.metric.controlRadius
-                            color: savedHover.hovered ? Theme.color.surfaceRaised : "transparent"
+                            color: savedHover.hovered ? Theme.surface.raised : "transparent"
                             Behavior on color {
                                 ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                             }
@@ -262,12 +262,12 @@ Item {
                             Text {
                                 text: saved.label
                                 color: saved.index === Engine.places.currentIndex
-                                           ? Theme.color.accent : Theme.color.textPrimary
+                                           ? Theme.accent.fill : Theme.ink.primary
                                 font.pixelSize: Theme.type.status
                             }
                             Text {
                                 text: saved.region
-                                color: Theme.color.textMuted
+                                color: Theme.ink.muted
                                 font.pixelSize: Theme.type.label
                             }
                         }
@@ -287,8 +287,8 @@ Item {
                                 height: 14
                                 preferredRendererType: Shape.CurveRenderer
                                 ShapePath {
-                                    fillColor: saved.isHome ? Theme.color.textPrimary
-                                                            : Theme.color.gridLine
+                                    fillColor: saved.isHome ? Theme.ink.primary
+                                                            : Theme.line.grid
                                     Behavior on fillColor {
                                         ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                                     }
@@ -319,7 +319,7 @@ Item {
             Rectangle {
                 width: parent.width
                 height: 1
-                color: Theme.color.gridLineWeak
+                color: Theme.line.gridWeak
             }
 
             // ---- use my location -------------------------------------------
@@ -334,8 +334,8 @@ Item {
 
                 Text {
                     text: qsTr("Use my location")
-                    color: Engine.locationAvailable() ? Theme.color.textPrimary
-                                                      : Theme.color.textDim
+                    color: Engine.locationAvailable() ? Theme.ink.primary
+                                                      : Theme.ink.dim
                     font.pixelSize: Theme.type.status
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -359,7 +359,7 @@ Item {
                 visible: text !== ""
                 text: Engine.locationAvailable()
                           ? "" : qsTr("This system has no location service Clima can use.")
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.label
                 wrapMode: Text.WordWrap
             }

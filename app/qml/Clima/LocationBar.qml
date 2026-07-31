@@ -36,7 +36,7 @@ Item {
         Text {
             id: placeName
             text: root.label
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.sectionTitle
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -70,8 +70,8 @@ Item {
                 }
                 preferredRendererType: Shape.CurveRenderer
                 ShapePath {
-                    strokeColor: chevronHover.hovered ? Theme.color.textPrimary
-                                                      : Theme.color.textMuted
+                    strokeColor: chevronHover.hovered ? Theme.ink.primary
+                                                      : Theme.ink.muted
                     // Hover is colour only (§10.6), and the stroke was the one
                     // hover on this bar that snapped while the ring beside it
                     // faded.
@@ -101,9 +101,9 @@ Item {
             Rectangle {
                 anchors.fill: parent
                 radius: width / 2
-                color: homeHover.hovered ? Theme.color.surfaceRaised : "transparent"
+                color: homeHover.hovered ? Theme.surface.raised : "transparent"
                 border.width: 1
-                border.color: root.isHome ? Theme.color.switchBorder : Theme.color.gridLine
+                border.color: root.isHome ? Theme.line.control : Theme.line.grid
                 Behavior on color {
                     ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                 }
@@ -121,7 +121,7 @@ Item {
                 height: 14
                 preferredRendererType: Shape.CurveRenderer
                 ShapePath {
-                    fillColor: root.isHome ? Theme.color.textPrimary : Theme.color.textMuted
+                    fillColor: root.isHome ? Theme.ink.primary : Theme.ink.muted
                     Behavior on fillColor {
                         ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                     }

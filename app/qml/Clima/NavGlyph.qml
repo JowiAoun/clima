@@ -24,7 +24,7 @@ Item {
 
     property string kind: "today"   // today | hourly | monthly | maps | me
     property real glyphSize: 22
-    property color tint: Theme.color.navGlyph
+    property color tint: Theme.control.navGlyph
 
     implicitWidth: glyphSize
     implicitHeight: glyphSize

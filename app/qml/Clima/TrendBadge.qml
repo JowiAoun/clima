@@ -40,9 +40,9 @@ Item {
     width: visible ? badgeSize : 0
     height: badgeSize
 
-    readonly property color tint: direction === "up" ? Theme.color.trendUp
-                                : direction === "down" ? Theme.color.trendDown
-                                                       : Theme.color.trendSteady
+    readonly property color tint: direction === "up" ? Theme.state.trendUp
+                                : direction === "down" ? Theme.state.trendDown
+                                                       : Theme.state.trendSteady
 
     Rectangle {
         anchors.fill: parent
@@ -56,7 +56,7 @@ Item {
 
         ShapePath {
             fillColor: "transparent"
-            strokeColor: Theme.color.onAccent
+            strokeColor: Theme.accent.ink
             strokeWidth: 1.6
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin

@@ -10,45 +10,43 @@
 // A `.pragma library` is evaluated once per engine and reading a property out
 // of one produces no change notification. So
 //
-//     color: Theme.color.textPrimary
+//     color: Theme.ink.primary
 //
 // used to be evaluated exactly once — when the binding was created — and never
 // again. Swapping the table at runtime repainted nothing, which is why
 // dark/light was not merely unbuilt but unbuildable, and why every component
 // written against the JS namespace in the meantime would have had to be
 // migrated twice. A QML property has a NOTIFY signal, so the identical line
-// above is now a live binding: when W3 gives this file a second table and a
-// mode to choose between them, all ~60 components repaint and not one of them
-// is edited.
+// above is now a live binding: when a second table and a mode to choose between
+// them arrive, all ~60 components repaint and not one of them is edited.
 //
 // ---- why the groups are objects and not prefixes ---------------------------
 //
-// `color`, `metric`, `type` and the rest are sub-objects rather than flattened
-// names (`colorTextPrimary`) for one reason beyond spelling: their identity
-// never changes. A theme switch will assign new values to the properties
-// *inside* these objects; it will never replace an object. Nothing that holds
-// `Theme.color` — a binding, a cached reference in a Canvas paint handler, a
-// property alias — is ever left pointing at a corpse.
+// `surface`, `ink`, `line`, `metric`, `type` and the rest are sub-objects rather
+// than flattened names (`inkPrimary`) for one reason beyond spelling: their
+// identity never changes. A theme switch will assign new values to the
+// properties *inside* these objects; it will never replace an object. Nothing
+// that holds `Theme.ink` — a binding, a cached reference in a Canvas paint
+// handler, a property alias — is ever left pointing at a corpse.
 //
 // Each group is an *inline component* instantiated once, rather than an
 // anonymous `QtObject { … }`, and that is a tooling decision with real teeth.
 // A property declared `QtObject` tells qmllint and qmlls that the thing on the
 // other side has QObject's members and nothing else — so every one of the six
-// hundred token reads in the tree came back as `Member "textPrimary" not found
-// on type "QObject"`. Six hundred warnings in the lint target and a squiggle
-// under every colour in the editor is not a cost worth paying for two fewer
-// lines here. Naming the type restores the check: a typo in a token name is a
-// lint error again, which is exactly what it was when this was a JS object
-// literal.
+// hundred token reads in the tree came back as `Member "primary" not found on
+// type "QObject"`. Six hundred warnings in the lint target and a squiggle under
+// every colour in the editor is not a cost worth paying for two fewer lines
+// here. Naming the type restores the check: a typo in a token name is a lint
+// error again, which is exactly what it was when this was a JS object literal.
 //
 // ---- groups and tables -----------------------------------------------------
 //
 // Two shapes live here and the difference is what the keys are.
 //
-//   A *group* is keyed by token name: `color`, `metric`, `type`, `motion`,
-//   `scale`, `star`, `surfaceAlpha`. Someone wrote each of those names down on
-//   purpose, and a component reads them one at a time, so each is a property
-//   with its own notification.
+//   A *group* is keyed by token name: the eleven colour roles, plus `metric`,
+//   `type`, `motion`, `scale`, `star`, `surfaceAlpha`. Someone wrote each of
+//   those names down on purpose, and a component reads them one at a time, so
+//   each is a property with its own notification.
 //
 //   A *table* is keyed by a data value: `sky` by a phase, `ramp` by a metric
 //   id, `precip.wash` by a precipitation type. The keys are not tokens — they
@@ -71,14 +69,13 @@
 // the three, and it puts the values and the essays about them in one place —
 // which is where they were.
 //
-// ---- what has deliberately NOT changed -------------------------------------
+// ---- what this file does not decide ----------------------------------------
 //
-// Not one token was renamed, restructured or deleted. `Theme.color.textPrimary`
-// is still `Theme.color.textPrimary`. The semantic pass — `Theme.ink.primary`,
-// dropping the handful of tokens that are duplicates of each other, adding the
-// light values — is a separate commit with its own review, because holding the
-// names still is the only thing that makes this one provable: the screenshots
-// come out byte-identical or the refactor is wrong.
+// The role names, the deletions and the seven absorbed literals are all
+// arguments made in theme.js, next to the values they are about. This file
+// republishes whatever is there. The one thing it adds is `motion.easing`,
+// which cannot live in a plain JS library because it is a QML enum, and the one
+// thing it *asks* rather than states is `type.family` — see below.
 pragma Singleton
 
 import QtQuick
@@ -102,11 +99,25 @@ QtObject {
         })
     }
 
+    // The colour roles, in the order the design system introduces them.
+    //
+    // This is the one list in the project that has to be maintained by hand, and
+    // it is here rather than in the gallery because it is a fact about the
+    // palette rather than about the tool that draws it. The palette page walks
+    // it and then walks `names()` inside each role, so a *token* added to a role
+    // still appears without anyone doing anything; only a whole new role costs a
+    // line. That trade is deliberate — a new role is a design decision worth
+    // one line of bookkeeping, and a new token is not.
+    readonly property var colorRoles: [
+        "page", "surface", "ink", "line", "accent",
+        "control", "overlay", "state", "glyph", "badge", "scaffold"
+    ]
+
     // ---- surfaces ----------------------------------------------------------
     // The alpha ladder, as the leading pair of an #AARRGGBB literal. Nothing
-    // reads these yet — the composed `color.surface*` values below are what the
-    // tree uses — and they stay exported because they are the ladder the
-    // design system quotes, not a leftover.
+    // reads these — the composed `surface.*` values below are what the tree
+    // uses — and they stay exported because they are the ladder the design
+    // system quotes, not a leftover.
     component SurfaceAlphaTokens: QtObject {
         readonly property string recede: Tokens.surfaceAlpha.recede
         readonly property string base:   Tokens.surfaceAlpha.base
@@ -115,136 +126,150 @@ QtObject {
     readonly property SurfaceAlphaTokens surfaceAlpha: SurfaceAlphaTokens { }
 
     // ---- colour ------------------------------------------------------------
-    // Declared `string` rather than `color`, which is not laziness. A `color`
-    // property round-trips through QColor, so `"transparent"` reads back as
-    // `"#00000000"` and `"#ffffff"` as `"#ffffffff"` — and the gallery's palette
-    // page prints these values as text beside each swatch. Assigning a string to
-    // a `color` property at the call site is a conversion QML already does
-    // everywhere, so nothing downstream can tell the difference; the palette
-    // page can.
-    component ColorTokens: QtObject {
-        readonly property string pageStop0:          Tokens.color.pageStop0
-        readonly property string pageStop1:          Tokens.color.pageStop1
-        readonly property string pageStop2:          Tokens.color.pageStop2
-        readonly property string pageStop3:          Tokens.color.pageStop3
-        readonly property string pageStop4:          Tokens.color.pageStop4
-        readonly property string pageBg:             Tokens.color.pageBg
+    // Eleven roles. Every one of them is declared `string` rather than `color`,
+    // which is not laziness. A `color` property round-trips through QColor, so
+    // `"transparent"` reads back as `"#00000000"` and `"#ffffff"` as
+    // `"#ffffffff"` — and the gallery's palette page prints these values as text
+    // beside each swatch. Assigning a string to a `color` property at the call
+    // site is a conversion QML already does everywhere, so nothing downstream
+    // can tell the difference; the palette page can.
 
-        readonly property string surfaceRecede:      Tokens.color.surfaceRecede
-        readonly property string surfaceBase:        Tokens.color.surfaceBase
-        readonly property string surfaceRaised:      Tokens.color.surfaceRaised
-
-        readonly property string cardBg:             Tokens.color.cardBg
-        readonly property string cardBorder:         Tokens.color.cardBorder
-        readonly property string panelBg:            Tokens.color.panelBg
-        readonly property string dayCardBg:          Tokens.color.dayCardBg
-
-        // Declared bare and bound further down, in its position in the table so
-        // the gallery's palette page still lists it where theme.js puts it. See
-        // `onAccentBinding` for why it cannot be written like its neighbours.
-        property string onAccent
-
-        readonly property string textPrimary:        Tokens.color.textPrimary
-        readonly property string textMuted:          Tokens.color.textMuted
-        readonly property string textDim:            Tokens.color.textDim
-
-        readonly property string gridLine:           Tokens.color.gridLine
-        readonly property string gridLineWeak:       Tokens.color.gridLineWeak
-
-        readonly property string pastVeil:           Tokens.color.pastVeil
-        readonly property string pastHatch:          Tokens.color.pastHatch
-        readonly property string nowLine:            Tokens.color.nowLine
-        readonly property string forecastDim:        Tokens.color.forecastDim
-        readonly property string trackLine:          Tokens.color.trackLine
-
-        readonly property string listRowAlt:         Tokens.color.listRowAlt
-        readonly property string nowRowBg:           Tokens.color.nowRowBg
-
-        readonly property string stripBg:            Tokens.color.stripBg
-        readonly property string stripPast:          Tokens.color.stripPast
-        readonly property string stripDivider:       Tokens.color.stripDivider
-        readonly property string droplet:            Tokens.color.droplet
-
-        readonly property string accent:             Tokens.color.accent
-        readonly property string toggleTrack:        Tokens.color.toggleTrack
-        readonly property string toggleKnob:         Tokens.color.toggleKnob
-
-        readonly property string pillHover:          Tokens.color.pillHover
-        readonly property string switchActive:       Tokens.color.switchActive
-        readonly property string switchBorder:       Tokens.color.switchBorder
-        readonly property string daySelectedBorder:  Tokens.color.daySelectedBorder
-
-        readonly property string pagerBg:            Tokens.color.pagerBg
-        readonly property string pagerBgHover:       Tokens.color.pagerBgHover
-        readonly property string pagerGlyph:         Tokens.color.pagerGlyph
-
-        readonly property string trendUp:            Tokens.color.trendUp
-        readonly property string trendDown:          Tokens.color.trendDown
-        readonly property string trendSteady:        Tokens.color.trendSteady
-
-        readonly property string sunGlyphWarm:       Tokens.color.sunGlyphWarm
-        readonly property string sunGlyphCool:       Tokens.color.sunGlyphCool
-        readonly property string moonGlyph:          Tokens.color.moonGlyph
-        readonly property string cloudTop:           Tokens.color.cloudTop
-        readonly property string cloudBottom:        Tokens.color.cloudBottom
-        readonly property string rainDrop:           Tokens.color.rainDrop
-        readonly property string cloudTopOnLight:    Tokens.color.cloudTopOnLight
-        readonly property string cloudBottomOnLight: Tokens.color.cloudBottomOnLight
-
-        readonly property string badgeDayTop:        Tokens.color.badgeDayTop
-        readonly property string badgeDayBottom:     Tokens.color.badgeDayBottom
-        readonly property string badgeNightTop:      Tokens.color.badgeNightTop
-        readonly property string badgeNightBottom:   Tokens.color.badgeNightBottom
-
-        readonly property string navBg:              Tokens.color.navBg
-        readonly property string navHairline:        Tokens.color.navHairline
-        readonly property string navGlyph:           Tokens.color.navGlyph
-        readonly property string navGlyphOn:         Tokens.color.navGlyphOn
-        readonly property string navPill:            Tokens.color.navPill
-
-        readonly property string menuBg:             Tokens.color.menuBg
-        readonly property string menuBorder:         Tokens.color.menuBorder
-
-        readonly property string statusGood:         Tokens.color.statusGood
-        readonly property string statusCaution:      Tokens.color.statusCaution
-        readonly property string statusPoor:         Tokens.color.statusPoor
-
-        readonly property string placeholderInk:     Tokens.color.placeholderInk
-        readonly property string placeholderStroke:  Tokens.color.placeholderStroke
+    // The ground everything is composited on. The gradient itself is `sky`.
+    component PageTokens: QtObject {
+        readonly property string bg: Tokens.page.bg
     }
-    readonly property ColorTokens color: ColorTokens { id: colorTokens }
+    readonly property PageTokens page: PageTokens { }
 
-    // ---- the one token that cannot be written like the others --------------
+    // §10.1's three-rung ladder, plus §10.12's opaque exceptions.
+    component SurfaceTokens: QtObject {
+        readonly property string recede: Tokens.surface.recede
+        readonly property string base:   Tokens.surface.base
+        readonly property string raised: Tokens.surface.raised
+        readonly property string panel:  Tokens.surface.panel
+        readonly property string rowAlt: Tokens.surface.rowAlt
+        readonly property string rowNow: Tokens.surface.rowNow
+        readonly property string nav:    Tokens.surface.nav
+        readonly property string menu:   Tokens.surface.menu
+    }
+    readonly property SurfaceTokens surface: SurfaceTokens { }
+
+    // Text. Ink for anything on the accent is `accent.ink`.
+    component InkTokens: QtObject {
+        readonly property string primary: Tokens.ink.primary
+        readonly property string muted:   Tokens.ink.muted
+        readonly property string dim:     Tokens.ink.dim
+    }
+    readonly property InkTokens ink: InkTokens { }
+
+    // Anything a pixel wide: it measures, it separates, or it is the unfilled
+    // remainder of a gauge.
+    component LineTokens: QtObject {
+        readonly property string grid:     Tokens.line.grid
+        readonly property string gridWeak: Tokens.line.gridWeak
+        readonly property string track:    Tokens.line.track
+        readonly property string now:      Tokens.line.now
+        readonly property string forecast: Tokens.line.forecast
+        readonly property string series:   Tokens.line.series
+        readonly property string card:     Tokens.line.card
+        readonly property string divider:  Tokens.line.divider
+        readonly property string nav:      Tokens.line.nav
+        readonly property string menu:     Tokens.line.menu
+        readonly property string control:  Tokens.line.control
+    }
+    readonly property LineTokens line: LineTokens { }
+
+    // The one saturated colour, and the only ink legible on it.
     //
-    // `onAccent` and `accent` are both in the table above, and QML will not host
-    // both on one object. Any binding whose name is `on` + a capital letter is
-    // parsed as a signal handler first and as a property second, so `onAccent:`
-    // is resolved against a member called `accent` — which exists — and the
-    // value goes to the signal rather than to the property.
+    // This pair used to be `color.accent` and `color.onAccent` on one object,
+    // and the second of those could not be written like its neighbours: any
+    // binding whose name is `on` + a capital letter is parsed as a signal
+    // handler first, so `onAccent:` resolved against a member called `accent` —
+    // which existed — and the value went to the signal rather than to the
+    // property.
     //
-    // How that fails is the reason this comment is long. With a literal it is at
+    // How that failed is why it is worth recording. With a literal it is at
     // least an error: `Cannot assign a value to a signal`. With an *expression*
-    // — which is what every token here is, since they all read out of theme.js —
-    // a script assigned to a signal is perfectly legal QML, so it compiles
-    // clean, runs clean, and leaves `Theme.color.onAccent` as the empty string.
-    // An empty string is a valid colour to QML: it paints black. The whole
-    // symptom was a 9x9 patch of the trend badge's arrow going from #141d33 to
-    // #000000 on four screenshots, with nothing on stderr.
+    // — which every token here is, since they all read out of theme.js — a
+    // script assigned to a signal is perfectly legal QML, so it compiled clean,
+    // ran clean, and left the token as the empty string. An empty string is a
+    // valid colour to QML: it paints black. The whole symptom was a 9x9 patch of
+    // the trend badge's arrow going from #141d33 to #000000 on four
+    // screenshots, with nothing on stderr. The workaround was a `Binding` that
+    // named the property as a *string*, taking the parser out of it, at the cost
+    // of the property's `readonly`.
     //
-    // Binding the property by *name* takes the parser out of it: `"onAccent"` is
-    // a string here, not an identifier the grammar gets an opinion about. The
-    // property has to give up `readonly` to be a Binding's target, which is the
-    // whole price. It is still a binding — when the theme gains a mode to
-    // switch on, this re-evaluates with the other seventy.
-    //
-    // Renaming the token would also fix it, and that is W3's call to make with
-    // the rest of the semantic pass. It is not a thing to do quietly inside a
-    // refactor that claims the pixels did not move.
-    readonly property Binding onAccentBinding: Binding {
-        target: colorTokens
-        property: "onAccent"
-        value: Tokens.color.onAccent
+    // Naming the pair by role deleted the problem instead of working around it.
+    // `fill` and `ink` say what they are for, they sit together because they are
+    // one decision, and neither of them starts with "on".
+    component AccentTokens: QtObject {
+        readonly property string fill: Tokens.accent.fill
+        readonly property string ink:  Tokens.accent.ink
     }
+    readonly property AccentTokens accent: AccentTokens { }
+
+    // Interactive chrome that carries its own colour rather than a surface's.
+    component ControlTokens: QtObject {
+        readonly property string toggleTrack:    Tokens.control.toggleTrack
+        readonly property string toggleKnob:     Tokens.control.toggleKnob
+        readonly property string pagerFill:      Tokens.control.pagerFill
+        readonly property string pagerFillHover: Tokens.control.pagerFillHover
+        readonly property string pagerGlyph:     Tokens.control.pagerGlyph
+        readonly property string navGlyph:       Tokens.control.navGlyph
+    }
+    readonly property ControlTokens control: ControlTokens { }
+
+    // Drawn over content it must not let through.
+    component OverlayTokens: QtObject {
+        readonly property string past:      Tokens.overlay.past
+        readonly property string pastHatch: Tokens.overlay.pastHatch
+        readonly property string hatch:     Tokens.overlay.hatch
+        readonly property string caption:   Tokens.overlay.caption
+        readonly property string readout:   Tokens.overlay.readout
+        readonly property string scrim:     Tokens.overlay.scrim
+    }
+    readonly property OverlayTokens overlay: OverlayTokens { }
+
+    // Colour as a verdict rather than as a value (§10.5).
+    component StateTokens: QtObject {
+        readonly property string trendUp:     Tokens.state.trendUp
+        readonly property string trendDown:   Tokens.state.trendDown
+        readonly property string trendSteady: Tokens.state.trendSteady
+        readonly property string good:        Tokens.state.good
+        readonly property string caution:     Tokens.state.caution
+        readonly property string poor:        Tokens.state.poor
+    }
+    readonly property StateTokens state: StateTokens { }
+
+    // The paints a weather glyph is drawn in, shared by six screens.
+    component GlyphTokens: QtObject {
+        readonly property string sunWarm:            Tokens.glyph.sunWarm
+        readonly property string sunCool:            Tokens.glyph.sunCool
+        readonly property string moon:               Tokens.glyph.moon
+        readonly property string moonShade:          Tokens.glyph.moonShade
+        readonly property string cloudTop:           Tokens.glyph.cloudTop
+        readonly property string cloudBottom:        Tokens.glyph.cloudBottom
+        readonly property string cloudTopOnLight:    Tokens.glyph.cloudTopOnLight
+        readonly property string cloudBottomOnLight: Tokens.glyph.cloudBottomOnLight
+        readonly property string rain:               Tokens.glyph.rain
+        readonly property string droplet:            Tokens.glyph.droplet
+    }
+    readonly property GlyphTokens glyph: GlyphTokens { }
+
+    // The disc a day's glyph sits on in the ten-day strip.
+    component BadgeTokens: QtObject {
+        readonly property string dayTop:      Tokens.badge.dayTop
+        readonly property string dayBottom:   Tokens.badge.dayBottom
+        readonly property string nightTop:    Tokens.badge.nightTop
+        readonly property string nightBottom: Tokens.badge.nightBottom
+    }
+    readonly property BadgeTokens badge: BadgeTokens { }
+
+    // Deliberately off-palette: something not built yet.
+    component ScaffoldTokens: QtObject {
+        readonly property string ink:    Tokens.scaffold.ink
+        readonly property string stroke: Tokens.scaffold.stroke
+    }
+    readonly property ScaffoldTokens scaffold: ScaffoldTokens { }
 
     // ---- precipitation -----------------------------------------------------
     // Three tokens and three tables in one group. `edge`, `splash` and `flash`
@@ -268,13 +293,18 @@ QtObject {
     // `--sky nonsense` is rejected rather than obeyed.
     readonly property var sky: Tokens.sky
 
+    // `glow` is four gradient stops rather than one colour, so it is a `var`
+    // for the same reason a ramp is: PageBackdrop indexes it.
     component StarTokens: QtObject {
         readonly property string ink:  Tokens.star.ink
         readonly property string line: Tokens.star.line
+        readonly property var    glow: Tokens.star.glow
     }
     readonly property StarTokens star: StarTokens { }
 
     // ---- measurements ------------------------------------------------------
+    // Theme-invariant: a 14 px radius is 14 px in any palette. These are not
+    // roles and they did not move when the colours became roles.
     component MetricTokens: QtObject {
         readonly property int hourWidth:        Tokens.metric.hourWidth
         readonly property int plotHeight:       Tokens.metric.plotHeight
@@ -345,8 +375,8 @@ QtObject {
         // Not live, one caveat. This is read once when the singleton is created,
         // and Qt.application.font has no change notification we can rely on, so
         // a runtime font switch will need this to become a property on a C++
-        // singleton with a NOTIFY of its own. That is W3's problem, and the call
-        // sites do not change when it is solved.
+        // singleton with a NOTIFY of its own. That is a later problem, and the
+        // call sites do not change when it is solved.
         //
         // The suppression is a gap in qmllint's type data rather than a gap in
         // Qt: `Qt.application.font` is documented and works — the gallery's Type
@@ -375,16 +405,11 @@ QtObject {
     readonly property TypeTokens type: TypeTokens { }
 
     // ---- motion ------------------------------------------------------------
-    // `easing` is new here and it is the one thing this file adds rather than
-    // republishes. theme.js says outright that it cannot hold `Easing.OutCubic`
-    // because a QML enum cannot live in a plain JS library, so the house rule —
-    // **OutCubic unless there is a stated reason** — is written literally at
-    // some sixty call sites and enforced by nothing. A singleton can hold it.
-    //
-    // The sixty call sites are deliberately NOT changed in this commit: a
-    // rewrite of every animation in the tree does not belong in a refactor
-    // whose whole claim is that the pixels did not move. It is available; the
-    // sweep through the call sites is the next commit.
+    // `easing` is the one thing this file adds rather than republishes. theme.js
+    // says outright that it cannot hold `Easing.OutCubic` because a QML enum
+    // cannot live in a plain JS library, so the house rule — **OutCubic unless
+    // there is a stated reason** — is written literally at some sixty call sites
+    // and enforced by nothing. A singleton can hold it.
     component MotionTokens: QtObject {
         readonly property int tint:    Tokens.motion.tint
         readonly property int move:    Tokens.motion.move

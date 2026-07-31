@@ -87,13 +87,13 @@ Item {
 
                     Text {
                         text: readingCell.modelData.label
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.label
                     }
 
                     Text {
                         text: readingCell.modelData.value
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.status
                         font.bold: true
                     }
@@ -115,7 +115,7 @@ Item {
         SkyArc {
             width: arcs.cellWidth
             reveal: root.reveal
-            tint: Theme.color.sunGlyphWarm
+            tint: Theme.glyph.sunWarm
 
             riseMin: root.sun.riseMin
             setMin: root.sun.setMin
@@ -132,16 +132,16 @@ Item {
                 width: 13
                 height: 13
                 radius: 6.5
-                color: Theme.color.sunGlyphWarm
+                color: Theme.glyph.sunWarm
                 border.width: 2
-                border.color: Theme.color.textPrimary
+                border.color: Theme.ink.primary
             }
         }
 
         SkyArc {
             width: arcs.cellWidth
             reveal: root.reveal
-            tint: Theme.color.moonGlyph
+            tint: Theme.glyph.moon
 
             riseMin: root.moon.riseMin
             setMin: root.moon.setMin

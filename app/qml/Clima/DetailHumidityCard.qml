@@ -121,7 +121,7 @@ DetailCard {
                     Rectangle {
                         anchors.fill: parent
                         radius: viz.barW / 2
-                        color: Theme.color.trackLine
+                        color: Theme.line.track
                     }
 
                     Rectangle {
@@ -160,14 +160,14 @@ DetailCard {
 
                 Text {
                     text: root.d.reading
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: Theme.type.readingPair
                     font.bold: true
                 }
 
                 Text {
                     text: qsTr("Relative Humidity")
-                    color: Theme.color.textMuted
+                    color: Theme.ink.muted
                     font.pixelSize: Theme.type.label
                     width: parent.width
                     elide: Text.ElideRight
@@ -180,14 +180,14 @@ DetailCard {
 
                 Text {
                     text: root.d.dewReading
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: Theme.type.readingPair
                     font.bold: true
                 }
 
                 Text {
                     text: qsTr("Dew point")
-                    color: Theme.color.textMuted
+                    color: Theme.ink.muted
                     font.pixelSize: Theme.type.label
                     width: parent.width
                     elide: Text.ElideRight

@@ -107,13 +107,13 @@ Item {
         id: card
         anchors.fill: parent
         radius: Theme.metric.detailRadius
-        color: Theme.color.surfaceBase
+        color: Theme.surface.base
     }
 
     Text {
         id: titleText
         text: root.title
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.detailTitle
         x: Theme.metric.detailPadH
         y: Theme.metric.detailPadV
@@ -145,7 +145,7 @@ Item {
 
         Text {
             text: root.status
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.status
             font.bold: true
         }
@@ -159,7 +159,7 @@ Item {
     Text {
         id: bodyText
         text: root.body
-        color: Theme.color.textMuted
+        color: Theme.ink.muted
         font.pixelSize: Theme.type.body
         lineHeight: 1.25
         wrapMode: Text.WordWrap

@@ -15,7 +15,7 @@ MobilePage {
 
     Text {
         text: Data.month.name + " " + Data.month.year
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.sectionTitle
         font.bold: true
     }

@@ -41,7 +41,7 @@ Item {
     // The one number the arc exists to give: how long it is up for.
     property string span: ""
 
-    property color tint: Theme.color.accent
+    property color tint: Theme.accent.fill
 
     // 0 → 1, driven by the card. See the note above.
     property real reveal: 1
@@ -85,7 +85,7 @@ Item {
         // something.
         ShapePath {
             fillColor: "transparent"
-            strokeColor: Theme.color.trackLine
+            strokeColor: Theme.line.track
             strokeWidth: 1.6
             strokeStyle: ShapePath.DashLine
             dashPattern: [1.6, 2.6]
@@ -128,7 +128,7 @@ Item {
         y: Math.round(root.baseY)
         width: (root.arcRadius + 4) * 2
         height: 1
-        color: Theme.color.gridLine
+        color: Theme.line.grid
     }
 
     Loader {
@@ -141,7 +141,7 @@ Item {
     Text {
         id: spanText
         text: root.span
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.label
         font.bold: true
         anchors.horizontalCenter: parent.horizontalCenter
@@ -164,12 +164,12 @@ Item {
 
             Text {
                 text: root.riseName
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.axis
             }
             Text {
                 text: root.riseLabel + " " + root.riseSuffix
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.label
                 font.bold: true
             }
@@ -181,13 +181,13 @@ Item {
 
             Text {
                 text: root.setName
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.axis
                 anchors.right: parent.right
             }
             Text {
                 text: root.setLabel + " " + root.setSuffix
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.label
                 font.bold: true
                 anchors.right: parent.right

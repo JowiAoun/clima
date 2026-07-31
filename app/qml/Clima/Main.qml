@@ -23,7 +23,7 @@ Window {
     // has to keep the narrowest screen readable.
     minimumWidth: 360
     minimumHeight: 480
-    color: Theme.color.pageBg
+    color: Theme.page.bg
     title: qsTr("Clima")
 
     // ---- which shell -------------------------------------------------------

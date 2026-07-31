@@ -62,7 +62,7 @@ Item {
     Text {
         id: heading
         text: qsTr("Current weather")
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.cardTitle
         font.bold: true
         anchors.left: parent.left
@@ -96,8 +96,8 @@ Item {
               Engine.updatedLabel,
               Engine.fromFallback ? qsTr("via %1").arg(Engine.sourceName) : "",
               Engine.problem].filter(function (s) { return s !== "" }).join("  ·  ")
-        color: Engine.stale || Engine.problem !== "" ? Theme.color.statusCaution
-                                                     : Theme.color.textMuted
+        color: Engine.stale || Engine.problem !== "" ? Theme.state.caution
+                                                     : Theme.ink.muted
         Behavior on color {
             ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
         }
@@ -133,7 +133,7 @@ Item {
         Text {
             id: reading
             text: Engine.hasData ? String(Detail.temperature.value) : ""
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.heroReading
             anchors.left: glyph.right
             anchors.leftMargin: 10
@@ -143,7 +143,7 @@ Item {
         Text {
             id: unit
             text: Detail.current.unitLabel
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.heroUnit
             anchors.left: reading.right
             anchors.leftMargin: 2
@@ -163,7 +163,7 @@ Item {
 
             Text {
                 text: Detail.cloudCover.condition
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.heroCaption
                 font.bold: true
                 width: parent.width
@@ -172,7 +172,7 @@ Item {
 
             Text {
                 text: qsTr("Feels like %1").arg(Detail.feelsLike.reading)
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.heroLabel
                 width: parent.width
                 elide: Text.ElideRight
@@ -184,7 +184,7 @@ Item {
     Text {
         id: outlook
         text: Detail.current.summary
-        color: Theme.color.textPrimary
+        color: Theme.ink.primary
         font.pixelSize: Theme.type.heroDetail
         wrapMode: Text.WordWrap
         anchors.left: parent.left
@@ -222,7 +222,7 @@ Item {
                 Text {
                     id: slugLabel
                     text: slug.modelData.label
-                    color: Theme.color.textMuted
+                    color: Theme.ink.muted
                     font.pixelSize: Theme.type.heroLabel
                     elide: Text.ElideRight
                     width: parent.width - 6
@@ -245,7 +245,7 @@ Item {
 
                     Text {
                         text: slug.modelData.value
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type.heroDetail
                         anchors.verticalCenter: parent.verticalCenter
                     }
@@ -264,7 +264,7 @@ Item {
                             preferredRendererType: Shape.CurveRenderer
                             rotation: slug.modelData.arrow + 180
                             ShapePath {
-                                fillColor: Theme.color.textPrimary
+                                fillColor: Theme.ink.primary
                                 strokeColor: "transparent"
                                 PathSvg { path: "M 7 0.5 L 10.8 13.5 L 7 10.6 L 3.2 13.5 Z" }
                             }

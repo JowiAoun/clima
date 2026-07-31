@@ -121,7 +121,7 @@ DetailCard {
             // something as a fraction of the distance it could have run.
             ShapePath {
                 strokeColor: "transparent"
-                fillColor: Theme.color.trackLine
+                fillColor: Theme.line.track
                 PathSvg { path: viz.sightPath(viz.x0, viz.x1) }
             }
 
@@ -149,7 +149,7 @@ DetailCard {
         // and dim: it is the ceiling, not a second reading.
         Text {
             text: root.d.scaleMax + " " + root.d.unit
-            color: Theme.color.textDim
+            color: Theme.ink.dim
             font.pixelSize: Theme.type.axis
             anchors.right: parent.right
             y: viz.axisY + viz.hFar + 8
@@ -165,14 +165,14 @@ DetailCard {
             Text {
                 id: readingValue
                 text: root.d.value
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.reading
                 font.bold: true
             }
 
             Text {
                 text: root.d.unit
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.label
                 anchors.baseline: readingValue.baseline
             }

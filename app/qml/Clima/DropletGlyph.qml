@@ -12,7 +12,7 @@ Item {
     id: root
 
     property real glyphSize: 11
-    property color fillColor: Theme.color.droplet
+    property color fillColor: Theme.glyph.droplet
 
     implicitWidth: glyphSize * 0.78
     implicitHeight: glyphSize

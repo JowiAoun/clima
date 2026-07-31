@@ -171,7 +171,7 @@ DetailCard {
             // faint to read as anything, and the wedge floated on nothing.
             ShapePath {
                 fillColor: "transparent"
-                strokeColor: Theme.color.trackLine
+                strokeColor: Theme.line.track
                 strokeWidth: 2.5
                 capStyle: ShapePath.RoundCap
                 PathSvg { path: viz.ringPath }
@@ -199,7 +199,7 @@ DetailCard {
             Text {
                 required property var modelData
                 text: modelData.label
-                color: Theme.color.textDim
+                color: Theme.ink.dim
                 font.pixelSize: Theme.type.axis
                 x: viz.ptX(modelData.deg, viz.ringR) - width / 2
                 y: viz.ptY(modelData.deg, viz.ringR) - height / 2
@@ -227,7 +227,7 @@ DetailCard {
             Text {
                 text: qsTr("From %1 (%2°)").arg(root.d.directionLabel)
                                            .arg(root.d.directionDeg)
-                color: Theme.color.textMuted
+                color: Theme.ink.muted
                 font.pixelSize: Theme.type.label
                 width: readout.width
                 elide: Text.ElideRight
@@ -238,7 +238,7 @@ DetailCard {
 
                 Text {
                     text: root.d.speed
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: Theme.type.readingPair
                     font.bold: true
                 }
@@ -248,12 +248,12 @@ DetailCard {
 
                     Text {
                         text: root.d.unit
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.label
                     }
                     Text {
                         text: qsTr("Wind Speed")
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.label
                     }
                 }
@@ -264,7 +264,7 @@ DetailCard {
 
                 Text {
                     text: root.d.gustReading
-                    color: Theme.color.textPrimary
+                    color: Theme.ink.primary
                     font.pixelSize: Theme.type.readingPair
                     font.bold: true
                 }
@@ -274,12 +274,12 @@ DetailCard {
 
                     Text {
                         text: root.d.unit
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.label
                     }
                     Text {
                         text: qsTr("Wind Gust")
-                        color: Theme.color.textMuted
+                        color: Theme.ink.muted
                         font.pixelSize: Theme.type.label
                     }
                 }

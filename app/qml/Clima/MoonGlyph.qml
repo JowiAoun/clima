@@ -19,7 +19,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: width / 2
-        color: "#38425e"
+        color: Theme.glyph.moonShade
     }
 
     Shape {
@@ -27,7 +27,7 @@ Item {
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
-            fillColor: Theme.color.accent
+            fillColor: Theme.accent.fill
             strokeColor: "transparent"
             PathSvg {
                 path: ChartMath.moonPath(root.width / 2, root.height / 2,
