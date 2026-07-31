@@ -36,19 +36,10 @@ Window {
     // clear colour — so every headless screenshot came out with a black page
     // behind the cards, which is not what is on screen.
     //
-    // It is a gradient rather than a flat fill because every surface above it
-    // is translucent: the cards have no colour of their own, and take whatever
-    // the gradient is doing behind them. Flatten this and the whole page
-    // flattens with it.
-    Rectangle {
+    // The gradient itself lives in PageBackdrop, because the gallery needs to
+    // paint the same thing inside a device frame.
+    PageBackdrop {
         anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0.00; color: Theme.color.pageStop0 }
-            GradientStop { position: 0.06; color: Theme.color.pageStop1 }
-            GradientStop { position: 0.30; color: Theme.color.pageStop2 }
-            GradientStop { position: 0.60; color: Theme.color.pageStop3 }
-            GradientStop { position: 1.00; color: Theme.color.pageStop4 }
-        }
     }
 
     // `--card Uv` renders one detail card on the page gradient and nothing
@@ -59,6 +50,11 @@ Window {
     property bool previewGrid: false
     property bool previewGallery: false
     property string galleryPick: ""
+
+    // Which device frame the gallery stages its specimens in. Empty is free —
+    // the component at its own size, which is what the gallery did before
+    // frames existed and is still right for a glyph.
+    property string galleryViewport: ""
 
     Loader {
         active: win.previewCard !== ""
@@ -103,7 +99,10 @@ Window {
         active: win.previewGallery
         anchors.fill: parent
         sourceComponent: Component {
-            Gallery { pick: win.galleryPick }
+            Gallery {
+                pick: win.galleryPick
+                viewport: win.galleryViewport
+            }
         }
     }
 
@@ -346,9 +345,17 @@ Window {
         if (vp >= 0 && vp + 1 < args.length) {
             var preset = Viewports.byId(args[vp + 1])
             if (preset !== null) {
-                win.forcedViewport = preset.id
-                win.width = preset.w
-                win.height = preset.h
+                // In the gallery the flag means something different, and it
+                // has to: resizing the window to 390 px there would leave 158
+                // px of stage beside a 232 px rail. The gallery frames a
+                // specimen at the preset instead, and keeps its own window.
+                if (args.indexOf("--gallery") >= 0) {
+                    win.galleryViewport = preset.id
+                } else {
+                    win.forcedViewport = preset.id
+                    win.width = preset.w
+                    win.height = preset.h
+                }
             } else {
                 console.warn("--viewport: expected one of",
                              Viewports.ids().join(", "), "— got", args[vp + 1])

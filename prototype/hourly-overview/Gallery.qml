@@ -13,6 +13,7 @@
 import QtQuick
 import "theme.js" as Theme
 import "gallery.js" as Catalogue
+import "viewports.js" as Viewports
 
 Item {
     id: root
@@ -22,6 +23,48 @@ Item {
     // Pre-selects an entry by name or file, so `--gallery moon` lands on the
     // moon card instead of on whatever happens to be first.
     property string pick: ""
+
+    // ---- device frames -------------------------------------------------------
+    // "" is free — the component at whatever size the catalogue gives it, which
+    // is what the gallery did before any of this existed and is still the right
+    // default for a glyph or a badge.
+    //
+    // Anything else is a viewports.js preset, and the specimen is staged inside
+    // a box of exactly that size with the page gradient painted inside it. The
+    // width is the point: almost every layout defect this prototype has had was
+    // a component that was fine at the width its author happened to try and
+    // broken at the width the app gives it. A frame makes that width a thing you
+    // choose rather than a thing you inherit from the window.
+    //
+    // The frame is not scaled to fit. A 1340x762 desktop frame inside a 1500 px
+    // window overflows the pane and the pane scrolls, which is honest — a
+    // half-size preview of a 11 px axis label tells you nothing about whether it
+    // is legible.
+    property string viewport: ""
+
+    readonly property var preset: viewport === "" ? null : Viewports.byId(viewport)
+    readonly property bool framed: preset !== null
+
+    // What the shell at this viewport would actually hand a component: the
+    // frame minus the page margin on both sides. A card staged at the full
+    // device width is a card reviewed 28 px wider than it will ever be drawn.
+    readonly property real frameContentWidth: {
+        if (!framed)
+            return 0
+        var margin = Viewports.usesMobileShell(preset.id) ? Theme.metric.mobileMargin
+                                                          : Theme.metric.pageMargin
+        return Math.min(preset.w - margin * 2,
+                        Viewports.usesMobileShell(preset.id)
+                            ? Theme.metric.mobileContentMax : preset.w)
+    }
+
+    function cycleViewport(d) {
+        // "" then the presets, so stepping wraps through free as one of the
+        // options rather than making it a mode you can only leave.
+        var ids = [""].concat(Viewports.ids())
+        var i = ids.indexOf(viewport)
+        viewport = ids[(Math.max(0, i) + d + ids.length) % ids.length]
+    }
 
     // Rebuild every specimen on the stage, replaying whatever they do on mount.
     // Driven by `--poke remount=1`; see Main.qml.
@@ -139,6 +182,31 @@ Item {
 
     Keys.onUpPressed: root.step(-1)
     Keys.onDownPressed: root.step(1)
+    Keys.onLeftPressed: root.cycleViewport(-1)
+    Keys.onRightPressed: root.cycleViewport(1)
+
+    // ---- how a specimen is sized in a frame ----------------------------------
+    // Three cases, and the catalogue says which by what it declares.
+    //
+    //   fills      a screen or a shell: it takes the whole device.
+    //   stage.w    it takes a width from its host, so in a frame that width is
+    //              the one the shell at this viewport would give it — not the
+    //              number in the catalogue, which was only ever a stand-in for
+    //              a host that was not there.
+    //   neither    a glyph, a badge, a toggle: natural size, whatever the frame.
+    function stageW(entry) {
+        if (!framed)
+            return entry.stage ? entry.stage.w : 0
+        if (entry.fills)
+            return preset.w
+        return (entry.stage && entry.stage.w > 0) ? frameContentWidth : 0
+    }
+
+    function stageH(entry) {
+        if (framed && entry.fills)
+            return preset.h
+        return entry.stage ? entry.stage.h : 0
+    }
 
     // ---- the rail --------------------------------------------------------
 
@@ -206,9 +274,92 @@ Item {
             }
         }
 
+        // ---- viewport control ------------------------------------------------
+        // In the rail rather than over the stage, because it is a property of
+        // how you are looking rather than of what you are looking at: it
+        // persists as you arrow through the catalogue, and a control that
+        // persists belongs with the other one that does.
+        Text {
+            id: viewportLabel
+            x: 12
+            y: filterBox.y + filterBox.height + 16
+            text: qsTr("VIEWPORT")
+            color: Theme.color.textDim
+            font.pixelSize: Theme.type.axis
+            font.letterSpacing: 0.8
+        }
+
+        Grid {
+            id: viewportPicker
+            x: 12
+            y: viewportLabel.y + viewportLabel.height + 6
+            width: rail.width - 24
+            columns: 2
+            spacing: 4
+
+            readonly property real cellWidth: (width - spacing) / 2
+
+            Repeater {
+                // Free first, then narrow to wide. The order is the order the
+                // arrow keys walk, so the control reads the way it steps.
+                model: [{ id: "", label: qsTr("Free") }].concat(Viewports.presets)
+
+                delegate: Rectangle {
+                    id: vpButton
+                    required property var modelData
+
+                    readonly property bool isCurrent: modelData.id === root.viewport
+
+                    width: viewportPicker.cellWidth
+                    height: 26
+                    radius: Theme.metric.controlRadius
+                    color: isCurrent ? Theme.color.surfaceRaised
+                                     : (vpHover.hovered ? Theme.color.surfaceBase : "transparent")
+                    border.width: 1
+                    border.color: isCurrent ? Theme.color.accent : Theme.color.gridLine
+
+                    Behavior on color {
+                        ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+                    }
+                    Behavior on border.color {
+                        ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: vpButton.modelData.label
+                        color: vpButton.isCurrent ? Theme.color.textPrimary : Theme.color.textMuted
+                        font.pixelSize: Theme.type.axis
+                    }
+
+                    HoverHandler { id: vpHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler {
+                        onTapped: {
+                            root.viewport = vpButton.modelData.id
+                            root.forceActiveFocus()
+                        }
+                    }
+                }
+            }
+        }
+
+        // The frame's own dimensions, so a review note can say what it was
+        // taken at without anyone measuring a screenshot.
+        Text {
+            id: viewportSize
+            x: 12
+            y: viewportPicker.y + viewportPicker.height + 6
+            width: rail.width - 24
+            elide: Text.ElideRight
+            text: root.framed ? root.preset.w + " × " + root.preset.h
+                              : qsTr("component's own size")
+            color: Theme.color.textDim
+            font.pixelSize: Theme.type.axis
+        }
+
         Flickable {
             id: railScroll
-            anchors.top: filterBox.bottom
+            anchors.top: viewportSize.bottom
             anchors.topMargin: 12
             anchors.left: parent.left
             anchors.right: parent.right
@@ -401,21 +552,70 @@ Item {
                 model: root.currentVariants
 
                 delegate: Column {
+                    id: cell
                     required property var modelData
                     spacing: 8
 
-                    Specimen {
-                        source: root.current.file
-                        props: parent.modelData.props ? parent.modelData.props : ({})
-                        stageWidth: root.current.stage ? root.current.stage.w : 0
-                        stageHeight: root.current.stage ? root.current.stage.h : 0
-                        remountToken: root.remountToken
+                    // The device frame, or nothing at all. In free mode this
+                    // Item is exactly the specimen's own size and paints
+                    // nothing of its own, so the free layout is byte for byte
+                    // what it was before frames existed.
+                    Item {
+                        id: frame
+                        width: root.framed ? root.preset.w : spec.width
+                        height: root.framed ? root.preset.h : spec.height
+
+                        // The gradient, inside the frame rather than behind it.
+                        // A card framed at 390x844 in a 950 px window would
+                        // otherwise be composited over the slice of the
+                        // window's gradient that happens to be behind it, which
+                        // is not the slice the app gives it — and being drawn on
+                        // the right background is the whole premise here.
+                        PageBackdrop {
+                            visible: root.framed
+                            anchors.fill: parent
+                            radius: 6
+                        }
+
+                        Specimen {
+                            id: spec
+                            source: root.current.file
+                            props: cell.modelData.props ? cell.modelData.props : ({})
+                            stageWidth: root.stageW(root.current)
+                            stageHeight: root.stageH(root.current)
+                            remountToken: root.remountToken
+
+                            // A screen fills the device. Anything else sits
+                            // where the page would put it: inset from the top
+                            // by the page margin and centred across.
+                            x: root.framed && !root.current.fills
+                               ? Math.round((frame.width - width) / 2) : 0
+                            y: root.framed && !root.current.fills
+                               ? Theme.metric.mobileMargin : 0
+                        }
+
+                        // The device edge. A border is the one thing that can
+                        // draw it: the frame's whole job is to show where the
+                        // screen stops, and a component that runs to the edge
+                        // — which every screen here does — has nothing else to
+                        // separate it from the pane behind.
+                        Rectangle {
+                            visible: root.framed
+                            anchors.fill: parent
+                            radius: 6
+                            color: "transparent"
+                            border.width: 1
+                            border.color: Theme.color.switchBorder
+                        }
                     }
 
                     Text {
                         text: {
-                            var lbl = parent.modelData.label
-                            var sz = parent.children[0].width + " × " + parent.children[0].height
+                            var lbl = cell.modelData.label
+                            // Rounded: a specimen sized from text metrics
+                            // reports 73.875, and three decimal places in a
+                            // caption reads as precision rather than as noise.
+                            var sz = Math.round(spec.width) + " × " + Math.round(spec.height)
                             return lbl ? lbl + "  ·  " + sz : sz
                         }
                         color: Theme.color.textDim

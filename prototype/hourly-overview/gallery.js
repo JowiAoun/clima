@@ -17,7 +17,16 @@
 //   kind     "palette" | "type" for the generated foundation pages
 //   blurb    one line, shown above the stage
 //   stage    { w, h } when the component has no implicit size of its own
+//   fills    true for a screen or a shell: in a device frame it takes the
+//            whole device rather than a content column inside it
 //   variants [{ label, props }]; omit for a single default instance
+//
+// `stage.w` and the viewport frames interact, and the rule is worth stating:
+// a stage width is a stand-in for a host that is not there, so when a frame
+// *is* there the frame wins and the component gets the width that viewport's
+// shell would actually give it. `stage.h` is left alone — a height in this
+// catalogue is usually the component saying it has no opinion, and the frame
+// has none either.
 .pragma library
 
 .import "theme.js" as Theme
@@ -106,7 +115,7 @@ var groups = [
     {
         name: "Screens",
         items: [
-            { name: "Weather page", file: "WeatherPage.qml", stage: { w: 1300, h: 740 },
+            { name: "Weather page", file: "WeatherPage.qml", stage: { w: 1300, h: 740 }, fills: true,
               blurb: "The whole thing: location, current conditions, hourly, details. Scrolls — its Flickable is layered, which is what keeps every chart on it inside the viewport." },
             // 980, not the page's own 1244: the gallery's rail takes 232 px, so a
             // full-width stage runs off the right of a default window and clips
@@ -131,8 +140,110 @@ var groups = [
         ]
     },
     {
+        // Everything below runs at 390 px in the app. Reviewing it at the
+        // gallery's own stage width is reviewing a layout the phone never
+        // draws — pick the Mobile viewport in the rail, or pass
+        // `--viewport mobile` alongside `--gallery`.
+        name: "Mobile screens",
+        items: [
+            { name: "Mobile shell", file: "MobileShell.qml", fills: true,
+              blurb: "Five destinations under a bottom nav. The nav pill slides; the page behind it does not transition.",
+              variants: [
+                  { label: "today",   props: { tab: "today" } },
+                  { label: "hourly",  props: { tab: "hourly" } },
+                  { label: "monthly", props: { tab: "monthly" } }
+              ] },
+            { name: "Today screen", file: "MobileTodayPage.qml", fills: true,
+              blurb: "The screen the app opens on: headline, hourly strip, ten days, sun & moon, pollen, activities." },
+            { name: "Hourly screen", file: "MobileHourlyPage.qml", fills: true,
+              blurb: "The desktop's chart card at 40 px columns and a shorter plot, with the ten metric pills replaced by one button." },
+            { name: "Monthly screen", file: "MobileMonthlyPage.qml", fills: true,
+              blurb: "A month of forecasts, four days to a row rather than seven." },
+            { name: "Maps screen", file: "MobileMapsPage.qml", fills: true,
+              blurb: "The placeholder. There is no map component; this says so in a way a screenshot cannot hide." },
+            { name: "Me screen", file: "MobileMePage.qml", fills: true,
+              blurb: "Units, places and attribution. The one screen here that is a proposal rather than a rebuild." }
+        ]
+    },
+    {
+        name: "Mobile parts",
+        items: [
+            { name: "Bottom nav", file: "BottomNav.qml", stage: { w: 390, h: 0 },
+              blurb: "The only persistent chrome the phone has, and the only thing on it allowed to be more opaque than a wash.",
+              variants: [
+                  { label: "today", props: { currentId: "today" } },
+                  { label: "maps",  props: { currentId: "maps" } },
+                  { label: "me",    props: { currentId: "me" } }
+              ] },
+            { name: "Mobile card", file: "MobileCard.qml", stage: { w: 362, h: 0 },
+              blurb: "The shell the phone's cards are built in. Unlike DetailCard it grows to its body, because on a phone a card is as tall as what is in it.",
+              variants: [
+                  { label: "with link", props: { title: "Today", link: "Hourly" } },
+                  { label: "plain",     props: { title: "Sun & Moon" } }
+              ] },
+            { name: "Mobile hero", file: "MobileCurrentWeather.qml", stage: { w: 362, h: 0 },
+              blurb: "The desktop headline with no card, no high/low, and six slugs wrapped three by two." },
+            { name: "Hour strip", file: "MobileHourStrip.qml", stage: { w: 362, h: 0 },
+              blurb: "Twenty-four hours, two at a time. The band's top edge is the temperature — the reference draws it flat." },
+            { name: "Ten-day strip", file: "MobileDailyStrip.qml", stage: { w: 362, h: 0 },
+              blurb: "A readout, not a control. Highs bold, lows not: the pair is the reading and one of them has to lead." },
+            { name: "Sun & moon", file: "MobileSunMoonCard.qml", stage: { w: 330, h: 0 },
+              blurb: "Two arcs on one reveal. They have to leave together or it reads as a race." },
+            { name: "Sky arc", file: "SkyArc.qml", stage: { w: 170, h: 0 },
+              blurb: "Progress from rise to set. Not DetailSunCard's altitude sinusoid — at this size that is a bump with nothing to read.",
+              variants: [
+                  { label: "mid-morning", props: { riseMin: 364, setMin: 1243, nowMin: 620,
+                                                   riseLabel: "6:04", riseSuffix: "AM", riseName: "Sunrise",
+                                                   setLabel: "8:43", setSuffix: "PM", setName: "Sunset",
+                                                   span: "14 hrs 39 mins" } },
+                  { label: "just risen",  props: { riseMin: 364, setMin: 1243, nowMin: 400,
+                                                   riseLabel: "6:04", riseSuffix: "AM", riseName: "Sunrise",
+                                                   setLabel: "8:43", setSuffix: "PM", setName: "Sunset",
+                                                   span: "14 hrs 39 mins" } },
+                  { label: "already set", props: { riseMin: 364, setMin: 1243, nowMin: 1400,
+                                                   riseLabel: "6:04", riseSuffix: "AM", riseName: "Sunrise",
+                                                   setLabel: "8:43", setSuffix: "PM", setName: "Sunset",
+                                                   span: "14 hrs 39 mins" } }
+              ] },
+            { name: "Pollen", file: "MobilePollenCard.qml", stage: { w: 330, h: 0 },
+              blurb: "The headline is a word, because the published answer is a band and nobody reads grains per cubic metre." },
+            { name: "Activities", file: "MobileActivitiesCard.qml", stage: { w: 330, h: 0 },
+              blurb: "Five verdicts. The dot is last on the row, or a column of colours outreads the labels saying what they are about." },
+            { name: "Week strip", file: "MobileWeekStrip.qml", stage: { w: 362, h: 0 },
+              blurb: "Seven days across a phone, so a column is 48 px. That is why it is not DayStrip." },
+            { name: "Metric picker", file: "MobileMetricPicker.qml",
+              blurb: "Ten pills become one button and a list. Shown open, because a menu you have only seen shut is a menu you have not checked.",
+              stage: { w: 0, h: 0 },
+              variants: [
+                  { label: "closed", props: { currentId: "overview", open: false } },
+                  { label: "open",   props: { currentId: "wind",     open: true } }
+              ] },
+            { name: "Calendar", file: "MobileCalendar.qml", stage: { w: 330, h: 0 },
+              blurb: "Four columns, not seven. A forecast is scanned for warm stretches, not looked up by weekday." },
+            { name: "Map placeholder", file: "MapPlaceholder.qml", stage: { w: 362, h: 520 },
+              blurb: "Deliberately off-palette and deliberately ugly. A tasteful empty state is what a finished screen with no data looks like." },
+            { name: "Nav glyph", file: "NavGlyph.qml",
+              blurb: "Outlines, not fills: at 22 px in a row of five, the silhouette is all there is to tell them apart.",
+              variants: [
+                  { label: "today",   props: { kind: "today",   glyphSize: 30 } },
+                  { label: "hourly",  props: { kind: "hourly",  glyphSize: 30 } },
+                  { label: "monthly", props: { kind: "monthly", glyphSize: 30 } },
+                  { label: "maps",    props: { kind: "maps",    glyphSize: 30 } },
+                  { label: "me",      props: { kind: "me",      glyphSize: 30 } }
+              ] }
+        ]
+    },
+    {
         name: "Controls",
         items: [
+            { name: "Chevron", file: "ChevronGlyph.qml",
+              blurb: "One path, rotated. Four hand-written ones is four chances for one to drift off its siblings.",
+              variants: [
+                  { label: "right", props: { direction: "right", glyphSize: 22 } },
+                  { label: "down",  props: { direction: "down",  glyphSize: 22 } },
+                  { label: "left",  props: { direction: "left",  glyphSize: 22 } },
+                  { label: "up",    props: { direction: "up",    glyphSize: 22 } }
+              ] },
             { name: "Location bar", file: "LocationBar.qml",
               blurb: "Sits on the page gradient rather than on a surface — there is nothing here to lift off the background.",
               variants: [
