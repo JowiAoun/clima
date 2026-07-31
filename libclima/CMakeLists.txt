@@ -43,8 +43,23 @@ add_library(libclima STATIC
     core/error.h
     core/error.cpp
     core/result.h
+    domain/airquality.h
+    domain/airquality.cpp
     domain/coordinate.h
     domain/coordinate.cpp
+    domain/forecast.h
+    domain/forecast.cpp
+    domain/reading.h
+    providers/iforecastprovider.h
+    providers/iforecastprovider.cpp
+    providers/registry.h
+    providers/registry.cpp
+    providers/airquality/openmeteoairqualityprovider.h
+    providers/airquality/openmeteoairqualityprovider.cpp
+    providers/metno/metnoforecastprovider.h
+    providers/metno/metnoforecastprovider.cpp
+    providers/metno/symbolcode.h
+    providers/metno/symbolcode.cpp
     net/backoff.h
     net/backoff.cpp
     net/httpclient.h

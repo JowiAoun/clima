@@ -117,6 +117,16 @@ if(CLIMA_BUILD_GALLERY)
     add_subdirectory(gallery)
 endif()
 
+# A harness that prints what the provider adapters make of a recorded fixture.
+# The gallery is for looking at components; this is for looking at data, and it
+# exists because the pollen gate in
+# libclima/providers/airquality/openmeteoairqualityprovider.h is the kind of
+# rule a test can satisfy while the screen still says something untrue. Guarded
+# by CLIMA_DEV_TOOLS, which is what that option was declared for.
+if(CLIMA_DEV_TOOLS)
+    add_subdirectory(tools/provider-probe)
+endif()
+
 # enable_testing() has to be called from the top-level directory or `ctest
 # --test-dir build/dev` finds no tests at all and says so in a way that reads
 # like the tests failed to build. It is guarded by the same option as the
