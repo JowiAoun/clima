@@ -42,6 +42,7 @@ SPDX-License-Identifier = "CC-BY-SA-4.0"
 [[annotations]]
 path = [
     ".gitignore",
+    "flake.lock",
     "tools/refcap/package.json",
     "tools/refcap/package-lock.json",
     "tools/refcap/targets.json",
