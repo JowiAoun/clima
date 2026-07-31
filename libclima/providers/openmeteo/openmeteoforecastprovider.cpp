@@ -3,8 +3,10 @@
 
 #include "openmeteoforecastprovider.h"
 
+#include "libclima/cache/payloadcache.h"
 #include "libclima/core/clock.h"
 #include "libclima/net/httpclient.h"
+#include "libclima/net/requestkey.h"
 #include "libclima/providers/openmeteo/openmeteoadapter.h"
 #include "libclima/providers/openmeteo/openmeteovariables.h"
 
@@ -36,90 +38,6 @@ CapabilityFlags supportedEverywhere()
          | Capability::UvIndex | Capability::WeatherCode | Capability::SunTimes;
 }
 
-// Whether any hour in the series has a value for this field.
-//
-// This is the question that decides whether a metric tab exists, and it has to
-// be asked of the whole column rather than of the first row: the recorded
-// Toronto response has a null hour in the middle of an otherwise complete
-// series, and a first-row test would hide the temperature tab for a forecast
-// that begins with one gap.
-template <typename Field>
-bool anyHourHas(const QList<HourlyPoint> &hourly, Field field)
-{
-    for (const HourlyPoint &point : hourly) {
-        if ((point.*field).has_value())
-            return true;
-    }
-    return false;
-}
-
-Capabilities learnFrom(const Forecast &forecast)
-{
-    CapabilityFlags available;
-
-    if (!forecast.current.isEmpty())
-        available |= Capability::CurrentConditions;
-    if (!forecast.hourly.isEmpty())
-        available |= Capability::Hourly;
-    if (!forecast.daily.isEmpty())
-        available |= Capability::Daily;
-
-    const QList<HourlyPoint> &hourly = forecast.hourly;
-
-    if (anyHourHas(hourly, &HourlyPoint::temperature))
-        available |= Capability::Temperature;
-    if (anyHourHas(hourly, &HourlyPoint::apparentTemperature))
-        available |= Capability::ApparentTemperature;
-    if (anyHourHas(hourly, &HourlyPoint::dewPoint))
-        available |= Capability::DewPoint;
-    if (anyHourHas(hourly, &HourlyPoint::relativeHumidity))
-        available |= Capability::Humidity;
-    if (anyHourHas(hourly, &HourlyPoint::precipitation))
-        available |= Capability::Precipitation;
-    if (anyHourHas(hourly, &HourlyPoint::precipitationProbability))
-        available |= Capability::PrecipitationProbability;
-    if (anyHourHas(hourly, &HourlyPoint::windSpeed))
-        available |= Capability::Wind;
-    if (anyHourHas(hourly, &HourlyPoint::windGust))
-        available |= Capability::WindGust;
-    if (anyHourHas(hourly, &HourlyPoint::pressureMsl))
-        available |= Capability::Pressure;
-    if (anyHourHas(hourly, &HourlyPoint::cloudCover))
-        available |= Capability::CloudCover;
-    if (anyHourHas(hourly, &HourlyPoint::uvIndex))
-        available |= Capability::UvIndex;
-
-    // The two that ECMWF IFS does not carry, and the reason this function
-    // exists rather than a constant. toronto-ecmwf-gaps.json is 72 hours of
-    // null for both.
-    if (anyHourHas(hourly, &HourlyPoint::visibility))
-        available |= Capability::Visibility;
-
-    // The rain / showers / snow split, which is what lets a chart colour a
-    // band by phase rather than guessing from temperature.
-    if (anyHourHas(hourly, &HourlyPoint::rain) || anyHourHas(hourly, &HourlyPoint::showers)
-        || anyHourHas(hourly, &HourlyPoint::snowfall))
-        available |= Capability::PrecipitationType;
-
-    for (const HourlyPoint &point : hourly) {
-        if (point.weatherCode) {
-            available |= Capability::WeatherCode;
-            break;
-        }
-    }
-
-    for (const DailyPoint &day : forecast.daily) {
-        if (day.sunrise.isValid() || day.sunset.isValid()) {
-            available |= Capability::SunTimes;
-            break;
-        }
-    }
-
-    // Nothing is undetermined once a payload has been seen: the response is
-    // the witness, and it has now testified.
-    return Capabilities(available);
-}
-
 } // namespace
 
 OpenMeteoForecastProvider::OpenMeteoForecastProvider(HttpClient *http, Clock *clock,
@@ -132,6 +50,11 @@ OpenMeteoForecastProvider::OpenMeteoForecastProvider(HttpClient *http, Clock *cl
 }
 
 OpenMeteoForecastProvider::~OpenMeteoForecastProvider() = default;
+
+void OpenMeteoForecastProvider::setCache(CacheStore *cache)
+{
+    m_cache = cache;
+}
 
 QString OpenMeteoForecastProvider::providerId()
 {
@@ -240,7 +163,7 @@ Capabilities OpenMeteoForecastProvider::capabilitiesAt(Coordinate coord) const
 
 void OpenMeteoForecastProvider::rememberCapabilities(Coordinate coord, const Forecast &forecast)
 {
-    m_learned.insert(coord.rounded().toKeyString(), learnFrom(forecast));
+    m_learned.insert(coord.rounded().toKeyString(), openmeteo::capabilitiesFor(forecast));
 }
 
 QFuture<Result<Forecast>> OpenMeteoForecastProvider::fetchForecast(const ForecastRequest &request)
@@ -259,7 +182,45 @@ QFuture<Result<Forecast>> OpenMeteoForecastProvider::fetchForecast(const Forecas
 
     const Coordinate coord = request.coord;
 
-    QFuture<Result<HttpResponse>> transfer = m_http->send(buildRequest(request));
+    const HttpRequest http = buildRequest(request);
+    const QString     key  = RequestKey::forRequest(http).toString();
+
+    // ---- the cache, read before the socket is opened ------------------------
+    //
+    // docs/04-architecture.md §4.1, principle 1: "the UI renders from cache,
+    // then reconciles with the network". A fresh entry is the whole answer and
+    // no request is made — §4.5 puts the hourly forecast's TTL at 30 minutes,
+    // and thirty minutes of identical bytes is thirty minutes of somebody
+    // else's bandwidth.
+    const payloadcache::Hit cached = payloadcache::lookUp(m_cache, key);
+
+    if (cached.present && (cached.fresh || request.cachedOnly)) {
+        Result<Forecast> adapted = openmeteo::adaptForecast(cached.payload, providerId());
+        if (adapted) {
+            // The moment the bytes were fetched, not the moment they were
+            // read. That is what makes "updated 12 minutes ago" true rather
+            // than "updated just now" every time the app is reopened.
+            adapted.value().fetchedAt = cached.fetchedAt;
+            rememberCapabilities(coord, adapted.value());
+            promise->addResult(adapted);
+            promise->finish();
+            return future;
+        }
+        // A cached payload that no longer parses is a cached payload we should
+        // not be holding. Fall through to the network rather than reporting a
+        // parse error for something the user never asked us to read.
+    }
+
+    if (request.cachedOnly) {
+        Error error(ErrorKind::NotFound,
+                    QStringLiteral("nothing cached for %1").arg(coord.toKeyString()));
+        error.setProviderId(providerId());
+        promise->addResult(Result<Forecast>(error));
+        promise->finish();
+        return future;
+    }
+
+    QFuture<Result<HttpResponse>> transfer = m_http->send(http);
 
     // A watcher parented to this, deleted when it finishes. The alternative —
     // `.then()` — runs its continuation on whichever thread finished the
@@ -269,11 +230,31 @@ QFuture<Result<Forecast>> OpenMeteoForecastProvider::fetchForecast(const Forecas
     auto *watcher = new QFutureWatcher<Result<HttpResponse>>(this);
 
     connect(watcher, &QFutureWatcherBase::finished, this,
-            [this, watcher, promise, coord]() {
+            [this, watcher, promise, coord, key, cached]() {
                 watcher->deleteLater();
 
                 const Result<HttpResponse> transferred = watcher->result();
                 if (!transferred) {
+                    // ---- the aeroplane case ---------------------------------
+                    //
+                    // The request failed and there is a stale payload on disk.
+                    // §4.5 ticks stale-while-revalidate for every forecast row,
+                    // and §4.1 says the app must never show an empty screen
+                    // because an API is down. So the stale bytes are served,
+                    // carrying the timestamp they were actually fetched at —
+                    // which is what makes the UI say "updated 3 hours ago"
+                    // rather than pretending this is current.
+                    if (cached.present) {
+                        Result<Forecast> stale =
+                            openmeteo::adaptForecast(cached.payload, providerId());
+                        if (stale) {
+                            stale.value().fetchedAt = cached.fetchedAt;
+                            rememberCapabilities(coord, stale.value());
+                            promise->addResult(stale);
+                            promise->finish();
+                            return;
+                        }
+                    }
                     promise->addResult(Result<Forecast>(transferred.error()));
                     promise->finish();
                     return;
@@ -287,6 +268,23 @@ QFuture<Result<Forecast>> OpenMeteoForecastProvider::fetchForecast(const Forecas
                 // told plainly rather than handed an empty Forecast that would
                 // read as "the provider has nothing here".
                 if (response.notModified) {
+                    if (cached.present) {
+                        payloadcache::touch(m_cache, key, DataKind::Forecast, response);
+                        Result<Forecast> confirmed =
+                            openmeteo::adaptForecast(cached.payload, providerId());
+                        if (confirmed) {
+                            // Confirmed current, so the age is now and not the
+                            // age of the bytes: a 304 is the server saying the
+                            // data has not changed, which makes it as fresh as
+                            // a 200 carrying the same body.
+                            confirmed.value().fetchedAt = response.fetchedAt;
+                            rememberCapabilities(coord, confirmed.value());
+                            promise->addResult(confirmed);
+                            promise->finish();
+                            return;
+                        }
+                    }
+
                     Error error(ErrorKind::Cancelled,
                                 QStringLiteral("not modified; the cached forecast stands"));
                     error.setProviderId(providerId());
@@ -306,6 +304,9 @@ QFuture<Result<Forecast>> OpenMeteoForecastProvider::fetchForecast(const Forecas
                     // fixtures were recorded.
                     adapted.value().fetchedAt = m_clock->now();
                     rememberCapabilities(coord, adapted.value());
+                    payloadcache::store(m_cache, key, providerId(),
+                                        QStringLiteral("forecast"), DataKind::Forecast,
+                                        coord, response);
                 }
 
                 promise->addResult(adapted);

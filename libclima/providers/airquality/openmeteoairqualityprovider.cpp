@@ -3,6 +3,7 @@
 
 #include "libclima/providers/airquality/openmeteoairqualityprovider.h"
 
+#include "libclima/cache/payloadcache.h"
 #include "libclima/core/clock.h"
 #include "libclima/net/httpclient.h"
 
@@ -173,6 +174,11 @@ void OpenMeteoAirQualityProvider::setBaseUrl(const QUrl &url)
     m_baseUrl = url;
 }
 
+void OpenMeteoAirQualityProvider::setCache(CacheStore *cache)
+{
+    m_cache = cache;
+}
+
 // ---- identity and credit -------------------------------------------------------
 
 QString OpenMeteoAirQualityProvider::id() const
@@ -293,12 +299,49 @@ OpenMeteoAirQualityProvider::fetchAirQuality(const ForecastRequest &request)
     // request" has to mean one thing — libclima/net/requestkey.h.
     const QString key = RequestKey::forRequest(http).toString();
 
+    // The persistent half of the two caches this class uses. `m_lastParsed`
+    // below is a per-process memo that exists because a 304 carries no bytes;
+    // this is the one that survives a restart, and it is what makes the Air
+    // Quality tab draw on a train. §4.5 gives it a 60-minute TTL, because CAMS
+    // publishes twice a day and asking more often is asking for the same
+    // numbers.
+    const payloadcache::Hit cached = payloadcache::lookUp(m_cache, key);
+
+    if (cached.present && (cached.fresh || request.cachedOnly)) {
+        Result<AirQuality> adapted = parse(cached.payload, cached.fetchedAt);
+        if (adapted.hasValue()) {
+            adapted.value().providerId = id();
+            remember(adapted.value());
+            m_lastParsed.insert(key, adapted.value());
+            return QtFuture::makeReadyValueFuture(adapted);
+        }
+    }
+
+    const Coordinate coord = request.coord;
+
+    if (request.cachedOnly) {
+        Error error(ErrorKind::NotFound,
+                    QStringLiteral("nothing cached for %1").arg(coord.toKeyString()));
+        error.setProviderId(id());
+        return QtFuture::makeReadyValueFuture(Result<AirQuality>(error));
+    }
+
     QFuture<Result<HttpResponse>> transfer = m_http->send(http);
 
     return transfer.then(this,
-                         [this, key](const Result<HttpResponse> &result) -> Result<AirQuality> {
-        if (!result.hasValue())
+                         [this, key, cached, coord](const Result<HttpResponse> &result)
+                             -> Result<AirQuality> {
+        if (!result.hasValue()) {
+            if (cached.present) {
+                Result<AirQuality> stale = parse(cached.payload, cached.fetchedAt);
+                if (stale.hasValue()) {
+                    stale.value().providerId = id();
+                    remember(stale.value());
+                    return stale;
+                }
+            }
             return result.error();
+        }
 
         const HttpResponse &response = result.value();
 
@@ -318,6 +361,8 @@ OpenMeteoAirQualityProvider::fetchAirQuality(const ForecastRequest &request)
         // the provider because the provider is what turns bytes into an
         // AirQuality, and a 304 carries no bytes.
         if (response.notModified) {
+            payloadcache::touch(m_cache, key, DataKind::AirQuality, response);
+
             const auto remembered = m_lastParsed.constFind(key);
             if (remembered == m_lastParsed.cend()) {
                 // 304 for something we never had. The server is revalidating
@@ -344,6 +389,8 @@ OpenMeteoAirQualityProvider::fetchAirQuality(const ForecastRequest &request)
         parsed.value().providerId = id();
         remember(parsed.value());
         m_lastParsed.insert(key, parsed.value());
+        payloadcache::store(m_cache, key, id(), QStringLiteral("air-quality"),
+                            DataKind::AirQuality, coord, response);
         return parsed;
     });
 }

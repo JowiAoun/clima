@@ -113,5 +113,17 @@ Result<Forecast> adaptForecast(const QByteArray &body, const QString &providerId
 // failure.
 Attribution attribution();
 
+// What a parsed payload turns out to carry — read off the columns rather than
+// declared, because "which tabs exist here" is a question only the response can
+// answer. tests/fixtures/openmeteo/toronto-ecmwf-gaps.json is 72 hours of null
+// UV and null visibility beside a complete temperature series, which is "no
+// such variable here" and not "no value this hour".
+//
+// Nothing it returns is ever undetermined: a payload has been seen, so the
+// witness has testified. Lives here rather than in the live provider because
+// the fixture provider learns the same fact from the same bytes, and two copies
+// of this table would be two answers to "is there a UV tab".
+Capabilities capabilitiesFor(const Forecast &forecast);
+
 } // namespace openmeteo
 } // namespace clima

@@ -3,6 +3,7 @@
 
 #include "libclima/providers/metno/metnoforecastprovider.h"
 
+#include "libclima/cache/payloadcache.h"
 #include "libclima/core/clock.h"
 #include "libclima/net/httpclient.h"
 #include "libclima/providers/metno/symbolcode.h"
@@ -175,6 +176,11 @@ void MetNoForecastProvider::setBaseUrl(const QUrl &url)
     m_baseUrl = url;
 }
 
+void MetNoForecastProvider::setCache(CacheStore *cache)
+{
+    m_cache = cache;
+}
+
 // ---- identity and credit ---------------------------------------------------------
 
 QString MetNoForecastProvider::id() const
@@ -259,18 +265,60 @@ QFuture<Result<Forecast>> MetNoForecastProvider::fetchForecast(const ForecastReq
 
     const QString key = RequestKey::forRequest(http).toString();
 
-    const QTimeZone zone = request.timeZone;
+    const QTimeZone  zone  = request.timeZone;
+    const Coordinate coord = request.coord;
+
+    // The same cache read the primary does, for the same reason
+    // (libclima/cache/payloadcache.h). It matters more here, not less: the
+    // fallback is reached precisely when things are going wrong, and a fallback
+    // that can only answer from a working network is a fallback for one of the
+    // two outages it exists for.
+    const payloadcache::Hit cached = payloadcache::lookUp(m_cache, key);
+
+    if (cached.present && (cached.fresh || request.cachedOnly)) {
+        Result<Forecast> adapted = parse(cached.payload, zone, cached.fetchedAt);
+        if (adapted.hasValue()) {
+            adapted.value().providerId = id();
+            m_lastParsed.insert(key, adapted.value());
+            return QtFuture::makeReadyValueFuture(adapted);
+        }
+    }
+
+    if (request.cachedOnly) {
+        Error error(ErrorKind::NotFound,
+                    QStringLiteral("nothing cached for %1").arg(coord.toKeyString()));
+        error.setProviderId(id());
+        return QtFuture::makeReadyValueFuture(Result<Forecast>(error));
+    }
 
     QFuture<Result<HttpResponse>> transfer = m_http->send(http);
 
     return transfer.then(
-        this, [this, key, zone](const Result<HttpResponse> &result) -> Result<Forecast> {
-            if (!result.hasValue())
+        this,
+        [this, key, zone, cached, coord](const Result<HttpResponse> &result) -> Result<Forecast> {
+            if (!result.hasValue()) {
+                if (cached.present) {
+                    Result<Forecast> stale = parse(cached.payload, zone, cached.fetchedAt);
+                    if (stale.hasValue()) {
+                        stale.value().providerId = id();
+                        return stale;
+                    }
+                }
                 return result.error();
+            }
 
             const HttpResponse &response = result.value();
 
             if (response.notModified) {
+                if (cached.present) {
+                    payloadcache::touch(m_cache, key, DataKind::Forecast, response);
+                    Result<Forecast> confirmed = parse(cached.payload, zone, response.fetchedAt);
+                    if (confirmed.hasValue()) {
+                        confirmed.value().providerId = id();
+                        return confirmed;
+                    }
+                }
+
                 const auto remembered = m_lastParsed.constFind(key);
                 if (remembered == m_lastParsed.cend()) {
                     Error error(ErrorKind::Parse,
@@ -293,6 +341,8 @@ QFuture<Result<Forecast>> MetNoForecastProvider::fetchForecast(const ForecastReq
 
             parsed.value().providerId = id();
             m_lastParsed.insert(key, parsed.value());
+            payloadcache::store(m_cache, key, id(), QStringLiteral("locationforecast"),
+                                DataKind::Forecast, coord, response);
             return parsed;
         });
 }

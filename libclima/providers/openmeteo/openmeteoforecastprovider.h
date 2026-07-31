@@ -67,6 +67,7 @@
 
 namespace clima {
 
+class CacheStore;
 class Clock;
 class HttpClient;
 
@@ -81,6 +82,13 @@ public:
     // it rather than a preference.
     OpenMeteoForecastProvider(HttpClient *http, Clock *clock, QObject *parent = nullptr);
     ~OpenMeteoForecastProvider() override;
+
+    // Where the last good payload for a place is kept, so that the next start
+    // draws before the network answers and a start with no network draws at
+    // all. Not owned; must outlive this. Null turns the whole of §4.5's
+    // stale-while-revalidate off, which is what a test about parsing rather
+    // than about caching passes — the same shape OpenMeteoGeocoder takes.
+    void setCache(CacheStore *cache);
 
     // The id a 403 disables and a cache row is keyed by. Never changes.
     static QString providerId();
@@ -114,6 +122,7 @@ private:
 
     HttpClient *m_http  = nullptr;
     Clock      *m_clock = nullptr;
+    CacheStore *m_cache = nullptr;
 
     QUrl m_baseUrl;
 

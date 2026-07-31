@@ -16,6 +16,24 @@ namespace clima {
 namespace openmeteo {
 namespace {
 
+// Whether any hour in the series has a value for this field.
+//
+// This is the question that decides whether a metric tab exists, and it has to
+// be asked of the whole column rather than of the first row: the recorded
+// Toronto response has a null hour in the middle of an otherwise complete
+// series, and a first-row test would hide the temperature tab for a forecast
+// that begins with one gap.
+template <typename Field>
+bool anyHourHas(const QList<HourlyPoint> &hourly, Field field)
+{
+    for (const HourlyPoint &point : hourly) {
+        if ((point.*field).has_value())
+            return true;
+    }
+    return false;
+}
+
+
 Error parseError(const QString &message, const QString &providerId)
 {
     Error error(ErrorKind::Parse, message);
@@ -117,6 +135,73 @@ QString firstRaggedColumn(const QJsonObject &block, const QList<QLatin1String> &
 }
 
 } // namespace
+
+Capabilities capabilitiesFor(const Forecast &forecast)
+{
+    CapabilityFlags available;
+
+    if (!forecast.current.isEmpty())
+        available |= Capability::CurrentConditions;
+    if (!forecast.hourly.isEmpty())
+        available |= Capability::Hourly;
+    if (!forecast.daily.isEmpty())
+        available |= Capability::Daily;
+
+    const QList<HourlyPoint> &hourly = forecast.hourly;
+
+    if (anyHourHas(hourly, &HourlyPoint::temperature))
+        available |= Capability::Temperature;
+    if (anyHourHas(hourly, &HourlyPoint::apparentTemperature))
+        available |= Capability::ApparentTemperature;
+    if (anyHourHas(hourly, &HourlyPoint::dewPoint))
+        available |= Capability::DewPoint;
+    if (anyHourHas(hourly, &HourlyPoint::relativeHumidity))
+        available |= Capability::Humidity;
+    if (anyHourHas(hourly, &HourlyPoint::precipitation))
+        available |= Capability::Precipitation;
+    if (anyHourHas(hourly, &HourlyPoint::precipitationProbability))
+        available |= Capability::PrecipitationProbability;
+    if (anyHourHas(hourly, &HourlyPoint::windSpeed))
+        available |= Capability::Wind;
+    if (anyHourHas(hourly, &HourlyPoint::windGust))
+        available |= Capability::WindGust;
+    if (anyHourHas(hourly, &HourlyPoint::pressureMsl))
+        available |= Capability::Pressure;
+    if (anyHourHas(hourly, &HourlyPoint::cloudCover))
+        available |= Capability::CloudCover;
+    if (anyHourHas(hourly, &HourlyPoint::uvIndex))
+        available |= Capability::UvIndex;
+
+    // The two that ECMWF IFS does not carry, and the reason this function
+    // exists rather than a constant. toronto-ecmwf-gaps.json is 72 hours of
+    // null for both.
+    if (anyHourHas(hourly, &HourlyPoint::visibility))
+        available |= Capability::Visibility;
+
+    // The rain / showers / snow split, which is what lets a chart colour a
+    // band by phase rather than guessing from temperature.
+    if (anyHourHas(hourly, &HourlyPoint::rain) || anyHourHas(hourly, &HourlyPoint::showers)
+        || anyHourHas(hourly, &HourlyPoint::snowfall))
+        available |= Capability::PrecipitationType;
+
+    for (const HourlyPoint &point : hourly) {
+        if (point.weatherCode) {
+            available |= Capability::WeatherCode;
+            break;
+        }
+    }
+
+    for (const DailyPoint &day : forecast.daily) {
+        if (day.sunrise.isValid() || day.sunset.isValid()) {
+            available |= Capability::SunTimes;
+            break;
+        }
+    }
+
+    // Nothing is undetermined once a payload has been seen: the response is
+    // the witness, and it has now testified.
+    return Capabilities(available);
+}
 
 Attribution attribution()
 {

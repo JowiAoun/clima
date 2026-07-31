@@ -281,6 +281,21 @@ struct ForecastRequest {
 
     bool wantEnsemble = false;
 
+    // Answer from the cache or not at all. No socket is opened; an absent entry
+    // is ErrorKind::NotFound, and a stale one is served *as an answer* carrying
+    // the timestamp it was fetched at.
+    //
+    // This is step 1 of docs/04-architecture.md §4.1's first principle — "the UI
+    // renders from cache, then reconciles" — and it is a request flag rather
+    // than a separate method because the two steps have to go through the same
+    // chain: a cached read that skipped the registry would not know which
+    // provider last served this place, and would draw MET Norway's forecast
+    // labelled Open-Meteo the morning after an outage.
+    //
+    // A provider with no cache answers NotFound, which is correct: it has
+    // nothing, and saying so lets the caller go straight to step 2.
+    bool cachedOnly = false;
+
     // The zone the daily rollup is grouped by, and the zone the UI formats in.
     //
     // Not an afterthought: Open-Meteo resolves it from the coordinate with

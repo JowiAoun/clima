@@ -110,6 +110,7 @@
 
 namespace clima {
 
+class CacheStore;
 class Clock;
 class HttpClient;
 
@@ -131,6 +132,10 @@ public:
     // parameter so that the real URL is the default and a test has to say it is
     // doing something unusual.
     void setBaseUrl(const QUrl &url);
+
+    // Where the last good payload is kept across launches. Not owned, must
+    // outlive this, null turns the persistent half of §4.5 off.
+    void setCache(CacheStore *cache);
 
     [[nodiscard]] QString     id() const override;
     [[nodiscard]] QString     displayName() const override;
@@ -162,6 +167,7 @@ private:
 
     HttpClient *m_http = nullptr;
     Clock      *m_clock = nullptr;
+    CacheStore *m_cache = nullptr;
     QUrl        m_baseUrl;
 
     struct Verdict {

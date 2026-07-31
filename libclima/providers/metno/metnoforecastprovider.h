@@ -133,6 +133,7 @@
 
 namespace clima {
 
+class CacheStore;
 class Clock;
 class HttpClient;
 
@@ -149,6 +150,10 @@ public:
     ~MetNoForecastProvider() override;
 
     void setBaseUrl(const QUrl &url);
+
+    // Where the last good payload is kept. Same contract as the primary's:
+    // not owned, must outlive this, null turns stale-while-revalidate off.
+    void setCache(CacheStore *cache);
 
     [[nodiscard]] QString      id() const override;
     [[nodiscard]] QString      displayName() const override;
@@ -172,6 +177,7 @@ public:
 private:
     HttpClient *m_http = nullptr;
     Clock      *m_clock = nullptr;
+    CacheStore *m_cache = nullptr;
     QUrl        m_baseUrl;
 
     // The last successfully parsed payload per RequestKey, so a 304 — which

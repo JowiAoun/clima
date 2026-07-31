@@ -36,6 +36,8 @@ add_library(libclima STATIC
     cache/cachepolicy.cpp
     cache/cachestore.h
     cache/cachestore.cpp
+    cache/payloadcache.h
+    cache/payloadcache.cpp
     cache/migrations.h
     cache/migrations.cpp
     core/clock.h
