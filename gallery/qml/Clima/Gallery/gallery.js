@@ -95,7 +95,7 @@ var groups = [
         name: "Foundations",
         items: [
             { name: "Colour", kind: "palette",
-              blurb: "Every token in theme.js, over the page gradient it is composited on." },
+              blurb: "Every colour token, grouped by the role it plays, over the page gradient it is composited on." },
             { name: "Type", kind: "type",
               blurb: "The type scale. Sizes are tokens: a range is not a rule." }
         ]

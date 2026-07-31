@@ -181,7 +181,7 @@ Item {
             anchors.fill: parent
             anchors.margins: 10
             text: root.error
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.body
             wrapMode: Text.Wrap
             verticalAlignment: Text.AlignVCenter

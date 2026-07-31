@@ -223,13 +223,13 @@ Item {
         id: rail
         width: root.railWidth
         height: parent.height
-        color: Theme.color.surfaceRecede
+        color: Theme.surface.recede
 
         Text {
             id: railTitle
             x: 16; y: 16
             text: qsTr("Components")
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: Theme.type.cardTitle
             font.bold: true
         }
@@ -241,7 +241,7 @@ Item {
             text: root.flat.length === root.total
                   ? root.total
                   : root.flat.length + "/" + root.total
-            color: Theme.color.textDim
+            color: Theme.ink.dim
             font.pixelSize: Theme.type.body
         }
 
@@ -252,8 +252,8 @@ Item {
             width: rail.width - 24
             height: 28
             radius: Theme.metric.controlRadius
-            color: filterField.activeFocus ? Theme.color.surfaceRaised
-                                           : Theme.color.surfaceBase
+            color: filterField.activeFocus ? Theme.surface.raised
+                                           : Theme.surface.base
 
             TextInput {
                 id: filterField
@@ -261,11 +261,11 @@ Item {
                 anchors.leftMargin: 9
                 anchors.rightMargin: 9
                 verticalAlignment: TextInput.AlignVCenter
-                color: Theme.color.textPrimary
+                color: Theme.ink.primary
                 font.pixelSize: Theme.type.body
                 selectByMouse: true
-                selectionColor: Theme.color.accent
-                selectedTextColor: Theme.color.onAccent
+                selectionColor: Theme.accent.fill
+                selectedTextColor: Theme.accent.ink
                 clip: true
                 onTextChanged: root.cursor = 0
                 Keys.onEscapePressed: { text = ""; root.forceActiveFocus() }
@@ -277,7 +277,7 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     visible: filterField.text === "" && !filterField.activeFocus
                     text: qsTr("Filter")
-                    color: Theme.color.textDim
+                    color: Theme.ink.dim
                     font.pixelSize: Theme.type.body
                 }
             }
@@ -293,7 +293,7 @@ Item {
             x: 12
             y: filterBox.y + filterBox.height + 16
             text: qsTr("VIEWPORT")
-            color: Theme.color.textDim
+            color: Theme.ink.dim
             font.pixelSize: Theme.type.axis
             font.letterSpacing: 0.8
         }
@@ -322,10 +322,10 @@ Item {
                     width: viewportPicker.cellWidth
                     height: 26
                     radius: Theme.metric.controlRadius
-                    color: isCurrent ? Theme.color.surfaceRaised
-                                     : (vpHover.hovered ? Theme.color.surfaceBase : "transparent")
+                    color: isCurrent ? Theme.surface.raised
+                                     : (vpHover.hovered ? Theme.surface.base : "transparent")
                     border.width: 1
-                    border.color: isCurrent ? Theme.color.accent : Theme.color.gridLine
+                    border.color: isCurrent ? Theme.accent.fill : Theme.line.grid
 
                     Behavior on color {
                         ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
@@ -337,7 +337,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: vpButton.modelData.label
-                        color: vpButton.isCurrent ? Theme.color.textPrimary : Theme.color.textMuted
+                        color: vpButton.isCurrent ? Theme.ink.primary : Theme.ink.muted
                         font.pixelSize: Theme.type.axis
                     }
 
@@ -362,7 +362,7 @@ Item {
             elide: Text.ElideRight
             text: root.framed ? root.preset.w + " × " + root.preset.h
                               : qsTr("component's own size")
-            color: Theme.color.textDim
+            color: Theme.ink.dim
             font.pixelSize: Theme.type.axis
         }
 
@@ -412,7 +412,7 @@ Item {
                             topPadding: 14
                             bottomPadding: 4
                             text: parent.modelData.name.toUpperCase()
-                            color: Theme.color.textDim
+                            color: Theme.ink.dim
                             font.pixelSize: Theme.type.axis
                             font.letterSpacing: 0.8
                         }
@@ -428,8 +428,8 @@ Item {
                                 width: railList.width
                                 height: 28
                                 color: isCurrent
-                                       ? Theme.color.surfaceRaised
-                                       : (hover.hovered ? Theme.color.surfaceBase : "transparent")
+                                       ? Theme.surface.raised
+                                       : (hover.hovered ? Theme.surface.base : "transparent")
 
                                 function report() {
                                     root.currentRowY = mapToItem(railList, 0, 0).y
@@ -447,7 +447,7 @@ Item {
                                 Rectangle {
                                     width: 2
                                     height: parent.height
-                                    color: Theme.color.accent
+                                    color: Theme.accent.fill
                                     visible: row.isCurrent
                                 }
 
@@ -457,8 +457,8 @@ Item {
                                     width: parent.width - 26
                                     elide: Text.ElideRight
                                     text: row.modelData.name
-                                    color: row.isCurrent ? Theme.color.textPrimary
-                                                         : Theme.color.textMuted
+                                    color: row.isCurrent ? Theme.ink.primary
+                                                         : Theme.ink.muted
                                     font.pixelSize: Theme.type.body
                                 }
 
@@ -491,7 +491,7 @@ Item {
         Text {
             id: heading
             text: root.current ? root.current.name : ""
-            color: Theme.color.textPrimary
+            color: Theme.ink.primary
             font.pixelSize: 20
             font.bold: true
         }
@@ -502,7 +502,7 @@ Item {
             anchors.leftMargin: 10
             anchors.baseline: heading.baseline
             text: root.current && root.current.file ? root.current.file : ""
-            color: Theme.color.textDim
+            color: Theme.ink.dim
             font.pixelSize: Theme.type.body
         }
 
@@ -512,7 +512,7 @@ Item {
             anchors.topMargin: 4
             width: stage.width
             text: root.current ? root.current.blurb : ""
-            color: Theme.color.textMuted
+            color: Theme.ink.muted
             font.pixelSize: Theme.type.body
             wrapMode: Text.WordWrap
         }
@@ -620,7 +620,7 @@ Item {
                             radius: 6
                             color: "transparent"
                             border.width: 1
-                            border.color: Theme.color.switchBorder
+                            border.color: Theme.line.control
                         }
                     }
 
@@ -633,7 +633,7 @@ Item {
                             var sz = Math.round(spec.width) + " × " + Math.round(spec.height)
                             return lbl ? lbl + "  ·  " + sz : sz
                         }
-                        color: Theme.color.textDim
+                        color: Theme.ink.dim
                         font.pixelSize: Theme.type.axis
                     }
                 }
@@ -644,40 +644,83 @@ Item {
     Component {
         id: paletteView
 
-        Flow {
-            spacing: 14
+        Column {
+            spacing: 22
             width: pane.width
 
             Repeater {
                 // Read off the theme rather than transcribed, so a token added
-                // there appears here without anyone remembering to add it.
-                // Theme.names() and not Object.keys(): a token group is a
-                // QObject now, and Object.keys() on one of those hands back
-                // `objectName` and a change signal per token alongside the
-                // names anybody wanted.
-                model: Theme.names(Theme.color)
+                // to a role appears here without anyone remembering to add it.
+                // `colorRoles` is the one list that is maintained by hand and it
+                // is maintained in Theme.qml, next to the roles, rather than
+                // here: a role is a design decision and the tool that draws the
+                // palette should not be the place it is recorded.
+                model: Theme.colorRoles
 
                 delegate: Column {
+                    id: role
                     required property var modelData
-                    spacing: 5
+                    readonly property var group: Theme[modelData]
 
-                    Rectangle {
-                        width: 116
-                        height: 52
-                        radius: Theme.metric.controlRadius
-                        color: Theme.color[parent.modelData]
+                    spacing: 8
+                    width: parent.width
+
+                    // The role, named. Without it the page is 59 swatches in one
+                    // undifferentiated field, which is the flat list this whole
+                    // restructure existed to get rid of — and a palette that
+                    // does not show its groups cannot show that a token is in
+                    // the wrong one.
+                    Text {
+                        text: role.modelData
+                        color: Theme.ink.muted
+                        font.pixelSize: Theme.type.cardTitle
+                        font.bold: true
                     }
 
-                    Text {
-                        text: parent.modelData
-                        color: Theme.color.textPrimary
-                        font.pixelSize: Theme.type.axis
-                    }
+                    Flow {
+                        spacing: 14
+                        width: parent.width
 
-                    Text {
-                        text: String(Theme.color[parent.modelData])
-                        color: Theme.color.textDim
-                        font.pixelSize: Theme.type.axis
+                        Repeater {
+                            // Theme.names() and not Object.keys(): a token group
+                            // is a QObject now, and Object.keys() on one of those
+                            // hands back `objectName` and a change signal per
+                            // token alongside the names anybody wanted.
+                            //
+                            // Name *and* value are resolved out here, where the
+                            // role is in scope. A Repeater's delegate is a
+                            // component of its own, so reaching back into
+                            // `role.group` from inside one is an unqualified
+                            // access — the swatch is handed everything it needs
+                            // instead.
+                            model: Theme.names(role.group).map(function (token) {
+                                return { token: token, value: String(role.group[token]) }
+                            })
+
+                            delegate: Column {
+                                required property var modelData
+                                spacing: 5
+
+                                Rectangle {
+                                    width: 116
+                                    height: 52
+                                    radius: Theme.metric.controlRadius
+                                    color: parent.modelData.value
+                                }
+
+                                Text {
+                                    text: parent.modelData.token
+                                    color: Theme.ink.primary
+                                    font.pixelSize: Theme.type.axis
+                                }
+
+                                Text {
+                                    text: parent.modelData.value
+                                    color: Theme.ink.dim
+                                    font.pixelSize: Theme.type.axis
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -698,7 +741,7 @@ Item {
             // like".
             Text {
                 text: qsTr("family · %1").arg(Theme.type.family)
-                color: Theme.color.textDim
+                color: Theme.ink.dim
                 font.pixelSize: Theme.type.axis
             }
 
@@ -721,7 +764,7 @@ Item {
                     Text {
                         width: 150
                         text: parent.modelData
-                        color: Theme.color.textDim
+                        color: Theme.ink.dim
                         font.pixelSize: Theme.type.axis
                         anchors.baseline: parent.children[2].baseline
                     }
@@ -729,14 +772,14 @@ Item {
                     Text {
                         width: 44
                         text: Theme.type[parent.modelData] + "px"
-                        color: Theme.color.textDim
+                        color: Theme.ink.dim
                         font.pixelSize: Theme.type.axis
                         anchors.baseline: parent.children[2].baseline
                     }
 
                     Text {
                         text: qsTr("Partly cloudy, 27°")
-                        color: Theme.color.textPrimary
+                        color: Theme.ink.primary
                         font.pixelSize: Theme.type[parent.modelData]
                         font.bold: parent.modelData.indexOf("reading") === 0
                                    || parent.modelData === "status"
@@ -751,7 +794,7 @@ Item {
         anchors.centerIn: parent
         visible: root.current === null
         text: qsTr("Nothing matches that filter.")
-        color: Theme.color.textDim
+        color: Theme.ink.dim
         font.pixelSize: Theme.type.status
     }
 }

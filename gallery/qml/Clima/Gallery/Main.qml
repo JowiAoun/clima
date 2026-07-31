@@ -39,7 +39,7 @@ Window {
     // silently clamps a --size is a screenshot at a size nobody chose.
     minimumWidth: 360
     minimumHeight: 480
-    color: Theme.color.pageBg
+    color: Theme.page.bg
     title: qsTr("Clima — components")
 
     // --card and --details each show one thing on its own; the catalogue is
