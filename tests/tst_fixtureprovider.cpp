@@ -51,6 +51,7 @@ private Q_SLOTS:
 
     void theCatalogueIsTheDirectoryListing();
     void torontoIsFrozenAtTheInstantTheMockDescribed();
+    void everyFixtureDescribesADayItsOwnPayloadContains();
     void everyFixtureParses();
 
     void kampalaHasOneWetHourAndItIsNineInTheMorning();
@@ -116,15 +117,75 @@ void TestFixtureProvider::torontoIsFrozenAtTheInstantTheMockDescribed()
     const Fixture fixture = fixtures::load(QStringLiteral("toronto"));
     QVERIFY(fixture.isValid());
 
-    // 2026-07-30, 12:28 PM in Toronto — the observation app/qml/Clima's mock
-    // data always claimed to be describing, and therefore the instant that
-    // keeps the committed screenshots comparable to the ones taken before there
-    // was any live data.
+    // 12:28 PM in Toronto — the observation app/qml/Clima's mock data always
+    // claimed to be describing, and therefore the instant that keeps the
+    // committed screenshots comparable to the ones taken before there was any
+    // live data. The date is the payload's own; see below for why that is not
+    // a detail.
     QCOMPARE(fixture.recordedAt,
-             QDateTime(QDate(2026, 7, 30), QTime(16, 28), QTimeZone::UTC));
+             QDateTime(QDate(2026, 7, 31), QTime(16, 28), QTimeZone::UTC));
 
     QCOMPARE(fixture.place.name, QStringLiteral("Toronto"));
     QCOMPARE(fixture.place.timezone, QStringLiteral("America/Toronto"));
+}
+
+// The bug this exists for shipped, looked completely plausible, and nothing
+// errored. toronto/fixture.json said recordedAt 2026-07-30; forecast.json's
+// daily array ran 07-29, 07-30, 07-31. So the frozen clock named a day the
+// recording did not describe. The app then did exactly what it should with the
+// clock it was handed and resolved "today" to 07-30 — the middle of the array —
+// which slid every label one place along: the card headed Today drew the
+// previous day's high and low, and the payload's own today sat under Tomorrow.
+//
+// It cannot be caught by looking, because the page is entirely self-consistent;
+// it is only wrong relative to the recording. So assert the relationship
+// directly: the instant the clock is frozen at must fall on a day the payload
+// has a daily row for, with a day either side so Yesterday and Tomorrow have
+// something real to draw.
+void TestFixtureProvider::everyFixtureDescribesADayItsOwnPayloadContains()
+{
+    for (const QString &name : fixtures::names()) {
+        const Fixture  fixture  = fixtures::load(name);
+        const Forecast forecast = forecastOf(name);
+        QVERIFY2(!forecast.daily.isEmpty(), qPrintable(name));
+
+        const QTimeZone zone(fixture.place.timezone.toUtf8());
+        QVERIFY2(zone.isValid(), qPrintable(name));
+        const QDate frozenDay = fixture.recordedAt.toTimeZone(zone).date();
+
+        QDate first = forecast.daily.constFirst().date;
+        QDate last  = first;
+        bool  found = false;
+        for (const DailyPoint &day : forecast.daily) {
+            if (day.date == frozenDay)
+                found = true;
+            if (day.date < first) first = day.date;
+            if (day.date > last)  last  = day.date;
+        }
+
+        QVERIFY2(found,
+                 qPrintable(QStringLiteral(
+                     "%1: fixture.json is frozen at %2 (%3 local) but forecast.json's daily "
+                     "array only covers %4 to %5. The day strip will label the wrong day Today.")
+                                .arg(name, fixture.recordedAt.toString(Qt::ISODate),
+                                     frozenDay.toString(Qt::ISODate),
+                                     first.toString(Qt::ISODate), last.toString(Qt::ISODate))));
+
+        // A day either side, but only for the fixture the app actually opens
+        // on. That one backs every committed screenshot, so its day strip has
+        // to have a real Yesterday and a real Tomorrow to draw. The others are
+        // narrow recordings kept for one assertion each — kampala is two days
+        // long because it exists to pin a single wet hour — and demanding a
+        // week of context from them would mean re-recording data that other
+        // tests pin to the byte.
+        if (name != fixtures::defaultName())
+            continue;
+
+        QVERIFY2(frozenDay > first && frozenDay < last,
+                 qPrintable(QStringLiteral("%1: frozen day %2 is at the edge of %3..%4")
+                                .arg(name, frozenDay.toString(Qt::ISODate),
+                                     first.toString(Qt::ISODate), last.toString(Qt::ISODate))));
+    }
 }
 
 void TestFixtureProvider::everyFixtureParses()
@@ -261,7 +322,7 @@ void TestFixtureProvider::theCreditIsOpenMeteosAndSaysItIsARecording()
     QCOMPARE(credit.name, QStringLiteral("Open-Meteo"));
     QCOMPARE(credit.creditLine, QStringLiteral("Weather data by Open-Meteo.com"));
     QVERIFY(credit.note.contains(QStringLiteral("Recorded")));
-    QVERIFY(credit.note.contains(QStringLiteral("2026-07-30")));
+    QVERIFY(credit.note.contains(QStringLiteral("2026-07-31")));
 }
 
 QTEST_MAIN(TestFixtureProvider)
