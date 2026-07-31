@@ -51,6 +51,7 @@
 #include "libclima/cache/migrations.h"
 #include "libclima/core/result.h"
 #include "libclima/domain/coordinate.h"
+#include "libclima/domain/place.h"
 #include "libclima/net/validatorstore.h"
 
 #include <QByteArray>
@@ -82,25 +83,9 @@ struct CacheEntry {
     Validators validators;
 };
 
-// A saved location.
-struct Place {
-    qint64  id = 0;          // 0 until saved
-    QString name;
-    QString admin1;          // state, province, région
-    QString country;
-    QString countryCode;     // ISO 3166-1 alpha-2, used for alert region routing
-    QString timezone;        // IANA name, from Open-Meteo's timezone=auto
-
-    // Full precision, on purpose. Requests round to four decimals; what the
-    // user chose is a different fact from what we ask for, and only one of them
-    // can be recovered from the other.
-    Coordinate coordinate;
-
-    std::optional<double> elevationMetres;
-    bool                  favourite = false;
-    int                   sortOrder = 0;
-    QDateTime             addedAt;
-};
+// A saved location. Declared in libclima/domain/place.h — it moved out of this
+// header when the geocoder and the location model turned out to need it, and
+// including QSqlDatabase to name a place was the wrong trade.
 
 class CacheStore final : public ValidatorStore
 {

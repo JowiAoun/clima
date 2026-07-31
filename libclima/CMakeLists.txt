@@ -47,15 +47,45 @@ add_library(libclima STATIC
     domain/airquality.cpp
     domain/coordinate.h
     domain/coordinate.cpp
+    domain/place.h
+    domain/place.cpp
     domain/forecast.h
     domain/forecast.cpp
+    domain/hourconvention.h
+    domain/hourconvention.cpp
     domain/reading.h
+    domain/timeaxis.h
+    domain/timeaxis.cpp
+    domain/weathercode.h
+    domain/weathercode.cpp
     providers/iforecastprovider.h
     providers/iforecastprovider.cpp
     providers/registry.h
     providers/registry.cpp
+    places/devicelocator.h
+    places/devicelocator.cpp
+    places/locationcontroller.h
+    places/locationcontroller.cpp
+    places/placesearchmodel.h
+    places/placesearchmodel.cpp
     providers/airquality/openmeteoairqualityprovider.h
     providers/airquality/openmeteoairqualityprovider.cpp
+    providers/geocoding/geocodingparser.h
+    providers/geocoding/geocodingparser.cpp
+    providers/geocoding/geonamesindex.h
+    providers/geocoding/geonamesindex.cpp
+    providers/geocoding/igeocoder.h
+    providers/geocoding/igeocoder.cpp
+    providers/geocoding/offlinereversegeocoder.h
+    providers/geocoding/offlinereversegeocoder.cpp
+    providers/geocoding/openmeteogeocoder.h
+    providers/geocoding/openmeteogeocoder.cpp
+    providers/openmeteo/openmeteoadapter.h
+    providers/openmeteo/openmeteoadapter.cpp
+    providers/openmeteo/openmeteoforecastprovider.h
+    providers/openmeteo/openmeteoforecastprovider.cpp
+    providers/openmeteo/openmeteovariables.h
+    providers/openmeteo/openmeteovariables.cpp
     providers/metno/metnoforecastprovider.h
     providers/metno/metnoforecastprovider.cpp
     providers/metno/symbolcode.h
@@ -83,6 +113,59 @@ set_target_properties(libclima PROPERTIES
 # string `clima --version` prints cannot disagree. See climaidentity.h.in — this
 # is a compliance string, not a nicety.
 configure_file(climaidentity.h.in climaidentity.h @ONLY)
+
+# ---- the bundled place index ------------------------------------------------
+#
+# Four hundred kilobytes of GeoNames, compiled into the library, and the reason
+# it is here rather than fetched is written out in
+# providers/geocoding/geonamesindex.h: Nominatim answers 403 to the first
+# reverse-geocoding request a properly identified client sends it, so the lookup
+# has to be local. Being local also makes it deterministic, which is what golden
+# images depend on, and offline, which is the app's headline property.
+#
+# The data is NOT ours. It is GeoNames, CC-BY 4.0, and REUSE.toml declares it
+# with GeoNames as the copyright holder rather than with ours — the same
+# distinction the bundled typeface gets in app/CMakeLists.txt, and for the same
+# reason. tools/geonames/ is the packer, and its output is committed so that a
+# build never needs a network.
+#
+# BASE strips the source path so the file lands at `:/clima/cities15000.cgx`
+# rather than at `:/clima/providers/geocoding/data/cities15000.cgx`. A resource
+# alias is what GeonamesIndex::bundledResourcePath() names, and a path that
+# repeats the source layout is a path that changes when the source layout does.
+qt_add_resources(libclima "clima_geonames"
+    PREFIX "/clima"
+    BASE providers/geocoding/data
+    FILES providers/geocoding/data/cities15000.cgx
+)
+
+# ---- optional: Qt Positioning -----------------------------------------------
+#
+# "My location" — docs/04-architecture.md §4.9 puts Qt Positioning against
+# GeoClue2 on Linux, Windows Location on Windows and CoreLocation on macOS.
+#
+# The find_package is at the TOP LEVEL and not here, which is worth a note
+# because everything else about this target is decided in this file. An
+# imported target created by a find_package in a subdirectory is visible only
+# in that subdirectory and below, and Qt Positioning brings a set of plugin
+# targets with it that Qt's own executable finalizer resolves from *app/* and
+# *gallery/* — sibling directories that would never see them. The build fails
+# there, naming Qt6::QGeoPositionInfoSourceFactoryGeoclue2Plugin, which is a
+# long way from the line that caused it.
+#
+# Qt6::Positioning links Qt6::Core and nothing else — checked, and it has to
+# be: clima_forbid_gui() at the bottom of this file would refuse the configure
+# otherwise, which is exactly the guard doing its job. The QML bindings that
+# would have pulled in QtQml are a separate Qt6::PositioningQuick target that
+# we do not link.
+if(TARGET Qt6::Positioning)
+    target_sources(libclima PRIVATE
+        places/qtpositioninglocator.h
+        places/qtpositioninglocator.cpp
+    )
+    target_compile_definitions(libclima PRIVATE CLIMA_HAVE_POSITIONING)
+    target_link_libraries(libclima PRIVATE Qt6::Positioning)
+endif()
 
 # ---- include paths ----------------------------------------------------------
 #

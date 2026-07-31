@@ -43,6 +43,16 @@ corresponding Qt source or a written offer from infrastructure we control**.
   `--share=network`, `--socket=wayland`, `--socket=fallback-x11`, and *no* `--filesystem=host`.
 - **Tray**: StatusNotifierItem is the only thing that works across Plasma and
   appindicator-based shells; plain XEmbed trays are dead.
+- **Location needs the portal, and Qt Positioning does not use it.** ⚠️ "Use my location"
+  goes through `QGeoPositionInfoSource`, whose Linux backend talks to GeoClue2 on the
+  session bus — which is not reachable from inside a Flatpak sandbox. The route in a
+  sandbox is `org.freedesktop.portal.Location`, so the manifest needs
+  `--talk-name=org.freedesktop.portal.Desktop` and the user gets a portal prompt on first
+  use. Until that is done, `clima-geocode`'s locator reports `Failure::Unavailable` under
+  Flatpak and the app falls back to manual search, which is a degraded feature and not a
+  broken one — see `libclima/places/devicelocator.h`. Nothing else needs location:
+  *reverse* geocoding is offline and bundled, so turning a coordinate into "Toronto,
+  Ontario" never leaves the sandbox.
 
 ## 7.3 CI matrix
 

@@ -66,6 +66,42 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "2016 The Inter Project Authors (https://github.com/rsms/inter)"
 SPDX-License-Identifier = "OFL-1.1"
 
+# The bundled place index, and the recorded geocoding responses beside it.
+#
+# THIS DATA IS NOT OURS. It is GeoNames — https://www.geonames.org — under
+# CC-BY 4.0, and the copyright line below has to say so. Declaring it as
+# "2026 Jowi Aoun" would be claiming authorship of a database thirty thousand
+# people have contributed to, and it would also break the attribution CC-BY
+# requires in exchange for our being allowed to ship it at all.
+#
+# cities15000.cgx is tools/geonames/pack.mjs's output: the cities15000 dump
+# reduced to seven columns and deflated. A transformation of a CC-BY work is a
+# work under the same licence; trimming columns and changing the container does
+# not make it ours. See libclima/providers/geocoding/geonamesindex.h for what
+# it is for, which begins with Nominatim answering 403 to the first
+# reverse-geocoding request a properly identified client sends it.
+#
+# The four JSON files are responses recorded from Open-Meteo's geocoding API,
+# which serves the same GeoNames database. They are here because
+# docs/04-architecture.md §4.11 wants golden-file provider tests "against
+# recorded API responses committed to tests/fixtures/ — no network in CI", and
+# they carry GeoNames rows, so they carry the GeoNames credit.
+#
+# The attribution obligation is also kept where a human can see it:
+# docs/02-data-sources.md §2.9 lists GeoNames as CC-BY 4.0, and both geocoders
+# return the credit line from attribution() for the About → Data sources screen.
+[[annotations]]
+path = [
+    "libclima/providers/geocoding/data/cities15000.cgx",
+    "tests/fixtures/geocoding/get-toronto.json",
+    "tests/fixtures/geocoding/search-kigali.json",
+    "tests/fixtures/geocoding/search-no-results.json",
+    "tests/fixtures/geocoding/search-toronto.json",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "GeoNames (https://www.geonames.org)"
+SPDX-License-Identifier = "CC-BY-4.0"
+
 # Recorded air-quality and forecast responses, for the golden-file tests.
 #
 # ALSO NOT OURS, and for the same reason as the GeoNames block above: these are

@@ -80,9 +80,15 @@ clima_add_test(tst_httpclient)
 clima_add_test(tst_cachestore)
 clima_add_test(tst_networkisolation)
 clima_add_test(tst_sourcerules)
+clima_add_test(tst_weathercode)
+clima_add_test(tst_timeaxis)
+clima_add_test(tst_openmeteoadapter)
 clima_add_test(tst_airquality)
 clima_add_test(tst_metno)
 clima_add_test(tst_providerregistry)
+clima_add_test(tst_geocoding)
+clima_add_test(tst_reversegeocode)
+clima_add_test(tst_places)
 
 # ---- the binary-level no-GUI check ------------------------------------------
 #

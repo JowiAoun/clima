@@ -63,5 +63,5 @@ Flagged so nobody quotes them as fact:
 | Supercell Wx licence = MIT | Believed; confirm from the repo's LICENSE |
 | MeteoAlarm's terms for third-party (non-member) API/feed consumers | **Unresolved — blocks M4 planning confidence** |
 | Whether Open-Meteo's free-tier limits are per-IP (assumed) rather than per-app | Assumed; matters for §2.8's "no backend needed" conclusion |
-| Reverse geocoding strategy (Nominatim policy vs. bundled offline admin polygons) | Undecided |
+| Reverse geocoding strategy (Nominatim policy vs. bundled offline data) | **Resolved — offline.** Nominatim answered HTTP 403 to the first request from a properly identified client, tested 2026-07-31. Clima bundles a packed GeoNames `cities15000` index instead (`tools/geonames/`, 412 KiB) |
 | Exact Flathub `org.kde.Platform` Qt version at our M7 date | Moves; recheck before freezing the Qt floor |

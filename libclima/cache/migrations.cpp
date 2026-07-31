@@ -179,12 +179,95 @@ Status createVersion1(QSqlDatabase &database)
     return ok();
 }
 
+// ---- version 2 --------------------------------------------------------------
+//
+// Places gain the two things the geocoder needs, and lose a column that was
+// never used.
+//
+// ---- geonames_id: what makes a saved place survive a rename -----------------
+//
+// Every place in Clima comes from GeoNames — the forward geocoder is
+// Open-Meteo's search API, which is GeoNames, and the offline reverse geocoder
+// is a packed cities15000, which is also GeoNames. So a place has an upstream
+// identity, and until now the schema threw it away and identified a saved
+// location by its name and coordinate.
+//
+// That is exactly the identity that drifts. GeoNames rebuilds daily; a name
+// gains or loses an accent between snapshots (Open-Meteo's copy says
+// "Reykjavik", today's dump says "Reykjavík"), a city is renamed, a country
+// reorganises its provinces. Every one of those turns a saved home into a
+// second row that looks new, and the user's home moves. Keyed on 3413829 it
+// does not, and `GET /v1/get?id=3413829` re-reads the description whenever it
+// is worth refreshing.
+//
+// UNIQUE, so that adding the same city twice is a constraint failure rather
+// than two rows the user then has to notice. NULL is allowed and repeatable —
+// SQLite does not consider two NULLs equal — which is what lets any number of
+// dropped map pins, which have no GeoNames identity at all, coexist.
+//
+// ---- favourite becomes is_home ----------------------------------------------
+//
+// `favourite` was created in v1 and never read by anything. What the UI
+// actually has is a home marker: app/qml/Clima/LocationBar.qml draws one ring
+// and emits homeToggled(), and the app opens on the home place from cache
+// before any network call completes. One concept, one column.
+//
+// A new nullable column rather than RENAME COLUMN, because the v1 column was
+// `NOT NULL DEFAULT 0` and NOT NULL is the one thing that would defeat the
+// partial index below: a non-home row has to be able to hold NULL. SQLite
+// cannot relax a constraint in place, so the column is replaced and the old one
+// dropped. DROP COLUMN needs SQLite 3.35 (2021), well below anything shipping
+// a Qt 6.
+//
+// The partial unique index is what makes "exactly one home" a property of the
+// database rather than a rule the code above it remembers. `WHERE is_home = 1`
+// indexes only the home row; every other row stores NULL there, and SQLite
+// allows any number of NULLs under a unique index. A second home is then a
+// failed statement, at the moment it happens, rather than a UI that shows two
+// houses and picks one arbitrarily on the next start.
+Status createVersion2(QSqlDatabase &database)
+{
+    Status status = execOrFail(database, QStringLiteral(
+        "ALTER TABLE places ADD COLUMN is_home INTEGER"));
+    if (!status)
+        return status;
+
+    // The lowest-numbered favourite and no other. v1 allowed any number of
+    // them, the index below allows one home, and a migration that fails on a
+    // database somebody happened to have two favourites in is a migration that
+    // refuses to open their cache. Promoting the first is the only outcome
+    // here that is both deterministic and non-destructive.
+    status = execOrFail(database, QStringLiteral(
+        "UPDATE places SET is_home = 1 "
+        "WHERE id = (SELECT MIN(id) FROM places WHERE favourite = 1)"));
+    if (!status)
+        return status;
+
+    status = execOrFail(database, QStringLiteral("ALTER TABLE places DROP COLUMN favourite"));
+    if (!status)
+        return status;
+
+    status = execOrFail(database, QStringLiteral(
+        "ALTER TABLE places ADD COLUMN geonames_id INTEGER"));
+    if (!status)
+        return status;
+
+    status = execOrFail(database, QStringLiteral(
+        "CREATE UNIQUE INDEX places_geonames_id ON places (geonames_id)"));
+    if (!status)
+        return status;
+
+    return execOrFail(database, QStringLiteral(
+        "CREATE UNIQUE INDEX places_home ON places (is_home) WHERE is_home = 1"));
+}
+
 } // namespace
 
 QList<Migration> defaultMigrations()
 {
     return {
         Migration{ 1, QStringLiteral("places, forecast_blob, settings"), createVersion1 },
+        Migration{ 2, QStringLiteral("places: geonames_id, is_home"), createVersion2 },
     };
 }
 

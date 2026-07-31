@@ -84,6 +84,34 @@ clima_guard_qt_components(${clima_qt_components})
 find_package(Qt6 6.8 REQUIRED COMPONENTS ${clima_qt_components})
 qt_standard_project_setup(REQUIRES 6.8)
 
+# ---- the one optional Qt module ---------------------------------------------
+#
+# Qt Positioning backs "use my location" (§4.9: GeoClue2 on Linux, Windows
+# Location, CoreLocation). It is QUIET and not REQUIRED, and both words are
+# deliberate:
+#
+#   * Optional, because a packager should not have to satisfy a dependency for
+#     a feature their users may never press. libclima compiles the backend out
+#     when this is absent and DeviceLocator::create() hands back a locator that
+#     reports Unavailable — the same branch a user who denied permission takes,
+#     so there is one code path and it is exercised either way.
+#
+#   * Here rather than in libclima/, where the code that uses it lives, because
+#     a find_package in a subdirectory creates targets only that subdirectory
+#     can see. Qt Positioning brings plugin targets that Qt's own executable
+#     finalizer resolves from app/ and gallery/, and those are siblings.
+#
+# It goes through the licence guard like everything else. Qt Positioning is
+# LGPLv3-or-commercial, not one of the GPLv3-only modules.
+clima_guard_qt_components(Positioning)
+find_package(Qt6 6.8 QUIET COMPONENTS Positioning)
+
+if(NOT TARGET Qt6::Positioning)
+    message(STATUS
+        "clima: Qt6::Positioning was not found, so \"use my location\" is compiled out. "
+        "Everything else works; the user searches for a place by name.")
+endif()
+
 # Where qt_add_qml_module lays out its module directories. This is not a tidiness
 # preference — it is what makes the build's own QML modules discoverable as
 # modules rather than as resources baked into one executable:
@@ -125,6 +153,22 @@ endif()
 # by CLIMA_DEV_TOOLS, which is what that option was declared for.
 if(CLIMA_DEV_TOOLS)
     add_subdirectory(tools/provider-probe)
+
+    # And its opposite number: the same shape of report, built from a *live*
+    # fetch rather than from a recording. The two answer different questions
+    # and neither replaces the other — a recorded fixture guards against
+    # regression in us, and only a real request notices Open-Meteo renaming a
+    # field or changing a unit. See tools/openmeteo-probe/main.cpp.
+    add_subdirectory(tools/openmeteo-probe)
+
+    # And the geocoding one, which is two harnesses in a trenchcoat: a live
+    # forward search, and an offline reverse lookup that prints the distance
+    # and whether the point was inside the settlement's modelled footprint.
+    # The second half is there because the ranking rule in
+    # libclima/providers/geocoding/geonamesindex.h is exactly the kind of
+    # heuristic that passes four test coordinates and says something silly
+    # about the fifth.
+    add_subdirectory(tools/geonames)
 endif()
 
 # enable_testing() has to be called from the top-level directory or `ctest

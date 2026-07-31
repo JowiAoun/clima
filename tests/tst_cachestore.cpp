@@ -42,7 +42,7 @@ private Q_SLOTS:
     void validatorsRoundTripThroughTheStore();
     void aValidatorOnlyRowIsNotACacheHit();
 
-    void migrationFromV1ToV2KeepsTheData();
+    void migrationToTheNextVersionKeepsTheData();
     void aFailingMigrationRollsBackEntirely();
     void aDatabaseFromTheFutureIsRefused();
 
@@ -73,7 +73,7 @@ void TestCacheStore::openCreatesTheSchema()
     const Status status = store.open(QStringLiteral(":memory:"));
     QVERIFY2(status.hasValue(), qPrintable(status.error().toString()));
     QVERIFY(store.isOpen());
-    QCOMPARE(store.schemaVersion(), 1);
+    QCOMPARE(store.schemaVersion(), highestVersion(defaultMigrations()));
 
     // The four tables the engine needs on day one, proved by using them rather
     // than by reading sqlite_master: a table that exists but whose columns do
@@ -294,7 +294,7 @@ void TestCacheStore::placesRoundTripAndKeepFullPrecision()
     berlin.timezone = QStringLiteral("Europe/Berlin");
     berlin.coordinate = Coordinate{ 52.5200066, 13.4049540 };
     berlin.elevationMetres = 74.0;
-    berlin.favourite = true;
+    berlin.isHome = true;
     berlin.sortOrder = 0;
 
     QVERIFY(store.savePlace(berlin).hasValue());
@@ -319,17 +319,17 @@ void TestCacheStore::placesRoundTripAndKeepFullPrecision()
     // one of the two can be recovered from the other.
     QCOMPARE(saved.value().at(0).coordinate.latitude, 52.5200066);
     QCOMPARE(saved.value().at(0).elevationMetres.value(), 74.0);
-    QVERIFY(saved.value().at(0).favourite);
+    QVERIFY(saved.value().at(0).isHome);
 
     // Non-ASCII survives the round trip. It is a weather app; half the place
     // names in Europe have a diacritic in them.
     QCOMPARE(saved.value().at(1).name, QStringLiteral("Tromsø"));
 
     // An update keeps the id.
-    berlin.favourite = false;
+    berlin.isHome = false;
     QVERIFY(store.savePlace(berlin).hasValue());
     QCOMPARE(store.places().value().size(), 2);
-    QVERIFY(!store.places().value().at(0).favourite);
+    QVERIFY(!store.places().value().at(0).isHome);
 
     QVERIFY(store.removePlace(berlin.id).hasValue());
     QCOMPARE(store.places().value().size(), 1);
@@ -403,7 +403,7 @@ void TestCacheStore::aValidatorOnlyRowIsNotACacheHit()
 
 // ---- migrations -------------------------------------------------------------
 
-void TestCacheStore::migrationFromV1ToV2KeepsTheData()
+void TestCacheStore::migrationToTheNextVersionKeepsTheData()
 {
     // A real file rather than :memory:, because the point of this test is that
     // a database written by one build is opened by the next one.
@@ -413,12 +413,17 @@ void TestCacheStore::migrationFromV1ToV2KeepsTheData()
 
     FrozenClock clock(QDateTime(QDate(2026, 3, 14), QTime(9, 0), QTimeZone::UTC));
 
-    // The v2 the product does not have yet. Passing the migration list in is
-    // what makes the *runner* testable without waiting for the schema to need
-    // a second version — see libclima/cache/migrations.h.
-    QList<Migration> withV2 = defaultMigrations();
-    withV2.append(Migration{
-        2, QStringLiteral("places.notes"), [](QSqlDatabase &database) -> Status {
+    // The next version the product does not have yet. Passing the migration
+    // list in is what makes the *runner* testable without waiting for the
+    // schema to need another version — see libclima/cache/migrations.h. The
+    // number is one past whatever defaultMigrations() currently ends at, so
+    // this test does not have to be edited every time the product migrates.
+    const int current = highestVersion(defaultMigrations());
+    const int next = current + 1;
+
+    QList<Migration> withNext = defaultMigrations();
+    withNext.append(Migration{
+        next, QStringLiteral("places.notes"), [](QSqlDatabase &database) -> Status {
             QSqlQuery query(database);
             if (!query.exec(QStringLiteral(
                     "ALTER TABLE places ADD COLUMN notes TEXT NOT NULL DEFAULT ''")))
@@ -426,11 +431,11 @@ void TestCacheStore::migrationFromV1ToV2KeepsTheData()
             return ok();
         } });
 
-    // Open at v1 and write something worth keeping.
+    // Open at the product's version and write something worth keeping.
     {
         CacheStore store(&clock);
-        QVERIFY2(store.open(path, defaultMigrations()).hasValue(), "v1 open");
-        QCOMPARE(store.schemaVersion(), 1);
+        QVERIFY2(store.open(path, defaultMigrations()).hasValue(), "open at the current version");
+        QCOMPARE(store.schemaVersion(), current);
 
         Place place;
         place.name = QStringLiteral("Berlin");
@@ -439,12 +444,12 @@ void TestCacheStore::migrationFromV1ToV2KeepsTheData()
         QVERIFY(store.put(entry(QStringLiteral("f"), DataKind::Forecast, clock.now())).hasValue());
     }
 
-    // Reopen with v2 available.
+    // Reopen with the next version available.
     {
         CacheStore store(&clock);
-        const Status status = store.open(path, withV2);
+        const Status status = store.open(path, withNext);
         QVERIFY2(status.hasValue(), qPrintable(status.error().toString()));
-        QCOMPARE(store.schemaVersion(), 2);
+        QCOMPARE(store.schemaVersion(), next);
 
         // Forward-only means the data is carried, not rebuilt.
         const Result<QList<Place>> places = store.places();
@@ -458,12 +463,12 @@ void TestCacheStore::migrationFromV1ToV2KeepsTheData()
                  QByteArrayLiteral(R"({"hourly":{"temperature_2m":[3.1,3.4]}})"));
     }
 
-    // Reopening at v2 again applies nothing and stays at v2 — migrations run
-    // once, and running them twice would fail on the duplicate column.
+    // Reopening again applies nothing and stays put — migrations run once, and
+    // running them twice would fail on the duplicate column.
     {
         CacheStore store(&clock);
-        QVERIFY2(store.open(path, withV2).hasValue(), "second v2 open");
-        QCOMPARE(store.schemaVersion(), 2);
+        QVERIFY2(store.open(path, withNext).hasValue(), "second open at the next version");
+        QCOMPARE(store.schemaVersion(), next);
     }
 }
 
@@ -475,8 +480,10 @@ void TestCacheStore::aFailingMigrationRollsBackEntirely()
 
     FrozenClock clock;
 
+    const int broken_version = highestVersion(defaultMigrations()) + 1;
+
     QList<Migration> broken = defaultMigrations();
-    broken.append(Migration{ 2, QStringLiteral("deliberately broken"),
+    broken.append(Migration{ broken_version, QStringLiteral("deliberately broken"),
                              [](QSqlDatabase &database) -> Status {
                                  QSqlQuery query(database);
                                  query.exec(QStringLiteral(
@@ -497,17 +504,19 @@ void TestCacheStore::aFailingMigrationRollsBackEntirely()
         const Status status = store.open(path, broken);
         QVERIFY(!status.hasValue());
         QCOMPARE(status.errorKind(), ErrorKind::Storage);
-        QVERIFY2(status.error().message().contains(QStringLiteral("migration 2")),
+        QVERIFY2(status.error().message().contains(
+                     QStringLiteral("migration %1").arg(broken_version)),
                  qPrintable(status.error().message()));
     }
 
-    // Still v1, and still openable. A half-applied migration would leave the
-    // file at v2 with a column the code does not know about, or at v1 with a
-    // column it does — both unrecoverable without deleting the cache.
+    // Still at the product's version, and still openable. A half-applied
+    // migration would leave the file one version on with a column the code does
+    // not know about, or one version back with a column it does — both
+    // unrecoverable without deleting the cache.
     {
         CacheStore store(&clock);
-        QVERIFY2(store.open(path, defaultMigrations()).hasValue(), "reopen at v1");
-        QCOMPARE(store.schemaVersion(), 1);
+        QVERIFY2(store.open(path, defaultMigrations()).hasValue(), "reopen unchanged");
+        QCOMPARE(store.schemaVersion(), broken_version - 1);
     }
 }
 
@@ -519,19 +528,21 @@ void TestCacheStore::aDatabaseFromTheFutureIsRefused()
 
     FrozenClock clock;
 
-    QList<Migration> withV2 = defaultMigrations();
-    withV2.append(Migration{ 2, QStringLiteral("places.notes"),
-                             [](QSqlDatabase &database) -> Status {
-                                 QSqlQuery query(database);
-                                 query.exec(QStringLiteral(
-                                     "ALTER TABLE places ADD COLUMN notes TEXT DEFAULT ''"));
-                                 return ok();
-                             } });
+    const int next = highestVersion(defaultMigrations()) + 1;
+
+    QList<Migration> withNext = defaultMigrations();
+    withNext.append(Migration{ next, QStringLiteral("places.notes"),
+                               [](QSqlDatabase &database) -> Status {
+                                   QSqlQuery query(database);
+                                   query.exec(QStringLiteral(
+                                       "ALTER TABLE places ADD COLUMN notes TEXT DEFAULT ''"));
+                                   return ok();
+                               } });
 
     {
         CacheStore store(&clock);
-        QVERIFY(store.open(path, withV2).hasValue());
-        QCOMPARE(store.schemaVersion(), 2);
+        QVERIFY(store.open(path, withNext).hasValue());
+        QCOMPARE(store.schemaVersion(), next);
     }
 
     // Now the older build opens it. Forward-only: it is refused rather than

@@ -133,7 +133,7 @@ or investigate open US sources later. Do not fake it.
 | Style | Custom MapLibre style JSON, dark/light variants, deliberately desaturated so radar reads clearly | Ours |
 | Renderer | MapLibre Native Qt (see [`03-tech-stack.md`](03-tech-stack.md)) | BSD-2 |
 | Forward geocoding | Open-Meteo Geocoding (GeoNames) | CC-BY 4.0; ≥2 chars exact, ≥3 fuzzy; supports postcodes and localisation |
-| Reverse geocoding | **Not offered by Open-Meteo** — use Nominatim (heavy usage policy) or offline point-in-polygon over a bundled admin dataset ⚠️ | Needs a decision |
+| Reverse geocoding | **Not offered by Open-Meteo. Decided: offline.** Nominatim returned HTTP 403 to the *first* request from a client with an identifying User-Agent and contact (tested 2026-07-31), so a bundled GeoNames `cities15000` index is used instead — `tools/geonames/` | CC-BY 4.0, GeoNames. 412 KiB packed; deterministic, works offline, and yields the **same `geonames_id`** as the forward geocoder, so "search Toronto" and "detect Toronto" are one place |
 | Timezones | `timezone=auto` from Open-Meteo; local TZ database via Qt | — |
 | Elevation | Open-Meteo Elevation API (90 m DEM) | CC-BY 4.0 |
 

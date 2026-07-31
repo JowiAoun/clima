@@ -363,15 +363,16 @@ Status CacheStore::savePlace(Place &place)
         query.prepare(QStringLiteral(R"sql(
             INSERT INTO places
                 (name, admin1, country, country_code, timezone,
-                 latitude, longitude, elevation_m, favourite, sort_order, added_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 latitude, longitude, elevation_m, is_home, sort_order, added_at,
+                 geonames_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         )sql"));
     } else {
         query.prepare(QStringLiteral(R"sql(
             UPDATE places SET
                 name = ?, admin1 = ?, country = ?, country_code = ?, timezone = ?,
-                latitude = ?, longitude = ?, elevation_m = ?, favourite = ?,
-                sort_order = ?, added_at = ?
+                latitude = ?, longitude = ?, elevation_m = ?, is_home = ?,
+                sort_order = ?, added_at = ?, geonames_id = ?
             WHERE id = ?
         )sql"));
     }
@@ -384,9 +385,17 @@ Status CacheStore::savePlace(Place &place)
     query.addBindValue(place.coordinate.latitude);
     query.addBindValue(place.coordinate.longitude);
     query.addBindValue(place.elevationMetres ? QVariant(*place.elevationMetres) : QVariant());
-    query.addBindValue(place.favourite ? 1 : 0);
+
+    // NULL rather than 0 when the place is not home, and the partial unique
+    // index in migration 2 is why: `WHERE is_home = 1` over a column full of
+    // NULLs indexes exactly the one home row, and SQLite lets any number of
+    // NULLs coexist under a unique index. A 0 would be a value, and the second
+    // non-home place would collide with the first.
+    query.addBindValue(place.isHome ? QVariant(1) : QVariant());
+
     query.addBindValue(place.sortOrder);
     query.addBindValue(toColumn(place.addedAt.isValid() ? place.addedAt : m_clock->now()));
+    query.addBindValue(place.geonamesId != 0 ? QVariant(place.geonamesId) : QVariant());
     if (place.id != 0)
         query.addBindValue(place.id);
 
@@ -408,7 +417,8 @@ Result<QList<Place>> CacheStore::places() const
     QSqlQuery query(m_database);
     if (!query.exec(QStringLiteral(R"sql(
             SELECT id, name, admin1, country, country_code, timezone,
-                   latitude, longitude, elevation_m, favourite, sort_order, added_at
+                   latitude, longitude, elevation_m, is_home, sort_order, added_at,
+                   geonames_id
             FROM places ORDER BY sort_order, id
         )sql"))) {
         return storageError(query, QStringLiteral("could not read the saved places"));
@@ -426,9 +436,10 @@ Result<QList<Place>> CacheStore::places() const
         place.coordinate = Coordinate{ query.value(6).toDouble(), query.value(7).toDouble() };
         if (!query.value(8).isNull())
             place.elevationMetres = query.value(8).toDouble();
-        place.favourite = query.value(9).toInt() != 0;
+        place.isHome = query.value(9).toInt() != 0;
         place.sortOrder = query.value(10).toInt();
         place.addedAt = fromColumn(query.value(11));
+        place.geonamesId = query.value(12).toLongLong();
         found.append(place);
     }
     return found;

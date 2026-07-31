@@ -25,6 +25,14 @@ pkgs.mkShell {
     qt6.qtsvg
     qt6.qtshadertools
 
+    # "Use my location", via GeoClue2 on Linux. Optional at configure time —
+    # libclima/CMakeLists.txt compiles the feature out when this is absent, and
+    # a packager is entitled to leave it out — but it is in the devshell so that
+    # the code path is actually built here rather than only on somebody else's
+    # machine. A feature nobody in CI compiles is a feature that stops
+    # compiling.
+    qt6.qtpositioning
+
     # The build. D8 in docs/03-tech-stack.md fixes the floor at CMake 3.21 and
     # the Qt6 CMake API; Ninja because qt_add_qml_module generates a lot of
     # small steps and make is slow at those.
