@@ -153,15 +153,47 @@ qt_add_executable(clima
     main.cpp
 )
 
+# ---- the C++ that QML can see -----------------------------------------------
+#
+# These go in SOURCES rather than in qt_add_executable, and the difference is
+# not cosmetic: qmltyperegistrar only scans what the *module* was told about, so
+# a header carrying QML_ELEMENT that is listed on the executable instead
+# compiles fine, links fine, and then does not exist as a QML type. The failure
+# names the QML file that used it.
+#
+set(clima_cpp_sources
+    appoptions.h
+    appoptions.cpp
+)
+
 qt_add_qml_module(clima
     URI Clima
     VERSION 1.0
     QML_FILES
         ${clima_qml_files}
         ${clima_js_files}
+    SOURCES
+        ${clima_cpp_sources}
 )
 
-target_include_directories(clima PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+# The binary dir is where configure_file put climaconfig.h. The source dir is
+# for a file nobody writes: qmltyperegistrar generates
+# clima_qmltyperegistrations.cpp with an `#include <appoptions.h>` — basename
+# only, no directory — so every directory holding a QML_ELEMENT header has to be
+# reachable that way or the generated file names a type that "was not declared
+# in this scope".
+target_include_directories(clima PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# The option has existed since the CMake skeleton landed; this is where it
+# starts meaning something. OFF compiles out --film, --poke, --walk, --scroll,
+# --sky, --metric, --day, --list, --tab and the three preview flags, leaving
+# --grab, --size and --viewport.
+if(CLIMA_DEV_TOOLS)
+    target_compile_definitions(clima PRIVATE CLIMA_DEV_TOOLS)
+endif()
 
 # Qt6::Quick and nothing else, because QtQuick and QtQuick.Shapes are the only
 # two modules the QML imports (QtQuick.Window ships inside Quick) and both come

@@ -1,21 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// The entry point, and deliberately almost nothing else.
+// The entry point.
 //
-// This file's whole job right now is to put a QML engine in front of the Clima
-// module and get out of the way. It is short because the thing it replaced —
-// `qml Main.qml` — was also short, and the port that introduced it is verified
-// by pixel equality against that runtime. Every line here is a line that could
-// have made a screenshot differ, so there are as few of them as the job allows.
-//
-// In particular, the command-line flags (`--grab`, `--viewport`, `--size`, …)
-// are still parsed in Main.qml, off `Qt.application.arguments`. Moving that
-// parse into a QCommandLineParser here is the obvious next step and it is a
-// separate one: a C++ parser has to reproduce the QML parser's behaviour
-// exactly, and the only way to know that it has is to hold everything else
-// still while it changes.
+// Three things happen here and their order is the only interesting thing about
+// the file: identity, then the command line, then the engine. Each one is a
+// precondition of the next.
 
+#include "appoptions.h"
 #include "climaconfig.h"
 
 #include <QGuiApplication>
@@ -25,20 +17,32 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
+    // ---- 1. identity -------------------------------------------------------
     // QStandardPaths derives the cache and config directories from the
     // organisation and application names, so these two decide where the
-    // forecast cache will live long before there is a cache. The app ID is the
-    // reverse-DNS name everything else in the desktop stack keys off — the
-    // desktop entry's basename, the icon name, the D-Bus name — and
-    // setDesktopFileName is what lets a Wayland compositor match this window to
-    // that entry. Without it the window gets a generic icon and no app-menu
-    // association, which is the sort of thing nobody notices until packaging.
+    // forecast cache and the preferences file will live long before there is
+    // either. The app ID is the reverse-DNS name the rest of the desktop stack
+    // keys off — the desktop entry's basename, the icon name, the D-Bus name —
+    // and setDesktopFileName is what lets a Wayland compositor match this
+    // window to that entry. Without it the window gets a generic icon and no
+    // app-menu association, which is the sort of thing nobody notices until
+    // packaging.
     QGuiApplication::setOrganizationName(QStringLiteral("Clima"));
     QGuiApplication::setOrganizationDomain(QStringLiteral("github.io"));
     QGuiApplication::setApplicationName(QStringLiteral(CLIMA_APP_NAME));
     QGuiApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
     QGuiApplication::setDesktopFileName(QStringLiteral(CLIMA_APP_ID));
 
+    // ---- 2. the command line -----------------------------------------------
+    // Before the engine loads anything, because Main.qml reads AppOptions at
+    // construction: --viewport and --size choose the window's width, and the
+    // window's width chooses which shell is built.
+    //
+    // Does not return for --help, --version, an unknown flag or a malformed
+    // value.
+    AppOptions::parseCommandLine(app);
+
+    // ---- 3. the engine -----------------------------------------------------
     QQmlApplicationEngine engine;
 
     // A QML file that fails to construct its root object leaves the engine
