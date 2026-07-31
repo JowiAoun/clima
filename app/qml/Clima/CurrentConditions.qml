@@ -158,9 +158,17 @@ Item {
         // Regular weight, not bold. At 64 px the reference sets this in book
         // weight and it is right: bold at that size stops reading as a number
         // and starts reading as a shout.
+        //
+        // Blank rather than a number when there is no forecast behind the card,
+        // and it has to be asked here because this is the one place that prints
+        // the figure separated from its unit: everywhere else the `reading`
+        // field carries both, and `readingOf()` decides. `value` is the number
+        // the ramps and the bars scale against — conditionsdata.cpp's
+        // "absent is not zero" note — and printing it unconditionally put a
+        // 64 px zero on a screen with nothing behind it.
         Text {
             id: reading
-            text: String(Detail.temperature.value)
+            text: Engine.hasData ? String(Detail.temperature.value) : ""
             color: Theme.color.textPrimary
             font.pixelSize: Theme.type.heroReading
             anchors.left: glyph.right
@@ -240,7 +248,8 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
                     Text {
-                        text: modelData.value + Detail.temperature.unit
+                        // Same rule as the hero above: no forecast, no figure.
+                        text: Engine.hasData ? modelData.value + Detail.temperature.unit : ""
                         color: Theme.color.textPrimary
                         font.pixelSize: Theme.type.heroCaption
                         anchors.horizontalCenter: parent.horizontalCenter

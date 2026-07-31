@@ -127,9 +127,12 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
         }
 
+        // Blank rather than a number when there is no forecast behind the card.
+        // CurrentConditions.qml carries the argument; the phone hero is the same
+        // figure split from the same unit and needs the same guard.
         Text {
             id: reading
-            text: String(Detail.temperature.value)
+            text: Engine.hasData ? String(Detail.temperature.value) : ""
             color: Theme.color.textPrimary
             font.pixelSize: Theme.type.heroReading
             anchors.left: glyph.right
