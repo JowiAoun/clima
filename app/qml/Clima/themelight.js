@@ -78,22 +78,36 @@ var surface = {
 
 // ---- ink --------------------------------------------------------------------
 //
-// `dim` is the one that wanted care. The obvious mirror of dark's #7a86a2 is a
-// mid grey around #78849c, which lands at about 3.8:1 on this page — under the
-// 4.5:1 the gallery's contrast column flags, and it is used for axis labels,
-// which are read rather than glanced at.
+// `dim` is the one that wanted care, and the one that proves an eye is not a
+// photometer. It was set to #6b7794 by mirroring dark's #7a86a2 and judging it
+// by looking, with a note here estimating it at "about 3.8:1". The gallery's
+// contrast column, once it existed, measured 3.48:1 — under the 4.5:1 that a
+// token carrying axis labels and body copy owes, and under my own guess by
+// enough to matter. Darkened until it clears: 4.52:1 on a card.
+//
+// Worth stating plainly, because dark's `ink.dim` fails the same floor at
+// 3.11:1 and that is a defect inherited from the reference design, not from
+// this file. It is left alone here; changing it is a change to what ships, not
+// to what is being added, and it goes in its own commit.
 var ink = {
     primary: "#141d2e",
     muted:   "#5a6580",
-    dim:     "#6b7794"
+    dim:     "#5b657e"
 };
 
 var line = {
     grid:     "#1a000000",
     gridWeak: "#0f000000",
     track:    "#26000000",
-    now:      "#59000000",
-    forecast: "#4d000000",
+    // These two are the only lines in the group that carry meaning — where the
+    // present is, and where the recording stops and the prediction starts — so
+    // they are the only two held to 3:1. Both were mirrored straight from dark
+    // at 0x59 and 0x4d and measured 2.36:1 and 2.09:1, because the same alpha
+    // over a pale ground is a far weaker line than over a navy one. Raised
+    // until they clear; the eight decorative rulings around them are left as
+    // they are, since a gridline is meant to be barely there.
+    now:      "#6e000000",
+    forecast: "#6e000000",
     series:   "#8c000000",
 
     // Load-bearing in this theme and decorative in the other. See the header.
@@ -108,22 +122,48 @@ var line = {
 // ---- accent -----------------------------------------------------------------
 //
 // Deepened from #ffd02c, which is a colour designed to sit on navy and which on
-// a near-white page reads as a highlighter rather than a selection. `ink` does
-// not move: it is the text drawn *on* the accent, and dark ink on yellow is the
-// right answer under both themes.
+// a near-white page reads as a highlighter rather than a selection.
+//
+// It was deepened once to #e8a900 by eye and that was still far too pale:
+// 1.62:1 on a card. The reason it looked acceptable is that a pill is a large
+// filled shape, and a large filled shape reads at a contrast that would be
+// illegible as a line — but `accent.fill` is not only a fill. It is the border
+// of today's cell in the calendar, the border of the open metric picker, and in
+// HourlyList and PlacePicker it is *text*. A hairline and a word at 1.62:1 are
+// not "a bit low", they are absent.
+//
+// So it is held to 4.5:1 as text rather than 3:1 as a component, which lands it
+// at #835f00 — a deep amber. That in turn forced `ink`, and this is the pair
+// worth understanding: there is no fill that carries dark ink at 4.5:1 *and*
+// clears 4.5:1 against a light card, because those two pull the same value in
+// opposite directions. On navy the accent can be bright and take dark ink; on a
+// pale page it has to be dark, and the ink on it has to be light. So the light
+// theme inverts the pair outright — near-white on deep amber, 5.73:1 — which is
+// the one place this theme is not a mirror of the other.
 //
 // Note this is deliberately not the desktop's accent colour. Accent here is
 // structure — the selected metric pill, the nav pill, the wash behind the now
-// row — and ink.onAccent is tuned to it. Repainting it purple would break three
+// row — and `ink` is tuned to it. Repainting it purple would break three
 // legibility relationships at once.
 var accent = {
-    fill: "#e8a900",
-    ink:  "#141d33"
+    fill: "#835f00",
+    ink:  "#fffdf7"
 };
 
 var control = {
     toggleTrack:    "#1f000000",
-    toggleKnob:     "#ffffff",
+
+    // The knob, and the one token here that could not simply be mirrored. In
+    // dark it is a pale grey riding a dark track and the state is obvious. The
+    // straight inversion is a white knob on a pale track, which measured 1.69:1
+    // — an "off" switch you cannot tell is a switch.
+    //
+    // The convention the rest of the light world settled on is the answer: an
+    // unselected control is identified by a *darker* handle, not a brighter
+    // one, and the handle is the palette's own muted ink. 3.44:1 on the track.
+    // Checked, the knob becomes `accent.ink` on an `accent.fill` track and the
+    // relationship inverts with it, which is why only this one moves.
+    toggleKnob:     "#5a6580",
     pagerFill:      "#b3f4f6fa",
     pagerFillHover: "#ccf4f6fa",
     pagerGlyph:     "#1b2436",
@@ -169,12 +209,26 @@ var state = {
 // plate inside the light theme needs one darker still.
 //
 // moonShade inverts outright: in dark it is the navy of the unlit limb against
-// a lit face, and here it is the pale grey of an unlit limb against a gold one.
+// a lit face, and here it is the shadow on a gold one.
+//
+// Every value below was set by looking and then corrected by measuring, and the
+// corrections were not small. A glyph is the information — a sun, a cloud, the
+// moon — so each is held to 3:1 against the card it is drawn on, and the two
+// stops of a gradient are scored as a pair, since an object is legible if
+// either end of it separates from the ground.
+//
+// What that changed: `sunCool` from #e07d1a to #c16c16 (2.29 -> 3.01), the sun
+// having been a warm plate that dissolved into a pale card; `moon` from #c9a961
+// to #9d7d36 (1.75 -> 3.01), and with the face darkened the pale unlit limb
+// stopped working at all, so `moonShade` inverts a second time to a shadow
+// (1.54 -> 3.01 against the new face). `sunWarm` and `cloudTop` stay bright and
+// stay under 3:1 on their own — they are the lit tops of objects whose darker
+// edge carries them, which is what the pair rule is for.
 var glyph = {
     sunWarm:            "#f5b942",
-    sunCool:            "#e07d1a",
-    moon:               "#c9a961",
-    moonShade:          "#cfd6e6",
+    sunCool:            "#c16c16",
+    moon:               "#9d7d36",
+    moonShade:          "#2c3854",
 
     // Darker than the OnLight pair below, and the first draft got this wrong by
     // reusing it. That pair was tuned for the day badge — a 40 px plate at
@@ -183,8 +237,11 @@ var glyph = {
     // theme is not: it is a wash a few percent off the page, so a near-white
     // cloud on it has almost nothing to be seen against. Rendered, the ten-day
     // strip's cloudy days read as blank cards next to the sunny ones.
+    // ...and the second draft still had the underside a shade too pale: 2.43:1
+    // as a pair, which is a cloud you can find only because you know it is
+    // there. Darkened again to 3.00:1.
     cloudTop:           "#d8e2f0",
-    cloudBottom:        "#7d93b5",
+    cloudBottom:        "#6a83aa",
 
     // And so the badge variant has to go darker again to keep the same
     // relationship it has in dark: one step of contrast beyond the ordinary

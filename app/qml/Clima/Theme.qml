@@ -255,10 +255,24 @@ QtObject {
         // measured against the lit face rather than against the card behind it.
         "glyph.moonShade":          { on: "glyph.moon" },
 
-        "badge.dayTop":      { pair: "badge.dayBottom" },
-        "badge.dayBottom":   { pair: "badge.dayTop" },
-        "badge.nightTop":    { pair: "badge.nightBottom" },
-        "badge.nightBottom": { pair: "badge.nightTop" },
+        // The four badge stops are the plate a weather glyph is drawn on, and
+        // the plate is not what has to be seen — the glyph is. That requirement
+        // is already carried, one role up, by glyph.cloud*OnLight measured
+        // against badge.dayTop.
+        //
+        // Scoring the plate against the card as well looked rigorous and was
+        // not. Rendered in light mode the day badge is a pale gold disc on a
+        // pale grey card: 1.11:1, and plainly visible, because almost all of
+        // the separation is hue and a WCAG ratio is luminance only. Two
+        // honest readings of that: the plate is decoration and the number does
+        // not apply, or the plate leans on a channel the number cannot see and
+        // should not be trusted alone. Both land here — no floor, ratio still
+        // printed — rather than on a threshold that would have been satisfied
+        // by turning a sunny day's badge into a bronze one.
+        "badge.dayTop":      { duty: "incidental" },
+        "badge.dayBottom":   { duty: "incidental" },
+        "badge.nightTop":    { duty: "incidental" },
+        "badge.nightBottom": { duty: "incidental" },
 
         // The map placeholder's linework is a frame around the label, not the
         // label.
