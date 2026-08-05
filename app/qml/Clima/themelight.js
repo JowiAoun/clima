@@ -268,6 +268,35 @@ var scaffold = {
     stroke: "#8fa6c0d8"
 };
 
+// ---- severity ----------------------------------------------------------------
+//
+// The one group in this file where the hue itself has to move, not just its
+// weight. Everything else here is the dark palette re-lit; these are different
+// colours.
+//
+// #ff8a70 is a warning on navy and a peach on #eef1f7. So each hue is taken
+// down to where it separates from a white page — and `ink`, which carries a
+// word at 4.5:1, ends up darker still. That is the same direction the whole
+// light theme moves in, only further, because a warning that reads as a pastel
+// has stopped being a warning.
+//
+// The washes needed more than a deeper hue. Amber and slate at the dark
+// palette's alphas came out at 1.16 and 1.19 against the page — below the 1.2
+// this file's own surface ladder holds itself to — because both sit close to
+// #eef1f7 in luminance and raising the alpha of a bright hue only produces a
+// larger bright plate. Deepening the wash colour is what fixed them; the
+// measurement is in tests/qml/tst_theme.qml, which fails if either drifts back.
+//
+// Unlike dark, the plates here order correctly all the way down: extreme 1.53,
+// severe 1.41, minor 1.37, unknown 1.35, moderate 1.34.
+var severity = {
+    extreme:  { wash: "#40b81f1f", edge: "#ffa31515", glyph: "#ffa31515", ink: "#ff8c1010" },
+    severe:   { wash: "#42b85410", edge: "#ff9a4a06", glyph: "#ff9a4a06", ink: "#ff863f04" },
+    moderate: { wash: "#45a67c00", edge: "#ff7d5a00", glyph: "#ff7d5a00", ink: "#ff6b4d00" },
+    minor:    { wash: "#3a35619f", edge: "#ff2c5099", glyph: "#ff2c5099", ink: "#ff254385" },
+    unknown:  { wash: "#33465370", edge: "#ff4b5670", glyph: "#ff4b5670", ink: "#ff3f4a61" }
+};
+
 // ---- precipitation ----------------------------------------------------------
 //
 // The wash hues do not move: hue *is* the precipitation type, and rain does not

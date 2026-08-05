@@ -303,6 +303,69 @@ var scaffold = {
     stroke: "#4d6a8fd8"
 };
 
+// ---- severity ----------------------------------------------------------------
+// The five CAP grades a severe-weather alert can carry, as a table keyed by
+// libclima's own severity key — "extreme", "severe", "moderate", "minor",
+// "unknown".
+//
+// A FOURTH CATEGORICAL GROUP, NOT A STRETCH OF state.good/caution/poor
+//
+// §10.5 says a published authority's bands get their own categorical palette,
+// and CAP's five levels are exactly that: somebody else's scale, with somebody
+// else's meaning, which we display rather than compute. The status trio is a
+// three-point verdict this app makes about a number it is holding; stretching
+// it to five would turn a set of named states into a scale, which is the thing
+// detaildata.js's own header warns against.
+//
+// The shape is precip's and for precip's reason: this is read as
+// `Theme.severity[key].edge` with the key coming from data, so it is a table
+// rather than twenty flat tokens.
+//
+// FOUR TOKENS, BECAUSE COLOUR ALONE MAY NOT CARRY IT
+//
+// §4.10 forbids colour-only encoding, so a severity is always drawn as a glyph
+// AND a word AND a colour. Hence `glyph` and `ink` beside `wash` and `edge`
+// rather than one hue used four ways at four opacities.
+//
+//   wash    the banner plate, over page.bg. Alpha rises with severity, so an
+//           Extreme reads as more present than a Minor before any word is read.
+//   edge    the rail down the leading edge, and the hairline. Saturated: this
+//           is the ECCC-recognisable red/orange/yellow.
+//   glyph   the severity mark. Same value as `edge` today and a separate token,
+//           because a rail and a symbol are not obliged to weigh the same in
+//           every palette.
+//   ink     the severity word. A tinted label rather than plain ink.primary,
+//           because that is what makes the banner read as an alert instead of
+//           as another card.
+//
+// Measured against the composited plate — every `ink` clears 4.5:1 and every
+// `edge`/`glyph` clears 3:1 in both schemes, and every plate separates from the
+// page by at least 1.3:1. tests/qml/tst_theme.qml asserts all three, because
+// unlike the audited colour roles this table is keyed by data and the gallery's
+// contrast column walks flat groups.
+//
+// One measurement worth knowing before it looks like a mistake: in DARK,
+// moderate's plate (1.56) sits a hair above extreme's (1.51). Amber on navy is
+// simply brighter than red on navy, and buying the ordering back would mean a
+// red so pale it stops reading as red. Both are far above the floor, and the
+// rail, the glyph and the word all order correctly.
+var severity = {
+    extreme:  { wash: "#5ce8503a", edge: "#ffff8a70", glyph: "#ffff8a70", ink: "#ffffc0b2" },
+    severe:   { wash: "#4af0842c", edge: "#ffffb060", glyph: "#ffffb060", ink: "#ffffd0a0" },
+    moderate: { wash: "#33f0c53c", edge: "#ffffd24a", glyph: "#ffffd24a", ink: "#ffffe490" },
+
+    // Blue rather than a fourth warm hue: Minor is informational, and a ladder
+    // that stays warm all the way down leaves nothing for "this is not an
+    // emergency" to look like.
+    minor:    { wash: "#2e6f9be8", edge: "#ff8fc0ff", glyph: "#ff8fc0ff", ink: "#ffb7d6ff" },
+
+    // The issuer declined to grade. Six of the nine alerts in
+    // tests/fixtures/alerts/ arrive this way, so this is not the rare case it
+    // looks like. Neutral, and deliberately NOT the quietest thing on the
+    // screen — an ungraded alert is still an alert.
+    unknown:  { wash: "#24aab4c8", edge: "#ffc0c8d8", glyph: "#ffc0c8d8", ink: "#ffd6dce8" }
+};
+
 // Precipitation effect. Two layers: a `wash` under the chart marking the hours
 // it falls in, and `drop`/`splash` particles over it saying what is falling.
 //

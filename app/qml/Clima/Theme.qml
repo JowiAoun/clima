@@ -581,6 +581,23 @@ QtObject {
     }
     readonly property PrecipTokens precip: PrecipTokens { src: theme.isLight ? LightTokens.precip : Tokens.precip }
 
+    // ---- severity ----------------------------------------------------------
+    // The five CAP grades, keyed by libclima's own severity key. A plain table
+    // rather than a token group, for precip's reason: every read of it is
+    // `Theme.severity[alert.severityKey]`, with the key coming from data.
+    //
+    // Not in `colorRoles`, and therefore not on the gallery's contrast page,
+    // which walks flat groups. It is audited instead by tests/qml/tst_theme.qml,
+    // which knows the shape and checks all twenty values against the plate they
+    // are actually drawn on — see theme.js for the numbers and why the ground
+    // is the composited plate and not the page.
+    readonly property var severity: theme.isLight ? LightTokens.severity : Tokens.severity
+
+    // The grades, worst first. The order the gallery lays specimens out in and
+    // the order a reader expects to meet them; nothing sorts by it at run time,
+    // because libclima has already ranked what the banner shows.
+    readonly property var severityKeys: ["extreme", "severe", "moderate", "minor", "unknown"]
+
     // ---- the sky -----------------------------------------------------------
     // A table keyed by phase — `night`, `dawn`, `day`, `dusk` — because that is
     // how it is read: `Theme.sky[phase]`, with the phase computed from the
