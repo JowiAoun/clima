@@ -125,8 +125,8 @@ var surface = {
 // for why the two are one pair rather than two tokens in two groups.
 var ink = {
     primary: "#ffffff",
-    muted:   "#98a4be",
-    dim:     "#7a86a2"
+    muted:   "#c5ccda",
+    dim:     "#9ba4b9"
 };
 
 // ---- line --------------------------------------------------------------------
@@ -149,12 +149,12 @@ var line = {
     // The rule marking the present hour, and the same rule the crosshair
     // follows: both answer "which hour is this", and a chart with two different
     // whites for that is a chart with a bug in it.
-    now:      "#59ffffff",
+    now:      "#5fffffff",
 
     // A forecast stretch is the same line as the observed one, drawn with less
     // certainty. Same value as `now` and deliberately a separate name: they
     // mean different things and will not always want the same alpha.
-    forecast: "#59ffffff",
+    forecast: "#5fffffff",
 
     // The dashed comparison line a metric may draw over its own series — gust
     // over wind, apparent over actual. The series proper is a ramp rather than
@@ -277,7 +277,7 @@ var glyph = {
     // Clouds are drawn white, which vanishes on the pale day badge — these keep
     // them readable there without changing them everywhere else.
     cloudTopOnLight:    "#fbfdff",
-    cloudBottomOnLight: "#9db0cc",
+    cloudBottomOnLight: "#7b95bb",
 
     rain:      "#7fb6e8",
     droplet:   "#93c6f2"
