@@ -18,6 +18,12 @@
 import QtQuick
 import Clima
 import "gallery.js" as Catalogue
+import "contrast.js" as Contrast
+// The app's own sampler, reached the same way gallery.js reaches theme.js: one
+// directory up, because Clima.Gallery maps one level below Clima. The ramps
+// page draws its bars with the function the chart draws its columns with, so a
+// ramp that reviews cleanly here is the ramp the chart got.
+import "../chartmath.js" as ChartMath
 
 Item {
     id: root
@@ -81,6 +87,119 @@ Item {
     function remount() { remountToken++ }
 
     readonly property real railWidth: 232
+
+    // ---- the palette page's instrument ---------------------------------------
+    //
+    // Both raw palettes, side by side, which is the one thing Theme's grouped
+    // properties deliberately cannot give you — they answer for the scheme that
+    // is running, and a light column beside a dark one is the entire point of a
+    // palette page.
+    //
+    // Built once here rather than inside the delegates. Fifty-nine tokens times
+    // two schemes times a ground chain that recurses through up to three
+    // translucent layers is a great deal of string parsing to redo on every row
+    // of every repaint.
+    function rawTable(scheme) {
+        var t = {}
+        for (var i = 0; i < Theme.colorRoles.length; ++i)
+            t[Theme.colorRoles[i]] = Theme.tokensFor(Theme.colorRoles[i], scheme)
+        return t
+    }
+
+    readonly property var paletteTables: ({
+        dark:  root.rawTable("dark"),
+        light: root.rawTable("light")
+    })
+
+    // The card, composited, in both schemes. Every ramp in the app is drawn on
+    // one, and the ramps page draws its bars on the same thing rather than on
+    // the pane behind it.
+    readonly property var cardGround: ({
+        dark:  Contrast.groundOf(root.paletteTables.dark,
+                                 Theme.contrastRule, "surface.base"),
+        light: Contrast.groundOf(root.paletteTables.light,
+                                 Theme.contrastRule, "surface.base")
+    })
+
+    // "4.52:1", or an em dash for a token with nothing to measure against.
+    // An incidental token still prints its number: it has no floor to clear,
+    // but a ratio you can see is how you notice one drifting.
+    function ratioText(audit) {
+        if (audit.on === null)
+            return "—"
+        return audit.ratio.toFixed(2) + ":1"
+    }
+
+    // Red is reserved for a token that misses the floor its duty sets. An
+    // incidental token is drawn dim rather than green, because a page where
+    // two thirds of the rows are a passing colour is a page where the four
+    // real failures do not stand out — which is the failure mode this column
+    // exists to avoid.
+    function ratioInk(audit) {
+        if (audit.verdict === "fail")
+            return Theme.state.poor
+        if (audit.verdict === "pass")
+            return Theme.ink.muted
+        return Theme.ink.dim
+    }
+
+    readonly property int colToken:  178
+    readonly property int colSwatch: 74
+    readonly property int colHex:    76
+    readonly property int colDuty:   74
+    readonly property int colOn:     214
+    readonly property int colRatio:  74
+    readonly property int colGap:    12
+
+    // A ramp, drawn.
+    //
+    // Sampled into cells rather than declared as a gradient because QML cannot
+    // build GradientStops from a Repeater — the same wall DetailSunCard and
+    // DetailMoonCard hit, where three colours are written twice over precisely
+    // this. Sampling with the app's own ChartMath.sampleRamp() is the better
+    // answer anyway: the bar is interpolated by the function the chart
+    // interpolates with, so a ramp that reviews cleanly here is the ramp the
+    // chart got, not a second reading of the same table.
+    //
+    // The ground matters. Six of the nine ramps carry alpha in every stop —
+    // `temp.fill` opens at 80% and closes at 43% — so a bar painted on the pane
+    // would be a bar reviewed at a contrast the chart never has.
+    // Square corners, and no clip. A rounded bar would need one to keep the
+    // sample cells off its corners, and a bar is a bar — the eight px cells are
+    // the honest shape for something being read as a sequence of stops rather
+    // than as a control.
+    component RampBar: Rectangle {
+
+        id: bar
+
+        required property var stops
+        required property color ground
+
+        property int samples: 68
+        property int cell: 8
+        property int barHeight: 26
+
+        width: samples * cell
+        height: barHeight
+        color: bar.ground
+
+        Row {
+            anchors.fill: parent
+
+            Repeater {
+                model: bar.samples
+
+                delegate: Rectangle {
+                    required property int index
+                    width: bar.cell
+                    height: bar.barHeight
+                    color: ChartMath.sampleRamp(
+                               bar.stops,
+                               bar.samples <= 1 ? 0 : index / (bar.samples - 1))
+                }
+            }
+        }
+    }
 
     // The catalogue, filtered. Groups that empty out drop away with their
     // heading rather than leaving a bare label over nothing.
@@ -528,7 +647,28 @@ Item {
             // Specimens draw with Shapes, which ignore ancestor clipping — see
             // docs/10-design-system.md §10.8. Without the layer, a specimen
             // taller than the pane paints its chart over the heading.
-            layer.enabled: true
+            //
+            // A `kind` page draws no Shapes, and the layer is off for those —
+            // which is not a micro-optimisation but a bug this page found.
+            //
+            // Qt 6.11's software renderer is what a headless capture runs, the
+            // offscreen platform plugin advertising no GL capability (the long
+            // note in scripts/grab.sh). It classifies a square, fully opaque
+            // Rectangle as an opaque node, and one such node anywhere inside a
+            // layer makes the *whole* layer composite as opaque black —
+            // measured: a 300x26 `color: "#36375b"` blacks out the entire
+            // 1220x1035 pane, while the same rectangle given a `radius`, or
+            // given alpha 254/255, does not. So this is a trap rather than a
+            // rule you could follow: the palette page escaped it only because
+            // every swatch on it happens to have a corner radius, and the ramps
+            // page, whose bars are deliberately square, did not.
+            //
+            // Turning the layer off where nothing needs it removes the trap
+            // from the three generated pages outright. It is still live for
+            // specimens, which is worth knowing before adding an opaque square
+            // Rectangle to a component — `TabFillet.qml` already has the only
+            // opaque colour in the palette.
+            layer.enabled: root.current !== null && root.current.kind === undefined
             contentWidth: Math.max(width, body.width)
             contentHeight: Math.max(height, body.height)
             boundsBehavior: Flickable.StopAtBounds
@@ -538,6 +678,7 @@ Item {
                 sourceComponent: {
                     if (!root.current) return null
                     if (root.current.kind === "palette") return paletteView
+                    if (root.current.kind === "ramps") return rampsView
                     if (root.current.kind === "type") return typeView
                     return specimenView
                 }
@@ -648,6 +789,58 @@ Item {
             spacing: 22
             width: pane.width
 
+            // The column heads, once at the top rather than per role. Eleven
+            // repetitions of the same seven words is a page you scroll past
+            // instead of read.
+            Row {
+                spacing: root.colGap
+
+                Text {
+                    width: root.colToken
+                    text: qsTr("token")
+                    color: Theme.ink.dim
+                    font.pixelSize: Theme.type.axis
+                }
+                Text {
+                    width: root.colSwatch + root.colGap + root.colHex
+                    text: qsTr("dark")
+                    color: Theme.ink.dim
+                    font.pixelSize: Theme.type.axis
+                }
+                Text {
+                    width: root.colSwatch + root.colGap + root.colHex
+                    text: qsTr("light")
+                    color: Theme.ink.dim
+                    font.pixelSize: Theme.type.axis
+                }
+                Text {
+                    width: root.colDuty
+                    text: qsTr("duty")
+                    color: Theme.ink.dim
+                    font.pixelSize: Theme.type.axis
+                }
+                Text {
+                    width: root.colOn
+                    text: qsTr("measured on")
+                    color: Theme.ink.dim
+                    font.pixelSize: Theme.type.axis
+                }
+                Text {
+                    width: root.colRatio
+                    text: qsTr("dark")
+                    color: Theme.ink.dim
+                    font.pixelSize: Theme.type.axis
+                    horizontalAlignment: Text.AlignRight
+                }
+                Text {
+                    width: root.colRatio
+                    text: qsTr("light")
+                    color: Theme.ink.dim
+                    font.pixelSize: Theme.type.axis
+                    horizontalAlignment: Text.AlignRight
+                }
+            }
+
             Repeater {
                 // Read off the theme rather than transcribed, so a token added
                 // to a role appears here without anyone remembering to add it.
@@ -660,12 +853,11 @@ Item {
                 delegate: Column {
                     id: role
                     required property var modelData
-                    readonly property var group: Theme[modelData]
 
-                    spacing: 8
+                    spacing: 6
                     width: parent.width
 
-                    // The role, named. Without it the page is 59 swatches in one
+                    // The role, named. Without it the page is 59 rows in one
                     // undifferentiated field, which is the flat list this whole
                     // restructure existed to get rid of — and a palette that
                     // does not show its groups cannot show that a token is in
@@ -675,50 +867,235 @@ Item {
                         color: Theme.ink.muted
                         font.pixelSize: Theme.type.cardTitle
                         font.bold: true
+                        bottomPadding: 2
                     }
 
-                    Flow {
-                        spacing: 14
-                        width: parent.width
-
-                        Repeater {
-                            // Theme.names() and not Object.keys(): a token group
-                            // is a QObject now, and Object.keys() on one of those
-                            // hands back `objectName` and a change signal per
-                            // token alongside the names anybody wanted.
-                            //
-                            // Name *and* value are resolved out here, where the
-                            // role is in scope. A Repeater's delegate is a
-                            // component of its own, so reaching back into
-                            // `role.group` from inside one is an unqualified
-                            // access — the swatch is handed everything it needs
-                            // instead.
-                            model: Theme.names(role.group).map(function (token) {
-                                return { token: token, value: String(role.group[token]) }
+                    Repeater {
+                        // Object.keys() on the *raw* table, not Theme.names()
+                        // on the grouped property. The grouped one is a QObject
+                        // and answers for the running scheme only; this page
+                        // has to show the scheme it is not in, which is the
+                        // whole reason Theme.tokensFor() exists.
+                        //
+                        // Everything a row needs is resolved out here, where
+                        // the role is in scope: a Repeater's delegate is a
+                        // component of its own, so reaching back into the role
+                        // from inside one is an unqualified access.
+                        model: {
+                            var tables = root.paletteTables
+                            return Object.keys(tables.dark[role.modelData]).map(function (token) {
+                                var path = role.modelData + "." + token
+                                var rule = Theme.contrastRule(path)
+                                return {
+                                    token: token,
+                                    on: rule.on === null ? "—" : rule.on,
+                                    duty: rule.duty,
+                                    darkValue:  String(tables.dark[role.modelData][token]),
+                                    lightValue: String(tables.light[role.modelData][token]),
+                                    darkAudit:  Contrast.audit(tables.dark,  Theme.contrastRule,
+                                                               Theme.contrastFloor, path),
+                                    lightAudit: Contrast.audit(tables.light, Theme.contrastRule,
+                                                               Theme.contrastFloor, path)
+                                }
                             })
+                        }
 
-                            delegate: Column {
-                                required property var modelData
-                                spacing: 5
+                        delegate: Row {
+                            id: tokenRow
+                            required property var modelData
+                            spacing: root.colGap
+
+                            Text {
+                                width: root.colToken
+                                text: tokenRow.modelData.token
+                                color: Theme.ink.primary
+                                font.pixelSize: Theme.type.axis
+                                elide: Text.ElideRight
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            // Each swatch is painted on the ground the audit
+                            // measured it against, and the token's own value is
+                            // laid over it translucent exactly as the app draws
+                            // it. A swatch of `#12ffffff` shown on the pane is a
+                            // swatch of a colour that never reaches a screen.
+                            Rectangle {
+                                width: root.colSwatch
+                                height: 26
+                                radius: Theme.metric.controlRadius
+                                color: tokenRow.modelData.darkAudit.on !== null
+                                       ? tokenRow.modelData.darkAudit.on : Theme.page.bg
+                                anchors.verticalCenter: parent.verticalCenter
 
                                 Rectangle {
-                                    width: 116
-                                    height: 52
-                                    radius: Theme.metric.controlRadius
-                                    color: parent.modelData.value
+                                    anchors.fill: parent
+                                    anchors.margins: 3
+                                    radius: 2
+                                    color: tokenRow.modelData.darkValue
                                 }
+                            }
+                            Text {
+                                width: root.colHex
+                                text: tokenRow.modelData.darkValue
+                                color: Theme.ink.dim
+                                font.pixelSize: Theme.type.axis
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
 
-                                Text {
-                                    text: parent.modelData.token
-                                    color: Theme.ink.primary
-                                    font.pixelSize: Theme.type.axis
-                                }
+                            Rectangle {
+                                width: root.colSwatch
+                                height: 26
+                                radius: Theme.metric.controlRadius
+                                color: tokenRow.modelData.lightAudit.on !== null
+                                       ? tokenRow.modelData.lightAudit.on : "#eef1f7"
+                                anchors.verticalCenter: parent.verticalCenter
 
-                                Text {
-                                    text: parent.modelData.value
-                                    color: Theme.ink.dim
-                                    font.pixelSize: Theme.type.axis
+                                Rectangle {
+                                    anchors.fill: parent
+                                    anchors.margins: 3
+                                    radius: 2
+                                    color: tokenRow.modelData.lightValue
                                 }
+                            }
+                            Text {
+                                width: root.colHex
+                                text: tokenRow.modelData.lightValue
+                                color: Theme.ink.dim
+                                font.pixelSize: Theme.type.axis
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                width: root.colDuty
+                                text: tokenRow.modelData.duty
+                                color: Theme.ink.dim
+                                font.pixelSize: Theme.type.axis
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                width: root.colOn
+                                // A paired token says so, because otherwise its
+                                // row is the page's most confusing sight: 1.07:1
+                                // and not red. The pair is why.
+                                text: tokenRow.modelData.darkAudit.paired !== undefined
+                                      ? tokenRow.modelData.on + "  + " + tokenRow.modelData.darkAudit.paired
+                                      : tokenRow.modelData.on
+                                color: Theme.ink.dim
+                                font.pixelSize: Theme.type.axis
+                                elide: Text.ElideRight
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                width: root.colRatio
+                                text: root.ratioText(tokenRow.modelData.darkAudit)
+                                color: root.ratioInk(tokenRow.modelData.darkAudit)
+                                font.pixelSize: Theme.type.axis
+                                font.bold: tokenRow.modelData.darkAudit.verdict === "fail"
+                                horizontalAlignment: Text.AlignRight
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                            Text {
+                                width: root.colRatio
+                                text: root.ratioText(tokenRow.modelData.lightAudit)
+                                color: root.ratioInk(tokenRow.modelData.lightAudit)
+                                font.pixelSize: Theme.type.axis
+                                font.bold: tokenRow.modelData.lightAudit.verdict === "fail"
+                                horizontalAlignment: Text.AlignRight
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: rampsView
+
+        Column {
+            spacing: 24
+            width: pane.width
+
+            Repeater {
+                model: Object.keys(Theme.rampsFor("dark"))
+
+                delegate: Column {
+                    id: rampRole
+                    required property var modelData
+                    readonly property bool categorical:
+                        Theme.categoricalRamps.indexOf(modelData) >= 0
+
+                    spacing: 6
+                    width: parent.width
+
+                    Row {
+                        spacing: 10
+
+                        Text {
+                            text: rampRole.modelData
+                            color: Theme.ink.muted
+                            font.pixelSize: Theme.type.cardTitle
+                            font.bold: true
+                        }
+                        Text {
+                            // Which kind of ramp this is, because it is the one
+                            // fact that explains why three of the nine look
+                            // identical in both schemes. A published band keeps
+                            // its hue: recolouring the WHO's UV scale would make
+                            // the app disagree with the source it is quoting.
+                            text: rampRole.categorical ? qsTr("categorical · authority bands")
+                                                       : qsTr("continuous")
+                            color: Theme.ink.dim
+                            font.pixelSize: Theme.type.axis
+                            anchors.baseline: parent.children[0].baseline
+                        }
+                        Text {
+                            text: qsTr("%1 fill stops").arg(
+                                      Theme.rampsFor("dark")[rampRole.modelData].fill.length)
+                            color: Theme.ink.dim
+                            font.pixelSize: Theme.type.axis
+                            anchors.baseline: parent.children[0].baseline
+                        }
+                    }
+
+                    Repeater {
+                        // fill and line are the two halves of every ramp and the
+                        // chart draws both — the area under the curve and the
+                        // curve itself — so a page showing only the fill would
+                        // be reviewing half of what ships.
+                        model: [
+                            { part: "fill",
+                              dark:  Theme.rampsFor("dark")[rampRole.modelData].fill,
+                              light: Theme.rampsFor("light")[rampRole.modelData].fill },
+                            { part: "line",
+                              dark:  Theme.rampsFor("dark")[rampRole.modelData].line,
+                              light: Theme.rampsFor("light")[rampRole.modelData].line }
+                        ]
+
+                        delegate: Row {
+                            id: rampRow
+                            required property var modelData
+                            spacing: root.colGap
+
+                            Text {
+                                width: 40
+                                text: rampRow.modelData.part
+                                color: Theme.ink.dim
+                                font.pixelSize: Theme.type.axis
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            RampBar {
+                                stops: rampRow.modelData.dark
+                                ground: root.cardGround.dark
+                            }
+
+                            RampBar {
+                                stops: rampRow.modelData.light
+                                ground: root.cardGround.light
                             }
                         }
                     }

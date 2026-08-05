@@ -43,6 +43,7 @@ set(clima_gallery_qml_files
 
 set(clima_gallery_js_files
     qml/Clima/Gallery/gallery.js
+    qml/Clima/Gallery/contrast.js
 )
 
 # Same flattening as app/, and here it is load-bearing rather than tidy.

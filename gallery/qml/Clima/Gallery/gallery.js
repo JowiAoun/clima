@@ -95,7 +95,9 @@ var groups = [
         name: "Foundations",
         items: [
             { name: "Colour", kind: "palette",
-              blurb: "Every colour token, grouped by the role it plays, over the page gradient it is composited on." },
+              blurb: "Every colour token in both schemes, on the background it is actually composited over, with the WCAG ratio it owes that background. Red is a token that does not clear the floor its duty sets." },
+            { name: "Ramps", kind: "ramps",
+              blurb: "The nine metric ramps in both schemes. Six are continuous and light inverts their lightness; three are published authority bands and light leaves their hues alone." },
             { name: "Type", kind: "type",
               blurb: "The type scale. Sizes are tokens: a range is not a rule." }
         ]
