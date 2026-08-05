@@ -87,9 +87,7 @@ Item {
         source: root.currentTab.page
 
         onLoaded: {
-            // The nav floats over the page, so the page has to know how much
-            // of its own bottom is covered or its last row is unreadable.
-            item.bottomInset = nav.height
+            root.pushInsets(item)
             root.adopt(item)
         }
 
@@ -125,6 +123,25 @@ Item {
             page.pickerRequested.connect(function () { picker.open = !picker.open })
     }
 
+    // The chrome that floats over the page, in the units the page pads by.
+    //
+    // A function rather than two `Qt.binding()`s, and the comment above says
+    // why: a binding pushed into a page is destroyed the first time the page
+    // assigns the property itself, and every later push silently stops. The
+    // banner makes that failure reachable in a way the nav never did — the nav's
+    // height is fixed, and the banner's changes when it is dismissed, when the
+    // severity changes, and when a second alert arrives.
+    //
+    // Called from onLoaded and from every one of those changes.
+    function pushInsets(page) {
+        if (page === null)
+            return
+        if (page.bottomInset !== undefined)
+            page.bottomInset = nav.height
+        if (page.topInset !== undefined)
+            page.topInset = banner.visible ? banner.height + Theme.metric.mobileGap : 0
+    }
+
     function push(page) {
         if (page === null)
             return
@@ -150,6 +167,30 @@ Item {
             root.tab = id
     }
 
+    // ---- the alert banner ---------------------------------------------------
+    //
+    // HERE, on the shell, and not on any of the five pages. MobileShell destroys
+    // and rebuilds its page on every tab change, so a per-page banner would be
+    // constructed five times in a session — re-running its reveal each time,
+    // and losing a dismissal on every tap of the nav bar. It also has to be
+    // visible from all five destinations, which a page cannot arrange.
+    //
+    // It floats over the page rather than displacing it: every mobile page
+    // paints its own sky, and a banner that pushed the page down would leave a
+    // strip of window background above the gradient. `topInset` is how the page
+    // moves its content out from under it.
+    AlertBanner {
+        id: banner
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: Theme.metric.mobileMargin
+        onOpened: sheet.open = true
+
+        onVisibleChanged: root.pushInsets(pageLoader.item)
+        onHeightChanged: root.pushInsets(pageLoader.item)
+    }
+
     // Over the nav bar as well as over the page, and that is the reason it is
     // here rather than on the page: a picker that a tab bar could be tapped
     // through is a picker that can be left half-open behind another screen.
@@ -160,6 +201,12 @@ Item {
             root.pickerOpen = open
             root.push(pageLoader.item)
         }
+    }
+
+    // Over the nav bar too, for the picker's reason.
+    AlertSheet {
+        id: sheet
+        onDismissed: open = false
     }
 
     BottomNav {

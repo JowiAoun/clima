@@ -32,6 +32,16 @@ Item {
     // that is not there.
     property real bottomInset: 0
 
+    // How much of the TOP is covered, by the alert banner. Zero on the ordinary
+    // day, which is most of them.
+    //
+    // An inset rather than the banner taking space above the page, and the
+    // difference is visible: every mobile page draws its own sky, so a banner
+    // that pushed the page down would leave a strip of window background above
+    // the gradient. It floats over the page and the content moves out from
+    // under it, which is exactly what `bottomInset` already does for the nav.
+    property real topInset: 0
+
     // Forwarded so the harness can scroll and flick a mobile page the same way
     // it does the desktop one. `--poke scroll=` assigns contentY; `--poke
     // flick=` goes through flick() so the view genuinely moves.
@@ -55,13 +65,13 @@ Item {
         layer.enabled: true
 
         contentWidth: width
-        contentHeight: column.height + root.margin + root.bottomInset
+        contentHeight: column.height + root.margin + root.topInset + root.bottomInset
         flickableDirection: Flickable.VerticalFlick
         boundsBehavior: Flickable.StopAtBounds
 
         Column {
             id: column
-            y: root.margin
+            y: root.margin + root.topInset
             x: Math.round((scroll.width - width) / 2)
             width: root.columnWidth
             spacing: Theme.metric.mobileGap

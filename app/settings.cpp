@@ -26,6 +26,7 @@ const auto windUnit          = QStringLiteral("units/wind");
 const auto pressureUnit      = QStringLiteral("units/pressure");
 const auto visibilityUnit    = QStringLiteral("units/visibility");
 const auto precipitationUnit = QStringLiteral("units/precipitation");
+const auto acknowledgedAlerts = QStringLiteral("alerts/acknowledged");
 } // namespace key
 
 // The directory QSettings would use for a given identity. Constructing a
@@ -290,4 +291,26 @@ void Settings::setPrecipitationUnit(const QString &value)
 {
     if (store(key::precipitationUnit, value))
         Q_EMIT precipitationUnitChanged();
+}
+
+// ---- the dismissed alerts --------------------------------------------------
+//
+// The one setting this class stores without understanding. Each entry is a
+// hazard key, the severity it was dismissed at and when it stops mattering,
+// packed by app/viewmodels/alertsdata.cpp — which owns the format, prunes the
+// expired entries and is the only thing that reads them back.
+//
+// Kept here anyway rather than in a file of its own, because the reason it
+// persists at all is that it is a *preference*: without it, a multi-day heat
+// warning re-raises its banner on every launch, which is how a person learns to
+// dismiss a banner without reading it.
+QStringList Settings::acknowledgedAlerts() const
+{
+    return load(key::acknowledgedAlerts, QStringList()).toStringList();
+}
+
+void Settings::setAcknowledgedAlerts(const QStringList &value)
+{
+    if (store(key::acknowledgedAlerts, value))
+        Q_EMIT acknowledgedAlertsChanged();
 }

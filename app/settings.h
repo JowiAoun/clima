@@ -138,6 +138,10 @@ public:
     QString precipitationUnit() const;
     void    setPrecipitationUnit(const QString &value);
 
+    // Opaque to this class. app/viewmodels/alertsdata.cpp owns the format.
+    QStringList acknowledgedAlerts() const;
+    void        setAcknowledgedAlerts(const QStringList &value);
+
 Q_SIGNALS:
     void appearanceChanged();
     void windowGeometryChanged();
@@ -146,6 +150,7 @@ Q_SIGNALS:
     void pressureUnitChanged();
     void visibilityUnitChanged();
     void precipitationUnitChanged();
+    void acknowledgedAlertsChanged();
 
 private:
     // Private for the same reason AppOptions' is: QML picks a default

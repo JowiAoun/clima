@@ -3,6 +3,7 @@
 
 #include "appengine.h"
 
+#include "alertsdata.h"
 #include "conditionsdata.h"
 #include "forecastdata.h"
 
@@ -13,15 +14,20 @@
 #include "libclima/places/locationcontroller.h"
 #include "libclima/places/placesearchmodel.h"
 #include "libclima/providers/airquality/openmeteoairqualityprovider.h"
+#include "libclima/providers/eccc/ecccalertprovider.h"
 #include "libclima/providers/geocoding/offlinereversegeocoder.h"
+#include "libclima/providers/nws/nwsalertprovider.h"
 #include "libclima/providers/geocoding/openmeteogeocoder.h"
 #include "libclima/providers/metno/metnoforecastprovider.h"
 #include "libclima/providers/openmeteo/openmeteoforecastprovider.h"
 #include "libclima/providers/registry.h"
 
+#include "settings.h"
+
 #include <QCoreApplication>
 #include <QEventLoop>
 #include <QFutureWatcher>
+#include <QLocale>
 #include <QProcessEnvironment>
 #include <QTimeZone>
 #include <QTimer>
@@ -87,7 +93,20 @@ QVariantMap attributionMap(const Attribution &credit)
 AppEngine::AppEngine()
     : m_forecastData(new ForecastData(this))
     , m_conditionsData(new ConditionsData(this))
+    // Not `new`ed: AlertsData is a QML singleton with its own instance(), like
+    // this class, because the banner outlives any one page and QML must reach
+    // the same object the engine pushes into. Parenting a second one here would
+    // give the C++ side a model nothing on screen is bound to.
+    , m_alerts(AlertsData::instance())
 {
+    // The poll timer is the alert model's, and this is the only thing it asks
+    // of the engine when it fires. Held apart deliberately: the refresh cadence
+    // for a warning is not the cadence for a forecast, and merging them would
+    // put a three-minute forecast refresh on every user.
+    connect(m_alerts, &AlertsData::refreshRequested, this, [this]() {
+        if (hasPlace())
+            fetch(/*cachedOnly=*/false);
+    });
 }
 
 AppEngine::~AppEngine()
@@ -183,6 +202,13 @@ void AppEngine::configure(const QString &fixtureName)
 
     m_registry = std::make_unique<ProviderRegistry>();
 
+    // The alert model reads the app's clock, which under `--fixture` is frozen
+    // at the recording's instant. Handed over before any provider runs, because
+    // the first set may arrive from cache inside fetch() below and be filtered
+    // against the wrong `now` otherwise.
+    m_alerts->setClock(m_clock.get());
+    m_alerts->setSettings(Settings::instance());
+
     if (isFixtureMode())
         buildFixtureProviders();
     else
@@ -269,6 +295,12 @@ void AppEngine::buildLiveProviders()
     m_openMeteoAq = new OpenMeteoAirQualityProvider(m_http.get(), m_clock.get(), this);
     m_openMeteoAq->setCache(m_cache.get());
 
+    m_eccc = new EcccAlertProvider(m_http.get(), m_clock.get(), this);
+    m_eccc->setCache(m_cache.get());
+
+    m_nws = new NwsAlertProvider(m_http.get(), m_clock.get(), this);
+    m_nws->setCache(m_cache.get());
+
     const QStringList fail = forcedFailures();
     if (fail.contains(m_openMeteo->id())) {
         m_openMeteo->setBaseUrl(deadEnd());
@@ -276,12 +308,22 @@ void AppEngine::buildLiveProviders()
     }
     if (fail.contains(m_metNo->id()))
         m_metNo->setBaseUrl(deadEnd());
+
+    // `--fail eccc` is how the partial-set path gets exercised by hand. It is
+    // the one state that is hard to reach any other way and easy to get wrong:
+    // one provider of two answering must read as "some warnings could not be
+    // checked", never as "no warnings".
+    if (fail.contains(m_eccc->id()))
+        m_eccc->setBaseUrl(deadEnd());
+    if (fail.contains(m_nws->id()))
+        m_nws->setBaseUrl(deadEnd());
 }
 
 void AppEngine::buildFixtureProviders()
 {
     m_fixtureForecast = new FixtureForecastProvider(m_fixture, this);
     m_fixtureAq       = new FixtureAirQualityProvider(m_fixture, this);
+    m_fixtureAlerts   = new FixtureAlertProvider(m_fixture, this);
 }
 
 void AppEngine::registerProviders()
@@ -304,12 +346,19 @@ void AppEngine::registerProviders()
     if (isFixtureMode()) {
         complain(m_registry->addForecastProvider(m_fixtureForecast, 100), "the fixture provider");
         complain(m_registry->addAirQualityProvider(m_fixtureAq, 100), "the fixture air quality");
+        complain(m_registry->addAlertProvider(m_fixtureAlerts, 0), "the fixture alerts");
         return;
     }
 
     complain(m_registry->addForecastProvider(m_openMeteo, 100), "Open-Meteo");
     complain(m_registry->addForecastProvider(m_metNo, 200), "MET Norway");
     complain(m_registry->addAirQualityProvider(m_openMeteoAq, 100), "Open-Meteo air quality");
+
+    // 0, the national-service slot the convention above reserved. Both of them,
+    // and the number means less here than everywhere else: alert providers do
+    // not fall through, so priority only orders the merge for readability.
+    complain(m_registry->addAlertProvider(m_eccc, 0), "ECCC alerts");
+    complain(m_registry->addAlertProvider(m_nws, 0), "NWS alerts");
 }
 
 // ---- the loop --------------------------------------------------------------------
@@ -459,6 +508,56 @@ void AppEngine::fetch(bool cachedOnly)
     const QFuture<Result<AirQualityAnswer>> airFuture = m_registry->fetchAirQuality(request);
     airWatcher->setFuture(airFuture);
     deliverIfReady(airWatcher, airFuture);
+
+    // ---- alerts ------------------------------------------------------------
+    //
+    // A request of its own rather than a field of the forecast one: an alert
+    // provider needs a point and a language and nothing else, and threading a
+    // day count and a model list through it would be four ignored fields — see
+    // libclima/providers/ialertprovider.h.
+    //
+    // Not counted in `loading`. A spinner over the whole window because a
+    // warning poll is in flight would make the app feel busy every three
+    // minutes for a request that usually returns 850 bytes of nothing.
+    AlertRequest alerts;
+    alerts.coord      = current.coordinate;
+    alerts.cachedOnly = cachedOnly;
+    alerts.language   = QLocale().name().left(2);
+
+    auto *alertWatcher = new QFutureWatcher<Result<AlertAnswer>>(this);
+    connect(alertWatcher, &QFutureWatcherBase::finished, this,
+            [this, alertWatcher, cachedOnly, generation]() {
+                alertWatcher->deleteLater();
+                if (generation != m_generation)
+                    return;
+
+                const Result<AlertAnswer> result = alertWatcher->result();
+
+                if (!result) {
+                    // Unsupported means nobody covers this place — most of the
+                    // world. The feature is hidden, which §4.4 asks for, and it
+                    // is not a failure to report.
+                    if (result.errorKind() == ErrorKind::Unsupported) {
+                        m_alerts->clear(/*available=*/false);
+                        return;
+                    }
+
+                    // Everything else: the place HAS alert coverage and we could
+                    // not reach it. Whatever is on screen stays, and the banner
+                    // gains a "last confirmed" line if the top alert is past its
+                    // refresh deadline. Never blanked — an empty banner and "we
+                    // could not check" are different claims.
+                    if (!cachedOnly)
+                        m_alerts->setRefreshFailed(true);
+                    return;
+                }
+
+                m_alerts->setRefreshFailed(false);
+                m_alerts->apply(result.value().value);
+            });
+    const QFuture<Result<AlertAnswer>> alertFuture = m_registry->fetchAlerts(alerts);
+    alertWatcher->setFuture(alertFuture);
+    deliverIfReady(alertWatcher, alertFuture);
 }
 
 void AppEngine::applyForecast(const Forecast &forecast, const QString &servedBy, bool fromFallback)

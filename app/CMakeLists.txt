@@ -26,6 +26,9 @@ configure_file(climaconfig.h.in climaconfig.h @ONLY)
 # scripts/check-qml-files.sh diffs this block against what is on disk, so the
 # list going stale is caught by a script rather than by an afternoon.
 set(clima_qml_files
+    qml/Clima/AlertBanner.qml
+    qml/Clima/AlertRow.qml
+    qml/Clima/AlertSheet.qml
     qml/Clima/BottomNav.qml
     qml/Clima/ChevronGlyph.qml
     qml/Clima/Clock.qml
@@ -81,6 +84,7 @@ set(clima_qml_files
     qml/Clima/PrecipitationStrip.qml
     qml/Clima/SectionHeader.qml
     qml/Clima/SeriesArea.qml
+    qml/Clima/SeverityGlyph.qml
     qml/Clima/SeriesBars.qml
     qml/Clima/SkyArc.qml
     qml/Clima/SunEventGlyph.qml
@@ -205,6 +209,8 @@ set(clima_cpp_sources
     # ordinary source compiles, links, and then does not exist as a QML type.
     viewmodels/appengine.h
     viewmodels/appengine.cpp
+    viewmodels/alertsdata.h
+    viewmodels/alertsdata.cpp
     viewmodels/conditionsdata.h
     viewmodels/conditionsdata.cpp
     viewmodels/forecastdata.h

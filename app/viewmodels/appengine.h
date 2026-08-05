@@ -75,6 +75,7 @@
 
 #include <memory>
 
+class AlertsData;
 class ConditionsData;
 class ForecastData;
 
@@ -82,8 +83,11 @@ namespace clima {
 class CacheStore;
 class Clock;
 class DeviceLocator;
+class EcccAlertProvider;
 class FixtureAirQualityProvider;
+class FixtureAlertProvider;
 class FixtureForecastProvider;
+class NwsAlertProvider;
 class HttpClient;
 class LocationController;
 class MetNoForecastProvider;
@@ -271,8 +275,12 @@ private:
     clima::MetNoForecastProvider       *m_metNo       = nullptr;
     clima::OpenMeteoAirQualityProvider *m_openMeteoAq = nullptr;
 
+    clima::EcccAlertProvider *m_eccc = nullptr;
+    clima::NwsAlertProvider  *m_nws  = nullptr;
+
     clima::FixtureForecastProvider   *m_fixtureForecast = nullptr;
     clima::FixtureAirQualityProvider *m_fixtureAq       = nullptr;
+    clima::FixtureAlertProvider      *m_fixtureAlerts   = nullptr;
 
     clima::OpenMeteoGeocoder      *m_geocoder = nullptr;
     clima::OfflineReverseGeocoder *m_reverse  = nullptr;
@@ -298,4 +306,10 @@ private:
 
     ForecastData   *m_forecastData   = nullptr;
     ConditionsData *m_conditionsData = nullptr;
+
+    // The fourth singleton QML sees. Not a formatter over the forecast the way
+    // the other two are — it is a view of a different product, on a different
+    // schedule, which is why it owns its own poll timer rather than riding this
+    // class's refresh.
+    AlertsData *m_alerts = nullptr;
 };

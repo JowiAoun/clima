@@ -65,9 +65,33 @@ Item {
     // so the column stops and centres instead.
     readonly property real maxContentWidth: 1320
 
+    // ---- the alert banner ---------------------------------------------------
+    //
+    // A sibling of the Flickable, above it, and NOT the first child of the
+    // column below — which is where it would naturally go and where it would be
+    // wrong. The column scrolls, so a warning placed in it is a warning that
+    // leaves the screen the moment the reader looks at the chart. The Flickable
+    // also sets `layer.enabled: true`, and a banner inside that layer would be
+    // composited with everything else the page draws.
+    //
+    // It takes space here rather than floating, unlike the phone's: the desktop
+    // page has no full-bleed backdrop of its own to leave a strip above, and a
+    // banner overlaying the location bar would cover the name of the place the
+    // warning is about.
+    AlertBanner {
+        id: banner
+        x: Math.round((root.width - width) / 2)
+        width: Math.min(root.width - root.margin * 2, root.maxContentWidth)
+        y: visible ? root.margin : 0
+        onOpened: sheet.open = true
+    }
+
     Flickable {
         id: scroll
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.top: banner.visible ? banner.bottom : parent.top
 
         // clip bounds the rectangles; the layer bounds the Shapes, which ignore
         // ancestor clipping entirely — every chart on this page draws with one,
@@ -155,6 +179,11 @@ Item {
     // it.
     PlacePicker {
         id: picker
+        onDismissed: open = false
+    }
+
+    AlertSheet {
+        id: sheet
         onDismissed: open = false
     }
 
