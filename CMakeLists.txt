@@ -76,7 +76,12 @@ include(ClimaEngineGuard)
 # QTRY_COMPARE are the two shapes an asynchronous network client is tested with.
 set(clima_qt_components Core Gui Quick Network Sql)
 if(CLIMA_BUILD_TESTS)
-    list(APPEND clima_qt_components Test)
+    # QuickTest as well as Test, because the 13,400 lines this project is mostly
+    # made of are QML and a C++ test can only reach them through a keyhole. It
+    # is the runner, not a second framework: QUICK_TEST_MAIN_WITH_SETUP builds a
+    # QQmlEngine per test file and reports through the same QTestLib that every
+    # other test here already reports through, so ctest sees one list.
+    list(APPEND clima_qt_components Test QuickTest)
 endif()
 
 clima_guard_qt_components(${clima_qt_components})

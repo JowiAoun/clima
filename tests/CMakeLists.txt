@@ -121,6 +121,23 @@ set_tests_properties(tst_conditionsdata PROPERTIES
     TIMEOUT 60
 )
 
+# ---- the QML suite ----------------------------------------------------------
+#
+# One executable running every tests/qml/tst_*.qml, and the first test coverage
+# this repository has ever had of the part of it that users look at.
+#
+# It links both QML modules and both plugins. `Clima` for the components and the
+# Theme singleton; `Clima.Gallery` for gallery.js — the catalogue of everything
+# in the tree, which tst_specimen walks — and contrast.js, which is where WCAG's
+# arithmetic lives. Linking the gallery module is why gallery/ builds a static
+# library with a thin executable on top rather than baking its module into the
+# binary: a module inside an executable is a module only that executable can
+# import.
+#
+# clima_forbid_gui() is deliberately absent, as it is for tst_conditionsdata.
+# This one is *all* GUI.
+add_subdirectory(qml)
+
 # ---- the binary-level no-GUI check ------------------------------------------
 #
 # cmake/ClimaEngineGuard.cmake refuses at configure time if libclima's target
