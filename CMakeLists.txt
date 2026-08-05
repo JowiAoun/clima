@@ -112,6 +112,29 @@ if(NOT TARGET Qt6::Positioning)
         "Everything else works; the user searches for a place by name.")
 endif()
 
+# ---- and the second one ------------------------------------------------------
+#
+# Qt D-Bus backs SystemAppearance: the XDG desktop portal is how an app learns
+# that the session went dark, and it is the only route that works from inside a
+# Flatpak. Optional for the same two reasons Positioning is, plus a third that
+# is specific to it — there is no session bus on Windows, so requiring it would
+# make one of our two shipping desktop targets unbuildable for a Linux feature.
+#
+# The fallbacks are real rather than nominal: QStyleHints::colorScheme() answers
+# the colour question on Windows and on a portal-less Linux session, and dark is
+# the floor under both. See app/platform/systemappearance.h for the order.
+#
+# LGPLv3-or-commercial, so it clears the guard.
+clima_guard_qt_components(DBus)
+find_package(Qt6 6.8 QUIET COMPONENTS DBus)
+
+if(NOT TARGET Qt6::DBus)
+    message(STATUS
+        "clima: Qt6::DBus was not found, so the desktop's colour scheme and "
+        "reduced-motion preference are read from QStyleHints alone. The three-way "
+        "override in Settings still works.")
+endif()
+
 # Where qt_add_qml_module lays out its module directories. This is not a tidiness
 # preference — it is what makes the build's own QML modules discoverable as
 # modules rather than as resources baked into one executable:

@@ -53,12 +53,57 @@ Window {
         AppOptions.sky !== "" ? AppOptions.sky
                               : (win.mobile ? Clock.skyPhase : "dusk")
 
-    // The colour scheme is pushed into the Theme singleton rather than read out
-    // of it, because Theme is where every component already looks and adding a
-    // second place to ask would mean two answers. --scheme wins outright: a
-    // capture that followed whichever theme the machine happened to be in would
-    // not be a capture of anything in particular, and every golden image and
-    // every README screenshot depends on that not being true.
+    // ---- the colour scheme -------------------------------------------------
+    //
+    // Pushed into the Theme singleton rather than read out of it, because Theme
+    // is where every component already looks and adding a second place to ask
+    // would mean two answers.
+    //
+    // Four sources, and the order is the whole of the policy:
+    //
+    //   1. --scheme, which wins outright
+    //   2. a capture with no --scheme, which is pinned to dark
+    //   3. the user's own choice, when they made one
+    //   4. the desktop's preference, and dark under that
+    //
+    // Rule 2 is the one worth defending. `Settings.appearance` defaults to
+    // "system", so without it a golden image would come out in whatever theme
+    // the machine that ran CI happened to be in — the same image passing on one
+    // runner and failing on the next, for a reason nothing in the diff would
+    // show. A capture already restores no window geometry for exactly this
+    // reason; the scheme is the same argument about a different property.
+    readonly property string resolvedScheme: {
+        if (AppOptions.scheme !== "")
+            return AppOptions.scheme
+        if (AppOptions.capturing)
+            return "dark"
+        if (Settings.appearance === "light" || Settings.appearance === "dark")
+            return Settings.appearance
+        return SystemAppearance.colorScheme
+    }
+
+    // A Binding rather than an assignment, because the desktop can change its
+    // mind while the app is open — that is the entire point of subscribing to
+    // the portal — and an assignment made once at startup would leave this
+    // window the only one on the screen still dark at sunrise.
+    Binding {
+        target: Theme
+        property: "scheme"
+        value: win.resolvedScheme
+    }
+
+    // Stillness is two unrelated requests that happen to want the same thing.
+    // A still capture holds still so the shutter cannot catch a transition —
+    // --film is exempt, since a contact sheet of eight identical frames is not
+    // a review of anything. And a reader who has asked their desktop for less
+    // movement has asked this window too; precipitation's standing animation is
+    // the first thing that has to stop.
+    Binding {
+        target: Theme
+        property: "stillness"
+        value: (AppOptions.grab !== "" && AppOptions.film === "")
+               || SystemAppearance.reduceMotion
+    }
 
     // The page background is painted as an item, not left to Window.color.
     // grabToImage() captures contentItem, which does not include the window's
@@ -143,17 +188,10 @@ Window {
         !AppOptions.capturing && !win.geometryFromFlags
 
     Component.onCompleted: {
-        // First, before any of the geometry work: the scheme decides what every
-        // component below paints with, and a frame drawn dark and then repainted
-        // light is a frame a capture can catch halfway.
-        if (AppOptions.scheme !== "")
-            Theme.scheme = AppOptions.scheme
-
-        // A still capture holds still. --film is the exception, because a
-        // contact sheet of eight identical frames is not a review of anything.
-        if (AppOptions.grab !== "" && AppOptions.film === "")
-            Theme.stillness = true
-
+        // The scheme and stillness are not set here. They are Bindings above,
+        // which apply during this object's completion and so are in force
+        // before the first frame — and, unlike the assignments they replaced,
+        // stay in force when the desktop changes underneath them.
         if (win.geometryRemembered && Settings.hasWindowSize) {
             // Size only. Position is stored, and restoring it is a lie on
             // Wayland — the compositor places windows, and a client that

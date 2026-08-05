@@ -120,6 +120,41 @@ MobilePage {
 
     MobileCard {
         width: parent.width
+        title: qsTr("Appearance")
+        content: Column {
+            SettingRow {
+                text: qsTr("Theme")
+                // "System" says what the app is following, and then what that
+                // resolved to, because the two are different facts and the
+                // second is the one somebody checking this row wants. When
+                // nothing answered — no portal, and a platform with no colour
+                // scheme hint — it says so rather than reporting a preference
+                // it never received.
+                value: {
+                    // --scheme outranks the stored preference, so when it is
+                    // present this row would otherwise describe a theme the
+                    // screen around it is not in. Say which one is winning; the
+                    // line only ever appears for somebody who passed the flag.
+                    if (AppOptions.scheme !== "")
+                        return qsTr("%1 · forced by --scheme").arg(AppOptions.scheme)
+                    if (Settings.appearance === "light") return qsTr("Light")
+                    if (Settings.appearance === "dark")  return qsTr("Dark")
+                    if (!SystemAppearance.available)     return qsTr("System · no preference")
+                    return SystemAppearance.colorScheme === "light"
+                           ? qsTr("System · light") : qsTr("System · dark")
+                }
+                tappable: true
+                last: true
+                onActivated: Settings.appearance =
+                    Settings.appearance === "system" ? "light"
+                  : Settings.appearance === "light"  ? "dark"
+                                                     : "system"
+            }
+        }
+    }
+
+    MobileCard {
+        width: parent.width
         title: qsTr("Units")
         content: Column {
             SettingRow {

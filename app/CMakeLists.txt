@@ -213,6 +213,15 @@ set(clima_cpp_sources
     viewmodels/metrics.cpp
     viewmodels/units.h
     viewmodels/units.cpp
+
+    # ---- the desktop, asked rather than assumed ------------------------------
+    #
+    # A QML_SINGLETON like the view models above, and here for the same reason.
+    # It answers two questions the session owns — dark or light, and whether to
+    # move — and it ships in every build: the D-Bus half is compiled out when
+    # Qt6::DBus is absent, and QStyleHints still answers the colour question.
+    platform/systemappearance.h
+    platform/systemappearance.cpp
 )
 
 # ---- the typeface -----------------------------------------------------------
@@ -269,6 +278,7 @@ target_include_directories(climaqml PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/devtools
     ${CMAKE_CURRENT_SOURCE_DIR}/viewmodels
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform
 )
 
 # The option has existed since the CMake skeleton landed; this is where it
@@ -288,6 +298,17 @@ endif()
 # from this one target. Adding a component "in case" is how a banned module
 # arrives — see cmake/ClimaLicenceGuard.cmake.
 target_link_libraries(climaqml PUBLIC Qt6::Quick)
+
+# The portal, when there is one to talk to. PRIVATE and guarded by a compile
+# definition rather than by a stub file: SystemAppearance is one class whose
+# D-Bus half is a handful of methods, and a second implementation of it kept in
+# step by hand is a larger liability than four #ifdefs in the file that owns
+# them. Without this the class still exists, still answers, and still floors at
+# dark — it just stops hearing about changes.
+if(TARGET Qt6::DBus)
+    target_link_libraries(climaqml PRIVATE Qt6::DBus)
+    target_compile_definitions(climaqml PRIVATE CLIMA_HAVE_DBUS)
+endif()
 
 # The engine. Nothing in app/ calls into it yet — the view models that will are
 # W4 — and it is linked now anyway, for two reasons that are both about the
