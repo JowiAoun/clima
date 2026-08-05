@@ -439,10 +439,34 @@ void HttpClient::onReplyFinished(const std::shared_ptr<InFlight> &flight, QNetwo
     }
 
     // ---- 404 and the rest of 4xx --------------------------------------------
+    //
+    // The body is read and appended, truncated. QNetworkReply::errorString() for
+    // a 4xx is "…server replied: Bad Request" and nothing else, while the answer
+    // to *why* is in the payload every one of our providers sends one in:
+    // Open-Meteo says `{"error":true,"reason":"Cannot initialize WeatherVariable
+    // from invalid String value …"}`, api.weather.gov says `"Parameter \"point\"
+    // is invalid: out of bounds"`. Dropping that turned a sentence naming the
+    // mistake into "Bad Request", which is the difference between a five-minute
+    // fix and an afternoon with a packet capture.
+    //
+    // Truncated because this reaches a log: an error message is a sentence, and
+    // a provider that answers 4xx with a page of HTML must not paste it into
+    // one.
     if (status >= 400) {
         const ErrorKind kind = status == 404 || status == 410 ? ErrorKind::NotFound
                                                               : ErrorKind::HttpStatus;
-        finish(flight, Result<HttpResponse>(fail(kind, reply->errorString())));
+
+        QString message = reply->errorString();
+        const QByteArray body = reply->readAll().trimmed();
+        if (!body.isEmpty()) {
+            constexpr int limit = 400;
+            QString detail = QString::fromUtf8(body.left(limit));
+            if (body.size() > limit)
+                detail += QStringLiteral("…");
+            message += QStringLiteral(" — ") + detail.simplified();
+        }
+
+        finish(flight, Result<HttpResponse>(fail(kind, message)));
         return;
     }
 
