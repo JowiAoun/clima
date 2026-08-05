@@ -227,6 +227,7 @@ path = [
     "tools/refcap/package.json",
     "tools/refcap/package-lock.json",
     "tools/refcap/targets.json",
+    "tests/qmllint-baseline",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"

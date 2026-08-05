@@ -141,8 +141,22 @@ target_compile_definitions(tst_environment PRIVATE
 
 add_test(NAME tst_environment COMMAND tst_environment)
 
+# Labelled `golden`, so that `ctest -LE golden` drops the canary along with the
+# images it guards. That is not tidiness — it was a real failure. Built against
+# Debian 13's Qt 6.8.2 the suite is 21/22, and the one failure is this test
+# correctly reporting that FreeType there rounds line heights differently:
+#
+#   11px height: recorded 13.296875, measured 13.312500
+#
+# One sixty-fourth of a pixel, at five of the eight sizes, with every advance
+# identical. Every golden image would differ and not one of those differences
+# would be a defect — which is exactly what this test exists to say. But the
+# packager's build deliberately runs a *different* Qt, so asking it whether the
+# machine matches the one the images were recorded on is asking a question with
+# a known answer and calling it a failure.
 set_tests_properties(tst_environment PROPERTIES
     ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORMTHEME=;QT_FORCE_STDERR_LOGGING=1;QT_SCALE_FACTOR=1;QT_ENABLE_HIGHDPI_SCALING=0;QT_SCREEN_SCALE_FACTORS=;QT_FONT_DPI=96;LC_ALL=C.UTF-8;LANG=C.UTF-8;TZ=UTC;FONTCONFIG_FILE=${CMAKE_CURRENT_SOURCE_DIR}/golden/fontconfig.conf"
+    LABELS "golden"
     TIMEOUT 60
 )
 

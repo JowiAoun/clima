@@ -1,0 +1,235 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Continuous integration.
+#
+# ---- why every job runs inside the flake -------------------------------------
+#
+# flake.lock pins nixpkgs by revision, so `nix develop` gives the same Qt, the
+# same compiler, the same FreeType and the same fontconfig on a maintainer's
+# laptop and on a runner — down to the store hash. That is what makes the golden
+# images comparable across machines at all, and it is a stronger guarantee than
+# the digest-pinned container docs/07 assumed, because it also covers the local
+# case: a developer who runs `nix develop -c ctest` is running what CI runs, not
+# something close to it.
+#
+# It is deliberately not the only thing that ever builds this. `linux-system-qt`
+# below builds against a distribution's own Qt with no Nix anywhere, because
+# that is what a packager does, and a project that only builds inside its own
+# pinned environment discovers on release day that it depends on it.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A second push to a pull request cancels the first. The golden job renders
+# thirty-two scenes and there is nothing to learn from a run against a commit
+# that has already been replaced.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---- the whole suite, in the pinned environment ---------------------------
+  #
+  # Tests and golden images in one job rather than two. They share a build that
+  # takes longer than either of them runs, and splitting would mean building
+  # twice to report the same information in two places.
+  test:
+    name: test (nix)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Configure
+        run: |
+          nix develop --command cmake -S . -B build/ci -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCLIMA_BUILD_TESTS=ON \
+            -DCLIMA_BUILD_GALLERY=ON \
+            -DCLIMA_DEV_TOOLS=ON
+
+      - name: Build
+        run: nix develop --command cmake --build build/ci
+
+      # tst_environment runs first by way of its DEPENDS, so a rasterisation
+      # change is reported as one sentence about the machine rather than as
+      # thirty-two image diffs. See tests/tst_environment.cpp.
+      - name: Test
+        run: nix develop --command ctest --test-dir build/ci --output-on-failure
+
+      # The renderings that did not match, so a golden failure can be looked at
+      # rather than only read about. `if: failure()` because on a green run
+      # there is nothing here to collect.
+      - name: Upload the images that differed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-actual
+          path: tests/golden/images/*.actual.png
+          if-no-files-found: ignore
+
+  # ---- a packager's build --------------------------------------------------
+  #
+  # Debian 13 ships Qt 6.8, which is the floor D2 sets, and this is the job that
+  # keeps the floor honest: no Nix, no flake, nothing fetched at configure time,
+  # only what apt provides. D8 in docs/03-tech-stack.md rules out Conan and
+  # vcpkg precisely so that this build is possible, and an assertion nobody runs
+  # is not an assertion.
+  #
+  # Golden images are not checked here and that is deliberate. A different Qt
+  # renders different pixels, which is a fact about Qt rather than a defect in
+  # this application, and tst_environment would correctly refuse the comparison.
+  # `-E golden` excludes it by the label tests/CMakeLists.txt gives it.
+  linux-system-qt:
+    name: build (debian 13, system Qt)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container: debian:trixie
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+            build-essential cmake ninja-build pkg-config \
+            qt6-base-dev qt6-declarative-dev qt6-declarative-dev-tools \
+            libqt6sql6-sqlite libgl1-mesa-dev
+
+      - name: Configure
+        run: |
+          cmake -S . -B build/deb -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCLIMA_BUILD_TESTS=ON \
+            -DCLIMA_BUILD_GALLERY=ON \
+            -DCLIMA_DEV_TOOLS=ON
+
+      - name: Build
+        run: cmake --build build/deb
+
+      - name: Test, without the golden images
+        run: ctest --test-dir build/deb -LE golden --output-on-failure
+
+  # ---- the other shipping desktop --------------------------------------------
+  #
+  # Windows is one of the two release targets, so it is built on every change
+  # rather than discovered at tag time. Qt comes from aqtinstall because there
+  # is no system Qt to speak of; that is a build-time dependency of CI only and
+  # does not touch D8, which is about what a *packager* needs.
+  #
+  # Golden images are excluded, and not only for the reason the Debian job
+  # excludes them. Windows renders text through DirectWrite rather than
+  # FreeType, so `FONTCONFIG_FILE` means nothing there and the images could not
+  # match however carefully the environment were pinned. docs/09 already draws
+  # this distinction for screenshots: an honest Windows picture comes from a
+  # real window, and it is documentation rather than a comparison.
+  #
+  # This is the one job in the file that has never been run — everything else
+  # here was executed locally before being committed, the Debian build inside
+  # the same container image it names. Treat its first run as the test of it.
+  windows-msvc:
+    name: build (windows, msvc)
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          modules: 'qtdeclarative'
+          cache: true
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        run: >
+          cmake -S . -B build/win -G Ninja
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCLIMA_BUILD_TESTS=ON
+          -DCLIMA_BUILD_GALLERY=ON
+          -DCLIMA_DEV_TOOLS=ON
+
+      - name: Build
+        run: cmake --build build/win
+
+      - name: Test, without the golden images
+        run: ctest --test-dir build/win -LE golden --output-on-failure
+
+  # ---- everything that reads the tree rather than building it ---------------
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      # Every file carries copyright and licensing. This is the check that
+      # keeps the MPL-2.0 engine and the GPL-3.0-or-later application apart,
+      # which is the whole of D6.
+      - name: reuse lint
+        run: nix develop --command reuse lint
+
+      - name: shellcheck
+        run: nix develop --command shellcheck --external-sources scripts/*.sh
+
+      # The explicit QML_FILES lists against what is on disk. A globbed module
+      # goes stale silently; this is what stops a file being added to the tree
+      # and not to the module that is supposed to contain it.
+      - name: QML module file lists
+        run: nix develop --command bash scripts/check-qml-files.sh
+
+      # ---- there is deliberately no clang-format step here --------------------
+      #
+      # Measured before deciding, over every .cpp and .h in the tree:
+      #
+      #   Microsoft   5,585 replacements      LLVM      20,508
+      #   WebKit      6,564                   Mozilla   21,108
+      #   Chromium   22,488                   Google    22,508
+      #   GNU        35,380
+      #
+      # and a config hand-tuned on the closest of them still wanted 2,719. This
+      # C++ was written by hand against no formatter and matches none of them.
+      #
+      # So the choice is a single enormous reformat commit or no gate, and the
+      # reformat is the worse one. It would rewrite `git blame` for every line
+      # of a codebase whose distinguishing feature is its comments, and
+      # ReflowComments is exactly the setting that would tear up the aligned
+      # prose those comments are written in — the same reason docs/09 records
+      # that qmlformat must never be run over the QML.
+      #
+      # The gap this leaves is real and worth stating: new C++ is reviewed for
+      # style by a person. If that stops working, the answer is to tune a
+      # .clang-format down to zero replacements against the tree as it stands
+      # and adopt it in a commit that does nothing else — not to adopt a
+      # standard style and reformat to meet it.
+
+      # Needs a configured build for the all_qmllint target, but not a compiled
+      # one — qmllint reads sources and the module metadata that configuring
+      # writes.
+      - name: Configure, for qmllint
+        run: |
+          nix develop --command cmake -S . -B build/lint -G Ninja \
+            -DCLIMA_BUILD_TESTS=OFF -DCLIMA_BUILD_GALLERY=ON
+
+      - name: qmllint, as a ratchet
+        run: CLIMA_BUILD_DIR=build/lint nix develop --command bash scripts/check-qmllint.sh
