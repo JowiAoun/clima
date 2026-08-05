@@ -70,6 +70,19 @@ Rectangle {
     // One item for the whole sky, so a phase change is one opacity rather than
     // a hundred and thirty. It is also what keeps the field out of the scene
     // graph's way entirely during the day.
+    //
+    // `visible` is not enough on its own, and that is why each Repeater below
+    // takes an empty model when the sky has no stars. `visible: false` stops an
+    // item being *drawn*; it does not stop a Repeater building it. Every
+    // desktop launch was therefore constructing 130 Rectangles, 9 beacon Shapes
+    // and 3 constellation Shapes in order to show none of them — the desktop is
+    // `dusk` with `stars: false` — and the light theme, whose four phases are
+    // all `stars: 0.00`, would have done the same on every phone screen.
+    //
+    // Guarding the models rather than wrapping the lot in a Loader keeps the
+    // change to three lines instead of re-indenting a hundred and fifty, and it
+    // also skips building the model arrays themselves. Rendered output is
+    // unchanged: dark stays byte-identical across all nine captures.
     Item {
         id: night
         anchors.fill: parent
@@ -81,7 +94,7 @@ Rectangle {
         // radial gradient per point would be 120 offscreen passes to draw
         // something two pixels across.
         Repeater {
-            model: Sky.field(130)
+            model: root.starOpacity > 0 ? Sky.field(130) : []
 
             delegate: Rectangle {
                 required property var modelData
@@ -101,7 +114,7 @@ Rectangle {
         // WeatherGlyph's sun halo had to learn: a flat circle has an edge you
         // can trace, and an edge makes it a stacked wash.
         Repeater {
-            model: Sky.beacons(9)
+            model: root.starOpacity > 0 ? Sky.beacons(9) : []
 
             delegate: Item {
                 id: beacon
@@ -157,7 +170,7 @@ Rectangle {
 
         // ---- the figures ----------------------------------------------------
         Repeater {
-            model: Sky.constellations
+            model: root.starOpacity > 0 ? Sky.constellations : []
 
             delegate: Item {
                 id: figure
