@@ -70,9 +70,19 @@ Three consequences, all of which have bitten already:
   is a glow and is fine; one you can trace the outline of is a stacked wash.
 - **A white wash is not a colour you can put text on.** Ink for anything
   sitting on the accent is `accent.ink`, never a surface token.
-- **Borders are usually wrong.** A 1px outline across a junction is exactly the
-  seam the junction exists to avoid. Contrast against the page defines a card;
-  reach for a border only when nothing else will do.
+- **Borders are usually wrong — in dark mode.** A 1px outline across a junction
+  is exactly the seam the junction exists to avoid. Contrast against the page
+  defines a card; reach for a border only when nothing else will do.
+
+  **In light mode the outer card edge is the exception**, and it is not a
+  matter of taste. The same ladder inverted is a black wash over a near-white
+  page, and 6% black over `#eef1f7` is a 1.14:1 step — measured on the palette
+  page, not estimated. Contrast that small does not define anything, so
+  `line.card` exists and is load-bearing in exactly one of the two themes. The
+  rule generalises: on a pale ground a filled shape can be found by its edge or
+  by nothing at all. It is also why `accent.fill` had to darken rather than
+  gain an outline — it paints text and hairlines as well as pills, and an edge
+  cannot rescue a word.
 
 `backdrop-filter: blur(60px)` is in the reference and deliberately not
 reproduced: blurring a smooth vertical gradient returns the same gradient. It
@@ -183,6 +193,42 @@ carries them in `bands`.
 Trend colours are fixed: `state.trendUp` warm, `state.trendDown` cool, `state.trendSteady`
 neutral. A rising temperature and a rising pressure use the same up colour;
 the card's words say whether that is good news.
+
+**A published band keeps its hue under both themes.** Six of the nine metric
+ramps are continuous and ours, so the light theme inverts their lightness while
+holding hue and chroma. The other three — `precip`, `aqi`, `uv` — are authority
+bands, and re-hueing them would make the app disagree with the source it is
+quoting. `Theme.categoricalRamps` is that list, and the gallery's Ramps page
+labels each ramp with which kind it is.
+
+### Every token declares what it owes its background
+
+`Theme.contrastDefaults` and `Theme.contrastOverrides` record, per token, the
+background it is actually composited over and which of three duties it does:
+`text` (4.5:1), `essential` (3:1 — you must see it to read the content or work
+a control), or `incidental` (no floor). The gallery's Colour page measures every
+token against that contract in both schemes and prints the ratio, red where it
+misses.
+
+Three things that pass had to be learned, and they are the reason the contract
+is per-token rather than one threshold:
+
+- **A ratio is only meaningful against the right ground.** `accent.ink` looked
+  broken at 1.48:1 against a card it is never drawn on. It is the label *on* the
+  pill, and against `accent.fill` it is 11.42:1.
+- **Gradients are scored as a pair.** A badge plate or a cloud is legible if
+  *either* end of it separates from the ground, and which end does that flips
+  between the schemes. Scored per stop, the same object reads as broken in one
+  theme and fine in the other.
+- **A WCAG ratio is luminance only, and some things are found by hue.** The
+  light day badge is a pale gold disc on a pale grey card — 1.11:1, and plainly
+  visible. That is why `badge.*` is `incidental` and the requirement it really
+  owes, the glyph *on* the plate, is measured one role up. Holding the plate
+  itself to 3:1 would have turned a sunny day's badge bronze.
+
+Both schemes currently have zero red rows. Adding a token means giving it a
+duty and a ground; leaving it out gets it its role's default, which is usually
+what you want.
 
 ## 10.6 Motion
 
@@ -552,6 +598,13 @@ Three layers, and each carries a different piece of the reading:
   in that hour, so the same forecast draws the same rain on every run and
   `--grab` is still a golden image. Two consecutive grabs are byte-identical;
   that is the check.
+- **A storm deepens in light mode; it cannot flash.** `precip.flash` is a
+  brightening on a night sky, and there is nothing brighter than a near-white
+  page to brighten it towards — so the light theme's flash is a *darkening*
+  (`#2a3f66`) and the storm band gets heavier rather than whiter for an instant.
+  The general form of this is worth keeping in mind for any effect defined as
+  "add light": under an inverted ladder it has to be redefined as "add
+  contrast", and the direction is a property of the theme.
 - **The loop wraps seamlessly or it is a glitch you will blame on something
   else.** One clock runs `0 → LOOP` and every particle's progress is
   `(clock × rate + offset) mod 1`, which is only continuous across the wrap
@@ -643,11 +696,24 @@ render is unchanged to the byte.
 
 Two rules, and both are the general rules applied here rather than new ones:
 
-- **Every phase is dark.** Surfaces are white washes at 0.05–0.10 and a wash is
-  only a surface if something darker is behind it, so a literal daylight sky
-  would make every card on every screen invisible at once. The phases differ in
-  hue and clarity, not lightness. This is the hard constraint on any future
-  theme: the surface ladder decides the background, not the other way round.
+- **Every phase is dark — within a theme.** Surfaces are white washes at
+  0.05–0.10 and a wash is only a surface if something darker is behind it, so a
+  literal daylight sky would make every card on every screen invisible at once.
+  The phases differ in hue and clarity, not lightness. The surface ladder
+  decides the background, not the other way round.
+
+  The light theme is the same rule read the other way, and it is worth stating
+  because it looks like an exception and is not. There the ladder is *black*
+  washes, so every one of the four phases is bright — and all four keep their
+  hue relationships, dawn still warmer than night. What the rule actually says
+  is that the sky and the ladder must agree on which way round the contrast
+  runs; it never said which way that is.
+
+- **In light mode there are no stars.** `stars` is 0.00 in all four phases, so
+  the 130 Rectangles and 12 Shapes are never instantiated and the light theme
+  is cheaper to draw than the dark one. This is not a performance trick: a star
+  is a bright point on a dark ground, and the same pinpoint on a pale sky is a
+  speck of dirt on the screen.
 - **Nothing in it moves.** §10.6's one standing exception is precipitation
   (§10.11), which is weather rather than decoration, and a twinkling star field
   is the worst possible place to make a second: it would run forever, behind
