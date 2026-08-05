@@ -121,6 +121,31 @@ set_tests_properties(tst_conditionsdata PROPERTIES
     TIMEOUT 60
 )
 
+# ---- the golden images' canary ----------------------------------------------
+#
+# Links climaqml for AppFont and therefore links Qt6::Gui, which is why it is
+# registered here rather than through clima_add_test() — that function applies
+# clima_forbid_gui() and would refuse the link. Measuring text without a GUI is
+# not a thing that can be arranged.
+#
+# FONTCONFIG_FILE is the whole reason this is meaningful: it measures the font
+# environment the golden images are *taken* in, not the one the developer's
+# desktop happens to have. Without it the numbers are about the host and the
+# test would fail on every machine but one.
+add_executable(tst_environment tst_environment.cpp)
+
+target_link_libraries(tst_environment PRIVATE climaqml Qt6::Test)
+target_compile_definitions(tst_environment PRIVATE
+    CLIMA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME tst_environment COMMAND tst_environment)
+
+set_tests_properties(tst_environment PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORMTHEME=;QT_FORCE_STDERR_LOGGING=1;QT_SCALE_FACTOR=1;QT_ENABLE_HIGHDPI_SCALING=0;QT_SCREEN_SCALE_FACTORS=;QT_FONT_DPI=96;LC_ALL=C.UTF-8;LANG=C.UTF-8;TZ=UTC;FONTCONFIG_FILE=${CMAKE_CURRENT_SOURCE_DIR}/golden/fontconfig.conf"
+    TIMEOUT 60
+)
+
 # ---- the QML suite ----------------------------------------------------------
 #
 # One executable running every tests/qml/tst_*.qml, and the first test coverage
@@ -149,6 +174,51 @@ add_subdirectory(qml)
 # the engine: the network client, the cache store and the clock, plus Qt Test.
 # If any of them dragged a GUI library in, it is in this executable's DT_NEEDED
 # list.
+# ---- the golden images ------------------------------------------------------
+#
+# Registered only when there is something to photograph with. `--grab` lives
+# behind CLIMA_DEV_TOOLS and half the cases are gallery pages, so without both
+# this would be a test that fails for want of a flag rather than for want of a
+# pixel.
+#
+# DEPENDS tst_environment so that ctest runs the canary first. When the machine's
+# text rasterisation has moved, every image differs and none of those
+# differences is a defect — having the one legible failure appear above thirty
+# image diffs is the entire reason the canary exists.
+#
+# LABELS so that `ctest -LE slow` skips it: a minute of rendering is the right
+# price in CI and the wrong one for a developer re-running a unit test.
+if(CLIMA_DEV_TOOLS AND CLIMA_BUILD_GALLERY AND UNIX AND NOT APPLE)
+    add_test(NAME golden_images
+        COMMAND ${CMAKE_SOURCE_DIR}/scripts/golden.sh check
+    )
+
+    set_tests_properties(golden_images PROPERTIES
+        ENVIRONMENT "CLIMA_BUILD_DIR=${CMAKE_BINARY_DIR}"
+        DEPENDS tst_environment
+        LABELS "slow;golden"
+        TIMEOUT 600
+    )
+endif()
+
+# ---- the binary-level licence check -----------------------------------------
+#
+# R2 and R3 from docs/08-risks.md, asked of the artefact. cmake/
+# ClimaLicenceGuard.cmake asks the same two questions of the build's own model
+# at configure time and cannot see a module that arrives without being named —
+# through a QML import, or through some future component's dependency graph.
+#
+# Registered as a ctest rather than only as a CI job because it is a property of
+# what was just built: a developer who adds `find_package(Qt6 COMPONENTS
+# Charts)` should learn about it from `ctest`, not from a red pull request.
+if(UNIX AND NOT APPLE)
+    add_test(NAME licences_are_compatible
+        COMMAND ${CMAKE_SOURCE_DIR}/scripts/check-licences.sh
+            $<TARGET_FILE:clima>
+            $<$<BOOL:${CLIMA_BUILD_GALLERY}>:$<TARGET_FILE:clima-gallery>>
+    )
+endif()
+
 find_program(CLIMA_OBJDUMP NAMES objdump llvm-objdump)
 
 # Registered only when it can actually run. A test that reports "passed"

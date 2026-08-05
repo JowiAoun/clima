@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The scenes a golden image is taken of.
+#
+#   name | binary | size | arguments…
+#
+# Pipe-delimited rather than the cases.json the plan called for, and the reason
+# is a dependency rather than a preference: parsing JSON from a shell script
+# needs jq or python, and D8 in docs/03-tech-stack.md is emphatic that a
+# distribution packager should be able to build and check this repository from
+# what their distribution already ships. Four fields and no quoting rules is
+# also a format a reviewer can read in a diff, which matters more here than
+# structure — this file is edited by people deciding what is worth watching.
+#
+# Blank lines and # comments are ignored. `binary` is `app` or `gallery`.
+#
+# ---- what is worth a golden ------------------------------------------------
+#
+# Named scenes, not a sweep. Every case below is either a layout that a change
+# elsewhere could plausibly break, or a piece of the design system that has been
+# got wrong before. The gallery pages carry their component's name, so a diff on
+# `moon.png` says which card moved without anybody opening the image.
+#
+# Both schemes for the scenes where the two differ structurally — the light
+# theme has no stars, a hairline card edge and an inverted accent — and dark
+# only for the rest, because a second copy of a page that differs by six
+# colours is a second image to re-record for no extra information.
+
+# ---- the desktop page -------------------------------------------------------
+desktop|app|1340x762|--scheme dark
+desktop-light|app|1340x762|--scheme light
+desktop-scrolled|app|1340x900|--scheme dark --scroll 900
+desktop-scrolled-light|app|1340x900|--scheme light --scroll 900
+desktop-uv|app|1340x762|--scheme dark --metric uv
+desktop-uv-light|app|1340x762|--scheme light --metric uv
+desktop-list|app|1340x762|--scheme dark --list
+desktop-night|app|1340x762|--scheme dark --sky night
+
+# ---- the phone --------------------------------------------------------------
+# Every tab, because MobileShell destroys and rebuilds a page on each change and
+# four of the five are reachable no other way in a capture.
+mobile-today|app|390x844|--scheme dark --viewport mobile
+mobile-today-light|app|390x844|--scheme light --viewport mobile
+mobile-hourly|app|390x844|--scheme dark --viewport mobile --tab hourly
+mobile-monthly|app|390x844|--scheme dark --viewport mobile --tab monthly
+mobile-maps|app|390x844|--scheme dark --viewport mobile --tab maps
+mobile-me|app|390x844|--scheme dark --viewport mobile --tab me
+mobile-me-light|app|390x844|--scheme light --viewport mobile --tab me
+mobile-night|app|390x844|--scheme dark --viewport mobile --sky night
+
+# ---- the tablet -------------------------------------------------------------
+tablet|app|834x1112|--scheme dark --viewport tablet
+tablet-light|app|834x1112|--scheme light --viewport tablet
+
+# ---- the design system, as the gallery draws it -----------------------------
+# The palette page is the audit instrument; a change to any colour token shows
+# up here as a diff on one row, which is the most legible failure in the set.
+gallery-colour|gallery|1500x2200|--scheme dark Colour
+gallery-colour-light|gallery|1500x2200|--scheme light Colour
+gallery-ramps|gallery|1500x1120|--scheme dark Ramps
+gallery-ramps-light|gallery|1500x1120|--scheme light Ramps
+gallery-type|gallery|1100x900|--scheme dark Type
+
+# ---- individual cards -------------------------------------------------------
+# The eight that carry a bespoke visualisation. These are the ones where a
+# change to chartmath.js or to a ramp shows up as a shape moving rather than as
+# a colour changing, and a per-card image is what names which.
+card-temperature|gallery|1100x760|--scheme dark Temperature
+card-feels-like|gallery|1100x760|--scheme dark "Feels like"
+card-precipitation|gallery|1100x760|--scheme dark Precipitation
+card-wind|gallery|1100x760|--scheme dark Wind
+card-uv|gallery|1100x760|--scheme dark UV
+card-pressure|gallery|1100x760|--scheme dark Pressure
+card-sun|gallery|1100x760|--scheme dark Sun
+card-moon|gallery|1100x760|--scheme dark Moon
+card-moon-light|gallery|1100x760|--scheme light Moon
