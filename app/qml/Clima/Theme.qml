@@ -135,9 +135,18 @@ QtObject {
     // and a `<name>Changed` entry per property. That is a wart of the port and
     // not something every caller should have to know, so it is filtered here
     // and only here.
+    // `src` and `still` are the inputs a group is *constructed* from, not
+    // tokens in it — the table a theme-varying group reads, and the flag the
+    // motion group collapses on. They are properties like any other as far as
+    // Object.keys is concerned, so without this line `Theme.names(Theme.page)`
+    // answers `["bg", "src"]` and any page generated from it grows a column for
+    // a design token that does not exist. Found by the test that compares this
+    // list against theme.js, which is also what now keeps it true.
+    readonly property var plumbing: ["objectName", "src", "still"]
+
     function names(group) {
         return Object.keys(group).filter(function (key) {
-            return key !== "objectName" && !/Changed$/.test(key)
+            return theme.plumbing.indexOf(key) < 0 && !/Changed$/.test(key)
         })
     }
 
