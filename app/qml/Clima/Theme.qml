@@ -155,6 +155,171 @@ QtObject {
         "control", "overlay", "state", "glyph", "badge", "scaffold"
     ]
 
+    // ---- what each token owes its background --------------------------------
+    //
+    // The contract the gallery's contrast column audits against. It is here and
+    // not in the gallery for the same reason `colorRoles` is: what a token is
+    // *for* is a design decision, and the tool that measures it should not also
+    // be the place it is written down.
+    //
+    // One blanket threshold was tried first and it was worthless. Held to 3:1,
+    // the shipped dark palette came out almost entirely red — `line.grid` at
+    // 1.40:1, `overlay.hatch` at 1.19:1 — and every one of those is the design
+    // working as intended, because a chart gridline is *supposed* to be barely
+    // there. An instrument that flags the correct answer is one nobody reads,
+    // and a page of red rows hides the four that are real.
+    //
+    // So a token declares two things. `on` is the background it is actually
+    // composited over — a token measured against a ground it never touches is
+    // measuring nothing, which is what made `accent.ink` (the label *on* the
+    // pill) look broken at 1.48:1 against a card it is never drawn on. And
+    // `duty` is which of three jobs it does:
+    //
+    //   text        draws glyphs of text at body size                    4.5:1
+    //   essential   you must see it to read the content or to work a     3.0:1
+    //               control — WCAG 1.4.11's "graphical objects required
+    //               to understand content" and "UI components"
+    //   incidental  scaffolding, washes, decoration. No minimum. The
+    //               ratio is still computed and still shown, because a
+    //               number you can see is how you notice it drifting.
+    //
+    // `pair` names the other stop of a two-stop gradient — a badge plate, a
+    // cloud, the sun. The requirement belongs to the pair and not to either
+    // stop: a plate is legible if *either* end of it separates from the card,
+    // and which end does that flips between the schemes. `badge.nightBottom` is
+    // the deep end of a blue plate; on a dark card it nearly vanishes and the
+    // light top carries it, on a light card the reverse. Scored per token it
+    // reads as broken in one scheme and fine in the other while being the same
+    // plate, which is a false alarm and a missed alarm from one rule.
+    readonly property var contrastDefaults: ({
+        "page":     { duty: "incidental", on: null           },
+        "surface":  { duty: "incidental", on: "page.bg"      },
+        "ink":      { duty: "text",       on: "surface.base" },
+        "line":     { duty: "incidental", on: "surface.base" },
+        "accent":   { duty: "essential",  on: "surface.base" },
+        "control":  { duty: "essential",  on: "surface.base" },
+        "overlay":  { duty: "incidental", on: "surface.base" },
+        "state":    { duty: "essential",  on: "surface.base" },
+        "glyph":    { duty: "essential",  on: "surface.base" },
+        "badge":    { duty: "essential",  on: "surface.base" },
+        "scaffold": { duty: "essential",  on: "surface.base" }
+    })
+
+    // Only the tokens that differ from their role's default need a line here,
+    // which is what keeps this a short list rather than a second copy of the
+    // palette. Two kinds of entry: a ground correction, where the token sits on
+    // something other than a card, and a duty correction, where one token in a
+    // role does a different job from its neighbours.
+    readonly property var contrastOverrides: ({
+        // A row tint is painted on the card, not on the page.
+        "surface.rowAlt":  { on: "surface.base" },
+        "surface.rowNow":  { on: "surface.base" },
+
+        // Three of the eleven lines carry meaning. `now` says where the present
+        // is, `forecast` says where the recording stops and the prediction
+        // starts, and `series` is the data itself — you cannot read the chart
+        // without them. The other eight are ruling.
+        "line.now":        { duty: "essential" },
+        "line.forecast":   { duty: "essential" },
+        "line.series":     { duty: "essential" },
+        // The hairline light mode adds exists to separate the card from the
+        // page, so the page is the only ground it can be measured against.
+        "line.card":       { on: "page.bg" },
+        "line.nav":        { on: "surface.nav" },
+        "line.menu":       { on: "surface.menu" },
+
+        // The label on the selected pill, on the pill.
+        "accent.ink":      { duty: "text", on: "accent.fill" },
+
+        // A switch is found by its knob, not by the boundary of its track, so
+        // the track is not what has to reach 3:1 — the knob against the track
+        // is. Same for the pager: the scrim behind the chevron is decoration
+        // and the chevron is the control.
+        "control.toggleTrack":    { duty: "incidental" },
+        "control.toggleKnob":     { on: "control.toggleTrack" },
+        "control.pagerFill":      { duty: "incidental" },
+        "control.pagerFillHover": { duty: "incidental" },
+        "control.pagerGlyph":     { on: "control.pagerFill" },
+        "control.navGlyph":       { on: "surface.nav" },
+
+        // Gradient stops. The sun, the cloud and the two badge plates are each
+        // one object drawn with two colours; the cloud on a day badge is drawn
+        // on the badge rather than on the card.
+        "glyph.sunWarm":            { pair: "glyph.sunCool" },
+        "glyph.sunCool":            { pair: "glyph.sunWarm" },
+        "glyph.cloudTop":           { pair: "glyph.cloudBottom" },
+        "glyph.cloudBottom":        { pair: "glyph.cloudTop" },
+        "glyph.cloudTopOnLight":    { pair: "glyph.cloudBottomOnLight", on: "badge.dayTop" },
+        "glyph.cloudBottomOnLight": { pair: "glyph.cloudTopOnLight",    on: "badge.dayTop" },
+        // The shaded limb is what makes a crescent read as a crescent, so it is
+        // measured against the lit face rather than against the card behind it.
+        "glyph.moonShade":          { on: "glyph.moon" },
+
+        "badge.dayTop":      { pair: "badge.dayBottom" },
+        "badge.dayBottom":   { pair: "badge.dayTop" },
+        "badge.nightTop":    { pair: "badge.nightBottom" },
+        "badge.nightBottom": { pair: "badge.nightTop" },
+
+        // The map placeholder's linework is a frame around the label, not the
+        // label.
+        "scaffold.stroke":   { duty: "incidental" }
+    })
+
+    // The two above, merged, for one token. Returns `{ duty, on, pair }` with
+    // `pair` undefined for the great majority of tokens that are not half of a
+    // gradient.
+    function contrastRule(path) {
+        var role = path.split(".")[0]
+        var base = contrastDefaults[role]
+        var over = contrastOverrides[path]
+        if (base === undefined)
+            return { duty: "incidental", on: null }
+        if (over === undefined)
+            return { duty: base.duty, on: base.on }
+        return {
+            duty: over.duty !== undefined ? over.duty : base.duty,
+            on:   over.on   !== undefined ? over.on   : base.on,
+            pair: over.pair
+        }
+    }
+
+    // The floor each duty has to clear. 0 means "no minimum" rather than
+    // "always passes", and the gallery draws those rows without a verdict at
+    // all so that an incidental token cannot be mistaken for one that passed.
+    function contrastFloor(duty) {
+        if (duty === "text")      return 4.5
+        if (duty === "essential") return 3.0
+        return 0
+    }
+
+    // ---- reading the palette from outside the running scheme ----------------
+    //
+    // Everything above hands components the table for whichever scheme is on.
+    // The gallery needs both at once — a light column beside a dark one is the
+    // whole point of a palette page — so these two hand back a raw table by
+    // name.
+    //
+    // Nothing in the app may call them. Reading a colour for a scheme you are
+    // not running is precisely the bug the grouped properties exist to prevent,
+    // and the only defensible caller is a tool whose subject is the palette
+    // itself rather than the weather.
+    function tokensFor(role, scheme) {
+        return (scheme === "light" ? LightTokens : Tokens)[role]
+    }
+
+    function rampsFor(scheme) {
+        return (scheme === "light" ? LightTokens : Tokens).ramp
+    }
+
+    // The ramps whose hues are published authority bands rather than our
+    // choice — European AQI, WHO UV, and the precipitation scale — so light
+    // mode passes them through unchanged instead of inverting their lightness
+    // like the six continuous ones. `tools/theme/ramp-light.mjs` holds the same
+    // list, because it is a one-shot generator that reads theme.js as data and
+    // never loads this singleton; if a fourth categorical ramp is ever added,
+    // both say so. The gallery labels each ramp from this list.
+    readonly property var categoricalRamps: ["precip", "aqi", "uv"]
+
     // ---- surfaces ----------------------------------------------------------
     // The alpha ladder, as the leading pair of an #AARRGGBB literal. Nothing
     // reads these — the composed `surface.*` values below are what the tree
