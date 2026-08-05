@@ -59,11 +59,22 @@ foreach(gallery_file IN LISTS clima_gallery_qml_files clima_gallery_js_files)
         PROPERTIES QT_RESOURCE_ALIAS "${gallery_file_name}")
 endforeach()
 
-qt_add_executable(clima-gallery
-    main.cpp
-)
+# A static library plus a thin executable, exactly the shape app/ uses one
+# directory over, and for the same reason turned around: a QML module baked
+# straight into an executable is a module only that executable can import.
+#
+# Here the second consumer is the test suite. `tests/qml/` runs the catalogue —
+# instantiating all sixty-odd components and asserting none of them errors is
+# the broadest smoke test this tree can have, and it costs almost nothing
+# because Gallery.qml and Specimen.qml already know how to do it. That test has
+# to be able to `import Clima.Gallery`, and it could not while the module lived
+# inside a binary.
+#
+# STATIC, again for app/CMakeLists.txt's reasons: one repository, one release,
+# consumers always built together. Nothing here ships.
+qt_add_library(climagalleryqml STATIC)
 
-qt_add_qml_module(clima-gallery
+qt_add_qml_module(climagalleryqml
     URI Clima.Gallery
     VERSION 1.0
     QML_FILES
@@ -74,16 +85,30 @@ qt_add_qml_module(clima-gallery
         galleryoptions.cpp
 )
 
-# For the generated clima-gallery_qmltyperegistrations.cpp, which includes
-# `<galleryoptions.h>` by basename with no directory.
-target_include_directories(clima-gallery PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+# PUBLIC rather than PRIVATE now that something links this library: the
+# generated climagalleryqml_qmltyperegistrations.cpp includes
+# `<galleryoptions.h>` by basename with no directory, and so does anything else
+# that ends up compiling against this module.
+target_include_directories(climagalleryqml PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Both, for the reason app/CMakeLists.txt gives at the same line: the plugin
 # registers the module with the engine, the backing library carries the usage
 # requirements — Qt6::Quick, and the include directory that makes
 # `#include "appoptions.h"` in galleryoptions.cpp resolve. Neither one alone
 # gets a build that both compiles and runs.
-target_link_libraries(clima-gallery PRIVATE climaqml climaqmlplugin)
+#
+# PUBLIC so that the executable and the test suite each get `Clima` as well as
+# `Clima.Gallery`; a gallery that could not import the module it exists to show
+# would be a short gallery.
+target_link_libraries(climagalleryqml PUBLIC climaqml climaqmlplugin)
+
+clima_guard_target(climagalleryqml)
+
+qt_add_executable(clima-gallery
+    main.cpp
+)
+
+target_link_libraries(clima-gallery PRIVATE climagalleryqml climagalleryqmlplugin)
 
 clima_guard_target(clima-gallery)
 
