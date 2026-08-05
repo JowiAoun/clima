@@ -179,6 +179,104 @@ TestCase {
                 + failures.join("\n  "))
     }
 
+    // ---- severity ----------------------------------------------------------
+    //
+    // The alert palette is a table keyed by data — `Theme.severity[key]` — so
+    // it is not in `colorRoles` and the audit above walks straight past it. It
+    // is also the group with the most at stake: a severity `ink` that fails its
+    // floor is a tornado warning nobody can read.
+    //
+    // So it is checked here, by hand, with the same arithmetic. The ground is
+    // the COMPOSITED PLATE — the wash over the page — and not the page itself,
+    // because that is what the text is actually drawn on. Auditing the ink
+    // against `page.bg` would score a colour against a background it never
+    // touches, which is the mistake theme.js's contrast contract exists to
+    // stop making.
+
+    function test_everySeverityHasEveryToken() {
+        for (var scheme in { dark: 0, light: 0 }) {
+            var table = Theme.tokensFor("severity", scheme)
+            verify(table !== undefined, scheme + " has no severity table")
+
+            for (var i = 0; i < Theme.severityKeys.length; ++i) {
+                var key = Theme.severityKeys[i]
+                verify(table[key] !== undefined,
+                       scheme + " severity table has no '" + key + "'")
+
+                for (var token in { wash: 0, edge: 0, glyph: 0, ink: 0 }) {
+                    verify(table[key][token] !== undefined,
+                           scheme + " severity." + key + " has no '" + token + "'")
+                }
+            }
+        }
+    }
+
+    function test_severityInkAndEdgeClearTheirFloors_data() {
+        return [{ tag: "dark", scheme: "dark" }, { tag: "light", scheme: "light" }]
+    }
+
+    function test_severityInkAndEdgeClearTheirFloors(data) {
+        var severity = Theme.tokensFor("severity", data.scheme)
+        var page = Theme.tokensFor("page", data.scheme).bg
+        var failures = []
+
+        // Same duties as everything else: `ink` carries words at body size and
+        // owes 4.5:1; `edge` and `glyph` are WCAG 1.4.11 graphical objects
+        // required to understand the content and owe 3:1.
+        var floors = { ink: 4.5, edge: 3.0, glyph: 3.0 }
+
+        for (var i = 0; i < Theme.severityKeys.length; ++i) {
+            var key = Theme.severityKeys[i]
+            var tones = severity[key]
+            var plate = Contrast.compose(tones.wash, page)
+
+            for (var token in floors) {
+                var r = Contrast.ratio(Contrast.compose(tones[token], plate), plate)
+                if (r < floors[token])
+                    failures.push("severity." + key + "." + token + " " + r.toFixed(2)
+                                  + ":1 (needs " + floors[token] + ":1 on its own plate)")
+            }
+
+            // And the plate has to separate from the page, or the banner is a
+            // rectangle of nothing with a coloured rail. 1.2:1 is the same step
+            // the surface ladder holds itself to.
+            var plateRatio = Contrast.ratio(plate, page)
+            if (plateRatio < 1.2)
+                failures.push("severity." + key + ".wash " + plateRatio.toFixed(2)
+                              + ":1 against the page (needs 1.2:1)")
+        }
+
+        compare(failures.length, 0,
+                data.scheme + " severity palette has " + failures.length + " failure(s):\n  "
+                + failures.join("\n  "))
+    }
+
+    // Extreme must be the most present thing on the screen. Checked on the
+    // saturated tokens rather than on the wash: in dark, amber on navy is
+    // simply brighter than red on navy, so moderate's PLATE sits a hair above
+    // extreme's and always will — theme.js records that measurement. The rail,
+    // the glyph and the word are what carry the ordering, and they can.
+    function test_severityIsDistinguishableGradeToGrade_data() {
+        return [{ tag: "dark", scheme: "dark" }, { tag: "light", scheme: "light" }]
+    }
+
+    function test_severityIsDistinguishableGradeToGrade(data) {
+        var severity = Theme.tokensFor("severity", data.scheme)
+        var seen = {}
+
+        for (var i = 0; i < Theme.severityKeys.length; ++i) {
+            var key = Theme.severityKeys[i]
+            var edge = severity[key].edge.toLowerCase()
+
+            // Two grades sharing an edge colour would make the rail — the one
+            // part of the banner readable from across a room — say nothing.
+            verify(seen[edge] === undefined,
+                   data.scheme + ": severity." + key + " and severity." + seen[edge]
+                   + " share the edge colour " + edge)
+            seen[edge] = key
+        }
+    }
+
     // ---- ramps -------------------------------------------------------------
 
     function test_everyRampHasBothPartsInBothSchemes() {

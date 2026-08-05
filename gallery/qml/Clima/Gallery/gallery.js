@@ -90,6 +90,94 @@ function _levels(hours) {
     return out;
 }
 
+// ---- alert specimens ---------------------------------------------------------
+//
+// An alert map in the shape app/viewmodels/alertsdata.cpp publishes. Five of
+// them, because the whole point of this group is the four grades the app cannot
+// show you on demand: a Canadian summer produces heat warnings, and waiting for
+// a tornado in order to review the palette is not a review process.
+//
+// The wording is real. Each row below is taken from an alert one of the two
+// services actually issued — see tests/fixtures/alerts/ — rather than invented,
+// because a specimen written to fit the layout is a specimen that proves the
+// layout fits itself. NWS descriptions are long, wrapped and bulleted; ECCC's
+// carry "Locations:" and "Time span:" on their own lines. Both shapes are here.
+function _alert(severity, event, issuer, area, when, sender, description, instruction) {
+    return {
+        id: "specimen-" + severity,
+        event: event,
+        headline: event + " issued for " + area,
+        description: description,
+        instruction: instruction || "",
+        area: area,
+        sender: sender,
+        severityKey: severity,
+        severityName: severity.charAt(0).toUpperCase() + severity.slice(1),
+        issuerLabel: issuer,
+        phase: "active",
+        when: when,
+        pastDeadline: false,
+        acknowledged: false,
+        web: ""
+    };
+}
+
+function _alerts() {
+    return {
+        extreme: _alert("extreme", "Tornado Warning", "Extreme",
+                        "Southern Douglas County", "Until 4:45 PM", "NWS Omaha NE",
+                        "At 411 PM CDT, a confirmed large and extremely dangerous tornado was\nlocated near Springfield, moving northeast at 30 mph.\n\nHAZARD...Damaging tornado.\n\nSOURCE...Weather spotters confirmed tornado.",
+                        "TAKE COVER NOW! Move to a basement or an interior room on the\nlowest floor of a sturdy building."),
+        severe:  _alert("severe", "air quality warning", "orange warning",
+                        "Eastern Fraser Valley", "Until Sun 11:00 PM",
+                        "Environment and Climate Change Canada",
+                        "Locations: Eastern Fraser Valley.\n\nTime span: persisting through the weekend.\n\nRemarks: Wildfire smoke is causing poor air quality and reduced visibility.",
+                        ""),
+        moderate: _alert("moderate", "Heat Advisory", "Moderate",
+                         "Foothills and Valleys of the North Cascades", "Until Fri 11:00 PM",
+                         "NWS Seattle WA",
+                         "* WHAT...Temperatures up to 95 expected.\n\n* WHERE...Foothills and valleys of the North Cascades.\n\n* WHEN...From noon today to 11 PM PDT Friday.",
+                         "Drink plenty of fluids, stay in an air-conditioned room, and check\nup on relatives and neighbors."),
+        minor:    _alert("minor", "Rip Current Statement", "Minor",
+                         "Coastal Miami Dade County", "Until 8:00 PM", "NWS Miami FL",
+                         "* WHAT...Dangerous rip currents expected.\n\n* WHERE...Atlantic beaches of Miami-Dade County.",
+                         "Swim near a lifeguard. If caught in a rip current, relax and float."),
+        unknown:  _alert("unknown", "Air Quality Alert", "Unknown",
+                         "King; Pierce; Snohomish", "Until 5:00 PM", "NWS Seattle WA",
+                         "The Puget Sound Clean Air Agency has issued an Air Quality Alert.\nFine particle pollution is expected to reach unhealthy levels.",
+                         "")
+    };
+}
+
+function _bannerVariants() {
+    var a = _alerts();
+    var out = [];
+    var order = ["extreme", "severe", "moderate", "minor", "unknown"];
+
+    for (var i = 0; i < order.length; ++i) {
+        out.push({ label: order[i],
+                   props: { alert: a[order[i]], moreCount: 0, acknowledged: false,
+                            complete: true, unconfirmed: false } });
+    }
+
+    // The three states that are about the app rather than about the weather,
+    // and the three a live screen almost never reaches.
+    out.push({ label: "with more",
+               props: { alert: a.moderate, moreCount: 3, acknowledged: false,
+                        complete: true, unconfirmed: false } });
+    out.push({ label: "acknowledged",
+               props: { alert: a.severe, moreCount: 2, acknowledged: true,
+                        complete: true, unconfirmed: false } });
+    out.push({ label: "unconfirmed",
+               props: { alert: a.extreme, moreCount: 0, acknowledged: false,
+                        complete: true, unconfirmed: true,
+                        confirmedLabel: "Last confirmed 2:05 PM" } });
+    out.push({ label: "incomplete",
+               props: { alert: a.moderate, moreCount: 0, acknowledged: false,
+                        complete: false, unconfirmed: false } });
+    return out;
+}
+
 var groups = [
     {
         name: "Foundations",
@@ -100,6 +188,35 @@ var groups = [
               blurb: "The nine metric ramps in both schemes. Six are continuous and light inverts their lightness; three are published authority bands and light leaves their hues alone." },
             { name: "Type", kind: "type",
               blurb: "The type scale. Sizes are tokens: a range is not a rule." }
+        ]
+    },
+    {
+        name: "Alerts",
+        items: [
+            { name: "Banner", file: "AlertBanner.qml",
+              blurb: "One alert, never a stack, plus a count of what it is not showing. The five CAP grades, then the three states that are about the app rather than the weather — dismissed, unconfirmed, and a partial answer.",
+              stage: { w: 720 },
+              variants: _bannerVariants() },
+
+            { name: "Row", file: "AlertRow.qml",
+              blurb: "The sheet's row: the issuer's headline, their paragraph breaks, and the instruction kept apart from the description because one says what is happening and the other says what to do.",
+              stage: { w: 620 },
+              variants: [
+                  { label: "expanded", props: { alert: _alerts().moderate, expanded: true } },
+                  { label: "collapsed", props: { alert: _alerts().extreme, expanded: false } },
+                  { label: "no instruction", props: { alert: _alerts().severe, expanded: true } }
+              ] },
+
+            { name: "Severity glyph", file: "SeverityGlyph.qml",
+              blurb: "A different SHAPE per grade, not one shape in five colours — §4.10 forbids colour-only encoding, and about one man in twelve cannot separate this red from this amber.",
+              stage: { w: 120, h: 60 },
+              variants: [
+                  { label: "extreme",  props: { severity: "extreme",  glyphSize: 28 } },
+                  { label: "severe",   props: { severity: "severe",   glyphSize: 28 } },
+                  { label: "moderate", props: { severity: "moderate", glyphSize: 28 } },
+                  { label: "minor",    props: { severity: "minor",    glyphSize: 28 } },
+                  { label: "unknown",  props: { severity: "unknown",  glyphSize: 28 } }
+              ] }
         ]
     },
     {

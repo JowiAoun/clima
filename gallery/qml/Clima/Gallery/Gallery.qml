@@ -322,9 +322,18 @@ Item {
     //              number in the catalogue, which was only ever a stand-in for
     //              a host that was not there.
     //   neither    a glyph, a badge, a toggle: natural size, whatever the frame.
+    // Zero for anything the catalogue did not state, and `|| 0` rather than a
+    // presence test on `stage` alone. Every entry written before the alert
+    // group spelled both dimensions — `stage: { w: 362, h: 0 }` — so an entry
+    // that gave only a width read `undefined` here and QML said so nine times,
+    // once per variant: "Unable to assign [undefined] to double".
+    //
+    // Requiring `h: 0` would be a catalogue convention that exists only because
+    // this function is fragile. A component with its own implicit height is the
+    // ordinary case, and saying nothing about height is the right way to say so.
     function stageW(entry) {
         if (!framed)
-            return entry.stage ? entry.stage.w : 0
+            return (entry.stage && entry.stage.w) || 0
         if (entry.fills)
             return preset.w
         return (entry.stage && entry.stage.w > 0) ? frameContentWidth : 0
@@ -333,7 +342,7 @@ Item {
     function stageH(entry) {
         if (framed && entry.fills)
             return preset.h
-        return entry.stage ? entry.stage.h : 0
+        return (entry.stage && entry.stage.h) || 0
     }
 
     // ---- the rail --------------------------------------------------------

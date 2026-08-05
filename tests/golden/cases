@@ -53,6 +53,28 @@ mobile-night|app|390x844|--scheme dark --viewport mobile --sky night
 tablet|app|834x1112|--scheme dark --viewport tablet
 tablet-light|app|834x1112|--scheme light --viewport tablet
 
+# ---- severe weather ---------------------------------------------------------
+#
+# The `seattle` fixture, which is the only one that carries alerts: four of them
+# at one coordinate on the afternoon of 5 August 2026, recorded from
+# api.weather.gov. Every other case above uses `toronto`, whose alerts.json is
+# an empty collection — so a change to the banner cannot silently move any of
+# the thirty-two images that came before these.
+#
+# It has to be a fixture. Alerts are the most volatile product in the app; a
+# golden image of a live one would have a shelf life measured in hours.
+alert-desktop|app|1340x762|--scheme dark --fixture seattle
+alert-desktop-light|app|1340x762|--scheme light --fixture seattle
+alert-mobile|app|390x844|--scheme dark --viewport mobile --fixture seattle
+alert-mobile-light|app|390x844|--scheme light --viewport mobile --fixture seattle
+
+# All five CAP grades side by side, plus the three states that are about the app
+# rather than the weather. This is the image that catches a severity colour
+# drifting, and it is the only place four of the five grades appear at all.
+gallery-alerts|gallery|1400x1250|--scheme dark Banner
+gallery-alerts-light|gallery|1400x1250|--scheme light Banner
+gallery-severity-glyph|gallery|900x300|--scheme dark "Severity glyph"
+
 # ---- the design system, as the gallery draws it -----------------------------
 # The palette page is the audit instrument; a change to any colour token shows
 # up here as a diff on one row, which is the most legible failure in the set.
