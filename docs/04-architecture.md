@@ -161,7 +161,7 @@ A provider that returns `∅` must make the UI *hide* the feature, not show a br
 | 15-minute nowcast | 5 min | — | ✅ |
 | Ensemble / model comparison | 60 min | — | ✅ |
 | Air quality | 60 min (CAMS updates 12-hourly) | — | ✅ |
-| Alerts | 3 min, **plus push-on-open** | CAP `sent`/`expires` | ⚠️ never show an expired alert |
+| Alerts | 3 min foreground, 10 idle, **stopped when hidden**, 15 metered | CAP `sent`/`expires` | ⚠️ never show an **ended** alert |
 | Radar frames | Frame lifetime (5 min) | Timeline manifest | ✅ |
 | Basemap tiles | 30 days | — | ✅ |
 | Historical archive / ERA5 | Immutable, cache forever | — | n/a |
@@ -174,6 +174,17 @@ background polling while the window is hidden unless the user enabled alert noti
 
 Storage: SQLite via Qt Sql at `QStandardPaths::AppDataLocation`, schema-versioned with
 forward-only migrations. Tiles in a separate size-capped LRU directory (default 200 MB).
+
+**What alert polling actually costs.** The estimate this table was written against assumed
+both services revalidate. Measured on 2026-08-05, only one does: `api.weather.gov` sends an
+`ETag` and most of its polls come back 304, while `api.weather.gc.ca` sends **no validator at
+all** — no `ETag`, no `Last-Modified`, no `Cache-Control`, only `Vary: Accept-Encoding` — so
+every Canadian poll is a full transfer of about 10 kB. A day of uninterrupted foreground
+polling in Canada is therefore nearer 5 MB than the 264 kB originally budgeted.
+
+The line that brings that down is "stopped when hidden", which is why it is in the table
+rather than in a comment. `app/viewmodels/alertsdata.h` owns the schedule; the measurements
+are in `tests/fixtures/alerts/README.md`.
 
 ## 4.6 ClimaCharts — the chart kit
 

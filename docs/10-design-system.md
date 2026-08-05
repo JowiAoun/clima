@@ -230,6 +230,48 @@ Both schemes currently have zero red rows. Adding a token means giving it a
 duty and a ground; leaving it out gets it its role's default, which is usually
 what you want.
 
+### Severity is a fourth categorical group, not a longer status scale
+
+The five CAP grades an alert can carry — Extreme, Severe, Moderate, Minor and
+**Unknown** — live in `Theme.severity`, keyed by grade the way `precip` is keyed
+by type.
+
+The tempting alternative is to stretch `state.good` / `caution` / `poor` to five.
+It is wrong for the reason the paragraph above gives about published bands: the
+status trio is a three-point verdict *this app computes* about a number it is
+holding, and CAP's five are *somebody else's scale*, with somebody else's
+meaning, which we display rather than decide. `detaildata.js` already says a
+fourth status level would turn a set of named states into a scale.
+
+Four tokens per grade, because §4.10 forbids colour-only encoding and a warning
+is the worst place to break that:
+
+| token | what it is | floor |
+|---|---|---|
+| `wash` | the banner plate, over `page.bg`. Alpha rises with grade | 1.2:1 vs the page |
+| `edge` | the rail down the leading edge — the ECCC-recognisable red/orange/yellow | 3:1 |
+| `glyph` | the severity mark, which is a different **shape** per grade | 3:1 |
+| `ink` | the severity word | 4.5:1 |
+
+Every one of those is measured against the **composited plate**, not the page,
+because that is what the text is drawn on. `tests/qml/tst_theme.qml` asserts all
+twenty values in both schemes — this table is keyed by data, so the gallery's
+Colour page, which walks flat groups, does not see it.
+
+Three things worth knowing before they look like mistakes:
+
+- **`Unknown` is a real grade and it is not "probably fine".** Six of the nine
+  alerts recorded in `tests/fixtures/alerts/` say Unknown, and all six are Air
+  Quality Alerts. It means the issuer declined to classify. It therefore sorts
+  *below* Minor, and it is still drawn — neutral, but not the quietest thing on
+  the screen.
+- **`Minor` is blue, not a fourth warm hue.** A ladder that stays warm all the
+  way down leaves nothing for "this is not an emergency" to look like.
+- **In dark, `moderate`'s plate sits 0.05 above `extreme`'s.** Amber on navy is
+  brighter than red on navy; buying the ordering back would need a red too pale
+  to read as red. The rail, the glyph and the word all order correctly, which is
+  what a reader actually scans.
+
 ## 10.6 Motion
 
 Durations are tokens in `theme.js` as `Theme.motion.*`. **Never write a literal

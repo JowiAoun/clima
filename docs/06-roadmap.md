@@ -128,7 +128,21 @@ Deliverables
 
 Exit criteria
 - A live US and a live European alert render correctly, including polygon geometry.
-- No expired alert is ever displayed (tested with fixtures around `expires`).
+- No **ended** alert is ever displayed (tested with fixtures around `ends`).
+
+  > **Corrected 2026-08-05, and the original wording was a bug.** This said "no *expired*
+  > alert", which mandates hiding a Heat Advisory before the heat starts. CAP's `expires` is
+  > when the **message** goes stale and the issuer promises another one; `ends` is when the
+  > **hazard** is over, and it is routinely much later. Verified live: a Medford Heat
+  > Advisory carried `expires` 2026-08-06T05:00-07:00 and `ends` 2026-08-06T23:00-07:00 —
+  > eighteen hours apart — and 19 of the 25 alerts in force in California that afternoon had
+  > the same shape. An app hiding at `expires` takes the advisory down at five in the morning
+  > on the day of the heat. See `libclima/domain/alert.h`; the fixture is
+  > `tests/fixtures/alerts/nws/siskiyou-heat-advisory.json`.
+  >
+  > `expires` still matters, for confidence rather than for visibility: past it, if the last
+  > poll *failed*, the banner says "last confirmed HH:MM" rather than silently keeping or
+  > silently dropping the alert.
 - CLI output is stable enough to document as an interface.
 
 ## 6.7 M5 — Trust layer, history, map overlays (7 weeks → 2027-02-11) · **Beta 0.5**
