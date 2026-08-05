@@ -1,0 +1,15 @@
+{
+    "recordedAt": "2026-08-05T21:30:00Z",
+    "description": "Seattle on the afternoon of 5 August 2026, with four National Weather Service alerts in force at that one coordinate: a Heat Advisory graded Moderate and three Air Quality Alerts the issuer declined to grade at all. The alert fixture, and the reason it is Seattle rather than anywhere prettier. Two of those three air quality alerts share an event name, a sender and a SAME geocode list and differ only in when they took effect, which is the payload that disproves the obvious way to identify an alert; the Heat Advisory carries ends 18 hours after expires, and the three air quality alerts carry no ends at all. recordedAt is the payload's own instant — forecast.json reports current.time 2026-08-05T14:30 at utc_offset -25200 — because a manifest naming a day the recording does not describe slides every daily label one place, which is what happened to toronto and took a regression test to find.",
+    "alertProvider": "nws",
+    "place": {
+        "geonamesId": 5809844,
+        "name": "Seattle",
+        "admin1": "Washington",
+        "country": "United States",
+        "countryCode": "US",
+        "timezone": "America/Los_Angeles",
+        "latitude": 47.6062,
+        "longitude": -122.3321
+    }
+}

@@ -83,10 +83,37 @@ QUrl composeUrl(const HttpRequest &request)
 
     if (request.coordinate.has_value()) {
         // Rounded, with the same helper the key uses. The URL and the key
-        // therefore agree by construction rather than by review.
+        // therefore agree by construction rather than by review — and every
+        // form below reads this one value, so a provider cannot opt out of the
+        // rounding by choosing a different spelling.
         const Coordinate coordinate = request.coordinate->rounded();
-        query.addQueryItem(request.latitudeParameter, coordinate.latitudeString());
-        query.addQueryItem(request.longitudeParameter, coordinate.longitudeString());
+
+        switch (request.coordinateForm) {
+        case CoordinateForm::LatitudeLongitudePair:
+            query.addQueryItem(request.latitudeParameter, coordinate.latitudeString());
+            query.addQueryItem(request.longitudeParameter, coordinate.longitudeString());
+            break;
+
+        case CoordinateForm::LatitudeCommaLongitude:
+            query.addQueryItem(request.coordinateParameter,
+                               coordinate.latitudeString() + QLatin1Char(',')
+                                   + coordinate.longitudeString());
+            break;
+
+        case CoordinateForm::DegenerateBoundingBox: {
+            // west,south,east,north — longitude first, which is the opposite
+            // order to the one above and the reason this is a form rather than
+            // a string a provider assembles. A bbox with the pair the wrong way
+            // round is not an error to the service; it is an empty answer off
+            // the coast of Africa.
+            const QString west  = coordinate.longitudeString();
+            const QString south = coordinate.latitudeString();
+            query.addQueryItem(request.coordinateParameter,
+                               west + QLatin1Char(',') + south + QLatin1Char(',') + west
+                                   + QLatin1Char(',') + south);
+            break;
+        }
+        }
     }
 
     for (const auto &parameter : request.parameters)

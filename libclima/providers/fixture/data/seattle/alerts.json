@@ -1,0 +1,377 @@
+{
+    "@context": [
+        "https://geojson.org/geojson-ld/geojson-context.jsonld",
+        {
+            "@version": "1.1",
+            "wx": "https://api.weather.gov/ontology#",
+            "@vocab": "https://api.weather.gov/ontology#"
+        }
+    ],
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.7dc5077ca77c6683445472d114ad0f01a1146e91.002.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.7dc5077ca77c6683445472d114ad0f01a1146e91.002.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.7dc5077ca77c6683445472d114ad0f01a1146e91.002.1",
+                "areaDesc": "Foothills and Valleys of the North Cascades; Foothills and Valleys of Snohomish and Northern King Counties; Foothills and Valleys of Central King County; Foothills and Valleys of Pierce and Southern King Counties; Lowlands of Western Whatcom County; Lowlands of Western Skagit and Northwestern Snohomish Counties; Downtown Everett / Marysville Area; Shoreline / Lynnwood / South Everett Area; Eastside; City of Seattle; Lowlands of Pierce and Southern King Counties",
+                "geocode": {
+                    "SAME": [
+                        "053073",
+                        "053057",
+                        "053061",
+                        "053033",
+                        "053053"
+                    ],
+                    "UGC": [
+                        "WAZ305",
+                        "WAZ306",
+                        "WAZ307",
+                        "WAZ308",
+                        "WAZ310",
+                        "WAZ311",
+                        "WAZ312",
+                        "WAZ313",
+                        "WAZ314",
+                        "WAZ315",
+                        "WAZ316"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/forecast/WAZ305",
+                    "https://api.weather.gov/zones/forecast/WAZ306",
+                    "https://api.weather.gov/zones/forecast/WAZ307",
+                    "https://api.weather.gov/zones/forecast/WAZ308",
+                    "https://api.weather.gov/zones/forecast/WAZ310",
+                    "https://api.weather.gov/zones/forecast/WAZ311",
+                    "https://api.weather.gov/zones/forecast/WAZ312",
+                    "https://api.weather.gov/zones/forecast/WAZ313",
+                    "https://api.weather.gov/zones/forecast/WAZ314",
+                    "https://api.weather.gov/zones/forecast/WAZ315",
+                    "https://api.weather.gov/zones/forecast/WAZ316"
+                ],
+                "references": [
+                    {
+                        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.23b6389b838e66f5af975c8d3d82b438d0a41d31.002.1",
+                        "identifier": "urn:oid:2.49.0.1.840.0.23b6389b838e66f5af975c8d3d82b438d0a41d31.002.1",
+                        "sender": "w-nws.webmaster@noaa.gov",
+                        "sent": "2026-08-04T20:48:00-07:00"
+                    }
+                ],
+                "sent": "2026-08-05T08:04:00-07:00",
+                "effective": "2026-08-05T08:04:00-07:00",
+                "onset": "2026-08-05T10:00:00-07:00",
+                "expires": "2026-08-05T16:15:00-07:00",
+                "ends": "2026-08-06T22:00:00-07:00",
+                "status": "Actual",
+                "messageType": "Update",
+                "category": "Met",
+                "severity": "Moderate",
+                "certainty": "Likely",
+                "urgency": "Expected",
+                "event": "Heat Advisory",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Seattle WA",
+                "headline": "Heat Advisory issued August 5 at 8:04AM PDT until August 6 at 10:00PM PDT by NWS Seattle WA",
+                "description": "* WHAT...Hot conditions with high temperatures up to 85 to 90\ndegrees expected and low temperatures 58 to 62 degrees. This will\npose a moderate risk of heat-related illness.\n\n* WHERE...Portions of northwest and west central Washington.\n\n* WHEN...Until 10 PM PDT Thursday.\n\n* IMPACTS...Heat will significantly increase the risk of\nheat-related illnesses for those who are sensitive to heat,\nespecially those without effective cooling or adequate hydration.\n\n* ADDITIONAL DETAILS...Warm temperatures overnight will bring\nlimited relief for the interior.",
+                "instruction": "Drink plenty of fluids, stay in an air-conditioned room, stay out of\nthe sun, and check up on relatives and neighbors. Young children and\npets should never be left unattended in vehicles under any\ncircumstances.\n\nTake extra precautions if you work or spend time outside. When\npossible reschedule strenuous activities to early morning or\nevening. Know the signs and symptoms of heat exhaustion and heat\nstroke. Wear lightweight and loose fitting clothing when possible.\nTo reduce risk during outdoor work, the Occupational Safety and\nHealth Administration recommends scheduling frequent rest breaks in\nshaded or air conditioned environments. Anyone overcome by heat\nshould be moved to a cool and shaded location. Heat stroke is an\nemergency! Call 9 1 1.\n\nFor sheltering information and other human services in your area,\ndial 2 1 1 during business hours or visit wa211.org anytime.\n\nTo stay safe when heat and smoke are present, go to spaces with\nindoor cooling and air filtration. To cool spaces with no air\nconditioning, pull shades to block daytime heat. Use portable air\ncleaners or DIY box fan filters to help cool and clean air. Stay\nhydrated and limit activity until heat and smoke improve.",
+                "response": "Execute",
+                "note": null,
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "NPWSEW"
+                    ],
+                    "WMOidentifier": [
+                        "WWUS76 KSEW 051504"
+                    ],
+                    "NWSheadline": [
+                        "HEAT ADVISORY REMAINS IN EFFECT UNTIL 10 PM PDT THURSDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ],
+                    "VTEC": [
+                        "/O.CON.KSEW.HT.Y.0004.260805T1700Z-260807T0500Z/"
+                    ],
+                    "eventEndingTime": [
+                        "2026-08-06T22:00:00-07:00"
+                    ],
+                    "expiredReferences": [
+                        "w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.71223d74b6a2ce40e561b3e7332a93293b565844.002.1,2026-08-04T13:37:00-07:00"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "HTY"
+                    ]
+                }
+            }
+        },
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.dcd6d57198e59cccf584c890035c49d1901f9ce1.001.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.dcd6d57198e59cccf584c890035c49d1901f9ce1.001.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.dcd6d57198e59cccf584c890035c49d1901f9ce1.001.1",
+                "areaDesc": "Grays Harbor, WA; King, WA; Kitsap, WA; Mason, WA; Pierce, WA; Snohomish, WA; Thurston, WA",
+                "geocode": {
+                    "SAME": [
+                        "053027",
+                        "053033",
+                        "053035",
+                        "053045",
+                        "053053",
+                        "053061",
+                        "053067"
+                    ],
+                    "UGC": [
+                        "WAC027",
+                        "WAC033",
+                        "WAC035",
+                        "WAC045",
+                        "WAC053",
+                        "WAC061",
+                        "WAC067"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/county/WAC027",
+                    "https://api.weather.gov/zones/county/WAC033",
+                    "https://api.weather.gov/zones/county/WAC035",
+                    "https://api.weather.gov/zones/county/WAC045",
+                    "https://api.weather.gov/zones/county/WAC053",
+                    "https://api.weather.gov/zones/county/WAC061",
+                    "https://api.weather.gov/zones/county/WAC067"
+                ],
+                "references": [],
+                "sent": "2026-08-04T11:11:00-07:00",
+                "effective": "2026-08-04T11:01:00-07:00",
+                "onset": "2026-08-04T11:01:00-07:00",
+                "expires": "2026-08-05T17:00:00-07:00",
+                "ends": null,
+                "status": "Actual",
+                "messageType": "Alert",
+                "category": "Met",
+                "severity": "Unknown",
+                "certainty": "Unknown",
+                "urgency": "Unknown",
+                "event": "Air Quality Alert",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Seattle WA",
+                "headline": "Air Quality Alert issued August 4 at 11:01AM PDT by NWS Seattle WA",
+                "description": "An Air Quality Alert for wildfire smoke has been issued by the\nfollowing agencies:\n\nPuget Sound Clean Air Agency\nOlympic Region Clean Air Agency\n\nAn Air Quality Alert has been issued for King, Kitsap, Pierce,\nSnohomish, Mason, Grays Harbor, and Thurston Counties through 5pm\nThursday, August 6 due to wildfire smoke from regional fires. Air\nquality is expected to be UNHEALTHY FOR SENSITIVE GROUPS to UNHEALTHY\nfor most of the area. When the air quality is UNHEALTHY FOR\nSENSITIVE GROUPS, individuals with health concerns and pre- existing\nconditions should reduce exposure and take precautions. At UNHEALTHY\nair quality, all individuals should take precautions to reduce\nexposure. This means limiting time outside, avoiding strenuous\noutdoor activity, and following tips for cleaner indoor air. Visit\npscleanair.gov and orcaa.org/news-notices for current conditions,\nupdates, and more information.",
+                "instruction": null,
+                "response": "Monitor",
+                "note": "Non-Weather Emergency Message. Not sent to IPAWS.",
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "AQASEW"
+                    ],
+                    "WMOidentifier": [
+                        "AEUS76 KSEW 041811"
+                    ],
+                    "NWSheadline": [
+                        "AIR QUALITY ALERT IN EFFECT UNTIL 5 PM PDT THURSDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "AQA"
+                    ]
+                }
+            }
+        },
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.19c5e4dec009c8105479712d141ddb47425b535c.001.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.19c5e4dec009c8105479712d141ddb47425b535c.001.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.19c5e4dec009c8105479712d141ddb47425b535c.001.1",
+                "areaDesc": "King, WA; Kitsap, WA; Pierce, WA; Snohomish, WA; Thurston, WA",
+                "geocode": {
+                    "SAME": [
+                        "053033",
+                        "053035",
+                        "053053",
+                        "053061",
+                        "053067"
+                    ],
+                    "UGC": [
+                        "WAC033",
+                        "WAC035",
+                        "WAC053",
+                        "WAC061",
+                        "WAC067"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/county/WAC033",
+                    "https://api.weather.gov/zones/county/WAC035",
+                    "https://api.weather.gov/zones/county/WAC053",
+                    "https://api.weather.gov/zones/county/WAC061",
+                    "https://api.weather.gov/zones/county/WAC067"
+                ],
+                "references": [],
+                "sent": "2026-08-03T13:51:00-07:00",
+                "effective": "2026-08-03T13:43:00-07:00",
+                "onset": "2026-08-03T13:43:00-07:00",
+                "expires": "2026-08-05T17:00:00-07:00",
+                "ends": null,
+                "status": "Actual",
+                "messageType": "Alert",
+                "category": "Met",
+                "severity": "Unknown",
+                "certainty": "Unknown",
+                "urgency": "Unknown",
+                "event": "Air Quality Alert",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Seattle WA",
+                "headline": "Air Quality Alert issued August 3 at 1:43PM PDT by NWS Seattle WA",
+                "description": "An Air Quality Alert for wildfire smoke has been issued by the\nfollowing agencies:\n\nPuget Sound Clean Air Agency\nOlympic Region Clean Air Agency\n\nAn Air Quality Alert has been issued for King, Kitsap, Pierce,\nSnohomish, and Thurston Counties through 5pm Wednesday August 5 due\nto expected wildfire smoke from regional fires. Air quality\nconditions are expected to worsen throughout the day today as smoke\nbegins to mix down to the surface. Particulate matter (PM2.5)\nconcentrations may reach UNHEALTHY FOR SENSITIVE GROUPS. When air\nquality is UNHEALTHY FOR SENSITIVE GROUPS, individuals with health\nconcerns and pre-existing conditions should reduce exposure and take\nprecautions. This means limiting time outside, avoiding strenuous\nactivity, and following tips for cleaner indoor air. Visit\npscleanair.gov and orcaa.org/news-notices for current conditions,\nupdates, and more information.",
+                "instruction": null,
+                "response": "Monitor",
+                "note": "Non-Weather Emergency Message. Not sent to IPAWS.",
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "AQASEW"
+                    ],
+                    "WMOidentifier": [
+                        "AEUS76 KSEW 032051"
+                    ],
+                    "NWSheadline": [
+                        "AIR QUALITY ALERT IN EFFECT UNTIL 5 PM PDT WEDNESDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "AQA"
+                    ]
+                }
+            }
+        },
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.c4a09f1156a02fe9f760c97e8b502b85aba78075.001.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.c4a09f1156a02fe9f760c97e8b502b85aba78075.001.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.c4a09f1156a02fe9f760c97e8b502b85aba78075.001.1",
+                "areaDesc": "King, WA; Kitsap, WA; Pierce, WA; Snohomish, WA; Thurston, WA",
+                "geocode": {
+                    "SAME": [
+                        "053033",
+                        "053035",
+                        "053053",
+                        "053061",
+                        "053067"
+                    ],
+                    "UGC": [
+                        "WAC033",
+                        "WAC035",
+                        "WAC053",
+                        "WAC061",
+                        "WAC067"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/county/WAC033",
+                    "https://api.weather.gov/zones/county/WAC035",
+                    "https://api.weather.gov/zones/county/WAC053",
+                    "https://api.weather.gov/zones/county/WAC061",
+                    "https://api.weather.gov/zones/county/WAC067"
+                ],
+                "references": [],
+                "sent": "2026-08-03T10:49:00-07:00",
+                "effective": "2026-08-03T10:38:00-07:00",
+                "onset": "2026-08-03T10:38:00-07:00",
+                "expires": "2026-08-05T17:00:00-07:00",
+                "ends": null,
+                "status": "Actual",
+                "messageType": "Alert",
+                "category": "Met",
+                "severity": "Unknown",
+                "certainty": "Unknown",
+                "urgency": "Unknown",
+                "event": "Air Quality Alert",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Seattle WA",
+                "headline": "Air Quality Alert issued August 3 at 10:38AM PDT by NWS Seattle WA",
+                "description": "An Air Quality Alert has been issued for King, Kitsap, Pierce,\nSnohomish, and Thurston Counties from 12pm Monday August 3 through\n5pm Wednesday August 5 due to expected wildfire smoke from regional\nfires. Air quality conditions are expected to worsen throughout the\nday today as smoke begins to mix down to the surface. Particulate\nmatter (PM2.5) concentrations may reach UNHEALTHY FOR SENSITIVE\nGROUPS. When air quality is UNHEALTHY FOR SENSITIVE GROUPS,\nindividuals with health concerns and pre-existing conditions should\nreduce exposure and take precautions. This means limiting time\noutside, avoiding strenuous activity, and following tips for cleaner\nindoor air. Visit pscleanair.gov and orcaa.org/news-notices for\ncurrent conditions, updates, and more information.",
+                "instruction": null,
+                "response": "Monitor",
+                "note": "Non-Weather Emergency Message. Not sent to IPAWS.",
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "AQASEW"
+                    ],
+                    "WMOidentifier": [
+                        "AEUS76 KSEW 031749"
+                    ],
+                    "NWSheadline": [
+                        "AIR QUALITY ALERT IN EFFECT FROM 12 PM MONDAY UNTIL 5 PM PDT WEDNESDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "AQA"
+                    ]
+                }
+            }
+        }
+    ],
+    "title": "Current watches, warnings, and advisories for 47.6062 N, 122.3321 W",
+    "updated": "2026-08-05T21:17:02+00:00"
+}

@@ -42,6 +42,28 @@
 
 namespace clima {
 
+// How the coordinate is spelled in the query string.
+//
+// Three shapes rather than one because the services genuinely disagree, and the
+// alternative — a provider composing its own URL — would put the rounding rule
+// above back in every provider's hands. Everything here still goes through the
+// single `rounded()` call in composeUrl(), which is the property this enum
+// exists to preserve.
+enum class CoordinateForm {
+    // latitude=43.6532&longitude=-79.3832. Open-Meteo, MET Norway.
+    LatitudeLongitudePair,
+
+    // point=43.6532,-79.3832 — latitude first. api.weather.gov.
+    LatitudeCommaLongitude,
+
+    // bbox=-79.3832,43.6532,-79.3832,43.6532 — LONGITUDE first, and the same
+    // point twice. A zero-area bounding box is how OGC API — Features Part 1
+    // asks "what covers this point", and it is what api.weather.gc.ca is asked
+    // with. See libclima/providers/eccc/ecccalertprovider.h for why that rather
+    // than the CQL2 spatial filter the plan called for.
+    DegenerateBoundingBox,
+};
+
 struct HttpRequest {
     // Which provider is asking. This is the unit a 403 disables, so it has to
     // be the provider's stable id — "open-meteo", "met-no", "nws" — and not a
@@ -62,8 +84,16 @@ struct HttpRequest {
 
     // Empty for an endpoint that is not about a point on the earth.
     std::optional<Coordinate> coordinate;
+
+    CoordinateForm coordinateForm = CoordinateForm::LatitudeLongitudePair;
+
+    // Read only by CoordinateForm::LatitudeLongitudePair.
     QString latitudeParameter  = QStringLiteral("latitude");
     QString longitudeParameter = QStringLiteral("longitude");
+
+    // Read by the other two forms: the one parameter the whole coordinate goes
+    // into. "point", "bbox".
+    QString coordinateParameter = QStringLiteral("point");
 
     // Everything else that goes in the query string, in the order a provider
     // wrote it. Order is preserved in the URL because a readable URL in a log

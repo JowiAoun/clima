@@ -1,0 +1,117 @@
+{
+    "@context": [
+        "https://geojson.org/geojson-ld/geojson-context.jsonld",
+        {
+            "@version": "1.1",
+            "wx": "https://api.weather.gov/ontology#",
+            "@vocab": "https://api.weather.gov/ontology#"
+        }
+    ],
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.81254b8efcf86819595c0259e5ffea5a848739c9.003.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.81254b8efcf86819595c0259e5ffea5a848739c9.003.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.81254b8efcf86819595c0259e5ffea5a848739c9.003.1",
+                "areaDesc": "Northwest Valley; Buckeye/Avondale; Deer Valley; Central Phoenix; North Phoenix/Glendale; Scottsdale/Paradise Valley; East Valley; South Mountain/Ahwatukee; Southeast Valley/Queen Creek",
+                "geocode": {
+                    "SAME": [
+                        "004013"
+                    ],
+                    "UGC": [
+                        "AZZ537",
+                        "AZZ540",
+                        "AZZ542",
+                        "AZZ543",
+                        "AZZ544",
+                        "AZZ546",
+                        "AZZ548",
+                        "AZZ550",
+                        "AZZ551"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/forecast/AZZ537",
+                    "https://api.weather.gov/zones/forecast/AZZ540",
+                    "https://api.weather.gov/zones/forecast/AZZ542",
+                    "https://api.weather.gov/zones/forecast/AZZ543",
+                    "https://api.weather.gov/zones/forecast/AZZ544",
+                    "https://api.weather.gov/zones/forecast/AZZ546",
+                    "https://api.weather.gov/zones/forecast/AZZ548",
+                    "https://api.weather.gov/zones/forecast/AZZ550",
+                    "https://api.weather.gov/zones/forecast/AZZ551"
+                ],
+                "references": [
+                    {
+                        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.875869e31f930ff09cc334fcd1bff1bbbeef59cd.003.1",
+                        "identifier": "urn:oid:2.49.0.1.840.0.875869e31f930ff09cc334fcd1bff1bbbeef59cd.003.1",
+                        "sender": "w-nws.webmaster@noaa.gov",
+                        "sent": "2026-08-04T23:33:00-07:00"
+                    }
+                ],
+                "sent": "2026-08-05T11:39:00-07:00",
+                "effective": "2026-08-05T11:39:00-07:00",
+                "onset": "2026-08-05T11:39:00-07:00",
+                "expires": "2026-08-06T03:30:00-07:00",
+                "ends": "2026-08-09T20:00:00-07:00",
+                "status": "Actual",
+                "messageType": "Update",
+                "category": "Met",
+                "severity": "Severe",
+                "certainty": "Likely",
+                "urgency": "Expected",
+                "event": "Extreme Heat Warning",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Phoenix AZ",
+                "headline": "Extreme Heat Warning issued August 5 at 11:39AM MST until August 9 at 8:00PM MST by NWS Phoenix AZ",
+                "description": "* WHAT...Dangerously hot and humid conditions. Afternoon temperatures\n106 to 114 degrees. Major Heat Risk.\n\n* WHERE...The Phoenix metropolitan area.\n\n* WHEN...Until 8 PM MST Sunday.\n\n* IMPACTS...Heat related illnesses increase significantly during\nextreme heat events. Overexposure can cause heat cramps and heat\nexhaustion to develop and, without intervention, can lead to heat\nstroke.\n\n* ADDITIONAL DETAILS...In Maricopa County, Call 2-1-1 to find a free\ncooling center, transportation, water and more.\nhttps://www.maricopa.gov/heat",
+                "instruction": "An Extreme Heat Warning means that a period of very hot temperatures,\neven by local standards, will occur. Actions should be taken to\nlessen the impact of the extreme heat.\n\nTake extra precautions if you work or spend time outside. When\npossible, reschedule strenuous activities to early morning or\nevening. Know the signs and symptoms of heat exhaustion and heat\nstroke. Wear lightweight and loose-fitting clothing when possible and\ndrink plenty of water.\n\nTo reduce risk during outdoor work, the Occupational Safety and\nHealth Administration recommends scheduling frequent rest breaks in\nshaded or air conditioned environments. Anyone overcome by heat\nshould be moved to a cool and shaded location. Heat stroke is an\nemergency! Call 9 1 1.\n\nPublic cooling shelters are available in some areas. Consult county\nofficials for more details.",
+                "response": "Execute",
+                "note": null,
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "NPWPSR"
+                    ],
+                    "WMOidentifier": [
+                        "WWUS75 KPSR 051839"
+                    ],
+                    "NWSheadline": [
+                        "EXTREME HEAT WARNING REMAINS IN EFFECT UNTIL 8 PM MST SUNDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ],
+                    "VTEC": [
+                        "/O.CON.KPSR.XH.W.0007.000000T0000Z-260810T0300Z/"
+                    ],
+                    "eventEndingTime": [
+                        "2026-08-09T20:00:00-07:00"
+                    ],
+                    "expiredReferences": [
+                        "w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.8ad3cb4c4fff7f02b98ac6a05035e24744e26424.003.1,2026-08-04T12:56:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.196cab0526dd25d8e2dbb68f67ebf1ca835342a9.003.1,2026-08-04T00:34:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.ae7dd590b8ffebae4f88ec319ffbb933e0b66dd9.003.1,2026-08-03T12:00:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.6a847cbdb9430625b8bd1bb6e951bc0e315c2e53.003.1,2026-08-03T00:28:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.62fbb253baf82b51f29538c1d1dbfed91901fd56.003.1,2026-08-02T12:12:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.cd17291384fae80fe8e7d9bdf80b7daacd96d2b2.003.1,2026-08-01T23:48:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.c17f6c66b219c6706f858e02f5d76fd68612b12c.004.1,2026-08-01T12:19:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.9bc7ccd35c3246f12d516de7958ae0699b17ebdb.004.1,2026-08-01T00:18:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.145c70e58b8a070b23e41e3ca2c769979bbe0389.004.1,2026-07-31T13:12:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.fee868181e9cc8ab3dedccff7100756159955d47.004.1,2026-07-31T00:32:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.e14a7f171d7537d56bd96e35ab974af2c4acbeec.004.1,2026-07-30T11:56:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.48af12039c7f2a4a54a54fab14c72b30bb516390.002.1,2026-07-30T00:21:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.09f89e86f70bef967a35dba8253040f84e83475f.002.1,2026-07-29T12:38:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.1edc24f28ca836c408ba8c67daf12e535e9e8963.002.1,2026-07-29T00:10:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.a1a68215c1b79618362a08aa9fa9ccaedf843a72.002.1,2026-07-28T13:56:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.cd9591765b0f3245066ff3205364b65fffef06bf.005.1,2026-07-27T23:12:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.6440263a65f12032f2b28882058e67ba917391b0.002.1,2026-07-27T22:49:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.aa51a18a60b446e53f932ccb4e00d2e0d6ca055b.003.1,2026-07-27T19:55:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.91506be7065ea2003d5356b8173f19062bbf9352.004.1,2026-07-27T13:56:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.a9d72305e47703e7adbb1e610d2ffa2ce59808bf.004.1,2026-07-27T00:48:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.c67564cd198e4ea34e8df91574be3fd78549caef.004.1,2026-07-27T00:45:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.4e68188e2db56b856870b0f3ebd40e769bdc5836.002.1,2026-07-26T11:59:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.b0c8f93e014d92b8a42c2dde1c9242717cb8c5fe.003.1,2026-07-26T03:21:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.39f639f5dcc48fa95c181c3db4141da9ff40c78a.003.1,2026-07-25T14:30:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.9fb37b9b5a0765f090908ef9fa6610550da0d2fa.003.1,2026-07-25T02:39:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.bb02244c144c3bf80a826513c7e97d6719a8f8d2.003.1,2026-07-24T14:21:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.831c27ee2c33372d2612d37fb8e05758baa8340c.003.1,2026-07-24T01:16:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.b9cfbf8a62332a4e31e96c3bfa8107b67c55178e.003.1,2026-07-23T15:56:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.040fd83fc05d38662131bfd74aace32b9eb9ad69.005.1,2026-07-23T00:18:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.2003c82fdb7d219ee54c19e75244c450210c4697.004.1,2026-07-22T11:33:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.f08e4a4a6ec308cf79cda46cd151c3ea034c1548.004.1,2026-07-22T00:22:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.9c5286b537e5884aa1e91e7c109d6e6fa17fc9cd.004.1,2026-07-21T11:58:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.45c09f44defd9365c791ebf58d318dd6b688fa44.004.2,2026-07-21T11:56:00-07:00"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "XHW"
+                    ]
+                }
+            }
+        }
+    ],
+    "title": "Current watches, warnings, and advisories for 33.4484 N, 112.074 W",
+    "updated": "2026-08-05T21:17:02+00:00"
+}

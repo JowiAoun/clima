@@ -1,0 +1,203 @@
+{
+    "@context": [
+        "https://geojson.org/geojson-ld/geojson-context.jsonld",
+        {
+            "@version": "1.1",
+            "wx": "https://api.weather.gov/ontology#",
+            "@vocab": "https://api.weather.gov/ontology#"
+        }
+    ],
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.8db90e4d318b92288a9f2a2c53e6ecab5f759219.001.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.8db90e4d318b92288a9f2a2c53e6ecab5f759219.001.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.8db90e4d318b92288a9f2a2c53e6ecab5f759219.001.1",
+                "areaDesc": "Boulder, CO; Larimer, CO; Douglas, CO; Denver, CO; Arapahoe, CO; Weld, CO; Jefferson, CO; Adams, CO; Broomfield, CO",
+                "geocode": {
+                    "SAME": [
+                        "008013",
+                        "008069",
+                        "008035",
+                        "008031",
+                        "008005",
+                        "008123",
+                        "008059",
+                        "008001",
+                        "008014"
+                    ],
+                    "UGC": [
+                        "COC013",
+                        "COC069",
+                        "COC035",
+                        "COC031",
+                        "COC005",
+                        "COC123",
+                        "COC059",
+                        "COC001",
+                        "COC014"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/county/COC013",
+                    "https://api.weather.gov/zones/county/COC069",
+                    "https://api.weather.gov/zones/county/COC035",
+                    "https://api.weather.gov/zones/county/COC031",
+                    "https://api.weather.gov/zones/county/COC005",
+                    "https://api.weather.gov/zones/county/COC123",
+                    "https://api.weather.gov/zones/county/COC059",
+                    "https://api.weather.gov/zones/county/COC001",
+                    "https://api.weather.gov/zones/county/COC014"
+                ],
+                "references": [],
+                "sent": "2026-08-05T09:10:00-06:00",
+                "effective": "2026-08-05T09:10:00-06:00",
+                "onset": "2026-08-05T09:10:00-06:00",
+                "expires": "2026-08-06T09:00:00-06:00",
+                "ends": null,
+                "status": "Actual",
+                "messageType": "Alert",
+                "category": "Met",
+                "severity": "Unknown",
+                "certainty": "Unknown",
+                "urgency": "Unknown",
+                "event": "Air Quality Alert",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Denver CO",
+                "headline": "Air Quality Alert issued August 5 at 9:10AM MDT by NWS Denver CO",
+                "description": "The Colorado Department of Public Health and Environment has\nissued the following...\n\nWHAT...Action Day for Multiple Pollutants.\n\nWHERE...Douglas, Jefferson, Denver, western Arapahoe, western\nAdams, Broomfield, Boulder, Larimer, and Weld Counties\n\nWHEN...400 PM Tuesday August 04 to 400 PM Wednesday August 05\n\nIMPACTS...Action Day for Multiple Pollutants is now in effect for\nthe Front Range Urban Corridor.  Warming temperatures and abundant\nsunshine, along with the presence of wildfire smoke, will result\nin elevated levels of both ozone and fine particulates throughout\nthe Colorado Front Range region on Tuesday and Wednesday.   For\nColorado air quality conditions, forecasts, and advisories, visit:\nhttps://www.colorado.gov/airquality/colorado_summary.aspx   If\npossible, please help us reduce ozone pollution by limiting\ndriving gas and diesel-powered vehicles until at least 4 p.m.\nWednesday, August 5, 2026. Colorado is also addressing ozone\npollution through state policies. For more information about\nhealth impacts and how ozone pollution forms in Colorado, visit:\nhttps://cdphe.colorado.gov/ozone-pollution-and-your-health\n\nHEALTH INFORMATION...If smoke is thick or becomes thick in your\nneighborhood you may want to remain indoors. This is especially\ntrue for those with heart disease, respiratory illnesses, the very\nyoung, and older adults. Consider limiting outdoor activity when\nmoderate to heavy smoke is present. Consider relocating\ntemporarily if smoke is present indoors and is making you ill. If\nvisibility is less than 5 miles in smoke in your neighborhood,\nsmoke has reached levels that are unhealthy.",
+                "instruction": null,
+                "response": "Monitor",
+                "note": "Non-Weather Emergency Message. Not sent to IPAWS.",
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "AQABOU"
+                    ],
+                    "WMOidentifier": [
+                        "AEUS75 KBOU 051510"
+                    ],
+                    "NWSheadline": [
+                        "ACTION DAY FOR MULTIPLE POLLUTANTS FROM 400 PM TUESDAY UNTIL 400 PM WEDNESDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "AQA"
+                    ]
+                }
+            }
+        },
+        {
+            "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.ab167b46ea8efbfa5e1023ccb7ce4cad6e29990f.001.1",
+            "type": "Feature",
+            "geometry": null,
+            "properties": {
+                "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.ab167b46ea8efbfa5e1023ccb7ce4cad6e29990f.001.1",
+                "@type": "wx:Alert",
+                "id": "urn:oid:2.49.0.1.840.0.ab167b46ea8efbfa5e1023ccb7ce4cad6e29990f.001.1",
+                "areaDesc": "Larimer, CO; Boulder, CO; Arapahoe, CO; Broomfield, CO; Adams, CO; Douglas, CO; Jefferson, CO; Weld, CO; Denver, CO",
+                "geocode": {
+                    "SAME": [
+                        "008069",
+                        "008013",
+                        "008005",
+                        "008014",
+                        "008001",
+                        "008035",
+                        "008059",
+                        "008123",
+                        "008031"
+                    ],
+                    "UGC": [
+                        "COC069",
+                        "COC013",
+                        "COC005",
+                        "COC014",
+                        "COC001",
+                        "COC035",
+                        "COC059",
+                        "COC123",
+                        "COC031"
+                    ]
+                },
+                "affectedZones": [
+                    "https://api.weather.gov/zones/county/COC069",
+                    "https://api.weather.gov/zones/county/COC013",
+                    "https://api.weather.gov/zones/county/COC005",
+                    "https://api.weather.gov/zones/county/COC014",
+                    "https://api.weather.gov/zones/county/COC001",
+                    "https://api.weather.gov/zones/county/COC035",
+                    "https://api.weather.gov/zones/county/COC059",
+                    "https://api.weather.gov/zones/county/COC123",
+                    "https://api.weather.gov/zones/county/COC031"
+                ],
+                "references": [],
+                "sent": "2026-08-04T16:10:00-06:00",
+                "effective": "2026-08-04T16:10:00-06:00",
+                "onset": "2026-08-04T16:10:00-06:00",
+                "expires": "2026-08-05T16:00:00-06:00",
+                "ends": null,
+                "status": "Actual",
+                "messageType": "Alert",
+                "category": "Met",
+                "severity": "Unknown",
+                "certainty": "Unknown",
+                "urgency": "Unknown",
+                "event": "Air Quality Alert",
+                "sender": "w-nws.webmaster@noaa.gov",
+                "senderName": "NWS Denver CO",
+                "headline": "Air Quality Alert issued August 4 at 4:10PM MDT by NWS Denver CO",
+                "description": "The Colorado Department of Public Health and Environment has\nissued the following...\n\nWHAT...Action Day for Multiple Pollutants.\n\nWHERE...Douglas, Jefferson, Denver, western Arapahoe, western\nAdams, Broomfield, Boulder, Larimer, and Weld Counties\n\nWHEN...400 PM Tuesday August 04 to 400 PM Wednesday August 05\n\nIMPACTS...Action Day for Multiple Pollutants is now in effect for\nthe Front Range Urban Corridor.  Warming temperatures and abundant\nsunshine, along with the presence of wildfire smoke, will result\nin elevated levels of both ozone and fine particulates throughout\nthe Colorado Front Range region on Tuesday and Wednesday.   For\nColorado air quality conditions, forecasts, and advisories, visit:\nhttps://www.colorado.gov/airquality/colorado_summary.aspx   If\npossible, please help us reduce ozone pollution by limiting\ndriving gas and diesel-powered vehicles until at least 4 p.m.\nWednesday, August 5, 2026. Colorado is also addressing ozone\npollution through state policies. For more information about\nhealth impacts and how ozone pollution forms in Colorado, visit:\nhttps://cdphe.colorado.gov/ozone-pollution-and-your-health\n\nHEALTH INFORMATION...If smoke is thick or becomes thick in your\nneighborhood you may want to remain indoors. This is especially\ntrue for those with heart disease, respiratory illnesses, the very\nyoung, and older adults. Consider limiting outdoor activity when\nmoderate to heavy smoke is present. Consider relocating\ntemporarily if smoke is present indoors and is making you ill. If\nvisibility is less than 5 miles in smoke in your neighborhood,\nsmoke has reached levels that are unhealthy.",
+                "instruction": null,
+                "response": "Monitor",
+                "note": "Non-Weather Emergency Message. Not sent to IPAWS.",
+                "parameters": {
+                    "AWIPSidentifier": [
+                        "AQABOU"
+                    ],
+                    "WMOidentifier": [
+                        "AEUS75 KBOU 042210"
+                    ],
+                    "NWSheadline": [
+                        "ACTION DAY FOR MULTIPLE POLLUTANTS FROM 400 PM TUESDAY UNTIL 400 PM WEDNESDAY"
+                    ],
+                    "BLOCKCHANNEL": [
+                        "EAS",
+                        "NWEM",
+                        "CMAS"
+                    ]
+                },
+                "scope": "Public",
+                "code": "IPAWSv1.0",
+                "language": "en-US",
+                "web": "http://www.weather.gov",
+                "eventCode": {
+                    "SAME": [
+                        "NWS"
+                    ],
+                    "NationalWeatherService": [
+                        "AQA"
+                    ]
+                }
+            }
+        }
+    ],
+    "title": "Current watches, warnings, and advisories for 39.7392 N, 104.9903 W",
+    "updated": "2026-08-05T21:17:02+00:00"
+}

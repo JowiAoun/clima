@@ -181,12 +181,62 @@ path = [
     "libclima/providers/fixture/data/berlin/airquality.json",
     "libclima/providers/fixture/data/berlin/forecast.json",
     "libclima/providers/fixture/data/kampala/forecast.json",
+    "libclima/providers/fixture/data/seattle/airquality.json",
+    "libclima/providers/fixture/data/seattle/forecast.json",
     "libclima/providers/fixture/data/toronto/airquality.json",
     "libclima/providers/fixture/data/toronto/forecast.json",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Open-Meteo (https://open-meteo.com)"
 SPDX-License-Identifier = "CC-BY-4.0"
+
+# ---- the alert recordings ---------------------------------------------------
+#
+# Two more services, two more licences, and neither of them is Open-Meteo's —
+# which is why they are a block of their own rather than more paths in the one
+# above. Getting this wrong would attach a Creative Commons licence to a work of
+# the United States government and a public-domain notice to Crown data.
+#
+#   api.weather.gc.ca   Environment and Climate Change Canada, under the Open
+#                       Government Licence – Canada 2.0. The credit line that
+#                       licence asks for is returned by
+#                       EcccAlertProvider::attribution() word for word.
+#
+#   api.weather.gov     A work of the United States federal government, which is
+#                       not subject to copyright protection under 17 U.S.C. §105.
+#                       That is a *status*, not a grant, and there is no SPDX
+#                       identifier that says it without implying a licence
+#                       somebody issued. `LicenseRef-` is the mechanism REUSE
+#                       provides for exactly this case.
+#
+# The `libclima/providers/fixture/data/**/alerts.json` files are compiled into
+# the shipped binary, so both obligations attach to the release and not only to
+# the repository — discharged at run time through Engine.sources, the same way
+# the forecast recordings' are.
+[[annotations]]
+path = [
+    "libclima/providers/fixture/data/toronto/alerts.json",
+    "tests/fixtures/alerts/eccc/annapolis-heat.json",
+    "tests/fixtures/alerts/eccc/fraser-valley-air-quality.json",
+    "tests/fixtures/alerts/eccc/toronto-clear.json",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Environment and Climate Change Canada"
+SPDX-License-Identifier = "LicenseRef-OGL-Canada-2.0"
+
+[[annotations]]
+path = [
+    "libclima/providers/fixture/data/seattle/alerts.json",
+    "tests/fixtures/alerts/nws/denver-air-quality.json",
+    "tests/fixtures/alerts/nws/minneapolis-clear.json",
+    "tests/fixtures/alerts/nws/out-of-bounds.json",
+    "tests/fixtures/alerts/nws/phoenix-extreme-heat.json",
+    "tests/fixtures/alerts/nws/seattle-four.json",
+    "tests/fixtures/alerts/nws/siskiyou-heat-advisory.json",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "NOAA National Weather Service"
+SPDX-License-Identifier = "LicenseRef-US-Public-Domain"
 
 # The manifests beside them are ours: a place, a description and the instant the
 # FrozenClock is set to. Not Open-Meteo's data, and JSON has nowhere to put a
@@ -196,6 +246,7 @@ SPDX-License-Identifier = "CC-BY-4.0"
 path = [
     "libclima/providers/fixture/data/berlin/fixture.json",
     "libclima/providers/fixture/data/kampala/fixture.json",
+    "libclima/providers/fixture/data/seattle/fixture.json",
     "libclima/providers/fixture/data/toronto/fixture.json",
 ]
 precedence = "aggregate"

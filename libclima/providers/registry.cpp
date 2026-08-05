@@ -291,6 +291,24 @@ Status ProviderRegistry::addAirQualityProvider(IAirQualityProvider *provider, in
     return ok();
 }
 
+Status ProviderRegistry::addAlertProvider(IAlertProvider *provider, int priority)
+{
+    const Status valid = validate(provider);
+    if (!valid)
+        return valid;
+
+    for (const Entry<IAlertProvider> &entry : std::as_const(m_alert)) {
+        if (entry.provider->id() == provider->id()) {
+            return Error(ErrorKind::Unsupported,
+                         QStringLiteral("an alert provider with id '%1' is already registered")
+                             .arg(provider->id()));
+        }
+    }
+
+    m_alert.append({ provider, priority, m_sequence++ });
+    return ok();
+}
+
 // Covered providers, lowest priority first, registration order breaking ties.
 // A stable sort rather than a comparator that reaches for the sequence number,
 // so the tie-break is a property of the algorithm rather than a thing the
@@ -343,6 +361,28 @@ Capabilities ProviderRegistry::airQualityCapabilitiesAt(Coordinate coord) const
     return chain.constFirst()->capabilitiesAt(coord);
 }
 
+QList<IAlertProvider *> ProviderRegistry::alertChain(Coordinate coord) const
+{
+    return orderedChain<IAlertProvider>(m_alert, coord);
+}
+
+Capabilities ProviderRegistry::alertCapabilitiesAt(Coordinate coord) const
+{
+    // The union, which is right here and wrong for the other two — see the
+    // header. Undetermined is unioned too and then cleared where it overlaps
+    // available, which Capabilities' constructor does: one provider knowing it
+    // has alerts here settles the question for the place, whatever a second
+    // provider has not learned yet.
+    CapabilityFlags available;
+    CapabilityFlags undetermined;
+    for (IAlertProvider *provider : alertChain(coord)) {
+        const Capabilities capabilities = provider->capabilitiesAt(coord);
+        available |= capabilities.available();
+        undetermined |= capabilities.undetermined();
+    }
+    return Capabilities(available, undetermined);
+}
+
 QList<const IProvider *> ProviderRegistry::providers() const
 {
     // Deduplicated by id, because one source can serve two products —
@@ -361,6 +401,8 @@ QList<const IProvider *> ProviderRegistry::providers() const
     for (const Entry<IForecastProvider> &entry : m_forecast)
         append(entry.provider);
     for (const Entry<IAirQualityProvider> &entry : m_airQuality)
+        append(entry.provider);
+    for (const Entry<IAlertProvider> &entry : m_alert)
         append(entry.provider);
 
     return all;
@@ -400,6 +442,156 @@ QFuture<Result<AirQualityAnswer>> ProviderRegistry::fetchAirQuality(const Foreca
         [this](const QString &servedBy, const QString &primary) {
             Q_EMIT servedByFallback(QStringLiteral("air quality"), servedBy, primary);
         });
+}
+
+// ---- the fan-out ---------------------------------------------------------------------
+//
+// Not the walk above. Every covering provider is asked, concurrently, and the
+// answers are merged. registry.h and libclima/providers/ialertprovider.h both
+// carry the argument; what follows is the bookkeeping.
+//
+// The three outcomes, and they are genuinely three:
+//
+//   at least one set        success. `complete` is true only if every provider
+//                           that was asked either produced a set or declined
+//                           the question with Unsupported.
+//   every provider declined Unsupported. Nobody covers this place after all,
+//                           and §4.4 says the UI hides the feature.
+//   everything else failed  the chain error, built the same way as the walk's.
+
+QFuture<Result<AlertAnswer>> ProviderRegistry::fetchAlerts(const AlertRequest &request)
+{
+    const QList<IAlertProvider *> chain = alertChain(request.coord);
+
+    if (chain.isEmpty()) {
+        return QtFuture::makeReadyValueFuture(Result<AlertAnswer>(
+            chainError({}, QStringLiteral("alerts"))));
+    }
+
+    struct State {
+        QPromise<Result<AlertAnswer>> promise;
+        QList<QFuture<void>>          pending;
+
+        QList<Alert>           merged;
+        QStringList            servedBy;
+        QList<ProviderFailure> failures;
+
+        // Providers that answered Unsupported: asked, declined, and not counted
+        // against completeness. Held as a number rather than a list because
+        // nothing reads which ones they were.
+        int declined = 0;
+
+        QDateTime fetchedAt;
+
+        // The EARLIEST confirmation across contributing providers. A set is only
+        // as confirmed as its least recently confirmed part, and taking the
+        // latest here would let a healthy NWS poll vouch for an ECCC answer that
+        // has been served from cache since breakfast.
+        QDateTime confirmedAt;
+
+        Coordinate coordinate;
+        int        outstanding = 0;
+    };
+
+    auto state         = std::make_shared<State>();
+    state->coordinate  = request.coord;
+    state->outstanding = int(chain.size());
+    state->promise.start();
+
+    QFuture<Result<AlertAnswer>> future = state->promise.future();
+
+    const auto settle = [state]() {
+        if (--state->outstanding > 0)
+            return;
+
+        const bool nobodyServed = state->servedBy.isEmpty();
+
+        if (nobodyServed && state->failures.isEmpty()) {
+            // Everything that was asked declined. Not an error worth showing —
+            // the same answer as an empty chain.
+            Error error(ErrorKind::Unsupported,
+                        QStringLiteral("no alert provider covers %1")
+                            .arg(state->coordinate.toKeyString()));
+            state->promise.addResult(Result<AlertAnswer>(error));
+            state->promise.finish();
+            return;
+        }
+
+        if (nobodyServed) {
+            state->promise.addResult(Result<AlertAnswer>(
+                chainError(state->failures, QStringLiteral("alerts"))));
+            state->promise.finish();
+            return;
+        }
+
+        AlertSet set;
+        set.alerts      = state->merged;
+        set.coordinate  = state->coordinate;
+        set.fetchedAt   = state->fetchedAt;
+        set.confirmedAt = state->confirmedAt;
+        set.providerId  = state->servedBy.join(QStringLiteral(", "));
+
+        // A provider that declined is not missing. A provider that failed is.
+        set.complete = state->failures.isEmpty();
+
+        AlertAnswer answer;
+        answer.value    = set;
+        answer.servedBy = set.providerId;
+        answer.failures = state->failures;
+
+        // Deliberately left false. There is no fallback here to have taken
+        // over, and setting it would put "showing NWS — ECCC is unavailable" on
+        // a screen where both were asked and one simply had nothing to say.
+        answer.fromFallback = false;
+
+        state->promise.addResult(Result<AlertAnswer>(answer));
+        state->promise.finish();
+    };
+
+    for (IAlertProvider *provider : chain) {
+        const QString providerId = provider->id();
+
+        state->pending.append(provider->fetchAlerts(request).then(
+            this, [state, settle, providerId](const Result<AlertSet> &result) {
+                if (result.hasValue()) {
+                    const AlertSet &part = result.value();
+
+                    for (const Alert &alert : part.alerts) {
+                        // Keys are provider-prefixed, so a duplicate across two
+                        // services cannot happen — this is a guard against one
+                        // provider repeating itself, which a merge of two
+                        // paginated answers could one day do.
+                        const bool known =
+                            std::any_of(state->merged.cbegin(), state->merged.cend(),
+                                        [&alert](const Alert &seen) {
+                                            return seen.isSameHazard(alert);
+                                        });
+                        if (!known)
+                            state->merged.append(alert);
+                    }
+
+                    state->servedBy.append(providerId);
+
+                    if (part.fetchedAt.isValid()
+                        && (!state->fetchedAt.isValid() || part.fetchedAt > state->fetchedAt))
+                        state->fetchedAt = part.fetchedAt;
+
+                    if (part.confirmedAt.isValid()
+                        && (!state->confirmedAt.isValid()
+                            || part.confirmedAt < state->confirmedAt))
+                        state->confirmedAt = part.confirmedAt;
+
+                } else if (result.errorKind() == ErrorKind::Unsupported) {
+                    ++state->declined;
+                } else {
+                    state->failures.append({ providerId, result.error() });
+                }
+
+                settle();
+            }));
+    }
+
+    return future;
 }
 
 } // namespace clima

@@ -85,10 +85,25 @@
 // Every attempt is recorded in the Answer either way, so a diagnostics panel
 // can show the whole walk and the UI can say which source it is showing.
 
+// ============================================================================
+// ALERTS ARE THE ONE PRODUCT THAT DOES NOT USE THE CHAIN
+//
+// Everything above describes a fall-through: ask the first, and on a failure
+// ask the next. fetchAlerts() below does not do that. It asks every covering
+// provider at once and merges the answers, because an alert provider succeeds
+// by returning an empty collection, and a fall-through stops at the first
+// success — so in Detroit, which is inside the loose Canadian box because the
+// box has to hold the Great Lakes, ECCC's valid empty answer would end the walk
+// and the National Weather Service would never be asked.
+//
+// A forecast from either of two services is a forecast. An alert set from one
+// of two services is half the warnings. libclima/providers/ialertprovider.h
+// carries the full argument and the measurement behind it.
+
 #pragma once
 
 #include "libclima/core/result.h"
-#include "libclima/providers/iforecastprovider.h"
+#include "libclima/providers/ialertprovider.h"
 
 #include <QList>
 #include <QObject>
@@ -174,6 +189,13 @@ struct Answer {
 using ForecastAnswer   = Answer<Forecast>;
 using AirQualityAnswer = Answer<AirQuality>;
 
+// `fromFallback` is always false here and `servedBy` is a comma-joined list,
+// because alerts fan out rather than fall back — see the second block at the
+// top of this file. `failures` still means what it says and is what a
+// diagnostics panel reads; the user-facing version of the same fact is
+// AlertSet::complete.
+using AlertAnswer = Answer<AlertSet>;
+
 // ---- the registry ------------------------------------------------------------------
 
 class ProviderRegistry : public QObject
@@ -200,10 +222,20 @@ public:
     Status addForecastProvider(IForecastProvider *provider, int priority);
     Status addAirQualityProvider(IAirQualityProvider *provider, int priority);
 
+    // `priority` orders the merge for readability — the lowest-numbered
+    // provider's id comes first in AlertSet::providerId — and nothing else. It
+    // cannot decide which provider answers, because they all do.
+    Status addAlertProvider(IAlertProvider *provider, int priority);
+
     // The ordered chain for a place: covered providers, lowest priority first,
     // ties broken by registration order so that the answer is deterministic.
     [[nodiscard]] QList<IForecastProvider *>   forecastChain(Coordinate coord) const;
     [[nodiscard]] QList<IAirQualityProvider *> airQualityChain(Coordinate coord) const;
+
+    // Not a chain — every one of these is asked. Named the same way as the
+    // others so that a reader looking for "which providers apply here" finds it,
+    // and documented here so a reader who assumes it behaves the same does not.
+    [[nodiscard]] QList<IAlertProvider *> alertChain(Coordinate coord) const;
 
     // What the app can show here, for the tab bar.
     //
@@ -219,6 +251,13 @@ public:
     [[nodiscard]] Capabilities forecastCapabilitiesAt(Coordinate coord) const;
     [[nodiscard]] Capabilities airQualityCapabilitiesAt(Coordinate coord) const;
 
+    // The UNION across the alert providers, and the one place where a union is
+    // the right answer rather than the wrong one. The argument against it for
+    // forecasts — that a tab built from a union empties the moment the fallback
+    // takes over — does not apply when every provider is queried on every poll,
+    // because there is no "the fallback took over".
+    [[nodiscard]] Capabilities alertCapabilitiesAt(Coordinate coord) const;
+
     // Every registered provider, deduplicated by id, in registration order.
     // This is what the About → Data sources screen is generated from — one
     // provider, one credit, no list maintained anywhere else. R12.
@@ -229,6 +268,17 @@ public:
     // error survives when none of them serve.
     QFuture<Result<ForecastAnswer>>   fetchForecast(const ForecastRequest &request);
     QFuture<Result<AirQualityAnswer>> fetchAirQuality(const ForecastRequest &request);
+
+    // Asks every covering provider concurrently and merges. Fails only when
+    // NONE of them produced a set; one provider of two answering is a success
+    // with AlertSet::complete false, because "we could not reach the service
+    // that would know" must not render as "there are no warnings".
+    //
+    // A provider answering ErrorKind::Unsupported — api.weather.gov's 400 for a
+    // coordinate outside the United States — is not a failure and does not make
+    // the set incomplete. When every provider answers that way the result is
+    // Unsupported, which §4.4 says must make the UI hide the feature.
+    QFuture<Result<AlertAnswer>> fetchAlerts(const AlertRequest &request);
 
 Q_SIGNALS:
     // Emitted when a request was served by something other than the first
@@ -256,6 +306,7 @@ private:
 
     QList<Entry<IForecastProvider>>   m_forecast;
     QList<Entry<IAirQualityProvider>> m_airQuality;
+    QList<Entry<IAlertProvider>>      m_alert;
 
     int m_sequence = 0;
 };

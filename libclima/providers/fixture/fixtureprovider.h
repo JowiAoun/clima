@@ -53,6 +53,7 @@
 
 #include "libclima/core/result.h"
 #include "libclima/domain/place.h"
+#include "libclima/providers/ialertprovider.h"
 #include "libclima/providers/iforecastprovider.h"
 
 #include <QByteArray>
@@ -75,6 +76,20 @@ struct Fixture {
     Place      place;
     QByteArray forecast;     // Open-Meteo /v1/forecast, verbatim
     QByteArray airQuality;   // Open-Meteo /v1/air-quality, verbatim; may be empty
+
+    // The alert payload, verbatim, and the id of the service that produced it.
+    //
+    // The id is in the manifest rather than sniffed from the bytes, because the
+    // two shapes are a GeoJSON FeatureCollection and a GeoJSON FeatureCollection
+    // — they differ only in their property names, and a sniffer would be a third
+    // parser that has to be kept in step with the two real ones.
+    //
+    // Empty means the fixture does not carry alerts, which is not the same as
+    // carrying none: toronto's alerts.json is an empty ECCC collection on
+    // purpose, so the default fixture exercises the "asked, nothing in force"
+    // path that a real quiet afternoon takes.
+    QByteArray alerts;
+    QString    alertProviderId;   // "eccc" or "nws"
 
     // A sentence for the About screen and for `--fixture list`.
     QString description;
@@ -139,6 +154,42 @@ public:
 private:
     Fixture      m_fixture;
     Capabilities m_capabilities;
+};
+
+// The reason CI never opens a socket to ask about a tornado.
+//
+// docs/04-architecture.md §4.11 forbids a network in tests, and the golden
+// images add a second requirement the forecast fixture already meets and the
+// alert one has to as well: a banner photographed today has to be the banner
+// photographed next month. Alerts are the most volatile product in the app —
+// the whole point of them is that they appear and vanish — so a golden image of
+// one taken from the live service would be a golden image with a shelf life of
+// hours.
+//
+// Parses through the real provider's static parse(), for the reason the
+// forecast fixture does: a fixture of the adapter's output tests everything
+// except the adapter, and here the adapter is where the severity mapping and
+// the identity keys are decided.
+class FixtureAlertProvider final : public QObject, public IAlertProvider
+{
+    Q_OBJECT
+
+public:
+    explicit FixtureAlertProvider(Fixture fixture, QObject *parent = nullptr);
+    ~FixtureAlertProvider() override;
+
+    static QString providerId();
+
+    [[nodiscard]] QString      id() const override;
+    [[nodiscard]] QString      displayName() const override;
+    [[nodiscard]] Attribution  attribution() const override;
+    [[nodiscard]] bool         covers(Coordinate coord) const override;
+    [[nodiscard]] Capabilities capabilitiesAt(Coordinate coord) const override;
+
+    QFuture<Result<AlertSet>> fetchAlerts(const AlertRequest &request) override;
+
+private:
+    Fixture m_fixture;
 };
 
 class FixtureAirQualityProvider final : public QObject, public IAirQualityProvider

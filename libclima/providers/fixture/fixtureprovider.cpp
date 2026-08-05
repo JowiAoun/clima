@@ -4,6 +4,8 @@
 #include "libclima/providers/fixture/fixtureprovider.h"
 
 #include "libclima/providers/airquality/openmeteoairqualityprovider.h"
+#include "libclima/providers/eccc/ecccalertprovider.h"
+#include "libclima/providers/nws/nwsalertprovider.h"
 #include "libclima/providers/openmeteo/openmeteoadapter.h"
 
 #include <QDir>
@@ -18,6 +20,7 @@ namespace {
 
 constexpr char kForecastId[]   = "fixture";
 constexpr char kAirQualityId[] = "fixture-air-quality";
+constexpr char kAlertId[]      = "fixture-alerts";
 constexpr char kRoot[]         = ":/clima/fixtures";
 
 QByteArray readResource(const QString &path)
@@ -110,6 +113,17 @@ Fixture load(const QString &name)
 
     fixture.forecast   = readResource(base + QStringLiteral("/forecast.json"));
     fixture.airQuality = readResource(base + QStringLiteral("/airquality.json"));
+
+    fixture.alerts = readResource(base + QStringLiteral("/alerts.json"));
+    fixture.alertProviderId = manifest.value(QStringLiteral("alertProvider")).toString();
+
+    // Bytes without a service named to parse them is a manifest mistake, and a
+    // silent one: the alert provider would cover the place and answer nothing,
+    // which looks exactly like a quiet afternoon. Dropping the bytes makes the
+    // fixture behave as though it carries no alerts, which is at least a state
+    // the rest of the code has a name for.
+    if (fixture.alertProviderId.isEmpty())
+        fixture.alerts.clear();
 
     return fixture;
 }
@@ -286,6 +300,108 @@ FixtureAirQualityProvider::fetchAirQuality(const ForecastRequest &request)
 
     promise.addResult(
         OpenMeteoAirQualityProvider::parse(m_fixture.airQuality, m_fixture.recordedAt));
+    promise.finish();
+    return promise.future();
+}
+
+// ---- alerts ------------------------------------------------------------------------
+
+FixtureAlertProvider::FixtureAlertProvider(Fixture fixture, QObject *parent)
+    : QObject(parent)
+    , m_fixture(std::move(fixture))
+{
+}
+
+FixtureAlertProvider::~FixtureAlertProvider() = default;
+
+QString FixtureAlertProvider::providerId()
+{
+    return QString::fromLatin1(kAlertId);
+}
+
+QString FixtureAlertProvider::id() const
+{
+    return providerId();
+}
+
+QString FixtureAlertProvider::displayName() const
+{
+    // Names the service that issued the alerts, then says it is a recording.
+    // Same order and same reason as the forecast fixture's.
+    const QString issuer = m_fixture.alertProviderId == QLatin1String("nws")
+        ? QStringLiteral("National Weather Service")
+        : QStringLiteral("Environment and Climate Change Canada");
+    return issuer + QStringLiteral(" (recorded ") + m_fixture.name + QLatin1Char(')');
+}
+
+Attribution FixtureAlertProvider::attribution() const
+{
+    Attribution original;
+    if (m_fixture.alertProviderId == QLatin1String("nws")) {
+        original.name        = QStringLiteral("NOAA / National Weather Service");
+        original.creditLine  = QStringLiteral("Alerts from the NOAA National Weather Service");
+        original.homepage    = QUrl(QStringLiteral("https://www.weather.gov/"));
+        original.licenceName = QStringLiteral("U.S. Public Domain (17 U.S.C. §105)");
+        original.licenceUrl  = QUrl(QStringLiteral("https://www.weather.gov/disclaimer"));
+    } else {
+        original.name       = QStringLiteral("Environment and Climate Change Canada");
+        original.creditLine = QStringLiteral(
+            "Data provided by Environment and Climate Change Canada. "
+            "Contains information licensed under the Open Government Licence – Canada.");
+        original.homepage    = QUrl(QStringLiteral("https://weather.gc.ca/"));
+        original.licenceName = QStringLiteral("Open Government Licence – Canada 2.0");
+        original.licenceUrl  = QUrl(
+            QStringLiteral("https://open.canada.ca/en/open-government-licence-canada"));
+    }
+    return recordedCredit(original, m_fixture);
+}
+
+bool FixtureAlertProvider::covers(Coordinate coord) const
+{
+    return coord.isValid() && !m_fixture.alerts.isEmpty();
+}
+
+Capabilities FixtureAlertProvider::capabilitiesAt(Coordinate coord) const
+{
+    if (!covers(coord))
+        return {};
+    return Capabilities(Capability::Alerts);
+}
+
+QFuture<Result<AlertSet>> FixtureAlertProvider::fetchAlerts(const AlertRequest &request)
+{
+    QPromise<Result<AlertSet>> promise;
+    promise.start();
+
+    if (m_fixture.alerts.isEmpty()) {
+        Error error(ErrorKind::Unsupported,
+                    QStringLiteral("fixture \"%1\" carries no alert recording")
+                        .arg(m_fixture.name));
+        error.setProviderId(id());
+        promise.addResult(Result<AlertSet>(error));
+        promise.finish();
+        return promise.future();
+    }
+
+    // Through the real parser, both of them. A fixture that handed back
+    // pre-built Alerts would stop testing the severity mapping and the identity
+    // keys, which are the two things in this feature that are invisible on
+    // screen when they are wrong.
+    Result<AlertSet> parsed = m_fixture.alertProviderId == QLatin1String("nws")
+        ? NwsAlertProvider::parse(m_fixture.alerts, m_fixture.recordedAt)
+        : EcccAlertProvider::parse(m_fixture.alerts, m_fixture.recordedAt, request.language);
+
+    if (parsed.hasValue()) {
+        parsed.value().providerId = id();
+        parsed.value().coordinate = request.coord;
+
+        // Confirmed at the moment of the recording, which is also `now` under
+        // the FrozenClock. So a fixture run never shows "last confirmed" — it is
+        // not out of date, it is a photograph of a moment.
+        parsed.value().confirmedAt = m_fixture.recordedAt;
+    }
+
+    promise.addResult(parsed);
     promise.finish();
     return promise.future();
 }

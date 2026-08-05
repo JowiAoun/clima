@@ -47,6 +47,8 @@ add_library(libclima STATIC
     core/result.h
     domain/airquality.h
     domain/airquality.cpp
+    domain/alert.h
+    domain/alert.cpp
     domain/coordinate.h
     domain/coordinate.cpp
     domain/place.h
@@ -60,6 +62,8 @@ add_library(libclima STATIC
     domain/timeaxis.cpp
     domain/weathercode.h
     domain/weathercode.cpp
+    providers/ialertprovider.h
+    providers/ialertprovider.cpp
     providers/iforecastprovider.h
     providers/iforecastprovider.cpp
     providers/registry.h
@@ -72,6 +76,10 @@ add_library(libclima STATIC
     places/placesearchmodel.cpp
     providers/airquality/openmeteoairqualityprovider.h
     providers/airquality/openmeteoairqualityprovider.cpp
+    providers/eccc/ecccalertprovider.h
+    providers/eccc/ecccalertprovider.cpp
+    providers/nws/nwsalertprovider.h
+    providers/nws/nwsalertprovider.cpp
     providers/geocoding/geocodingparser.h
     providers/geocoding/geocodingparser.cpp
     providers/geocoding/geonamesindex.h
@@ -170,6 +178,11 @@ qt_add_resources(libclima "clima_fixtures"
         providers/fixture/data/toronto/fixture.json
         providers/fixture/data/toronto/forecast.json
         providers/fixture/data/toronto/airquality.json
+        providers/fixture/data/toronto/alerts.json
+        providers/fixture/data/seattle/fixture.json
+        providers/fixture/data/seattle/forecast.json
+        providers/fixture/data/seattle/airquality.json
+        providers/fixture/data/seattle/alerts.json
         providers/fixture/data/berlin/fixture.json
         providers/fixture/data/berlin/forecast.json
         providers/fixture/data/berlin/airquality.json

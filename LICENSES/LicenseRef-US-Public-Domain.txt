@@ -1,0 +1,46 @@
+United States Government Work — Public Domain
+
+This is a copyright STATUS, not a licence. Nobody granted it and nobody can
+revoke it, which is exactly why it cannot be spelled with an SPDX identifier:
+every one of those names a grant somebody made, and writing CC0-1.0 or
+Unlicense here would claim a waiver that was never issued because none was ever
+needed.
+
+REUSE provides LicenseRef- for this case, and this file is what it refers to.
+
+
+The statute
+
+  17 U.S.C. § 105 — Subject matter of copyright: United States Government works
+
+  Copyright protection under this title is not available for any work of the
+  United States Government, but the United States Government is not precluded
+  from receiving and holding copyrights transferred to it by assignment,
+  bequest, or otherwise.
+
+  § 101 defines a "work of the United States Government" as a work prepared by
+  an officer or employee of the United States Government as part of that
+  person's official duties.
+
+
+What it covers here
+
+The severe-weather alert responses recorded from api.weather.gov, listed in
+REUSE.toml. They are produced by the National Weather Service, an agency of the
+National Oceanic and Atmospheric Administration within the United States
+Department of Commerce, as part of its statutory duties.
+
+
+Two limits worth stating
+
+Within the United States these works are in the public domain. Some other
+jurisdictions do not recognise a government-work exception, and NOAA's own
+disclaimer notes that material on its sites may occasionally include work owned
+by third parties, which this exception does not reach.
+
+Neither limit affects Clima's use: the recordings are unmodified responses used
+to test a parser, and the National Weather Service is credited in the
+application through NwsAlertProvider::attribution() whether or not any licence
+compels it.
+
+  https://www.weather.gov/disclaimer
