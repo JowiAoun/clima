@@ -348,7 +348,19 @@ QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask)
             item.insert(QStringLiteral("headline"), alert.headline);
             item.insert(QStringLiteral("severity"), alertSeverityKey(alert.severity));
             item.insert(QStringLiteral("urgency"), alertUrgencyName(alert.urgency));
-            item.insert(QStringLiteral("issuer"), alert.issuerLabel);
+
+            // Two different facts that both sound like "issuer", so neither is
+            // called that. `issuerLabel` is the service's own grading —
+            // "yellow warning", and for the NWS simply "Moderate" — which
+            // domain/alert.h says is shown and never parsed. `sender` is who
+            // put it out: "NWS Medford OR".
+            //
+            // The wire briefly called the first one `issuer`, which is a key a
+            // reader reasonably assumes is the agency. It was caught by looking
+            // at a recorded Seattle snapshot and finding the issuer of four
+            // alerts was "Unknown".
+            item.insert(QStringLiteral("issuerLabel"), alert.issuerLabel);
+            item.insert(QStringLiteral("sender"), alert.senderName);
             item.insert(QStringLiteral("areaDescription"), alert.areaDescription);
             item.insert(QStringLiteral("onset"), instant(alert.onset, zone));
             item.insert(QStringLiteral("expires"), instant(alert.expires, zone));
