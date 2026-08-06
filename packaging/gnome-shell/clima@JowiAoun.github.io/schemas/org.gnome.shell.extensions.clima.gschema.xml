@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Jowi Aoun
+SPDX-License-Identifier: GPL-3.0-or-later
+
+The extension's own settings, which are about PLACEMENT and nothing else.
+
+Everything about how a tile looks — units, dark or light, which place is home —
+belongs to the app and lives in its INI, because a widget that showed °C to
+somebody who chose °F would be the app disagreeing with itself. The extension
+owns where the tiles sit on the screen, which is a question the app has no
+opinion about.
+
+`place` is the exception and it is deliberately an override: empty means "the
+app's home place", which is what almost everyone wants, and a value here is for
+the reader who wants their desktop to show somewhere they are not.
+-->
+<schemalist gettext-domain="clima">
+  <enum id="org.gnome.shell.extensions.clima.anchor">
+    <value nick="top-left" value="0"/>
+    <value nick="top-right" value="1"/>
+    <value nick="bottom-left" value="2"/>
+    <value nick="bottom-right" value="3"/>
+  </enum>
+
+  <schema id="org.gnome.shell.extensions.clima"
+          path="/org/gnome/shell/extensions/clima/">
+
+    <key name="widgets" type="as">
+      <default>['current-conditions','hourly-strip','daily-strip','alerts']</default>
+      <summary>Which tiles to show</summary>
+      <description>
+        Catalogue ids, in the order they are laid out. `clima-widget --list`
+        prints the ones this build of the app knows about. An id the app does
+        not recognise is refused loudly rather than skipped, so a typo here is
+        visible instead of being one missing tile.
+      </description>
+    </key>
+
+    <key name="place" type="s">
+      <default>''</default>
+      <summary>Which place, or empty for the app's home place</summary>
+    </key>
+
+    <key name="columns" type="i">
+      <default>1</default>
+      <range min="1" max="6"/>
+      <summary>How many tiles per row</summary>
+    </key>
+
+    <key name="anchor" enum="org.gnome.shell.extensions.clima.anchor">
+      <default>'top-right'</default>
+      <summary>Which corner of the primary monitor the tiles sit in</summary>
+      <description>
+        An anchor and a margin rather than absolute coordinates, so that
+        unplugging a monitor cannot leave the tiles off the edge of the one
+        that is left.
+      </description>
+    </key>
+
+    <key name="margin" type="i">
+      <default>24</default>
+      <range min="0" max="400"/>
+      <summary>Distance from that corner, in pixels</summary>
+    </key>
+
+    <key name="show-indicator" type="b">
+      <default>true</default>
+      <summary>Show the temperature in the top bar</summary>
+    </key>
+
+    <!-- Read back off the window rather than set by anybody. Kept so the
+         placement survives a shell restart without the tiles jumping while the
+         host is still working out how big it is. -->
+    <key name="last-width" type="i">
+      <default>0</default>
+      <summary>The width the tiles last occupied</summary>
+    </key>
+
+    <key name="last-height" type="i">
+      <default>0</default>
+      <summary>The height the tiles last occupied</summary>
+    </key>
+  </schema>
+</schemalist>

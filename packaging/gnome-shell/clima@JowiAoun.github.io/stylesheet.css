@@ -1,0 +1,16 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Jowi Aoun
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Nine lines, and that is the whole of the styling this extension does.
+ *
+ * The indicator inherits the shell's theme on purpose. A panel button restyled
+ * to look like Clima would be a second design system maintained in CSS, drifting
+ * from the real one on every release, and it would look wrong under every user
+ * theme that is not Adwaita. The one thing set here is the spacing a temperature
+ * needs so it does not touch the clock.
+ */
+
+.clima-indicator-label {
+    padding: 0 4px;
+}

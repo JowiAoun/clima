@@ -280,6 +280,16 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "NOAA National Weather Service"
 SPDX-License-Identifier = "LicenseRef-US-Public-Domain"
 
+# The GNOME Shell extension's manifest. JSON has nowhere to put a header
+# comment and gnome-shell parses this file strictly, so it is annotated here
+# like every other JSON file in the repository. The extension's own code carries
+# ordinary SPDX headers.
+[[annotations]]
+path = ["packaging/gnome-shell/clima@JowiAoun.github.io/metadata.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Jowi Aoun"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
 # The wire snapshots: what clima-daemon SENDS, recorded by driving it against
 # the fixtures above (tests/fixtures/wire/record.sh).
 #
