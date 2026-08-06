@@ -56,6 +56,18 @@ macOS signing budget, and team shape. See [`08-risks.md`](08-risks.md) §8.2.
 | [`08-risks.md`](08-risks.md) | Twelve risks, five decisions I need from you, six things I could not verify |
 | [`09-reference-capture.md`](09-reference-capture.md) | How we measure MSN instead of guessing at it, and what the first captures corrected |
 
+## The documents that describe the app rather than the plan
+
+The nine above are a **planning baseline**, frozen at 2026-07-30 and amended in
+place with dated corrections when the code contradicts them. These describe
+what exists now, and they change whenever it does.
+
+| Doc | What it answers |
+|---|---|
+| [`known-gaps.md`](known-gaps.md) | What the app does not do, what it costs, and what would close it |
+| [`releasing.md`](releasing.md) | How a version gets from `main` to a download, and the one step that is deliberately manual |
+| [`10-design-system.md`](10-design-system.md) | The tokens, the layout rules, and what a tablet's extra room buys |
+
 ## Non-negotiables
 
 Ranked, so that when something has to give, it is clear what gives last.

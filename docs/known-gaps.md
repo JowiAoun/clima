@@ -112,3 +112,106 @@ The constant is not only a stopgap. The gallery's device frames are drawn
 against it, and golden images need a number that does not depend on which
 handset the capture ran on. When `SafeArea` arrives, the app should read it and
 the gallery should keep the constant.
+
+---
+
+## The Windows build is unsigned
+
+**Status: shipped this way, deliberately, because the alternative is worse.**
+
+The MSI and the portable ZIP carry no Authenticode signature, so Windows
+SmartScreen shows an "unknown publisher" dialog the first time somebody runs
+either one. That is not a defect in the build; it is the absence of a code
+signing certificate, and there is no way to produce one from CI.
+
+`docs/07-packaging.md` §7.1 lists **signed MSIX** as the P0 Windows channel.
+That is corrected to **unsigned MSI**, and the reason is the signing rather
+than the format. An unsigned MSIX cannot be side-loaded at all until the user
+imports a certificate into their trusted root store, which is a worse thing to
+ask of somebody than dismissing a warning — it teaches them to trust an
+arbitrary publisher permanently in order to run one program once. An unsigned
+MSI simply warns.
+
+MSI also earns three things independently of that: winget validates it
+natively, it installs per-user with no administrator rights, and it produces a
+real Add/Remove Programs entry with an upgrade code, so version two replaces
+version one instead of sitting beside it.
+
+### The mitigations, in the order they should be attempted
+
+1. **Azure Trusted Signing**, roughly $10/month, authenticates from Actions
+   over OIDC with no hardware token. This is the real fix. Confirm eligibility
+   first: individual accounts need a three-year identity history, which is a
+   requirement a new account cannot satisfy by waiting a week.
+2. **Publish to winget.** The manifest pins a SHA-256, so `winget install`
+   verifies the download against a hash in a reviewed, public repository. It
+   does not remove the SmartScreen dialog; it does mean the bytes were checked
+   by something other than the user's judgement.
+3. **`SHA256SUMS` and build provenance**, which the release workflow already
+   attaches. `gh attestation verify` proves an artefact came out of this
+   workflow at this commit. That is weaker than a signature in exactly one way
+   — it is not checked by the operating system — and stronger in one way, since
+   it names the source revision.
+
+Until 1 happens, the README has to say the build is unsigned. A project that
+quietly ships unsigned binaries and lets users discover it from a Windows
+dialog has told them something about how it handles the things they cannot see.
+
+---
+
+## There is no macOS build
+
+**Status: builds in CI, ships nothing, and that is a decision rather than an
+oversight.**
+
+Notarising a macOS application requires an Apple Developer ID at $99/year.
+Without notarisation, Gatekeeper on a current macOS refuses to open a
+downloaded app at all — not a warning, a refusal — and the workaround is a
+right-click-open dance that changes with every release. Shipping a DMG nobody
+can open would be worse than shipping none.
+
+The engine is licensed to keep the door open: `libclima` is MPL-2.0 precisely
+so that a macOS build is a packaging decision later rather than a licensing
+problem. The Mac App Store stays ruled out regardless — D6, GPLv3 against the
+App Store terms.
+
+---
+
+## The .deb does not cover Ubuntu 24.04
+
+**Status: correct behaviour, and the Flatpak is the answer.**
+
+Ubuntu 24.04 LTS ships Qt 6.4.2. This project's floor is Qt 6.8, which is where
+the Qt Quick features it relies on settle, so the package declares
+`libqt6core6t64 (>= 6.8.2)` and apt correctly refuses to install it there.
+
+That is the right failure. A package that installed and then would not start is
+worse than one that says why up front. 24.04 users, and anybody on a
+distribution older than Debian 13, get the Flatpak — which carries its own Qt
+out of `org.kde.Platform` and does not care what the host has. That is the
+whole reason `docs/07-packaging.md` §7.1 makes Flathub the P0 channel.
+
+`docs/07-packaging.md` §7.3's `linux-system-qt` on `ubuntu-24.04` is corrected
+to `debian:trixie` for the same reason: a job pinned to a distribution that
+cannot satisfy the floor cannot prove the packager build path works.
+
+---
+
+## The Windows and AppImage release jobs have never run
+
+**Status: written from documentation, executed never.**
+
+The same footing as the Android job, and recorded here for the same reason. The
+development environment for this work is a Nix devshell on Linux: there is no
+MSVC, no Windows, no `wix`, and no 22.04 userland with `linuxdeploy` in it. So
+`packaging/windows/clima.wxs` has never been compiled by `wix build`, and the
+AppImage job has never produced an AppImage.
+
+Both are written against the documented behaviour of their tools, which is a
+first draft of a build rather than a check that passed. The AppImage job is
+`continue-on-error` so that a release with a working `.deb`, Flatpak and MSI is
+not blocked by the P1 artefact, and the publish job prints which artefacts
+arrived so that a missing one is stated rather than merely absent.
+
+What closes it: one tagged release, and fixing whatever it says. Move the
+AppImage job into the required set in the commit that makes it green.
