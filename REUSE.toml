@@ -35,6 +35,34 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
+# The application icon at the hicolor sizes.
+#
+# CC-BY-SA-4.0, matching packaging/icons/clima.svg, which carries the licence in
+# a header of its own and which these are cut from by scripts/icons.sh. The same
+# reasoning the golden-image block at the bottom of this file sets out, applied
+# to a different source: a rendering inherits the licence of the thing it is a
+# rendering of, because it has no existence apart from it. There the source is
+# GPL QML and the images are GPL; here the source is a CC-BY-SA drawing and the
+# PNGs are CC-BY-SA.
+#
+# They are committed rather than generated at build time so that a packager
+# without librsvg still gets an icon; scripts/icons.sh check is what stops them
+# drifting from the master. PNG has nowhere to put a header.
+[[annotations]]
+path = [
+    "packaging/icons/clima-16.png",
+    "packaging/icons/clima-24.png",
+    "packaging/icons/clima-32.png",
+    "packaging/icons/clima-48.png",
+    "packaging/icons/clima-64.png",
+    "packaging/icons/clima-128.png",
+    "packaging/icons/clima-256.png",
+    "packaging/icons/clima-512.png",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Jowi Aoun"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
 # The bundled typeface. Inter 4.1 (git-9221beed3), by The Inter Project Authors,
 # under the SIL Open Font License 1.1 — from the upstream release archive,
 # https://github.com/rsms/inter/releases/tag/v4.1, unmodified.

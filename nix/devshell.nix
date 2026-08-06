@@ -60,6 +60,15 @@ pkgs.mkShell {
     # Flathub submission requirements — see docs/07-packaging.md.
     appstream
     desktop-file-utils
+
+    # The icon rasteriser. The master is one SVG and the hicolor theme wants
+    # eight PNG sizes, so the sizes are generated rather than drawn — see
+    # scripts/icons.sh, which also re-renders and diffs them in CI so a hand-
+    # edited PNG cannot survive. librsvg rather than ImageMagick because the
+    # output has to be byte-reproducible: a flake-pinned librsvg renders the
+    # same bytes on every machine, and `convert` delegates to whatever it found
+    # at build time.
+    librsvg
   ];
 
   shellHook = ''

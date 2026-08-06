@@ -199,6 +199,16 @@ if(CLIMA_DEV_TOOLS)
     add_subdirectory(tools/geonames)
 endif()
 
+# What a Linux install puts on disk beside the binary: the desktop entry, the
+# AppStream component and the icon theme. Not guarded by an option — a build
+# that cannot be installed is not a build anybody can package, and the
+# directory returns immediately on every platform that has no use for it.
+#
+# It reads CLIMA_APP_ID and PROJECT_VERSION and defines no targets, so it could
+# go anywhere after the identity block above. It is here, last of the product
+# directories, because it is the only one whose output is not code.
+add_subdirectory(packaging)
+
 # enable_testing() has to be called from the top-level directory or `ctest
 # --test-dir build/dev` finds no tests at all and says so in a way that reads
 # like the tests failed to build. It is guarded by the same option as the

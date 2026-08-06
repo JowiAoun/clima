@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The desktop entry, templated so that the app ID appears once in the build and
+# not once per format. packaging/CMakeLists.txt installs the result as
+# @CLIMA_APP_ID@.desktop — the *filename* has to be the app ID exactly, or a
+# Wayland compositor cannot match our window to this file and the user gets a
+# generic icon and no application menu. That is one of the two silent failure
+# modes in this file; the other is Icon=, below.
+
+[Desktop Entry]
+Type=Application
+Version=1.5
+
+Name=Clima
+GenericName=Weather
+Comment=Check the forecast, the radar and severe weather warnings
+
+# The installed binary, on PATH. Not an absolute path: a Flatpak, an AppImage
+# and a .deb put it in three different prefixes, and flatpak-builder rewrites
+# this line on export anyway.
+Exec=clima
+Icon=@CLIMA_APP_ID@
+Terminal=false
+
+# One main category on purpose. There is no Weather in the menu spec, and the
+# nearest fit — Science, carrying the registered Geoscience — files a
+# general-audience weather app next to the periodic table. Listing both is
+# worse than either: desktop-file-validate warns that two main categories make
+# the app appear twice in the menu, which it does.
+Categories=Utility;
+
+# What someone types into a launcher when they do not remember what we called
+# it. "Rain" and "Snow" earn their place: people search for the condition, not
+# for the category.
+Keywords=Weather;Forecast;Radar;Temperature;Rain;Snow;Storm;Alert;Climate;
+
+StartupNotify=true
+
+# For X11 only, and it is not redundant with the filename rule above. Qt sets
+# WM_CLASS from the executable's basename there, so a shell matching a window
+# to this entry looks for `clima` and would otherwise find nothing. On Wayland
+# the app_id comes from QGuiApplication::setDesktopFileName() and already
+# matches; see app/main.cpp, which calls it for exactly this reason.
+StartupWMClass=clima

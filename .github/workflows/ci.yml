@@ -82,6 +82,17 @@ jobs:
           path: tests/golden/images/*.actual.png
           if-no-files-found: ignore
 
+      # The desktop entry, the AppStream component and the icons, checked from
+      # a staged install rather than from the templates — so this covers the
+      # install rules too, which is where half of the silent failures live.
+      #
+      # It runs here, in the job that has a built tree, rather than in `lint`,
+      # which configures but never builds: `cmake --install` needs the binary
+      # it was told to install. The devshell carries appstreamcli,
+      # desktop-file-validate and librsvg for exactly this step.
+      - name: Packaging metadata
+        run: CLIMA_BUILD_DIR=build/ci nix develop --command bash scripts/check-packaging.sh
+
   # ---- a packager's build --------------------------------------------------
   #
   # Debian 13 ships Qt 6.8, which is the floor D2 sets, and this is the job that

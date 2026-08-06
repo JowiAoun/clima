@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPDX-FileCopyrightText: 2026 Jowi Aoun
+  SPDX-License-Identifier: CC0-1.0
+
+  The AppStream component. This is what GNOME Software, KDE Discover and
+  Flathub read, and it is the only description of this app that most people
+  will ever see.
+
+  CC0 rather than the CC-BY-SA-4.0 the other prose in this repository takes,
+  and that is not an oversight: AppStream requires `metadata_license` to be a
+  permissive licence from a short list, so that a distribution may reproduce
+  the description in a catalogue without inheriting a share-alike obligation.
+  CC-BY-SA-4.0 is not on that list. The licence of the *software* is
+  `project_license`, below, and it is GPL-3.0-or-later like everything else.
+
+  ==== the rule this file is governed by ======================================
+
+  It describes what the app does today, not what docs/06-roadmap.md says it
+  will do. There is no radar here and no model comparison, because neither is
+  built: the maps tab renders a deliberate scaffold (see `scaffold` in
+  app/qml/Clima/theme.js, which exists so a placeholder cannot be mistaken for
+  a finished screen). A store listing is the one place where describing the
+  plan instead of the product is indistinguishable from lying, so when those
+  land they get added here and not before.
+
+  Validated by `appstreamcli validate` in strict mode in CI, via
+  scripts/check-packaging.sh. Run that before pushing: the failures are
+  specific and the fixes are quick, and Flathub runs the same check on
+  submission.
+
+  One XML rule bites repeatedly while editing this file: a comment may not
+  contain a double hyphen, so neither a rule of dashes nor a quoted long option
+  can appear in one. libxml2 reports it as twenty parser errors pointing at the
+  wrong line.
+-->
+<component type="desktop-application">
+  <id>@CLIMA_APP_ID@</id>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>Clima</name>
+  <summary>Check the forecast and severe weather warnings</summary>
+
+  <developer id="io.github.jowiaoun">
+    <name>Jowi Aoun</name>
+  </developer>
+
+  <description>
+    <p>
+      Clima is a native weather app for the desktop. It shows the next two weeks
+      of forecast as charts you can read rather than a grid of numbers, and it
+      puts official severe-weather warnings on every screen where they matter.
+    </p>
+    <p>
+      It is quiet software. There are no ads, no news feed, no telemetry, no
+      account to make and no API key to paste in.
+    </p>
+    <p>Included:</p>
+    <ul>
+      <li>Hourly and ten-day forecasts, with temperature, precipitation, wind, humidity, pressure, visibility, UV and air quality</li>
+      <li>Severe weather warnings from Environment and Climate Change Canada and the United States National Weather Service, live and unfiltered</li>
+      <li>Detail cards for sunrise and sunset, the moon phase, and each measurement in turn</li>
+      <li>A dark and a light theme, following the desktop's own setting</li>
+      <li>Layouts for a phone, a tablet and a desktop window</li>
+      <li>Offline-first: it renders from its cache and reconciles with the network, so a service being down is never an empty screen</li>
+    </ul>
+    <p>
+      Weather data comes from Open-Meteo, which aggregates ECMWF, NOAA, DWD,
+      Météo-France, the UK Met Office and fourteen more national services, with
+      MET Norway as a fallback. Every source is credited in the app under
+      About, Data sources.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">@CLIMA_APP_ID@.desktop</launchable>
+
+  <url type="homepage">https://github.com/JowiAoun/clima</url>
+  <url type="bugtracker">https://github.com/JowiAoun/clima/issues</url>
+  <url type="vcs-browser">https://github.com/JowiAoun/clima</url>
+  <url type="contribute">https://github.com/JowiAoun/clima/blob/main/CONTRIBUTING.md</url>
+
+  <categories>
+    <category>Utility</category>
+  </categories>
+
+  <keywords>
+    <keyword>weather</keyword>
+    <keyword>forecast</keyword>
+    <keyword>temperature</keyword>
+    <keyword>rain</keyword>
+    <keyword>storm</keyword>
+    <keyword>alert</keyword>
+    <keyword>climate</keyword>
+  </keywords>
+
+  <!--
+    The screenshots are published to gh-pages by the release workflow rather
+    than committed here, because AppStream wants stable absolute URLs and a
+    raw.githubusercontent link moves with the branch. They are un-bezelled
+    grabs on purpose: Flathub's linter reads a marketing composite with a
+    phone frame around it as excessive whitespace and rejects it. The framed
+    versions are for the README, and they are a different capture profile —
+    see docs/screenshots.md.
+  -->
+  <screenshots>
+    <screenshot type="default">
+      <caption>The desktop window, showing an hourly overview</caption>
+      <image>https://jowiaoun.github.io/clima/screenshots/desktop-dark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>The same window in the light theme</caption>
+      <image>https://jowiaoun.github.io/clima/screenshots/desktop-light.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>A severe weather warning, as issued</caption>
+      <image>https://jowiaoun.github.io/clima/screenshots/alerts.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Ten days at a glance on a narrow window</caption>
+      <image>https://jowiaoun.github.io/clima/screenshots/mobile-daily.png</image>
+    </screenshot>
+  </screenshots>
+
+  <!--
+    Our two palette anchors, so a software centre tints the page with the app's
+    own colours rather than guessing from the icon. `sky.night.stops[1]` for
+    dark and `surface.base` for light — see app/qml/Clima/theme.js.
+  -->
+  <branding>
+    <color type="primary" scheme_preference="dark">#141f4a</color>
+    <color type="primary" scheme_preference="light">#eef1f7</color>
+  </branding>
+
+  <!--
+    360 px is the narrowest layout that exists — the phone breakpoint in
+    app/qml/Clima/Viewports.qml. Below it the app does not degrade, it clips,
+    so this is a requirement rather than a recommendation.
+  -->
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+
+  <!--
+    Nothing to declare. No user-generated content, no chat, no purchases, no
+    advertising, and location never leaves the machine except as the
+    coordinates of the forecast being requested.
+  -->
+  <content_rating type="oars-1.1"/>
+
+  <!--
+    History, so these stay literal while the version in the build comes from
+    `project(clima VERSION …)`. packaging/CMakeLists.txt asserts that the
+    newest entry here matches that version, which is the check that catches the
+    release nobody wrote a note for.
+  -->
+  <releases>
+    <release version="0.1.0" date="2026-08-05" type="development">
+      <description>
+        <p>First development release.</p>
+        <ul>
+          <li>Hourly and ten-day forecasts from Open-Meteo, with MET Norway as a fallback</li>
+          <li>Severe weather warnings for Canada and the United States</li>
+          <li>Dark and light themes that follow the desktop</li>
+          <li>Phone, tablet and desktop layouts</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

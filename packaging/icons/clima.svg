@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPDX-FileCopyrightText: 2026 Jowi Aoun
+  SPDX-License-Identifier: CC-BY-SA-4.0
+
+  The application icon, and the master every other size is cut from.
+  scripts/icons.sh rasterises this into packaging/icons/clima-<n>.png for the
+  hicolor sizes; nothing edits those by hand.
+
+  Every colour here is a token out of app/qml/Clima/theme.js rather than a value
+  picked to look nice next to the others, because an icon is the one piece of
+  the product people see before they see the product. The five sky stops are
+  `sky.night.stops`, the sun is `glyph.sunWarm` into `accent.fill`, and the
+  cloud is `glyph.cloudTop` into `glyph.cloudBottom`. When the palette moves,
+  this moves with it.
+
+  Drawn at 512 and designed to survive 16. The rules that follow from that:
+
+    * Two shapes carry the icon — a warm disc and a pale cloud — because a third
+      is mud at 16 px. The stars are texture, not information: at 512 they are
+      6 px and read, at 16 they are a fifth of a pixel and disappear, which is
+      the correct way for a detail to degrade.
+    * The sun sits up-left and the cloud crosses it low-right, so the two never
+      resolve into one blob. Overlap is what makes it read as weather rather
+      than as a yellow dot.
+    * The halo is a radial fading to zero alpha, never a flat disc — the same
+      correction WeatherGlyph.qml carries, and for the same reason: a flat
+      circle has an edge you can trace at any size above a thumbnail.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <!-- sky.night.stops, top to bottom, exactly as PageBackdrop lays them out. -->
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"    stop-color="#0c1738"/>
+      <stop offset="0.25" stop-color="#141f4a"/>
+      <stop offset="0.5"  stop-color="#1a2350"/>
+      <stop offset="0.75" stop-color="#131a3e"/>
+      <stop offset="1"    stop-color="#0a0f2c"/>
+    </linearGradient>
+
+    <!-- glyph.sunWarm at the centre, accent.fill at the rim. -->
+    <radialGradient id="sun" cx="0.42" cy="0.38" r="0.72">
+      <stop offset="0"   stop-color="#ffd97a"/>
+      <stop offset="0.6" stop-color="#ffd02c"/>
+      <stop offset="1"   stop-color="#f2952f"/>
+    </radialGradient>
+
+    <!-- The glow. Zero alpha at the rim, so there is no edge to find. -->
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#ffd97a" stop-opacity="0.40"/>
+      <stop offset="0.55" stop-color="#ffd97a" stop-opacity="0.14"/>
+      <stop offset="1"    stop-color="#ffd97a" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- glyph.cloudTop into glyph.cloudBottom. -->
+    <linearGradient id="cloud" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#c1cddf"/>
+    </linearGradient>
+
+    <!-- The tile clips the scene, so the halo and the cloud can run past its
+         edge without a bounding box to line them up against. -->
+    <clipPath id="tile">
+      <rect x="32" y="32" width="448" height="448" rx="112" ry="112"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <rect x="32" y="32" width="448" height="448" fill="url(#sky)"/>
+
+    <!-- Texture. Three stars, up-right, clear of both the sun and the cloud. -->
+    <circle cx="390" cy="132" r="7.5" fill="#ffffff" opacity="0.85"/>
+    <circle cx="434" cy="208" r="5"   fill="#ffffff" opacity="0.6"/>
+    <circle cx="338" cy="86"  r="4.5" fill="#ffffff" opacity="0.45"/>
+
+    <circle cx="192" cy="178" r="156" fill="url(#halo)"/>
+    <circle cx="192" cy="178" r="80"  fill="url(#sun)"/>
+
+    <!-- The cloud, as one path rather than four overlapping shapes: librsvg
+         antialiases every internal seam it can see, and at 32 px those seams
+         are visible as a lighter stripe through the body.
+
+         Translated down-right off the sun's centre rather than drawn there.
+         The first cut had them concentric enough that at 32 px the sun was a
+         yellow rind on a white cloud and the icon read as weather-in-general;
+         the whole point of the overlap is that both shapes stay nameable. -->
+    <g transform="translate(16 22)">
+      <path fill="url(#cloud)" d="
+        M 196 404
+        a 56 56 0 0 1 -6 -111
+        a 74 74 0 0 1 138 -30
+        a 60 60 0 0 1 34 141
+        z"/>
+    </g>
+  </g>
+</svg>

@@ -364,6 +364,27 @@ set_target_properties(clima PROPERTIES
     MACOSX_BUNDLE TRUE
 )
 
+# ---- installing -------------------------------------------------------------
+#
+# One executable, and that really is the whole payload. Every QML file, every JS
+# file and both Inter faces are compiled into it — qt_add_qml_module builds
+# `climaqml` as a static library carrying its QML in a resource — so there is no
+# module directory to install, no qmldir to ship and no QML_IMPORT_PATH to set
+# at run time. The data files that do get installed are the desktop entry, the
+# AppStream component and the icons, and those are packaging/'s business.
+#
+# Qt is deliberately not deployed alongside it. A .deb and a Flatpak both take
+# Qt from the platform underneath them, which is the point of D8 ruling out
+# bundled dependencies: a distribution packager builds this against the Qt they
+# already ship. Windows is the exception, because there is no platform Qt there
+# to take, and windeployqt handles it — see packaging/windows/.
+include(GNUInstallDirs)
+
+install(TARGETS clima
+    BUNDLE  DESTINATION .
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
 # ---- Android ----------------------------------------------------------------
 #
 # The properties Qt's Android deployment reads, and nothing else. There is
