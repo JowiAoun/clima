@@ -1,0 +1,150 @@
+{
+    "schema": 1,
+    "widgets": [
+        {
+            "id": "current-conditions",
+            "title": "Current conditions",
+            "summary": "Temperature, what it feels like, and the sky right now.",
+            "size": [240, 140],
+            "minSize": [180, 110],
+            "hours": 0,
+            "days": 0,
+            "fields": [
+                "place",
+                "current.temperature",
+                "current.apparentTemperature",
+                "current.weatherCode",
+                "current.isDay"
+            ]
+        },
+        {
+            "id": "temperature-sparkline",
+            "title": "Temperature trend",
+            "summary": "The next day of temperature as one unlabelled line.",
+            "size": [260, 120],
+            "minSize": [200, 90],
+            "hours": 24,
+            "days": 0,
+            "fields": [
+                "place",
+                "current.temperature",
+                "hourly.temperature"
+            ]
+        },
+        {
+            "id": "hourly-strip",
+            "title": "Hourly",
+            "summary": "The next twelve hours, with the rain drawn under the line.",
+            "size": [360, 160],
+            "minSize": [280, 130],
+            "hours": 12,
+            "days": 0,
+            "fields": [
+                "place",
+                "hourly.temperature",
+                "hourly.precipitation",
+                "hourly.weatherCode",
+                "current.isDay"
+            ]
+        },
+        {
+            "id": "precipitation-6h",
+            "title": "Rain, next six hours",
+            "summary": "How much, and how likely, in the near term.",
+            "size": [240, 140],
+            "minSize": [190, 110],
+            "hours": 6,
+            "days": 0,
+            "fields": [
+                "place",
+                "hourly.precipitation",
+                "hourly.precipitationProbability"
+            ]
+        },
+        {
+            "id": "wind-rose",
+            "title": "Wind",
+            "summary": "Speed, gust and the direction it is blowing from.",
+            "size": [180, 180],
+            "minSize": [140, 140],
+            "hours": 0,
+            "days": 0,
+            "fields": [
+                "place",
+                "current.windSpeed",
+                "current.windGust",
+                "current.windDirection"
+            ]
+        },
+        {
+            "id": "uv-dial",
+            "title": "UV index",
+            "summary": "Now, against today's maximum.",
+            "size": [160, 160],
+            "minSize": [130, 130],
+            "hours": 0,
+            "days": 1,
+            "fields": [
+                "place",
+                "current.uvIndex",
+                "daily.uvIndexMax"
+            ]
+        },
+        {
+            "id": "aqi-dial",
+            "title": "Air quality",
+            "summary": "The index, its band, and the pollutant driving it.",
+            "size": [160, 160],
+            "minSize": [130, 130],
+            "hours": 0,
+            "days": 0,
+            "fields": [
+                "place",
+                "airquality.index",
+                "airquality.dominant"
+            ]
+        },
+        {
+            "id": "sun-arc",
+            "title": "Sun",
+            "summary": "Where the sun is between rising and setting.",
+            "size": [260, 140],
+            "minSize": [200, 110],
+            "hours": 0,
+            "days": 1,
+            "fields": [
+                "place",
+                "daily.sunrise",
+                "daily.sunset"
+            ]
+        },
+        {
+            "id": "daily-strip",
+            "title": "Seven days",
+            "summary": "High, low and the sky, a week at a time.",
+            "size": [360, 150],
+            "minSize": [280, 120],
+            "hours": 0,
+            "days": 7,
+            "fields": [
+                "place",
+                "daily.temperatureMax",
+                "daily.temperatureMin",
+                "daily.weatherCode"
+            ]
+        },
+        {
+            "id": "alerts",
+            "title": "Severe weather",
+            "summary": "The highest-ranked warning in force, or nothing at all.",
+            "size": [320, 110],
+            "minSize": [260, 90],
+            "hours": 0,
+            "days": 0,
+            "fields": [
+                "place",
+                "alerts"
+            ]
+        }
+    ]
+}

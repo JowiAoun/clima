@@ -92,6 +92,7 @@ clima_add_test(tst_providerregistry)
 clima_add_test(tst_geocoding)
 clima_add_test(tst_reversegeocode)
 clima_add_test(tst_places)
+clima_add_test(tst_wiresnapshot)
 
 # ---- the one test that links app/ -------------------------------------------
 #

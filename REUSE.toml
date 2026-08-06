@@ -358,3 +358,12 @@ path = ["tests/shell/clima-window-probe@clima.invalid/metadata.json"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The widget catalogue. JSON has nowhere to put a comment, and this file is
+# read by five things — the widget host, the gallery, the Plasma configuration
+# page, the extension's menu and the docs — so it is data rather than an asset.
+[[annotations]]
+path = ["widgets/catalogue.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Jowi Aoun"
+SPDX-License-Identifier = "GPL-3.0-or-later"

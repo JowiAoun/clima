@@ -111,6 +111,13 @@ add_library(libclima STATIC
     net/requestkey.cpp
     net/validatorstore.h
     net/validatorstore.cpp
+
+    # How a forecast leaves this process. It is here rather than in daemon/
+    # because both ends of the wire need it and one of them is not the daemon —
+    # and because it is pure data with no I/O and no clock, which is what lets
+    # a test build a snapshot out of a recorded fixture and compare the bytes.
+    wire/snapshot.h
+    wire/snapshot.cpp
 )
 
 set_target_properties(libclima PROPERTIES
