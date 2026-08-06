@@ -94,7 +94,7 @@ Rectangle {
         // radial gradient per point would be 120 offscreen passes to draw
         // something two pixels across.
         Repeater {
-            model: root.starOpacity > 0 ? Sky.field(130) : []
+            model: root.starOpacity > 0 ? Sky.field(Theme.perf.starField) : []
 
             delegate: Rectangle {
                 required property var modelData
@@ -114,7 +114,7 @@ Rectangle {
         // WeatherGlyph's sun halo had to learn: a flat circle has an edge you
         // can trace, and an edge makes it a stacked wash.
         Repeater {
-            model: root.starOpacity > 0 ? Sky.beacons(9) : []
+            model: root.starOpacity > 0 ? Sky.beacons(Theme.perf.starBeacons) : []
 
             delegate: Item {
                 id: beacon
@@ -170,7 +170,8 @@ Rectangle {
 
         // ---- the figures ----------------------------------------------------
         Repeater {
-            model: root.starOpacity > 0 ? Sky.constellations : []
+            model: root.starOpacity > 0
+                   ? Sky.constellations.slice(0, Theme.perf.constellations) : []
 
             delegate: Item {
                 id: figure

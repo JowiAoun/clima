@@ -1,0 +1,114 @@
+<!--
+SPDX-FileCopyrightText: 2026 Jowi Aoun
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+
+# Known gaps
+
+Things this app does not do, or does not do yet, written down where a reader
+can find them rather than discovered by using it. Each entry says what is
+missing, what it costs, and what would have to happen for it to close.
+
+A gap is not a bug. A bug is behaviour that contradicts what the app claims;
+everything here is something the app has never claimed, and the point of the
+file is to keep it that way.
+
+---
+
+## Android: the app runs, the alerts do not
+
+**Status: the build is written and has never run. Nothing has been on a device.**
+
+What exists today is the whole of the client side. The mobile shell is the
+tablet shell is the phone shell, the touch targets clear the 44 px floor, the
+back gesture pops a tab and then lets the platform close the app, the drawing
+tier halves the star field on a handheld, and `app/CMakeLists.txt` carries the
+Qt Android deployment properties and the two permissions the app needs. There
+is a CI job, gated on `workflow_dispatch` because it has never executed.
+
+None of that is the gate. **The gate is delivering a severe weather alert to a
+phone that is asleep**, and it is not a rendering problem or a packaging
+problem — it is a problem Qt does not have an answer to.
+
+### What the desktop does, and why it does not port
+
+On a desktop, alert polling is `AlertsData`'s timer: three minutes with the
+window focused, ten idle, and **stopped entirely when the window is hidden**.
+That last rule is what makes the poll cost defensible — see
+`docs/04-architecture.md` §4.5 — and it is also exactly the rule that makes the
+feature useless on a phone, where the window is hidden almost all of the time.
+
+An Android app that wants to poll while it is not on screen needs, in order:
+
+1. **A `WorkManager` periodic job**, which is Java. Qt gives you `QJniObject`
+   and nothing above it, so this is hand-written JNI plus a Java class in the
+   package source directory — the first Java in this repository.
+2. **A notification channel**, created at first run, with the severity opt-in
+   the desktop already has mapped onto Android's channel importance levels.
+3. **Battery-optimisation UX.** Doze batches `WorkManager` jobs into
+   maintenance windows; the effective floor is roughly 15 minutes and in Doze
+   it is longer than that. An extreme heat warning arriving 40 minutes late is
+   defensible. A tornado warning arriving 40 minutes late is not, and an app
+   that appears to deliver tornado warnings and does not is worse than an app
+   that says it does not.
+4. **A foreground-service declaration** if 3 is unacceptable, which on Google
+   Play means declaring a foreground service type and justifying it in review.
+   `dataSync` is the honest type and Play has been rejecting it for exactly
+   this shape of use.
+5. **`SCHEDULE_EXACT_ALARM`** if even that is not enough, which since Android
+   13 is granted by the user in a system settings page most users never open.
+
+### What that means for scope
+
+Steps 1 and 2 are a week of work and are worth doing. Steps 3 to 5 are a
+product decision, not an engineering one, and the decision is between:
+
+- **Ship the app without background alerts.** Alerts appear when the app is
+  opened, which is honest, useful, and how most weather apps behaved before
+  push. The app must then say so in its own settings screen — an alert toggle
+  that silently means "when you happen to look" is the failure this whole
+  feature exists to avoid.
+- **Ship a foreground service.** Reliable, visible in the notification shade
+  forever, and a Play review argument. F-Droid, which
+  `docs/06-roadmap.md` names as the natural primary channel for a GPL,
+  no-telemetry, no-account weather app, has no such review.
+
+**The recommendation is the first one**, with the second reachable as an opt-in
+later. It is reversible, it is truthful, and it does not put the release behind
+a Play policy conversation.
+
+### What would close this
+
+An APK built by somebody with the toolchain, installed on a device, and the
+sentence "alerts arrive only while the app is open" written into the settings
+screen next to the toggle that controls them.
+
+---
+
+## The desktop page is not touch-audited
+
+`tests/qml/tst_hittargets.qml` measures every tappable area on every screen the
+mobile shell can reach, and it does not measure `WeatherPage` or the twelve
+detail cards. That is deliberate — a desktop is a pointer device, and a pointer
+is one pixel — but it is a gap and not a proof: a 1024 px touch screen runs the
+desktop page today, and nothing checks what that is like to use.
+
+The two controls the mobile shell borrows from the desktop, `PagerButton` and
+`FeelsLikeToggle`, are covered because the phone's hourly screen reaches them.
+
+Closing this means either adding the desktop groups to that test and raising
+whatever it finds, or deciding that a touch device never gets the desktop page
+— which is a change to `Viewports.classOf` and to nothing else.
+
+---
+
+## `SafeArea` is a constant, not a measurement
+
+`Theme.metric.navSafeArea` is 12 px, and on a real phone the gesture strip is
+whatever the device says it is. Qt exposes that as the `SafeArea` attached
+property in 6.9; this project's floor is 6.8, so the constant stands in.
+
+The constant is not only a stopgap. The gallery's device frames are drawn
+against it, and golden images need a number that does not depend on which
+handset the capture ran on. When `SafeArea` arrives, the app should read it and
+the gallery should keep the constant.

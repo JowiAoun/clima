@@ -233,3 +233,63 @@ jobs:
 
       - name: qmllint, as a ratchet
         run: CLIMA_BUILD_DIR=build/lint nix develop --command bash scripts/check-qmllint.sh
+
+  # ---- Android ---------------------------------------------------------------
+  #
+  # NOT part of the default run, and the `if` below is the honest reason: this
+  # job has never executed. It was written against Qt's documented Android
+  # deployment properties in an environment with no NDK, no SDK and no Qt for
+  # Android in it — a Nix devshell with desktop Qt — so it is a first draft of a
+  # build, not a check that passed.
+  #
+  # A job in that state does not belong on every pull request. Landing it as
+  # `workflow_dispatch` only means the first person with the toolchain can run
+  # it, fix whatever it says, and move it into the matrix in the commit that
+  # makes it green — rather than merging a red X that everyone learns to skip.
+  #
+  # What it does NOT establish, whatever it reports: that the app works on a
+  # phone. An APK that builds is an APK that builds. The gate this track is
+  # actually waiting on is background alert delivery, which is not a build
+  # problem at all — see docs/known-gaps.md.
+  android:
+    name: build (android, arm64-v8a)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # The desktop Qt too, and it is not optional: androiddeployqt runs the
+      # host's qmlimportscanner and moc, so a cross build needs a host Qt of
+      # exactly the same version beside the target one.
+      - name: Install Qt for Android and its host Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: linux
+          target: android
+          arch: android_arm64_v8a
+          modules: 'qtpositioning'
+
+      - name: Configure
+        run: |
+          "$QT_ROOT_DIR/bin/qt-cmake" -S . -B build/android -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCLIMA_BUILD_TESTS=OFF \
+            -DCLIMA_BUILD_GALLERY=OFF \
+            -DCLIMA_DEV_TOOLS=OFF \
+            -DQT_ANDROID_ABIS=arm64-v8a
+
+      - name: Build the APK
+        run: cmake --build build/android --target apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: clima-apk
+          path: build/android/app/android-build/build/outputs/apk/**/*.apk
+          if-no-files-found: error

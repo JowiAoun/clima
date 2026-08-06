@@ -94,6 +94,7 @@ class AppOptions : public QObject
     Q_PROPERTY(QString tab    READ tab    CONSTANT)
     Q_PROPERTY(QString sky    READ sky    CONSTANT)
     Q_PROPERTY(QString scheme READ scheme CONSTANT)
+    Q_PROPERTY(QString perf   READ perf   CONSTANT)
     Q_PROPERTY(QString metric READ metric CONSTANT)
     Q_PROPERTY(int     day    READ day    CONSTANT)
     Q_PROPERTY(bool    list   READ list   CONSTANT)
@@ -125,6 +126,7 @@ public:
     static QStringList viewportIds();
     static QStringList skyPhases();
     static QStringList schemes();
+    static QStringList perfTiers();
 
     // Which recorded fixture this run replays, or empty for the live network.
     //
@@ -180,6 +182,7 @@ public:
     QString     tab()         const { return m_tab; }
     QString     sky()         const { return m_sky; }
     QString     scheme()      const { return m_scheme; }
+    QString     perf()        const { return m_perf; }
     QString     metric()      const { return m_metric; }
     int         day()         const { return m_day; }
     bool        list()        const { return m_list; }
@@ -213,6 +216,7 @@ private:
     QString     m_tab;
     QString     m_sky;
     QString     m_scheme;
+    QString     m_perf;
     QString     m_metric;
     // -1 rather than 0, because 0 is a day. Every "unset" below is a value the
     // flag could not legally produce, so QML can test for it without a second

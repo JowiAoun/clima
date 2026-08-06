@@ -135,6 +135,11 @@ QStringList AppOptions::skyPhases()
              QStringLiteral("day"), QStringLiteral("dusk") };
 }
 
+QStringList AppOptions::perfTiers()
+{
+    return { QStringLiteral("full"), QStringLiteral("reduced") };
+}
+
 QStringList AppOptions::schemes()
 {
     return { QStringLiteral("dark"), QStringLiteral("light") };
@@ -240,6 +245,15 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
             .arg(schemes().join(QStringLiteral(", "))),
         QStringLiteral("name"));
     parser.addOption(schemeOption);
+
+    const QCommandLineOption perfOption(
+        QStringLiteral("perf"),
+        QStringLiteral("Force the drawing tier rather than deriving it from the platform: %1. "
+                       "`reduced` halves the night sky's star count, which is what a handheld "
+                       "gets by default — this is how it is reviewed on a desktop.")
+            .arg(perfTiers().join(QStringLiteral(", "))),
+        QStringLiteral("tier"));
+    parser.addOption(perfOption);
 
     const QCommandLineOption metricOption(
         QStringLiteral("metric"), QStringLiteral("Select a chart metric, e.g. wind or uv."),
@@ -390,6 +404,14 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
             fail(QStringLiteral("--scheme: expected one of %1 — got \"%2\"")
                      .arg(schemes().join(QStringLiteral(", ")), name));
         self->m_scheme = name;
+    }
+
+    if (parser.isSet(perfOption)) {
+        const QString tier = parser.value(perfOption);
+        if (!perfTiers().contains(tier))
+            fail(QStringLiteral("--perf: expected one of %1 — got \"%2\"")
+                     .arg(perfTiers().join(QStringLiteral(", ")), tier));
+        self->m_perf = tier;
     }
 
     if (parser.isSet(metricOption))

@@ -364,3 +364,45 @@ set_target_properties(clima PROPERTIES
     MACOSX_BUNDLE TRUE
 )
 
+# ---- Android ----------------------------------------------------------------
+#
+# The properties Qt's Android deployment reads, and nothing else. There is
+# deliberately no AndroidManifest.xml in this repository: androiddeployqt
+# generates one, `qt_add_android_permission` puts the two permissions this app
+# needs into it, and a hand-written manifest would be a copy of Qt's own
+# template that has to be re-merged on every Qt release. The moment we need one
+# — an app icon, an adaptive icon, a splash theme — it belongs with the rest of
+# the packaging work, not here.
+#
+# NOT VERIFIED ON A DEVICE. This block has never been configured, because the
+# development environment is a Nix devshell with desktop Qt in it and no NDK,
+# no SDK and no Qt for Android. It is written from the documented property
+# names; treat the first `qt-cmake` run against it as the test it has not had.
+# See docs/known-gaps.md.
+if(ANDROID)
+    set_target_properties(clima PROPERTIES
+        # `io.github.JowiAoun.Clima`, which is a legal Java package name — the
+        # segments start with a letter and contain only letters and digits —
+        # even though the capitals are unconventional. One id, everywhere: the
+        # same string names the .desktop file, the AppStream component, the
+        # D-Bus name and the QSettings organisation.
+        QT_ANDROID_PACKAGE_NAME "${CLIMA_APP_ID}"
+        QT_ANDROID_APP_NAME "Clima"
+
+        # 28 is Android 9, which is where `QSettings` at AppDataLocation, TLS
+        # 1.3 and the scoped-storage rules the cache relies on all settle. 35 is
+        # the target Play requires as of this writing; it is a claim about what
+        # the app has been tested against, which is why it is not simply the
+        # newest number available.
+        QT_ANDROID_MIN_SDK_VERSION 28
+        QT_ANDROID_TARGET_SDK_VERSION 35
+    )
+
+    # Internet, and a coarse location for "use my location". COARSE and not
+    # FINE: this app puts a city's weather on the screen, and a city is not a
+    # street — asking for a precision the product has no use for is how a
+    # no-account, no-telemetry weather app ends up looking like every other
+    # weather app.
+    qt_add_android_permission(clima NAME android.permission.INTERNET)
+    qt_add_android_permission(clima NAME android.permission.ACCESS_COARSE_LOCATION)
+endif()

@@ -724,3 +724,36 @@ var ramp = {
     }
 };
 
+// ---------------------------------------------------------------------------
+// Performance tiers
+// ---------------------------------------------------------------------------
+// How much of the night sky is built. Not how it is drawn — every tier draws
+// the same stars the same way — but how many of them there are.
+//
+// The sky is the only thing in this app whose cost is a *count* rather than a
+// consequence of the data: 130 Rectangles, 9 Shapes with a radial gradient
+// each, and 3 more Shapes with a stroked polyline, every one of them
+// constructed before the first frame of a phone screen at night. On a desktop
+// that is nothing. On a mid-range handset it is the difference between the
+// window appearing and the window appearing to hesitate.
+//
+// The counts are prefixes and not samples, and that is the whole reason this
+// works: sky.js seeds every star from its own index, so `field(70)` is the
+// first seventy of the same hundred and thirty. A reduced sky is the same sky
+// with fewer stars in it, in the same places — so a golden image per tier is
+// stable, and switching tiers cannot move a constellation.
+var perf = {
+    full: {
+        starField:      130,
+        starBeacons:    9,
+        constellations: 3
+    },
+    // Roughly half the field, half the beacons, and one figure. The figures are
+    // the expensive third — a stroked Shape plus its own vertex stars — and one
+    // of them still says "those points make a shape", which is the entire job.
+    reduced: {
+        starField:      70,
+        starBeacons:    4,
+        constellations: 1
+    }
+};

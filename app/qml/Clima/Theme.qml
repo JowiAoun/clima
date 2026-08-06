@@ -654,6 +654,31 @@ QtObject {
     }
     readonly property MetricTokens metric: MetricTokens { }
 
+    // ---- performance -------------------------------------------------------
+    //
+    // "full" or "reduced". Pushed in from Main, like `scheme` and `stillness`
+    // and for the same reason: the answer belongs to the running application —
+    // it is the platform on a handset and a flag under review — and Theme is
+    // where every component already looks.
+    //
+    // A tier and not a device check at each site. There is one consumer today
+    // (PageBackdrop) and the temptation is to write `Qt.platform.os` there;
+    // that would put the decision in the file that draws rather than in the
+    // file that decides, and the second thing to become tier-aware would make
+    // its own copy of the rule.
+    property string perfTier: "full"
+
+    component PerfTokens: QtObject {
+        required property string tier
+
+        readonly property var table:
+            Tokens.perf[tier] !== undefined ? Tokens.perf[tier] : Tokens.perf.full
+
+        readonly property int starField:      table.starField
+        readonly property int starBeacons:    table.starBeacons
+        readonly property int constellations: table.constellations
+    }
+    readonly property PerfTokens perf: PerfTokens { tier: theme.perfTier }
 
     // ---- type --------------------------------------------------------------
     // `font.pixelSize` is an int in Qt and a fractional value fails object

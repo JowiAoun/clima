@@ -201,9 +201,34 @@ Exit criteria
 ## 6.10 Post-1.0 backlog
 
 Satellite imagery (needs an open ingest story) · marine forecasts · flood/GloFAS ·
-CMIP6 climate projections · Android and iOS (note the GPLv3/App Store constraint in D6) ·
+CMIP6 climate projections · iOS (note the GPLv3/App Store constraint in D6) ·
 lightning · webcams · personal weather station ingest (WeeWX, Ecowitt) ·
 `clima-relay` self-hostable proxy · Home Assistant integration.
+
+### Correction: Android moved forward, and one part of it did not
+
+**As written above, Android was post-1.0.** That was right about the hard part
+and wrong about the cheap part, and the two turned out to be separable.
+
+The cheap part is the client, and it is done: there is no mobile build, so a
+phone runs the same five-tab shell a tablet does, at the same touch floor, with
+the same components. What Android needed beyond that was a viewport class the
+platform pins rather than the width (a landscape tablet is 1112 px and is not a
+desktop), a back gesture that pops a tab and then lets the platform close the
+app, a drawing tier that halves the star field, and the Qt deployment
+properties. That is a day's work on top of the tablet layout, not a milestone.
+
+The hard part is unchanged and is **not** the build: it is delivering an alert
+to a phone that is asleep, which needs JNI into `WorkManager`, notification
+channels, and a foreground-service argument with Google Play. The desktop stops
+polling entirely when its window is hidden — see
+[`04-architecture.md`](04-architecture.md) §4.5 — and on a phone the window is
+hidden almost always, so the rule that makes the poll cost defensible is the
+rule that makes the feature useless.
+
+That decision is scoped in [`known-gaps.md`](known-gaps.md), with a
+recommendation: ship without background alerts and say so in the settings
+screen, rather than putting the release behind a Play policy conversation.
 
 ## 6.11 Concrete first week
 

@@ -18,6 +18,8 @@ import QtQuick
 import QtTest
 import Clima
 
+import "qrc:/qt/qml/Clima/sky.js" as Sky
+
 // The audit arithmetic, out of the gallery module rather than reimplemented.
 // By resource URL and not by a relative path: this file is loaded off disk by
 // the QtQuickTest runner, so `../../gallery/...` would work today and break the
@@ -405,5 +407,43 @@ TestCase {
         verify(Theme.isLight)
 
         Theme.scheme = was
+    }
+
+    // ---- the drawing tier ---------------------------------------------------
+    //
+    // Two facts, and the second is the one the whole idea rests on: a reduced
+    // sky must be a PREFIX of the full one. sky.js seeds every star from its own
+    // index, so `field(70)` is the first seventy of the same hundred and thirty
+    // — which is what makes a reduced sky the same sky with fewer stars rather
+    // than a different sky, and what lets a golden image exist per tier.
+    function test_theReducedTierIsSmallerInEveryDimension() {
+        var was = Theme.perfTier
+
+        Theme.perfTier = "full"
+        var full = { f: Theme.perf.starField, b: Theme.perf.starBeacons,
+                     c: Theme.perf.constellations }
+
+        Theme.perfTier = "reduced"
+        verify(Theme.perf.starField < full.f, "the field should shrink")
+        verify(Theme.perf.starBeacons < full.b, "the beacons should shrink")
+        verify(Theme.perf.constellations < full.c, "the figures should shrink")
+        verify(Theme.perf.constellations >= 1, "one figure still says what they are")
+
+        // An unknown tier is `full` rather than an empty sky. A typo in a flag
+        // should not silently produce a page with no stars on it.
+        Theme.perfTier = "nonsense"
+        compare(Theme.perf.starField, full.f)
+
+        Theme.perfTier = was
+    }
+
+    function test_theReducedSkyIsAPrefixOfTheFullOne() {
+        var full = Sky.field(130)
+        var lean = Sky.field(70)
+        compare(lean.length, 70)
+        for (var i = 0; i < lean.length; ++i) {
+            compare(lean[i].x, full[i].x, "star " + i + " moved between tiers")
+            compare(lean[i].y, full[i].y, "star " + i + " moved between tiers")
+        }
     }
 }
