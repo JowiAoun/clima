@@ -203,6 +203,15 @@ jobs:
       - name: shellcheck
         run: nix develop --command shellcheck --external-sources scripts/*.sh
 
+      # The workflows themselves, which nothing else checks until they run.
+      # That gap is worst exactly where it costs most: a release workflow is
+      # exercised by tagging a release, so a mistake in it is discovered by
+      # publishing a broken one. actionlint also pipes every `run:` block
+      # through shellcheck, which is the half of a workflow that is really a
+      # shell script nobody lints.
+      - name: actionlint
+        run: nix develop --command actionlint
+
       # The explicit QML_FILES lists against what is on disk. A globbed module
       # goes stale silently; this is what stops a file being added to the tree
       # and not to the module that is supposed to contain it.

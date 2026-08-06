@@ -1,0 +1,75 @@
+SPDX-FileCopyrightText: 2026 Jowi Aoun
+SPDX-License-Identifier: CC0-1.0
+
+                WRITTEN OFFER FOR THE CORRESPONDING SOURCE
+                       OF THE Qt LIBRARIES IN CLIMA
+
+Clima is built on the Qt framework, which is used here under the GNU Lesser
+General Public License, version 3 (LGPLv3). LGPLv3 incorporates section 6 of
+the GNU General Public License version 3, which requires that anyone who
+conveys the library in object-code form also convey the Corresponding Source,
+or accompany it with a written offer to supply that source.
+
+A hyperlink to qt.io does not discharge that obligation. GPLv3 section 6
+permits pointing at a third-party server only when the object code was itself
+obtained from that same server by the recipient, which is not how anybody
+receives this program. So this is a written offer.
+
+
+  WHICH BUILDS THIS APPLIES TO, AND WHICH IT DOES NOT
+
+It applies to the builds that carry Qt with them:
+
+    * the Windows installer (.msi) and the portable Windows archive (.zip)
+    * the Linux AppImage
+
+It does NOT apply to the builds that take Qt from the platform underneath
+them, because those do not convey Qt at all:
+
+    * the Debian package (.deb), which declares a dependency on the Qt
+      packages the distribution already ships and publishes the source for
+    * the Flatpak, whose Qt is the org.kde.Platform runtime, conveyed and
+      sourced by KDE
+
+Stating this is not an attempt to narrow the obligation. It is the obligation
+described accurately: an offer covering builds that convey no Qt would be
+misleading in the opposite direction.
+
+
+  THE OFFER
+
+For any Clima release listed above, and for a period of at least THREE YEARS
+from the date that release was published, the copyright holder named below
+will provide, to anyone who possesses that release, a complete machine-readable
+copy of the Corresponding Source for the Qt libraries distributed within it.
+That copy will be provided on a physical medium customarily used for software
+interchange, for a charge no more than the cost of physically performing the
+distribution, or by an equivalent electronic transfer at the recipient's
+option.
+
+The Corresponding Source means the exact, unmodified upstream source archive
+of the Qt version that release was built against, together with the build
+scripts and the configure invocation used to produce the binaries in it, and
+any patch applied to Qt in producing them. As of this release no patch is
+applied to Qt.
+
+The Corresponding Source also includes everything needed to relink the
+application against a modified version of the Qt libraries, which LGPLv3
+section 4(d) requires. Qt is linked DYNAMICALLY in every build of this
+application, and a CI check asserts that on the built binary
+(scripts/check-licences.sh), so relinking requires nothing more than replacing
+the Qt shared libraries that ship beside the executable.
+
+To request the source, open an issue at:
+
+    https://github.com/JowiAoun/clima/issues
+
+or write to the address in the Maintainer field of the package.
+
+The same source is also published as a release asset alongside the binaries it
+corresponds to, which is the route we expect anybody to actually use. The offer
+above stands regardless, for the full three years, because a release asset is a
+convenience and an offer is a commitment.
+
+Copyright holder:  Jowi Aoun
+Project:           https://github.com/JowiAoun/clima

@@ -18,7 +18,12 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(clima
-    VERSION 0.1.0
+    # The single source of truth for the version, and the marker is load-bearing
+    # rather than decorative: release-please's generic updater rewrites the
+    # number on any line carrying that comment, which is how a merged release PR
+    # bumps CLIMA_VERSION, the AppStream <release>, the MSI ProductVersion and
+    # the MET Norway User-Agent from one edit. See .github/release-please-config.json.
+    VERSION 0.1.0 # x-release-please-version
     DESCRIPTION "A native Qt 6 weather app"
     HOMEPAGE_URL "https://github.com/JowiAoun/clima"
     LANGUAGES CXX
@@ -223,6 +228,14 @@ endif()
 # one directory down produces a package with a default name and no dependencies,
 # and says nothing about it. See the file for why it has to be built against
 # system Qt.
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR WIN32)
+# Linux only, and Windows is not an omission. Both Windows artefacts — the
+# portable ZIP and the MSI — bundle Qt, which makes them LGPLv3 conveyances
+# that have to carry the written source offer and the third-party licence
+# bundle. A `cpack -G ZIP` here would produce an archive that satisfies neither,
+# from a one-line invocation, on anybody's machine. The release workflow stages
+# the install, adds those two files, and builds both artefacts from that one
+# tree — so there is no route to a Windows archive that has not been through
+# it. See .github/workflows/release.yml and packaging/QT-SOURCE-OFFER.txt.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include(ClimaCPack)
 endif()

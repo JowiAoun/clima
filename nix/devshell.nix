@@ -49,6 +49,13 @@ pkgs.mkShell {
     shellcheck
     shfmt
 
+    # The workflows, which are the one part of CI that CI cannot check before
+    # it runs. actionlint parses them, verifies every `uses:` and `runs-on:`
+    # against the real schema, and pipes each `run:` block through shellcheck —
+    # so a typo in the release workflow is caught here rather than by tagging
+    # a release and watching it fail.
+    actionlint
+
     # tools/refcap is a Node/Playwright harness; film.sh tiles frames with
     # ffmpeg; jq reads the capture manifests.
     nodejs

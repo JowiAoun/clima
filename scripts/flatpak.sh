@@ -85,6 +85,27 @@ case "$command" in
     echo "  scripts/flatpak.sh run"
     ;;
 
+  bundle)
+    # A single-file .flatpak, which is what a GitHub release can attach and
+    # what somebody installs with `flatpak install ./clima.flatpak` on a
+    # machine that has never heard of us. Distinct from `build`, which installs
+    # into the user's flatpak and produces no file.
+    #
+    # Exporting to a repo first is not an extra step that could be skipped:
+    # build-bundle reads an OSTree repo, so --repo is where the bundle comes
+    # from. The release workflow calls exactly this, so CI and a laptop take
+    # the same path.
+    flatpak-builder --user --repo="$state_dir/repo" --force-clean \
+      --state-dir "$state_dir/state" \
+      "$state_dir/build" "$manifest"
+
+    version="$(sed -n 's/^ *VERSION \([0-9][0-9.]*\).*/\1/p' "$root/CMakeLists.txt" | head -1)"
+    out="${1:-$root/build/clima-$version-x86_64.flatpak}"
+
+    flatpak build-bundle "$state_dir/repo" "$out" "$app_id"
+    echo "flatpak: $out ($(wc -c < "$out") bytes)"
+    ;;
+
   run)
     exec flatpak run "$app_id" "$@"
     ;;

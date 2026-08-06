@@ -50,23 +50,6 @@ set(CPACK_PACKAGE_CONTACT "${CLIMA_MAINTAINER}")
 
 set(CPACK_STRIP_FILES ON)
 
-# ---- Windows: the portable ZIP ----------------------------------------------
-#
-# The MSI is not built here. CPack's WIX generator wants WiX v3, which is
-# end-of-life, and the installer we ship is authored in v5 — see
-# packaging/windows/clima.wxs, which the release workflow builds with the
-# `wix` dotnet tool against the same staged install this ZIP is made from.
-#
-# So CPack's job on Windows is the staging and the archive, and that is worth
-# having on its own: docs/07-packaging.md §7.1 lists a portable ZIP as P1, for
-# people who will not run an installer.
-if(WIN32)
-    set(CPACK_GENERATOR "ZIP")
-    set(CPACK_PACKAGE_FILE_NAME "clima-${PROJECT_VERSION}-windows-x64")
-    include(CPack)
-    return()
-endif()
-
 set(CPACK_GENERATOR "DEB")
 
 # ---- the Debian control fields ----------------------------------------------

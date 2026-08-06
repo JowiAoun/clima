@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Keeps a release pull request open against main, and tags when it merges.
+#
+# The history here is already strictly conventional-commit — every commit in
+# this repository has a type and a scope — so the changelog is derivable and
+# there is nothing to write by hand. `bump-minor-pre-major` keeps us on 0.x
+# until somebody decides otherwise: before 1.0, a `feat` is a minor bump rather
+# than a major one.
+#
+# ==== one thing the release PR will do, and it is deliberate =================
+#
+# It will come up RED, once, on the version bump.
+#
+# release-please rewrites `project(clima VERSION …)` and nothing else. The
+# AppStream <releases> block in packaging/linux/clima.metainfo.xml.in is a
+# changelog for a software centre — curated prose, not a generated list — so it
+# is written by a person, and packaging/CMakeLists.txt fails the configure step
+# when the newest entry there does not match the project version.
+#
+# That is the forcing function. The alternative is a release that ships to
+# GNOME Software and Discover showing the previous version's description, which
+# nobody notices until it is published. Reviewing the release PR means writing
+# the release note; the CMake error says so in as many words.
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: release pull request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: .github/release-please-config.json
+          manifest-file: .release-please-manifest.json
