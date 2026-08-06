@@ -238,7 +238,8 @@ void ScreenshotController::applyPokes()
         // Every target below except `remount` lives on the shell, and in
         // clima-gallery there is no shell. Warning beats throwing: a poke that
         // cannot land should say so, not abort the rest of the list.
-        if (target != QLatin1String("remount") && m_shell == nullptr) {
+        if (target != QLatin1String("remount") && target != QLatin1String("hits")
+            && m_shell == nullptr) {
             qWarning("--poke %s: no shell is running", qPrintable(target));
             continue;
         }
@@ -275,6 +276,15 @@ void ScreenshotController::applyPokes()
             const double amount   = (!ok || velocity == 0) ? 1400.0 : velocity;
             QMetaObject::invokeMethod(m_shell, "flickBy",
                                       Q_ARG(QVariant, QVariant(-qAbs(amount))));
+        } else if (target == QLatin1String("hits")) {
+            // The touch-target overlay. A poke rather than a flag on the
+            // gallery's parser, because it is the same kind of thing `remount`
+            // is: a review state to put a capture into, not a mode the binary
+            // runs in.
+            if (m_gallery != nullptr)
+                offer(m_gallery, "showHits", on);
+            else
+                qWarning("--poke hits: only meaningful in the component gallery");
         } else if (target == QLatin1String("remount")) {
             // Rebuilding the specimen replays whatever the component does on
             // mount, which for a detail card is the only animation it has — the

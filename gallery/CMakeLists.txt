@@ -37,6 +37,7 @@
 # stale silently and reports the failure at some other file's point of use.
 set(clima_gallery_qml_files
     qml/Clima/Gallery/Gallery.qml
+    qml/Clima/Gallery/HitTargets.qml
     qml/Clima/Gallery/Main.qml
     qml/Clima/Gallery/Specimen.qml
 )

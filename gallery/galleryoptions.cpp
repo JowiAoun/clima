@@ -164,9 +164,10 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
 
     const QCommandLineOption pokeOption(
         QStringLiteral("poke"),
-        QStringLiteral("Apply <target>=<value> once the stage has settled; repeatable. The "
-                       "only target that means anything here is remount, which rebuilds every "
-                       "specimen and replays whatever it does on mount."),
+        QStringLiteral("Apply <target>=<value> once the stage has settled; repeatable. Two "
+                       "targets mean anything here: remount, which rebuilds every specimen and "
+                       "replays whatever it does on mount, and hits, which draws every tappable "
+                       "area over the stage and measures it against the touch floor."),
         QStringLiteral("target=value"));
     parser.addOption(pokeOption);
 

@@ -85,6 +85,12 @@ Item {
     property int remountToken: 0
     function remount() { remountToken++ }
 
+    // Draw every tappable area over every specimen on the stage, measured
+    // against the touch floor. See HitTargets.qml. Driven by the rail's toggle
+    // and by `--poke hits=1`, so a finding can be put in a screenshot rather
+    // than described.
+    property bool showHits: false
+
     readonly property real railWidth: 232
 
     // ---- the palette page's instrument ---------------------------------------
@@ -493,9 +499,49 @@ Item {
             font.pixelSize: Theme.type.axis
         }
 
+        // ---- the touch audit --------------------------------------------------
+        // Beside the viewport control, because it asks the same kind of
+        // question: not what does this component look like, but is it usable at
+        // the size something else is going to give it.
+        Rectangle {
+            id: hitsToggle
+            x: 12
+            y: viewportSize.y + viewportSize.height + 12
+            width: rail.width - 24
+            height: 26
+            radius: Theme.metric.controlRadius
+            color: root.showHits ? Theme.surface.raised
+                                 : (hitsHover.hovered ? Theme.surface.base : "transparent")
+            border.width: 1
+            border.color: root.showHits ? Theme.accent.fill : Theme.line.grid
+
+            Behavior on color {
+                ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+            }
+            Behavior on border.color {
+                ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
+            }
+
+            Text {
+                anchors.centerIn: parent
+                //: Toggles an overlay drawing every tappable area's bounds
+                text: qsTr("Touch targets · %1 px").arg(Theme.metric.hitMin)
+                color: root.showHits ? Theme.ink.primary : Theme.ink.muted
+                font.pixelSize: Theme.type.axis
+            }
+
+            HoverHandler { id: hitsHover; cursorShape: Qt.PointingHandCursor }
+            TapHandler {
+                onTapped: {
+                    root.showHits = !root.showHits
+                    root.forceActiveFocus()
+                }
+            }
+        }
+
         Flickable {
             id: railScroll
-            anchors.top: viewportSize.bottom
+            anchors.top: hitsToggle.bottom
             anchors.topMargin: 12
             anchors.left: parent.left
             anchors.right: parent.right
@@ -756,6 +802,15 @@ Item {
                                ? Math.round((frame.width - width) / 2) : 0
                             y: root.framed && !root.current.fills
                                ? Theme.metric.mobileMargin : 0
+                        }
+
+                        // Over the specimen and under the device edge, so a
+                        // target that runs past the screen's boundary reads as
+                        // running past it rather than as ending there.
+                        HitTargets {
+                            anchors.fill: parent
+                            visible: root.showHits
+                            subject: spec.instance
                         }
 
                         // The device edge. A border is the one thing that can
