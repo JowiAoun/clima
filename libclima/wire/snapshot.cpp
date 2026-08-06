@@ -21,13 +21,19 @@ QJsonValue number(std::optional<int> value)
     return value.has_value() ? QJsonValue(*value) : QJsonValue();
 }
 
-// ISO 8601 with the offset the QDateTime carries. The forecast is fetched with
-// timezone=auto, so these are the place's local times and the offset is what
-// says so — a reader that formats them without one shows Toronto's afternoon
-// in its own timezone.
-QJsonValue instant(const QDateTime &value)
+// ISO 8601, moved into the place's own zone.
+//
+// The instant is the same either way, so this is not a correctness fix on its
+// own — it is what makes the offset in the string carry the information. A
+// widget showing Toronto to a reader in Berlin has to know that 17:00Z is the
+// Toronto afternoon, and the alternative to putting that in the string is
+// every reader doing the conversion and one of them forgetting.
+QJsonValue instant(const QDateTime &value, const QTimeZone &zone)
 {
-    return value.isValid() ? QJsonValue(value.toString(Qt::ISODate)) : QJsonValue();
+    if (!value.isValid())
+        return {};
+    return QJsonValue(zone.isValid() ? value.toTimeZone(zone).toString(Qt::ISODate)
+                                     : value.toString(Qt::ISODate));
 }
 
 QJsonValue day(const QDate &value)
@@ -142,14 +148,34 @@ QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask)
 {
     QJsonObject root;
 
-    // These four are unconditional. A reader has to be able to work out how
+    // The place's zone, preferred from the forecast because that is what the
+    // provider actually answered in; the saved place is the fallback for a
+    // snapshot built before any forecast arrived.
+    QTimeZone zone = source.forecast.timeZone;
+    if (!zone.isValid() && !source.place.timezone.isEmpty())
+        zone = QTimeZone(source.place.timezone.toUtf8());
+
+    // These five are unconditional. A reader has to be able to work out how
     // old this is, and whether it understands the shape, before it reads a
     // single number out of it.
     root.insert(QStringLiteral("schema"), kSchemaVersion);
     root.insert(QStringLiteral("placeId"), source.placeId);
-    root.insert(QStringLiteral("generatedAt"), instant(source.now));
+    root.insert(QStringLiteral("generatedAt"), instant(source.now, zone));
+    // Three states, not two. "cached" and "unknown" look the same to a naive
+    // reader and mean opposite things: one is a reading that was true forty
+    // minutes ago, the other is no reading at all. A widget that cannot tell
+    // them apart draws a stale number as though it were current, or a null as
+    // though it were zero.
     root.insert(QStringLiteral("state"),
-                source.fromCache ? QStringLiteral("cached") : QStringLiteral("live"));
+                source.forecast.isEmpty() ? QStringLiteral("unknown")
+                    : source.fromCache    ? QStringLiteral("cached")
+                                          : QStringLiteral("live"));
+
+    // Unconditional, and it has to be: every timestamp below is only half a
+    // fact without it, and a mask narrow enough to exclude `place` is exactly
+    // the mask a series-only widget uses.
+    if (zone.isValid())
+        root.insert(QStringLiteral("timezone"), QString::fromUtf8(zone.id()));
 
     if (!source.servedBy.isEmpty())
         root.insert(QStringLiteral("servedBy"), source.servedBy);
@@ -159,7 +185,7 @@ QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask)
     // from, and it is the reason killing the daemon leaves a stale reading on
     // screen instead of a blank tile.
     if (source.forecast.fetchedAt.isValid())
-        root.insert(QStringLiteral("fetchedAt"), instant(source.forecast.fetchedAt));
+        root.insert(QStringLiteral("fetchedAt"), instant(source.forecast.fetchedAt, zone));
 
     if (mask.wantsAnyUnder(QStringLiteral("place"))) {
         QJsonObject place;
@@ -183,7 +209,7 @@ QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask)
                 current.insert(QLatin1String(leaf), value);
         };
 
-        put("time", instant(c.time));
+        put("time", instant(c.time, zone));
         put("temperature", number(c.temperature));
         put("apparentTemperature", number(c.apparentTemperature));
         put("relativeHumidity", number(c.relativeHumidity));
@@ -213,7 +239,7 @@ QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask)
         // Rule 1: the axis travels whether or not it was asked for.
         QJsonArray time;
         for (qsizetype i = from; i < from + count; ++i)
-            time.append(instant(points.at(i).time));
+            time.append(instant(points.at(i).time, zone));
         hourly.insert(QStringLiteral("time"), time);
 
         const auto series = [&](const char *leaf, auto pick) {
@@ -277,8 +303,8 @@ QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask)
         series("windSpeedMax", [](const DailyPoint &p) { return number(p.windSpeedMax); });
         series("uvIndexMax", [](const DailyPoint &p) { return number(p.uvIndexMax); });
         series("weatherCode", [](const DailyPoint &p) { return number(p.weatherCode); });
-        series("sunrise", [](const DailyPoint &p) { return instant(p.sunrise); });
-        series("sunset", [](const DailyPoint &p) { return instant(p.sunset); });
+        series("sunrise", [&zone](const DailyPoint &p) { return instant(p.sunrise, zone); });
+        series("sunset", [&zone](const DailyPoint &p) { return instant(p.sunset, zone); });
         series("moonPhase", [](const DailyPoint &p) { return number(p.moonPhase); });
 
         root.insert(QStringLiteral("daily"), daily);
@@ -301,7 +327,7 @@ QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask)
         }
 
         if (!air.isEmpty()) {
-            air.insert(QStringLiteral("time"), instant(now.time));
+            air.insert(QStringLiteral("time"), instant(now.time, zone));
             root.insert(QStringLiteral("airquality"), air);
         }
     }
@@ -324,9 +350,9 @@ QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask)
             item.insert(QStringLiteral("urgency"), alertUrgencyName(alert.urgency));
             item.insert(QStringLiteral("issuer"), alert.issuerLabel);
             item.insert(QStringLiteral("areaDescription"), alert.areaDescription);
-            item.insert(QStringLiteral("onset"), instant(alert.onset));
-            item.insert(QStringLiteral("expires"), instant(alert.expires));
-            item.insert(QStringLiteral("ends"), instant(alert.ends));
+            item.insert(QStringLiteral("onset"), instant(alert.onset, zone));
+            item.insert(QStringLiteral("expires"), instant(alert.expires, zone));
+            item.insert(QStringLiteral("ends"), instant(alert.ends, zone));
             if (!alert.web.isEmpty())
                 item.insert(QStringLiteral("web"), alert.web.toString());
             alerts.append(item);

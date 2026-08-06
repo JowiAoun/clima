@@ -141,9 +141,27 @@ struct SnapshotSource {
     bool    fromCache = false;
 };
 
-// The snapshot, masked. Always carries `schema`, `placeId`, `generatedAt` and
-// `state` regardless of the mask: a reader has to be able to tell how old this
-// is and whether it understands it before it looks at anything else.
+// The snapshot, masked.
+//
+// Five keys ignore the mask, because a reader has to be able to tell how old
+// this is and whether it understands it before it looks at anything else:
+//
+//   schema       the version of this shape
+//   placeId      the canonical id actually resolved to, which is not always
+//                the one that was asked for — "home" is an alias
+//   generatedAt  when the snapshot was built
+//   timezone     the place's IANA zone
+//   state        "live" | "cached" | "unknown"
+//
+// `timezone` is unconditional because every timestamp in the payload is only
+// half a fact without it, and a mask narrow enough to exclude `place` — one
+// asking for a bare series — is exactly the mask a sparkline uses.
+//
+// `state` has three values rather than two on purpose. "cached" is a reading
+// that was true forty minutes ago; "unknown" is no reading at all. They render
+// identically if a reader does not distinguish them, and the two mistakes that
+// follow are drawing a stale number as current and drawing a null as zero.
+[[nodiscard]] QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask);
 [[nodiscard]] QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask);
 
 // Compact, because this goes over a bus rather than into a file.

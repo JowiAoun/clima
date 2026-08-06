@@ -160,6 +160,9 @@ private slots:
     void dailySliceStartsToday();
 
     void alwaysCarriesEnoughToBeJudged();
+    void timezoneTravelsEvenWithoutPlace();
+    void instantsAreInThePlacesOwnZone();
+    void stateSeparatesStaleFromAbsent();
     void alertsKnownSeparatesEmptyFromUnasked();
 
     void catalogueIsWellFormed();
@@ -304,6 +307,61 @@ void TestWireSnapshot::alwaysCarriesEnoughToBeJudged()
     wire::SnapshotSource cached = makeSource();
     cached.fromCache            = true;
     QCOMPARE(wire::buildSnapshot(cached, wire::FieldMask::everything())
+                 .value(QStringLiteral("state"))
+                 .toString(),
+             QStringLiteral("cached"));
+}
+
+void TestWireSnapshot::timezoneTravelsEvenWithoutPlace()
+{
+    // A sparkline asks for one series and nothing else. Without the zone it
+    // has twelve timestamps it cannot place on a clock, and a widget showing
+    // Toronto to somebody in Berlin draws the wrong six hours.
+    const QJsonObject snap = wire::buildSnapshot(
+        makeSource(), wire::FieldMask::fromFields({QStringLiteral("hourly.temperature")}));
+
+    QVERIFY(!snap.contains(QStringLiteral("place")));
+    QCOMPARE(snap.value(QStringLiteral("timezone")).toString(),
+             QStringLiteral("America/Toronto"));
+}
+
+void TestWireSnapshot::instantsAreInThePlacesOwnZone()
+{
+    const QJsonObject snap = wire::buildSnapshot(
+        makeSource(), wire::FieldMask::fromFields({QStringLiteral("hourly.temperature")}));
+
+    // Toronto in August is UTC-4, so noon local is 16:00Z. The instant is the
+    // same either way; what matters is that the offset in the string says
+    // which afternoon this is.
+    const QString first =
+        snap.value(QStringLiteral("hourly")).toObject().value(QStringLiteral("time")).toArray().at(0).toString();
+    QCOMPARE(first, QStringLiteral("2026-08-06T12:00:00-04:00"));
+    QCOMPARE(QDateTime::fromString(first, Qt::ISODate).toUTC(), kNow.toUTC());
+}
+
+void TestWireSnapshot::stateSeparatesStaleFromAbsent()
+{
+    // Three states, because "cached" and "unknown" render identically to a
+    // reader that does not distinguish them and mean opposite things.
+    wire::SnapshotSource nothing;
+    nothing.placeId = QStringLiteral("toronto");
+    nothing.place   = makePlace();
+    nothing.now     = kNow;
+    QCOMPARE(wire::buildSnapshot(nothing, wire::FieldMask::everything())
+                 .value(QStringLiteral("state"))
+                 .toString(),
+             QStringLiteral("unknown"));
+
+    // …and the zone still travels, because it comes off the saved place when
+    // no forecast has arrived to carry one.
+    QCOMPARE(wire::buildSnapshot(nothing, wire::FieldMask::everything())
+                 .value(QStringLiteral("timezone"))
+                 .toString(),
+             QStringLiteral("America/Toronto"));
+
+    wire::SnapshotSource stale = makeSource();
+    stale.fromCache            = true;
+    QCOMPARE(wire::buildSnapshot(stale, wire::FieldMask::everything())
                  .value(QStringLiteral("state"))
                  .toString(),
              QStringLiteral("cached"));
