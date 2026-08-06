@@ -76,6 +76,46 @@ install(
     DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo
 )
 
+# ---- the two entries the desktop widgets need -------------------------------
+#
+# Only where there is a session bus to serve on, which is the same gate the
+# top-level CMakeLists puts on building the daemon at all. Installing an
+# autostart entry for a binary that was not built is how a package ends up with
+# a startup application that fails every login.
+#
+# The daemon's goes to /etc/xdg/autostart and not to applications/: it is a
+# background service, and the whole reason it exists is the days nobody opens
+# the weather app. The widget host's goes to applications/ and is a launcher —
+# on GNOME the shell extension spawns it and this entry is not how anyone gets
+# the tiles, but on every other desktop it is.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET clima-daemon)
+    configure_file(
+        linux/clima-daemon.desktop.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Daemon.desktop
+        @ONLY
+    )
+
+    configure_file(
+        linux/clima-widget.desktop.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Widget.desktop
+        @ONLY
+    )
+
+    # /etc/xdg, absolute, and deliberately not under CMAKE_INSTALL_PREFIX:
+    # the XDG autostart search path is a fixed list and a file in
+    # /usr/local/etc/xdg/autostart is read by nothing. CMAKE_INSTALL_SYSCONFDIR
+    # is "etc" under a prefixed install, so this is spelled out.
+    install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Daemon.desktop
+        DESTINATION /etc/xdg/autostart
+    )
+
+    install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Widget.desktop
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
+    )
+endif()
+
 # ---- the icon ---------------------------------------------------------------
 #
 # Renamed on the way in rather than stored under the app ID, so that a fork or a

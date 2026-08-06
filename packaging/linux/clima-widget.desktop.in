@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# A launcher entry for the widget host, so that the tiles can be opened on a
+# desktop whose shell has no way to pin them.
+#
+# ---- who this is for --------------------------------------------------------
+#
+# On GNOME the tiles are launched and pinned by the shell extension, and this
+# entry is not how anybody gets them. It is for everywhere else: KDE, XFCE,
+# Sway, a wlroots compositor — where `clima-widget` today comes up as an
+# ordinary window that the user places themselves.
+#
+# That is a real limitation and packaging/plasma/README.md says why rather than
+# leaving it to be discovered. It is also genuinely useful in the meantime: the
+# tiles work, they read from the daemon, and they survive it going away.
+#
+# ---- the filename -----------------------------------------------------------
+#
+# @CLIMA_APP_ID@.Widget.desktop, matching the desktop file name the host sets in
+# QGuiApplication::setDesktopFileName() (widgets/main.cpp). A surface whose
+# app_id has no matching entry gets a generic icon and "Unknown application"
+# under Wayland; one that claimed the app's own id would put a second Clima in
+# the dock.
+
+[Desktop Entry]
+Type=Application
+Version=1.5
+
+Name=Clima widgets
+GenericName=Weather widgets
+Comment=Weather tiles for the desktop
+
+Exec=clima-widget
+Icon=@CLIMA_APP_ID@
+Terminal=false
+
+Categories=Utility;
+Keywords=Weather;Widget;Desktop;Forecast;
+
+StartupNotify=true
+StartupWMClass=clima-widget
+
+# Linux desktops only, for the same reason as the daemon's entry: the host reads
+# from a session bus, and there is not one anywhere else.
+OnlyShowIn=GNOME;KDE;XFCE;MATE;Cinnamon;LXQt;Budgie;Unity;Pantheon;

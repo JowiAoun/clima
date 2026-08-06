@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The autostart entry for clima-daemon, installed into /etc/xdg/autostart.
+#
+# ---- why the daemon needs one and the app does not --------------------------
+#
+# Because the whole point of a desktop widget is the days nobody opens the
+# weather app. The tiles read from this process over the session bus; without it
+# they come up, find nothing, and show ten skeletons — which is a broken
+# installation that looks like broken code.
+#
+# It is NOT D-Bus activation, and that is a design decision rather than an
+# omission. daemon/main.cpp has the argument at length: a bus-activated process
+# is spawned by dbus-daemon, so gnome-shell can never own its Wayland client and
+# can never adopt a window belonging to it. That rules activation out for the
+# widget host, and once the host is spawned by the shell there is nothing left
+# for activation to buy the daemon either — so it is an ordinary autostart, and
+# a user who wants it off can turn it off in the same place as everything else.
+#
+# ---- what it costs a user who has no widgets --------------------------------
+#
+# One process, under 25 MB, that polls on a timer. That is not nothing, so
+# `X-GNOME-Autostart-enabled` and the equivalent switch in every other desktop's
+# startup-applications list are the honest control, and they work: this is a
+# plain autostart entry with no special handling anywhere.
+
+[Desktop Entry]
+Type=Application
+Version=1.5
+
+Name=Clima weather service
+Comment=Fetches the weather once and serves it to Clima's desktop widgets
+
+# Not an absolute path: a Flatpak, an AppImage and a .deb put the binary in
+# three different prefixes.
+Exec=clima-daemon
+Icon=@CLIMA_APP_ID@
+Terminal=false
+
+# Nothing to show in a menu. This is a background service, and a "Clima weather
+# service" entry beside "Clima" in the launcher is two things where the user
+# installed one.
+NoDisplay=true
+
+# Linux desktops only. There is no session bus on Windows or macOS and this
+# whole file is meaningless there — but a .desktop with no OnlyShowIn is shown
+# everywhere, so the list is what keeps it out of environments that would run
+# it and get nothing.
+OnlyShowIn=GNOME;KDE;XFCE;MATE;Cinnamon;LXQt;Budgie;Unity;Pantheon;
+
+# The two flags every desktop's startup-applications UI writes into a copy of
+# this file when somebody switches it off. Written here as the default so that
+# the switch has something to toggle rather than a file to create.
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel

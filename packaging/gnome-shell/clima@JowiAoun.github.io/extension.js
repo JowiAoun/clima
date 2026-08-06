@@ -125,6 +125,78 @@ function log_(message) {
 }
 
 // ============================================================================
+// The daemon
+// ============================================================================
+//
+// The tiles read from clima-daemon, so something has to start it. On a .deb or
+// an AppImage install that is /etc/xdg/autostart; a Flatpak has no way to put a
+// file there, and the portal that would replace it — org.freedesktop.portal.
+// Background — is a permission prompt the app has not been given yet.
+//
+// So the extension starts it when nothing else has. Cheap, idempotent and
+// self-correcting: the daemon refuses to start when its name is already owned
+// (exit 5), so a race between this and an autostart entry costs one process
+// that exits immediately.
+//
+// Spawned with an ordinary Gio.Subprocess and NOT through Meta.WaylandClient.
+// The daemon draws nothing, so there is no window to adopt and no reason for
+// the shell to own its Wayland client — it does not have one.
+class DaemonStarter {
+    constructor() {
+        this._watchId = 0;
+        this._tried = false;
+    }
+
+    start() {
+        this._watchId = Gio.bus_watch_name(
+            Gio.BusType.SESSION, DAEMON_NAME, Gio.BusNameWatcherFlags.NONE,
+            () => {
+                // Somebody has it. Reset, so that a daemon which is upgraded
+                // and does not come back gets one more attempt.
+                this._tried = false;
+            },
+            () => this._launch());
+    }
+
+    _launch() {
+        if (this._tried)
+            return;
+        this._tried = true;
+
+        const dev = GLib.getenv('CLIMA_DAEMON');
+        const host = dev || GLib.find_program_in_path('clima-daemon');
+
+        let argv;
+        if (host) {
+            argv = [host];
+        } else if (GLib.find_program_in_path('flatpak')) {
+            argv = ['flatpak', 'run', '--command=clima-daemon', APP_ID];
+        } else {
+            return;
+        }
+
+        try {
+            Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE);
+            log_('started the weather service.');
+        } catch (e) {
+            log_(`could not start the weather service: ${e.message}`);
+        }
+    }
+
+    stop() {
+        if (this._watchId !== 0) {
+            Gio.bus_unwatch_name(this._watchId);
+            this._watchId = 0;
+        }
+
+        // The daemon is deliberately NOT killed here. It is a shared service —
+        // the app reads from it too — and an extension that stopped the weather
+        // for everything else on the desktop every time the screen locked would
+        // be doing something nobody asked for.
+    }
+}
+
+// ============================================================================
 // The widget host
 // ============================================================================
 
@@ -590,6 +662,11 @@ export default class ClimaExtension extends Extension {
             return;
         }
 
+        // Started before the host, so that the first tiles find something to
+        // read from rather than a skeleton and a retry.
+        this._daemon = new DaemonStarter();
+        this._daemon.start();
+
         this._host = new WidgetHost(this._settings);
         this._host.start();
 
@@ -618,6 +695,9 @@ export default class ClimaExtension extends Extension {
 
         this._host?.stop();
         this._host = null;
+
+        this._daemon?.stop();
+        this._daemon = null;
 
         this._settings = null;
     }
