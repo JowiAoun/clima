@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2026 Clima contributors
+# SPDX-License-Identifier: CC-BY-SA-4.0
+name: Bug report
+description: Something the app does that contradicts what it claims
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: **[`docs/known-gaps.md`](https://github.com/JowiAoun/clima/blob/main/docs/known-gaps.md)**
+        lists what the app deliberately does not do yet — no radar, no macOS build,
+        an unsigned Windows build, no Android alert delivery. Those are gaps, not bugs.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce it
+      placeholder: |
+        1. Open the app with …
+        2. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: A screenshot from the app itself
+      description: |
+        Run `clima --grab bug.png` and drag the file in. That captures exactly what the
+        app rendered, at the size it rendered it, with no window manager in the way —
+        which answers most of the questions this form would otherwise generate.
+
+        If the app will not start, paste its stderr instead.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: channel
+    attributes:
+      label: How did you install it?
+      options:
+        - Flatpak
+        - .deb
+        - Windows .msi
+        - Windows portable .zip
+        - AppImage
+        - Built from source
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: From `clima --version`, or the release you downloaded.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: session
+    attributes:
+      label: Display server
+      description: Qt behaves differently on each, and this is the first thing we would ask.
+      options:
+        - Wayland
+        - X11
+        - Windows
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Ubuntu 26.04, Fedora 41, Windows 11 23H2 …
+    validations:
+      required: true

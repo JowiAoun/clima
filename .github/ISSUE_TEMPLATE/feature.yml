@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2026 Clima contributors
+# SPDX-License-Identifier: CC-BY-SA-4.0
+name: Feature request
+description: Something the app should do and does not
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The plan already covers a lot of ground — [`docs/06-roadmap.md`](https://github.com/JowiAoun/clima/blob/main/docs/06-roadmap.md)
+        has eight milestones, and [`docs/known-gaps.md`](https://github.com/JowiAoun/clima/blob/main/docs/known-gaps.md)
+        says what is deliberately missing today. If your idea is in either, comment there
+        instead so the discussion stays in one place.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do that the app makes hard?
+      description: The problem, not the solution. It is much easier to design for a described situation than for a described feature.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you had in mind
+    validations:
+      required: false
+
+  - type: textarea
+    id: prior
+    attributes:
+      label: Anywhere this is already done well?
+      description: A screenshot of another app, or a link. Concrete beats abstract.
+    validations:
+      required: false

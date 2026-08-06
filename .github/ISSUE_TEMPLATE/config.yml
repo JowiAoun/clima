@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 Clima contributors
+# SPDX-License-Identifier: CC-BY-SA-4.0
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/JowiAoun/clima/security/advisories/new
+    about: Report privately. Please do not open a public issue for this.
+  - name: Wrong forecast, or a missing weather alert
+    url: https://open-meteo.com/
+    about: >-
+      The numbers come from national weather services through Open-Meteo, and alerts
+      come from ECCC and the NWS unaltered. If the data is wrong, it is wrong upstream —
+      but do file an issue if we are DISPLAYING it wrongly.
