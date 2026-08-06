@@ -8,6 +8,7 @@
 #include "units.h"
 
 #include "libclima/domain/hourconvention.h"
+#include "libclima/domain/scales.h"
 #include "libclima/domain/timeaxis.h"
 #include "libclima/domain/weathercode.h"
 
@@ -71,78 +72,18 @@ QString sentenceTime(const QDateTime &instant, const QTimeZone &zone)
 // Each of these is somebody else's table, transcribed. None of them is a
 // judgement of ours, and none of them may be adjusted to make a card look
 // better balanced.
+//
+// They used to be defined here, and they moved to libclima/domain/scales.h the
+// day a second thing had to draw weather. A UV dial on the desktop has to put
+// the same word under the same number as the card in the app, and the only way
+// to guarantee that is for there to be one table. See that header.
 
-// WHO: low 0-2, moderate 3-5, high 6-7, very high 8-10, extreme 11+.
-QString uvBand(double index)
-{
-    if (index < 3)  return ConditionsData::tr("Low");
-    if (index < 6)  return ConditionsData::tr("Moderate");
-    if (index < 8)  return ConditionsData::tr("High");
-    if (index < 11) return ConditionsData::tr("Very high");
-    return ConditionsData::tr("Extreme");
-}
-
-// The European AQI's own bands: 0-20 good, 20-40 fair, 40-60 moderate,
-// 60-80 poor, 80-100 very poor, 100+ extremely poor.
-QString aqiBand(double index)
-{
-    if (index <= 20)  return ConditionsData::tr("Good");
-    if (index <= 40)  return ConditionsData::tr("Fair");
-    if (index <= 60)  return ConditionsData::tr("Moderate");
-    if (index <= 80)  return ConditionsData::tr("Poor");
-    if (index <= 100) return ConditionsData::tr("Very poor");
-    return ConditionsData::tr("Extremely poor");
-}
-
-// The Beaufort scale, in km/h, from the standard v = 0.836 B^1.5 in m/s.
-int beaufortFor(double kmh)
-{
-    if (qIsNaN(kmh))
-        return 0;
-    const double ms = kmh / 3.6;
-    return qBound(0, int(std::floor(std::pow(ms / 0.836, 2.0 / 3.0) + 0.5)), 12);
-}
-
-QString beaufortName(int force)
-{
-    switch (force) {
-    case 0:  return ConditionsData::tr("Calm");
-    case 1:  return ConditionsData::tr("Light air");
-    case 2:  return ConditionsData::tr("Light breeze");
-    case 3:  return ConditionsData::tr("Gentle breeze");
-    case 4:  return ConditionsData::tr("Moderate breeze");
-    case 5:  return ConditionsData::tr("Fresh breeze");
-    case 6:  return ConditionsData::tr("Strong breeze");
-    case 7:  return ConditionsData::tr("Near gale");
-    case 8:  return ConditionsData::tr("Gale");
-    case 9:  return ConditionsData::tr("Severe gale");
-    case 10: return ConditionsData::tr("Storm");
-    case 11: return ConditionsData::tr("Violent storm");
-    default: return ConditionsData::tr("Hurricane force");
-    }
-}
-
-// The sixteen-point compass. Sixteen and not thirty-two: a forecast's wind
-// direction is a model average and NNE-by-E is a precision it does not have.
-QString compassPoint(double degrees)
-{
-    static const char *const points[] = { "N",  "NNE", "NE", "ENE", "E",  "ESE", "SE", "SSE",
-                                          "S",  "SSW", "SW", "WSW", "W",  "WNW", "NW", "NNW" };
-    if (qIsNaN(degrees))
-        return {};
-    const int index = int(std::lround(degrees / 22.5)) & 15;
-    return QString::fromLatin1(points[index]);
-}
-
-QString visibilityBand(double km)
-{
-    if (qIsNaN(km))     return {};
-    if (km >= 16)       return ConditionsData::tr("Excellent");
-    if (km >= 10)       return ConditionsData::tr("Good");
-    if (km >= 4)        return ConditionsData::tr("Moderate");
-    if (km >= 1)        return ConditionsData::tr("Poor");
-    return ConditionsData::tr("Very poor");
-}
+using clima::scales::aqiBand;
+using clima::scales::beaufortForce;
+using clima::scales::beaufortName;
+using clima::scales::compassPoint;
+using clima::scales::uvBand;
+using clima::scales::visibilityBand;
 
 // up | down | steady, from the difference between now and three hours out.
 // The badge tracks the *number*; whether that direction is good news is the
@@ -860,7 +801,7 @@ void ConditionsData::buildWind()
     const Units             *units = Units::instance();
 
     const double  kmh   = value(now.windSpeed);
-    const int     force = beaufortFor(kmh);
+    const int     force = beaufortForce(kmh);
     const double  degrees = value(now.windDirection);
 
     m_wind = QVariantMap{

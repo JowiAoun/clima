@@ -58,6 +58,8 @@ add_library(libclima STATIC
     domain/hourconvention.h
     domain/hourconvention.cpp
     domain/reading.h
+    domain/scales.h
+    domain/scales.cpp
     domain/timeaxis.h
     domain/timeaxis.cpp
     domain/weathercode.h
