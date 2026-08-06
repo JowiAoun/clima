@@ -79,10 +79,24 @@ unmarshalling error. `libclima/wire/snapshot.h` argues it at length.
 The field mask is what makes that affordable. A wind rose asks for three
 current readings; it is not sent 408 hourly points.
 
+There are two readers today and they exercise the interface differently, which
+is worth more than one of them exercising it twice. `clima-widget` holds one
+subscription per tile and adds an **arg0 match rule** for each token, so the bus
+filters before delivery and one tile's refresh does not wake the other seven.
+The GNOME extension's panel indicator holds a single subscription and filters in
+its callback, because GJS's proxy wrapper exposes no argument matching — which
+costs one wakeup per other subscriber and, for one indicator, is nothing.
+
 ```sh
 clima-daemon --print-address
-clima-daemon --fixture toronto     # recorded data at a frozen clock
+clima-daemon --fixture toronto           # recorded data at a frozen clock
+clima-daemon --fixture toronto --dump-snapshot   # one snapshot, no bus at all
 ```
+
+That last one is how `tests/fixtures/wire/` is recorded, and it goes through the
+same encoder the bus does — a recorded fixture produced any other way would
+drift from what the daemon actually sends, which is the whole of what makes the
+recording worth having.
 
 ## What was measured, and on what
 
@@ -169,8 +183,8 @@ hide_from_window_list  make_desktop  make_dock  owns_window  show_in_window_list
 
 `make_dock()` gets `on_all_workspaces` and exclusion from the overview by
 construction, which is most of what the title flags were emulating. Clima's
-extension will use it when it is written, and nothing we send a widget will
-travel through a window title.
+extension uses it — `packaging/gnome-shell/clima@JowiAoun.github.io/extension.js`
+— and nothing we send a widget travels through a window title.
 
 ### 4. `get_sandboxed_app_id()` returns null here, so it cannot identify us
 
@@ -226,28 +240,121 @@ normalised to booleans.
 
 ---
 
+## Three things the tiles corrected once they ran
+
+The mechanism above was measured before anything was built on it. What follows
+was not measurable in advance — it only appears when a widget is on screen —
+and each of the three produced a tile that looked plausible and was wrong.
+
+### 5. QML builds a second singleton when the type is default-constructible
+
+`QML_SINGLETON` plus a `static T *create(QQmlEngine *, QJSEngine *)` looks like
+it settles how the object is made. It does not. `QQmlPrivate::singletonConstructionMode()`
+checks in this order:
+
+```cpp
+if constexpr (std::is_default_constructible<T>::value)
+    return SingletonConstructionMode::Constructor;   // <- wins
+if constexpr (HasSingletonFactory<T>::value)
+    return SingletonConstructionMode::Factory;
+```
+
+So a public `Foo(QObject *parent = nullptr)` makes the type default
+constructible, that branch is taken first, and `create()` is never called
+however correct it is. The engine gets a fresh object; C++ goes on holding the
+one it made; nothing warns at build time or at run time.
+
+Here that meant the command line parsed correctly, the recorded snapshot loaded
+correctly, and every tile came up empty — because QML's `WidgetOptions` had no
+widget list and QML's `DaemonLink` had never been told about the file. The fix
+is one access specifier: the constructors of `DaemonLink`, `WidgetOptions` and
+`Wx` are private, which is what `app/settings.h` and `app/viewmodels/units.h`
+already did without saying why.
+
+### 6. A JSON array is not a JavaScript array
+
+`QJsonObject::toVariantMap()` is what keeps a JSON `null` a null QVariant all
+the way into QML — rule 2 of the wire format survives the trip because of it.
+What it also does is turn every array into a **QVariantList**, which QML hands
+to JavaScript as a sequence wrapper: it has a `length`, it indexes, and
+`Array.isArray()` returns **false** for it.
+
+A guard written as `Array.isArray(v) ? v : []` therefore turns every series in
+the snapshot into an empty one. The tiles lay out correctly, draw nothing, and
+look exactly like a tile waiting for its first snapshot. `wire.js` copies into a
+real array instead, because the wrapper also has none of `Array`'s methods and
+`.concat()` on one throws inside a binding — where a throw is an expression that
+silently evaluates to `undefined`.
+
+### 7. A tile has no page behind it
+
+`Theme.surface.base` is a 7 % white wash. It is a *lift* off the page, not a
+colour, and that works everywhere in the app because there is always a page.
+On a desktop there is not: there is a wallpaper the user chose and this process
+knows nothing about.
+
+Rendered as-is, a dark-mode tile was 7 % white over a photograph with white text
+on it — legible over some wallpapers and invisible over the rest, and
+unfixable from the theme, because the token means what it says. So a tile paints
+`Theme.page.bg` at 92 % and carries its own page. The same argument makes the
+hairline card edge unconditional here rather than a light-mode exception:
+`docs/10-design-system.md` §10.1 bans borders because contrast against the page
+defines a card, which is exactly the premise a wallpaper removes.
+
+---
+
 ## What exists today
 
-**Built and verified.** The mechanism above, measured on a real shell. The wire
-format and its field mask, with the three encoder rules under test. The widget
-catalogue, with a test that asserts every field a widget declares is one the
-encoder actually emits. `clima-daemon`, exercised end to end on a private
-session bus against a fixture — introspection, a masked `GetSnapshot`, a
-`Subscribe` that delivers its own token, `Unsubscribe`.
+**Built and verified.**
 
-**Not built.** Everything that draws:
+| | |
+|---|---|
+| The adoption mechanism | Measured on GNOME Shell 46, Wayland — the verdict above |
+| The wire format and its field mask | `tst_wiresnapshot`, 17 assertions, three encoder rules |
+| `clima-daemon` | Exercised end to end on a private session bus: introspection, a masked `GetSnapshot`, `Subscribe` delivering its own token, `Unsubscribe` |
+| `clima-widget` and the ten tiles | Rendered against four recorded snapshots in both schemes; `tst_widgets` asserts the catalogue, the dispatch and the module list agree, plus every `Wx` boundary |
+| The link-line guard | `widget_has_no_engine`, verified by injecting the defect |
+| The GNOME extension | `scripts/check-extension.sh`: both modules parse, the introspection XML matches what it calls, and every `Meta.WaylandClient` method it calls exists on this machine's mutter. Verified by injecting both defects. |
 
-- the widget host and the ten widgets in the catalogue — the catalogue
-  describes them, and nothing renders them yet;
-- the GNOME extension that spawns the host and adopts its window;
-- the Plasma 6 applet, which is the cheapest of the three because a Plasma
-  applet *is* QML and the widget files go into `contents/ui/` nearly verbatim;
-- the SNI tray;
-- the link-line guard that keeps a widget process from linking the providers.
-  libclima is a static archive, so the check that matters is a symbol check on
-  the built binary rather than `ldd` — a widget that never calls `HttpClient`
-  does not carry it, and asserting that is stronger than asserting a shared
-  object is absent.
+```sh
+clima-widget --list
+clima-widget --snapshot tests/fixtures/wire/seattle.json --columns 2 \
+             --widget current-conditions --widget alerts --grab tiles.png
+```
+
+**Not built, and each for a stated reason.**
+
+- **The extension has not been run on a live session.** It is the probe's
+  measured mechanism with placement, respawn, a daemon starter and an indicator
+  around it, and `scripts/check-extension.sh` covers what can be asserted
+  without a shell. The `shell-version` list declares 45 to 48 and only 46 was
+  measured; that is a claim to re-check before the first upload.
+
+- **The Plasma applet.** The plan called it the cheapest of the three because
+  "a Plasma applet *is* QML"; that is wrong, and `packaging/plasma/README.md`
+  has the correction. Every tile reads `WidgetFeed`, `DaemonLink`, `Wx` and
+  `Units`, which are C++ types a plasmoid cannot import unless the module is
+  installed as a shared QML plugin — and Plasma 6 ships no generic D-Bus
+  binding for QML, so a pure-QML second implementation is not available either.
+  The better answer is `layer-shell-qt`, which pins the *same binary* on KWin
+  and on every wlroots compositor with no applet at all. It is not built
+  because mutter does not implement `wlr-layer-shell`, so on this machine it
+  could have been compiled and never once run — and this document exists
+  because that is not how this project builds on a mechanism.
+
+- **The SNI tray.** Dropped rather than deferred. It was in the plan as the
+  cheap validator for the wire schema, and the schema now has two independent
+  readers — a Qt host and a GJS indicator — which is a stronger check than one
+  more Qt process would have been. As a *feature* it earns less than it costs:
+  GNOME hides SNI icons entirely without a third-party extension, KDE gets a
+  better answer from layer-shell, and Windows — where a tray genuinely is the
+  right shape — has no session bus and therefore no daemon to read from.
+
+- **The Background portal.** A Flatpak cannot write to `/etc/xdg/autostart`, so
+  a Flatpak-installed daemon does not autostart. The GNOME extension starts it
+  when nothing else has, which covers the case that matters today; the portal
+  flow is the general answer and it is a permission prompt, so it belongs with
+  the notifications work rather than here.
 
 The daemon is additive. The app does not link it, does not know about it, and
 behaves exactly as it did before this existed when nothing is running.
