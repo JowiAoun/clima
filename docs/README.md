@@ -66,6 +66,7 @@ what exists now, and they change whenever it does.
 |---|---|
 | [`known-gaps.md`](known-gaps.md) | What the app does not do, what it costs, and what would close it |
 | [`releasing.md`](releasing.md) | How a version gets from `main` to a download, and the one step that is deliberately manual |
+| [`screenshots.md`](screenshots.md) | The three capture profiles, why they differ, and which one Flathub rejects |
 | [`10-design-system.md`](10-design-system.md) | The tokens, the layout rules, and what a tablet's extra room buys |
 
 ## Non-negotiables
