@@ -351,8 +351,37 @@ clima_guard_target(climaqml)
 # links its backing library privately, so its usage requirements — Qt6::Quick,
 # and the three include directories below — stop there. Link only the plugin and
 # main.cpp cannot find <QQmlEngine>.
+# ---- the Windows resource script --------------------------------------------
+#
+# Compiled into the executable, so it has to be decided before the target is
+# declared rather than added to it afterwards. It carries the icon and the
+# version block — see packaging/windows/clima.rc.in for why an executable needs
+# its own icon even after an installer has made a shortcut with one.
+#
+# VERSIONINFO's FILEVERSION field is four comma-separated numbers and nothing
+# else; a dotted string there is a syntax error in rc.exe. The fourth is the
+# build number, which we do not have and which is conventionally 0.
+if(WIN32)
+    string(REPLACE "." "," CLIMA_VERSION_RC "${PROJECT_VERSION}")
+    set(CLIMA_VERSION_RC "${CLIMA_VERSION_RC},0")
+
+    # An absolute path with forward slashes. rc.exe treats a backslash inside a
+    # quoted string as an escape, so a Windows-style path here fails to find a
+    # file whose name it has just mangled.
+    set(CLIMA_ICON_FILE "${CMAKE_SOURCE_DIR}/packaging/icons/clima.ico")
+
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/packaging/windows/clima.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/clima.rc
+        @ONLY
+    )
+
+    set(clima_windows_resources ${CMAKE_CURRENT_BINARY_DIR}/clima.rc)
+endif()
+
 qt_add_executable(clima
     main.cpp
+    ${clima_windows_resources}
 )
 
 target_link_libraries(clima PRIVATE climaqml climaqmlplugin)
@@ -384,6 +413,26 @@ install(TARGETS clima
     BUNDLE  DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+# Windows is where the paragraph above stops applying. There is no platform Qt
+# to link against, so the install has to carry one, and this is the rule that
+# puts it there: qt_generate_deploy_qml_app_script writes a script that runs
+# windeployqt at *install* time rather than at build time, which is what makes
+# one rule serve `cmake --install`, the portable ZIP and the MSI alike — all
+# three are the same staged tree.
+#
+# NO_TRANSLATIONS because this app has none of its own and opens no Qt standard
+# dialog, so Qt's .qm files are several megabytes of strings nothing displays.
+# Revisit the moment there is a translation project, which docs/07 §7.5 lists
+# as a launch item.
+if(WIN32)
+    qt_generate_deploy_qml_app_script(
+        TARGET clima
+        OUTPUT_SCRIPT clima_deploy_script
+        NO_TRANSLATIONS
+    )
+    install(SCRIPT ${clima_deploy_script})
+endif()
 
 # ---- Android ----------------------------------------------------------------
 #

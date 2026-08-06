@@ -60,6 +60,10 @@ case "$command" in
       render_one "$size" "$icons_dir"
       echo "icons: clima-$size.png"
     done
+    # And the Windows container, which is those same PNGs in one file. It is
+    # built from the rendered sizes rather than from the SVG, so it cannot
+    # describe a drawing the PNGs do not.
+    python3 "$here/make-ico.py" "$icons_dir" "$icons_dir/clima.ico"
     ;;
 
   check)
@@ -80,11 +84,17 @@ case "$command" in
       fi
     done
 
+    python3 "$here/make-ico.py" "$tmp" "$tmp/clima.ico" > /dev/null
+    if ! cmp -s "$tmp/clima.ico" "$icons_dir/clima.ico"; then
+      echo "icons: clima.ico does not match the rendered sizes" >&2
+      drift=1
+    fi
+
     if [ "$drift" -ne 0 ]; then
       echo "icons: run \`scripts/icons.sh render\` and commit the result" >&2
       exit 1
     fi
-    echo "icons: ${#sizes[@]} sizes match the master"
+    echo "icons: ${#sizes[@]} sizes and the .ico match the master"
     ;;
 
   *)

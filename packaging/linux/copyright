@@ -1,0 +1,117 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Clima
+Upstream-Contact: https://github.com/JowiAoun/clima/issues
+Source: https://github.com/JowiAoun/clima
+Comment:
+ Installed as /usr/share/doc/clima/copyright, and it is not a formality: the
+ clima binary is statically linked and carries a typeface, a place-name
+ database and several recorded weather-service payloads inside it. Every one of
+ those arrives under somebody else's licence, and a copyright file that named
+ only the GPL would be describing a package that is not this one.
+ .
+ The authoritative, per-file record is the SPDX metadata in the source tree —
+ every file carries an SPDX-License-Identifier header, and REUSE.toml covers
+ the binaries and the JSON that cannot. `reuse lint` over the source is what
+ keeps this file honest. What follows is that record collapsed to the grouping
+ Debian asks for.
+
+Files: *
+Copyright: 2026 Jowi Aoun
+License: GPL-3.0-or-later
+
+Files: libclima/*
+Copyright: 2026 Jowi Aoun
+License: MPL-2.0
+Comment:
+ The engine is deliberately weaker-copyleft than the application it serves, so
+ that it stays reusable outside a GPL program — decision D6 in
+ docs/03-tech-stack.md. It links no Qt GUI module and a CMake assertion
+ enforces that.
+
+Files: packaging/icons/*
+ docs/*
+ README.md
+Copyright: 2026 Jowi Aoun
+License: CC-BY-SA-4.0
+Comment: Artwork and prose rather than code, per D6.
+
+Files: app/fonts/Inter-Regular.ttf
+ app/fonts/Inter-Bold.ttf
+Copyright: 2016 The Inter Project Authors (https://github.com/rsms/inter)
+License: OFL-1.1
+Comment:
+ Compiled into the binary and installed with it. Both files carry the copyright
+ in name ID 0 and the licence in name ID 13 of their own name tables, which is
+ how OFL section 2 asks a binary redistribution to carry the notice; we do not
+ strip them.
+
+Files: libclima/providers/geocoding/data/cities15000.cgx
+Copyright: GeoNames (https://www.geonames.org)
+License: CC-BY-4.0
+Comment:
+ The offline reverse-geocoding index, compiled into the binary. It is the
+ GeoNames cities15000 dump reduced to seven columns and deflated; trimming
+ columns and changing the container does not make it ours. The credit CC-BY
+ requires is shown at run time under About, Data sources.
+
+Files: libclima/providers/fixture/data/*/forecast.json
+ libclima/providers/fixture/data/*/airquality.json
+Copyright: Open-Meteo (https://open-meteo.com)
+License: CC-BY-4.0
+Comment:
+ Recorded API responses, compiled into the binary so that --fixture renders
+ without a network. Credited at run time under About, Data sources.
+
+Files: libclima/providers/fixture/data/toronto/alerts.json
+Copyright: Environment and Climate Change Canada
+License: LicenseRef-OGL-Canada-2.0
+Comment:
+ Recorded from api.weather.gc.ca under the Open Government Licence – Canada
+ 2.0. The attribution that licence requires is returned verbatim by
+ EcccAlertProvider::attribution().
+
+Files: libclima/providers/fixture/data/seattle/alerts.json
+Copyright: NOAA National Weather Service
+License: LicenseRef-US-Public-Domain
+Comment:
+ Recorded from api.weather.gov. A work of the United States federal government,
+ not subject to copyright protection under 17 U.S.C. 105. That is a status
+ rather than a grant, which is why it has no standard SPDX identifier.
+
+License: GPL-3.0-or-later
+ This program is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later
+ version.
+ .
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ .
+ On Debian systems the complete text of the GNU General Public License version
+ 3 can be found in /usr/share/common-licenses/GPL-3.
+
+License: MPL-2.0
+ This Source Code Form is subject to the terms of the Mozilla Public License,
+ v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ obtain one at https://mozilla.org/MPL/2.0/.
+
+License: CC-BY-SA-4.0
+ Creative Commons Attribution-ShareAlike 4.0 International.
+ The complete text is at https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+License: CC-BY-4.0
+ Creative Commons Attribution 4.0 International.
+ The complete text is at https://creativecommons.org/licenses/by/4.0/legalcode
+
+License: OFL-1.1
+ SIL Open Font License, Version 1.1.
+ The complete text is at https://openfontlicense.org/
+
+License: LicenseRef-OGL-Canada-2.0
+ Open Government Licence - Canada, version 2.0.
+ The complete text is at https://open.canada.ca/en/open-government-licence-canada
+
+License: LicenseRef-US-Public-Domain
+ A work of the United States federal government, not subject to copyright
+ protection in the United States under 17 U.S.C. 105.

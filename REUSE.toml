@@ -58,10 +58,24 @@ path = [
     "packaging/icons/clima-128.png",
     "packaging/icons/clima-256.png",
     "packaging/icons/clima-512.png",
+    "packaging/icons/clima.ico",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+# The Debian copyright file, which is the one file here that cannot carry an
+# SPDX header for a reason other than syntax. It is a machine-readable document
+# in Debian's DEP-5 format whose whole job is to state licensing, and a
+# `SPDX-License-Identifier:` line at the top of it would read as a field of
+# that document rather than as a header about it — a copyright file that
+# appears to declare the package GPL-only, which is precisely the error it
+# exists to prevent.
+[[annotations]]
+path = ["packaging/linux/copyright"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Jowi Aoun"
+SPDX-License-Identifier = "GPL-3.0-or-later"
 
 # The bundled typeface. Inter 4.1 (git-9221beed3), by The Inter Project Authors,
 # under the SIL Open Font License 1.1 — from the upstream release archive,

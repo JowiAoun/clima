@@ -97,3 +97,20 @@ install(
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
     RENAME ${CLIMA_APP_ID}.svg
 )
+
+# ---- the copyright file -----------------------------------------------------
+#
+# Debian policy §12.5 requires every package to carry one, and this one is not
+# a formality. `clima` is statically linked and carries Inter, the GeoNames
+# place index and several recorded weather-service payloads inside the
+# executable — five licences that are not ours, in a file that would otherwise
+# claim the whole thing is GPL. See packaging/linux/copyright, which is the
+# SPDX metadata in the source tree collapsed into the format Debian reads.
+#
+# Installed on every Linux target rather than only in the .deb: a Flatpak and
+# an AppImage redistribute exactly the same bytes and incur exactly the same
+# obligation.
+install(
+    FILES ${CMAKE_CURRENT_SOURCE_DIR}/linux/copyright
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/clima
+)

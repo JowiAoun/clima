@@ -217,3 +217,12 @@ if(CLIMA_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+# The .deb. Last, and included here rather than from packaging/, because CPack
+# reads its configuration out of the directory that includes it — a CPack set up
+# one directory down produces a package with a default name and no dependencies,
+# and says nothing about it. See the file for why it has to be built against
+# system Qt.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR WIN32)
+    include(ClimaCPack)
+endif()
