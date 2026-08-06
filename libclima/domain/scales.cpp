@@ -4,6 +4,7 @@
 #include "libclima/domain/scales.h"
 
 #include <QCoreApplication>
+#include <QHash>
 #include <QtGlobal>
 
 #include <cmath>
@@ -88,6 +89,23 @@ QString compassPoint(double degrees)
         return {};
     const int index = int(std::lround(degrees / 22.5)) & 15;
     return QString::fromLatin1(points[index]);
+}
+
+QString pollutantLabel(const QString &id)
+{
+    // Subscripts as real characters rather than as rich text, because these go
+    // into a QML Text with no styled-text parsing and into a widget tile that
+    // has room for four glyphs. Not translated: a chemical formula is the same
+    // in every language this app will ever ship in.
+    static const QHash<QString, QString> names{
+        { QStringLiteral("pm2_5"), QStringLiteral("PM2.5") },
+        { QStringLiteral("pm10"), QStringLiteral("PM10") },
+        { QStringLiteral("o3"), QStringLiteral("O₃") },
+        { QStringLiteral("no2"), QStringLiteral("NO₂") },
+        { QStringLiteral("so2"), QStringLiteral("SO₂") },
+        { QStringLiteral("co"), QStringLiteral("CO") },
+    };
+    return names.value(id.toLower(), id.toUpper());
 }
 
 } // namespace clima::scales

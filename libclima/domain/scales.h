@@ -65,4 +65,16 @@ namespace clima::scales {
 // average, and NNE-by-E is a precision it does not have.
 [[nodiscard]] QString compassPoint(double degrees);
 
+// A pollutant's machine id — `clima::pollutantId()`'s "pm2_5", "no2", "o3" —
+// as the name a chemist would write.
+//
+// airquality.h is explicit that its ids are not user-facing, and until there
+// was a second thing that displayed them the app got away with uppercasing
+// one: the air-quality card has been printing "PM2_5" where every published
+// index in the world writes "PM2.5". Doing that in two places would have made
+// it two defects, so the spelling lives here with the rest of the transcribed
+// tables. Unknown ids come back uppercased, which is the old behaviour and the
+// only honest answer for a species we have no name for.
+[[nodiscard]] QString pollutantLabel(const QString &id);
+
 } // namespace clima::scales
