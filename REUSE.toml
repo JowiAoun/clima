@@ -349,3 +349,12 @@ path = [
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The probe extension's manifest. metadata.json is a fixed schema that
+# gnome-shell parses — it rejects an unknown key and JSON has nowhere to put a
+# comment — so the header goes here. extension.js next to it carries its own.
+[[annotations]]
+path = ["tests/shell/clima-window-probe@clima.invalid/metadata.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Jowi Aoun"
+SPDX-License-Identifier = "GPL-3.0-or-later"

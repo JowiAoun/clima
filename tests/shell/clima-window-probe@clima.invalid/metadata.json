@@ -1,0 +1,6 @@
+{
+    "uuid": "clima-window-probe@clima.invalid",
+    "name": "Clima window probe",
+    "description": "Test fixture, never published. Spawns a target through Meta.WaylandClient and reports whether the resulting window can be adopted, re-typed and hidden from the window list.",
+    "shell-version": ["45", "46", "47", "48"]
+}
