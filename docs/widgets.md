@@ -33,6 +33,57 @@ components with the app instead of being a second implementation.
 
 ---
 
+## One process fetches; the rest draw
+
+`clima-daemon` owns the network, the cache and the clock. Everything else —
+widgets, the tray, eventually the app — reads from it over the session bus.
+
+Three reasons, in the order they bite. **SQLite has one writer**, and a desktop
+with six widgets is eight processes writing one database. **The free tier is
+per-client**, so eight processes each honouring a 15-minute TTL is eight times
+the requests for one desktop's worth of weather, which is the difference
+between a good citizen and a scraper (R5). And **the alert poll has to be in
+one place** — `docs/04-architecture.md` §4.5 budgets it at ~264 KB a day on the
+assumption that there is one of it, and eight independent pollers is eight
+tombstone state machines that can disagree about whether a warning was
+cancelled.
+
+```
+io.github.JowiAoun.Clima.Daemon   /io/github/JowiAoun/Clima/Daemon
+io.github.JowiAoun.Clima.Daemon1
+```
+
+| Call | Does |
+|---|---|
+| `SchemaVersion() → i` | The version of the JSON. Check it before trusting anything else. |
+| `GetSnapshot(placeId, fields, hours, days) → s` | One masked snapshot, now |
+| `Subscribe(placeId, fields, hours, days) → s` | The same, kept. Returns a token |
+| `Unsubscribe(token) → b` | |
+| `RequestRefresh(placeId)` | Ask now rather than at the next poll |
+| `ListWidgets() → s` | `widgets/catalogue.json`, verbatim |
+| `ListPlaces() → as` | Canonical place ids |
+| `SnapshotChanged(token, json)` | signal |
+
+**The token is the signal's first argument on purpose.** A D-Bus signal is a
+broadcast, so without it every widget is woken — and made to parse a snapshot —
+every time any other widget refreshes. A reader adds a match rule with
+`arg0='<its token>'` and the bus filters before delivery. That is what keeps
+the ~0 % idle CPU line in `docs/03-tech-stack.md` §3.4 true on a desktop full
+of tiles.
+
+The payload is JSON rather than a typed D-Bus signature, for the version-skew
+reason in the section below: the two ends ship from different places on
+different clocks, and an unknown key has to be ignorable rather than an
+unmarshalling error. `libclima/wire/snapshot.h` argues it at length.
+
+The field mask is what makes that affordable. A wind rose asks for three
+current readings; it is not sent 408 hourly points.
+
+```sh
+clima-daemon --print-address
+clima-daemon --fixture toronto     # recorded data at a frozen clock
+```
+
 ## What was measured, and on what
 
 | | |
@@ -118,8 +169,8 @@ hide_from_window_list  make_desktop  make_dock  owns_window  show_in_window_list
 
 `make_dock()` gets `on_all_workspaces` and exclusion from the overview by
 construction, which is most of what the title flags were emulating. Clima's
-extension uses it, and no part of our wire protocol travels through a window
-title.
+extension will use it when it is written, and nothing we send a widget will
+travel through a window title.
 
 ### 4. `get_sandboxed_app_id()` returns null here, so it cannot identify us
 
@@ -172,3 +223,31 @@ doing nothing, the window still in alt-tab, the window no longer composited),
 each of which fails it. The script end-to-end has been run in the form
 described here; the committed copy is the same harness with its output
 normalised to booleans.
+
+---
+
+## What exists today
+
+**Built and verified.** The mechanism above, measured on a real shell. The wire
+format and its field mask, with the three encoder rules under test. The widget
+catalogue, with a test that asserts every field a widget declares is one the
+encoder actually emits. `clima-daemon`, exercised end to end on a private
+session bus against a fixture — introspection, a masked `GetSnapshot`, a
+`Subscribe` that delivers its own token, `Unsubscribe`.
+
+**Not built.** Everything that draws:
+
+- the widget host and the ten widgets in the catalogue — the catalogue
+  describes them, and nothing renders them yet;
+- the GNOME extension that spawns the host and adopts its window;
+- the Plasma 6 applet, which is the cheapest of the three because a Plasma
+  applet *is* QML and the widget files go into `contents/ui/` nearly verbatim;
+- the SNI tray;
+- the link-line guard that keeps a widget process from linking the providers.
+  libclima is a static archive, so the check that matters is a symbol check on
+  the built binary rather than `ldd` — a widget that never calls `HttpClient`
+  does not carry it, and asserting that is stronger than asserting a shared
+  object is absent.
+
+The daemon is additive. The app does not link it, does not know about it, and
+behaves exactly as it did before this existed when nothing is running.
