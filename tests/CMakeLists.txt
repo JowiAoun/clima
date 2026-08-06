@@ -94,6 +94,35 @@ clima_add_test(tst_reversegeocode)
 clima_add_test(tst_places)
 clima_add_test(tst_wiresnapshot)
 
+# ---- the tiles ---------------------------------------------------------------
+#
+# Registered by hand rather than through clima_add_test(), for two reasons that
+# both come from the subject. It links `climawidgetsqml` — the widget host's QML
+# module — rather than libclima, because `Wx` is what every number a tile prints
+# goes through. And clima_forbid_gui() is deliberately not applied: that guard
+# enforces libclima's own promise, and this is a test of a thing that draws.
+#
+# Guarded on the target, because widgets/ is only entered on Linux with Qt DBus.
+if(TARGET climawidgetsqml)
+    add_executable(tst_widgets tst_widgets.cpp)
+
+    target_link_libraries(tst_widgets PRIVATE climawidgetsqml Qt6::Test)
+    target_compile_definitions(tst_widgets PRIVATE
+        CLIMA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    )
+
+    add_test(NAME tst_widgets COMMAND tst_widgets)
+
+    # TZ=UTC is load-bearing here rather than hygienic. Half of what this file
+    # asserts is that an instant is read in the zone its own offset names and
+    # NOT converted into the reader's — which is invisible on a machine whose
+    # clock happens to agree with the fixture.
+    set_tests_properties(tst_widgets PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
+        TIMEOUT 60
+    )
+endif()
+
 # ---- the one test that links app/ -------------------------------------------
 #
 # Registered by hand rather than through clima_add_test(), because it is the one
