@@ -280,6 +280,36 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "NOAA National Weather Service"
 SPDX-License-Identifier = "LicenseRef-US-Public-Domain"
 
+# The wire snapshots: what clima-daemon SENDS, recorded by driving it against
+# the fixtures above (tests/fixtures/wire/record.sh).
+#
+# Derived rather than captured, and the annotation says so by naming all three
+# upstreams. Each file is one JSON document that mixes an Open-Meteo forecast,
+# an Open-Meteo air-quality reading and — for two of the four — alerts from the
+# NWS or from ECCC, put through our own encoder. There is no way to split the
+# obligations file by file because they are interleaved inside one object, so
+# the licence expression carries all of them and the attribution lists every
+# service whose data is in there.
+#
+# Our contribution is the *shape*, which is GPL-3.0-or-later like the rest of
+# the daemon; it is in the expression too rather than replacing the others,
+# because a reuse of these bytes reuses the readings inside them.
+[[annotations]]
+path = [
+    "tests/fixtures/wire/berlin.json",
+    "tests/fixtures/wire/kampala.json",
+    "tests/fixtures/wire/seattle.json",
+    "tests/fixtures/wire/toronto.json",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+    "2026 Jowi Aoun",
+    "Open-Meteo (https://open-meteo.com)",
+    "NOAA National Weather Service",
+    "Environment and Climate Change Canada",
+]
+SPDX-License-Identifier = "GPL-3.0-or-later AND CC-BY-4.0 AND LicenseRef-US-Public-Domain AND LicenseRef-OGL-Canada-2.0"
+
 # The manifests beside them are ours: a place, a description and the instant the
 # FrozenClock is set to. Not Open-Meteo's data, and JSON has nowhere to put a
 # header comment — the same reason every other JSON file in this repository is
