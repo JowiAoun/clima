@@ -33,6 +33,19 @@ Item {
 
     property string tab: Tabs.list[0].id
 
+    // ---- how much room this is ----------------------------------------------
+    //
+    // Which viewport class the app decided on, pushed down from Main. Not
+    // derived from this item's width, and that is the whole reason it is a
+    // property: `--viewport mobile --size 900x844` means review the phone at
+    // 900 px, and a shell that re-derived the class from its own width would
+    // give the reviewer a tablet instead. Android pins it too — see Main.
+    property string viewportClass: "mobile"
+
+    readonly property string navStyle:
+        Viewports.navStyle(root.viewportClass, root.width, root.height)
+    readonly property bool railed: navStyle === "rail"
+
     // Forwarded to whichever page wants them, so `--metric`, `--day`,
     // `--list` and `--poke feels=` still reach the chart now that a screen
     // sits between them and Main. A page that does not have a chart ignores
@@ -77,19 +90,48 @@ Item {
 
     readonly property var currentTab: Tabs.byId(tab)
 
+    // The page that is up, read-only.
+    //
+    // It exists so that a test can hold the object and check it is still the
+    // same one after the window has been turned, which is the one thing about
+    // this shell that cannot be asserted from the outside and is the easiest
+    // thing to break: `source` is bound to the tab and to nothing else, and a
+    // geometry change that reached it would rebuild the page, replay every
+    // card's entrance and throw away the reader's scroll position — for the
+    // crime of rotating the device. See tests/qml/tst_shell.qml.
+    readonly property Item currentPage: pageLoader.item as Item
+
+    // Placed rather than anchored, because the nav moves. Anchoring the page to
+    // `nav.top` was right while there was only one place a nav could be; with a
+    // rail the page has to give up width on the left instead of height at the
+    // bottom, and a conditional anchor line leaves the anchor from the other
+    // branch still attached.
+    //
+    // `source` is untouched by any of this, and it has to stay that way: it is
+    // bound to the current tab and nothing else, so a rotation moves the page
+    // and does not rebuild it. A Loader whose source changed on rotation would
+    // replay every card's entrance and lose the reader's scroll position for
+    // the crime of turning the device.
     Loader {
         id: pageLoader
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.bottom: nav.top
+        x: root.railed ? nav.width : 0
+        y: 0
+        width: root.width - (root.railed ? nav.width : 0)
+        height: root.height - (root.railed ? 0 : nav.height)
 
         source: root.currentTab.page
 
         onLoaded: {
-            root.pushInsets(item)
+            root.pushLayout(item)
             root.adopt(item)
         }
+
+        // The rail swap and every resize. `pushLayout` is a push and not a
+        // binding — see below — so nothing arrives at the page unless something
+        // calls it, and a tablet turned on its side is exactly the case where
+        // the column count and both insets all change at once.
+        onWidthChanged: root.pushLayout(item)
+        onHeightChanged: root.pushLayout(item)
 
         onStatusChanged: if (status === Loader.Error)
             console.warn("mobile shell: could not load", source)
@@ -123,23 +165,29 @@ Item {
             page.pickerRequested.connect(function () { picker.open = !picker.open })
     }
 
-    // The chrome that floats over the page, in the units the page pads by.
+    // Everything about the shape of the page that the shell decides: the chrome
+    // that floats over it, in the units the page pads by, and how many columns
+    // the room is worth splitting into.
     //
-    // A function rather than two `Qt.binding()`s, and the comment above says
+    // A function rather than three `Qt.binding()`s, and the comment above says
     // why: a binding pushed into a page is destroyed the first time the page
     // assigns the property itself, and every later push silently stops. The
     // banner makes that failure reachable in a way the nav never did — the nav's
     // height is fixed, and the banner's changes when it is dismissed, when the
     // severity changes, and when a second alert arrives.
     //
-    // Called from onLoaded and from every one of those changes.
-    function pushInsets(page) {
+    // Called from onLoaded, from every one of those changes, and from the
+    // page's own resize — which is what a rotation is, and where all three of
+    // these change at once.
+    function pushLayout(page) {
         if (page === null)
             return
         if (page.bottomInset !== undefined)
-            page.bottomInset = nav.height
+            page.bottomInset = root.railed ? 0 : nav.height
         if (page.topInset !== undefined)
             page.topInset = banner.visible ? banner.height + Theme.metric.mobileGap : 0
+        if (page.viewportClass !== undefined)
+            page.viewportClass = root.viewportClass
     }
 
     function push(page) {
@@ -167,6 +215,44 @@ Item {
             root.tab = id
     }
 
+    // ---- back ----------------------------------------------------------------
+    //
+    // Android's back gesture, and this shell is the only thing in the app with
+    // a navigation stack to pop. Any tab but the first goes to the first; on
+    // the first the event is left unaccepted, which closes the app. That is the
+    // convention every Android launcher-facing screen follows, and the
+    // alternative — swallowing it on the home screen — leaves a reader holding
+    // a gesture that does nothing at all.
+    //
+    // A sheet outranks a tab: the picker and the alert sheet cover the nav bar,
+    // so back has to close what is on top before it moves what is underneath.
+    //
+    // `Keys.onPressed` and a Qt.Key_Back test rather than `Keys.onBackPressed`,
+    // which is the Qt 5 spelling: it is deprecated, and it only ever fired for
+    // the hardware key that handsets stopped shipping years ago.
+    //
+    // The PRESS, and that is not arbitrary — it was `onReleased` first, and the
+    // picker's own `Keys.onEscapePressed` accepts the press and leaves the
+    // release unaccepted. So one tap of Escape closed the sheet on the way down
+    // and changed the tab on the way up: two navigations from one key, and the
+    // second one invisible in a screenshot. Handling the same stage the sheets
+    // handle is what makes "accepted" mean anything between them.
+    focus: true
+    Keys.onPressed: function (event) {
+        if (event.key !== Qt.Key_Back && event.key !== Qt.Key_Escape)
+            return
+        if (sheet.open) {
+            sheet.open = false
+        } else if (picker.open) {
+            picker.open = false
+        } else if (root.tab !== Tabs.list[0].id) {
+            root.tab = Tabs.list[0].id
+        } else {
+            return      // unaccepted: on Android this closes the app
+        }
+        event.accepted = true
+    }
+
     // ---- the alert banner ---------------------------------------------------
     //
     // HERE, on the shell, and not on any of the five pages. MobileShell destroys
@@ -181,14 +267,13 @@ Item {
     // moves its content out from under it.
     AlertBanner {
         id: banner
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.margins: Theme.metric.mobileMargin
+        x: pageLoader.x + Theme.metric.mobileMargin
+        y: Theme.metric.mobileMargin
+        width: pageLoader.width - Theme.metric.mobileMargin * 2
         onOpened: sheet.open = true
 
-        onVisibleChanged: root.pushInsets(pageLoader.item)
-        onHeightChanged: root.pushInsets(pageLoader.item)
+        onVisibleChanged: root.pushLayout(pageLoader.item)
+        onHeightChanged: root.pushLayout(pageLoader.item)
     }
 
     // Over the nav bar as well as over the page, and that is the reason it is
@@ -200,6 +285,14 @@ Item {
         onOpenChanged: {
             root.pickerOpen = open
             root.push(pageLoader.item)
+            // Focus comes back when the sheet goes. The picker takes it on the
+            // way in — its search field calls forceActiveFocus() so you can
+            // type a place name immediately — and without this it keeps it on
+            // the way out, on a field nobody can see any more. Every key the
+            // shell handles is dead from then on, which on Android is the back
+            // gesture.
+            if (!open)
+                root.forceActiveFocus()
         }
     }
 
@@ -207,13 +300,20 @@ Item {
     AlertSheet {
         id: sheet
         onDismissed: open = false
+        onOpenChanged: if (!open) root.forceActiveFocus()
     }
 
-    BottomNav {
+    // Bottom bar or left rail, and one component either way — see ShellNav for
+    // why that is not two files. Placed with numbers rather than anchors so
+    // that turning the device moves it instead of leaving it anchored to an
+    // edge the other arrangement does not use.
+    ShellNav {
         id: nav
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        orientation: root.railed ? Qt.Vertical : Qt.Horizontal
+        x: 0
+        y: root.railed ? 0 : root.height - height
+        width: root.railed ? implicitWidth : root.width
+        height: root.railed ? root.height : implicitHeight
         currentId: root.tab
         onSelected: function (id) { root.tab = id }
     }

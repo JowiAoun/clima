@@ -54,7 +54,7 @@ MobilePage {
 
     MobileWeekStrip {
         id: week
-        width: parent.width
+        width: root.spanWidth(2)
     }
 
     // The reading and the metric button share a row, and the row is lifted
@@ -64,7 +64,7 @@ MobilePage {
     // failure mode of building a menu without a popup layer.
     Item {
         id: readingRow
-        width: parent.width
+        width: root.spanWidth(2)
         height: 44
         z: 10
 
@@ -108,7 +108,7 @@ MobilePage {
     // ever reached the chart; here the screen is arrived at from a tab bar, so
     // it has to say so itself.
     Text {
-        width: parent.width
+        width: root.spanWidth(2)
         text: Detail.observedAt + ", " + Detail.observedOn
         color: Theme.ink.muted
         font.pixelSize: Theme.type.label
@@ -117,7 +117,7 @@ MobilePage {
 
     HourlyOverview {
         id: chart
-        width: parent.width
+        width: root.spanWidth(2)
         metricId: root.metricId
         listView: root.listView
 
@@ -133,7 +133,12 @@ MobilePage {
     }
 
     MobileCard {
-        width: parent.width
+        // One column, not two. The body is a paragraph, and a paragraph
+        // set across both columns of a landscape tablet is a 95-character
+        // measure — half again the widest line typography has ever called
+        // comfortable. It leaves the right column empty under the chart,
+        // which is what a page with one card left in it looks like.
+        width: root.spanWidth(1)
         title: qsTr("Daily summary")
         content: Item {
             id: summary

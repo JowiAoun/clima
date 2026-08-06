@@ -21,6 +21,12 @@ compile_commands.json
 /reference/
 /tools/refcap/node_modules
 
+# What `scripts/golden.sh check` writes beside an image that did not match. It
+# is the rendering the run produced, for looking at; the recorded image is the
+# one in git. Committing one by accident replaces a golden with the thing it was
+# supposed to catch.
+tests/golden/images/*.actual.png
+
 # OS cruft
 .DS_Store
 Thumbs.db

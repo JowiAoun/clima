@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The five destinations of the mobile shell.
 //
-// One list, read by two things that must not disagree: `BottomNav` draws it,
+// One list, read by two things that must not disagree: `ShellNav` draws it,
 // and `MobileShell` loads `page` for whichever id is current. Same argument as
 // the metric registry — adding a screen is a line of data, and a screen that exists in
 // the tree but not in this list shows up as a tab that is missing rather than

@@ -66,11 +66,10 @@ Item {
     readonly property real frameContentWidth: {
         if (!framed)
             return 0
-        var margin = Viewports.usesMobileShell(preset.id) ? Theme.metric.mobileMargin
-                                                          : Theme.metric.pageMargin
+        var handheld = Viewports.usesMobileShell(preset.cls)
+        var margin = handheld ? Theme.metric.mobileMargin : Theme.metric.pageMargin
         return Math.min(preset.w - margin * 2,
-                        Viewports.usesMobileShell(preset.id)
-                            ? Theme.metric.mobileContentMax : preset.w)
+                        handheld ? Theme.metric.mobileContentMax : preset.w)
     }
 
     function cycleViewport(d) {
@@ -736,7 +735,7 @@ Item {
                             radius: 6
 
                             readonly property bool onPhone:
-                                root.framed && Viewports.usesMobileShell(root.preset.id)
+                                root.framed && Viewports.usesMobileShell(root.preset.cls)
 
                             phase: onPhone ? root.skyPhase : "dusk"
                             stars: onPhone

@@ -125,7 +125,8 @@ AppOptions *AppOptions::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 // exists — which is precisely when the command line has to be parsed.
 QStringList AppOptions::viewportIds()
 {
-    return { QStringLiteral("mobile"), QStringLiteral("tablet"), QStringLiteral("desktop") };
+    return { QStringLiteral("mobile"), QStringLiteral("tablet"),
+             QStringLiteral("tablet-landscape"), QStringLiteral("desktop") };
 }
 
 QStringList AppOptions::skyPhases()

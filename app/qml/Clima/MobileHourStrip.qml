@@ -30,7 +30,12 @@ Item {
 
     readonly property int step: 2
     readonly property int columns: 12
-    readonly property real columnWidth: 74
+
+    // A floor, for the reason MobileDailyStrip states at greater length: twelve
+    // columns of 74 overflow a phone and scroll, and fall 120 px short inside a
+    // landscape tablet's card. At 362 px this is max(74, 30) and nothing moves.
+    readonly property real columnWidth:
+        Math.max(74, root.width / Math.max(1, columns))
 
     // Indices into the hourly series, starting at now.
     readonly property var hours: {

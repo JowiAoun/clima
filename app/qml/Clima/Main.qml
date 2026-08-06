@@ -33,8 +33,23 @@ Window {
     // headless grab needs: a shell chosen from a width that a screenshot flag
     // then changes is a shell chosen from the wrong width.
     property string forcedViewport: ""
-    readonly property string viewportClass:
-        forcedViewport !== "" ? forcedViewport : Viewports.classOf(win.width)
+
+    // A handheld is never a desktop, whatever its width. A tablet held in
+    // landscape is 1112 px across — past the desktop threshold — and the
+    // desktop page is the wrong answer for it twice over: a hover crosshair
+    // nobody can hover, and a twelve-card grid of 300 px cards laid out for a
+    // pointer. `Viewports.classOf` cannot know this, because a 1112 px window
+    // on a laptop *is* a desktop and the geometry is identical. The platform
+    // is the signal the geometry does not carry.
+    readonly property bool handheld:
+        Qt.platform.os === "android" || Qt.platform.os === "ios"
+
+    readonly property string viewportClass: {
+        if (forcedViewport !== "")
+            return forcedViewport
+        var byWidth = Viewports.classOf(win.width)
+        return win.handheld && byWidth === "desktop" ? "tablet" : byWidth
+    }
     readonly property bool mobile: Viewports.usesMobileShell(viewportClass)
 
     // ---- the sky -----------------------------------------------------------
@@ -92,6 +107,20 @@ Window {
         value: win.resolvedScheme
     }
 
+    // How much of the sky to build.
+    //
+    // A handheld by default, because that is where the cost is: 130 Rectangles
+    // and 12 Shapes constructed before a phone's first night frame, on hardware
+    // with a fraction of a desktop's fill rate. `--perf` overrides it, which is
+    // the only way the reduced tier can be reviewed or photographed on a
+    // machine that is not a phone.
+    Binding {
+        target: Theme
+        property: "perfTier"
+        value: AppOptions.perf !== "" ? AppOptions.perf
+                                      : (win.handheld ? "reduced" : "full")
+    }
+
     // Stillness is two unrelated requests that happen to want the same thing.
     // A still capture holds still so the shutter cannot catch a transition —
     // --film is exempt, since a contact sheet of eight identical frames is not
@@ -138,7 +167,12 @@ Window {
         // Assigned on completion rather than bound through the constructor:
         // MobileShell's default tab is mobiletabs.js's first entry, and naming
         // that entry a second time out here is how the two come to disagree.
+        //
+        // `viewportClass` IS bound, because it is not a starting value — it is
+        // the answer to a question the window keeps being asked. Dragging a
+        // window from 834 to 1112 px changes it, and so does turning a tablet.
         MobileShell {
+            viewportClass: win.viewportClass
             Component.onCompleted: if (AppOptions.tab !== "") tab = AppOptions.tab
         }
     }
@@ -202,7 +236,11 @@ Window {
 
         var preset = AppOptions.viewport !== "" ? Viewports.byId(AppOptions.viewport) : null
         if (preset !== null) {
-            win.forcedViewport = preset.id
+            // The preset's CLASS, not its id. Three of the four are the same
+            // word; `tablet-landscape` is the one that is not, and forcing its
+            // id would put a class nothing has heard of into every layout
+            // question the shell asks.
+            win.forcedViewport = preset.cls
             win.width = preset.w
             win.height = preset.h
         } else if (AppOptions.viewport !== "") {

@@ -56,20 +56,91 @@ TestCase {
     }
 
     // Every preset resolves, and every preset's own width classifies as the
-    // preset it belongs to. The gallery frames a specimen at exactly the width
-    // the app would switch at, so a preset whose width lands in a different
-    // class than its id claims would review a phone card at desktop width.
+    // class it claims. The gallery frames a specimen at exactly the width the
+    // app would switch at, so a preset whose width lands in a different class
+    // than it declares would review a phone card at desktop width.
+    //
+    // `pinned` is the exception, and it is the whole reason the class is a
+    // field rather than the id: a tablet in landscape is 1112 px wide, which
+    // classifies as desktop, and that is not a bug in either the preset or the
+    // breakpoints — width genuinely cannot tell that window from a desktop one.
+    // It is asked for by name instead. This test's job is to make sure the
+    // exception stays the single documented one.
     function test_presetsAgreeWithTheirOwnWidths() {
         var ids = Viewports.ids()
         verify(ids.length > 0)
 
+        var pinned = 0
         for (var i = 0; i < ids.length; ++i) {
             var preset = Viewports.byId(ids[i])
             verify(preset !== null, ids[i] + " should resolve")
-            compare(Viewports.classOf(preset.w), preset.id,
+            verify(preset.cls !== undefined, preset.id + " must declare a class")
+
+            if (preset.pinned === true) {
+                ++pinned
+                verify(Viewports.classOf(preset.w) !== preset.cls,
+                       preset.id + " is marked pinned but its width already "
+                       + "classifies as " + preset.cls + " — drop the flag")
+                continue
+            }
+            compare(Viewports.classOf(preset.w), preset.cls,
                     preset.id + " opens at " + preset.w + "px, which classifies as "
                     + Viewports.classOf(preset.w))
         }
+        compare(pinned, 1, "there should be exactly one pinned preset, found " + pinned)
+    }
+
+    // The class a preset declares has to be one the shell question can answer.
+    function test_everyPresetClassIsKnown() {
+        var ids = Viewports.ids()
+        for (var i = 0; i < ids.length; ++i) {
+            var cls = Viewports.classFor(ids[i])
+            verify(cls === "mobile" || cls === "tablet" || cls === "desktop",
+                   ids[i] + " declares an unknown class: " + cls)
+        }
+        compare(Viewports.classFor("watch"), "")
+    }
+
+    // ---- what the room buys -------------------------------------------------
+
+    function test_columnsSplitOnlyWhenBothAreWideEnough_data() {
+        return [
+            { tag: "phone",             cls: "mobile",  w: 362,  columns: 1 },
+            { tag: "wide phone",        cls: "mobile",  w: 800,  columns: 1 },
+            { tag: "narrow tablet",     cls: "tablet",  w: 600,  columns: 1 },
+            { tag: "one under",         cls: "tablet",  w: 719,  columns: 1 },
+            { tag: "exactly two",       cls: "tablet",  w: 720,  columns: 2 },
+            { tag: "portrait tablet",   cls: "tablet",  w: 806,  columns: 2 },
+            { tag: "landscape tablet",  cls: "tablet",  w: 1008, columns: 2 },
+            { tag: "desktop never",     cls: "desktop", w: 1300, columns: 1 }
+        ]
+    }
+
+    function test_columnsSplitOnlyWhenBothAreWideEnough(data) {
+        compare(Viewports.contentColumns(data.cls, data.w), data.columns)
+    }
+
+    // A forced phone stays a phone however wide the window is. `--viewport
+    // mobile --size 900x844` is a request to review the phone at 900 px, and a
+    // second column would be the gallery answering a different question.
+    function test_aForcedPhoneNeverSplits() {
+        compare(Viewports.contentColumns("mobile", 1200), 1)
+    }
+
+    function test_navStyle_data() {
+        return [
+            { tag: "phone portrait",    cls: "mobile",  w: 390,  h: 844,  style: "bottom" },
+            { tag: "phone landscape",   cls: "mobile",  w: 844,  h: 390,  style: "bottom" },
+            { tag: "forced phone, wide", cls: "mobile", w: 1112, h: 834,  style: "bottom" },
+            { tag: "tablet portrait",   cls: "tablet",  w: 834,  h: 1112, style: "bottom" },
+            { tag: "tablet landscape",  cls: "tablet",  w: 1112, h: 834,  style: "rail" },
+            { tag: "square, wide",      cls: "tablet",  w: 1000, h: 1000, style: "bottom" },
+            { tag: "desktop",           cls: "desktop", w: 1340, h: 762,  style: "none" }
+        ]
+    }
+
+    function test_navStyle(data) {
+        compare(Viewports.navStyle(data.cls, data.w, data.h), data.style)
     }
 
     function test_unknownIdIsNull() {

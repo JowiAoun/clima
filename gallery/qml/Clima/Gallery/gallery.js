@@ -298,12 +298,21 @@ var groups = [
     {
         name: "Mobile parts",
         items: [
-            { name: "Bottom nav", file: "BottomNav.qml", stage: { w: 390, h: 0 },
-              blurb: "The only persistent chrome the phone has, and the only thing on it allowed to be more opaque than a wash.",
+            { name: "Shell nav", file: "ShellNav.qml", stage: { w: 390, h: 0 },
+              blurb: "The only persistent chrome the phone has, and the only thing on it allowed to be more opaque than a wash. A landscape tablet stands it on end.",
               variants: [
                   { label: "today", props: { currentId: "today" } },
                   { label: "maps",  props: { currentId: "maps" } },
                   { label: "me",    props: { currentId: "me" } }
+              ] },
+            // The same file on its side. Its own entry rather than two more
+            // variants of the one above, because a stage is declared per entry
+            // and a 76x620 rail beside a 390x70 bar is not one stage.
+            { name: "Nav rail", file: "ShellNav.qml", stage: { w: 76, h: 620 },
+              blurb: "A landscape tablet's navigation. Five targets across 1112 px is a row a thumb cannot cross, so they stand up instead.",
+              variants: [
+                  { label: "today", props: { currentId: "today", orientation: Qt.Vertical } },
+                  { label: "maps",  props: { currentId: "maps",  orientation: Qt.Vertical } }
               ] },
             { name: "Mobile card", file: "MobileCard.qml", stage: { w: 362, h: 0 },
               blurb: "The shell the phone's cards are built in. Unlike DetailCard it grows to its body, because on a phone a card is as tall as what is in it.",

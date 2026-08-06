@@ -17,7 +17,16 @@ import QtQuick
 Item {
     id: root
 
-    readonly property real columnWidth: 72
+    // 72 on a phone, where ten of them are wider than the screen and the strip
+    // scrolls. On a tablet ten columns of 72 is 720 px inside a card that may
+    // be 1008 wide, and a row of days that stops two thirds of the way across
+    // reads as a strip that failed to load the rest — so past the point where
+    // the whole week fits, the columns take the room instead of leaving it.
+    //
+    // A floor and not a fixed width, so the phone is untouched: at 362 px this
+    // is max(72, 36) and the strip flicks exactly as it did.
+    readonly property real columnWidth:
+        Math.max(72, root.width / Math.max(1, forecast.length))
 
     // Today and the nine days after it. `days` also carries yesterday, which
     // belongs on the desktop strip — where the reader can page backwards — and

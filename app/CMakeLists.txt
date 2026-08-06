@@ -29,7 +29,6 @@ set(clima_qml_files
     qml/Clima/AlertBanner.qml
     qml/Clima/AlertRow.qml
     qml/Clima/AlertSheet.qml
-    qml/Clima/BottomNav.qml
     qml/Clima/ChevronGlyph.qml
     qml/Clima/Clock.qml
     qml/Clima/CurrentConditions.qml
@@ -86,6 +85,7 @@ set(clima_qml_files
     qml/Clima/SeriesArea.qml
     qml/Clima/SeverityGlyph.qml
     qml/Clima/SeriesBars.qml
+    qml/Clima/ShellNav.qml
     qml/Clima/SkyArc.qml
     qml/Clima/SunEventGlyph.qml
     qml/Clima/TabFillet.qml
@@ -362,3 +362,4 @@ set_target_properties(clima PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+

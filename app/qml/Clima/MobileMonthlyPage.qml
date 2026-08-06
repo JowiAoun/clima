@@ -14,6 +14,7 @@ MobilePage {
     id: root
 
     Text {
+        width: root.spanWidth(2)
         text: Data.month.name + " " + Data.month.year
         color: Theme.ink.primary
         font.pixelSize: Theme.type.sectionTitle
@@ -21,7 +22,7 @@ MobilePage {
     }
 
     MobileCard {
-        width: parent.width
+        width: root.spanWidth(2)
         content: MobileCalendar { }
     }
 }

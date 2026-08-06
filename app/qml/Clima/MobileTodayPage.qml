@@ -37,7 +37,7 @@ MobilePage {
     property bool pickerOpen: false
 
     Item {
-        width: parent.width
+        width: root.spanWidth(2)
         height: 30
 
         LocationBar {
@@ -50,11 +50,11 @@ MobilePage {
     }
 
     MobileCurrentWeather {
-        width: parent.width
+        width: root.spanWidth(2)
     }
 
     MobileCard {
-        width: parent.width
+        width: root.spanWidth(2)
         title: qsTr("Today")
         link: qsTr("Hourly")
         bleed: true
@@ -63,7 +63,7 @@ MobilePage {
     }
 
     MobileCard {
-        width: parent.width
+        width: root.spanWidth(2)
         title: qsTr("10 Day")
         link: qsTr("Monthly")
         bleed: true
@@ -72,7 +72,7 @@ MobilePage {
     }
 
     MobileCard {
-        width: parent.width
+        width: root.spanWidth(1)
         title: qsTr("Sun & Moon")
         content: MobileSunMoonCard { }
     }
@@ -87,13 +87,13 @@ MobilePage {
     // which is one appearance, not an appearance and a correction.
     MobileCard {
         visible: Engine.hasPollen
-        width: parent.width
+        width: root.spanWidth(1)
         title: qsTr("Pollen")
         content: MobilePollenCard { }
     }
 
     MobileCard {
-        width: parent.width
+        width: root.spanWidth(1)
         title: qsTr("Health & activities")
         content: MobileActivitiesCard { }
     }
