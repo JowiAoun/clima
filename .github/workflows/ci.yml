@@ -93,6 +93,14 @@ jobs:
       - name: Packaging metadata
         run: CLIMA_BUILD_DIR=build/ci nix develop --command bash scripts/check-packaging.sh
 
+      # The README's device images, re-rendered and diffed against what is
+      # committed. They are composed out of the real shells at real breakpoints,
+      # so this is the check that stops the front page of the project showing a
+      # layout the app stopped producing — the failure mode a screenshot pasted
+      # into a README has always had and never reported.
+      - name: README device images
+        run: CLIMA_BUILD_DIR=build/ci nix develop --command bash scripts/shots.sh check
+
   # ---- a packager's build --------------------------------------------------
   #
   # Debian 13 ships Qt 6.8, which is the floor D2 sets, and this is the job that

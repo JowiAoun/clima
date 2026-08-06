@@ -46,7 +46,14 @@ Window {
     // --card and --details each show one thing on its own; the catalogue is
     // what is left. The parser has already refused the two together, so this is
     // a switch and not a precedence rule.
-    readonly property bool previewing: GalleryOptions.card !== "" || GalleryOptions.details
+    readonly property bool previewing:
+        GalleryOptions.card !== "" || GalleryOptions.details || win.shooting
+
+    // --shot composes whole devices rather than one component, so it turns the
+    // catalogue off like the other two preview modes do — and unlike them it
+    // also decides the window's size, because the sheet's dimensions are
+    // derived from Viewports and there is no sensible number to type instead.
+    readonly property bool shooting: GalleryOptions.shot !== ""
 
     // ---- the sky -------------------------------------------------------------
     // The same rule the app runs, off the same tables, because the whole premise
@@ -106,6 +113,30 @@ Window {
                     id: gridItem
                     width: parent.width
                 }
+            }
+        }
+    }
+
+    // The composed device sheets the README is made of. Behind a Loader rather
+    // than declared with `visible: false`, because a sheet builds up to three
+    // whole shells — a phone, a tablet and a desktop page at once — and an
+    // inactive Loader builds none of them.
+    Loader {
+        id: shotLoader
+        active: win.shooting
+        anchors.centerIn: parent
+        sourceComponent: Component {
+            ShotSheet { shot: GalleryOptions.shot }
+        }
+
+        // The window takes its size from the sheet and not the other way round.
+        // Not circular: the sheet's size comes from Viewports and the shot
+        // definition, neither of which knows the window exists. --size still
+        // wins, because somebody asking for an exact capture size means it.
+        onLoaded: {
+            if (!GalleryOptions.hasSize) {
+                win.width = shotLoader.item.implicitWidth
+                win.height = shotLoader.item.implicitHeight
             }
         }
     }

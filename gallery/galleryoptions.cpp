@@ -60,6 +60,15 @@ GalleryOptions *g_instance = nullptr;
 
 GalleryOptions::GalleryOptions() = default;
 
+// In the order shots.js declares them, because --help prints this list and a
+// reader comparing the two should not have to sort them in their head.
+// tests/qml/tst_shots.qml asserts the two agree, element by element.
+QStringList GalleryOptions::shotIds()
+{
+    return { QStringLiteral("hero"), QStringLiteral("desktop"), QStringLiteral("tablet"),
+             QStringLiteral("tablet-landscape"), QStringLiteral("phone") };
+}
+
 GalleryOptions *GalleryOptions::instance()
 {
     if (g_instance == nullptr)
@@ -143,6 +152,14 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("details"),
         QStringLiteral("Render the weather-details grid on its own, all twelve cards."));
     parser.addOption(detailsOption);
+
+    const QCommandLineOption shotOption(
+        QStringLiteral("shot"),
+        QStringLiteral("Render a composed device sheet for the README instead of the "
+                       "catalogue: %1. The window sizes itself to the sheet.")
+            .arg(GalleryOptions::shotIds().join(QStringLiteral(", "))),
+        QStringLiteral("id"));
+    parser.addOption(shotOption);
 
 #ifdef CLIMA_DEV_TOOLS
     const QCommandLineOption filmOption(
@@ -232,6 +249,22 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(cardOption))
         self->m_card = parser.value(cardOption);
     self->m_details = parser.isSet(detailsOption);
+
+    if (parser.isSet(shotOption)) {
+        const QString id = parser.value(shotOption);
+        if (!GalleryOptions::shotIds().contains(id))
+            fail(QStringLiteral("--shot: expected one of %1 — got \"%2\"")
+                     .arg(GalleryOptions::shotIds().join(QStringLiteral(", ")), id));
+        self->m_shot = id;
+    }
+
+    // A sheet is the whole product; a card, the details grid and a catalogue
+    // pick are each one piece of it. Asking for both is a contradiction rather
+    // than a precedence question — the same rule --card and --details are held
+    // to two lines below, and for the same reason.
+    if (!self->m_shot.isEmpty() && (!self->m_card.isEmpty() || parser.isSet(detailsOption)))
+        fail(QStringLiteral("--shot composes whole devices; --card and --details each "
+                            "render one piece. Pick one."));
 
     // Both at once is a contradiction rather than a precedence question, and
     // guessing which one was meant is how a screenshot ends up being of the

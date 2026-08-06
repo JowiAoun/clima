@@ -344,6 +344,7 @@ SPDX-License-Identifier = "CC0-1.0"
 path = [
     "tests/golden/images/**.png",
     "tests/golden/environment.json",
+    "docs/images/**.png",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"

@@ -65,6 +65,16 @@ class GalleryOptions : public QObject
     Q_PROPERTY(QString card    READ card    CONSTANT)
     Q_PROPERTY(bool    details READ details CONSTANT)
 
+    // ---- and the way of looking at the whole product -----------------------
+    // A composed device sheet for the README, rather than a component. See
+    // gallery/qml/Clima/Gallery/ShotSheet.qml.
+    Q_PROPERTY(QString shot READ shot CONSTANT)
+
+    // Exposed to QML for one reader only: tests/qml/tst_shots.qml, which
+    // compares it against shots.js. A static method cannot be called from QML,
+    // and the alternative to this property is a duplicated list nothing checks.
+    Q_PROPERTY(QStringList shotIds READ shotIds CONSTANT)
+
 public:
     // Parses argv into the process-wide instance. Call from main() before the
     // QML engine loads anything: the window reads these at construction to size
@@ -79,6 +89,17 @@ public:
     // QML_SINGLETON's factory. See the long note in appoptions.h for why the
     // constructor below has to be private for this to be called at all.
     static GalleryOptions *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
+
+    // The shot ids --shot accepts. This is a second copy of the list in
+    // gallery/qml/Clima/Gallery/shots.js, and it exists for the same reason
+    // AppOptions::viewportIds() is a second copy of the Viewports presets: a
+    // command line has to reject a bad value before any QML has loaded, and
+    // C++ cannot read a `.pragma library`.
+    //
+    // The copy is not left to trust. tests/qml/tst_shots.qml asserts the two
+    // lists are equal, so adding a sheet to shots.js and not to here is a
+    // failing test rather than a flag that silently refuses a real shot.
+    static QStringList shotIds();
 
     QString     grab()       const { return m_grab; }
     QString     film()       const { return m_film; }
@@ -95,6 +116,7 @@ public:
     QString     pick()       const { return m_pick; }
     QString     card()       const { return m_card; }
     bool        details()    const { return m_details; }
+    QString     shot()       const { return m_shot; }
 
 private:
     GalleryOptions();
@@ -112,5 +134,6 @@ private:
     QString     m_scheme;
     QString     m_pick;
     QString     m_card;
+    QString     m_shot;
     bool        m_details    = false;
 };

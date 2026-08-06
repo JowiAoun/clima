@@ -36,15 +36,18 @@
 # for the reason app/CMakeLists.txt gives at length: a globbed QML module goes
 # stale silently and reports the failure at some other file's point of use.
 set(clima_gallery_qml_files
+    qml/Clima/Gallery/DeviceFrame.qml
     qml/Clima/Gallery/Gallery.qml
     qml/Clima/Gallery/HitTargets.qml
     qml/Clima/Gallery/Main.qml
+    qml/Clima/Gallery/ShotSheet.qml
     qml/Clima/Gallery/Specimen.qml
 )
 
 set(clima_gallery_js_files
     qml/Clima/Gallery/gallery.js
     qml/Clima/Gallery/contrast.js
+    qml/Clima/Gallery/shots.js
 )
 
 # Same flattening as app/, and here it is load-bearing rather than tidy.
