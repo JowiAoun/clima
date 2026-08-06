@@ -56,6 +56,17 @@ set(CLIMA_APP_ID "io.github.JowiAoun.Clima" CACHE STRING
 set(CLIMA_CONTACT "https://github.com/JowiAoun/clima/issues" CACHE STRING
     "Contact channel in the outbound User-Agent. Packagers: point this at yours")
 
+# The daemon's object path: the app ID with its dots turned into slashes.
+#
+# Computed here rather than in daemon/ because there are two ends of that bus
+# and both have to spell it identically — clima-daemon exports the object and
+# clima-widget calls it. A path they disagree about is a service that registers
+# successfully and then answers nothing, which looks like a daemon bug from one
+# side and a widget bug from the other. Both configure the same
+# daemon/daemonconfig.h.in from this variable, so there is one spelling.
+string(REPLACE "." "/" CLIMA_DAEMON_PATH "/${CLIMA_APP_ID}")
+set(CLIMA_DAEMON_PATH "${CLIMA_DAEMON_PATH}/Daemon")
+
 # ---- options ----------------------------------------------------------------
 # Declared now, wired up as each lands. An option that appears the same day as
 # the feature it guards is an option nobody remembered to check for, so they go

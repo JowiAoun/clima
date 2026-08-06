@@ -13,12 +13,10 @@
 # The 25 MB headless budget in docs/03-tech-stack.md §3.4 is only reachable
 # because of this line.
 
-# The object path is the app ID with its dots turned into slashes, computed
-# here so that C++ never has to. Doing it at run time would make a mistake in
-# it look like a service that registers and then answers nothing.
-string(REPLACE "." "/" CLIMA_DAEMON_PATH "/${CLIMA_APP_ID}")
-set(CLIMA_DAEMON_PATH "${CLIMA_DAEMON_PATH}/Daemon")
-
+# CLIMA_DAEMON_PATH comes from the top-level CMakeLists, because widgets/
+# configures this same template to call what this directory exports. The name,
+# path and interface are a contract between two executables, so they are one
+# variable and one template rather than two copies that agree today.
 configure_file(daemonconfig.h.in daemonconfig.h @ONLY)
 
 qt_add_executable(clima-daemon

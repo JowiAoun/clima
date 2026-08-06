@@ -44,6 +44,7 @@
 #include <QDBusConnectionInterface>
 #include <QDBusError>
 #include <QDBusReply>
+#include <QTimer>
 
 #include <cstdio>
 
@@ -78,6 +79,17 @@ int main(int argc, char *argv[])
         QStringLiteral("Print the service name, object path and interface, then exit."));
     parser.addOption(printOption);
 
+    const QCommandLineOption dumpOption(
+        QStringLiteral("dump-snapshot"),
+        QStringLiteral("Print one full snapshot as JSON and exit. Needs no session bus."));
+    parser.addOption(dumpOption);
+
+    const QCommandLineOption placeOption(
+        QStringLiteral("place"),
+        QStringLiteral("Which place --dump-snapshot is for. Defaults to the home place."),
+        QStringLiteral("id"), QStringLiteral("home"));
+    parser.addOption(placeOption);
+
     parser.process(app);
 
     if (parser.isSet(printOption)) {
@@ -92,6 +104,72 @@ int main(int argc, char *argv[])
                      qPrintable(fixtureName),
                      qPrintable(clima::fixtures::names().join(QStringLiteral(", "))));
         return 2;
+    }
+
+    // ---- one snapshot, no bus ------------------------------------------------
+    //
+    // This is how tests/fixtures/wire/*.json are recorded (scripts/record-wire.sh),
+    // and it is deliberately the same code path the bus serves rather than a
+    // second encoder written for the purpose: a recorded fixture that came from
+    // somewhere other than the daemon would drift from what the daemon actually
+    // sends, and the whole value of the recording is that it does not.
+    //
+    // It waits for the snapshot to SETTLE, which is not the same as waiting for
+    // the first one. Three fetches are in flight — the forecast, the air
+    // quality and the alerts — and each publishes as it lands, so a recorder
+    // that took the first non-empty answer would write a file with no
+    // air-quality index and `alertsKnown: false` in it. That file would then be
+    // the fixture every widget was reviewed against, and the AQI dial would
+    // have been developed against a permanent dash.
+    //
+    // So: keep the most recent snapshot, and print it once nothing new has
+    // arrived for a moment.
+    if (parser.isSet(dumpOption)) {
+        auto *service = new SnapshotService(&app);
+        service->configure(fixtureName);
+
+        const QString place = parser.value(placeOption);
+        const QString token = service->subscribe(place, {}, -1, -1);
+        if (token.isEmpty()) {
+            std::fprintf(stderr, "clima-daemon: could not resolve a place called \"%s\".\n",
+                         qPrintable(place));
+            return 6;
+        }
+
+        auto *settled = new QTimer(&app);
+        settled->setSingleShot(true);
+        settled->setInterval(750);
+
+        auto *latest = new QString;
+
+        QObject::connect(service, &SnapshotService::snapshotChanged, &app,
+                         [token, settled, latest](const QString &delivered, const QString &json) {
+                             if (delivered != token)
+                                 return;
+                             // The cold-start publish carries no reading at all.
+                             // subscribe() delivers it immediately so a widget
+                             // has a shape to bind to before the first fetch
+                             // lands; it is not something to record.
+                             if (json.contains(QLatin1String("\"state\":\"unknown\"")))
+                                 return;
+                             *latest = json;
+                             settled->start();
+                         });
+
+        QObject::connect(settled, &QTimer::timeout, &app, [latest]() {
+            std::printf("%s\n", qPrintable(*latest));
+            QCoreApplication::quit();
+        });
+
+        // Long enough for a live fetch over a slow link, and finite so that a
+        // recording script cannot hang a CI job. Exiting non-zero rather than
+        // writing a half-empty file is the point.
+        QTimer::singleShot(30000, &app, []() {
+            std::fprintf(stderr, "clima-daemon: no snapshot arrived within 30 s.\n");
+            QCoreApplication::exit(7);
+        });
+
+        return QCoreApplication::exec();
     }
 
     QDBusConnection bus = QDBusConnection::sessionBus();
