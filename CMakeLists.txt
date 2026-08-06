@@ -188,6 +188,12 @@ add_subdirectory(app)
 # running is exactly the app that shipped before this directory existed.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET Qt6::DBus)
     add_subdirectory(daemon)
+
+    # And the process that draws what it serves. Gated with the daemon rather
+    # than separately, because a widget host with nothing to read from is not a
+    # degraded feature — every number on its tiles comes over that bus, and it
+    # would come up, register nothing, and show ten skeletons.
+    add_subdirectory(widgets)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS
         "clima: Qt6::DBus was not found, so clima-daemon is not built and the "

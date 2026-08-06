@@ -28,12 +28,21 @@ repo="$(cd "$here/.." && pwd)"
 # the CMakeLists.txt that has to name them. The path is what appears in the
 # build file, so it is also what this greps for — see below.
 #
-# There are two because the component gallery is its own executable. Adding a
-# third means adding a line here; a module that is not listed is a module this
-# script silently approves of.
+# Three, because the component gallery and the desktop widget host are each
+# their own executable with their own QML module. Adding a fourth means adding a
+# line here; a module that is not listed is a module this script silently
+# approves of.
+#
+# widgets/ is checked for the files it OWNS. Its CMakeLists.txt also lists a
+# handful of app/qml/Clima/ files by absolute path — the presentation components
+# a tile shares with the app — and those are deliberately outside this check:
+# they are already covered by the app's own entry, and a second claim on them
+# here would report every one of them as "on disk but not listed" the moment the
+# widget host stopped using one.
 modules=(
     "app:qml/Clima"
     "gallery:qml/Clima/Gallery"
+    "widgets:qml/Clima/Widgets"
 )
 
 # Reported indented, because a bare column of filenames under an error line
