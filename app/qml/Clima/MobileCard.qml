@@ -102,15 +102,25 @@ Item {
                 tint: linkText.color
                 anchors.verticalCenter: parent.verticalCenter
             }
+        }
 
-            // Declared inside the Row, not beside it, so the hover region is
-            // the link and not the whole header. A pointer handler is not a
-            // visual item, so it takes no cell in the Row's layout.
-            //
-            // On the header this would tint the link from anywhere along a
-            // 350 px bar — promising a tap where there is nothing to tap.
-            HoverHandler { id: linkHover; cursorShape: Qt.PointingHandCursor }
-            TapHandler { onTapped: root.linkActivated() }
+        // Over the link row and not inside it, which is the difference between
+        // a target and a third column: a Row lays out every visual child it
+        // has, and this is one where the HoverHandler it replaced was not.
+        //
+        // The region is the link and not the whole header. On the header a
+        // hover would tint the link from anywhere along a 350 px bar, promising
+        // a tap where there is nothing to tap — which is why the handler was
+        // inside the Row to begin with.
+        //
+        // The row is 17 px tall, the height of the word in it. The target is
+        // 44, grown into the header band above and below, where there is
+        // nothing else to hit.
+        TouchTarget {
+            id: linkHover
+            area: linkRow
+            visible: linkRow.visible
+            onTapped: root.linkActivated()
         }
     }
 

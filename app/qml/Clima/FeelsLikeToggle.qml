@@ -61,9 +61,10 @@ Item {
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        onClicked: root.checked = !root.checked
+    // The switch is 22 px tall because a 44 px track beside a 12 px caption
+    // would be a control twice the height of the row it sits in. The target is
+    // 44 either way, and it grows into the header band's own padding.
+    TouchTarget {
+        onTapped: root.checked = !root.checked
     }
 }

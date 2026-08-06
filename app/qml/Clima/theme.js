@@ -512,10 +512,31 @@ var metric = {
     navHeight:        58,
     navSafeArea:      12,
 
-    // Where the content column stops growing on a tablet. The mobile shell
-    // runs at 834 px too, and a hero row stretched that wide puts the
-    // temperature and the condition at opposite ends of the screen.
-    mobileContentMax: 620
+    // The same nav turned on its side, for a tablet in landscape. 76 rather
+    // than 58, because a rail's constraint is the label's width where a bar's
+    // is its own height: "Monthly" at the axis size is 46 px, and 76 is the
+    // narrowest strip that clears it on both sides and still holds a 44 px
+    // target.
+    navRailWidth:     76,
+
+    // Where a single content column stops growing. The mobile shell runs at
+    // 834 px too, and a hero row stretched that wide puts the temperature and
+    // the condition at opposite ends of the screen. This is a cap per COLUMN,
+    // not per page: two columns are allowed 620 each.
+    mobileContentMax: 620,
+
+    // The smallest a control may be in either direction, in device-independent
+    // pixels. Not a rounded-up version of what the mouse needs — a pointer is
+    // a pixel and a fingertip's contact patch is about 8 mm, so every platform
+    // guideline that has measured it lands within a few px of the same number:
+    // Apple says 44, Google says 48 dp, the WCAG 2.2 target-size floor is 24
+    // and its enhanced level is 44.
+    //
+    // It applies to the TARGET and not to the mark. A dismiss cross stays 11 px
+    // wide because 44 px of drawn cross is a shape shouting at the reader; what
+    // grows is the invisible area around it, which is why raising this floor
+    // moves nothing on screen.
+    hitMin:           44
 };
 
 // Type sizes, as tokens rather than as a table in a document, because twelve
@@ -702,3 +723,4 @@ var ramp = {
         line: [{ p: 0.00, c: "#ffb98ede" }, { p: 1.00, c: "#ff8fd4ac" }]
     }
 };
+

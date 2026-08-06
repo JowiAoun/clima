@@ -25,16 +25,46 @@ Item {
     signal homeToggled()
 
     implicitWidth: bar.width
+
+    // Still 26, which is the height of the row this bar draws. The cells inside
+    // it are 44 and overflow it by 9 px top and bottom, into the section gap
+    // that is already there and that nothing else is aiming at.
+    //
+    // The alternative was to make the bar 44 and it moved every page in the app
+    // down by 18 px — a whole-page diff on eleven golden images to make room for
+    // air around two marks that had not changed size. The rule this file ended
+    // up on is the one TouchTarget states: the target grows, the layout does
+    // not. Here it could not be TouchTarget itself, because the two marks are
+    // too close together for two 44 px areas — so the cells grew instead, and
+    // only across.
     implicitHeight: 26
     height: implicitHeight
 
+    // ---- spacing is the touch fix here ---------------------------------------
+    //
+    // The chevron and the home marker are two different actions — open the
+    // place list, make this place home — and they used to sit 10 px apart, with
+    // a 14 px target and a 24 px one. Two 44 px targets need 88 px between their
+    // outer edges and cannot be conjured out of 48; growing them in place would
+    // have made each one steal half the other's taps, which is worse than
+    // leaving both small.
+    //
+    // So the cells are the floor and the spacing goes to zero, which puts 15 px
+    // of air between the name and the chevron where there were 10, and 25 px
+    // between the chevron and the home ring where there were 10. That reads as
+    // a deliberate separation of two unlike controls rather than as a gap — and
+    // it is the only part of this bar that moved. See `implicitHeight`.
     Row {
         id: bar
-        spacing: 10
+        spacing: 0
         anchors.verticalCenter: parent.verticalCenter
 
         Text {
             id: placeName
+            // The name keeps its own 10 px of air from the chevron cell, which
+            // the Row no longer provides. Right-padded rather than spaced,
+            // because the two gaps in this bar are now different on purpose.
+            rightPadding: 10
             text: root.label
             color: Theme.ink.primary
             font.pixelSize: Theme.type.sectionTitle
@@ -58,12 +88,14 @@ Item {
         // `Theme.motion.move` and not `view`: the chevron is one small object
         // travelling, not a screenful arriving.
         Item {
-            width: 14
-            height: 14
+            width: Theme.metric.hitMin
+            height: Theme.metric.hitMin
             anchors.verticalCenter: parent.verticalCenter
 
             Shape {
-                anchors.fill: parent
+                width: 14
+                height: 14
+                anchors.centerIn: parent
                 rotation: root.disclosed ? 180 : 0
                 Behavior on rotation {
                     NumberAnimation { duration: Theme.motion.move; easing.type: Easing.OutCubic }
@@ -94,12 +126,14 @@ Item {
         // A ring rather than a filled plate: a filled circle here would be the
         // only opaque thing on the page.
         Item {
-            width: 24
-            height: 24
+            width: Theme.metric.hitMin
+            height: Theme.metric.hitMin
             anchors.verticalCenter: parent.verticalCenter
 
             Rectangle {
-                anchors.fill: parent
+                width: 24
+                height: 24
+                anchors.centerIn: parent
                 radius: width / 2
                 color: homeHover.hovered ? Theme.surface.raised : "transparent"
                 border.width: 1

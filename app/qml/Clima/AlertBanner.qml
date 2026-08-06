@@ -151,7 +151,12 @@ Item {
             anchors.top: parent.top
             opacity: root.acknowledged ? 1 : 0
             visible: opacity > 0
-            implicitHeight: 38
+
+            // The floor. The collapsed strip IS the target — the whole thing is
+            // tappable and tapping it is how an acknowledged alert is read
+            // again — so here the control's size is the affordance and it grows
+            // rather than growing an invisible area around itself.
+            implicitHeight: Theme.metric.hitMin
 
             Behavior on opacity {
                 enabled: !Theme.stillness
@@ -261,11 +266,16 @@ Item {
                 }
 
                 // ---- dismiss ------------------------------------------------
-                // 32 px of target around an 11 px mark, which is larger than
-                // the mark needs and smaller than a finger wants. The touch
-                // floor is a separate piece of work — there is no
-                // `Theme.metric.hitMin` yet — and when it arrives this is one of
-                // the targets it will have to raise.
+                // 32 px of drawn control around an 11 px mark, and 44 px of
+                // target around that. The item stays 32 because it is what sets
+                // the head row's height, and a 44 px row would push the whole
+                // banner 12 px taller to hold a cross nobody wants bigger.
+                //
+                // The target grows past the item on all four sides. It is 6 px
+                // clear of the plate's right edge and well inside its top, which
+                // matters because the plate clips — and clipping in Qt Quick
+                // takes input with it, so a target that overflowed a clipped
+                // edge would silently be smaller than it says.
                 Item {
                     id: dismiss
                     width: 32
@@ -278,7 +288,7 @@ Item {
                         width: 22
                         height: 22
                         radius: 11
-                        color: dismissArea.containsMouse ? Theme.surface.raised : "transparent"
+                        color: dismissArea.hovered ? Theme.surface.raised : "transparent"
                         Behavior on color {
                             enabled: !Theme.stillness
                             ColorAnimation { duration: Theme.motion.tint }
@@ -300,11 +310,9 @@ Item {
                         }
                     }
 
-                    MouseArea {
+                    TouchTarget {
                         id: dismissArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: Alerts.acknowledge()
+                        onTapped: Alerts.acknowledge()
                     }
                 }
             }

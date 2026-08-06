@@ -89,6 +89,7 @@ set(clima_qml_files
     qml/Clima/SkyArc.qml
     qml/Clima/SunEventGlyph.qml
     qml/Clima/TabFillet.qml
+    qml/Clima/TouchTarget.qml
     qml/Clima/Theme.qml
     qml/Clima/TrendBadge.qml
     qml/Clima/Viewports.qml

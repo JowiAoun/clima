@@ -31,7 +31,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.controlRadius
-        color: hover.hovered ? Theme.control.pagerFillHover : Theme.control.pagerFill
+        color: pagerTarget.hovered ? Theme.control.pagerFillHover : Theme.control.pagerFill
         opacity: 0.94
         Behavior on color {
             ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
@@ -62,9 +62,17 @@ Item {
         }
     }
 
-    HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
-
-    TapHandler {
-        onTapped: if (root.enabledState) root.activated()
+    // 22 px of drawn button and 44 px of target. The plate stays narrow because
+    // it floats over a chart and a wider one would cover more of the series;
+    // what grows is the area around it, into the margin the pager already sits
+    // in. Declared after the Shape so it takes the taps, which is the only
+    // ordering that works — see TouchTarget.
+    // The hover it carries is the plate's too, rather than a second handler
+    // over the same control: with two, the pointing hand appeared 11 px before
+    // the plate lit up.
+    TouchTarget {
+        id: pagerTarget
+        enabled: root.enabledState
+        onTapped: root.activated()
     }
 }

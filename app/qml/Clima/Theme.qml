@@ -648,9 +648,12 @@ QtObject {
         readonly property int mobileCardPadV:   Tokens.metric.mobileCardPadV
         readonly property int navHeight:        Tokens.metric.navHeight
         readonly property int navSafeArea:      Tokens.metric.navSafeArea
+        readonly property int navRailWidth:     Tokens.metric.navRailWidth
         readonly property int mobileContentMax: Tokens.metric.mobileContentMax
+        readonly property int hitMin:           Tokens.metric.hitMin
     }
     readonly property MetricTokens metric: MetricTokens { }
+
 
     // ---- type --------------------------------------------------------------
     // `font.pixelSize` is an int in Qt and a fractional value fails object

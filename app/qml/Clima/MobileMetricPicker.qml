@@ -41,7 +41,13 @@ Item {
     Rectangle {
         id: button
         width: label.width + chevron.width + 26
-        height: 34
+
+        // The floor, not a number: this is a button a thumb aims at, and unlike
+        // a mark its size IS the affordance — a bigger button here is a better
+        // button, so the control grows rather than growing an invisible area
+        // around itself. It sits in a 44 px row, which is where 44 came from
+        // twice over.
+        height: Theme.metric.hitMin
         radius: Theme.metric.controlRadius
         color: root.open || hover.hovered ? Theme.surface.raised
                                           : Theme.surface.base
@@ -123,7 +129,12 @@ Item {
                     readonly property bool isCurrent: modelData.id === root.currentId
 
                     width: menuColumn.width
-                    height: 38
+
+                    // A menu row for the same reason the button is: the row is
+                    // the target and its height is what a reader is aiming at,
+                    // so ten of them are 60 px taller than they were and that
+                    // is the fix rather than a cost of it.
+                    height: Theme.metric.hitMin
                     color: optionHover.hovered ? Theme.surface.raised : "transparent"
 
                     Behavior on color {

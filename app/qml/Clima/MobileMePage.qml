@@ -51,7 +51,12 @@ MobilePage {
         signal activated()
 
         width: parent ? parent.width : 0
-        height: 42
+
+        // The floor, and it used to be 42. A settings row is a target whose
+        // size is its affordance, so two more pixels is the fix and not a
+        // workaround for one — which is the same call the metric picker's menu
+        // rows make, and the reason they are now the same height.
+        height: Theme.metric.hitMin
 
         Rectangle {
             anchors.fill: parent
@@ -112,6 +117,7 @@ MobilePage {
     }
 
     Text {
+        width: root.spanWidth(2)
         text: qsTr("Me")
         color: Theme.ink.primary
         font.pixelSize: Theme.type.sectionTitle
@@ -119,7 +125,7 @@ MobilePage {
     }
 
     MobileCard {
-        width: parent.width
+        width: root.spanWidth(1)
         title: qsTr("Appearance")
         content: Column {
             SettingRow {
@@ -154,7 +160,7 @@ MobilePage {
     }
 
     MobileCard {
-        width: parent.width
+        width: root.spanWidth(1)
         title: qsTr("Units")
         content: Column {
             SettingRow {
@@ -196,7 +202,7 @@ MobilePage {
     }
 
     MobileCard {
-        width: parent.width
+        width: root.spanWidth(1)
         title: qsTr("Places")
         content: Column {
             Repeater {
@@ -218,7 +224,7 @@ MobilePage {
     }
 
     MobileCard {
-        width: parent.width
+        width: root.spanWidth(1)
         title: qsTr("Data sources")
         content: Column {
             spacing: 12
@@ -283,7 +289,7 @@ MobilePage {
     // deserves to be told that by the screenshot rather than by the command
     // that produced it.
     Text {
-        width: parent.width
+        width: root.spanWidth(2)
         visible: Engine.fixtureMode
         text: qsTr("Showing the recorded “%1” fixture at its frozen clock. "
                  + "No network request was made for this forecast.").arg(Engine.fixtureName)
