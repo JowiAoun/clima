@@ -253,7 +253,20 @@ Rectangle {
     // disappearing never changes the tile's height. It is dim on purpose: this
     // is a caveat on the number above it, not a second reading.
 
+    // A scrim under it, because on a twelve-column hourly strip the bottom-right
+    // corner already has a temperature in it. Without one the two texts overlap
+    // and the tile reads as broken at exactly the moment it is trying to say
+    // something careful about its data.
+    Rectangle {
+        anchors.fill: age
+        anchors.margins: -3
+        radius: 3
+        color: Theme.overlay.readout
+        visible: age.visible
+    }
+
     Text {
+        id: age
         anchors.right: body.right
         anchors.bottom: body.bottom
         visible: root.stale && text !== ""

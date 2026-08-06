@@ -118,6 +118,9 @@ Window {
         id: shutter
         window: win
         grab: WidgetOptions.grab
+        film: WidgetOptions.film
+        frames: WidgetOptions.frames
+        every: WidgetOptions.every
     }
 
     Component.onCompleted: shutter.start()

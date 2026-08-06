@@ -97,6 +97,16 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     const QCommandLineOption grabOption(
         QStringLiteral("grab"), QStringLiteral("Render once, write a PNG, and exit."),
         QStringLiteral("file"));
+    const QCommandLineOption filmOption(
+        QStringLiteral("film"),
+        QStringLiteral("Write a numbered sequence of frames instead of one."),
+        QStringLiteral("prefix"));
+    const QCommandLineOption framesOption(
+        QStringLiteral("frames"), QStringLiteral("How many frames --film writes. Default 8."),
+        QStringLiteral("n"), QStringLiteral("8"));
+    const QCommandLineOption everyOption(
+        QStringLiteral("every"), QStringLiteral("Milliseconds between frames. Default 500."),
+        QStringLiteral("ms"), QStringLiteral("500"));
     const QCommandLineOption stillOption(
         QStringLiteral("still"), QStringLiteral("Hold every animation at its end state."));
     const QCommandLineOption windowedOption(
@@ -115,6 +125,9 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     parser.addOption(schemeOption);
     parser.addOption(snapshotOption);
     parser.addOption(grabOption);
+    parser.addOption(filmOption);
+    parser.addOption(framesOption);
+    parser.addOption(everyOption);
     parser.addOption(stillOption);
     parser.addOption(windowedOption);
     parser.addOption(listOption);
@@ -197,10 +210,23 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
 
     self->m_snapshotFile = parser.value(snapshotOption);
     self->m_grab         = parser.value(grabOption);
+    self->m_film         = parser.value(filmOption);
+    self->m_frames       = parser.value(framesOption).toInt();
+    self->m_every        = parser.value(everyOption).toInt();
+
+    if (self->m_frames < 1 || self->m_every < 1) {
+        std::fprintf(stderr, "clima-widget: --frames and --every take positive numbers.\n");
+        std::exit(2);
+    }
 
     // A capture holds still, for the same reason app/qml/Clima/Main.qml gives:
     // otherwise the shutter catches whichever frame of a reveal it happened to
     // land on, and two runs of the same command produce two different files.
-    self->m_still    = parser.isSet(stillOption) || !self->m_grab.isEmpty();
-    self->m_windowed = parser.isSet(windowedOption) || !self->m_grab.isEmpty();
+    // A single capture holds still so two runs of the same command produce the
+    // same file. A film does not, and must not: a contact sheet of eight
+    // identical frames is not a review of anything.
+    self->m_still    = parser.isSet(stillOption)
+        || (!self->m_grab.isEmpty() && self->m_film.isEmpty());
+    self->m_windowed = parser.isSet(windowedOption) || !self->m_grab.isEmpty()
+        || !self->m_film.isEmpty();
 }

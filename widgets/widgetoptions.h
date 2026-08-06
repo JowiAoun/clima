@@ -47,6 +47,15 @@ class WidgetOptions : public QObject
     Q_PROPERTY(bool still READ still CONSTANT)
     Q_PROPERTY(QString grab READ grab CONSTANT)
 
+    // A contact sheet rather than one frame. The app has the same three flags
+    // and they are here for a reason a tile makes sharper: the states worth
+    // looking at are the ones that arrive over TIME — a first snapshot landing,
+    // and a daemon going away under a tile that has to keep drawing. Neither is
+    // visible in a single shutter.
+    Q_PROPERTY(QString film READ film CONSTANT)
+    Q_PROPERTY(int frames READ frames CONSTANT)
+    Q_PROPERTY(int every READ every CONSTANT)
+
     // True when the window should be an ordinary decorated window rather than a
     // frameless surface for the shell to adopt. The GNOME extension spawns us
     // without it; a developer looking at a tile wants it.
@@ -67,6 +76,9 @@ public:
     [[nodiscard]] int         columns() const { return m_columns; }
     [[nodiscard]] bool        still() const { return m_still; }
     [[nodiscard]] QString     grab() const { return m_grab; }
+    [[nodiscard]] QString     film() const { return m_film; }
+    [[nodiscard]] int         frames() const { return m_frames; }
+    [[nodiscard]] int         every() const { return m_every; }
     [[nodiscard]] bool        windowed() const { return m_windowed; }
     [[nodiscard]] QString     snapshotFile() const { return m_snapshotFile; }
 
@@ -84,6 +96,9 @@ private:
     QString     m_scheme;
     QString     m_snapshotFile;
     QString     m_grab;
+    QString     m_film;
+    int         m_frames = 8;
+    int         m_every  = 500;
     int         m_columns  = 1;
     bool        m_still    = false;
     bool        m_windowed = false;
