@@ -50,8 +50,27 @@ mobile-me-light|app|390x844|--scheme light --viewport mobile --tab me
 mobile-night|app|390x844|--scheme dark --viewport mobile --sky night
 
 # ---- the tablet -------------------------------------------------------------
+#
+# Both orientations, because they are two different layouts and not one layout
+# at two sizes: portrait is two columns under a bottom bar, landscape is two
+# columns beside a left rail. Every tab is not worth photographing here — the
+# phone already covers what each page contains — but Me is, because it is the
+# one screen whose cards are all half-width and so the one where the second
+# column is the whole of what changed.
 tablet|app|834x1112|--scheme dark --viewport tablet
 tablet-light|app|834x1112|--scheme light --viewport tablet
+tablet-me|app|834x1112|--scheme dark --viewport tablet --tab me
+tablet-landscape|app|1112x834|--scheme dark --viewport tablet-landscape
+tablet-landscape-light|app|1112x834|--scheme light --viewport tablet-landscape
+tablet-landscape-hourly|app|1112x834|--scheme dark --viewport tablet-landscape --tab hourly
+
+# ---- the drawing tier -------------------------------------------------------
+#
+# A handheld builds half the star field and one constellation instead of three.
+# The night sky is the only place it shows, and it has to be photographed or the
+# claim that a reduced sky is the SAME sky with fewer stars — same seeds, same
+# positions — is a claim nobody ever checks.
+mobile-night-reduced|app|390x844|--scheme dark --viewport mobile --sky night --perf reduced
 
 # ---- severe weather ---------------------------------------------------------
 #
@@ -74,6 +93,20 @@ alert-mobile-light|app|390x844|--scheme light --viewport mobile --fixture seattl
 gallery-alerts|gallery|1400x1250|--scheme dark Banner
 gallery-alerts-light|gallery|1400x1250|--scheme light Banner
 gallery-severity-glyph|gallery|900x300|--scheme dark "Severity glyph"
+
+# ---- touch ------------------------------------------------------------------
+#
+# The overlay, over the screen it was switched on for. Nine defects came out of
+# the first run of it — a 14x14 disclosure chevron among them — and an image is
+# what stops the tenth being argued about: every rectangle here is green, and a
+# red one in a diff names the control and prints its size inside it.
+#
+# tst_hittargets is the assertion; this is the evidence. Neither replaces the
+# other: the test says a screen passes, the picture says what passing looks
+# like, and a change that made the scanner stop finding anything would pass the
+# test's count pin and show up here as an empty screen.
+gallery-touch-today|gallery|1200x1000|--scheme dark --viewport mobile --poke hits=1 "Today screen"
+gallery-touch-hourly|gallery|1200x1000|--scheme dark --viewport mobile --poke hits=1 "Hourly screen"
 
 # ---- the design system, as the gallery draws it -----------------------------
 # The palette page is the audit instrument; a change to any colour token shows
