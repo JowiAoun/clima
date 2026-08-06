@@ -5,10 +5,12 @@
 
 #include "daemonlink.h"
 #include "settings.h"
+#include "widgetclock.h"
 
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QCoreApplication>
+#include <QDateTime>
 #include <QSettings>
 #include <QVariantMap>
 
@@ -102,6 +104,10 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
         QStringLiteral("Show an ordinary decorated window rather than a bare surface."));
     const QCommandLineOption listOption(
         QStringLiteral("list"), QStringLiteral("Print the widget catalogue and exit."));
+    const QCommandLineOption nowOption(
+        QStringLiteral("now"),
+        QStringLiteral("Draw as though it were this instant (ISO 8601). For captures."),
+        QStringLiteral("iso"));
 
     parser.addOption(widgetOption);
     parser.addOption(placeOption);
@@ -112,8 +118,24 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     parser.addOption(stillOption);
     parser.addOption(windowedOption);
     parser.addOption(listOption);
+    parser.addOption(nowOption);
 
     parser.process(app);
+
+    // Before anything else reads a clock. Two things on a tile move without new
+    // data — the sun mark and the age footer — and both are correct behaviour
+    // that makes a screenshot different every time it is taken. See
+    // widgets/widgetclock.h.
+    const QString frozen = parser.value(nowOption);
+    if (!frozen.isEmpty()) {
+        const QDateTime instant = QDateTime::fromString(frozen, Qt::ISODate);
+        if (!instant.isValid()) {
+            std::fprintf(stderr, "clima-widget: --now takes an ISO 8601 instant, "
+                                 "for example 2026-08-06T15:00:00-07:00.\n");
+            std::exit(2);
+        }
+        clima::widgets::freezeClock(instant);
+    }
 
     const QVariantList catalogue = DaemonLink::instance()->catalogue();
 

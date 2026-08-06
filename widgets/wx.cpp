@@ -3,6 +3,8 @@
 
 #include "wx.h"
 
+#include "widgetclock.h"
+
 #include "libclima/domain/scales.h"
 #include "libclima/domain/weathercode.h"
 
@@ -194,8 +196,7 @@ int Wx::nowMinutesInZoneOf(const QVariant &iso) const
     if (!reference.isValid())
         return -1;
 
-    const QDateTime here = QDateTime::currentDateTimeUtc().toOffsetFromUtc(
-        reference.offsetFromUtc());
+    const QDateTime here = clima::widgets::now().toOffsetFromUtc(reference.offsetFromUtc());
     return here.time().hour() * 60 + here.time().minute();
 }
 

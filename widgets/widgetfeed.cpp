@@ -4,6 +4,7 @@
 #include "widgetfeed.h"
 
 #include "daemonlink.h"
+#include "widgetclock.h"
 
 #include <QDateTime>
 
@@ -106,7 +107,7 @@ int WidgetFeed::ageMinutes() const
     // Floored rather than rounded, so a reading taken 119 seconds ago is "1
     // minute" and never "2". A widget's age is a claim about the past and it
     // must not overstate it.
-    const qint64 seconds = m_fetchedAt.secsTo(QDateTime::currentDateTimeUtc());
+    const qint64 seconds = m_fetchedAt.secsTo(clima::widgets::now());
     return seconds < 0 ? 0 : int(seconds / 60);
 }
 

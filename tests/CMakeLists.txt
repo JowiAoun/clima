@@ -262,6 +262,12 @@ if(UNIX AND NOT APPLE)
         COMMAND ${CMAKE_SOURCE_DIR}/scripts/check-licences.sh
             $<TARGET_FILE:clima>
             $<$<BOOL:${CLIMA_BUILD_GALLERY}>:$<TARGET_FILE:clima-gallery>>
+            # And the two that ship beside it on Linux. The widget host is the
+            # one that matters here: it is a second Qt Quick binary, built from
+            # a second QML module, and a banned module added to that module
+            # would be invisible to a check that only ever looked at `clima`.
+            $<$<TARGET_EXISTS:clima-widget>:$<TARGET_FILE:clima-widget>>
+            $<$<TARGET_EXISTS:clima-daemon>:$<TARGET_FILE:clima-daemon>>
     )
 endif()
 

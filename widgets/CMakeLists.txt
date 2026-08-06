@@ -127,6 +127,8 @@ endforeach()
 set(clima_widget_sources
     daemonlink.h
     daemonlink.cpp
+    widgetclock.h
+    widgetclock.cpp
     widgetfeed.h
     widgetfeed.cpp
     widgetoptions.h
