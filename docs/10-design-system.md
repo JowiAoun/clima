@@ -673,23 +673,62 @@ Three layers, and each carries a different piece of the reading:
 
 ## 10.12 Viewports
 
-`prototype/hourly-overview/viewports.js` is the single source of truth for what
-counts as a phone. Both the app and the component gallery read it, and they must
-not disagree: a gallery that frames a component at 390 px while the app switches
-shells at 420 is reviewing a layout the app never renders.
+`Viewports.qml` is the single source of truth for what counts as a phone. Both
+the app and the component gallery read it, and they must not disagree: a gallery
+that frames a component at 390 px while the app switches shells at 420 is
+reviewing a layout the app never renders.
 
 | Class | From | Shell |
 |---|---|---|
-| `mobile` | 0 | `MobileShell` — five tabs under a bottom nav |
-| `tablet` | 600 | `MobileShell`, content column capped at `mobileContentMax` |
+| `mobile` | 0 | `MobileShell` — five tabs under a bottom nav, one column |
+| `tablet` | 600 | `MobileShell`, two columns past 720 px of content, a rail in landscape |
 | `desktop` | 1024 | `WeatherPage` — four sections in one scrolling column |
 
 **There is no mobile build.** The window width picks the shell and nothing else
 in the app knows which one is running. `--viewport <id>` pins a class and
 resizes to match; it is a review convenience, not a mode.
 
-**Tablet is not a third layout.** Ask `usesMobileShell()` rather than testing the
-id, so the day it does diverge there is one place that decides it.
+**Tablet is not a third layout**, and that survived the tablet work. The five
+destinations, the cards and the pages are the phone's; what a tablet has is more
+room, and what the room buys is answered by two functions beside
+`usesMobileShell()` rather than by it:
+
+| Question | Function | Answer |
+|---|---|---|
+| how many columns | `contentColumns(cls, usableWidth)` | 2 for a tablet with ≥ 720 px of content, else 1 |
+| where navigation lives | `navStyle(cls, w, h)` | `rail` for a tablet ≥ 900 px and wider than tall, else `bottom` |
+
+Keeping them separate is the point: `usesMobileShell` means "the five-tab
+shell", and folding either arrangement into it would make the answer to *which
+shell* depend on how wide the window happened to be when a page was loaded.
+
+**Width cannot always answer.** A tablet held in landscape is 1112 px across,
+which is past the desktop threshold, and it is not a desktop; a desktop window
+dragged to 1112 px is. Same number, two answers, nothing in the geometry to
+separate them. So `classOf` answers the question width *can* answer and two
+callers override it — `--viewport tablet-landscape` in review, and the platform
+at run time, where a handheld is never a desktop whatever its width. The
+`tablet-landscape` preset is marked `pinned` for exactly this reason and is the
+only one that is.
+
+### Spans, not a masonry pass
+
+A section states its width in columns — `root.spanWidth(1)` or `spanWidth(2)` —
+and `MobilePage` lays them out in a `Flow`. A full-width child takes a row to
+itself and two half-width children share one, which is the two-column
+arrangement with no code to arrange it; at one column every child is full width
+and a `Flow` *is* a `Column`, which is what let the phone's eight golden images
+stay byte for byte what they were.
+
+The hero, the hourly strip, the ten-day strip, the calendar, the map and the
+alert banner are always `span: 2`. Prose is always `span: 1` — the hourly
+screen's daily summary is half width on a tablet and leaves the right column
+empty, because the alternative is a 95-character measure, which is half again
+the widest line typography has ever called comfortable.
+
+What this is not is a masonry pass over `children` at resize time. §10.6 rules
+that out for the reason it always does: a layout computed from whatever happens
+to be in it is a layout nobody can predict from reading the file.
 
 ### What changes on a phone, and what does not
 
@@ -717,6 +756,34 @@ the width rather than a restyling. The five that exist:
   to hide, and this is not a junction — it is the edge where a floating bar
   stops and scrolling content begins, and it is the only cue that the content
   continues behind it.
+
+### 44 px, and what it applies to
+
+`Theme.metric.hitMin` is 44. Every platform guideline that has measured a
+fingertip lands within a few pixels of the same number — Apple says 44, Google
+says 48 dp, WCAG 2.2's enhanced target size is 44 — because the thing being
+measured is a contact patch of about 8 mm and not a design opinion.
+
+**It applies to the target and never to the mark.** A 44 px dismiss cross is a
+shape shouting at the reader. `TouchTarget.qml` is an invisible area that
+centres on its parent and grows to the floor in whichever direction the parent
+is short of it, so raising the floor moves nothing on screen. Where a control's
+size genuinely *is* its affordance — a settings row, a menu item, a collapsed
+alert strip, a button — the control grows instead, because a bigger surface to
+aim at is a better one.
+
+Neighbours are the case neither answer solves. Two marks 29 px apart cannot both
+have a 44 px target, and growing them anyway means each steals half the other's
+taps — which is worse than leaving both small. The answer there is to move them
+apart, and `LocationBar` is where it came up: its disclosure chevron and its
+home toggle are two different actions that sat 10 px apart with a 14 px target
+and a 24 px one.
+
+The audit is `tests/qml/tst_hittargets.qml`, which measures every tappable area
+on every screen the mobile shell reaches, and the gallery's **Touch targets**
+toggle, which draws them. The first run of the overlay found nine, including a
+14 × 14 disclosure chevron on every phone screen in the app. See
+`docs/known-gaps.md` for what it deliberately does not measure.
 
 ### Two more surfaces to defend
 

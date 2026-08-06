@@ -254,6 +254,13 @@ The Plasma applet and GNOME extension are exactly why `libclima` is MPL-2.0 and 
 
 - Every chart exposes an accessible data table; nothing is colour-only (weather severity
   gets shape + label, colour-blind-safe palettes, tested for deuteranopia/protanopia).
+- **No target smaller than `Theme.metric.hitMin` (44 px) in either direction.** It is a
+  floor on the target, not on the mark: `TouchTarget.qml` grows an invisible area around a
+  control that should stay small, and a control whose size *is* its affordance grows
+  instead. Two audits enforce it — `tests/qml/tst_hittargets.qml` walks every screen the
+  mobile shell reaches and fails on anything under the floor, and the gallery's **Touch
+  targets** overlay draws them for review. Neither replaces the other: the test says a
+  screen passes, the picture says what passing looks like.
 - Full keyboard navigation including chart scrubbing and radar timeline.
 - Respect `prefers-reduced-motion` equivalents; all animation is disable-able.
 - Qt Linguist `.ts` catalogues; translation via Weblate. WMO code → localised condition
