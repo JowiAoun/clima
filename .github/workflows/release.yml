@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     container: debian:trixie
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install the build dependencies
         run: |
@@ -83,7 +83,7 @@ jobs:
       - name: Package
         run: cd build && cpack -G DEB
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: deb
           path: build/*.deb
@@ -99,7 +99,7 @@ jobs:
     name: .flatpak
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install flatpak-builder
         run: |
@@ -114,7 +114,7 @@ jobs:
       - name: Build the bundle
         run: scripts/flatpak.sh bundle
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: flatpak
           path: build/*.flatpak
@@ -139,7 +139,7 @@ jobs:
     runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: jurplel/install-qt-action@v4
         with:
@@ -189,7 +189,7 @@ jobs:
             --desktop-file AppDir/usr/share/applications/io.github.JowiAoun.Clima.desktop \
             --icon-file packaging/icons/clima-256.png
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: appimage
           path: '*.AppImage'
@@ -206,7 +206,7 @@ jobs:
     name: .msi and .zip (windows x64)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: jurplel/install-qt-action@v4
         with:
@@ -257,7 +257,7 @@ jobs:
             -bindpath "icons=packaging\icons" `
             -o "clima-$env:CLIMA_RELEASE_VERSION-windows-x64.msi"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows
           path: |
@@ -274,9 +274,9 @@ jobs:
     # not take the release with it. The step below reports what arrived.
     if: always()
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: cachix/install-nix-action@v27
+      - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
@@ -292,7 +292,7 @@ jobs:
           nix develop --command scripts/licence-bundle.sh meta/THIRD-PARTY-LICENCES.txt
           cp packaging/QT-SOURCE-OFFER.txt meta/
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: incoming
 
@@ -326,7 +326,7 @@ jobs:
       - name: Checksums
         run: cd dist && sha256sum -- * > SHA256SUMS && cat SHA256SUMS
 
-      - uses: actions/attest-build-provenance@v2
+      - uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             dist/*.deb
