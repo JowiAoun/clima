@@ -1,0 +1,128 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The Flatpak manifest. This is the P0 channel: docs/07-packaging.md §7.1 makes
+# Flathub the primary Linux route, and the reason is Ubuntu 24.04, which ships
+# Qt 6.4.2 and can therefore never run a build of this app made against its own
+# libraries. A Flatpak brings its own Qt and does not care.
+#
+# Build and run it with scripts/flatpak.sh, which wraps the three
+# flatpak-builder incantations worth remembering.
+#
+# ==== the runtime version, and a correction ==================================
+#
+# docs/07-packaging.md §7.1 says `org.kde.Platform` at Qt >= 6.8, and the plan
+# this work follows said `org.kde.Platform//6.8` outright. Measured against
+# Flathub on 2026-08-05, that branch does not exist: the published branches are
+# 5.15-25.08, 6.9, 6.10 and 6.11. KDE retires runtime branches as they age, so
+# a manifest pinned to our *compile* floor would not build at all.
+#
+# 6.11 rather than 6.9 or 6.10, and the reason is not "newest is best". It is
+# the Qt the flake pins, so it is the Qt every test in this repository and
+# every one of the 46 golden images was produced against. Shipping a Flatpak
+# built on a runtime nobody has tested against, in order to be conservative,
+# gets the risk exactly backwards.
+#
+# This number needs looking at on every KDE runtime release, and the failure
+# mode when it goes stale is a Flathub build that stops rather than an app that
+# misbehaves. That is the good kind of failure.
+id: io.github.JowiAoun.Clima
+
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+
+command: clima
+
+# ==== the scalable icon does not go in ========================================
+#
+# packaging/CMakeLists.txt installs clima.svg to hicolor/scalable/apps, which is
+# correct for a .deb and for a source install, and fatal here. flatpak-builder
+# validates every icon it exports with flatpak-validate-icon, that tool loads
+# images through gdk-pixbuf, and librsvg removed its gdk-pixbuf loader in 2.58.
+# So on any current system the SVG comes back "Format not recognized" and the
+# export fails after everything has already compiled.
+#
+# Measured on 2026-08-05, and it is worth being precise about what was measured,
+# because the obvious diagnosis is wrong. This is NOT a Nix artefact: the host's
+# own /usr/libexec/flatpak-validate-icon rejects the same file, and accepts the
+# 512 px PNG beside it. Nothing is wrong with the drawing.
+#
+# Dropping it costs nothing a user sees. Flatpak's icon pipeline is PNG-based —
+# it exports the hicolor PNGs above into the host's icon theme, and 512 px is
+# larger than any shell asks for. The scalable icon still ships in the .deb.
+cleanup:
+  - /share/icons/hicolor/scalable
+
+# ==== the sandbox ============================================================
+#
+# Deliberately short, and every line has to justify itself, because these are
+# holes in a sandbox and a reviewer on Flathub will ask about each one.
+#
+# What is NOT here matters more than what is:
+#
+#   * No --filesystem=host, and no --filesystem of any kind. This app reads no
+#     user file and writes none. Its cache and its settings live in
+#     ~/.var/app/io.github.JowiAoun.Clima, which the sandbox provides without
+#     being asked, and QStandardPaths resolves to it with no code of ours
+#     knowing the difference.
+#
+#   * No --talk-name for the portals, contrary to docs/07-packaging.md §7.2.
+#     Flatpak's default policy already permits org.freedesktop.portal.*; a
+#     manifest that lists it is stating a permission it was given anyway. That
+#     matters because SystemAppearance reads the colour scheme over the portal
+#     and it works in the sandbox today with nothing declared here.
+#
+#   * No --talk-name=org.kde.StatusNotifierWatcher yet. The tray is W7a and the
+#     permission arrives with the feature; a sandbox hole opened in advance of
+#     the code that needs it is a hole nobody remembers to close if the feature
+#     is dropped.
+finish-args:
+  # The forecast. This is the only thing the app sends anywhere, and it sends
+  # a coordinate and receives JSON — see libclima/net/httpclient.h for the
+  # User-Agent policy that goes with it.
+  - --share=network
+
+  # Wayland first, X11 as the fallback, and --share=ipc with it: X11 shared
+  # memory is what MIT-SHM needs, and without it an X11 session falls back to
+  # sending every frame over the socket. --device=dri is the GPU, and this app
+  # is a Qt Quick scene graph — without it every frame is rendered on the CPU.
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --device=dri
+
+modules:
+  - name: clima
+    buildsystem: cmake-ninja
+
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+
+      # Everything that is not the product. The gallery is a storybook, the
+      # dev tools are the --grab and --film harnesses, and the tests are not
+      # run from inside a Flatpak. Off here is roughly 1,100 lines of QML and
+      # the whole of app/devtools against the <15 MB budget in
+      # docs/03-tech-stack.md §3.4.
+      - -DCLIMA_BUILD_TESTS=OFF
+      - -DCLIMA_BUILD_GALLERY=OFF
+      - -DCLIMA_DEV_TOOLS=OFF
+
+    # No build-args: --share=network, and that is a property of the build
+    # rather than a setting. D8 in docs/03-tech-stack.md rules out Conan and
+    # vcpkg so that a packager can build from what they already have, which
+    # means this configure step fetches nothing. Flathub requires exactly that
+    # and it costs us nothing to comply.
+    sources:
+      # A directory source builds the working tree, which is what makes
+      # `scripts/flatpak.sh run` a thing you can do to a branch before pushing
+      # it. The Flathub manifest is a separate file in a separate repository
+      # (flathub/io.github.JowiAoun.Clima) and uses a `git` source pinned to a
+      # tag and a commit, because a published build has to be reproducible from
+      # something immutable. This one is for us.
+      - type: dir
+        path: ../..
+        skip:
+          - build
+          - .git
+          - .worktree
