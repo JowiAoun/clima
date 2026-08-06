@@ -254,3 +254,34 @@ else()
         "clima: no objdump found, so the binary-level no-GUI test is not registered. "
         "The configure-time guard in cmake/ClimaEngineGuard.cmake still applies.")
 endif()
+
+# ---- and the opposite question, asked of the widget host ---------------------
+#
+# `engine_has_no_gui` above asks whether the engine reached a windowing toolkit.
+# This asks whether a *drawing* process reached the engine's fetching half, which
+# is the same architectural rule from the other end: one process fetches and
+# every other one reads from it over the bus.
+#
+# It is a symbol check and not an `ldd`, and cmake/ClimaNoEngineSymbolCheck.cmake
+# opens with why: libclima is a static archive, so there is no shared object to
+# look for and DT_NEEDED records nothing about which members were pulled in. What
+# a static link leaves behind is a symbol.
+#
+# Registered here rather than in widgets/CMakeLists.txt because enable_testing()
+# runs from the top-level directory after that one is entered, so an add_test()
+# there registers nothing at all — a guard that is silently absent from a green
+# ctest run.
+if(TARGET clima-widget)
+    find_program(CLIMA_NM NAMES nm llvm-nm)
+    if(CLIMA_NM)
+        add_test(NAME widget_has_no_engine
+            COMMAND ${CMAKE_COMMAND}
+                -DCLIMA_BINARY=$<TARGET_FILE:clima-widget>
+                -DCLIMA_NM=${CLIMA_NM}
+                -P ${CMAKE_SOURCE_DIR}/cmake/ClimaNoEngineSymbolCheck.cmake
+        )
+    else()
+        message(STATUS
+            "clima: no nm found, so the widget host's link line is unchecked in this build.")
+    endif()
+endif()
