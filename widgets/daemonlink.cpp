@@ -379,6 +379,25 @@ void DaemonLink::resubscribe(WidgetFeed *feed)
 
     m_byToken.insert(token, feed);
     m_tokens.insert(feed, token);
+
+    // ---- and now the first snapshot, pulled rather than waited for ----------
+    //
+    // The match rule is in place, so this is the first moment anything the
+    // daemon emits could reach us. The daemon used to push one snapshot on
+    // subscribe and it could not work: this process was blocked in the
+    // Subscribe call while that push went out, and AddMatch is itself a round
+    // trip. Every tile came up blank against a live daemon while `gdbus
+    // monitor` showed the signals going past.
+    //
+    // One extra call at startup, once per tile, against a local process. That
+    // buys a deterministic first paint, which is worth more than the round trip
+    // costs — and it is the same arguments, so the daemon answers it out of the
+    // memory it already filled for the subscription.
+    const QDBusReply<QString> first =
+        daemon.call(QStringLiteral("GetSnapshot"), feed->place(), feed->fields(), feed->hours(),
+                    feed->days());
+    if (first.isValid() && !first.value().isEmpty())
+        deliver(feed, first.value().toUtf8());
 }
 
 void DaemonLink::dropSubscription(WidgetFeed *feed)

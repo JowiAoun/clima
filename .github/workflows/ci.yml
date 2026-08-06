@@ -226,6 +226,23 @@ jobs:
       - name: QML module file lists
         run: nix develop --command bash scripts/check-qml-files.sh
 
+      # The GNOME Shell extension, as far as a runner can reach it: both modules
+      # parse as ES modules, the D-Bus introspection XML parses and matches what
+      # the extension calls, metadata.json is well formed and the GSettings
+      # schema compiles --strict.
+      #
+      # gjs comes from apt rather than from the devshell, and the mutter typelib
+      # is absent on a runner — so the WaylandClient check SKIPS here and the
+      # script says so. That is the one assertion that needs a GNOME, and it is
+      # exactly why scripts/shell-probe.sh is a manual acceptance test: standing
+      # a shell up on a runner would test that stack rather than the one users
+      # have.
+      - name: install gjs
+        run: sudo apt-get update && sudo apt-get install -y gjs
+
+      - name: GNOME Shell extension
+        run: nix develop --command bash scripts/check-extension.sh
+
       # ---- there is deliberately no clang-format step here --------------------
       #
       # Measured before deciding, over every .cpp and .h in the tree:

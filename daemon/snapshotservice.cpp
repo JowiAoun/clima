@@ -256,17 +256,26 @@ QString SnapshotService::subscribe(const QString    &placeId,
 
     ensureWatched(key);
 
-    // Deliver once, on a return to the event loop, so a subscriber that
-    // connects to the signal after this call still gets its first snapshot
-    // without having to also call GetSnapshot.
-    QTimer::singleShot(0, this, [this, token]() {
-        const auto it = m_subscriptions.constFind(token);
-        if (it == m_subscriptions.cend())
-            return;
-        const QByteArray json = snapshot(it->placeId, it->mask.fields(), it->hours, it->days);
-        if (!json.isEmpty())
-            Q_EMIT snapshotChanged(token, QString::fromUtf8(json));
-    });
+    // ---- there is deliberately no first publish here ------------------------
+    //
+    // There used to be: a QTimer::singleShot(0) that emitted one snapshot on the
+    // next return to the event loop, so that "a subscriber which connects to the
+    // signal after this call still gets its first snapshot". That does not work,
+    // and the way it fails is invisible from this side.
+    //
+    // The subscriber is blocked in this method call. It cannot add its match
+    // rule until the reply reaches it, and adding one is itself a round trip to
+    // the bus daemon — while singleShot(0) fires here as soon as the reply is
+    // *written*. So the race is not close: the first snapshot is normally
+    // emitted before anybody is listening for it, and a widget then shows its
+    // waiting skeleton until the next poll five minutes later.
+    //
+    // Measured, not reasoned about. Every tile in clima-widget came up blank
+    // against a live daemon while `gdbus monitor` showed the signals going out.
+    //
+    // The subscriber calls GetSnapshot once after its match rule is in place,
+    // which is deterministic and is one call it is already making a connection
+    // for. See DaemonLink::resubscribe.
 
     return token;
 }
