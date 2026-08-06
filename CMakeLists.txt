@@ -166,6 +166,23 @@ add_subdirectory(libclima)
 
 add_subdirectory(app)
 
+# The daemon that widgets and the tray read from. Gated twice, and both gates
+# are real: the whole thing is a session-bus service, and Windows has no
+# session bus, so on Windows this is not a feature that is switched off but a
+# concept that does not exist. A Linux build without Qt DBus is the same
+# situation as a Linux build without Qt Positioning — the app is complete, and
+# one optional thing beside it is not built.
+#
+# The app does not link it and does not know about it. A desktop with no daemon
+# running is exactly the app that shipped before this directory existed.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET Qt6::DBus)
+    add_subdirectory(daemon)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(STATUS
+        "clima: Qt6::DBus was not found, so clima-daemon is not built and the "
+        "desktop widgets have nothing to read from. The app is unaffected.")
+endif()
+
 # The component gallery is a separate executable and not a mode of the app, so
 # `CLIMA_BUILD_GALLERY=OFF` is a directory that is never entered rather than a
 # preprocessor symbol threaded through the product. That is the whole point of

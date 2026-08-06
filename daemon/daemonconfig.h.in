@@ -1,0 +1,28 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Generated from daemon/daemonconfig.h.in by CMake. Do not edit the copy in
+// the build directory.
+//
+// The daemon's three names, all derived from CLIMA_APP_ID so that a rebrand
+// stays the twenty-line change app/climaconfig.h.in promises. The object path
+// is here rather than assembled in C++ because it is the app ID with its dots
+// turned into slashes, and doing that at run time would mean a bug in it shows
+// up as a service that registers and answers nothing.
+//
+// The trailing 1 on the interface is the D-Bus convention for a version, and
+// it is not the same number as the wire schema in libclima/wire/snapshot.h:
+// this one changes when a *method* changes shape, that one when the JSON does.
+// Ask SchemaVersion() for the second.
+#pragma once
+
+#define CLIMA_DAEMON_SERVICE   "@CLIMA_APP_ID@.Daemon"
+#define CLIMA_DAEMON_PATH      "@CLIMA_DAEMON_PATH@"
+#define CLIMA_DAEMON_INTERFACE "@CLIMA_APP_ID@.Daemon1"
+
+// Repeated from app/climaconfig.h.in rather than included from it, so that the
+// daemon does not reach into app/ for two strings and acquire its include path
+// along with them. Both are generated from the same CMake variables.
+#define CLIMA_APP_ID   "@CLIMA_APP_ID@"
+#define CLIMA_VERSION  "@PROJECT_VERSION@"
+#define CLIMA_APP_NAME "@PROJECT_NAME@"
