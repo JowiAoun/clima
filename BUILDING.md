@@ -78,11 +78,24 @@ carries its own Qt — see [`docs/known-gaps.md`](docs/known-gaps.md).
 | `CLIMA_APP_ID` | `io.github.JowiAoun.Clima` | Reverse-DNS id: desktop file, AppStream, icon name, settings path. |
 | `CLIMA_CONTACT` | the issue tracker | Goes in the outbound User-Agent. **Packagers should override this** — a rate-limit complaint about your rebuild should reach you. |
 | `CLIMA_MAINTAINER` | a noreply address | The Debian `Maintainer` field. |
+| `CLIMA_INSTALL_AUTOSTART` | `ON` | Installs the daemon's entry into `/etc/xdg/autostart` — an absolute path, because the XDG search path is a fixed list. `OFF` for a sandboxed or staged install that cannot write there; the Flatpak passes it. |
 
-Two optional Qt modules are found if present and compiled out if not:
-**Qt Positioning** (the "use my location" button; without it the user searches
-by name) and **Qt D-Bus** (reads the desktop's colour scheme over the XDG
-portal; without it `QStyleHints` answers instead).
+Three optional dependencies are found if present and compiled out if not:
+
+| | What it buys | Without it |
+|---|---|---|
+| **Qt Positioning** | the "use my location" button | the user searches by name |
+| **Qt D-Bus** | the desktop's colour scheme over the XDG portal | `QStyleHints` answers instead |
+| **layer-shell-qt** + `wayland-client` | `clima-widget --pin`: the tiles pin themselves under your windows on KDE Plasma, Sway, Hyprland and every other wlroots compositor | `--pin` says so and the tiles are an ordinary window. GNOME is unaffected — its shell extension does the pinning, and mutter implements no such protocol anyway. |
+
+```sh
+sudo apt install liblayershellqt6-dev libwayland-dev     # Debian 13 / Ubuntu 26.04+
+sudo dnf install layer-shell-qt-devel wayland-devel      # Fedora
+sudo pacman -S layer-shell-qt wayland                    # Arch
+```
+
+The configure step prints which way it went, so a build that quietly lost the
+feature says so at the top rather than at the first `--pin`.
 
 ## Packaging
 

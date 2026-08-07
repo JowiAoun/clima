@@ -7,13 +7,21 @@
 # ---- who this is for --------------------------------------------------------
 #
 # On GNOME the tiles are launched and pinned by the shell extension, and this
-# entry is not how anybody gets them. It is for everywhere else: KDE, XFCE,
-# Sway, a wlroots compositor — where `clima-widget` today comes up as an
-# ordinary window that the user places themselves.
+# entry is not how anybody gets them. It is for everywhere else: KDE, Sway,
+# Hyprland, XFCE.
 #
-# That is a real limitation and packaging/plasma/README.md says why rather than
-# leaving it to be discovered. It is also genuinely useful in the meantime: the
-# tiles work, they read from the daemon, and they survive it going away.
+# `Exec` carries no flags because it does not need any. `--pin` defaults to
+# `auto`, so on a compositor that implements zwlr_layer_shell_v1 — KWin and
+# every wlroots compositor — starting this from the application menu produces
+# tiles pinned to the desktop, top-right, under every window. Where the
+# protocol is absent it produces an ordinary window instead, which is what an
+# X11 desktop gets and what a GNOME user gets if they start this by hand rather
+# than enabling the extension. See packaging/plasma/README.md.
+#
+# There is deliberately no autostart entry beside this one. The daemon
+# autostarts because it is a service; whether weather tiles appear on somebody's
+# desktop at every login is their decision, and it is a copy of this file into
+# ~/.config/autostart/.
 #
 # ---- the filename -----------------------------------------------------------
 #

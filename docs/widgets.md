@@ -315,12 +315,40 @@ defines a card, which is exactly the premise a wallpaper removes.
 | `clima-widget` and the ten tiles | Rendered against four recorded snapshots in both schemes; `tst_widgets` asserts the catalogue, the dispatch and the module list agree, plus every `Wx` boundary |
 | The link-line guard | `widget_has_no_engine`, verified by injecting the defect |
 | The GNOME extension | `scripts/check-extension.sh`: both modules parse, the introspection XML matches what it calls, and every `Meta.WaylandClient` method it calls exists on this machine's mutter. Verified by injecting both defects. |
+| Pinning on KDE and wlroots | `scripts/check-layer-shell.sh`, in CI: a real headless wlroots compositor, six assertions, one of which is the same binary with `--pin off` failing them |
 
 ```sh
 clima-widget --list
 clima-widget --snapshot tests/fixtures/wire/seattle.json --columns 2 \
              --widget current-conditions --widget alerts --grab tiles.png
+clima-widget --pin on --anchor bottom-right --margin 16
 ```
+
+### The second mechanism
+
+The tiles reach a desktop two ways, and which one is used is a property of the
+compositor rather than a build option.
+
+| | GNOME | KDE, Sway, Hyprland, Wayfire, river, labwc |
+|---|---|---|
+| Mechanism | the shell adopts our window | we ask for a layer surface |
+| Protocol | none — mutter exposes no such thing | `zwlr_layer_shell_v1` |
+| What ships | ~600 lines of GJS, separately, from extensions.gnome.org | nothing extra |
+| Identity | an inherited socket fd, so we must be *spawned* | an ordinary Wayland client |
+| Placement | `make_dock()` + `lower()` + saved geometry | `--anchor`, `--margin`, `--layer` |
+| Measured on | GNOME Shell 46, by hand | headless wlroots, in CI |
+
+Both draw the same tiles from the same binary. The GNOME column is the
+expensive one and it is expensive because of the first row: where a protocol
+exists, none of the rest of that column is needed.
+
+**A guard that matters more than it looks.** The availability probe in
+`widgets/layershell.cpp` refuses to run when `WAYLAND_SOCKET` is set, and that
+is not tidiness. `wl_display_connect(nullptr)` reads that variable, takes
+ownership of the descriptor and unsets it — and that descriptor is precisely
+the one the GNOME extension handed us to establish who we are. Probing there
+would consume the handshake, leave Qt with no socket to connect to, and produce
+tiles that never appear under the one shell that spawns us.
 
 **Not built, and each for a stated reason.**
 
@@ -330,17 +358,16 @@ clima-widget --snapshot tests/fixtures/wire/seattle.json --columns 2 \
   without a shell. The `shell-version` list declares 45 to 48 and only 46 was
   measured; that is a claim to re-check before the first upload.
 
-- **The Plasma applet.** The plan called it the cheapest of the three because
-  "a Plasma applet *is* QML"; that is wrong, and `packaging/plasma/README.md`
-  has the correction. Every tile reads `WidgetFeed`, `DaemonLink`, `Wx` and
-  `Units`, which are C++ types a plasmoid cannot import unless the module is
-  installed as a shared QML plugin — and Plasma 6 ships no generic D-Bus
-  binding for QML, so a pure-QML second implementation is not available either.
-  The better answer is `layer-shell-qt`, which pins the *same binary* on KWin
-  and on every wlroots compositor with no applet at all. It is not built
-  because mutter does not implement `wlr-layer-shell`, so on this machine it
-  could have been compiled and never once run — and this document exists
-  because that is not how this project builds on a mechanism.
+- **The Plasma applet.** Not built and not going to be. The plan called it the
+  cheapest of the three because "a Plasma applet *is* QML"; that is wrong, and
+  `packaging/plasma/README.md` has the correction. Every tile reads
+  `WidgetFeed`, `DaemonLink`, `Wx` and `Units`, which are C++ types a plasmoid
+  cannot import unless the module is installed as a shared QML plugin — and
+  Plasma 6 ships no generic D-Bus binding for QML, so a pure-QML second
+  implementation is not available either. **`--pin` is what KDE gets instead**,
+  and it is a better outcome than an applet: the same binary, the same tiles,
+  and every wlroots compositor for free. It is in the table above rather than
+  here.
 
 - **The SNI tray.** Dropped rather than deferred. It was in the plan as the
   cheap validator for the wire schema, and the schema now has two independent

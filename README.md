@@ -32,11 +32,12 @@ what the app actually draws.
   XDG portal.
 - **Phone, tablet and desktop layouts** — one product, three arrangements,
   chosen by the width of the window.
-- **Ten desktop widgets**, drawn from the same components as the app, pinned to
-  the GNOME desktop by an extension that draws no weather itself. One process
-  fetches; every tile and the top-bar indicator read from it over the session
-  bus, so a desktop full of widgets is one client of the forecast service and
-  not eight.
+- **Ten desktop widgets**, drawn from the same components as the app, pinned
+  under your windows on GNOME by a shell extension that draws no weather itself,
+  and on KDE, Sway, Hyprland and every other wlroots compositor by the tiles
+  asking for it directly. One process fetches; every tile and the top-bar
+  indicator read from it over the session bus, so a desktop full of widgets is
+  one client of the forecast service and not eight.
 - **Offline-first.** It renders from its cache and reconciles with the network,
   so a service being down is never an empty screen.
 - **No ads, no news feed, no telemetry, no account, no API key.**
@@ -54,10 +55,10 @@ if it were a feature list is the thing this project is trying not to be.
 - **The Windows build is unsigned**, so SmartScreen warns on first run.
 - **Android is plumbed and has never run on a device.** The gate is delivering
   an alert to a sleeping phone, which Qt has no answer for.
-- **The widgets pin themselves on GNOME only.** Everywhere else they run as an
-  ordinary window you place yourself. The answer for KDE, Sway and Hyprland is
-  `layer-shell-qt` on the same binary — `packaging/plasma/README.md` explains
-  why it is not built rather than why it is coming.
+- **The widgets have never been pinned on a KDE session.** They pin themselves
+  on GNOME, which was measured by hand, and on wlroots, which is measured in CI
+  against a headless compositor. KWin implements the same protocol and nobody
+  has run it there.
 
 All six, with what would close them: [`docs/known-gaps.md`](docs/known-gaps.md).
 
@@ -110,10 +111,12 @@ and stronger in another, since it names the source revision.
 | **Desktop** — one scrolling column, the chart card open on Overview <br> ![](docs/images/desktop.png) | **Phone** — five destinations under a nav bar <br> ![](docs/images/phone.png) |
 | **Tablet** — two content columns, bottom bar <br> ![](docs/images/tablet.png) | **Tablet, turned** — the nav becomes a left rail <br> ![](docs/images/tablet-landscape.png) |
 
-**Desktop widgets** — six of the ten, on a GNOME desktop. The extension launches
+**Desktop widgets** — six of the ten. On GNOME a shell extension launches
 Clima's own Qt process and pins its window below everything else; it draws none
-of this itself, because GNOME Shell cannot host a QML surface.
-[`docs/widgets.md`](docs/widgets.md) has the mechanism and the measurements.
+of this itself, because GNOME Shell cannot host a QML surface. On KDE and every
+wlroots compositor the same binary asks for a desktop-layer surface and there is
+no extension at all. [`docs/widgets.md`](docs/widgets.md) has both mechanisms
+and the measurements.
 
 ![](docs/images/widgets.png)
 

@@ -115,6 +115,42 @@ the gallery should keep the constant.
 
 ---
 
+## The desktop widgets have never been pinned on a KDE session
+
+**Status: two mechanisms, one measured by hand, one measured in CI, and neither
+measurement was taken on Plasma.**
+
+The tiles reach a desktop two different ways and both of them work:
+
+- **GNOME.** A shell extension spawns `clima-widget`, adopts the window,
+  re-types it as a dock and lowers it. Mutter exposes no protocol for this, so
+  there is no other way in. Measured by hand on GNOME Shell 46, Wayland — see
+  `docs/widgets.md`.
+- **Everywhere else.** `clima-widget --pin` asks the compositor for a
+  `zwlr_layer_shell_v1` surface and places itself. Measured in CI, against a
+  real headless wlroots compositor, by `scripts/check-layer-shell.sh`.
+
+The gap is in the second row. **wlroots is not KWin.** It is the reference
+implementation of that protocol, KWin was written against the same protocol, and
+the surface `clima-widget` creates uses nothing outside version 1 of it — which
+is a good argument and is not a measurement. `docs/widgets.md` exists because
+the GNOME mechanism was measured before anything was built on it, and the same
+standard applies here.
+
+Two smaller ones travel with it. The GNOME extension declares
+`shell-version` 45 to 48 and only 46 has been run, which is a claim to re-check
+before the first upload to extensions.gnome.org. And the monitor-hotplug
+recovery in `widgets/layershell.cpp` — unplug the screen a pinned surface lives
+on and the tiles come back on another one — has been exercised against sway's
+`output … unplug`, which is a developer command, not a cable.
+
+**What closes it:** `clima-widget --pin on` on a Plasma 6 session and on one
+other wlroots compositor that is not sway, with the results written into
+`packaging/plasma/README.md`. Nothing is expected to need changing; what is
+missing is somebody having looked.
+
+---
+
 ## The Windows build is unsigned
 
 **Status: shipped this way, deliberately, because the alternative is worse.**
