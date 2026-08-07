@@ -101,6 +101,19 @@ jobs:
       - name: README device images
         run: CLIMA_BUILD_DIR=build/ci nix develop --command bash scripts/shots.sh check
 
+      # The desktop widgets, against a real compositor. `WLR_BACKENDS=headless
+      # sway` needs no GPU, no seat and no display, and wlroots is the reference
+      # implementation of the protocol KWin also speaks — so this is the KDE and
+      # Sway story actually being exercised rather than compiled.
+      #
+      # It runs here rather than in `lint` for the reason the packaging step
+      # does: it needs a built clima-widget. The script skips, loudly, if sway
+      # cannot start on the runner at all — a machine that cannot host a
+      # compositor has said nothing about this code — and fails for every other
+      # reason.
+      - name: Desktop widgets pin themselves
+        run: nix develop --command bash scripts/check-layer-shell.sh build/ci/widgets/clima-widget
+
   # ---- a packager's build --------------------------------------------------
   #
   # Debian 13 ships Qt 6.8, which is the floor D2 sets, and this is the job that
