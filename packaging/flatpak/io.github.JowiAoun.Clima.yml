@@ -107,6 +107,34 @@ finish-args:
   - --device=dri
 
 modules:
+  # ---- layer-shell-qt, so the widgets can pin themselves ---------------------
+  #
+  # `zwlr_layer_shell_v1` is how clima-widget puts tiles on the desktop
+  # everywhere except GNOME — KDE Plasma, Sway, Hyprland, Wayfire, river. See
+  # packaging/plasma/README.md.
+  #
+  # It is built here because org.kde.Sdk does not ship it. Everything it needs
+  # to build does: extra-cmake-modules, wayland-scanner, wayland-protocols and
+  # Qt's private QtWaylandClient headers are all in the 6.11 SDK, so this is a
+  # source module and not a bundled binary.
+  #
+  # Without it the Flatpak still runs — widgets/CMakeLists.txt makes it optional
+  # and `--pin` reports its absence as the reason — but the Flatpak is the
+  # primary Linux channel, and "the primary channel is the one that cannot pin
+  # on KDE" is not a footnote anybody should have to find.
+  #
+  # LGPL-2.1-or-later, which is compatible with this application's
+  # GPL-3.0-or-later, and dynamically linked either way.
+  - name: layer-shell-qt
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_TESTING=OFF
+    sources:
+      - type: archive
+        url: https://download.kde.org/stable/plasma/6.6.6/layer-shell-qt-6.6.6.tar.xz
+        sha256: ee3385f48787417d62ac8697881127407e5daa2a53483d363a1212b586307a4e
+
   - name: clima
     buildsystem: cmake-ninja
 
@@ -121,6 +149,14 @@ modules:
       - -DCLIMA_BUILD_TESTS=OFF
       - -DCLIMA_BUILD_GALLERY=OFF
       - -DCLIMA_DEV_TOOLS=OFF
+
+      # The daemon's autostart entry installs to an absolute /etc/xdg/autostart
+      # — it has to, because the XDG search path is a fixed list — and /etc is
+      # read-only in this sandbox, so leaving it on fails the install step after
+      # the whole application has compiled. A Flatpak could not use the file
+      # anyway: nothing outside the sandbox reads /app, and autostart inside one
+      # is the Background portal's job. See packaging/CMakeLists.txt.
+      - -DCLIMA_INSTALL_AUTOSTART=OFF
 
     # No build-args: --share=network, and that is a property of the build
     # rather than a setting. D8 in docs/03-tech-stack.md rules out Conan and
