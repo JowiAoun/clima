@@ -48,17 +48,45 @@ fi
 cached_id="$(sed -n 's/^CLIMA_APP_ID:STRING=//p' "$build_dir/CMakeCache.txt" || true)"
 [ -n "$cached_id" ] && app_id="$cached_id"
 
-stage="$(mktemp -d)"
-trap 'rm -rf "$stage"' EXIT
+root="$(mktemp -d)"
+trap 'rm -rf "$root"' EXIT
 
 echo "packaging: staging an install of $app_id"
-cmake --install "$build_dir" --prefix "$stage" > /dev/null
+
+# DESTDIR and not only --prefix, because one install rule in this project has an
+# absolute destination and has to: the daemon's XDG autostart entry goes to
+# /etc/xdg/autostart, since the autostart search path is a fixed list and
+# nothing reads /usr/local/etc/xdg/autostart. `--prefix` does not redirect an
+# absolute DESTINATION — it is not for staging — so this script tried to write
+# into the real /etc and stopped with "Permission denied", which is a check
+# that fails on the machine rather than on the tree.
+#
+# DESTDIR is the mechanism that exists for this and every packager already uses
+# it. It also means the autostart entry is now *covered* here, rather than
+# switched off to make the check pass.
+DESTDIR="$root" cmake --install "$build_dir" --prefix /usr > /dev/null
+stage="$root/usr"
 
 fail=0
 note() {
   echo "packaging: $1" >&2
   fail=1
 }
+
+# ---- the daemon's autostart entry -------------------------------------------
+#
+# Outside $stage on purpose: it is the one thing here that does not live under
+# the prefix. Checked only when the daemon was built, which is the same gate
+# packaging/CMakeLists.txt puts on installing it — a build without Qt D-Bus has
+# no daemon and correctly installs no entry for one.
+if [ -x "$build_dir/daemon/clima-daemon" ]; then
+  autostart="$root/etc/xdg/autostart/$app_id.Daemon.desktop"
+  if [ ! -f "$autostart" ]; then
+    note "the daemon was built but installed no autostart entry at etc/xdg/autostart/$app_id.Daemon.desktop"
+  elif command -v desktop-file-validate > /dev/null; then
+    desktop-file-validate "$autostart" && echo "autostart entry: valid"
+  fi
+fi
 
 # ---- the desktop entry ------------------------------------------------------
 desktop="$stage/share/applications/$app_id.desktop"

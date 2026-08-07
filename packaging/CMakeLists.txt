@@ -105,10 +105,27 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET clima-daemon)
     # the XDG autostart search path is a fixed list and a file in
     # /usr/local/etc/xdg/autostart is read by nothing. CMAKE_INSTALL_SYSCONFDIR
     # is "etc" under a prefixed install, so this is spelled out.
-    install(
-        FILES ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Daemon.desktop
-        DESTINATION /etc/xdg/autostart
-    )
+    #
+    # Which is exactly why it has an off switch. An absolute destination ignores
+    # DESTDIR-free staged installs and every read-only /etc there is, and one of
+    # those is the Flatpak build sandbox: `cmake --install` there failed with
+    # "Read-only file system" *after* compiling the whole application, which is
+    # the most expensive possible place to discover a packaging rule.
+    #
+    # A Flatpak could not use this file anyway — nothing outside the sandbox
+    # reads /app, and autostart inside one is the Background portal's job, which
+    # is a permission prompt and belongs with the notifications work. So the
+    # manifest passes -DCLIMA_INSTALL_AUTOSTART=OFF and the daemon is started by
+    # whatever opens it: the app, the GNOME extension, or a widget host.
+    option(CLIMA_INSTALL_AUTOSTART
+        "Install the daemon's XDG autostart entry into /etc/xdg/autostart" ON)
+
+    if(CLIMA_INSTALL_AUTOSTART)
+        install(
+            FILES ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Daemon.desktop
+            DESTINATION /etc/xdg/autostart
+        )
+    endif()
 
     install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Widget.desktop
