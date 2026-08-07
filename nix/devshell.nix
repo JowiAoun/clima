@@ -11,27 +11,58 @@
 
 { pkgs }:
 
+let
+  # The Qt derivations, named once. Nix splits Qt across one store path per
+  # module, so "where are Qt's plugins" has as many answers as there are
+  # modules here — and the shell hook below turns this list into that answer
+  # rather than letting scripts/qt-env.sh guess it back out of `ldd`, which can
+  # only ever find the two modules a binary happens to link.
+  qtModules = with pkgs; [
+    qt6.qtbase
+    qt6.qtdeclarative
+    qt6.qtsvg
+    qt6.qtshadertools
+    qt6.qtpositioning
+
+    # The Wayland platform plugin. Not needed to build anything and needed to
+    # run one thing: `clima-widget --pin`, which asks a compositor for a
+    # desktop-layer surface and can only do that over Wayland. Without this
+    # module Qt has no `wayland` platform plugin at all and the layer-shell
+    # path could be compiled here and never once executed — which is the exact
+    # reason packaging/plasma/README.md gave for not building it.
+    qt6.qtwayland
+  ];
+in
+
 pkgs.mkShell {
   name = "clima-dev";
 
   # Grouped by what they are for. An alphabetical list would sort nicely and
   # stop telling you why anything is in it, and this list only grows.
-  packages = with pkgs; [
-    # Qt 6. qtshadertools is not optional even though nothing calls it directly:
-    # qtdeclarative's own build needs it, and `qsb` is how any ShaderEffect we
-    # write gets compiled ahead of time.
-    qt6.qtbase
-    qt6.qtdeclarative
-    qt6.qtsvg
-    qt6.qtshadertools
+  packages = with pkgs; qtModules ++ [
+    # Qt 6 is in qtModules above, because the shell hook needs the list to
+    # build QT_PLUGIN_PATH. qtshadertools is not optional even though nothing
+    # calls it directly: qtdeclarative's own build needs it, and `qsb` is how
+    # any ShaderEffect we write gets compiled ahead of time. qtpositioning is
+    # "use my location" via GeoClue2 — optional at configure time, since
+    # libclima/CMakeLists.txt compiles the feature out when it is absent and a
+    # packager is entitled to leave it out, but present here so the code path
+    # is actually built somewhere. A feature nobody in CI compiles is a feature
+    # that stops compiling.
 
-    # "Use my location", via GeoClue2 on Linux. Optional at configure time —
-    # libclima/CMakeLists.txt compiles the feature out when this is absent, and
-    # a packager is entitled to leave it out — but it is in the devshell so that
-    # the code path is actually built here rather than only on somebody else's
-    # machine. A feature nobody in CI compiles is a feature that stops
-    # compiling.
-    qt6.qtpositioning
+    # Desktop widgets on KDE and on every wlroots compositor. This is the
+    # `zwlr_layer_shell_v1` client half: it turns clima-widget's window into a
+    # surface the compositor pins to a layer of the desktop, which is what
+    # GNOME needs a whole shell extension to do. Optional at configure time in
+    # exactly the same way — widgets/CMakeLists.txt compiles --pin out when it
+    # is missing — and, like qtpositioning, present here so that "optional"
+    # does not mean "never built".
+    kdePackages.layer-shell-qt
+
+    # wayland-client, for the one question that has to be answered before
+    # anything else: does the compositor we are talking to implement
+    # zwlr_layer_shell_v1 at all? See widgets/layershell.cpp.
+    wayland
 
     # The build. D8 in docs/03-tech-stack.md fixes the floor at CMake 3.21 and
     # the Qt6 CMake API; Ninja because qt_add_qml_module generates a lot of
@@ -55,6 +86,23 @@ pkgs.mkShell {
     # so a typo in the release workflow is caught here rather than by tagging
     # a release and watching it fail.
     actionlint
+
+    # A compositor to prove the desktop-layer path against, because "it
+    # compiles" is not evidence that a surface was ever created.
+    #
+    # sway is here rather than KWin for one reason: it runs headless.
+    # `WLR_BACKENDS=headless sway` stands up a wlroots compositor with a
+    # virtual output, no GPU and no seat, and wlroots is the reference
+    # implementation of the protocol KWin also speaks — so a layer surface that
+    # sway accepts is one Plasma, Hyprland, Wayfire and river accept too.
+    # scripts/check-layer-shell.sh drives it; `sway -d` logs each layer surface
+    # with its namespace, layer, anchor and margins, which is the assertion.
+    #
+    # grim photographs the result and wayland-info lists what the compositor
+    # advertises — the two things that turn "it did not crash" into a check.
+    sway
+    grim
+    wayland-utils
 
     # tools/refcap is a Node/Playwright harness; film.sh tiles frames with
     # ffmpeg; jq reads the capture manifests.
@@ -93,6 +141,27 @@ pkgs.mkShell {
     # Without this, Qt decides stderr has no console and silently swallows QML
     # errors — the app comes up blank and says nothing about why.
     export QT_FORCE_STDERR_LOGGING=1
+
+    # Where Qt's plugins and QML modules are, said by the thing that knows.
+    #
+    # scripts/qt-env.sh can work this out on its own and does, for a bare
+    # terminal — but only from `ldd qml`, which finds qtbase and qtdeclarative
+    # because those are the two a `qml` binary links. Every other Nix Qt module
+    # is a separate store path that nothing links, so nothing points at it:
+    # qtsvg's image formats and qtwayland's *platform plugin* were both absent
+    # from QT_PLUGIN_PATH here, and a missing platform plugin is not a
+    # degraded run, it is `could not load the Qt platform plugin "wayland"`.
+    #
+    # Set before qt-env.sh is sourced, because every export in there honours a
+    # value that is already set. So this wins where it knows better and that
+    # file still answers for everyone outside this shell.
+    export QT_PLUGIN_PATH="${
+      pkgs.lib.makeSearchPath "lib/qt-6/plugins" qtModules
+    }''${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
+    export QML_IMPORT_PATH="${
+      pkgs.lib.makeSearchPath "lib/qt-6/qml" qtModules
+    }''${QML_IMPORT_PATH:+:$QML_IMPORT_PATH}"
+    export QML2_IMPORT_PATH="$QML_IMPORT_PATH"
 
     # Everything else about this Qt — QML_IMPORT_PATH, QT_PLUGIN_PATH, and the
     # CLIMA_QT_PREFIX that a CMake configure wants — comes from the same script
