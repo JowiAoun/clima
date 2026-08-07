@@ -40,12 +40,17 @@
 
 #include "appfont.h"
 #include "daemonlink.h"
+#include "layershell.h"
 #include "settings.h"
 #include "widgetconfig.h"
 #include "widgetoptions.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QWindow>
+
+#include <cstdio>
+#include <cstdlib>
 
 int main(int argc, char *argv[])
 {
@@ -85,6 +90,44 @@ int main(int argc, char *argv[])
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
     engine.loadFromModule("Clima.Widgets", "WidgetWindow");
+
+    // ---- shown from here, not from QML -------------------------------------
+    //
+    // WidgetWindow.qml is `visible: false` and this is why. A window that shows
+    // itself during component completion already has a platform surface by the
+    // time this line runs, and a surface has already committed to being an
+    // ordinary xdg-shell window — `LayerShellQt::Window::get()` after that
+    // point warns onto a logging category nobody has enabled and changes
+    // nothing. The tiles would appear, floating, and the only evidence that
+    // `--pin` had failed would be that they were in the wrong place.
+    //
+    // So: find the window, ask for a layer surface, then show it.
+    const QList<QObject *> roots = engine.rootObjects();
+    QWindow               *window =
+        roots.isEmpty() ? nullptr : qobject_cast<QWindow *>(roots.constFirst());
+    if (window == nullptr) {
+        std::fprintf(stderr, "clima-widget: the QML root is not a window.\n");
+        return 1;
+    }
+
+    const WidgetOptions *options = WidgetOptions::instance();
+    if (options->pin() != WidgetOptions::Pin::Off) {
+        const QString unavailable = clima::widgets::layershell::unavailableReason();
+
+        // `--pin on` refuses rather than degrades, because the caller that
+        // passes it is an autostart entry or a compositor config line and there
+        // is nobody at the keyboard to notice that the tiles came up floating in
+        // the middle of the screen. `--pin auto` is the one a person types.
+        if (!unavailable.isEmpty() && options->pin() == WidgetOptions::Pin::On) {
+            std::fprintf(stderr, "clima-widget: --pin on, but %s.\n",
+                         qUtf8Printable(unavailable));
+            return 3;
+        }
+
+        clima::widgets::layershell::pin(window, options->placement());
+    }
+
+    window->setVisible(true);
 
     return QGuiApplication::exec();
 }

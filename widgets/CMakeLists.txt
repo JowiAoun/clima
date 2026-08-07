@@ -127,6 +127,8 @@ endforeach()
 set(clima_widget_sources
     daemonlink.h
     daemonlink.cpp
+    layershell.h
+    layershell.cpp
     widgetclock.h
     widgetclock.cpp
     widgetfeed.h
@@ -192,6 +194,42 @@ target_link_libraries(climawidgetsqml PUBLIC Qt6::Quick Qt6::DBus)
 # definition is what the shared source file branches on and it has to be spelled
 # the same way in both modules.
 target_compile_definitions(climawidgetsqml PRIVATE CLIMA_HAVE_DBUS)
+
+# ---- pinning the tiles to the desktop, where the compositor allows it ---------
+#
+# `zwlr_layer_shell_v1` is what KWin, Sway, Hyprland, Wayfire, river and labwc
+# implement and mutter does not. Where it exists, clima-widget asks for a
+# desktop-layer surface itself and there is no shell extension, no applet and no
+# plugin — see widgets/layershell.h for why that is the whole of the KDE story.
+#
+# Optional, on the same terms qtpositioning is optional in libclima: a packager
+# on a GNOME-only distribution may leave layer-shell-qt out, and then --pin
+# reports that as its reason instead of failing to build.
+#
+# PUBLIC on the definition, not PRIVATE. widgets/layershell.h is included by
+# widgetoptions.h, which the executable compiles against; a definition that
+# changed the header's meaning between the library and its consumer is the ODR
+# violation that links cleanly and misbehaves at run time — the same trap
+# CLIMA_DEV_TOOLS is PUBLIC for, twenty lines up.
+find_package(LayerShellQt QUIET)
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+    pkg_check_modules(WaylandClient QUIET IMPORTED_TARGET wayland-client)
+endif()
+
+if(LayerShellQt_FOUND AND WaylandClient_FOUND)
+    target_compile_definitions(climawidgetsqml PUBLIC CLIMA_HAS_LAYER_SHELL)
+    # PkgConfig::WaylandClient is for the one registry roundtrip in
+    # layershell.cpp that asks the compositor what it implements. Qt will not
+    # answer that question — its Wayland globals are private API.
+    target_link_libraries(climawidgetsqml PUBLIC LayerShellQt::Interface PkgConfig::WaylandClient)
+    message(STATUS "clima: layer-shell-qt found — clima-widget can pin itself to the desktop")
+else()
+    message(STATUS
+        "clima: layer-shell-qt or wayland-client not found, so clima-widget cannot "
+        "pin itself to the desktop on KDE or a wlroots compositor. --pin says so at "
+        "run time. GNOME is unaffected: its shell extension does the pinning.")
+endif()
 
 clima_guard_target(climawidgetsqml)
 

@@ -27,6 +27,8 @@
 
 #pragma once
 
+#include "layershell.h"
+
 #include <QObject>
 #include <QQmlEngine>
 #include <QString>
@@ -63,6 +65,13 @@ class WidgetOptions : public QObject
 
 public:
 
+    // What `--pin` was asked for. Not a bool, because the three answers are
+    // genuinely different: `Off` never asks the compositor, `Auto` asks and
+    // accepts an ordinary window if it cannot have one, and `On` refuses to
+    // start rather than put an unpinned window on somebody's desktop — which is
+    // what an autostart entry needs, since nobody is watching it start.
+    enum class Pin { Auto, On, Off };
+
     static WidgetOptions *instance();
     static WidgetOptions *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 
@@ -81,6 +90,13 @@ public:
     [[nodiscard]] int         every() const { return m_every; }
     [[nodiscard]] bool        windowed() const { return m_windowed; }
     [[nodiscard]] QString     snapshotFile() const { return m_snapshotFile; }
+
+    [[nodiscard]] Pin pin() const { return m_pin; }
+
+    [[nodiscard]] clima::widgets::layershell::Placement placement() const
+    {
+        return m_placement;
+    }
 
 private:
     // Private, and that is load-bearing rather than tidy: a public
@@ -102,4 +118,7 @@ private:
     int         m_columns  = 1;
     bool        m_still    = false;
     bool        m_windowed = false;
+
+    Pin                                        m_pin = Pin::Auto;
+    clima::widgets::layershell::Placement       m_placement;
 };

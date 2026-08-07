@@ -16,6 +16,8 @@
 
 #include <cstdio>
 
+namespace layershell = clima::widgets::layershell;
+
 namespace {
 
 // What a first run puts on the desktop when nobody has chosen yet.
@@ -119,6 +121,34 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
         QStringLiteral("Draw as though it were this instant (ISO 8601). For captures."),
         QStringLiteral("iso"));
 
+    // ---- pinning to the desktop --------------------------------------------
+    //
+    // The help text names the compositors rather than the protocol, because
+    // "zwlr_layer_shell_v1" tells somebody running KDE nothing about whether it
+    // will work for them.
+    const QCommandLineOption pinOption(
+        QStringLiteral("pin"),
+        QStringLiteral("Pin the tiles to the desktop, under every window: "
+                       "auto | on | off. Works on KDE Plasma, Sway, Hyprland and "
+                       "other wlroots compositors. On GNOME the shell extension "
+                       "does this instead. Default: auto."),
+        QStringLiteral("mode"), QStringLiteral("auto"));
+    const QCommandLineOption anchorOption(
+        QStringLiteral("anchor"),
+        QStringLiteral("Where a pinned window sits: %1. Default top-right.")
+            .arg(layershell::anchorNames().join(QStringLiteral(" | "))),
+        QStringLiteral("where"), QStringLiteral("top-right"));
+    const QCommandLineOption marginOption(
+        QStringLiteral("margin"),
+        QStringLiteral("How far a pinned window sits from the screen edge. Default 24."),
+        QStringLiteral("px"), QStringLiteral("24"));
+    const QCommandLineOption layerOption(
+        QStringLiteral("layer"),
+        QStringLiteral("Which layer a pinned window is on: %1. Default bottom, "
+                       "which is above the wallpaper and below every window.")
+            .arg(layershell::layerNames().join(QStringLiteral(" | "))),
+        QStringLiteral("name"), QStringLiteral("bottom"));
+
     parser.addOption(widgetOption);
     parser.addOption(placeOption);
     parser.addOption(columnsOption);
@@ -132,6 +162,10 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     parser.addOption(windowedOption);
     parser.addOption(listOption);
     parser.addOption(nowOption);
+    parser.addOption(pinOption);
+    parser.addOption(anchorOption);
+    parser.addOption(marginOption);
+    parser.addOption(layerOption);
 
     parser.process(app);
 
@@ -229,4 +263,50 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
         || (!self->m_grab.isEmpty() && self->m_film.isEmpty());
     self->m_windowed = parser.isSet(windowedOption) || !self->m_grab.isEmpty()
         || !self->m_film.isEmpty();
+
+    // ---- pinning ------------------------------------------------------------
+
+    const QString pin = parser.value(pinOption);
+    if (pin == QLatin1String("auto")) {
+        self->m_pin = Pin::Auto;
+    } else if (pin == QLatin1String("on")) {
+        self->m_pin = Pin::On;
+    } else if (pin == QLatin1String("off")) {
+        self->m_pin = Pin::Off;
+    } else {
+        std::fprintf(stderr, "clima-widget: --pin takes auto, on or off.\n");
+        std::exit(2);
+    }
+
+    // A window somebody asked to be ordinary, or one that exists only to be
+    // photographed, is not pinned to anything. Both already force --windowed
+    // above; this says the same thing about the surface type, because the two
+    // are separate decisions on Wayland — a frameless window is still an
+    // xdg-shell window.
+    if (self->m_windowed)
+        self->m_pin = Pin::Off;
+
+    self->m_placement.anchor = parser.value(anchorOption);
+    if (!layershell::anchorNames().contains(self->m_placement.anchor)) {
+        std::fprintf(stderr, "clima-widget: unknown --anchor \"%s\". Known: %s\n",
+                     qUtf8Printable(self->m_placement.anchor),
+                     qUtf8Printable(layershell::anchorNames().join(u' ')));
+        std::exit(2);
+    }
+
+    self->m_placement.layer = parser.value(layerOption);
+    if (!layershell::layerNames().contains(self->m_placement.layer)) {
+        std::fprintf(stderr, "clima-widget: unknown --layer \"%s\". Known: %s\n",
+                     qUtf8Printable(self->m_placement.layer),
+                     qUtf8Printable(layershell::layerNames().join(u' ')));
+        std::exit(2);
+    }
+
+    bool      marginOk = false;
+    const int margin   = parser.value(marginOption).toInt(&marginOk);
+    if (!marginOk || margin < 0) {
+        std::fprintf(stderr, "clima-widget: --margin takes a number of pixels, zero or more.\n");
+        std::exit(2);
+    }
+    self->m_placement.margin = margin;
 }

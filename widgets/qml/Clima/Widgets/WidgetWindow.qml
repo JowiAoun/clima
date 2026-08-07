@@ -34,7 +34,16 @@ import QtQuick
 Window {
     id: win
 
-    visible: true
+    // Shown by widgets/main.cpp, and this is the one property in the file that
+    // is load-bearing rather than cosmetic.
+    //
+    // `--pin` asks the compositor for a desktop-layer surface, and that request
+    // has to be made before the window has a platform surface at all. A
+    // `visible: true` here creates one during component completion, which is
+    // before main() gets the chance — and the failure is silent: the tiles
+    // appear as an ordinary window, in the middle of the screen, above
+    // everything, and nothing says why. See widgets/layershell.h.
+    visible: false
     title: qsTr("Clima widgets")
 
     color: "transparent"
