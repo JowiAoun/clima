@@ -112,19 +112,38 @@ int main(int argc, char *argv[])
 
     const WidgetOptions *options = WidgetOptions::instance();
     if (options->pin() != WidgetOptions::Pin::Off) {
-        const QString unavailable = clima::widgets::layershell::unavailableReason();
+        const bool required = options->pin() == WidgetOptions::Pin::On;
 
-        // `--pin on` refuses rather than degrades, because the caller that
-        // passes it is an autostart entry or a compositor config line and there
-        // is nobody at the keyboard to notice that the tiles came up floating in
-        // the middle of the screen. `--pin auto` is the one a person types.
-        if (!unavailable.isEmpty() && options->pin() == WidgetOptions::Pin::On) {
-            std::fprintf(stderr, "clima-widget: --pin on, but %s.\n",
-                         qUtf8Printable(unavailable));
-            return 3;
+        // Asked, rather than assumed, so that the failure is reported once with
+        // a reason rather than left to be inferred from where the tiles ended
+        // up. pin() answers the same question again and it is cached.
+        QString unavailable = clima::widgets::layershell::unavailableReason();
+
+        if (unavailable.isEmpty() && !clima::widgets::layershell::pin(window, options->placement()))
+            unavailable = QStringLiteral("the compositor accepted the protocol and refused the "
+                                         "surface");
+
+        if (!unavailable.isEmpty()) {
+            // `--pin on` refuses rather than degrades, because the caller that
+            // passes it is an autostart entry or a compositor config line and
+            // there is nobody at the keyboard to notice that the tiles came up
+            // floating in the middle of the screen.
+            if (required) {
+                std::fprintf(stderr, "clima-widget: --pin on, but %s.\n",
+                             qUtf8Printable(unavailable));
+                return 3;
+            }
+
+            // `--pin auto` degrades, and says so once — but only to somebody who
+            // typed it. It is also the default, and a line on every X11 and
+            // GNOME start explaining a flag nobody passed is noise.
+            if (options->pinWasRequested()) {
+                std::fprintf(stderr,
+                             "clima-widget: not pinning, because %s. The tiles are an ordinary "
+                             "window.\n",
+                             qUtf8Printable(unavailable));
+            }
         }
-
-        clima::widgets::layershell::pin(window, options->placement());
     }
 
     window->setVisible(true);

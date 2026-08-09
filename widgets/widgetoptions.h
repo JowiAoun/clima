@@ -93,6 +93,11 @@ public:
 
     [[nodiscard]] Pin pin() const { return m_pin; }
 
+    // Whether `--pin` was typed, as against defaulted to `auto`. The difference
+    // is who gets told when the compositor cannot pin: somebody who asked, and
+    // not every X11 and GNOME start of a flag nobody passed.
+    [[nodiscard]] bool pinWasRequested() const { return m_pinRequested; }
+
     [[nodiscard]] clima::widgets::layershell::Placement placement() const
     {
         return m_placement;
@@ -119,6 +124,7 @@ private:
     bool        m_still    = false;
     bool        m_windowed = false;
 
-    Pin                                        m_pin = Pin::Auto;
-    clima::widgets::layershell::Placement       m_placement;
+    Pin                                  m_pin          = Pin::Auto;
+    bool                                 m_pinRequested = false;
+    clima::widgets::layershell::Placement m_placement;
 };

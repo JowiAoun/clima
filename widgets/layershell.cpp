@@ -9,6 +9,8 @@
 #include <QTimer>
 #include <QWindow>
 
+#include <iterator> // std::size, over the two tables below
+
 #ifdef CLIMA_HAS_LAYER_SHELL
 #include <LayerShellQt/Window>
 #include <wayland-client.h>

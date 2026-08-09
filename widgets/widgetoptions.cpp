@@ -266,6 +266,8 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
 
     // ---- pinning ------------------------------------------------------------
 
+    self->m_pinRequested = parser.isSet(pinOption);
+
     const QString pin = parser.value(pinOption);
     if (pin == QLatin1String("auto")) {
         self->m_pin = Pin::Auto;
