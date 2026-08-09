@@ -113,13 +113,47 @@ echo "refuses when it cannot pin: ok"
 # renderer is what makes this the same check everywhere rather than one that only
 # a workstation can run. Overridable, because on a machine with a GPU the GL path
 # is the one users are actually on.
+#
+# ---- and why the teardown waits rather than sleeps ---------------------------
+#
+# A fixed `sleep 6` before the screenshot is a bet on how long Qt takes to start,
+# and the machine that loses that bet is a loaded CI runner rendering in
+# software — where the tiles arrive at second seven and every assertion below
+# reads an empty screen. That failure would say "nothing was drawn in the corner
+# the tiles were anchored to", which is exactly wrong about what happened.
+#
+# So it waits for the widget to be *on screen* by either route — a layer surface
+# in the log, or an ordinary window in the tree — and only then settles and
+# photographs. The control case reaches the second condition, the pinned cases
+# the first, and a widget that never starts at all runs into `timeout 120 sway`
+# and fails as it should.
 run_sway() {
-    local name="$1" delay="$2"
+    local name="$1" settle="$2"
     shift 2
+
+    # A file rather than a quoted one-liner in the config: sway's `exec` goes
+    # through /bin/sh, and a wait loop written inline would be three levels of
+    # quoting deep before it did anything.
+    cat > "$run/$name.teardown.sh" <<TEARDOWN
+#!/bin/sh
+tries=0
+while [ \$tries -lt 160 ]; do
+    grep -q 'namespace clima-widgets' "$run/$name.log" && break
+    swaymsg -t get_tree | grep -q '"app_id": *"[^"]' && break
+    tries=\$((tries + 1))
+    sleep 0.25
+done
+sleep $settle
+swaymsg -t get_tree > "$run/$name.tree.json"
+grim "$run/$name.png"
+swaymsg exit
+TEARDOWN
+    chmod +x "$run/$name.teardown.sh"
+
     {
         echo "output HEADLESS-1 resolution 1200x800"
         for line in "$@"; do echo "$line"; done
-        echo "exec \"sleep $delay; swaymsg -t get_tree > $run/$name.tree.json; grim $run/$name.png; swaymsg exit\""
+        echo "exec \"$run/$name.teardown.sh\""
     } > "$run/$name.conf"
 
     XDG_RUNTIME_DIR="$run" \
@@ -180,7 +214,7 @@ luma() {
 
 echo
 echo "== pinned =="
-run_sway pinned 6 "exec \"$tiles --pin on --anchor top-right --margin 24 > $run/pinned.widget.log 2>&1\""
+run_sway pinned 2 "exec \"$tiles --pin on --anchor top-right --margin 24 > $run/pinned.widget.log 2>&1\""
 
 surface="$(grep -o 'new layer surface: namespace [^ ]* layer [0-9]*' "$run/pinned.log" | head -n1 || true)"
 [ -n "$surface" ] || fail "no layer surface was created — sway logged none"
@@ -206,7 +240,10 @@ echo "top-right luminance $right, top-left luminance $left"
 [ "$left" -lt 20 ] || fail "something was drawn in the corner the tiles were anchored away from"
 echo "anchor and margin: ok"
 
-grep -q '"app_id": *"' "$run/pinned.tree.json" \
+# The same pattern the control asserts the presence of, character for character.
+# A looser one here would make the two cases test different things, and the
+# whole point of the control is that it is this assertion inverted.
+grep -q '"app_id": *"[^"]' "$run/pinned.tree.json" \
     && fail "a pinned surface turned up in the window tree; it should not be a window at all"
 echo "absent from the window tree: ok"
 
@@ -218,7 +255,7 @@ echo "absent from the window tree: ok"
 
 echo
 echo "== not pinned (the control) =="
-run_sway plain 6 "exec \"$tiles --pin off > $run/plain.widget.log 2>&1\""
+run_sway plain 2 "exec \"$tiles --pin off > $run/plain.widget.log 2>&1\""
 
 grep -q 'new layer surface' "$run/plain.log" \
     && fail "--pin off still created a layer surface"
@@ -237,12 +274,35 @@ echo "an ordinary window in the tree: ok"
 # what says so.
 #
 # sway will not unplug the last output, hence the second one.
+#
+# The trigger waits for the first surface rather than sleeping towards it. On a
+# slow machine a fixed delay unplugs the output before the tiles have arrived on
+# it, and then "the tiles did not come back" is true and means nothing — they
+# had not been there to come back.
+
+cat > "$run/hotplug.trigger.sh" <<TRIGGER
+#!/bin/sh
+tries=0
+while [ \$tries -lt 160 ]; do
+    grep -q 'namespace clima-widgets' "$run/hotplug.log" && break
+    tries=\$((tries + 1))
+    sleep 0.25
+done
+[ \$tries -lt 160 ] || { echo "the tiles never appeared on the first output" >&2; exit 1; }
+swaymsg create_output
+sleep 1
+swaymsg output HEADLESS-1 unplug
+TRIGGER
+chmod +x "$run/hotplug.trigger.sh"
 
 echo
 echo "== monitor unplugged =="
-run_sway hotplug 12 \
+run_sway hotplug 4 \
     "exec \"$tiles --pin on > $run/hotplug.widget.log 2>&1\"" \
-    "exec \"sleep 5; swaymsg create_output; sleep 2; swaymsg output HEADLESS-1 unplug\""
+    "exec \"$run/hotplug.trigger.sh > $run/hotplug.trigger.log 2>&1\""
+
+grep -q 'never appeared' "$run/hotplug.trigger.log" \
+    && fail "the tiles never reached the first output, so nothing was unplugged from under them"
 
 surfaces="$(grep -c 'namespace clima-widgets' "$run/hotplug.log" || true)"
 echo "layer surfaces created across the unplug: $surfaces"

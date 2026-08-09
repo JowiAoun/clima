@@ -82,6 +82,23 @@ jobs:
           path: tests/golden/images/*.actual.png
           if-no-files-found: ignore
 
+      # The two licence questions only a linked binary can answer: is a
+      # GPLv3-only Qt module in the DT_NEEDED list, and is Qt linked
+      # dynamically. cmake/ClimaLicenceGuard.cmake catches the way that mistake
+      # is normally made — a banned name in a find_package or a link line — and
+      # cannot see a module that arrives through a QML import or another
+      # module's dependency graph. This is risk R2 and R3 in
+      # docs/08-risks.md, and static linking would silently relicense the
+      # application.
+      #
+      # The script existed and nothing called it, which for a compliance check
+      # is the same as it not existing. All three shipped binaries, because
+      # clima-widget and clima-daemon are as much a release artefact as the app.
+      - name: Licence-compatible linking
+        run: |
+          nix develop --command bash scripts/check-licences.sh \
+            build/ci/app/clima build/ci/daemon/clima-daemon build/ci/widgets/clima-widget
+
       # The desktop entry, the AppStream component and the icons, checked from
       # a staged install rather than from the templates — so this covers the
       # install rules too, which is where half of the silent failures live.
