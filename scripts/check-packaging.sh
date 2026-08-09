@@ -83,8 +83,15 @@ if [ -x "$build_dir/daemon/clima-daemon" ]; then
   autostart="$root/etc/xdg/autostart/$app_id.Daemon.desktop"
   if [ ! -f "$autostart" ]; then
     note "the daemon was built but installed no autostart entry at etc/xdg/autostart/$app_id.Daemon.desktop"
-  elif command -v desktop-file-validate > /dev/null; then
-    desktop-file-validate "$autostart" && echo "autostart entry: valid"
+  elif ! command -v desktop-file-validate > /dev/null; then
+    echo "packaging: no desktop-file-validate; the autostart entry is not validated." >&2
+  elif ! desktop-file-validate "$autostart"; then
+    # `if !`, not `cmd && echo`. This script runs under `set -e`, where a bare
+    # `cmd && echo ok` aborts on failure instead of reaching note() — so the one
+    # thing it would have to say is the one thing it would not print.
+    note "the daemon's autostart entry is not a valid desktop file"
+  else
+    echo "autostart entry: valid"
   fi
 fi
 

@@ -76,6 +76,9 @@ install(
     DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo
 )
 
+option(CLIMA_INSTALL_AUTOSTART
+    "Install the daemon's XDG autostart entry into /etc/xdg/autostart" ON)
+
 # ---- the two entries the desktop widgets need -------------------------------
 #
 # Only where there is a session bus to serve on, which is the same gate the
@@ -117,9 +120,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET clima-daemon)
     # is a permission prompt and belongs with the notifications work. So the
     # manifest passes -DCLIMA_INSTALL_AUTOSTART=OFF and the daemon is started by
     # whatever opens it: the app, the GNOME extension, or a widget host.
-    option(CLIMA_INSTALL_AUTOSTART
-        "Install the daemon's XDG autostart entry into /etc/xdg/autostart" ON)
-
+    #
+    # The option itself is declared above this `if`, not inside it. A packager
+    # who passes -DCLIMA_INSTALL_AUTOSTART=OFF to a build with no Qt D-Bus would
+    # otherwise get "Manually-specified variables were not used by the project"
+    # and no way to tell whether it had been honoured or misspelled.
     if(CLIMA_INSTALL_AUTOSTART)
         install(
             FILES ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Daemon.desktop
