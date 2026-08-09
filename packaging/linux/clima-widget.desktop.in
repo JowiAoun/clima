@@ -46,9 +46,20 @@ Terminal=false
 Categories=Utility;
 Keywords=Weather;Widget;Desktop;Forecast;
 
-StartupNotify=true
+# False, and that is about what a pinned tile is. Startup notification ends when
+# the launched program takes the activation token, which a desktop-layer surface
+# never does — widgets/layershell.cpp sets activateOnShow(false), because a tile
+# that grabbed focus on appearing would eat the first keystroke after login. So
+# `true` here buys a launcher spinner that runs until it times out, on the
+# desktops where this now works best.
+StartupNotify=false
+
+# Still correct, and only for the case where there is a window to match: an X11
+# desktop, or a Wayland one with no layer-shell. A pinned surface has no
+# toplevel and nothing to match against.
 StartupWMClass=clima-widget
 
-# Linux desktops only, for the same reason as the daemon's entry: the host reads
-# from a session bus, and there is not one anywhere else.
-OnlyShowIn=GNOME;KDE;XFCE;MATE;Cinnamon;LXQt;Budgie;Unity;Pantheon;
+# No OnlyShowIn, for the reason clima-daemon.desktop.in sets out at length: the
+# install rule already restricts this to Linux, and an enumerated list of
+# desktop names excluded Sway, Hyprland, Wayfire, river, labwc, niri and COSMIC
+# — which is to say, most of the compositors where `--pin` works.

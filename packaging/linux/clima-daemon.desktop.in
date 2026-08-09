@@ -43,11 +43,27 @@ Terminal=false
 # installed one.
 NoDisplay=true
 
-# Linux desktops only. There is no session bus on Windows or macOS and this
-# whole file is meaningless there — but a .desktop with no OnlyShowIn is shown
-# everywhere, so the list is what keeps it out of environments that would run
-# it and get nothing.
-OnlyShowIn=GNOME;KDE;XFCE;MATE;Cinnamon;LXQt;Budgie;Unity;Pantheon;
+# ---- there is deliberately no OnlyShowIn ------------------------------------
+#
+# There used to be, and it was wrong twice over.
+#
+# The reason given for it was "Linux desktops only — there is no session bus on
+# Windows or macOS". That is already true by construction: packaging/CMakeLists.txt
+# installs this file only when CMAKE_SYSTEM_NAME is Linux and clima-daemon was
+# built at all. A .desktop that is not installed is not shown anywhere.
+#
+# What the list actually did was the opposite of its stated purpose. OnlyShowIn
+# on an *autostart* entry is not a menu filter — the session refuses to start
+# the program unless XDG_CURRENT_DESKTOP matches one of the names. The list was
+# GNOME, KDE, XFCE, MATE, Cinnamon, LXQt, Budgie, Unity and Pantheon, and
+# XDG_CURRENT_DESKTOP on Sway is `sway`, on Hyprland `Hyprland`, on Wayfire
+# `wayfire`, and so on for river, labwc, niri and COSMIC. So on every wlroots
+# compositor the daemon never started, and the tiles that read from it — the
+# ones that pin themselves there without any extension at all — would have sat
+# on "waiting" forever with nothing anywhere saying why.
+#
+# An enumerated allow-list of desktops is a list that is wrong the moment
+# somebody writes a new one, which for Wayland compositors is roughly annually.
 
 # The two flags every desktop's startup-applications UI writes into a copy of
 # this file when somebody switches it off. Written here as the default so that
