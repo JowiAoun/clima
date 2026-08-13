@@ -388,15 +388,18 @@ clima-widget --pin on --anchor bottom-right --margin 16
 
 In a build tree there is nothing installed for the bus to activate, so the tiles
 will say the weather service is not running — correctly — until one is started
-beside them:
+beside them. `scripts/widgets-run.sh` is that:
 
 ```sh
-build/dev/daemon/clima-daemon --fixture toronto &
-build/dev/widgets/clima-widget
+scripts/widgets-run.sh                          # live
+CLIMA_FIXTURE=toronto scripts/widgets-run.sh    # recorded, frozen clock
+scripts/widgets-run.sh --columns 2 --widget uv-dial --widget wind-rose
 ```
 
-`--snapshot` is the other way, and the one CI uses: it reads a recorded snapshot
-and never touches the bus at all.
+It starts a daemon, hands everything else to `clima-widget`, and stops the one
+it started — never one that was already there. `--snapshot` is the other way,
+and the one CI uses: it reads a recorded file and never touches the bus at all,
+so the script stays out of the way when it sees that flag.
 
 ### Preferences arrive at start, not while running
 

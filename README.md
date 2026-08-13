@@ -156,6 +156,15 @@ scripts/dev-run.sh --place "Halifax"           # live ECCC alerts
 scripts/dev-run.sh --fixture seattle           # four NWS alerts, offline
 ```
 
+The desktop tiles are a second binary reading from a third — a weather service
+the session bus starts on demand once Clima is installed. Nothing is installed
+in a build tree, so this starts one beside them:
+
+```sh
+scripts/widgets-run.sh                         # the tiles, with a daemon to read
+CLIMA_FIXTURE=toronto scripts/widgets-run.sh   # …from recorded data
+```
+
 Without a Nix devshell, any Qt 6.8 or newer works —
 [`BUILDING.md`](BUILDING.md) has the distribution package lists and the
 CMake options.
