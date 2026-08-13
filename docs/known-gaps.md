@@ -144,6 +144,34 @@ a time — which is most of them.
 
 ---
 
+## A widget host that starts cold has nothing to draw
+
+**Status: bounded, and narrower than it was — but the "never blank" promise is
+about a process that is already running.**
+
+A tile that has ever had a reading keeps it: the daemon can exit, be upgraded or
+crash, and the tiles go on drawing the last snapshot and counting minutes. That
+is `docs/README.md`'s non-negotiable 1 one process out, and it holds.
+
+What it does not cover is a widget host that starts when there is no daemon at
+all. Nothing has ever been delivered, so there is nothing to keep, and the tiles
+come up with a sentence saying why instead of a reading. D-Bus activation makes
+that rare — the bus starts a daemon for the host that asked — but it is still
+what a machine with no service installed shows, and the first snapshot after an
+activation is a fetch somebody is watching.
+
+The widget host deliberately does not read the cache: `widgets/CMakeLists.txt`
+asserts against the built binary that it links no provider and no store, and a
+second SQLite reader on one desktop is the arrangement the daemon exists to
+prevent.
+
+What closes it: the daemon writing its last published snapshot per subscription
+mask to a small file the host may read at startup, or — cheaper and probably
+better — the daemon answering `GetSnapshot` from its cache before its first
+fetch returns, which is one call already made on every path.
+
+---
+
 ## A preference change does not reach a running widget
 
 **Status: known, bounded, and the same shape as the units it inherits.**

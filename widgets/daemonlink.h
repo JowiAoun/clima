@@ -7,9 +7,10 @@
 // WHAT THIS IS FOR
 //
 // clima-daemon fetches the weather once and serves it to everything on the
-// desktop (daemon/snapshotservice.h). This is the reader: it finds the daemon,
-// re-finds it when it restarts, keeps one subscription per tile, and hands
-// each tile its own snapshot. Nothing here draws and nothing here fetches.
+// desktop (daemon/snapshotservice.h). This is the reader: it finds the daemon —
+// asking the bus to start one if nothing else has — re-finds it when it
+// restarts, keeps one subscription per tile, and hands each tile its own
+// snapshot. Nothing here draws and nothing here fetches.
 //
 // ============================================================================
 // arg0 FILTERING IS THE WHOLE POINT OF THE TOKEN
@@ -40,6 +41,26 @@
 // When the name comes back, every attached feed is re-subscribed from here.
 // Tokens are not stable across a daemon restart — the new daemon has never
 // heard of the old ones — so the match rules are torn down and rebuilt.
+//
+// ============================================================================
+// AND A MISSING ONE IS NOT A LOADING TILE
+//
+// The paragraph above is about a tile that HAS a reading. A tile that has never
+// had one is a different problem and it was the one this class got wrong: it
+// left every feed sitting on its skeleton, indefinitely, whether the first
+// snapshot was half a second away or was never coming at all.
+//
+// Those are not the same state and they had the same picture. Four grey tiles
+// on a desktop, no message on screen, and — because the only warning here was
+// for a session bus that could not be reached — nothing in the journal either.
+// The daemon simply was not running, which is the ordinary case on any desktop
+// that is not GNOME: the extension starts it, and nothing else did.
+//
+// So this class now decides which of the two it is and hands every feed a
+// sentence for the second. `WidgetFeed::waitingReason` has the argument; the
+// sentences are below, next to the code that establishes each fact, because
+// each one is a different failure and "not running", "not answering" and "there
+// is no such place" are three different things to do about it.
 //
 // ============================================================================
 // THE FILE SOURCE
@@ -174,16 +195,28 @@ private:
     explicit DaemonLink(QObject *parent = nullptr);
 
     void handshake();
+
+    // Ask the bus to activate the daemon, if a .service file was installed for
+    // it. Fire and forget: the service watcher is what notices it arriving.
+    void startDaemon();
+
     void loadCatalogue();
     void loadEmbeddedCatalogue();
     void subscribeAll();
     void dropSubscription(WidgetFeed *feed);
     void deliver(WidgetFeed *feed, const QByteArray &json);
 
+    // The reason every feed is given while there is no subscription to be had —
+    // empty when a snapshot is on its way, which is what leaves the skeleton up.
+    // Per-feed refinements (a place this daemon does not have) are set in
+    // resubscribe(), after this one has been pushed to everybody.
+    void setReason(const QString &reason);
+
     bool         m_available     = false;
     bool         m_usingBus      = false;
     int          m_schemaVersion = 0;
     QString      m_incompatibility;
+    QString      m_reason;
     QString      m_filePath;
     QByteArray   m_fileJson;
     QVariantList m_catalogue;

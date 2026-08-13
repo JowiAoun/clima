@@ -89,8 +89,21 @@ void WidgetFeed::deliver(const QVariantMap &snapshot)
     m_fetchedAt = QDateTime::fromString(snapshot.value(QStringLiteral("fetchedAt")).toString(),
                                         Qt::ISODate);
 
+    // Data outranks any explanation of its absence, and it keeps outranking it:
+    // when the daemon goes away later, this tile is `stale` and says how old its
+    // reading is. It must not go back to being a tile with a sentence on it.
+    setWaitingReason({});
+
     Q_EMIT snapshotChanged();
     Q_EMIT ageChanged();
+}
+
+void WidgetFeed::setWaitingReason(const QString &reason)
+{
+    if (m_waitingReason == reason)
+        return;
+    m_waitingReason = reason;
+    Q_EMIT waitingReasonChanged();
 }
 
 QString WidgetFeed::state() const

@@ -28,6 +28,18 @@
 //                     else, and a brief lie is still the thing that rule is
 //                     about.
 //
+//                     The skeleton means "a snapshot is on its way" and it is
+//                     only ever shown when one is. When nothing is coming —
+//                     no daemon, no place, a daemon that has stopped answering
+//                     — the tile says which, in `feed.waitingReason`.
+//
+//                     That distinction is the whole of this state and it was
+//                     missing: four skeletons on a desktop, no message on
+//                     screen and none in the journal, for the most ordinary
+//                     situation there is. "Loading forever" is a lie of the
+//                     same family as a fabricated number, told with a picture
+//                     rather than a digit.
+//
 //   3. STALE          there is data and it is not current: the daemon went
 //                     away, or it is serving from its cache. The tile draws
 //                     everything it has and says how old it is. This is the
@@ -79,6 +91,18 @@ Rectangle {
 
     readonly property bool stale: feed.hasData
                                   && (feed.state !== "live" || !DaemonLink.available)
+
+    // The one line this tile shows instead of a body, or "" when it has one to
+    // show. Both states that replace a body come through here, in the order the
+    // header ranks them: a shape this build cannot read outranks everything,
+    // and a reason to be empty only applies while the tile is empty.
+    //
+    // Written as one property rather than as two visibilities so that the
+    // ranking is stated once. Two `visible:` expressions that each have to
+    // exclude the other is how a tile ends up drawing both.
+    readonly property string message:
+        DaemonLink.incompatibility !== "" ? DaemonLink.incompatibility
+                                          : (root.ready ? "" : feed.waitingReason)
 
     // Where a body puts its children.
     default property alias content: body.data
@@ -202,16 +226,17 @@ Rectangle {
     // ---- state 2: waiting --------------------------------------------------
     //
     // Three bars at the weights a reading, a caption and a series would have
-    // had. Not a spinner: a spinner claims something is happening right now,
-    // and most of the time this tile is waiting for a daemon that has not been
-    // started rather than for a request in flight.
+    // had. Not a spinner, because a spinner is a claim about work in progress
+    // and this is a claim about a request in flight — which, now that `message`
+    // covers the case where there is no request, is a claim that is true
+    // whenever these bars are on screen.
 
     Column {
         anchors.left: body.left
         anchors.top: body.top
         anchors.topMargin: 6
         spacing: 8
-        visible: !root.ready && DaemonLink.incompatibility === ""
+        visible: !root.ready && root.message === ""
 
         Rectangle {
             width: Math.min(96, body.width * 0.5)
@@ -235,12 +260,21 @@ Rectangle {
         }
     }
 
-    // ---- state 1: incompatible ---------------------------------------------
-
+    // ---- state 1, and the half of state 2 that has something to say ---------
+    //
+    // One Text for both, because they are the same thing on screen: a sentence
+    // where a body would have been. Which sentence is `message`'s decision, up
+    // at the top of this file with the other state.
+    //
+    // Vertically centred rather than top-aligned. It is the tile's whole
+    // content, and the smallest one in the catalogue is 110 px tall — a line of
+    // text under the title with a drop of empty space beneath it reads as a
+    // tile that failed to finish drawing, which is the impression this line
+    // exists to correct.
     Text {
         anchors.fill: body
-        visible: DaemonLink.incompatibility !== ""
-        text: DaemonLink.incompatibility
+        visible: root.message !== ""
+        text: root.message
         color: Theme.ink.muted
         font.pixelSize: Theme.type.label
         wrapMode: Text.WordWrap

@@ -30,6 +30,8 @@
 // a screenshot, not an assertion. `clima-widget --snapshot … --grab` is how
 // that is looked at, and tests/fixtures/wire/ is what it is looked at against.
 
+#include "daemonlink.h"
+#include "widgetfeed.h"
 #include "wx.h"
 
 #include <QDir>
@@ -83,6 +85,16 @@ private Q_SLOTS:
     void everyComponentHasAWidget();
     void everyComponentIsInTheModule();
     void everyDeclaredFieldIsOneTheDaemonSends();
+
+    // ---- what a tile with no data says -------------------------------------
+    //
+    // Order matters between these three and it is not stylistic. DaemonLink is
+    // a process-wide singleton by construction, so each of them leaves it
+    // further along than it found it: no source at all, then a source that
+    // failed, then one that worked. Qt runs private slots in declaration order.
+    void aFeedWithNoSourceSaysThereIsNoService();
+    void anUnreadableSnapshotNamesTheFile();
+    void aReadableSnapshotLeavesNothingToExplain();
 
     // ---- Wx ----------------------------------------------------------------
     void absentReadingsStayAbsent();
@@ -200,6 +212,72 @@ void TestWidgets::everyDeclaredFieldIsOneTheDaemonSends()
                                     .arg(id, path)));
         }
     }
+}
+
+// ---- what a tile with no data says ------------------------------------------
+//
+// The bug these exist for: every tile drew a skeleton for as long as it had
+// nothing, whether a snapshot was half a second away or was never coming. On a
+// desktop with no daemon that is a permanent picture of loading, and the only
+// other evidence was a warning that could not fire, since the one warning here
+// was for a session bus that could not be reached.
+//
+// None of this touches D-Bus. That is not a limitation of a headless test — it
+// is the point: DaemonLink has to be able to answer "why is there nothing" from
+// what it knows, and the two states below are established before any bus is
+// consulted. The bus paths were exercised by hand against a real daemon on a
+// private bus; the sentences are what a test can hold still.
+
+void TestWidgets::aFeedWithNoSourceSaysThereIsNoService()
+{
+    WidgetFeed feed;
+    feed.classBegin();
+
+    // Before completion a feed is not attached, and it must not pretend to know
+    // anything. QML assigns properties between these two calls.
+    QVERIFY(feed.waitingReason().isEmpty());
+
+    feed.componentComplete();
+
+    QVERIFY2(!feed.waitingReason().isEmpty(),
+             "a tile with no daemon, no file and nothing on its way said nothing at all — "
+             "which is the skeleton-forever bug this property exists to close");
+    QVERIFY(feed.waitingReason().contains(QStringLiteral("not running")));
+    QVERIFY(!feed.hasData());
+}
+
+void TestWidgets::anUnreadableSnapshotNamesTheFile()
+{
+    WidgetFeed feed;
+    feed.classBegin();
+    feed.componentComplete();
+
+    const QString missing = QStringLiteral(CLIMA_SOURCE_DIR "/tests/fixtures/wire/nowhere.json");
+    DaemonLink::instance()->useSnapshotFile(missing);
+
+    // Attached BEFORE the change, so this also covers the push: a feed that is
+    // already on a desktop has to be told when the answer changes under it, not
+    // only when it asks.
+    QVERIFY2(feed.waitingReason().contains(QStringLiteral("nowhere.json")),
+             qPrintable(QStringLiteral("expected the file to be named, got: \"%1\"")
+                            .arg(feed.waitingReason())));
+    QVERIFY(!feed.hasData());
+}
+
+void TestWidgets::aReadableSnapshotLeavesNothingToExplain()
+{
+    DaemonLink::instance()->useSnapshotFile(
+        QStringLiteral(CLIMA_SOURCE_DIR "/tests/fixtures/wire/toronto.json"));
+
+    WidgetFeed feed;
+    feed.classBegin();
+    feed.componentComplete();
+
+    QVERIFY(feed.hasData());
+
+    // Data outranks every explanation of its absence. A tile that has a reading
+    // shows the reading and its age — never a sentence about why it has none.
+    QVERIFY(feed.waitingReason().isEmpty());
 }
 
 // ---- Wx ---------------------------------------------------------------------

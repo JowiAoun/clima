@@ -87,6 +87,31 @@ class WidgetFeed : public QObject, public QQmlParserStatus
     // died keeps counting up instead of freezing at the last number it saw.
     Q_PROPERTY(int ageMinutes READ ageMinutes NOTIFY ageChanged)
 
+    // ---- why there is still nothing ----------------------------------------
+    //
+    // A sentence to draw in place of the skeleton, or empty while a snapshot is
+    // genuinely on its way.
+    //
+    // The skeleton in WidgetSurface was designed for the moment before the
+    // first snapshot arrives, and for that moment it is exactly right. What it
+    // was never honest about is the state it is actually in most of the time:
+    // there is no daemon, nothing is coming, and three grey bars go on claiming
+    // to be loading for as long as the desktop is up. That is the one failure
+    // in this process that a user cannot tell apart from a hang — and the file
+    // that draws it says so in its own comment ("most of the time this tile is
+    // waiting for a daemon that has not been started").
+    //
+    // So DaemonLink sets this the moment it knows nothing is coming, and it is
+    // the whole of what separates "loading" from "there is nothing to load
+    // from". The sentence is built in C++, beside the code that establishes the
+    // fact, rather than mapped from a code in QML — the same shape as
+    // DaemonLink::incompatibility, which is the other state that replaces a
+    // tile's body with words.
+    //
+    // Cleared the instant anything arrives. A tile with data draws the data and
+    // its age, never a message; see the state order in WidgetSurface.qml.
+    Q_PROPERTY(QString waitingReason READ waitingReason NOTIFY waitingReasonChanged)
+
 public:
     explicit WidgetFeed(QObject *parent = nullptr);
     ~WidgetFeed() override;
@@ -109,9 +134,16 @@ public:
     [[nodiscard]] QString     state() const;
     [[nodiscard]] QDateTime   fetchedAt() const { return m_fetchedAt; }
     [[nodiscard]] int         ageMinutes() const;
+    [[nodiscard]] QString     waitingReason() const { return m_waitingReason; }
 
     // Called by DaemonLink when a snapshot for this feed's token arrives.
     void deliver(const QVariantMap &snapshot);
+
+    // Also DaemonLink's, and not QML's — which is why it is a plain setter and
+    // not a WRITE on the property. A tile declares what it needs; why it has
+    // not been given it is a fact about the bus, and the bus is the one thing a
+    // widget file is not allowed to know about.
+    void setWaitingReason(const QString &reason);
 
     // Ask the daemon to refresh this feed's place now.
     Q_INVOKABLE void refresh();
@@ -120,6 +152,7 @@ Q_SIGNALS:
     void requestChanged();
     void snapshotChanged();
     void ageChanged();
+    void waitingReasonChanged();
 
 private:
     void requestResubscribe();
@@ -133,4 +166,5 @@ private:
     bool        m_hasData  = false;
     bool        m_complete = false;
     QDateTime   m_fetchedAt;
+    QString     m_waitingReason;
 };
