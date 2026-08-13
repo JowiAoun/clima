@@ -92,6 +92,17 @@ public Q_SLOTS:
 Q_SIGNALS:
     void SnapshotChanged(const QString &token, const QString &json);
 
+    // The saved places changed: one was added, removed, moved or made home.
+    // Carries nothing — a reader that cares calls Subscribe again, which is
+    // the only thing it could do with any argument this might have had.
+    //
+    // Additive, so it does not move the trailing 1 on the interface name. An
+    // older reader never asks for it and is unaffected; existing subscriptions
+    // are re-pointed at the new place before this goes out, so ignoring it
+    // costs nothing except in the one case where there was no subscription to
+    // re-point — a widget that came up before the user had chosen a place.
+    void PlacesChanged();
+
 private:
     SnapshotService *m_service;
 };

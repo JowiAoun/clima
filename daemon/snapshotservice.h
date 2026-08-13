@@ -80,6 +80,7 @@ class FixtureAirQualityProvider;
 class FixtureAlertProvider;
 } // namespace clima
 
+class QFileSystemWatcher;
 class QTimer;
 
 class SnapshotService : public QObject
@@ -121,6 +122,15 @@ Q_SIGNALS:
     // on arg0 in its match rule and never be woken for somebody else's widget.
     void snapshotChanged(const QString &token, const QString &json);
 
+    // The saved places changed under us: one was added, removed, moved or made
+    // home. Existing subscriptions are re-pointed here before this goes out, so
+    // a reader that ignores it still ends up with the right city — what it is
+    // for is the reader whose Subscribe FAILED, which is every widget on a
+    // desktop where the tiles were put up before anybody chose a place. There
+    // is no subscription to re-point for those, and this is the only thing that
+    // will ever tell them to ask again.
+    void placesChanged();
+
 private:
     // Everything held for one place. The three payloads are kept in memory
     // rather than re-read from the cache on every call, because a widget host
@@ -137,7 +147,18 @@ private:
     };
 
     struct Subscription {
+        // What this subscription resolved to when it was made, and what was
+        // asked for. Both, because they answer different questions and the
+        // second one used to be thrown away.
+        //
+        // A reader subscribes to "home". That is canonicalised to a row id here
+        // so the fetch, the cache and the publish all key on one string — and
+        // for as long as only the id was kept, "home" meant *whichever place
+        // was home the moment you asked*. Change home in the app and every
+        // widget on the desktop went on drawing the old city, correctly
+        // serving a subscription nobody would have made on purpose.
         QString              placeId;
+        QString              requested;
         clima::wire::FieldMask mask;
         int                  hours = 0;
         int                  days  = 0;
@@ -154,6 +175,28 @@ private:
     void     fetch(const QString &placeId);
     void     publish(const QString &placeId);
     void     onPollTimeout();
+
+    // ---- keeping up with the app -------------------------------------------
+    //
+    // The places table belongs to the app: it is where somebody searches for a
+    // city, sets a home and deletes the one they mistyped. This process reads
+    // it and nothing tells it when it changes — deliberately, because the app
+    // does not know this daemon exists (see the header) and a bus call from it
+    // would be the first line of it finding out.
+    //
+    // So the database is watched instead, and the list is re-read on the poll
+    // as well. The watcher is the fast path and the poll is the guarantee: file
+    // notifications are best-effort across filesystems, containers and network
+    // homes, and a widget that follows a change within five minutes is a
+    // different bug from one that never follows it at all.
+    void watchPlaces();
+    void reloadPlaces();
+
+    // Everything a resolution could turn on: which rows exist, which is home,
+    // which is current, and where each one is. Compared rather than trusted,
+    // because this process writes to the same database on every fetch and
+    // would otherwise re-resolve the world every time it cached a forecast.
+    [[nodiscard]] QString placesFingerprint() const;
 
     QString                                m_fixtureName;
     clima::Fixture                         m_fixture;
@@ -179,4 +222,8 @@ private:
     quint64                      m_nextToken = 1;
 
     QTimer *m_poll = nullptr;
+
+    QFileSystemWatcher *m_placesWatch    = nullptr;
+    QTimer             *m_placesSettle   = nullptr;
+    QString             m_placesFingerprint;
 };

@@ -195,6 +195,13 @@ What closes it: either a `SettingsChanged` signal on the existing bus interface,
 or a `QFileSystemWatcher` on the INI in the widget host — the second is a dozen
 lines and needs no wire-format change, which is probably the right first answer.
 
+There is now a worked example of exactly that shape one process over. The daemon
+watches the places database and re-reads it when it settles, so a change of home
+place reaches a running tile in about a second; `daemon/snapshotservice.cpp` has
+the watcher, the settle timer, the fingerprint that keeps its own writes from
+retriggering it, and the poll-tick re-read that covers a notification that never
+arrives. The INI wants the same four pieces and none of the bus work.
+
 ---
 
 ## The desktop widgets have never been pinned on a KDE session

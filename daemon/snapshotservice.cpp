@@ -15,7 +15,10 @@
 #include "libclima/providers/registry.h"
 
 #include <QFile>
+#include <QFileInfo>
+#include <QFileSystemWatcher>
 #include <QFutureWatcher>
+#include <QSet>
 #include <QTimer>
 
 using namespace clima;
@@ -32,6 +35,12 @@ constexpr int kPollIntervalMs = 5 * 60 * 1000;
 // What the daemon keeps for a place that nobody has narrowed. A widget asks
 // for what it needs through the mask; these are the ceilings behind it.
 constexpr int kForecastDays = 10;
+
+// How long the places table has to hold still before it is re-read. Long
+// enough that the several writes behind one edit in the app are seen as one,
+// short enough that somebody who just changed their home place watches the
+// tiles follow rather than wondering whether they will.
+constexpr int kPlacesSettleMs = 750;
 
 QString tokenFor(quint64 n)
 {
@@ -84,6 +93,8 @@ void SnapshotService::configure(const QString &fixtureName)
 
     m_places = new LocationController(m_cache.get(), this);
     m_places->load();
+    m_placesFingerprint = placesFingerprint();
+    watchPlaces();
 
     m_poll = new QTimer(this);
     m_poll->setInterval(kPollIntervalMs);
@@ -177,6 +188,128 @@ QString SnapshotService::canonical(const QString &placeId) const
     return place.id != 0 ? QString::number(place.id) : QString();
 }
 
+// ---- keeping up with the app ------------------------------------------------
+
+void SnapshotService::watchPlaces()
+{
+    // Nothing to watch: a fixture's place comes out of a recorded file and no
+    // edit in the app can reach it.
+    if (isFixtureMode())
+        return;
+
+    const QString database = CacheStore::defaultDatabasePath();
+    if (database.isEmpty())
+        return;
+
+    // Settled rather than immediate, and the interval is chosen for SQLite
+    // rather than for the user. One place added by the app is several writes —
+    // the row, the home flag on the row that used to hold it, the WAL, a
+    // checkpoint — and re-reading the table between two of them would answer a
+    // question about a half-finished edit.
+    m_placesSettle = new QTimer(this);
+    m_placesSettle->setSingleShot(true);
+    m_placesSettle->setInterval(kPlacesSettleMs);
+    connect(m_placesSettle, &QTimer::timeout, this, &SnapshotService::reloadPlaces);
+
+    m_placesWatch = new QFileSystemWatcher(this);
+
+    // The directory as well as the files, because in WAL mode the interesting
+    // write lands in cache.sqlite-wal, and that file is created, checkpointed
+    // and deleted underneath a watcher that is only ever told about paths that
+    // exist. Watching the directory catches it reappearing; re-arming below
+    // catches everything else.
+    const QFileInfo info(database);
+    m_placesWatch->addPath(info.absolutePath());
+    m_placesWatch->addPath(database);
+    m_placesWatch->addPath(database + QLatin1String("-wal"));
+
+    const auto touched = [this, database](const QString &) {
+        // Re-arm first. A path that was replaced rather than modified is
+        // dropped by the watcher, and the second edit of the evening would
+        // otherwise be the one nobody hears.
+        const QStringList held = m_placesWatch->files();
+        for (const QString &path : { database, database + QLatin1String("-wal") }) {
+            if (!held.contains(path) && QFile::exists(path))
+                m_placesWatch->addPath(path);
+        }
+        m_placesSettle->start();
+    };
+
+    connect(m_placesWatch, &QFileSystemWatcher::fileChanged, this, touched);
+    connect(m_placesWatch, &QFileSystemWatcher::directoryChanged, this, touched);
+}
+
+void SnapshotService::reloadPlaces()
+{
+    if (isFixtureMode())
+        return;
+
+    m_places->load();
+
+    const QString now = placesFingerprint();
+    if (now == m_placesFingerprint)
+        return; // Our own cache write, almost every time.
+
+    m_placesFingerprint = now;
+
+    // Every subscription re-resolved against the list that just arrived. A
+    // reader asked for "home" and is entitled to whichever place is home now,
+    // not the one that was home when it happened to start its widgets.
+    QSet<QString> moved;
+    for (auto it = m_subscriptions.begin(); it != m_subscriptions.end(); ++it) {
+        const QString resolved = canonical(it->requested);
+
+        // An empty resolution is a place that has been deleted with a
+        // subscription still on it. The subscription is left pointing where it
+        // was: the tile goes on showing its last reading and ages it, which is
+        // the same answer this process gives for every other kind of loss.
+        if (resolved.isEmpty() || resolved == it->placeId)
+            continue;
+
+        it->placeId = resolved;
+        moved.insert(resolved);
+    }
+
+    for (const QString &placeId : std::as_const(moved)) {
+        const Watched &watched = ensureWatched(placeId);
+
+        // Published only when there is something to publish. ensureWatched has
+        // already kicked a fetch for a place nobody was watching, and sending
+        // an empty snapshot in the meantime would replace a tile's old-but-real
+        // city with a new one made of dashes.
+        if (!watched.forecast.isEmpty())
+            publish(placeId);
+    }
+
+    Q_EMIT placesChanged();
+}
+
+QString SnapshotService::placesFingerprint() const
+{
+    if (m_places == nullptr)
+        return {};
+
+    QStringList parts;
+    const QList<Place> all = m_places->places();
+    parts.reserve(all.size() + 1);
+
+    for (const Place &place : all) {
+        parts.append(QStringLiteral("%1/%2/%3/%4/%5")
+                         .arg(place.id)
+                         .arg(place.isHome ? 1 : 0)
+                         .arg(place.coordinate.latitude, 0, 'f', 5)
+                         .arg(place.coordinate.longitude, 0, 'f', 5)
+                         .arg(place.timezone));
+    }
+
+    // The current place is a setting rather than a column, and it is the second
+    // thing resolve() consults. A reader whose home place has been deleted
+    // follows it, so a change to it has to count as a change.
+    parts.append(QStringLiteral("current/%1").arg(m_places->currentPlace().id));
+
+    return parts.join(QLatin1Char('|'));
+}
+
 QStringList SnapshotService::placeIds() const
 {
     if (isFixtureMode())
@@ -246,10 +379,11 @@ QString SnapshotService::subscribe(const QString    &placeId,
         return {};
 
     Subscription sub;
-    sub.placeId = key;
-    sub.mask    = wire::FieldMask::fromFields(fields);
-    sub.hours   = hours;
-    sub.days    = days;
+    sub.placeId   = key;
+    sub.requested = placeId;
+    sub.mask      = wire::FieldMask::fromFields(fields);
+    sub.hours     = hours;
+    sub.days      = days;
 
     const QString token = tokenFor(m_nextToken++);
     m_subscriptions.insert(token, sub);
@@ -310,6 +444,13 @@ QByteArray SnapshotService::catalogue() const
 
 void SnapshotService::onPollTimeout()
 {
+    // The guarantee behind the file watcher. If a notification was never
+    // delivered — a filesystem that does not report, a database on a network
+    // home, a container that isolates inotify — the list is still re-read here,
+    // and the worst case becomes "the widgets follow within five minutes"
+    // rather than "the widgets never follow".
+    reloadPlaces();
+
     // Only what somebody is actually looking at. A place with no subscription
     // and no recent GetSnapshot is not refreshed, which is what keeps a daemon
     // with ten saved cities from making ten requests for the nine nobody has

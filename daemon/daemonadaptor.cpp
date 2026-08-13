@@ -14,6 +14,7 @@ DaemonAdaptor::DaemonAdaptor(SnapshotService *service)
     // is here rather than in the service so that nothing below this file knows
     // there is a bus at all.
     connect(service, &SnapshotService::snapshotChanged, this, &DaemonAdaptor::SnapshotChanged);
+    connect(service, &SnapshotService::placesChanged, this, &DaemonAdaptor::PlacesChanged);
 }
 
 int DaemonAdaptor::SchemaVersion() const

@@ -164,6 +164,11 @@ private Q_SLOTS:
     void onServiceUnregistered(const QString &service);
     void onSnapshotChanged(const QString &token, const QString &json);
 
+    // Declared as a slot and connected by name, like the one above, because
+    // both arrive through QDBusConnection::connect rather than from a QObject
+    // this process owns.
+    void onPlacesChanged();
+
 private:
     // ---- why the constructor is private -----------------------------------
     //

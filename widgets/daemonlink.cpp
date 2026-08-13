@@ -241,6 +241,21 @@ void DaemonLink::connectToBus()
     connect(m_watcher, &QDBusServiceWatcher::serviceUnregistered, this,
             &DaemonLink::onServiceUnregistered);
 
+    // ---- the places moving under us -----------------------------------------
+    //
+    // Connected once, here, rather than per subscription: the match rule is on
+    // the well-known name, so it survives the daemon exiting and coming back
+    // and there is no token to key it on anyway.
+    //
+    // What it is for is the tile that has no subscription. A widget host that
+    // started before the user had chosen a place got an empty token from
+    // Subscribe, said so on the tile, and had nothing left that would ever make
+    // it ask again — no timer, no retry, and the daemon has no way to push to a
+    // subscription that was never created. This is that missing edge.
+    bus.connect(QStringLiteral(CLIMA_DAEMON_SERVICE), QStringLiteral(CLIMA_DAEMON_PATH),
+                QStringLiteral(CLIMA_DAEMON_INTERFACE), QStringLiteral("PlacesChanged"), this,
+                SLOT(onPlacesChanged()));
+
     if (bus.interface()->isServiceRegistered(QStringLiteral(CLIMA_DAEMON_SERVICE))) {
         handshake();
         return;
@@ -595,6 +610,17 @@ void DaemonLink::setReason(const QString &reason)
     // WidgetSurface.qml — and they would disagree the first time either moved.
     for (WidgetFeed *feed : std::as_const(m_feeds))
         feed->setWaitingReason(reason);
+}
+
+void DaemonLink::onPlacesChanged()
+{
+    // Every feed, not only the ones that failed. A subscription made against
+    // "home" was resolved to a row id when it was made, and the daemon has
+    // already re-pointed it — but a tile naming a specific place that has just
+    // been deleted, or one whose subscription predates the place it wants,
+    // is only put right by asking again. Four tiles is four round trips to a
+    // local process, on an event that happens when somebody edits their places.
+    subscribeAll();
 }
 
 void DaemonLink::onSnapshotChanged(const QString &token, const QString &json)

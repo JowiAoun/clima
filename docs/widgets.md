@@ -63,6 +63,7 @@ io.github.JowiAoun.Clima.Daemon1
 | `ListWidgets() → s` | `widgets/catalogue.json`, verbatim |
 | `ListPlaces() → as` | Canonical place ids |
 | `SnapshotChanged(token, json)` | signal |
+| `PlacesChanged()` | signal: the saved places moved under you — subscribe again |
 
 **The token is the signal's first argument on purpose.** A D-Bus signal is a
 broadcast, so without it every widget is woken — and made to parse a snapshot —
@@ -262,11 +263,11 @@ normalised to booleans.
 
 ---
 
-## Four things the tiles corrected once they ran
+## Five things the tiles corrected once they ran
 
 The mechanism above was measured before anything was built on it. What follows
 was not measurable in advance — it only appears when a widget is on screen —
-and each of the four produced a tile that looked plausible and was wrong.
+and each of the five produced a tile that looked plausible and was wrong.
 
 ### 5. QML builds a second singleton when the type is default-constructible
 
@@ -361,6 +362,69 @@ chosen anywhere. `Subscribe` answers with an empty token, which is the daemon
 saying *I have no place by that id* — and that answer had been on the wire,
 unread, since the day the interface was written.
 
+### 9. Two lines in `main()` are the address of the database
+
+Once the tiles could say what was wrong, they said it: **no such place** — on a
+machine with seven saved cities and Toronto as home.
+
+`QStandardPaths::AppDataLocation` is `<organizationName>/<applicationName>`, and
+`libclima/cache/cachestore.cpp` puts `cache.sqlite` under it. The three
+processes set those two names in three separate `main()` functions, and one of
+them disagreed:
+
+| | organization | application | opens |
+|---|---|---|---|
+| `clima` | `Clima` | `clima` | `~/.local/share/Clima/clima` |
+| `clima-widget` | `Clima` | `clima` | the same |
+| `clima-daemon` | `clima` | **`clima-daemon`** | `~/.local/share/clima/clima-daemon` |
+
+So the daemon had its own database, empty of places, and had never once served
+the weather for a city anybody chose. Both processes were working perfectly.
+
+**Why nothing caught it.** Every test and every screenshot of the tiles runs the
+daemon with `--fixture`, which resolves its place out of a recorded file and
+never opens the places table at all — the mode that exists so CI can never touch
+the network is also the mode that never touches the database. The one path
+nobody automated was the only path a user takes. `tests/tst_widgets.cpp` now
+reads all three `main()` functions and fails when they disagree, which is a
+weaker check than a real one and is the check that would have caught this.
+
+There is a general lesson here about test doubles that is worth more than the
+bug: a fixture replaces the thing you are least able to run in CI, which makes
+it exactly the thing your tests stop covering. `--fixture` was designed to
+remove the network. It removed the database with it, and nobody noticed for as
+long as there was nothing else looking at the database.
+
+### And what it took to see a place change
+
+Fixing the address exposed the next thing behind it: a daemon that reads the
+places table once, at startup, and a subscription that resolves `home` to a row
+id at the moment it is made. Change your home place in the app and every tile on
+the desktop went on drawing the old city — correctly serving a subscription
+nobody would have made on purpose.
+
+The app cannot be the one to say so: it does not know this daemon exists, and a
+bus call from it would be the first line of it finding out. So the daemon
+watches the database instead — a settle timer behind a `QFileSystemWatcher` on
+the file, the WAL and the directory, with a re-read on every poll as the
+guarantee behind it, since file notifications are best-effort across network
+homes and containers.
+
+When the list really has changed (a fingerprint over the rows, the home flag,
+the coordinates and the current place — not the file's mtime, since this process
+writes to that database itself on every fetch):
+
+- every existing subscription is **re-resolved**, so a reader that ignores the
+  news still ends up with the right city;
+- `PlacesChanged` goes out on the bus, for the reader that has **no**
+  subscription to re-resolve — which is every widget on a desktop where the
+  tiles went up before anybody chose a place.
+
+Measured on a copy of a real profile: a running `clima-widget`, untouched,
+followed a home change from Toronto to Vancouver and back within one frame of
+the settle interval — including the hourly axis moving to the new city's own
+zone.
+
 ---
 
 ## What exists today
@@ -371,7 +435,7 @@ unread, since the day the interface was written.
 |---|---|
 | The adoption mechanism | Measured on GNOME Shell 46, Wayland — the verdict above |
 | The wire format and its field mask | `tst_wiresnapshot`, 17 assertions, three encoder rules |
-| `clima-daemon` | Exercised end to end on a private session bus: introspection, a masked `GetSnapshot`, `Subscribe` delivering its own token, `Unsubscribe` |
+| `clima-daemon` | Exercised end to end on a private session bus: introspection, a masked `GetSnapshot`, `Subscribe` delivering its own token, `Unsubscribe`. Serving a **real** places table — as against a fixture — was measured against a copy of a live profile, which is how finding 9 was found |
 | `clima-widget` and the ten tiles | Rendered against four recorded snapshots in both schemes; `tst_widgets` asserts the catalogue, the dispatch and the module list agree, plus every `Wx` boundary |
 | Starting the daemon | D-Bus activation, run against a private bus with its own service directory: no daemon, no autostart, and `clima-widget` alone brought one up and filled its tiles. The three states a tile can be empty in were each photographed. |
 | The link-line guard | `widget_has_no_engine`, verified by injecting the defect |
