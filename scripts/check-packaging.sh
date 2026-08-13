@@ -93,6 +93,39 @@ if [ -x "$build_dir/daemon/clima-daemon" ]; then
   else
     echo "autostart entry: valid"
   fi
+
+  # ---- and the file that starts it on demand --------------------------------
+  #
+  # Under the prefix, unlike the entry above. Three things have to line up or
+  # activation silently does not happen, and "silently" is the whole problem:
+  # the bus ignores a service file it cannot match, and the only symptom is a
+  # widget host that finds no daemon.
+  #
+  #   * the FILE NAME is the bus name. The bus matches a request against it, and
+  #     flatpak refuses to export a service file named anything else.
+  #   * the Name= key agrees with it, and with the name the daemon actually
+  #     registers — which is read out of the binary rather than assumed, so a
+  #     rename that reaches one and not the other fails here.
+  #   * Exec= is absolute. The bus does not search PATH, and a relative Exec is
+  #     an activation that fails at the moment somebody needs it.
+  service="$stage/share/dbus-1/services/$app_id.Daemon.service"
+  if [ ! -f "$service" ]; then
+    note "the daemon was built but installed no D-Bus service file at share/dbus-1/services/$app_id.Daemon.service"
+  else
+    registers="$("$build_dir/daemon/clima-daemon" --print-address | awk '$1 == "service" { print $2 }')"
+    declared="$(awk -F= '$1 == "Name" { print $2 }' "$service")"
+    exec_line="$(awk -F= '$1 == "Exec" { print $2 }' "$service")"
+
+    if [ "$declared" != "$app_id.Daemon" ]; then
+      note "the service file declares Name=$declared, which is not its own file name"
+    elif [ "$declared" != "$registers" ]; then
+      note "the service file declares Name=$declared and the daemon registers $registers"
+    elif [ "${exec_line#/}" = "$exec_line" ]; then
+      note "Exec= in the service file is not an absolute path: $exec_line"
+    else
+      echo "d-bus activation: $declared"
+    fi
+  fi
 fi
 
 # ---- the desktop entry ------------------------------------------------------
@@ -144,4 +177,5 @@ if [ "$fail" -ne 0 ]; then
   exit 1
 fi
 
-echo "packaging: desktop entry, AppStream component and 9 icons are installable and valid"
+echo "packaging: desktop entries, AppStream component, D-Bus activation and 9 icons are" \
+     "installable and valid"

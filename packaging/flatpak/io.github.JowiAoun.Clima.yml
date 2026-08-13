@@ -88,9 +88,18 @@ cleanup:
 #     autostart for the daemon from a Flatpak install. packaging/linux/
 #     clima-daemon.desktop.in covers a .deb; inside a sandbox nothing can write
 #     to /etc/xdg/autostart, and the portal that replaces it is a permission
-#     prompt this app has not earned yet. The GNOME extension starts the daemon
-#     itself when nothing else has, which closes the loop for the case that
-#     matters most today — see packaging/gnome-shell/.
+#     prompt this app has not earned yet.
+#
+#     What starts the daemon here instead is D-Bus activation: the build
+#     installs a service file to /app/share/dbus-1/services, flatpak exports it
+#     with the Exec rewritten to `flatpak run --command=clima-daemon`, and the
+#     bus starts it when a widget host asks for the weather. That needs no
+#     permission of any kind — the name is under the app ID, which this app owns
+#     by default — and it gets the daemon its own sandbox instance rather than a
+#     life inside whichever process happened to want it first.
+#
+#     The GNOME extension still starts one when nothing else has, and the two
+#     cannot collide: the loser of the race exits 5.
 finish-args:
   # The forecast. This is the only thing the app sends anywhere, and it sends
   # a coordinate and receives JSON — see libclima/net/httpclient.h for the

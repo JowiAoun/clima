@@ -104,6 +104,29 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET clima-daemon)
         @ONLY
     )
 
+    # ---- and the one that starts the daemon on demand ------------------------
+    #
+    # Under the prefix, unlike the autostart entry, so it stages, relocates and
+    # exports like everything else — and it is therefore NOT behind
+    # CLIMA_INSTALL_AUTOSTART. The Flatpak that has to switch that option off is
+    # the install that needs this file most: it is the only mechanism by which a
+    # sandboxed daemon ever starts on a desktop with no GNOME extension on it.
+    #
+    # The file name has to BE the bus name. The bus looks up an activation
+    # request by matching it against the file's own name, and flatpak's export
+    # check requires the same thing before it will publish it — a service file
+    # named anything else is silently ignored by both.
+    configure_file(
+        linux/clima-daemon.service.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Daemon.service
+        @ONLY
+    )
+
+    install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/${CLIMA_APP_ID}.Daemon.service
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/dbus-1/services
+    )
+
     # /etc/xdg, absolute, and deliberately not under CMAKE_INSTALL_PREFIX:
     # the XDG autostart search path is a fixed list and a file in
     # /usr/local/etc/xdg/autostart is read by nothing. CMAKE_INSTALL_SYSCONFDIR

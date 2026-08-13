@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# D-Bus activation for clima-daemon: the bus starts it when something asks it
+# for the weather.
+#
+# ---- what this is for, given that there is already an autostart entry -------
+#
+# The autostart entry starts the daemon at login, on a desktop that reads
+# /etc/xdg/autostart, if the user has not switched it off. This file starts it
+# when it is *wanted*, and covers three cases the other one cannot:
+#
+#   * A FLATPAK INSTALL. Nothing inside a sandbox can write to /etc/xdg/
+#     autostart, which is why the manifest turns that install rule off. Flatpak
+#     does export this file, so the tiles work on a Flatpak install the same way
+#     they work on a .deb.
+#
+#   * A DESKTOP THAT IS NOT GNOME. The GNOME extension starts the daemon when
+#     nothing else has. There is no extension on KDE, Sway, Hyprland, Wayfire or
+#     river — `clima-widget --pin` puts the tiles there on its own — so on every
+#     one of those the daemon had nobody to start it between one login and the
+#     next.
+#
+#   * THE FIRST RUN. Install the package, put the widgets on the desktop, and
+#     the autostart entry does nothing until the next login. Which is where this
+#     was found: four tiles that had reached the point of drawing and had
+#     nothing to draw.
+#
+# ---- why this does not contradict "the daemon is not activatable" -----------
+#
+# It does contradict it, and the sentence it contradicts was wrong. It is in
+# daemon/main.cpp and in the autostart entry beside this file, and the argument
+# given is that a bus-activated process is spawned by dbus-daemon, so
+# gnome-shell can never own its Wayland client and can never adopt its window.
+#
+# Every word of that is true of the WIDGET HOST, where it was measured
+# (docs/widgets.md, finding 1). None of it is true of the daemon: it has no
+# window, no Wayland connection and nothing to adopt. The constraint was carried
+# one process too far.
+#
+# ---- lifetime ---------------------------------------------------------------
+#
+# Activation starts one and the daemon then stays, because it has no idle
+# timeout by design — a service that quit after five idle minutes would take the
+# tiles stale with it. So this costs at most one process, started only on a
+# desktop where something actually asked for the weather, which is a smaller
+# claim on a machine than the autostart entry makes.
+#
+# A race with the autostart entry or with the GNOME extension costs nothing: the
+# second daemon finds the name owned and exits 5 immediately (daemon/main.cpp).
+[D-BUS Service]
+Name=@CLIMA_APP_ID@.Daemon
+
+# Absolute, as the bus requires — it does not search PATH. Flatpak rewrites this
+# line when it exports the file, to `flatpak run --command=clima-daemon`, so the
+# activated daemon gets its own sandbox instance rather than living inside
+# whichever one happened to ask for it first.
+Exec=@CMAKE_INSTALL_FULL_BINDIR@/clima-daemon

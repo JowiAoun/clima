@@ -10,13 +10,20 @@
 # they come up, find nothing, and show ten skeletons — which is a broken
 # installation that looks like broken code.
 #
-# It is NOT D-Bus activation, and that is a design decision rather than an
-# omission. daemon/main.cpp has the argument at length: a bus-activated process
-# is spawned by dbus-daemon, so gnome-shell can never own its Wayland client and
-# can never adopt a window belonging to it. That rules activation out for the
-# widget host, and once the host is spawned by the shell there is nothing left
-# for activation to buy the daemon either — so it is an ordinary autostart, and
-# a user who wants it off can turn it off in the same place as everything else.
+# This is not the only way it starts, and it is no longer the only way that
+# matters. clima-daemon.service.in beside this file makes the daemon
+# D-Bus-activatable, so the bus starts one the moment a widget host or the GNOME
+# extension looks for it — which is what covers a Flatpak (nothing in a sandbox
+# can write to /etc/xdg/autostart) and the first run of any install, where this
+# entry does nothing at all until the next login.
+#
+# What this file is still for is the other direction: the daemon exists to serve
+# the days nobody opens the weather app, and a tile that is pinned to a desktop
+# wants its reading to be current when the desktop appears rather than fetched
+# after something asks. That is a login-time job and activation is not one.
+#
+# The two cannot collide. Whichever loses the race finds the name owned and
+# exits 5 without touching anything.
 #
 # ---- what it costs a user who has no widgets --------------------------------
 #

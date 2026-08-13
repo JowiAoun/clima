@@ -93,6 +93,28 @@ clima-daemon --fixture toronto           # recorded data at a frozen clock
 clima-daemon --fixture toronto --dump-snapshot   # one snapshot, no bus at all
 ```
 
+### What starts it
+
+Three things, and the order is how little each asks of the user.
+
+| | |
+|---|---|
+| **The bus** | `packaging/linux/clima-daemon.service.in` makes it activatable, so the first widget host or extension that looks for the name gets one started for it. Works from a Flatpak, on any desktop, without a login. |
+| **An autostart entry** | `/etc/xdg/autostart`, where a package can write one. Login-time, which is what a pinned tile wants: a reading that is already current when the desktop appears. |
+| **By hand** | `clima-daemon`. |
+
+All three are idempotent — whichever loses the race finds the name owned and
+exits 5 — and none of them is a fallback for the others.
+
+**Activation is new, and it reverses a decision this document made.** Finding 1
+below rules out D-Bus activation for the *widget host*, because a bus-activated
+process is spawned by `dbus-daemon` and gnome-shell can therefore never own its
+Wayland client. That was measured and it stands. What went wrong is that the
+same conclusion was written into the daemon, which has no window, no Wayland
+connection and nothing for a shell to adopt — and the cost only appeared once
+`--pin` put tiles on compositors where there is no extension to start anything.
+On a Flatpak install on KDE, nothing started the daemon, ever.
+
 That last one is how `tests/fixtures/wire/` is recorded, and it goes through the
 same encoder the bus does — a recorded fixture produced any other way would
 drift from what the daemon actually sends, which is the whole of what makes the
@@ -240,11 +262,11 @@ normalised to booleans.
 
 ---
 
-## Three things the tiles corrected once they ran
+## Four things the tiles corrected once they ran
 
 The mechanism above was measured before anything was built on it. What follows
 was not measurable in advance — it only appears when a widget is on screen —
-and each of the three produced a tile that looked plausible and was wrong.
+and each of the four produced a tile that looked plausible and was wrong.
 
 ### 5. QML builds a second singleton when the type is default-constructible
 
@@ -301,6 +323,44 @@ hairline card edge unconditional here rather than a light-mode exception:
 `docs/10-design-system.md` §10.1 bans borders because contrast against the page
 defines a card, which is exactly the premise a wallpaper removes.
 
+### 8. A loading skeleton is a claim, and it was making a false one
+
+Every tile drew three grey bars while it had no snapshot. Correct for the
+fraction of a second before the first one arrives — and the same picture,
+indefinitely, when no snapshot was ever coming.
+
+That state was not rare. It is what a desktop looks like whenever the daemon is
+not running, which until D-Bus activation was every Flatpak install on a
+compositor that is not GNOME, every first run before the next login, and every
+build tree. Four tiles animating nothing, no message on screen, and nothing in
+the journal either: the only warning on that path was for a session bus that
+could not be reached, which is not the case that happens.
+
+`docs/README.md` ranks not fabricating a reading above everything else. This was
+the same lie told with a picture instead of a digit — and worse than a wrong
+number, because a wrong number is at least reported. A skeleton is read as *the
+software is working on it*, and that is what sends somebody to look at the
+widget code rather than at the service that is not running.
+
+So `WidgetFeed::waitingReason` splits the state in two. The bars now mean "a
+snapshot is on its way" and are shown only when one is; everything else gets a
+sentence that names what is wrong, because "not running", "not answering" and
+"there is no place set" send a reader to three different places:
+
+| What the tile shows | What is actually true |
+|---|---|
+| a skeleton | subscribed, or an activation request is in flight |
+| The Clima weather service is not running. | nothing owns the name and the bus could not start one |
+| The Clima weather service is not answering. | something owns the name and did not reply |
+| No place yet. Open Clima and choose one. | a working daemon with an empty place database — a first run |
+
+The third one is the interesting one, and it was a second silent failure hiding
+behind the first: a package installs the widgets and the daemon together, so the
+tiles can reach a healthy daemon on a machine where nobody has opened Clima and
+chosen anywhere. `Subscribe` answers with an empty token, which is the daemon
+saying *I have no place by that id* — and that answer had been on the wire,
+unread, since the day the interface was written.
+
 ---
 
 ## What exists today
@@ -313,6 +373,7 @@ defines a card, which is exactly the premise a wallpaper removes.
 | The wire format and its field mask | `tst_wiresnapshot`, 17 assertions, three encoder rules |
 | `clima-daemon` | Exercised end to end on a private session bus: introspection, a masked `GetSnapshot`, `Subscribe` delivering its own token, `Unsubscribe` |
 | `clima-widget` and the ten tiles | Rendered against four recorded snapshots in both schemes; `tst_widgets` asserts the catalogue, the dispatch and the module list agree, plus every `Wx` boundary |
+| Starting the daemon | D-Bus activation, run against a private bus with its own service directory: no daemon, no autostart, and `clima-widget` alone brought one up and filled its tiles. The three states a tile can be empty in were each photographed. |
 | The link-line guard | `widget_has_no_engine`, verified by injecting the defect |
 | The GNOME extension | `scripts/check-extension.sh`: both modules parse, the introspection XML matches what it calls, and every `Meta.WaylandClient` method it calls exists on this machine's mutter. Verified by injecting both defects. |
 | Pinning on KDE and wlroots | `scripts/check-layer-shell.sh`, in CI: a real headless wlroots compositor, six assertions, one of which is the same binary with `--pin off` failing them |
@@ -324,6 +385,18 @@ clima-widget --snapshot tests/fixtures/wire/seattle.json --columns 2 \
              --widget current-conditions --widget alerts --grab tiles.png
 clima-widget --pin on --anchor bottom-right --margin 16
 ```
+
+In a build tree there is nothing installed for the bus to activate, so the tiles
+will say the weather service is not running — correctly — until one is started
+beside them:
+
+```sh
+build/dev/daemon/clima-daemon --fixture toronto &
+build/dev/widgets/clima-widget
+```
+
+`--snapshot` is the other way, and the one CI uses: it reads a recorded snapshot
+and never touches the bus at all.
 
 ### Preferences arrive at start, not while running
 
@@ -391,10 +464,12 @@ tiles that never appear under the one shell that spawns us.
   right shape — has no session bus and therefore no daemon to read from.
 
 - **The Background portal.** A Flatpak cannot write to `/etc/xdg/autostart`, so
-  a Flatpak-installed daemon does not autostart. The GNOME extension starts it
-  when nothing else has, which covers the case that matters today; the portal
-  flow is the general answer and it is a permission prompt, so it belongs with
-  the notifications work rather than here.
+  a Flatpak-installed daemon does not autostart. D-Bus activation covers the
+  case that matters — the daemon is running by the time the first tile has
+  anything to ask — and what the portal would add on top is a daemon that is
+  *already* running when the desktop appears, so the first reading is not
+  fetched while somebody watches. That is a permission prompt, and it belongs
+  with the notifications work rather than here.
 
 The daemon is additive. The app does not link it, does not know about it, and
 behaves exactly as it did before this existed when nothing is running.

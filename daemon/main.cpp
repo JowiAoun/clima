@@ -24,12 +24,25 @@
 // disappears after five idle minutes is a daemon whose widgets go stale in a
 // way that looks like a bug in the widget.
 //
-// It is also NOT D-Bus-activatable, and that is not an oversight. A
-// bus-activated process is spawned by dbus-daemon, which means gnome-shell can
-// never own its Wayland client and can never adopt its windows — see
-// docs/widgets.md, where that was measured. The widget host is spawned by the
-// shell extension; this daemon is started by whatever wants it and its
-// autostart is an ordinary .desktop entry.
+// It IS D-Bus-activatable — packaging/linux/clima-daemon.service.in — and this
+// comment used to say the opposite, at length, so it is worth being clear about
+// what changed and what did not.
+//
+// The argument was: a bus-activated process is spawned by dbus-daemon, so
+// gnome-shell can never own its Wayland client and can never adopt its window.
+// That is true, it was measured (docs/widgets.md, finding 1), and it rules
+// activation out — for the WIDGET HOST, which is the process with a window to
+// adopt. This one has no window, no Wayland connection and nothing for a shell
+// to own. The constraint was carried one process too far, and the cost of
+// carrying it was a desktop full of tiles that had nothing to read: the GNOME
+// extension starts this daemon, and on KDE, Sway, Hyprland, Wayfire and river —
+// where `clima-widget --pin` needs no extension at all — nothing did.
+//
+// So there are now three ways it starts, in order of how little they ask of the
+// user: the bus activates it when a widget host or the extension looks for it,
+// an /etc/xdg/autostart entry starts it at login where one can be installed, and
+// anybody can run it by hand. All three are idempotent — see the name
+// registration below, which exits 5 rather than fighting over the name.
 
 #include "daemonadaptor.h"
 #include "daemonconfig.h"
