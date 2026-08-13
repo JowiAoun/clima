@@ -64,9 +64,41 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    QCoreApplication::setApplicationName(QStringLiteral("clima-daemon"));
+
+    // ---- the same two names the app sets, and it is load-bearing ------------
+    //
+    // QStandardPaths::AppDataLocation is <organizationName>/<applicationName>,
+    // and libclima/cache/cachestore.cpp resolves the database under it. So
+    // these two lines are not identity — they are the address of the places
+    // table, and a process that gets them wrong opens a different file and
+    // finds an empty world.
+    //
+    // Which is what happened. This said organizationName("clima") and
+    // applicationName("clima-daemon"), so the daemon opened
+    // ~/.local/share/clima/clima-daemon/cache.sqlite while the app wrote
+    // ~/.local/share/Clima/clima/cache.sqlite. Every Subscribe answered "the
+    // daemon has no such place", every tile stayed empty, and nothing was
+    // wrong with either process on its own.
+    //
+    // It survived because every test and every screenshot of the tiles used
+    // --fixture, which resolves a place out of a recorded file and never asks
+    // the database anything. The one path nobody automated was the only one a
+    // user takes.
+    //
+    // widgets/main.cpp already had this right, and says why in the same words:
+    // these names are what QSettings and QStandardPaths key on, so a process
+    // that wants to see what the app saved has to be the app as far as they
+    // are concerned. tests/tst_widgets.cpp now asserts all three agree.
+    //
+    // The cost is that `--version` prints "clima 0.1.0" rather than
+    // "clima-daemon 0.1.0", since QCommandLineParser reads applicationName.
+    // clima-widget has spelled it that way since it was written; a process
+    // says which it is in argv[0] and in --help's description, and neither of
+    // those decides where the data lives.
+    QCoreApplication::setOrganizationName(QStringLiteral("Clima"));
+    QCoreApplication::setOrganizationDomain(QStringLiteral("github.io"));
+    QCoreApplication::setApplicationName(QStringLiteral(CLIMA_APP_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
-    QCoreApplication::setOrganizationName(QStringLiteral(CLIMA_APP_NAME));
 
     QCommandLineParser parser;
     parser.setApplicationDescription(

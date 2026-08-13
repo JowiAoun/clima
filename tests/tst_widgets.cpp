@@ -58,6 +58,34 @@ QJsonObject readJson(const QString &relative)
     return QJsonDocument::fromJson(readFile(relative).toUtf8()).object();
 }
 
+// Source with its // comments removed, so that a check for what a file DOES is
+// not answered by a paragraph about what it used to do. daemon/main.cpp quotes
+// the wrong identity at length in the comment that explains the fix.
+QString withoutComments(const QString &source)
+{
+    QStringList kept;
+    const QStringList lines = source.split(u'\n');
+    kept.reserve(lines.size());
+    for (const QString &line : lines) {
+        if (!line.trimmed().startsWith(QLatin1String("//")))
+            kept.append(line);
+    }
+    return kept.join(u'\n');
+}
+
+// The argument to a QCoreApplication/QGuiApplication setter, verbatim — the
+// text, not the value, because two of these are a macro and comparing what
+// each file WROTE is the question. `QStringLiteral(CLIMA_APP_NAME)` in one
+// file and `QStringLiteral("clima")` in another would be equal at run time on
+// the day it was written and would drift the day the macro moved.
+QString identitySetTo(const QString &source, const QString &setter)
+{
+    const QRegularExpression pattern(
+        QStringLiteral("(?:QCoreApplication|QGuiApplication)::%1\\(([^;]*)\\);").arg(setter));
+    const QRegularExpressionMatch match = pattern.match(source);
+    return match.hasMatch() ? match.captured(1).simplified() : QString();
+}
+
 // Every dotted path the encoder produced in a recorded snapshot. Used to check
 // a catalogue's declared fields against something real rather than against a
 // list written from the same beliefs.
@@ -85,6 +113,7 @@ private Q_SLOTS:
     void everyComponentHasAWidget();
     void everyComponentIsInTheModule();
     void everyDeclaredFieldIsOneTheDaemonSends();
+    void allThreeProcessesShareOneStorageIdentity();
 
     // ---- what a tile with no data says -------------------------------------
     //
@@ -211,6 +240,63 @@ void TestWidgets::everyDeclaredFieldIsOneTheDaemonSends()
                                                "recorded snapshot.")
                                     .arg(id, path)));
         }
+    }
+}
+
+// ---- and the fourth file, which is where the data lives ---------------------
+
+void TestWidgets::allThreeProcessesShareOneStorageIdentity()
+{
+    // QStandardPaths::AppDataLocation is <organizationName>/<applicationName>,
+    // and libclima/cache/cachestore.cpp puts the database under it. So these
+    // two calls in three main() functions are not identity, they are an
+    // address — and three processes that are supposed to share one database
+    // agree about it in three separate files with nothing joining them up.
+    //
+    // The daemon disagreed. It set organizationName("clima") and
+    // applicationName("clima-daemon"), opened
+    // ~/.local/share/clima/clima-daemon/cache.sqlite, and found no places in
+    // it — so every Subscribe answered "no such place" and every tile on every
+    // desktop stayed empty, while both processes ran perfectly.
+    //
+    // Nothing caught it, and the reason is worth keeping: every automated test
+    // and every screenshot of the tiles runs the daemon with --fixture, which
+    // resolves its place out of a recorded file and never opens the places
+    // table at all. The mode nobody automated was the only one a user runs.
+    const QStringList mains = {
+        QStringLiteral("app/main.cpp"),
+        QStringLiteral("widgets/main.cpp"),
+        QStringLiteral("daemon/main.cpp"),
+    };
+
+    QString organisation;
+    QString application;
+
+    for (const QString &path : mains) {
+        const QString source = withoutComments(readFile(path));
+        QVERIFY2(!source.isEmpty(), qPrintable(path + QStringLiteral(" is missing")));
+
+        const QString org = identitySetTo(source, QStringLiteral("setOrganizationName"));
+        const QString app = identitySetTo(source, QStringLiteral("setApplicationName"));
+
+        QVERIFY2(!org.isEmpty() && !app.isEmpty(),
+                 qPrintable(QStringLiteral("%1 does not set both names. Qt defaults the missing "
+                                           "one to the executable name, so this process would "
+                                           "open a database of its own.")
+                                .arg(path)));
+
+        if (organisation.isEmpty()) {
+            organisation = org;
+            application  = app;
+            continue;
+        }
+
+        QVERIFY2(org == organisation && app == application,
+                 qPrintable(QStringLiteral("%1 sets (%2, %3); %4 sets (%5, %6). These name the "
+                                           "AppDataLocation each process reads, so they resolve "
+                                           "to different databases and the daemon serves a "
+                                           "places table the app has never written to.")
+                                .arg(mains.first(), organisation, application, path, org, app)));
     }
 }
 
