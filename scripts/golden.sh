@@ -11,6 +11,26 @@
 # CLIMA_BUILD_DIR selects the build to photograph; it defaults to build/dev.
 # CLIMA_GOLDEN_FILTER=<substring> narrows the run while working on one case.
 #
+# ---- do not `accept` under a filter -----------------------------------------
+#
+# The filter is for `check` and `capture`. Re-recording under one produces an
+# image that a full run does not reproduce, and the failure is a case that
+# differs immediately after being accepted — which reads like a nondeterministic
+# renderer and is not one.
+#
+# The cause is one line below: XDG_CONFIG_HOME, XDG_DATA_HOME and XDG_CACHE_HOME
+# are redirected into ONE scratch directory for the whole invocation, not one per
+# case. That is deliberate and it is what keeps a capture out of the developer's
+# own settings — but it also means the cases in a run share a places database.
+# The first case to render writes its own place as home; every later case with a
+# different fixture then draws its location bar's home marker unfilled. Run the
+# Seattle cases alone and Seattle is home; run them after the Toronto ones and it
+# is not. Two pixels, in the same place, every time.
+#
+# So `accept` re-records everything, and the ordering is part of what is
+# recorded. If that ever becomes intolerable — a hundred cases to re-record for
+# one — the fix is a scratch per case rather than a filter that is trusted.
+#
 # ---- how this is reproducible on a machine that is not yours ----------------
 #
 # Not a container, which is what docs/07 and the original plan assumed. This
