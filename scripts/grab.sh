@@ -90,6 +90,29 @@ export GALLIUM_DRIVER=llvmpipe
 # make them absent.
 unset QT_QUICK_BACKEND QSG_RHI_BACKEND QMLSCENE_DEVICE
 
+# ---- and which frame the picture comes from ---------------------------------
+#
+# Everything above pins what the pixels look like. This pins *when* they are
+# read, which is the other half of the same promise and was not pinned at all.
+#
+# Qt Quick's default render loop is threaded, and `grabToImage()` — what
+# app/devtools/screenshotcontroller.cpp calls — completes on the render thread.
+# The capture is therefore a race with whatever the scene is still doing.
+# `basic` is the single-threaded loop: rendered and read back on this thread, in
+# order, with nothing in flight.
+#
+# What it is believed to have fixed, stated with the evidence rather than more
+# confidently than that. One golden run in five produced two pages with the
+# preferences gear — a whole Shape — missing, which is what a lost grab race
+# looks like. It has not recurred in the fourteen runs since this line, and
+# every recorded image still matched when it was added, so it changes which
+# frame is captured and not what is in it. Fourteen runs is not proof of a race
+# that showed up once in five.
+#
+# What it did NOT fix is in docs/screenshots.md: a ±1 difference on twenty-three
+# antialiased pixels that survives this, and survives LP_NUM_THREADS=1.
+export QSG_RENDER_LOOP=basic
+
 # ---- scale ------------------------------------------------------------------
 #
 # All four, because Qt has four separate ways to arrive at a device pixel ratio

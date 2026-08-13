@@ -94,6 +94,49 @@ capture. This exists because `--grab` once had a race with `PagerButton`'s
 eye and fatal to a byte comparison. The same mechanism serves the reduced-motion
 accessibility setting.
 
+### The suite is not byte-deterministic on this machine, and here is exactly how
+
+Repeated full runs of `scripts/golden.sh check`, same machine, same build, no
+source change between them. Two separate failures, and they are not the same
+kind of thing.
+
+**A whole `Shape` missing.** One run in five came back with the preferences gear
+absent from `alert-desktop` and `alert-desktop-light` — 600 bytes smaller, and
+it reads exactly like a bug in the gear rather than a bug in the harness. Qt
+Quick's render loop is threaded by default and `grabToImage()` completes on the
+render thread, so the shutter races the scene. `QSG_RENDER_LOOP=basic` is now
+pinned beside the rasteriser, every recorded image still matched when it was
+added, and it has not recurred in fourteen runs. That is evidence, not proof,
+for something that appeared once in five.
+
+**Twenty-three pixels, off by one.** Still happening, in about two runs in five,
+and always identically: `desktop-preferences.png`, x 89–95, y 827–838 — the
+chevron of the left pager in the hourly chart, under the sheet's scrim. The
+largest channel difference is **1**, which is a rasteriser rounding a blend two
+ways rather than anything in the scene. It survives `QSG_RENDER_LOOP=basic`
+(5 runs, 2 failed) and it survives `LP_NUM_THREADS=1` (5 runs, 2 failed), so it
+is neither the grab race above nor llvmpipe's thread count.
+
+It is not `Theme.stillness`: that already removed this control's fade, which is
+a *different* PagerButton race and is documented in `Theme.qml`. A shade caught
+mid-fade would be tens of levels, not one.
+
+**What it costs, and the two ways out.** A suite that fails two runs in five
+teaches people to re-run it, which is the same as not having it — so this needs
+settling before it trains anybody. Either find the remaining rounding (the next
+suspect is scene-graph batching: the chevron is the one antialiased thing under
+a translucent full-page layer, and how it batches with that layer is not a
+stable property of the scene), or compare with a tolerance — no pixel off by
+more than one level, no more than N pixels, and report every tolerated pixel so
+nothing hides behind it. The second gives up the byte-equality claim that is
+this suite's whole argument, so it is a decision rather than a fix.
+
+Two things worth taking from it either way. An intermittent capture does not
+look intermittent — it looks like whatever it dropped, so the first suspect is
+the newest thing on the page, which is how this cost an afternoon on a gear that
+was never broken. And a harness that pins twelve variables to make the pixels
+reproducible had pinned nothing about *which frame* they came from.
+
 ## When an image changes
 
 A pull request that re-records any compared image **has to say why the pixels

@@ -101,6 +101,13 @@ export QT_QPA_PLATFORM=offscreen
 export LIBGL_ALWAYS_SOFTWARE=1
 export GALLIUM_DRIVER=llvmpipe
 unset QT_QUICK_BACKEND QSG_RHI_BACKEND QMLSCENE_DEVICE
+
+# The single-threaded render loop. With the default threaded one, grabToImage()
+# completes on the render thread and the capture races the scene — which is how
+# one run in five came back with the preferences gear missing from two pages.
+# scripts/grab.sh carries the evidence and its limits, and docs/screenshots.md
+# has the ±1 difference this does not fix.
+export QSG_RENDER_LOOP=basic
 export QT_SCALE_FACTOR=1
 export QT_ENABLE_HIGHDPI_SCALING=0
 export QT_SCREEN_SCALE_FACTORS=
