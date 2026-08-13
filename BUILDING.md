@@ -78,7 +78,7 @@ carries its own Qt — see [`docs/known-gaps.md`](docs/known-gaps.md).
 | `CLIMA_APP_ID` | `io.github.JowiAoun.Clima` | Reverse-DNS id: desktop file, AppStream, icon name, settings path. |
 | `CLIMA_CONTACT` | the issue tracker | Goes in the outbound User-Agent. **Packagers should override this** — a rate-limit complaint about your rebuild should reach you. |
 | `CLIMA_MAINTAINER` | a noreply address | The Debian `Maintainer` field. |
-| `CLIMA_INSTALL_AUTOSTART` | `ON` | Installs the daemon's entry into `/etc/xdg/autostart` — an absolute path, because the XDG search path is a fixed list. `OFF` for a sandboxed or staged install that cannot write there; the Flatpak passes it. |
+| `CLIMA_INSTALL_AUTOSTART` | `ON` | Installs the daemon's entry into `/etc/xdg/autostart` — an absolute path, because the XDG search path is a fixed list. `OFF` for a sandboxed or staged install that cannot write there; the Flatpak passes it. Switching it off does not leave the widgets without a service: the D-Bus activation file installs under the prefix regardless, and the bus starts one when a widget host asks. |
 
 Three optional dependencies are found if present and compiled out if not:
 
