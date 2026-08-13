@@ -316,6 +316,7 @@ defines a card, which is exactly the premise a wallpaper removes.
 | The link-line guard | `widget_has_no_engine`, verified by injecting the defect |
 | The GNOME extension | `scripts/check-extension.sh`: both modules parse, the introspection XML matches what it calls, and every `Meta.WaylandClient` method it calls exists on this machine's mutter. Verified by injecting both defects. |
 | Pinning on KDE and wlroots | `scripts/check-layer-shell.sh`, in CI: a real headless wlroots compositor, six assertions, one of which is the same binary with `--pin off` failing them |
+| The reader's units and clock | `app/settings.cpp`, `app/viewmodels/units.cpp` and `app/viewmodels/timeformat.cpp` are compiled into the widget host, so a tile prints °F and a 24-hour clock because the app's own preference says so — one mapping, two processes |
 
 ```sh
 clima-widget --list
@@ -323,6 +324,18 @@ clima-widget --snapshot tests/fixtures/wire/seattle.json --columns 2 \
              --widget current-conditions --widget alerts --grab tiles.png
 clima-widget --pin on --anchor bottom-right --margin 16
 ```
+
+### Preferences arrive at start, not while running
+
+A tile shows the units and the clock format the reader chose in the app, because
+both processes read the same INI and share the code that interprets it. What
+neither shares is a *change*: the widget host reads the file when it starts.
+Switch to a 24-hour clock in the app and the tiles keep the old spelling until
+the host is restarted.
+
+Nothing pushes a settings change across processes today — the daemon's bus
+interface carries the forecast, not the reader's preferences. `docs/known-gaps.md`
+has the entry, including the cheapest way to close it.
 
 ### The second mechanism
 

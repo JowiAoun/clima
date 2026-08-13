@@ -115,6 +115,60 @@ the gallery should keep the constant.
 
 ---
 
+## The clock format defaults to AM/PM everywhere, including where nobody writes it
+
+**Status: deliberate, and it is the wrong default outside North America.**
+
+`Settings.clockFormat` is `12h` or `24h` and it defaults to `12h`. The obvious
+default is the locale's — `QLocale().timeFormat()` already knows that a French
+or German desktop writes 15:30 — and it is not what this does.
+
+The reason is the capture path rather than the clock. Every picture this project
+takes of itself runs under `LC_ALL=C.UTF-8`, whose short time format is
+24-hour: the golden images, the README screenshots and the `--grab` a bug report
+attaches. A locale-derived default would mean the app renders one way for the
+reader and another way in every picture of it, and the picture is what review
+happens against. `scripts/golden.sh` pins the locale for exactly this class of
+reason, and a preference that read around the pin would undo it.
+
+The cost is a reader in Paris seeing "3 PM" until they open Preferences. The
+switch is the second row of the first group and it reaches every clock in the
+app and in the widgets, so it is one tap — but a default nobody has to correct
+would be better.
+
+What closes it: pin the format explicitly in `scripts/grab.sh` the way the
+colour scheme is already pinned under `--grab`, then default the preference from
+`QLocale`. That is one line in the capture script, one in
+`app/viewmodels/timeformat.cpp`, and a re-record of every golden image carrying
+a time — which is most of them.
+
+---
+
+## A preference change does not reach a running widget
+
+**Status: known, bounded, and the same shape as the units it inherits.**
+
+`clima-widget` is a second process. It reads the reader's units and clock format
+out of the same INI the app writes — that is why `app/settings.cpp`,
+`app/viewmodels/units.cpp` and `app/viewmodels/timeformat.cpp` are compiled into
+the widget host rather than reimplemented there — but it reads them at start.
+Switch to a 24-hour clock in the app and the tiles on the desktop keep saying
+"3 PM" until the host is restarted.
+
+Nothing pushes a settings change across processes today. The daemon's session-bus
+interface carries the *forecast*, not the reader's preferences, and adding a
+preference channel to it is a wire-format change that wants its own commit.
+
+This is not new with the clock: the units have behaved this way since the tiles
+first drew a temperature. What is new is that there is now a screen that makes
+the divergence easy to produce on purpose.
+
+What closes it: either a `SettingsChanged` signal on the existing bus interface,
+or a `QFileSystemWatcher` on the INI in the widget host — the second is a dozen
+lines and needs no wire-format change, which is probably the right first answer.
+
+---
+
 ## The desktop widgets have never been pinned on a KDE session
 
 **Status: two mechanisms, one measured by hand, one measured in CI, and neither

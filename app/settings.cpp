@@ -17,6 +17,7 @@ namespace {
 // never loads — no error, no warning, just a setting that does not stick.
 namespace key {
 const auto appearance        = QStringLiteral("appearance");
+const auto clockFormat       = QStringLiteral("time/format");
 const auto windowWidth       = QStringLiteral("window/width");
 const auto windowHeight      = QStringLiteral("window/height");
 const auto windowX           = QStringLiteral("window/x");
@@ -169,6 +170,26 @@ void Settings::setAppearance(const QString &value)
 {
     if (store(key::appearance, value))
         Q_EMIT appearanceChanged();
+}
+
+// ---- the clock --------------------------------------------------------------
+
+QString Settings::clockFormat() const
+{
+    // Anything that is not "24h" reads as "12h", including a hand-edited value
+    // and a key written by a future version that grew a third spelling. A clock
+    // is not a setting that may fail closed: an unrecognised value has to still
+    // put a time on the screen.
+    return load(key::clockFormat, QStringLiteral("12h")).toString() == QLatin1String("24h")
+               ? QStringLiteral("24h")
+               : QStringLiteral("12h");
+}
+
+void Settings::setClockFormat(const QString &value)
+{
+    if (store(key::clockFormat, value == QLatin1String("24h") ? QStringLiteral("24h")
+                                                              : QStringLiteral("12h")))
+        Q_EMIT clockFormatChanged();
 }
 
 // ---- window geometry --------------------------------------------------------

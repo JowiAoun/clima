@@ -61,6 +61,12 @@ class Settings : public QObject
     // W3 — but the key exists so the preference survives that work landing.
     Q_PROPERTY(QString appearance READ appearance WRITE setAppearance NOTIFY appearanceChanged)
 
+    // "12h" | "24h". Every clock reading in the app and in the widgets goes
+    // through app/viewmodels/timeformat.h, which is the only thing that reads
+    // this, and whose header carries the argument for the default.
+    Q_PROPERTY(QString clockFormat READ clockFormat WRITE setClockFormat
+                   NOTIFY clockFormatChanged)
+
     // Window geometry. Position is stored as well as size, because a
     // multi-monitor user who always puts Clima on the left screen wants it
     // there again; whether it can be honoured is a platform question — see
@@ -113,6 +119,9 @@ public:
     QString appearance() const;
     void    setAppearance(const QString &value);
 
+    QString clockFormat() const;
+    void    setClockFormat(const QString &value);
+
     int  windowWidth() const;
     void setWindowWidth(int value);
     int  windowHeight() const;
@@ -144,6 +153,7 @@ public:
 
 Q_SIGNALS:
     void appearanceChanged();
+    void clockFormatChanged();
     void windowGeometryChanged();
     void temperatureUnitChanged();
     void windUnitChanged();

@@ -218,6 +218,8 @@ set(clima_cpp_sources
     viewmodels/forecastdata.cpp
     viewmodels/metrics.h
     viewmodels/metrics.cpp
+    viewmodels/timeformat.h
+    viewmodels/timeformat.cpp
     viewmodels/units.h
     viewmodels/units.cpp
 

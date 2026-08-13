@@ -4,6 +4,7 @@
 #include "forecastdata.h"
 
 #include "appengine.h"
+#include "timeformat.h"
 #include "units.h"
 
 #include "libclima/domain/hourconvention.h"
@@ -56,13 +57,18 @@ QString shortWeekday(QDate date)
 }
 
 
-// "3 PM". The reference's spelling, and the one mockdata.js used.
-QString twelveHour(const QDateTime &local)
+// "3 PM", or "15:00" for a reader who asked for a 24-hour clock. The reference's
+// spelling was the only one this returned until the preferences screen landed,
+// and the arithmetic that produced it now lives in one file for the whole app —
+// see app/viewmodels/timeformat.h, whose header says why five copies of it was
+// not a tidiness problem.
+//
+// Not called `hourLabel`: ForecastData has a member of that name, and a member
+// hides a namespace-scope function of the same name at every call site inside
+// the class.
+QString hourOf(const QDateTime &local)
 {
-    const int hour   = local.time().hour();
-    const int shown  = hour % 12 == 0 ? 12 : hour % 12;
-    return QString::number(shown) + QLatin1Char(' ')
-         + (hour < 12 ? ForecastData::tr("AM") : ForecastData::tr("PM"));
+    return TimeFormat::instance()->hour(local.time());
 }
 
 // ---- the two maps, and why only they need this ------------------------------
@@ -109,10 +115,17 @@ ForecastData::ForecastData(QObject *parent)
     // changes. Cheaper would be to convert lazily in the getters; that would
     // also mean nothing notifies, and a settings screen whose effect appears
     // after the next refresh is a settings screen that looks broken.
-    connect(Units::instance(), &Units::changed, this, [this]() {
+    const auto rebuild = [this]() {
         if (!m_forecast.isEmpty())
             setSnapshot(m_forecast, m_air, m_now, m_place);
-    });
+    };
+    connect(Units::instance(), &Units::changed, this, rebuild);
+
+    // The same treatment for the clock, and for the same reason: every hour
+    // label on the chart and in the list is a formatted string held in a
+    // snapshot, so a format changed while the app is open has to rebuild it or
+    // the preference appears to do nothing until the next fetch.
+    connect(TimeFormat::instance(), &TimeFormat::changed, this, rebuild);
 }
 
 ForecastData *ForecastData::create(QQmlEngine *, QJSEngine *)
@@ -455,8 +468,13 @@ void ForecastData::buildSunEvents()
         QVariantMap event;
         event[QStringLiteral("index")] = index;
         event[QStringLiteral("kind")]  = kind;
-        event[QStringLiteral("text")]  = QLocale().toString(instant.toTimeZone(m_zone).time(),
-                                                            QStringLiteral("h:mm AP"));
+        // The badge on a sunrise or sunset marker in the hourly chart. It was
+        // the sixth and last clock in this application to be formatted by hand,
+        // and the one that made the case for TimeFormat: it is two badges on a
+        // chart whose axis is right above them, so a 24-hour axis over a 12-hour
+        // badge is a contradiction inside one card.
+        event[QStringLiteral("text")] =
+            TimeFormat::instance()->clock(instant.toTimeZone(m_zone).time());
         m_sunEvents.append(event);
     };
 
@@ -558,5 +576,5 @@ QString ForecastData::clockLabel(int index) const
     const QDateTime local = localTimeAt(index);
     if (!local.isValid())
         return {};
-    return twelveHour(local);
+    return hourOf(local);
 }

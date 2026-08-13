@@ -267,6 +267,12 @@ The Plasma applet and GNOME extension are exactly why `libclima` is MPL-2.0 and 
   strings live in `libclima` so the CLI and applets share them.
 - Units are per-quantity, not a global metric/imperial switch (people want °C with mph, or
   inHg with mm) — a lesson from every weather-app review comment section.
+- The clock format IS global — `Settings.clockFormat`, 12h or 24h — and that is not a
+  contradiction of the line above. A unit is a property of a quantity and there are five
+  of them; a clock is a property of the reader. `app/viewmodels/timeformat.h` is the one
+  place that reads the key, and it reaches the app and the widget host both, because
+  before it existed this program printed "3 PM" on a chart and "23:00" in the banner
+  underneath it.
 
 ## 4.11 Testing strategy
 

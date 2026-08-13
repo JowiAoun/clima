@@ -5,6 +5,8 @@
 
 #include "widgetclock.h"
 
+#include "timeformat.h"
+
 #include "libclima/domain/scales.h"
 #include "libclima/domain/weathercode.h"
 
@@ -129,29 +131,31 @@ QString Wx::pollutant(const QVariant &id) const
 
 // ---- instants ---------------------------------------------------------------
 
+// ---- all four of these go through TimeFormat ---------------------------------
+//
+// Which is the same arrangement `Units` already has here: the tiles are a second
+// process, and they read the reader's preferences out of the same INI the app
+// writes. A second implementation of "what time is it" in a second binary is a
+// second place for a 24-hour clock to be half-applied — and the failure mode is
+// a desktop showing "15:00" in the app and "3 PM" on the tile beside it.
+//
+// The preference is read at start, not followed live. Nothing pushes a settings
+// change across processes today, and the units on a tile behave the same way;
+// docs/widgets.md records it.
 QString Wx::clockTime(const QVariant &iso) const
 {
     const QDateTime instant = instantOf(iso);
     if (!instant.isValid())
         return {};
-    return QLocale().toString(instant.time(), QStringLiteral("h:mm AP"));
+    return TimeFormat::instance()->clock(instant.time());
 }
 
-// "8:42", not "20:42".
-//
-// QLocale's "h" is a 24-hour hour unless the format string also carries AP, and
-// the suffix is a separate field here — so asking for "h:mm" and appending "PM"
-// produced "20:37 PM" under every sunset in the first render of the sun tile.
-// app/viewmodels/conditionsdata.cpp hit this and wrote the same two lines; the
-// arithmetic is shorter than the format string that gets it right.
 QString Wx::clockLabel(const QVariant &iso) const
 {
     const QDateTime instant = instantOf(iso);
     if (!instant.isValid())
         return {};
-    const QTime time = instant.time();
-    const int   hour = time.hour() % 12 == 0 ? 12 : time.hour() % 12;
-    return QStringLiteral("%1:%2").arg(hour).arg(time.minute(), 2, 10, QLatin1Char('0'));
+    return TimeFormat::instance()->clockBare(instant.time());
 }
 
 QString Wx::clockSuffix(const QVariant &iso) const
@@ -159,7 +163,7 @@ QString Wx::clockSuffix(const QVariant &iso) const
     const QDateTime instant = instantOf(iso);
     if (!instant.isValid())
         return {};
-    return instant.time().hour() < 12 ? tr("AM") : tr("PM");
+    return TimeFormat::instance()->meridiem(instant.time());
 }
 
 QString Wx::hourLabel(const QVariant &iso) const
@@ -167,14 +171,7 @@ QString Wx::hourLabel(const QVariant &iso) const
     const QDateTime instant = instantOf(iso);
     if (!instant.isValid())
         return {};
-
-    // "3 PM" and not "3:00 PM". An hourly strip gives each column about thirty
-    // pixels, and ":00" is four of them spent restating that an hourly point
-    // falls on the hour. The minutes come back the moment they are not always
-    // zero, which for an hourly forecast is never.
-    const QTime time = instant.time();
-    const int   hour = time.hour() % 12 == 0 ? 12 : time.hour() % 12;
-    return QStringLiteral("%1 %2").arg(hour).arg(time.hour() < 12 ? tr("AM") : tr("PM"));
+    return TimeFormat::instance()->hour(instant.time());
 }
 
 QString Wx::spanBetween(const QVariant &fromIso, const QVariant &toIso) const

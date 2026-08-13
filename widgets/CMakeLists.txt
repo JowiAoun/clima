@@ -115,9 +115,10 @@ endforeach()
 #
 # Four of these are app/'s own files, compiled a second time rather than linked.
 #
-# `Settings` and `Units` because a tile has to show the units the reader chose
-# in the app, and they choose them by writing an INI that both processes read —
-# a second implementation of that mapping is a second place for °F to be wrong.
+# `Settings`, `Units` and `TimeFormat` because a tile has to show the units and
+# the clock the reader chose in the app, and they choose them by writing an INI
+# that both processes read — a second implementation of either mapping is a
+# second place for °F, or for a 24-hour clock, to be wrong.
 # `SystemAppearance` because a tile follows the desktop's light/dark preference
 # like everything else on it. `ScreenshotController` because `--grab` is what
 # makes a tile reviewable in CI without a session bus.
@@ -140,6 +141,8 @@ set(clima_widget_sources
 
     ${CMAKE_SOURCE_DIR}/app/settings.h
     ${CMAKE_SOURCE_DIR}/app/settings.cpp
+    ${CMAKE_SOURCE_DIR}/app/viewmodels/timeformat.h
+    ${CMAKE_SOURCE_DIR}/app/viewmodels/timeformat.cpp
     ${CMAKE_SOURCE_DIR}/app/viewmodels/units.h
     ${CMAKE_SOURCE_DIR}/app/viewmodels/units.cpp
     ${CMAKE_SOURCE_DIR}/app/platform/systemappearance.h

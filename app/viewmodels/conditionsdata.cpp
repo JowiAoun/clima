@@ -5,6 +5,7 @@
 
 #include "appengine.h"
 #include "forecastdata.h"
+#include "timeformat.h"
 #include "units.h"
 
 #include "libclima/domain/hourconvention.h"
@@ -46,25 +47,23 @@ int roundedDisplay(const Reading &reading, Units::Quantity quantity)
     return qIsNaN(converted) ? 0 : int(std::lround(converted));
 }
 
+// "12:28 PM", or "12:28" for a reader who asked for a 24-hour clock.
 QString clockLabel(const QDateTime &instant, const QTimeZone &zone)
 {
     if (!instant.isValid())
         return {};
-    return QLocale().toString(instant.toTimeZone(zone).time(), QStringLiteral("h:mm AP"));
+    return TimeFormat::instance()->clock(instant.toTimeZone(zone).time());
 }
 
 // "3:00 p.m." — the reference's spelling for a sentence, as distinct from the
-// "3:00 PM" a label uses. detaildata.js used both, in the same two places.
+// "3:00 PM" a label uses. detaildata.js used both, in the same two places, and
+// TimeFormat keeps the distinction because losing it would mean a body sentence
+// shouting its meridiem at the reader mid-paragraph.
 QString sentenceTime(const QDateTime &instant, const QTimeZone &zone)
 {
     if (!instant.isValid())
         return {};
-    const QTime time = instant.toTimeZone(zone).time();
-    const int   hour = time.hour() % 12 == 0 ? 12 : time.hour() % 12;
-    return QStringLiteral("%1:%2 %3")
-        .arg(hour)
-        .arg(time.minute(), 2, 10, QLatin1Char('0'))
-        .arg(time.hour() < 12 ? ConditionsData::tr("a.m.") : ConditionsData::tr("p.m."));
+    return TimeFormat::instance()->sentence(instant.toTimeZone(zone).time());
 }
 
 // ---- the published scales ---------------------------------------------------
@@ -439,10 +438,17 @@ ConditionsData::ConditionsData(QObject *parent)
     // neutral block above for what the alternative sounded like.
     clear();
 
-    connect(Units::instance(), &Units::changed, this, [this]() {
+    const auto rebuild = [this]() {
         if (!m_forecast.isEmpty())
             setSnapshot(m_forecast, m_air, m_now, m_place, m_hasPollen);
-    });
+    };
+    connect(Units::instance(), &Units::changed, this, rebuild);
+
+    // The clock is a preference this class formats with, exactly as the units
+    // are: the observation stamp, both sun and moon readings and nine body
+    // sentences are strings held in a snapshot, so the format changing has to
+    // rebuild it or the switch appears inert until the next fetch.
+    connect(TimeFormat::instance(), &TimeFormat::changed, this, rebuild);
 }
 
 ConditionsData *ConditionsData::create(QQmlEngine *, QJSEngine *)
@@ -1034,21 +1040,23 @@ void ConditionsData::buildSunMoon()
     const int     dayHours = daylight ? int(*daylight) / 3600 : 0;
     const int     dayMins  = daylight ? (int(*daylight) % 3600) / 60 : 0;
 
-    // "8:42", not "20:42". QLocale's "h" is a 24-hour hour unless the format
-    // also carries AP, and the suffix is a separate field here — so asking for
-    // "h:mm" and appending "PM" produced "20:42 PM" on every sunset after noon.
-    // Computed rather than formatted, because the arithmetic is two lines and
-    // the format string that gets this right is a thing to be remembered.
+    // Two fields rather than one, because the sun and moon cards draw the suffix
+    // smaller and beside the reading — see DetailSunCard.qml. Under a 24-hour
+    // clock `suffix` is empty and `hhmm` carries the whole reading, so the card
+    // degrades to one field rather than to a stray "PM".
+    //
+    // The arithmetic that used to be here is in app/viewmodels/timeformat.cpp,
+    // together with the note about QLocale's "h" being a 24-hour hour unless the
+    // format string also carries AP — which is what produced "20:42 PM" on every
+    // sunset after noon the first time this was written.
     const auto hhmm = [&](const QDateTime &instant) {
-        if (!instant.isValid())
-            return QString();
-        const QTime time = instant.toTimeZone(m_zone).time();
-        const int   hour = time.hour() % 12 == 0 ? 12 : time.hour() % 12;
-        return QStringLiteral("%1:%2").arg(hour).arg(time.minute(), 2, 10, QLatin1Char('0'));
+        return instant.isValid()
+                   ? TimeFormat::instance()->clockBare(instant.toTimeZone(m_zone).time())
+                   : QString();
     };
     const auto suffix = [&](const QDateTime &instant) {
         return instant.isValid()
-                   ? (instant.toTimeZone(m_zone).time().hour() < 12 ? tr("AM") : tr("PM"))
+                   ? TimeFormat::instance()->meridiem(instant.toTimeZone(m_zone).time())
                    : QString();
     };
 

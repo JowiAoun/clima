@@ -153,6 +153,33 @@ set_tests_properties(tst_conditionsdata PROPERTIES
     TIMEOUT 60
 )
 
+# ---- the second one that links app/ -----------------------------------------
+#
+# `TimeFormat`'s five spellings. Here rather than through clima_add_test() for
+# tst_conditionsdata's reason — its subject is app/ and clima_forbid_gui() would
+# refuse the link.
+#
+# LC_ALL matters more here than anywhere else in this file. Half of what this
+# asserts is that a clock reading is decided by the *preference* and not by the
+# locale, which was true of five of the six formatters in this app and not of the
+# sixth; pinning the locale is what makes a regression to QLocale::ShortFormat
+# fail here rather than pass on a developer's machine and fail in CI.
+foreach(clima_app_test tst_timeformat)
+    add_executable(${clima_app_test} ${clima_app_test}.cpp)
+
+    target_link_libraries(${clima_app_test} PRIVATE climaqml clima_testsupport Qt6::Test)
+    target_compile_definitions(${clima_app_test} PRIVATE
+        CLIMA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    )
+
+    add_test(NAME ${clima_app_test} COMMAND ${clima_app_test})
+
+    set_tests_properties(${clima_app_test} PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
+        TIMEOUT 60
+    )
+endforeach()
+
 # ---- the golden images' canary ----------------------------------------------
 #
 # Links climaqml for AppFont and therefore links Qt6::Gui, which is why it is

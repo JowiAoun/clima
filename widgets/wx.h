@@ -80,13 +80,17 @@ public:
     // showing Toronto shows Toronto's afternoon whatever zone the desktop is
     // in, and there is no second conversion here to get backwards.
 
-    // "3:00 PM", in the reader's locale.
+    // "3:00 PM", or "15:00" under a 24-hour clock. app/viewmodels/timeformat.h
+    // owns the spelling for both processes.
     Q_INVOKABLE [[nodiscard]] QString clockTime(const QVariant &iso) const;
 
     // The same instant split where SkyArc.qml wants it: "3:00" and "PM". Two
     // calls rather than one string, because the component sets them in
     // different type sizes and a widget must not be the one place that glues
     // them back together with a space.
+    //
+    // Under a 24-hour clock the suffix is empty and the label carries the whole
+    // reading, so the tile degrades to one field rather than to a stray "PM".
     Q_INVOKABLE [[nodiscard]] QString clockLabel(const QVariant &iso) const;
     Q_INVOKABLE [[nodiscard]] QString clockSuffix(const QVariant &iso) const;
 

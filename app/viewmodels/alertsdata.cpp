@@ -4,6 +4,7 @@
 #include "app/viewmodels/alertsdata.h"
 
 #include "app/settings.h"
+#include "app/viewmodels/timeformat.h"
 #include "libclima/core/clock.h"
 
 #include <QLocale>
@@ -44,10 +45,20 @@ const QChar kFieldSeparator = QChar(0x1f);
 //
 // A weekday rather than a date for the other case, because an alert's horizon is
 // hours to days. "Thu" is what a reader needs; "06/08" is what a form needs.
+//
+// ---- the time itself is the reader's preference, not the locale's ------------
+//
+// It used to be QLocale::ShortFormat on the QTime, which is the half of the
+// paragraph above that survived. That was the only clock in this application
+// that followed the locale — every other one hardcoded a 12-hour spelling — so
+// under a C locale the chart said "3 PM" and the banner underneath it said
+// "23:00", in the same window, in the same second. Neither was a decision.
+//
+// TimeFormat is now the one answer, and the same one the hour labels use.
 QString stamp(const QDateTime &instant, const QDateTime &now, const QLocale &locale)
 {
     const QDateTime local = instant.toLocalTime();
-    const QString   time  = locale.toString(local.time(), QLocale::ShortFormat);
+    const QString   time  = TimeFormat::instance()->clock(local.time());
 
     if (local.date() == now.toLocalTime().date())
         return time;
@@ -82,6 +93,11 @@ AlertsData::AlertsData()
 
     m_poll.setTimerType(Qt::VeryCoarseTimer);
     connect(&m_poll, &QTimer::timeout, this, &AlertsData::refreshRequested);
+
+    // Every "Until 11:00 PM" on the banner is a string built in rebuild(), so a
+    // reader who switches to a 24-hour clock while a warning is up gets the
+    // banner redrawn rather than the one line in the app that did not hear.
+    connect(TimeFormat::instance(), &TimeFormat::changed, this, &AlertsData::rebuild);
 }
 
 AlertsData::~AlertsData() = default;
