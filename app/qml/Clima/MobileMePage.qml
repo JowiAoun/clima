@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Me: units, places, where the data comes from.
+// Me: preferences, places, where the data comes from.
 //
 // The reference has no screenshot of this tab and the nav bar has five slots,
 // so this is the one screen here that is a proposal rather than a rebuild.
@@ -13,13 +13,21 @@
 // already knows which model they prefer, and the fallback chain means the app
 // answers that question for everybody else.
 //
-// ---- the units rows are the settings, not a picture of them -----------------
-// Tapping one cycles it. A cycle rather than a menu because there are two
-// temperature units and five wind units, and a picker for two options is a
-// dialog nobody wanted; the current value is on the row, so the cycle shows its
-// result rather than hiding it behind a sheet. Everything downstream — the
-// hero, the chart axis, the hourly list, the day strip — is bound to the same
-// Units singleton, so the whole app changes on the tap.
+// ---- the preferences here are the same objects the desktop opens ------------
+// `PrefGeneral` and `PrefUnits` are two files in this module, and the desktop's
+// PreferencesSheet puts the same two on a sheet. Not a copy: this screen used to
+// carry its own Appearance and Units cards, written here, and the moment the
+// desktop needed settings at all that would have been two screens to keep in
+// step — with the phone's the one people would have kept editing, because it is
+// the one anybody could reach.
+//
+// They are two components rather than one for this page's benefit: MobilePage
+// lays its children out in a Flow, so on a tablet two half-width cards sit side
+// by side and one tall card could only ever be a column.
+//
+// Everything downstream — the hero, the chart axis, the hourly list, the day
+// strip — is bound to the same Units singleton, so the whole app changes on the
+// tap.
 //
 // ---- the data sources card is GENERATED -------------------------------------
 // docs/08-risks.md R12 is "a new provider gets added without its credit", and
@@ -37,9 +45,16 @@ import QtQuick
 MobilePage {
     id: root
 
-    // One row shape, three cards. A settings list is the one place where
-    // writing the rows out longhand really would produce three different row
-    // heights, which is what this component exists to prevent.
+    // The row shape for the two cards below. It used to serve four of them —
+    // Appearance and Units are PrefGroup/PrefRow now, which is a richer row with
+    // a subtitle and a control slot — and it stays for the two that are a name
+    // and a value with nothing to explain.
+    //
+    // Not replaced by PrefRow as well, which was the tempting tidy-up: a place
+    // is not a preference. These rows are a list of things the reader added,
+    // where the trailing text says which one is home rather than what a control
+    // is set to, and a card of them inside a preferences group would say the
+    // wrong thing about what they are.
     component SettingRow: Item {
         id: settingRow
 
@@ -105,17 +120,6 @@ MobilePage {
         }
     }
 
-    // The next option in a quantity's list, wrapping. The list is Units' — there
-    // is no second copy of "which units exist" anywhere in the QML, which is
-    // what stops a row offering a unit nothing can convert to.
-    function cycle(quantity, current) {
-        var options = Units.choicesFor(quantity)
-        for (var i = 0; i < options.length; ++i)
-            if (options[i].id === current)
-                return options[(i + 1) % options.length].id
-        return options.length > 0 ? options[0].id : current
-    }
-
     Text {
         width: root.spanWidth(2)
         text: qsTr("Me")
@@ -124,82 +128,9 @@ MobilePage {
         font.bold: true
     }
 
-    MobileCard {
-        width: root.spanWidth(1)
-        title: qsTr("Appearance")
-        content: Column {
-            SettingRow {
-                text: qsTr("Theme")
-                // "System" says what the app is following, and then what that
-                // resolved to, because the two are different facts and the
-                // second is the one somebody checking this row wants. When
-                // nothing answered — no portal, and a platform with no colour
-                // scheme hint — it says so rather than reporting a preference
-                // it never received.
-                value: {
-                    // --scheme outranks the stored preference, so when it is
-                    // present this row would otherwise describe a theme the
-                    // screen around it is not in. Say which one is winning; the
-                    // line only ever appears for somebody who passed the flag.
-                    if (AppOptions.scheme !== "")
-                        return qsTr("%1 · forced by --scheme").arg(AppOptions.scheme)
-                    if (Settings.appearance === "light") return qsTr("Light")
-                    if (Settings.appearance === "dark")  return qsTr("Dark")
-                    if (!SystemAppearance.available)     return qsTr("System · no preference")
-                    return SystemAppearance.colorScheme === "light"
-                           ? qsTr("System · light") : qsTr("System · dark")
-                }
-                tappable: true
-                last: true
-                onActivated: Settings.appearance =
-                    Settings.appearance === "system" ? "light"
-                  : Settings.appearance === "light"  ? "dark"
-                                                     : "system"
-            }
-        }
-    }
+    PrefGeneral { width: root.spanWidth(1) }
 
-    MobileCard {
-        width: root.spanWidth(1)
-        title: qsTr("Units")
-        content: Column {
-            SettingRow {
-                text: qsTr("Temperature")
-                value: Units.bareSymbol(Units.Temperature)
-                tappable: true
-                onActivated: Settings.temperatureUnit =
-                    root.cycle(Units.Temperature, Settings.temperatureUnit)
-            }
-            SettingRow {
-                text: qsTr("Wind")
-                value: Units.bareSymbol(Units.Wind)
-                tappable: true
-                onActivated: Settings.windUnit = root.cycle(Units.Wind, Settings.windUnit)
-            }
-            SettingRow {
-                text: qsTr("Pressure")
-                value: Units.bareSymbol(Units.Pressure)
-                tappable: true
-                onActivated: Settings.pressureUnit =
-                    root.cycle(Units.Pressure, Settings.pressureUnit)
-            }
-            SettingRow {
-                text: qsTr("Precipitation")
-                value: Units.bareSymbol(Units.Precipitation)
-                tappable: true
-                onActivated: Settings.precipitationUnit =
-                    root.cycle(Units.Precipitation, Settings.precipitationUnit)
-            }
-            SettingRow {
-                text: qsTr("Visibility")
-                value: Units.bareSymbol(Units.Visibility)
-                tappable: true
-                last: true
-                onActivated: Settings.visibilityUnit =
-                    root.cycle(Units.Visibility, Settings.visibilityUnit)
-            }
-        }
-    }
+    PrefUnits { width: root.spanWidth(1) }
 
     MobileCard {
         width: root.spanWidth(1)

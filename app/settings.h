@@ -61,6 +61,14 @@ class Settings : public QObject
     // W3 — but the key exists so the preference survives that work landing.
     Q_PROPERTY(QString appearance READ appearance WRITE setAppearance NOTIFY appearanceChanged)
 
+    // Whether the page gradient follows the sky over the place on screen —
+    // night, dawn, day, dusk — or holds at one palette. On by default, which is
+    // what this app has always done. See app/qml/Clima/Main.qml, which owns the
+    // rule this switches between, and which pins it under `--grab` for the same
+    // reason it pins the colour scheme there.
+    Q_PROPERTY(bool dynamicBackground READ dynamicBackground WRITE setDynamicBackground
+                   NOTIFY dynamicBackgroundChanged)
+
     // "12h" | "24h". Every clock reading in the app and in the widgets goes
     // through app/viewmodels/timeformat.h, which is the only thing that reads
     // this, and whose header carries the argument for the default.
@@ -119,6 +127,9 @@ public:
     QString appearance() const;
     void    setAppearance(const QString &value);
 
+    bool dynamicBackground() const;
+    void setDynamicBackground(bool value);
+
     QString clockFormat() const;
     void    setClockFormat(const QString &value);
 
@@ -153,6 +164,7 @@ public:
 
 Q_SIGNALS:
     void appearanceChanged();
+    void dynamicBackgroundChanged();
     void clockFormatChanged();
     void windowGeometryChanged();
     void temperatureUnitChanged();

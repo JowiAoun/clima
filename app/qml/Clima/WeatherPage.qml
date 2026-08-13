@@ -51,6 +51,13 @@ Item {
     // one is loaded without knowing which it is.
     property alias pickerOpen: picker.open
 
+    // `--poke prefs=1`. The mobile shell has no property of this name and that
+    // is deliberate rather than an omission — the phone shows the same
+    // preferences inline on its Me tab, which `--tab me` already reaches, and a
+    // property here that silently did nothing there would be worse than the
+    // warning ScreenshotController prints.
+    property alias prefsOpen: prefs.open
+
     // A real flick, not an assignment. Setting `contentY` goes through
     // QQuickFlickable::setContentY(), which calls movementEnding() — so `moving`
     // never becomes true and the scroll thumb's recolour, the only animation
@@ -119,10 +126,47 @@ Item {
                 width: parent.width
                 spacing: 14
 
-                LocationBar {
-                    disclosed: picker.open
-                    onChangeRequested: picker.open = !picker.open
-                    onHomeToggled: Engine.toggleHome(Engine.places.currentIndex)
+                // The bar and the preferences gear share a row: one names the
+                // place the page is about, the other opens the settings for the
+                // app around it. Opposite ends of the same line, because they
+                // are the two things on this page that are not weather.
+                //
+                // The Item takes the bar's own height and no more, so the row is
+                // laid out exactly as it was before the gear existed — both
+                // children overflow it by 9 px into the section gap that is
+                // already there, which is the arrangement LocationBar's header
+                // describes and defends.
+                Item {
+                    width: parent.width
+                    height: locationBar.height
+
+                    LocationBar {
+                        id: locationBar
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        disclosed: picker.open
+                        onChangeRequested: picker.open = !picker.open
+                        onHomeToggled: Engine.toggleHome(Engine.places.currentIndex)
+                    }
+
+                    Item {
+                        id: prefsButton
+                        width: Theme.metric.hitMin
+                        height: Theme.metric.hitMin
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        GearGlyph {
+                            anchors.centerIn: parent
+                            glyphSize: 18
+                            tint: prefsTarget.hovered ? Theme.ink.primary : Theme.ink.muted
+                        }
+
+                        TouchTarget {
+                            id: prefsTarget
+                            onTapped: prefs.open = !prefs.open
+                        }
+                    }
                 }
 
                 CurrentConditions { width: parent.width }
@@ -185,6 +229,21 @@ Item {
     AlertSheet {
         id: sheet
         onDismissed: open = false
+    }
+
+    PreferencesSheet {
+        id: prefs
+        onDismissed: open = false
+    }
+
+    // The sequence every desktop application has bound to preferences for thirty
+    // years. Written out rather than taken from StandardKey.Preferences, which
+    // Qt maps to nothing at all on Windows and Linux — it is a macOS-only
+    // binding, so the shortcut would exist on the one platform this app does not
+    // ship.
+    Shortcut {
+        sequence: "Ctrl+,"
+        onActivated: prefs.open = !prefs.open
     }
 
     // ---- scroll indicator --------------------------------------------------

@@ -267,6 +267,13 @@ The Plasma applet and GNOME extension are exactly why `libclima` is MPL-2.0 and 
   strings live in `libclima` so the CLI and applets share them.
 - Units are per-quantity, not a global metric/imperial switch (people want °C with mph, or
   inHg with mm) — a lesson from every weather-app review comment section.
+  - **Amended, and the rule is unchanged.** The preferences screen offers a °C and a °F
+    preset above the five per-quantity rows. They are a *shortcut that writes the five*,
+    not a sixth preference: `Units::system()` is a reading of what the five currently
+    say and answers `custom` for any mixture, which the screen draws by filling neither
+    radio. Change one row after choosing a preset and the other four stay where they
+    were — which is precisely what a real switch could not do, and why °C-with-mph is
+    still one tap. `Settings` has no unit-system key and will not grow one.
 - The clock format IS global — `Settings.clockFormat`, 12h or 24h — and that is not a
   contradiction of the line above. A unit is a property of a quantity and there are five
   of them; a clock is a property of the reader. `app/viewmodels/timeformat.h` is the one

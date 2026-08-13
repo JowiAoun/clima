@@ -30,6 +30,12 @@ what the app actually draws.
   in turn.
 - **A dark and a light theme**, following the desktop's own setting through the
   XDG portal.
+- **Preferences** — a gear beside the place name on the desktop, or the Me tab
+  on a phone. The background can follow the sky over the place on screen or hold
+  still; the clock is 24-hour or AM/PM everywhere at once, tiles included; and
+  units are °C or °F as a pair of presets **over** five independent preferences,
+  so °C with mph or inches of rain with millimetres of visibility is one tap and
+  not an impossibility.
 - **Phone, tablet and desktop layouts** — one product, three arrangements,
   chosen by the width of the window.
 - **Ten desktop widgets**, drawn from the same components as the app, pinned

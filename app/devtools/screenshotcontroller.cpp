@@ -259,6 +259,17 @@ void ScreenshotController::applyPokes()
             // by nothing else — which for a screen with a search field, a saved
             // list and a failure state is the wrong side of the line.
             offer(m_shell, "pickerOpen", on);
+        } else if (target == QLatin1String("prefs")) {
+            // The preferences sheet, which only the desktop shell has: the phone
+            // shows the same two groups inline on its Me tab, and `--poke tab=me`
+            // is how that is photographed. Saying so beats offering a property
+            // the mobile shell does not have and reporting nothing — `offer`
+            // is silent by design, and silence here would read as a sheet that
+            // failed to open.
+            if (!m_mobile)
+                offer(m_shell, "prefsOpen", on);
+            else
+                qWarning("--poke prefs: the mobile shell has no sheet; use --tab me");
         } else if (target == QLatin1String("scroll")) {
             offer(m_shell, "contentY", value.toDouble());
         } else if (target == QLatin1String("tab")) {

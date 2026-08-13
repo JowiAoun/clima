@@ -425,6 +425,46 @@ var groups = [
         ]
     },
     {
+        // The preferences screen, in parts. It is the one screen in this app
+        // that is the same objects in both shells — PreferencesSheet puts these
+        // groups on a desktop sheet and MobileMePage puts the same two on the
+        // phone's Me tab — so reviewing them here is reviewing both.
+        name: "Preferences",
+        items: [
+            { name: "General", file: "PrefGeneral.qml", stage: { w: 520, h: 0 },
+              blurb: "Reads and writes the real preferences: switching one here changes the gallery's own window." },
+            { name: "Units", file: "PrefUnits.qml", stage: { w: 520, h: 0 },
+              blurb: "Two presets over five per-quantity preferences. Change one row and both radios empty — that state is `custom`, and it is the model being honest." },
+            { name: "Preference row", file: "PrefRow.qml", stage: { w: 460, h: 0 },
+              blurb: "Title, sentence, control. The three shapes it takes; the control slot needs a Component, so the two groups above are where it is reviewed with one in it.",
+              variants: [
+                  { label: "with a sentence", props: { title: "Dynamic background", subtitle: "The page follows the sky over the place on screen — night, dawn, day and dusk." } },
+                  { label: "title only",      props: { title: "Wind" } },
+                  { label: "not interactive", props: { title: "Theme", subtitle: "Following the desktop, which is dark.", interactive: false } }
+              ] },
+            { name: "Preference switch", file: "PrefSwitch.qml",
+              blurb: "FeelsLikeToggle without the caption: a preferences row has already said what the switch means, twice.",
+              variants: [
+                  { label: "off", props: { checked: false } },
+                  { label: "on",  props: { checked: true } }
+              ] },
+            { name: "Segment", file: "PrefSegment.qml",
+              blurb: "Both options visible at rest, which is the whole difference from a cycling row. `custom` selects nothing rather than lying about the first cell.",
+              variants: [
+                  { label: "two",    props: { options: [{ id: "24h", label: "24 hour" }, { id: "12h", label: "AM / PM" }], currentId: "12h" } },
+                  { label: "three",  props: { options: [{ id: "system", label: "System" }, { id: "light", label: "Light" }, { id: "dark", label: "Dark" }], currentId: "system" } },
+                  { label: "custom", props: { options: [{ id: "metric", label: "Metric" }, { id: "imperial", label: "Imperial" }], currentId: "custom" } }
+              ] },
+            { name: "Gear", file: "GearGlyph.qml",
+              blurb: "The one pictogram in this app whose meaning is learned rather than read — which is why it is the only borrowed one.",
+              variants: [
+                  { label: "18", props: { glyphSize: 18 } },
+                  { label: "28", props: { glyphSize: 28 } },
+                  { label: "56", props: { glyphSize: 56 } }
+              ] }
+        ]
+    },
+    {
         name: "Glyphs",
         items: [
             { name: "Weather glyph", file: "WeatherGlyph.qml",

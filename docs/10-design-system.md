@@ -362,8 +362,13 @@ grabs identically to one that is right.** `film.sh` is the tool:
 
 It films N frames and tiles them into one contact sheet, reading left to right.
 Frame 00 is the state *before* the poke; every frame after it is the transition.
-`--poke` drives `metric`, `day`, `list`, `feels`, `scroll` and — in the gallery
-— `remount`, which rebuilds the specimen and replays whatever it does on mount.
+`--poke` drives `metric`, `day`, `list`, `feels`, `scroll`, `picker`, `prefs`
+and — in the gallery — `remount`, which rebuilds the specimen and replays
+whatever it does on mount. `picker` and `prefs` are the two sheets: they are the
+only surfaces in the app reachable no other way in a capture, which is what a
+poke is for. `prefs` is the desktop shell's, and says so rather than doing
+nothing when the mobile shell is loaded — the phone shows the same preferences
+inline, and `--tab me` is how they are photographed there.
 
 If every frame on the sheet looks identical, either nothing is animating or the
 whole thing finished inside one interval.

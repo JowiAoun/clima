@@ -37,6 +37,14 @@ desktop-uv-light|app|1340x762|--scheme light --metric uv
 desktop-list|app|1340x762|--scheme dark --list
 desktop-night|app|1340x762|--scheme dark --sky night
 
+# The preferences sheet, which is the desktop's only settings surface and the
+# one screen in this app that is the same objects in both shells: the two groups
+# here are the two the phone shows inline on `mobile-me`. Both schemes, because
+# the switch track, the segment pill and the radio dot are the only controls in
+# the app that carry `accent.fill` against a card rather than against the page.
+desktop-preferences|app|1340x900|--scheme dark --poke prefs=1
+desktop-preferences-light|app|1340x900|--scheme light --poke prefs=1
+
 # ---- the phone --------------------------------------------------------------
 # Every tab, because MobileShell destroys and rebuilds a page on each change and
 # four of the five are reachable no other way in a capture.

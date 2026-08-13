@@ -153,18 +153,19 @@ set_tests_properties(tst_conditionsdata PROPERTIES
     TIMEOUT 60
 )
 
-# ---- the second one that links app/ -----------------------------------------
+# ---- the other two that link app/ -------------------------------------------
 #
-# `TimeFormat`'s five spellings. Here rather than through clima_add_test() for
-# tst_conditionsdata's reason — its subject is app/ and clima_forbid_gui() would
-# refuse the link.
+# `TimeFormat`'s five spellings and `Units`' two presets. Here rather than
+# through clima_add_test() for tst_conditionsdata's reason — their subject is
+# app/ and clima_forbid_gui() would refuse the link.
 #
-# LC_ALL matters more here than anywhere else in this file. Half of what this
-# asserts is that a clock reading is decided by the *preference* and not by the
-# locale, which was true of five of the six formatters in this app and not of the
-# sixth; pinning the locale is what makes a regression to QLocale::ShortFormat
-# fail here rather than pass on a developer's machine and fail in CI.
-foreach(clima_app_test tst_timeformat)
+# LC_ALL matters more to the first of these than anywhere else in this file. Half
+# of what it asserts is that a clock reading is decided by the *preference* and
+# not by the locale, which was true of five of the six formatters in this app and
+# not of the sixth; pinning the locale is what makes a regression to
+# QLocale::ShortFormat fail here rather than pass on a developer's machine and
+# fail in CI.
+foreach(clima_app_test tst_timeformat tst_units)
     add_executable(${clima_app_test} ${clima_app_test}.cpp)
 
     target_link_libraries(${clima_app_test} PRIVATE climaqml clima_testsupport Qt6::Test)

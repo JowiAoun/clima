@@ -17,6 +17,11 @@ namespace {
 // never loads — no error, no warning, just a setting that does not stick.
 namespace key {
 const auto appearance        = QStringLiteral("appearance");
+// A group of its own rather than `appearance/dynamic`. QSettings will happily
+// write a scalar `appearance` and a section `[appearance]` into the same INI,
+// and the file that comes out is one nobody can read at a glance — which is the
+// whole reason this app forces INI in the first place.
+const auto dynamicBackground = QStringLiteral("background/dynamic");
 const auto clockFormat       = QStringLiteral("time/format");
 const auto windowWidth       = QStringLiteral("window/width");
 const auto windowHeight      = QStringLiteral("window/height");
@@ -170,6 +175,17 @@ void Settings::setAppearance(const QString &value)
 {
     if (store(key::appearance, value))
         Q_EMIT appearanceChanged();
+}
+
+bool Settings::dynamicBackground() const
+{
+    return load(key::dynamicBackground, true).toBool();
+}
+
+void Settings::setDynamicBackground(bool value)
+{
+    if (store(key::dynamicBackground, value))
+        Q_EMIT dynamicBackgroundChanged();
 }
 
 // ---- the clock --------------------------------------------------------------

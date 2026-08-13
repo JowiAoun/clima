@@ -49,6 +49,7 @@ set(clima_qml_files
     qml/Clima/DetailWindCard.qml
     qml/Clima/DropletGlyph.qml
     qml/Clima/FeelsLikeToggle.qml
+    qml/Clima/GearGlyph.qml
     qml/Clima/HatchPattern.qml
     qml/Clima/HourlyList.qml
     qml/Clima/HourlyOverview.qml
@@ -81,6 +82,13 @@ set(clima_qml_files
     qml/Clima/PrecipBands.qml
     qml/Clima/PrecipField.qml
     qml/Clima/PrecipitationStrip.qml
+    qml/Clima/PrefGeneral.qml
+    qml/Clima/PrefGroup.qml
+    qml/Clima/PrefRow.qml
+    qml/Clima/PrefSegment.qml
+    qml/Clima/PrefSwitch.qml
+    qml/Clima/PrefUnits.qml
+    qml/Clima/PreferencesSheet.qml
     qml/Clima/SectionHeader.qml
     qml/Clima/SeriesArea.qml
     qml/Clima/SeverityGlyph.qml

@@ -53,20 +53,43 @@ Window {
     readonly property bool mobile: Viewports.usesMobileShell(viewportClass)
 
     // ---- the sky -----------------------------------------------------------
-    // The phone's background follows the clock: a deep blue by day, a starred
-    // indigo at night, warmed at the two crossings. The desktop stays at
-    // `dusk`, because a 1340 px window is mostly cards — the background is a
-    // rim around them, and the reader never sees enough of it for a
-    // constellation to be anything but noise behind a chart. A phone is the
-    // opposite: the hero sits directly on the sky with no card at all.
+    // The background follows the clock: a deep blue by day, a starred indigo at
+    // night, warmed at the two crossings. Or it does not, and holds at `dusk` —
+    // the palette this prototype has always had — which is what
+    // `Settings.dynamicBackground` switches between and what the preferences
+    // screen's first row is.
     //
     // Clock owns what time it is and which of the four phases that falls in, so
     // that the component gallery's window — which paints this same backdrop —
     // reads the hour from the same place rather than from its own copy of the
     // same three arguments.
+    //
+    // ---- three sources, and the order is the policy ------------------------
+    //
+    //   1. --sky, which wins outright
+    //   2. a capture with no --sky, which is pinned to what this app did before
+    //      the preference existed
+    //   3. the reader's own choice
+    //
+    // Rule 2 is the same rule `resolvedScheme` states below, for the same
+    // reason and with the same cost. A golden image is taken with whatever is in
+    // the INI of the machine that took it, so a capture that read this
+    // preference would be a picture that changes when a developer flips a switch
+    // — the failure would appear in CI, on an unrelated pull request, with
+    // nothing in the diff to explain it. The scheme has been pinned under
+    // `--grab` since the day the theme landed; this is that decision applied to
+    // the other half of the backdrop.
+    //
+    // What it costs is that `--grab` cannot photograph the preference switched
+    // off. `--sky dusk` is that photograph, which is why rule 1 outranks
+    // everything: the flag that pins a phase is the same flag a reviewer uses to
+    // see what pinning looks like.
+    readonly property bool dynamicSky:
+        AppOptions.capturing ? win.mobile : Settings.dynamicBackground
+
     readonly property string skyPhase:
         AppOptions.sky !== "" ? AppOptions.sky
-                              : (win.mobile ? Clock.skyPhase : "dusk")
+                              : (win.dynamicSky ? Clock.skyPhase : "dusk")
 
     // ---- the colour scheme -------------------------------------------------
     //
@@ -138,6 +161,15 @@ Window {
     // grabToImage() captures contentItem, which does not include the window's
     // clear colour — so every headless screenshot came out with a black page
     // behind the cards, which is not what is on screen.
+    // The starfield is still the phone's alone, and that is a separate question
+    // from which phase the gradient is in. A 1340 px window is mostly cards —
+    // the background is a rim around them — and the reader never sees enough of
+    // it for a constellation to be anything but noise behind a chart. A phone is
+    // the opposite: the hero sits directly on the sky with no card at all. So a
+    // desktop that has followed the clock into the night gets the night
+    // gradient and no stars, which is the arrangement `--sky night` has always
+    // produced on the desktop for anyone who asked for it, and `desktop-night`
+    // is the golden image of it.
     PageBackdrop {
         anchors.fill: parent
         phase: win.skyPhase

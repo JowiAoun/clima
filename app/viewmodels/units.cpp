@@ -15,6 +15,43 @@ QVariantMap choice(const QString &id, const QString &label)
     return QVariantMap{ { QStringLiteral("id"), id }, { QStringLiteral("label"), label } };
 }
 
+// The two presets, as the five spellings each one writes. In this order:
+// temperature, wind, pressure, visibility, precipitation.
+//
+// `metric` is the same five strings Settings falls back to when nothing has been
+// stored, and deliberately so — a reader who opens preferences on a fresh
+// install sees "°C" already selected rather than "custom", which is what a
+// second table drifting from Settings' defaults would show them.
+struct SystemSpec
+{
+    const char *id;
+    QString temperature;
+    QString wind;
+    QString pressure;
+    QString visibility;
+    QString precipitation;
+};
+
+const SystemSpec &metricSpec()
+{
+    static const SystemSpec spec{ "metric",
+                                  QStringLiteral("celsius"), QStringLiteral("kmh"),
+                                  QStringLiteral("hpa"), QStringLiteral("km"),
+                                  QStringLiteral("mm") };
+    return spec;
+}
+
+const SystemSpec &imperialSpec()
+{
+    // inHg and not mb, miles and not km: this is the bundle a US reader means by
+    // "imperial", and every entry is one `choicesFor` already offers.
+    static const SystemSpec spec{ "imperial",
+                                  QStringLiteral("fahrenheit"), QStringLiteral("mph"),
+                                  QStringLiteral("inhg"), QStringLiteral("mi"),
+                                  QStringLiteral("in") };
+    return spec;
+}
+
 } // namespace
 
 Units::Units()
@@ -323,6 +360,61 @@ QVariantList Units::choicesFor(Quantity quantity) const
     default:
         return {};
     }
+}
+
+// ---- the two presets ---------------------------------------------------------
+
+QString Units::system() const
+{
+    const auto matches = [this](const SystemSpec &spec) {
+        return temperatureUnit() == spec.temperature && windUnit() == spec.wind
+            && pressureUnit() == spec.pressure && visibilityUnit() == spec.visibility
+            && precipitationUnit() == spec.precipitation;
+    };
+
+    if (matches(metricSpec()))
+        return QStringLiteral("metric");
+    if (matches(imperialSpec()))
+        return QStringLiteral("imperial");
+    return QStringLiteral("custom");
+}
+
+void Units::applySystem(const QString &system)
+{
+    const SystemSpec *spec = system == QLatin1String("metric")     ? &metricSpec()
+                             : system == QLatin1String("imperial") ? &imperialSpec()
+                                                                   : nullptr;
+    if (spec == nullptr) {
+        qWarning("units: %s is not a unit system", qPrintable(system));
+        return;
+    }
+
+    // Five writes, each of which emits its own Settings signal and so five
+    // `changed()` in a row. That is not worth suppressing: every consumer of
+    // this signal rebuilds a snapshot, and rebuilding five times in one call
+    // stack costs a few hundred microseconds once, on a click.
+    Settings *store = settings();
+    store->setTemperatureUnit(spec->temperature);
+    store->setWindUnit(spec->wind);
+    store->setPressureUnit(spec->pressure);
+    store->setVisibilityUnit(spec->visibility);
+    store->setPrecipitationUnit(spec->precipitation);
+}
+
+QVariantList Units::systemChoices() const
+{
+    const auto entry = [](const QString &id, const QString &label, const QString &blurb) {
+        return QVariantMap{ { QStringLiteral("id"), id },
+                            { QStringLiteral("label"), label },
+                            { QStringLiteral("blurb"), blurb } };
+    };
+
+    return {
+        entry(QStringLiteral("metric"), QStringLiteral("°C"),
+              tr("Celsius, km/h, hPa, kilometres and millimetres.")),
+        entry(QStringLiteral("imperial"), QStringLiteral("°F"),
+              tr("Fahrenheit, mph, inHg, miles and inches.")),
+    };
 }
 
 Units::Quantity Units::quantityFor(const QString &name)

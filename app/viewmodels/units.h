@@ -69,6 +69,11 @@ class Units : public QObject
     Q_PROPERTY(QString visibility READ visibilityUnit NOTIFY changed)
     Q_PROPERTY(QString precipitation READ precipitationUnit NOTIFY changed)
 
+    // "metric" | "imperial" | "custom" — a READING of the five above, never a
+    // sixth preference. See `applySystem` for why the distinction is the whole
+    // of the design here.
+    Q_PROPERTY(QString system READ system NOTIFY changed)
+
 public:
     // The quantities that have a unit preference, plus the ones that do not
     // and still need a symbol. `None` is not "dimensionless" — the UV index and
@@ -140,6 +145,41 @@ public:
     // that the list of units a user can pick and the list this class can
     // convert cannot drift apart.
     Q_INVOKABLE QVariantList choicesFor(Quantity quantity) const;
+
+    // ========================================================================
+    // THE TWO PRESETS, AND WHY THEY DO NOT CONTRADICT THE HEADER
+    //
+    // The header above says there is no metric/imperial switch and there will
+    // not be one, and there still is not. What follows is a pair of *shortcuts*
+    // that write the five preferences at once, plus a readout of whether the
+    // five currently happen to spell one of them.
+    //
+    // The difference is not a word game and it is visible in one keystroke.
+    // Choosing "imperial" here sets fahrenheit/mph/inHg/mi/in — and then setting
+    // precipitation back to millimetres is allowed, leaves the other four alone,
+    // and makes `system()` answer "custom". A real switch could not do that:
+    // it would own the five, and °C-with-mph — the single most repeated
+    // complaint under every weather app's reviews — would be unreachable.
+    //
+    // So the preset is an accelerator for the common case and the per-quantity
+    // rows underneath it remain the truth. A settings screen showing both is
+    // showing the model rather than hiding it: docs/04-architecture.md §4.10.
+    //
+    // `system()` returns "custom" for any mixture, which is a state the UI has
+    // to be able to draw — neither radio filled — rather than one it may round
+    // to the nearest preset.
+    [[nodiscard]] QString system() const;
+
+    // Writes all five. A no-op for an id that is neither "metric" nor
+    // "imperial", because the alternative is a typo silently resetting somebody
+    // to Celsius.
+    Q_INVOKABLE void applySystem(const QString &system);
+
+    // {id, label, blurb} for the presets, in the order a screen should list
+    // them. Here rather than in QML for the same reason `choicesFor` is: the
+    // list a reader can pick from and the list `applySystem` understands are one
+    // list, and the blurb names the units the preset actually writes.
+    Q_INVOKABLE QVariantList systemChoices() const;
 
     // The spelling → Quantity, for QML and for the metric registry. Unknown
     // reads as None rather than as an error: a metric with no unit is a
