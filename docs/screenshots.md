@@ -11,13 +11,13 @@ taste — one of them gets rejected by Flathub's linter, and another one fails C
 
 | Profile | Made by | Looks like | Compared how |
 |---|---|---|---|
-| **golden** | `scripts/golden.sh` | raw, exact, 46 scenes | byte for byte, every commit |
+| **golden** | `scripts/golden.sh` | raw, exact, 50 scenes | byte for byte, every commit |
 | **showcase** | `scripts/shots.sh` | device bezels, composed | byte for byte, every commit |
 | **store** | `clima --grab` | raw, un-bezelled, whole window | not compared |
 
 ## golden — the regression detector
 
-46 scenes from the app and the gallery, in `tests/golden/images/`. Nobody looks
+50 scenes from the app and the gallery, in `tests/golden/images/`. Nobody looks
 at these; a machine does.
 
 ```sh

@@ -37,6 +37,18 @@ desktop-uv-light|app|1340x762|--scheme light --metric uv
 desktop-list|app|1340x762|--scheme dark --list
 desktop-night|app|1340x762|--scheme dark --sky night
 
+# The day strip, doing what it says. Two cases and not one, because the two
+# interesting states of the chart are on opposite sides of the present: a day
+# ahead has no past veil and no now line at all, and a day gone is veiled and
+# hatched from edge to edge. Both also drop the "Now" column and start their
+# axis at midnight, which is the whole of what `selectedDay` changes.
+#
+# `desktop` above is the third state and needs no flag: today, the window around
+# the present, fifteen observed hours on the left. The three of them together
+# are what stops the window quietly reverting to one.
+desktop-day-ahead|app|1340x762|--scheme dark --day 4
+desktop-day-past|app|1340x762|--scheme dark --day 0
+
 # The preferences sheet, which is the desktop's only settings surface and the
 # one screen in this app that is the same objects in both shells: the two groups
 # here are the two the phone shows inline on `mobile-me`. Both schemes, because

@@ -16,11 +16,12 @@
 // What the phone changes is the *control*: ten pills become one button and a
 // list. See MobileMetricPicker for why.
 //
-// ---- what this does not do ---------------------------------------------------
-// Selecting a different day moves the strip and leaves the chart alone. That
-// is the same gap the desktop has and it is honest here for the same reason —
-// there is one day of hourly data behind it. The strip is wired, the data is
-// not; when a provider arrives, this is one binding.
+// ---- the day the chart is of -------------------------------------------------
+// The week strip writes `Data.selectedDay` and the chart reads the window that
+// moves with it, so picking a day here redraws the chart under it. The reading
+// row above it does not move — it says what the weather is doing *now*, which
+// is a different question from what the chart is answering, and it asks
+// `Data.ahead(0)` rather than the window so that it keeps saying so.
 import QtQuick
 
 MobilePage {
@@ -70,7 +71,7 @@ MobilePage {
 
         WeatherGlyph {
             id: nowGlyph
-            kind: Data.conditionFor(Data.nowIndex)
+            kind: Data.ahead(0).condition
             glyphSize: 34
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
@@ -78,7 +79,7 @@ MobilePage {
 
         Text {
             id: nowTemp
-            text: Units.formatDisplay(Units.Temperature, Data.temperature[Data.nowIndex])
+            text: Units.formatDisplay(Units.Temperature, Data.ahead(0).temperature)
             color: Theme.ink.primary
             font.pixelSize: Theme.type.heroCaption
             anchors.left: nowGlyph.right
@@ -87,7 +88,7 @@ MobilePage {
         }
 
         Text {
-            text: qsTr("Feels like %1").arg(Units.formatDisplay(Units.Temperature, Data.apparent[Data.nowIndex]))
+            text: qsTr("Feels like %1").arg(Units.formatDisplay(Units.Temperature, Data.ahead(0).apparent))
             color: Theme.ink.muted
             font.pixelSize: Theme.type.label
             anchors.left: nowTemp.right
@@ -106,10 +107,17 @@ MobilePage {
 
     // Which day the chart is of. On the desktop the page said this before you
     // ever reached the chart; here the screen is arrived at from a tab bar, so
-    // it has to say so itself.
+    // it has to say so itself — and now that the strip above actually moves the
+    // window, "which day" is a question with more than one answer.
+    //
+    // Today's window is the one around the present and the observation stamp is
+    // what dates it. Any other day is a date, and its weekday and number are
+    // what name it; the stamp would be a time from a different day entirely.
     Text {
         width: root.spanWidth(2)
-        text: Detail.observedAt + ", " + Detail.observedOn
+        text: (Data.nowInWindow || !root.day)
+              ? Detail.observedAt + ", " + Detail.observedOn
+              : root.day.weekday + " " + root.day.date
         color: Theme.ink.muted
         font.pixelSize: Theme.type.label
         elide: Text.ElideRight
@@ -181,8 +189,22 @@ MobilePage {
                 anchors.verticalCenter: summaryGlyph.verticalCenter
             }
 
+            // Today's sentence, and only under today's numbers.
+            //
+            // The glyph and the pair above come from the selected day and
+            // always did; this line comes from `Detail`, which is the twelve
+            // detail cards' view model and is built entirely around the present
+            // — "Peaks at 4:00 p.m." is a claim about today. Under a high and
+            // low read off Monday it is a claim about Monday, and a wrong one.
+            //
+            // Hidden rather than rewritten because there is nothing honest to
+            // put here yet: a day's peak hour is in the hourly series and
+            // `Detail` does not window it. That is the day-scoped detail work
+            // in docs/known-gaps.md, not a line of QML.
             Text {
                 id: summaryText
+                visible: Data.nowInWindow
+                height: visible ? implicitHeight : 0
                 text: Detail.temperature.body
                 color: Theme.ink.muted
                 font.pixelSize: Theme.type.body

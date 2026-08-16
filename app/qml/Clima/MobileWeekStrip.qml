@@ -18,9 +18,19 @@ import QtQuick
 Item {
     id: root
 
-    // Index into Data.days. The shell owns it so a day chosen here survives a
-    // trip to another tab.
-    property int currentIndex: Data.todayIndex
+    // Index into Data.days, and the model's rather than this strip's — see
+    // DayStrip, which says at length why the day the chart is drawing cannot be
+    // a number the control keeps a copy of. The shell still carries one so that
+    // a day chosen here survives the page being destroyed on a tab change; that
+    // is a memory, not the source of truth.
+    property int currentIndex: Data.selectedDay
+    onCurrentIndexChanged: Data.selectedDay = root.currentIndex
+    Binding {
+        target: root
+        property: "currentIndex"
+        value: Data.selectedDay
+        restoreMode: Binding.RestoreNone
+    }
 
     readonly property int count: 7
 

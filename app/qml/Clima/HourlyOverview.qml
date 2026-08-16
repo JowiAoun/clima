@@ -58,7 +58,14 @@ Item {
 
     readonly property real contentW: (Data.count - 1) * hourWidth
     readonly property var labelIndices: Data.labelIndices
-    readonly property real nowX: xForIndex(Data.nowIndex)
+    // Where the present falls on the plot. `Data.nowIndex` is an offset that
+    // may sit outside the window — see forecastdata.h — so this can be negative
+    // for a day still ahead and past `contentW` for one already gone, and both
+    // are the answer rather than a case to guard. Clamped only because the two
+    // things that read it are a width and an x, and a negative width is a Qt
+    // warning rather than an empty rectangle.
+    readonly property real nowX:
+        ChartMath.clamp(xForIndex(Data.nowIndex), 0, contentW)
 
     // Axis bounds come from the metric, except where it opts into auto-scaling.
     readonly property real axisMin: metric.min
@@ -417,10 +424,27 @@ Item {
                 // Assigned on completion rather than bound: this is where the
                 // chart opens, not where it has to stay, and a binding would
                 // haul the reader back here after every flick.
-                Component.onCompleted:
+                // A function rather than a one-off, because the window is no
+                // longer fixed for the life of the card: the day strip replaces
+                // it, and a chart of Friday left at yesterday's contentX opens
+                // on whichever hours happened to sit at that many pixels.
+                function openOnStart() {
                     contentX = ChartMath.clamp(
                         root.xForIndex(Data.nowIndex - Data.labelStep) - root.hourWidth,
                         0, Math.max(0, contentWidth - width))
+                }
+
+                Component.onCompleted: openOnStart()
+
+                // On a day that is not today the clamp does the work: `nowIndex`
+                // is negative for a day ahead, so this asks for a negative
+                // contentX and gets 0 — midnight, which is where a chart of a
+                // date should open. For a day behind it asks for more than
+                // there is and gets the end of the day.
+                Connections {
+                    target: Data
+                    function onSelectedDayChanged() { flick.openOnStart() }
+                }
 
                 // A pager step is three quarters of the plot: one view of the day
                 // becoming another, hence `view`. A *drag* is not animated — the
@@ -454,7 +478,8 @@ Item {
                         delegate: Item {
                             required property var modelData
                             readonly property int hourIndex: modelData
-                            readonly property bool isNow: hourIndex === Data.nowIndex
+                            readonly property bool isNow:
+                                Data.nowInWindow && hourIndex === Data.nowIndex
 
                             x: root.xForIndex(hourIndex) - width / 2
                             y: 0
@@ -584,6 +609,12 @@ Item {
                         // The past, veiled and hatched *over* the series: observed hours
                         // are still real data, so they stay visible, but they are visibly
                         // not forecast. Blanking them would read as a rendering bug.
+                        //
+                        // No branch for the day strip: a day that has not started
+                        // yet puts the present at or before column zero and this
+                        // comes out empty, and a day that is over puts it past
+                        // the last column and this covers the plot. Which is
+                        // exactly right — every hour of Tuesday is observed.
                         Item {
                             width: root.nowX
                             height: plot.height
@@ -598,8 +629,11 @@ Item {
                             }
                         }
 
-                        // now
+                        // now — drawn only where there is a now to draw. On any
+                        // other day the line would sit on the plot's edge and
+                        // claim midnight, or the last hour, was this moment.
                         Rectangle {
+                            visible: Data.nowInWindow
                             x: root.nowX
                             width: 1
                             height: plot.height

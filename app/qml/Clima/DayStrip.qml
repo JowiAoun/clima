@@ -48,7 +48,28 @@ import QtQuick
 Item {
     id: root
 
-    property int currentIndex: Data.todayIndex
+    // The selection is the model's, not the strip's, and it travels both ways.
+    //
+    // It has to be the model's because it is what the chart below is a chart
+    // *of* — the strip is the control and `Data` is what it controls, and a
+    // number kept here with a copy pushed into the model is two numbers that
+    // can disagree. It has to travel both ways because the model clamps: ask
+    // for a row that a shorter forecast no longer has and the answer comes back
+    // different from what was asked, and the card that lights up should be the
+    // one being drawn.
+    //
+    // The Binding element rather than a plain binding on `currentIndex`,
+    // because a tap writes to it and a written property has no binding left.
+    // RestoreNone: there is nothing to restore to — the value this replaces is
+    // the one it just sent.
+    property int currentIndex: Data.selectedDay
+    onCurrentIndexChanged: Data.selectedDay = root.currentIndex
+    Binding {
+        target: root
+        property: "currentIndex"
+        value: Data.selectedDay
+        restoreMode: Binding.RestoreNone
+    }
 
     readonly property real cardWidth: 172
     readonly property real selectedExtra: 72     // room for the second badge

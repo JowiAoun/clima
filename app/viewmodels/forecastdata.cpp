@@ -22,6 +22,11 @@ namespace {
 constexpr int kWindowHours = 48;
 constexpr int kPastHours   = 15;
 
+// And the window for any day that is not today: the day itself, midnight to
+// midnight. Not 48 with the day in the middle — a chart of Friday that opens on
+// Thursday evening is a chart of Friday you have to scroll to find.
+constexpr int kDayHours = 24;
+
 // Below this an hour is dry. precip.js's TRACE, and the only number from that
 // file repeated here — repeated because the question "is this hour wet" is
 // asked before precip.js sees the data, when the type is being read off the
@@ -167,9 +172,11 @@ QVariantList ForecastData::weekdayNames() const
     return names;
 }
 
-void ForecastData::clear()
+// Everything a day change invalidates, and nothing else. Every builder below
+// appends, so this is what makes calling one twice mean "rebuild" rather than
+// "append a second copy" — which is what a day change does four times over.
+void ForecastData::clearWindow()
 {
-    m_hours.clear();
     m_count = 0;
     m_nowIndex = 0;
     m_start = 0;
@@ -178,10 +185,17 @@ void ForecastData::clear()
     m_windDirection.clear(); m_pressure.clear(); m_uvIndex.clear(); m_visibility.clear();
     m_airQuality.clear(); m_precipTypes.clear();
     m_hasApparent = false;
-    m_days.clear(); m_todayIndex = 0;
-    m_monthDays.clear();
     m_sunEvents.clear();
     m_labelIndices.clear(); m_precipBuckets.clear();
+}
+
+void ForecastData::clear()
+{
+    m_hours.clear();
+    m_nowAbsolute = 0;
+    clearWindow();
+    m_days.clear(); m_dayDates.clear(); m_todayIndex = 0; m_selectedDay = 0;
+    m_monthDays.clear();
 
     // Reset to a shape rather than emptied, for the reason the two functions
     // give. buildMonth() and buildSunEvents() overwrite these keys in place, so
@@ -223,14 +237,45 @@ void ForecastData::setSnapshot(const Forecast &forecast, const AirQuality &airQu
     // timestamp.
     m_hours = asHourStarting(forecast.hourly);
 
+    // Days first now, and that ordering is load-bearing: the window is of a day
+    // and has to be able to look its date up. A fresh snapshot always opens on
+    // today — the rows have moved, so a remembered index would point at a
+    // different date, and the one thing worse than losing a selection is
+    // keeping the number and silently changing what it means.
+    buildDays(now);
+    m_selectedDay = m_todayIndex;
+
     buildWindow(now);
     buildSeries();
-    buildDays(now);
     buildMonth(now);
     buildSunEvents();
     buildBuckets();
 
+    Q_EMIT selectedDayChanged();
     Q_EMIT changed();
+}
+
+void ForecastData::setSelectedDay(int index)
+{
+    const int clamped = m_days.isEmpty() ? 0 : qBound(0, index, int(m_days.size()) - 1);
+    if (clamped == m_selectedDay)
+        return;
+
+    m_selectedDay = clamped;
+    if (!m_hours.isEmpty())
+        retarget();
+
+    Q_EMIT selectedDayChanged();
+    Q_EMIT changed();
+}
+
+void ForecastData::retarget()
+{
+    clearWindow();
+    buildWindow(m_now);
+    buildSeries();
+    buildSunEvents();
+    buildBuckets();
 }
 
 // ---- the window ------------------------------------------------------------------
@@ -251,17 +296,52 @@ void ForecastData::buildWindow(const QDateTime &now)
         else
             break;
     }
+    m_nowAbsolute = current;
 
-    m_start = qMax(0, current - kPastHours);
-    m_count = qMin(kWindowHours, int(m_hours.size()) - m_start);
+    // Today keeps the window described at the top of the header, to the hour.
+    // Any other day is that day, and `firstOfDay` returning -1 falls back to
+    // today's rather than to an empty chart: the strip draws eleven cards off
+    // the *daily* series and a provider whose hourly horizon is shorter than
+    // its daily one — MET Norway's is, by days — would otherwise have cards on
+    // it that select nothing.
+    const QDate today = now.toTimeZone(m_zone).date();
+    const QDate wanted = m_dayDates.value(m_selectedDay);
+
+    int firstOfDay = -1;
+    if (wanted.isValid() && wanted != today) {
+        for (int i = 0; i < m_hours.size(); ++i) {
+            if (m_hours.at(i).time.toTimeZone(m_zone).date() == wanted) {
+                firstOfDay = i;
+                break;
+            }
+        }
+    }
+
+    if (firstOfDay < 0) {
+        m_start = qMax(0, current - kPastHours);
+        m_count = qMin(kWindowHours, int(m_hours.size()) - m_start);
+    } else {
+        m_start = firstOfDay;
+        m_count = qMin(kDayHours, int(m_hours.size()) - m_start);
+    }
+
+    // Deliberately not clamped. See the header: this is an offset to the
+    // present, and the chart's past veil is `xForIndex(nowIndex)` wide — so a
+    // day still ahead of us produces a negative width and veils nothing, and a
+    // day behind us produces one wider than the plot and veils all of it,
+    // without a single branch in the QML.
     m_nowIndex = current - m_start;
 
     // "Now" has to be a labelled column or the word is never drawn, and the
     // labels run every `labelStep` hours from `firstLabelIndex`. So the phase
     // of the label sequence is chosen by where now landed rather than fixed —
     // which is the one thing that has to move when the window's start does.
+    //
+    // On a day window there is no "Now" to land on and the window starts at
+    // midnight, so the phase is midnight's: labels on even hours, which is what
+    // a reader expects of a chart of a date.
     m_labelStep       = 2;
-    m_firstLabelIndex = m_nowIndex % m_labelStep;
+    m_firstLabelIndex = nowInWindow() ? m_nowIndex % m_labelStep : 0;
 
     const QDateTime first = localTimeAt(0);
     m_startHour = first.isValid() ? first.time().hour() : 0;
@@ -340,6 +420,7 @@ void ForecastData::buildDays(const QDateTime &now)
     const QDate today = now.toTimeZone(m_zone).date();
 
     QVariantList all;
+    QList<QDate> allDates;
     int          todayRow = -1;
 
     for (const DailyPoint &day : m_forecast.daily) {
@@ -372,10 +453,12 @@ void ForecastData::buildDays(const QDateTime &now)
         if (day.date == today)
             todayRow = int(all.size());
         all.append(entry);
+        allDates.append(day.date);
     }
 
     if (todayRow < 0) {
         m_days       = all;
+        m_dayDates   = allDates;
         m_todayIndex = 0;
         return;
     }
@@ -387,8 +470,10 @@ void ForecastData::buildDays(const QDateTime &now)
     // and a provider that sends none would leave it off the end.
     const int from = qMax(0, todayRow - 1);
     const int to   = qMin(int(all.size()), todayRow + 10);
-    for (int i = from; i < to; ++i)
+    for (int i = from; i < to; ++i) {
         m_days.append(all.at(i));
+        m_dayDates.append(allDates.at(i));
+    }
     m_todayIndex = todayRow - from;
 }
 
@@ -483,13 +568,17 @@ void ForecastData::buildSunEvents()
         place(day.sunset, QStringLiteral("sunset"));
     }
 
-    // Today's moon. The phase is a position in the cycle and the illumination
-    // is the lit fraction, which is not linear in it — libclima computes the
-    // second from the first so that a waxing crescent is not reported as a
-    // quarter lit.
+    // The moon of the day the window is of, which is today until the day strip
+    // says otherwise. It is read by one thing — the chart's own legend, right
+    // under the plot — so a legend naming today's phase over Friday's hours
+    // would be the chart contradicting itself. The phase is a position in the
+    // cycle and the illumination is the lit fraction, which is not linear in
+    // it: libclima computes the second from the first so that a waxing crescent
+    // is not reported as a quarter lit.
     const QDate today = m_now.toTimeZone(m_zone).date();
+    const QDate wanted = m_dayDates.value(m_selectedDay, today);
     for (const DailyPoint &day : m_forecast.daily) {
-        if (day.date != today)
+        if (day.date != wanted)
             continue;
         const Reading lit = moonIllumination(day.moonPhase);
         m_moonPhase[QStringLiteral("name")]        = moonPhaseLabel(moonPhaseName(day.moonPhase));
@@ -566,9 +655,39 @@ QString ForecastData::conditionText(int index) const
 
 QString ForecastData::hourLabel(int index) const
 {
-    if (index == m_nowIndex)
+    // `nowInWindow()` and not just the comparison: on a day window `nowIndex`
+    // is an offset that can land anywhere, and 0 == 0 would print "Now" over
+    // Friday midnight on the one afternoon a year the arithmetic agreed.
+    if (nowInWindow() && index == m_nowIndex)
         return tr("Now");
     return clockLabel(index);
+}
+
+QVariantMap ForecastData::ahead(int offset) const
+{
+    QVariantMap out;
+
+    const int absolute = m_nowAbsolute + offset;
+    if (absolute < 0 || absolute >= m_hours.size())
+        return out;
+
+    const HourlyPoint &hour = m_hours.at(absolute);
+    const bool night = hour.isDay.has_value() && !*hour.isDay;
+
+    out[QStringLiteral("temperature")] =
+        display(hour.temperature, Units::Quantity::Temperature);
+    out[QStringLiteral("apparent")] =
+        display(hour.apparentTemperature, Units::Quantity::Temperature);
+    out[QStringLiteral("precipProb")] = rounded(hour.precipitationProbability);
+    out[QStringLiteral("night")]      = night;
+    out[QStringLiteral("condition")] =
+        hour.weatherCode
+            ? conditionKindName(drawableToday(clima::conditionFor(*hour.weatherCode, !night)))
+            : QString();
+    out[QStringLiteral("label")] =
+        offset == 0 ? tr("Now") : hourOf(hour.time.toTimeZone(m_zone));
+
+    return out;
 }
 
 QString ForecastData::clockLabel(int index) const

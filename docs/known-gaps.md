@@ -85,6 +85,32 @@ screen next to the toggle that controls them.
 
 ---
 
+## The detail cards are about now, whichever day the chart is showing
+
+The day strip moves the hourly window: pick Friday and the chart, the list and
+the precipitation strip are Friday's, midnight to midnight. **The twelve detail
+cards below it are not.** They are `Detail` — `app/viewmodels/conditionsdata.h`
+— which is built entirely around the present observation, and a card that reads
+"Peaks at 4:00 p.m." means today whatever the strip says.
+
+This is defensible as it stands and it is not invisible. On the desktop the two
+are separate sections with their own headers and the details carry the
+observation stamp, so neither claims to be the other. On the phone one line did
+claim it — the Hourly screen's daily summary put today's sentence under the
+selected day's high and low — and that line is now hidden on any day but today,
+which is honest and is also obviously a stopgap.
+
+Closing it means giving `ConditionsData` the same treatment `ForecastData` just
+had: a selected day, a window that follows it, and a decision per block about
+what each of the fifteen means on a day that is not today. Several of them have
+no meaning at all there — "feels like" is a reading, not a forecast, and an air
+quality index four days out is a different product from the one this shows.
+So it is a design question first and a port second, and the honest intermediate
+is what exists now: the sections that follow the day say so, and the ones that
+do not are dated.
+
+---
+
 ## The desktop page is not touch-audited
 
 `tests/qml/tst_hittargets.qml` measures every tappable area on every screen the

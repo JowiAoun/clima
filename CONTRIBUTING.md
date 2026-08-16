@@ -115,7 +115,7 @@ Two suites compare images byte for byte, and both will fail on a change that is
 perfectly correct.
 
 ```sh
-scripts/golden.sh check          # 46 scenes from the app and the gallery
+scripts/golden.sh check          # 50 scenes from the app and the gallery
 scripts/shots.sh check           # 5 composed device images for the README
 ```
 

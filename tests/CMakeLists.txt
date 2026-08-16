@@ -153,6 +153,30 @@ set_tests_properties(tst_conditionsdata PROPERTIES
     TIMEOUT 60
 )
 
+# ---- and the window under the chart -----------------------------------------
+#
+# `Data`'s hourly window, which stopped being one window the moment the day
+# strip was wired to it. Registered here for tst_conditionsdata's reason: the
+# subject is a view model in app/, and clima_forbid_gui() would refuse the link.
+#
+# TZ is pinned for the same reason the golden run pins it. The window is
+# selected by comparing a local date against a local date, and the fixture's
+# zone is Toronto's — a runner in UTC and a runner in Tokyo disagreeing about
+# which hours are "Friday" is exactly the failure this asserts is impossible.
+add_executable(tst_forecastdata tst_forecastdata.cpp)
+
+target_link_libraries(tst_forecastdata PRIVATE climaqml clima_testsupport Qt6::Test)
+target_compile_definitions(tst_forecastdata PRIVATE
+    CLIMA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME tst_forecastdata COMMAND tst_forecastdata)
+
+set_tests_properties(tst_forecastdata PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
+    TIMEOUT 60
+)
+
 # ---- the other two that link app/ -------------------------------------------
 #
 # `TimeFormat`'s five spellings and `Units`' two presets. Here rather than

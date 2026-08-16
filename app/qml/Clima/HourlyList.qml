@@ -28,11 +28,11 @@
 //   * Every cell in here is text, and §10.6 says text does not fly, fade or
 //     slide.
 //
-// The list also has no state to transition between: it is metric-agnostic and
-// day-agnostic, `nowIndex` moves only when a whole new snapshot arrives, and the past
-// dimming never changes. Arrival is the switch's motion and the switch belongs
-// to `HourlyOverview`, which is the only place that can sequence it against the
-// chart underneath.
+// The list also has no state to transition between: it is metric-agnostic, and
+// the day it draws is whichever one `Data`'s window is of, so a day change
+// replaces the model rather than transitioning it. Arrival is the switch's
+// motion and the switch belongs to `HourlyOverview`, which is the only place
+// that can sequence it against the chart underneath.
 import QtQuick
 
 Item {
@@ -145,7 +145,25 @@ Item {
         // inside the page and on "now" in the gallery. Positioning explicitly
         // makes it the same list in both, and "now" is the answer: the past is
         // dimmed context you can scroll back to, not the thing you came for.
-        Component.onCompleted: positionViewAtIndex(Data.nowIndex, ListView.Beginning)
+        //
+        // Clamped, and a function rather than a one-off, because the day strip
+        // moves the window: `Data.nowIndex` is an offset to the present, so on
+        // any day but today it points outside the list, where
+        // positionViewAtIndex does nothing at all and the list would be left
+        // wherever the previous day had scrolled it. Clamping opens a future day
+        // on midnight and a past one on its last hour, which is what the chart
+        // beside it does with the same number.
+        function openOnNow() {
+            positionViewAtIndex(Math.max(0, Math.min(Data.count - 1, Data.nowIndex)),
+                                ListView.Beginning)
+        }
+
+        Component.onCompleted: openOnNow()
+
+        Connections {
+            target: Data
+            function onSelectedDayChanged() { view.openOnNow() }
+        }
 
         delegate: Item {
             id: hourRow

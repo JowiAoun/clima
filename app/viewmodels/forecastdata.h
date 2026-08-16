@@ -44,6 +44,33 @@
 // labelled column or it is never drawn.
 //
 // ============================================================================
+// …AND WHICH DAY THE WINDOW IS OF
+//
+// The paragraph above describes the window when the day strip is on Today, and
+// that is still exactly what it does. `selectedDay` moves it: pick any other
+// card and the window becomes that day's own hours, midnight to midnight.
+//
+// The asymmetry is deliberate. "Today" is not a date here, it is the present —
+// the reason for fifteen hours of past is that they are hours you have lived
+// through, and the reason the window runs 48 forward is that "later" does not
+// stop at midnight. Neither sentence is true of Friday. Friday is a date, and
+// the honest unit of a date is the day.
+//
+// `nowIndex` therefore stops being an index into the window and becomes an
+// offset that MAY FALL OUTSIDE IT: negative when the whole window is still
+// ahead, `>= count` when it is all behind. That is not a degenerate case to
+// guard against, it is the answer — the chart's past veil runs from the plot's
+// left edge to `nowIndex`, so a future day veils nothing and a past day veils
+// everything, with no branch anywhere. `nowInWindow` is for the two things that
+// cannot be expressed as a width: whether to draw the now line, and whether any
+// column is labelled "Now".
+//
+// What does NOT move with it: `days`, `todayIndex`, the calendar, the moon —
+// all of those are about dates rather than about the window — and `ahead()`,
+// which is below and exists precisely because two readouts mean "now" and have
+// to keep meaning it while the chart is showing Friday.
+//
+// ============================================================================
 // UNITS: THE SERIES ARE CANONICAL EXCEPT WHERE THE READER SEES THEM
 //
 // Temperatures, wind speeds, pressures and visibilities are converted here, on
@@ -83,6 +110,22 @@ class ForecastData : public QObject
     Q_PROPERTY(int startHour READ startHour NOTIFY changed)
     Q_PROPERTY(int firstLabelIndex READ firstLabelIndex NOTIFY changed)
     Q_PROPERTY(int labelStep READ labelStep NOTIFY changed)
+
+    // Which row of `days` the window is of, and whether the present is inside
+    // it. The setter is the one thing in this class a view is allowed to write:
+    // the day strip and the week strip both push into it and both read it back,
+    // so two shells cannot disagree about which day is on screen.
+    Q_PROPERTY(int selectedDay READ selectedDay WRITE setSelectedDay NOTIFY selectedDayChanged)
+    Q_PROPERTY(bool nowInWindow READ nowInWindow NOTIFY changed)
+
+    // ---- now, wherever the window is ---------------------------------------
+    //
+    // Hours counted forward from the present, into the whole series rather than
+    // into the window. The Today screen's hourly strip and the Hourly screen's
+    // reading both mean "right now", and before this they said `nowIndex` and
+    // meant it — which stopped being the same thing the moment the window
+    // could be Friday's. `aheadCount` is how many exist; `ahead(0)` is now.
+    Q_PROPERTY(int aheadCount READ aheadCount NOTIFY changed)
 
     // ---- the series --------------------------------------------------------
     //
@@ -174,6 +217,23 @@ public:
     [[nodiscard]] int firstLabelIndex() const { return m_firstLabelIndex; }
     [[nodiscard]] int labelStep() const { return m_labelStep; }
 
+    [[nodiscard]] int  selectedDay() const { return m_selectedDay; }
+    void               setSelectedDay(int index);
+    [[nodiscard]] bool nowInWindow() const { return m_nowIndex >= 0 && m_nowIndex < m_count; }
+
+    [[nodiscard]] int aheadCount() const
+    {
+        return qMax(0, int(m_hours.size()) - m_nowAbsolute);
+    }
+
+    // One hour, `offset` hours from now: temperature and probability in the
+    // reader's units, the condition glyph's name, the axis label, and whether
+    // it is dark. A map rather than five parallel accessors because every
+    // caller wants all of it for one column, and an empty map for an hour past
+    // the end of the series — QML reads a missing key as `undefined`, which is
+    // what a column with nothing in it should be.
+    [[nodiscard]] Q_INVOKABLE QVariantMap ahead(int offset) const;
+
     [[nodiscard]] QVariantList temperature() const { return m_temperature; }
     [[nodiscard]] QVariantList apparent() const { return m_apparent; }
     [[nodiscard]] QVariantList precipProb() const { return m_precipProb; }
@@ -226,8 +286,22 @@ Q_SIGNALS:
     // signal set would be twenty ways to forget one.
     void changed();
 
+    // Its own signal as well as `changed()`, because this is the one property a
+    // view writes: a strip that bound `currentIndex` to `changed()` would
+    // re-read the selection on every refresh, and one that bound it to nothing
+    // would never see another view move it.
+    void selectedDayChanged();
+
 private:
     void clear();
+
+    // Everything downstream of which hours the window covers, rebuilt. Called
+    // for a new snapshot and again for every day change — the series, the sun
+    // markers and the precipitation buckets are all slices of the window, and
+    // `clearWindow()` exists because all three builders append.
+    void clearWindow();
+    void retarget();
+
     void buildWindow(const QDateTime &now);
     void buildSeries();
     void buildDays(const QDateTime &now);
@@ -252,10 +326,15 @@ private:
 
     int m_start           = 0;   // index into m_hours of column 0
     int m_count           = 0;
-    int m_nowIndex        = 0;
+    int m_nowIndex        = 0;   // may fall outside [0, count) — see the header
     int m_startHour       = 0;
     int m_firstLabelIndex = 1;
     int m_labelStep       = 2;
+
+    // Where the present is in `m_hours`, which is what `nowIndex` is measured
+    // from and what `ahead()` counts from. Kept separately because it is the
+    // one index in this class that does not move when the window does.
+    int m_nowAbsolute = 0;
 
     QVariantList m_temperature, m_apparent, m_precipProb, m_precipMm, m_cloud, m_humidity;
     QVariantList m_windSpeed, m_windGust, m_windDirection, m_pressure, m_uvIndex;
@@ -264,6 +343,13 @@ private:
 
     QVariantList m_days;
     int          m_todayIndex = 0;
+
+    // The dates behind `m_days`, in the same order. `days` publishes a day and
+    // a month for the card to print and that is not enough to find an hour: a
+    // sixteen-day forecast crosses a month boundary and two rows can carry the
+    // same `date`.
+    QList<QDate> m_dayDates;
+    int          m_selectedDay = 0;
 
     QVariantMap  m_month;
     QVariantList m_monthDays;

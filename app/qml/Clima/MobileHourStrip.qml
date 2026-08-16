@@ -37,13 +37,21 @@ Item {
     readonly property real columnWidth:
         Math.max(74, root.width / Math.max(1, columns))
 
-    // Indices into the hourly series, starting at now.
+    // The hours themselves, counted forward from the present — not indices into
+    // the chart's window, which is what these were.
+    //
+    // The distinction did not exist until the day strip started moving that
+    // window: `Data.nowIndex + i * step` meant "now, and every second hour
+    // after it" only while the window was always the one around now. Pick
+    // Friday on the Hourly tab and come back here, and this screen would have
+    // gone on saying "Now" over a column of Friday afternoon. `ahead()` indexes
+    // the whole series from the present and cannot be moved by a control on
+    // another screen.
     readonly property var hours: {
         var out = []
         for (var i = 0; i < columns; ++i) {
-            var idx = Data.nowIndex + i * step
-            if (idx < Data.count)
-                out.push(idx)
+            if (i * step < Data.aheadCount)
+                out.push(Data.ahead(i * step))
         }
         return out
     }
@@ -72,7 +80,7 @@ Item {
     readonly property var values: {
         var out = []
         for (var i = 0; i < hours.length; ++i)
-            out.push(Data.temperature[hours[i]])
+            out.push(hours[i].temperature)
         return out
     }
 
@@ -177,8 +185,8 @@ Item {
                     required property int index
                     required property var modelData
 
-                    readonly property int hourIndex: modelData
-                    readonly property bool isNow: hourIndex === Data.nowIndex
+                    readonly property var hour: modelData
+                    readonly property bool isNow: index === 0
 
                     x: index * root.columnWidth
                     width: root.columnWidth
@@ -189,7 +197,7 @@ Item {
                     // a label chasing a shallow curve wanders by a few pixels
                     // per column and reads as misalignment.
                     Text {
-                        text: Units.formatDisplay(Units.Temperature, Data.temperature[column.hourIndex])
+                        text: Units.formatDisplay(Units.Temperature, column.hour.temperature)
                         color: Theme.ink.primary
                         font.pixelSize: Theme.type.status
                         font.bold: column.isNow
@@ -198,7 +206,7 @@ Item {
                     }
 
                     WeatherGlyph {
-                        kind: Data.conditionFor(column.hourIndex)
+                        kind: column.hour.condition
                         glyphSize: 30
                         anchors.horizontalCenter: parent.horizontalCenter
                         y: root.tempRowHeight + root.glyphTop
@@ -215,7 +223,7 @@ Item {
                         }
 
                         Text {
-                            text: Data.precipProb[column.hourIndex] + "%"
+                            text: column.hour.precipProb + "%"
                             color: Theme.ink.muted
                             font.pixelSize: Theme.type.axis
                             anchors.verticalCenter: parent.verticalCenter
@@ -223,7 +231,7 @@ Item {
                     }
 
                     Text {
-                        text: Data.hourLabel(column.hourIndex)
+                        text: column.hour.label
                         color: column.isNow ? Theme.ink.primary : Theme.ink.muted
                         font.pixelSize: Theme.type.label
                         font.bold: column.isNow
