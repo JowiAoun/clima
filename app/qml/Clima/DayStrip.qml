@@ -16,11 +16,33 @@
 // side of the raised card and curves its edge outward into the panel. Without them
 // the card reads as pasted on top of the panel rather than growing out of it.
 //
-// Motion. Selecting a card is the one event here and it changes four things at
-// once — fill, outline, size and the second badge — so they are choreographed
-// from this file rather than from the components. TabFillet and DayIconBadge
-// stay dumb; a fillet that animated itself would animate in the gallery too,
-// where nothing is selecting anything.
+// Motion. Selecting a card is the one event here and it changes six things at
+// once — fill, outline, width, height, the bottom corners and the fillets — so
+// they are choreographed from this file rather than from the components.
+// TabFillet and DayIconBadge stay dumb; a fillet that animated itself would
+// animate in the gallery too, where nothing is selecting anything.
+//
+// The geometry of the merge runs off ONE animated number, `merge`, split into
+// two beats that cannot overlap: the card travels down to the panel, and then
+// the corner it has made fillets outward. Reversed, the join comes apart before
+// the card lifts. Everything else here — fill, outline, the day/night crossfade
+// — is content rather than junction and keeps its own `tint` beat.
+//
+// It is worth saying why, because the obvious spelling is a Behavior per
+// property and that is what this was. Three clocks on three properties drift:
+// the fillet reached two thirds of its radius while the card was still 20 px
+// clear of the panel, so a rounded wedge hung in the gap with nothing to join,
+// and the bottom corners switched square in one frame under it. Deriving the
+// parts from one number is what makes "a junction only exists where two
+// surfaces touch" a property of the code rather than of the numbers agreeing.
+//
+// The pragma is qmllint's ask and this file is the one place it costs nothing:
+// a Repeater delegate cannot see an outer id without it, so every `root.` in
+// the card below is an unqualified access and a binding qmlcachegen declines to
+// compile ahead of time. The requirement it brings — that a delegate declare
+// what it takes from the model with `required` — this delegate already met.
+pragma ComponentBehavior: Bound
+
 import QtQuick
 
 Item {
@@ -40,6 +62,14 @@ Item {
     readonly property real mergeDepth: 0
     readonly property real unselectedInset: 20   // how much shorter the others are
     readonly property real filletRadius: Theme.metric.filletRadius
+
+    // Where the card stops travelling and the junction starts forming, as a
+    // fraction of the merge. 0.6 under OutCubic is 50 ms of travel and 140 ms of
+    // junction: the card arrives quickly, decelerating onto the panel, and the
+    // corner it makes takes its time. Filmed the other way round and the card
+    // was still drifting downward while the join was already drawn, which is
+    // the thing this whole arrangement exists to make impossible.
+    readonly property real mergeSplit: 0.6
 
     implicitHeight: 130
     height: implicitHeight
@@ -97,32 +127,51 @@ Item {
 
                     readonly property bool selected: index === root.currentIndex
 
-                    // How big the fillets either side of this card currently are.
+                    // How far through becoming the tab this card is: 0 is a card
+                    // standing clear of the panel, 1 is a tab that is part of it.
                     //
-                    // Arriving it runs the card's own curve and duration, so the
-                    // junction grows out of nothing with the card instead of snapping
-                    // to full size beside a card that is still 20 px short of the
-                    // panel. Leaving it goes in one frame, with the selection.
-                    //
-                    // That asymmetry is geometry, not taste. The fillet is concave and
-                    // the card's bottom corners are convex the moment the card stops
-                    // being the tab; the two cannot share an edge, and shrinking the
-                    // fillet past a corner that has already rounded leaves a 10 px
-                    // wedge of background between them. Filmed it: it is worse than
-                    // the fillet simply going.
-                    property real filletSize: selected ? root.filletRadius : 0
-                    Behavior on filletSize {
-                        NumberAnimation {
-                            duration: card.selected ? Theme.motion.move : 0
-                            easing.type: Easing.OutCubic
-                        }
+                    // One number, and every moving part of the merge is read off it.
+                    // They used to be three Behaviors on three properties, which is
+                    // how they came to disagree: the height said the card was still
+                    // 20 px above the panel while the fillet said the junction was
+                    // two thirds built, and a junction is not a thing a card can be
+                    // two thirds of while it is in mid-air.
+                    property real merge: card.selected ? 1 : 0
+                    Behavior on merge {
+                        NumberAnimation { duration: Theme.motion.move; easing.type: Easing.OutCubic }
                     }
 
-                    width: selected ? root.cardWidth + root.selectedExtra : root.cardWidth
-                    height: selected ? root.height + root.mergeDepth
-                                     : root.height - root.unselectedInset
-                    Behavior on width { NumberAnimation { duration: Theme.motion.move; easing.type: Easing.OutCubic } }
-                    Behavior on height { NumberAnimation { duration: Theme.motion.move; easing.type: Easing.OutCubic } }
+                    // Two beats, and `mergeSplit` is the point between them.
+                    //
+                    // Beat one: the card reaches down to the panel, its bottom
+                    // corners flattening as they arrive. Beat two: the corner it has
+                    // just made fillets outward. They cannot overlap, and that is the
+                    // whole of the fix — `joined` is above zero only where `landed`
+                    // is exactly 1, so a fillet is never drawn beside a card that has
+                    // not touched down, and never beside a corner that is still
+                    // round. Those were the two ways the old spelling produced a
+                    // rounded wedge sitting on its own in the gap.
+                    //
+                    // Splitting the *range* rather than the duration is also what
+                    // gets the order right in both directions without asking which
+                    // direction it is: run the same expressions backwards and the
+                    // join comes apart before the card lifts, which is the only
+                    // order it can come apart in. The old spelling did ask —
+                    // `duration: selected ? move : 0` — and a Behavior can fire
+                    // before the binding feeding its duration has been re-evaluated,
+                    // so "leaving goes in one frame" held on some runs and not on
+                    // others. It did not hold in the screenshot that started this.
+                    readonly property real landed: Math.min(1, card.merge / root.mergeSplit)
+                    readonly property real joined:
+                        Math.max(0, (card.merge - root.mergeSplit) / (1 - root.mergeSplit))
+
+                    // How big the fillets either side of this card currently are.
+                    // Derived, so it has no clock of its own to drift against.
+                    readonly property real filletSize: root.filletRadius * card.joined
+
+                    width: root.cardWidth + root.selectedExtra * card.merge
+                    height: root.height - root.unselectedInset
+                            + (root.unselectedInset + root.mergeDepth) * card.landed
 
                     Rectangle {
                         id: surface
@@ -137,12 +186,18 @@ Item {
                         // over it, so this is one wash and not two (§10.1).
                         border.width: 1
                         border.color: card.selected ? Theme.surface.base : Theme.line.card
-                        // Square at the bottom when selected: that edge is under the
-                        // chart card and must not round away from it.
+                        // Square at the bottom when selected: that edge is against
+                        // the chart card and must not round away from it.
+                        //
+                        // It flattens over beat one rather than switching, so the
+                        // bottom edge is already straight by the time it lands and
+                        // the fillet has a corner to grow into. Switching it left a
+                        // convex corner and a concave fillet claiming the same
+                        // pixels for the length of the animation.
                         topLeftRadius: Theme.metric.cardRadius
                         topRightRadius: Theme.metric.cardRadius
-                        bottomLeftRadius: card.selected ? 0 : Theme.metric.cardRadius
-                        bottomRightRadius: card.selected ? 0 : Theme.metric.cardRadius
+                        bottomLeftRadius: Theme.metric.cardRadius * (1 - card.landed)
+                        bottomRightRadius: Theme.metric.cardRadius * (1 - card.landed)
                         Behavior on color {
                             ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                         }
@@ -249,27 +304,21 @@ Item {
                         // `selectedExtra` is the room the card widens to fit it. It
                         // used to arrive at full strength on frame one, at the card's
                         // *old* width — hard up against the high/low, which it had not
-                        // been given room beside yet. Now it waits a `stagger` and then
-                        // fades over `tint`: 45 + 150 puts it fully there as the card
-                        // stops widening. Leaving, it goes straight away, so it is gone
-                        // before the room closes.
+                        // been given room beside yet.
+                        //
+                        // So it is read off the same merge the width is, one quarter
+                        // in: it cannot be visible before a quarter of its room
+                        // exists, and backwards that is the same sentence — it is
+                        // gone before the room closes. That was a `stagger` pause
+                        // with `duration: selected ? 45 : 0` before, which is the
+                        // same direction-branched Behavior as the fillet's and had
+                        // the same failure in it.
                         DayIconBadge {
                             kind: card.modelData.nightIcon
                             night: true
                             badgeSize: root.badgeSize
-                            opacity: card.selected ? 1 : 0
+                            opacity: Math.max(0, (card.merge - 0.25) / 0.75)
                             visible: opacity > 0
-                            Behavior on opacity {
-                                SequentialAnimation {
-                                    PauseAnimation {
-                                        duration: card.selected ? Theme.motion.stagger : 0
-                                    }
-                                    NumberAnimation {
-                                        duration: Theme.motion.tint
-                                        easing.type: Easing.OutCubic
-                                    }
-                                }
-                            }
                         }
                     }
 

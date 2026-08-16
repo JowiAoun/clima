@@ -322,6 +322,27 @@ where nothing is legible, and every one of these has a specific failure mode.
   negotiable.
 - **Layout does not animate on resize.** Reflow is not a transition; a window
   drag that makes twelve cards ease to new positions reads as lag.
+- **Nothing is drawn that only makes sense at one end of the transition.** The
+  day strip's tab fillet is the worked example: it is the corner between a
+  selected card and the chart panel, so it has no meaning at all while the card
+  is still travelling toward the panel. Given its own Behavior it reached two
+  thirds of its radius 20 px short of anything to join, and a rounded wedge sat
+  in the page background for the length of the animation. Both ends were
+  correct, which is why it survived 48 golden images and shipped.
+
+  The rule that follows: when several properties describe **one** change, animate
+  **one** number and derive them from it. Three Behaviors are three clocks, and
+  three clocks drift — the card said it was 20 px up, the fillet said the join
+  was built, and both were telling the truth about themselves. If the parts have
+  to arrive in an order, split the *range* of that one number rather than giving
+  each part a delay: it is then the same expression run backwards that takes the
+  join apart before the card lifts, and nothing has to ask which direction the
+  change is going. `DayStrip.qml`'s `merge`, `landed` and `joined` are this.
+- **A Behavior must not branch on the property that triggered it.**
+  `duration: selected ? move : 0` is the shape to watch for. A Behavior can fire
+  before the binding feeding its duration has been re-evaluated, so it holds on
+  some runs and not others — the worst possible failure, since it looks correct
+  every time you check it.
 
 **One exception, and it is a real one: precipitation** (§10.11). Rain is not a
 transition between two states, it is a state, and the only honest way to draw it
@@ -372,6 +393,16 @@ inline, and `--tab me` is how they are photographed there.
 
 If every frame on the sheet looks identical, either nothing is animating or the
 whole thing finished inside one interval.
+
+**`--every` is a floor, not a rate.** Grabbing a frame costs more than a frame
+does: asked for 8 ms between frames, this machine delivered nearer 50, so a
+190 ms transition is sampled four or five times however small the number goes.
+That is enough to see whether something moves and not enough to prove that
+nothing goes wrong in between — the fillet defect above sat in exactly that
+blind spot. Where a transition has an invariant that must hold at *every* point,
+write it down as one: `tests/qml/tst_daystrip.qml` sweeps the driver directly,
+with `Theme.stillness` on so the Behavior does not intercept the assignment, and
+checks a hundred points in eleven milliseconds.
 
 **`--every` has a floor of roughly 90 ms per frame offscreen**, whatever you ask
 for: `grabToImage` plus a PNG encode costs more than the interval you set, so
