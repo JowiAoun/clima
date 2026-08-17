@@ -255,13 +255,44 @@ Item {
     readonly property var curvePoints: buildPoints(feelsBlend, plotHeight, hourWidth, metric)
     readonly property var overlayPoints: buildOverlay(plotHeight, hourWidth, metric)
 
+    // How completely the raised day card above is standing on this card's top
+    // corners, 0 to 1 — see DayStrip, which computes it and is the only caller.
+    // Zero for the mobile shell and the gallery, where nothing merges into this
+    // card and both corners are simply corners.
+    property real tabCoverLeft: 0
+    property real tabCoverRight: 0
+
     // ---- card ------------------------------------------------------------
     // No border: this card's top edge is where the selected day card merges into
     // it, and a 1px outline drawn across that junction is exactly the seam we are
     // trying not to have. Fill contrast against the page defines the card instead.
+    //
+    // And a corner with a tab standing on it is not a corner. The first and last
+    // day cards reach the ends of the strip, where their bottom edge is straight
+    // and this card's is curving away from it — 14 px of page background showing
+    // through a junction whose whole job is to have no seam in it. The fillets
+    // cannot close that one: they fill the reflex corner *beside* a tab, and
+    // beside a tab at the end of the strip there is no panel to fill into.
+    //
+    // A fraction rather than a switch, so the corner flattens on the same beat
+    // as the card's own bottom corners — both are `cardRadius * (1 - landed)`,
+    // and that is not a coincidence, it is the same edge.
+    //
+    // `undefined` where nothing covers the corner, and that is not a stylistic
+    // choice. Assigning a per-corner radius AT ALL — even the same number
+    // `radius` already holds — moves the rectangle onto Qt's individual-corner
+    // scene-graph path, which antialiases the arc one level differently. Bound
+    // unconditionally it changed four pixels in eleven recorded images that have
+    // no day strip over them at all. A binding that evaluates to `undefined`
+    // calls the property's resetter instead, so a card nothing is standing on is
+    // drawn by exactly the code that drew it before.
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.cardRadius
+        topLeftRadius: root.tabCoverLeft > 0
+                       ? Theme.metric.cardRadius * (1 - root.tabCoverLeft) : undefined
+        topRightRadius: root.tabCoverRight > 0
+                        ? Theme.metric.cardRadius * (1 - root.tabCoverRight) : undefined
         color: Theme.surface.base
     }
 

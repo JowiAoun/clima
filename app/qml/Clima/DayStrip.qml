@@ -92,6 +92,55 @@ Item {
     // the thing this whole arrangement exists to make impossible.
     readonly property real mergeSplit: 0.6
 
+    // ---- where a tab reaches the ends of the strip ---------------------------
+    //
+    // How completely a raised card is sitting on each end, 0 to 1. The panel
+    // below reads these and stops rounding the corner underneath.
+    //
+    // A corner with a tab on it is not a corner. The card's bottom edge is
+    // straight and the panel's is curving away from it, so the two meet across a
+    // 14 px notch of page background — the same seam the fillets exist to close,
+    // at the one place a fillet cannot go, because outside the panel there is no
+    // panel to fillet into.
+    //
+    // It is a fraction rather than a flag so that the panel's corner flattens on
+    // the same beat as the card's own bottom corners do, off the same `landed`.
+    // A flag would switch it in one frame under a tab that is still arriving,
+    // which is the defect this file already carries a long note about.
+    property real leftCover: 0
+    property real rightCover: 0
+
+    // Recomputed rather than bound, and this is the one place in this file that
+    // is. The inputs are every delegate's x, width and landed plus the
+    // flickable's contentX and width — a binding cannot subscribe to a
+    // Repeater's children, and the answer is a maximum over them, which is not
+    // a binding at all.
+    //
+    // Every card, not just the selected one: during a change of day the card
+    // leaving is still landed for a beat, and it is the one at the edge. Reading
+    // only `currentIndex` would round the corner out from under it.
+    function updateCover() {
+        var left = 0
+        var right = 0
+
+        for (var i = 0; i < row.children.length; ++i) {
+            var card = row.children[i]
+            if (card.landed === undefined || card.landed <= 0)
+                continue
+
+            var from = card.x - flick.contentX
+            var to   = from + card.width
+
+            if (from <= 0 && to > 0)
+                left = Math.max(left, card.landed)
+            if (from < flick.width && to >= flick.width)
+                right = Math.max(right, card.landed)
+        }
+
+        root.leftCover  = left
+        root.rightCover = right
+    }
+
     implicitHeight: 130
     height: implicitHeight
 
@@ -112,6 +161,12 @@ Item {
         contentHeight: height
         flickableDirection: Flickable.HorizontalFlick
         boundsBehavior: Flickable.StopAtBounds
+
+        // Scrolling moves a tab on or off an end as surely as selecting one
+        // does, so the panel's corners follow the strip's position too.
+        onContentXChanged: root.updateCover()
+        onWidthChanged: root.updateCover()
+        Component.onCompleted: root.updateCover()
 
         // `view` rather than `move`: a pager press swings the strip on by 70 % of
         // its width, so it replaces most of what you were looking at instead of
@@ -363,6 +418,14 @@ Item {
                             anchors.right: parent.right
                         }
                     }
+
+                    // The three inputs the strip's end-cover is a maximum over.
+                    // `x` because the cards before this one widen and push it,
+                    // `width` because this one does, and `landed` because a card
+                    // that is not on the panel is not covering anything.
+                    onXChanged: root.updateCover()
+                    onWidthChanged: root.updateCover()
+                    onLandedChanged: root.updateCover()
 
                     HoverHandler { cursorShape: Qt.PointingHandCursor }
                     TapHandler { onTapped: root.currentIndex = card.index }

@@ -54,6 +54,18 @@ TestCase {
             width: parent.width
             anchors.top: parent.top
         }
+
+        // A second, narrower strip for the end-cover tests, and a separate
+        // instance on purpose: the sweeps above assign `merge` on their
+        // delegates, which replaces the binding that feeds it, so a card of
+        // `strip` is not a card that still reacts to a selection afterwards.
+        // 900 px is also narrow enough that eleven cards overflow it, which is
+        // the only way to scroll a tab onto the right-hand end.
+        DayStrip {
+            id: ends
+            y: 140
+            width: 900
+        }
     }
 
     property bool wasStill: false
@@ -71,7 +83,7 @@ TestCase {
     // path down to them runs Flickable -> contentItem -> Row -> Repeater and
     // its items, and three of those four are Qt's to rearrange. A day card is
     // the thing in there with a `merge` on it.
-    function cards() {
+    function cardsOf(root) {
         var found = []
         function walk(item) {
             for (var i = 0; i < item.children.length; ++i) {
@@ -82,8 +94,98 @@ TestCase {
                     walk(child)
             }
         }
-        walk(strip)
+        walk(root)
         return found
+    }
+
+    function cards() { return cardsOf(strip) }
+
+    // The strip's own Flickable, so a test can scroll it the way a reader does.
+    function scrollerOf(root) {
+        var found = null
+        function walk(item) {
+            for (var i = 0; i < item.children.length && !found; ++i) {
+                var child = item.children[i]
+                if (child.contentX !== undefined && child.contentWidth !== undefined)
+                    found = child
+                else
+                    walk(child)
+            }
+        }
+        walk(root)
+        return found
+    }
+
+    // ---- the ends of the strip -------------------------------------------
+    //
+    // The panel below is a rounded rectangle; a tab that reaches the end of the
+    // strip stands on one of its top corners, and a corner with a tab on it is
+    // not a corner. Left round, it meets the tab's straight bottom edge across
+    // 14 px of page background — which is what the first and last day cards did.
+    //
+    // These are the numbers HourlyOverview turns into `cardRadius * (1 - cover)`,
+    // and they are geometry rather than "is this card the first one": a card
+    // scrolled until it straddles an end covers it just as completely, and one
+    // scrolled off does not cover it at all.
+
+    function test_endsAreUncoveredWhenTheSelectionIsInTheMiddle() {
+        var flick = scrollerOf(ends)
+        flick.contentX = 0
+        ends.currentIndex = Data.todayIndex     // 1, and 172 px wide at 900 px
+        verify(ends.currentIndex > 0)
+        compare(ends.leftCover, 0)
+        compare(ends.rightCover, 0)
+    }
+
+    function test_theFirstCardCoversTheLeftEnd() {
+        var flick = scrollerOf(ends)
+        flick.contentX = 0
+        ends.currentIndex = 0
+
+        compare(ends.leftCover, 1, "the first card does not cover the left end")
+        compare(ends.rightCover, 0, "the first card covers the right end too")
+
+        // Not a flag: it is the covering card's own landing, which is what puts
+        // the panel's corner on the same beat as the card's bottom corners.
+        compare(ends.leftCover, cardsOf(ends)[0].landed)
+    }
+
+    function test_theLastCardCoversTheRightEnd() {
+        var flick = scrollerOf(ends)
+        var last = cardsOf(ends).length - 1
+
+        ends.currentIndex = last
+        flick.contentX = flick.contentWidth - flick.width
+        verify(flick.contentX > 0, "eleven cards fit in 900 px, so nothing can reach the end")
+
+        compare(ends.rightCover, 1, "the last card does not cover the right end")
+        compare(ends.leftCover, 0, "the last card covers the left end too")
+    }
+
+    function test_aTabStraddlingAnEndStillCoversIt() {
+        var flick = scrollerOf(ends)
+        var card = cardsOf(ends)[3]
+
+        ends.currentIndex = 3
+        // Scrolled until the selected card is cut in half by the left edge. It
+        // is still the thing drawn at that edge, so the corner under it is still
+        // not a corner.
+        flick.contentX = card.x + card.width / 2
+
+        compare(ends.leftCover, 1, "a tab cut by the left edge left the corner rounded")
+    }
+
+    function test_scrollingATabOffAnEndUncoversIt() {
+        var flick = scrollerOf(ends)
+        var card = cardsOf(ends)[0]
+
+        ends.currentIndex = 0
+        flick.contentX = 0
+        compare(ends.leftCover, 1)
+
+        // Past its right edge: the card is gone from the strip entirely.
+        flick.contentX = card.x + card.width + 1
+        compare(ends.leftCover, 0, "a tab scrolled out of sight is still covering an end")
     }
 
     function test_thereAreCardsToMeasure() {

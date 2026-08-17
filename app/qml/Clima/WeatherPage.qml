@@ -206,6 +206,13 @@ Item {
                     anchors.top: dayStrip.bottom
                     metricId: tabs.currentId
                     listView: tabs.listView
+
+                    // The two corners the strip above can be standing on. Only
+                    // this shell merges the two cards, so only this shell says
+                    // so — the phone's week strip is a row of pills with a gap
+                    // under it and nothing to join.
+                    tabCoverLeft: dayStrip.leftCover
+                    tabCoverRight: dayStrip.rightCover
                 }
             }
 
