@@ -55,16 +55,20 @@ TestCase {
             anchors.top: parent.top
         }
 
-        // A second, narrower strip for the end-cover tests, and a separate
-        // instance on purpose: the sweeps above assign `merge` on their
+        // A second, narrower strip for the end-cover and scroll tests, and a
+        // separate instance on purpose: the sweeps above assign `merge` on their
         // delegates, which replaces the binding that feeds it, so a card of
         // `strip` is not a card that still reacts to a selection afterwards.
-        // 900 px is also narrow enough that eleven cards overflow it, which is
-        // the only way to scroll a tab onto the right-hand end.
+        //
+        // 950 px is chosen, not round. Eleven cards overflow it, which is the
+        // only way to scroll a tab onto the right-hand end — and card 4 ends at
+        // 916, inside the strip, but at 988 once selected, outside it. That is
+        // the case a reader hits by clicking the rightmost card they can see,
+        // and at most widths no card is in it.
         DayStrip {
             id: ends
             y: 140
-            width: 900
+            width: 950
         }
     }
 
@@ -77,6 +81,13 @@ TestCase {
 
     function cleanupTestCase() {
         Theme.stillness = wasStill
+
+        // `Data` is one object for the whole process — `ForecastData::create`
+        // hands out AppEngine's, deliberately, and says why — so a selection
+        // left here is a selection the next test FILE inherits. QtQuickTest runs
+        // them in alphabetical order, which put this one in front of
+        // tst_hourlychart and had it opening a chart of a Tuesday.
+        Data.selectedDay = Data.todayIndex
     }
 
     // The delegates, found by what they are rather than by where they sit: the
@@ -186,6 +197,92 @@ TestCase {
         // Past its right edge: the card is gone from the strip entirely.
         flick.contentX = card.x + card.width + 1
         compare(ends.leftCover, 0, "a tab scrolled out of sight is still covering an end")
+    }
+
+    // ---- keeping the selection on screen ----------------------------------
+    //
+    // `Theme.stillness` is on for this file, so the scroll animation has a zero
+    // duration — but it is still an animation, and an animation lands on the
+    // next frame rather than on the next statement. Hence the wait.
+
+    function visibleExtent(index) {
+        var flick = scrollerOf(ends)
+        var card = cardsOf(ends)[index]
+        return { from: card.x - flick.contentX, to: card.x + card.width - flick.contentX,
+                 width: flick.width }
+    }
+
+    function test_selectingACardOffTheEndBringsItIn() {
+        var flick = scrollerOf(ends)
+        flick.contentX = 0
+        ends.currentIndex = Data.todayIndex
+
+        var last = cardsOf(ends).length - 1
+        verify(visibleExtent(last).from > flick.width, "the last card was already in view")
+
+        ends.currentIndex = last
+        wait(50)
+
+        var seen = visibleExtent(last)
+        verify(seen.from >= 0 && seen.to <= seen.width + 0.5,
+               "the selected card sits at " + seen.from + ".." + seen.to
+               + " in a strip " + seen.width + " px wide")
+    }
+
+    // The case a reader hits without doing anything unusual: the rightmost card
+    // they can see is one they can select and then not see, because selecting it
+    // widens it by `selectedExtra` into the edge.
+    //
+    // The strip is sized from the card rather than the card looked for in a
+    // strip of a chosen width. There is a band of widths where a given card is
+    // fully visible and its widened self is not — 72 px wide, out of a 186 px
+    // pitch — and picking a round number lands outside it more often than in,
+    // which is a test that passes by measuring nothing.
+    function test_selectingTheRightmostVisibleCardMakesRoomForIt() {
+        var flick = scrollerOf(ends)
+        var was = ends.width
+
+        // The selection starts *after* the card under test, so that selecting
+        // it is a pure widening. Start it before and the card that shrinks is
+        // ahead of this one, pulling it 72 px left by exactly as much as it
+        // grows — the strip absorbs the change and there is nothing to reveal.
+        ends.currentIndex = cardsOf(ends).length - 1
+        flick.contentX = 0
+        wait(50)
+
+        var card = cardsOf(ends)[4]
+        ends.width = card.x + card.width + 20
+        wait(50)
+
+        var before = visibleExtent(4)
+        verify(before.to <= before.width, "the card is not fully visible to begin with")
+        verify(before.to + ends.selectedExtra > before.width,
+               "this card had room to widen anyway, so it proves nothing")
+
+        ends.currentIndex = 4
+        wait(50)
+
+        var after = visibleExtent(4)
+        verify(after.to <= after.width + 0.5,
+               "the card grew " + (after.to - after.width) + " px out of the strip")
+        verify(flick.contentX > 0, "the strip made room without scrolling, which it cannot")
+
+        ends.width = was
+        wait(50)
+    }
+
+    function test_selectingACardWithRoomAlreadyDoesNotScroll() {
+        var flick = scrollerOf(ends)
+        flick.contentX = 0
+        ends.currentIndex = 0
+        wait(50)
+        compare(flick.contentX, 0)
+
+        // Card 1 at 900 px has both its own room and its widening room, so
+        // nothing should move under the reader.
+        ends.currentIndex = 1
+        wait(50)
+        compare(flick.contentX, 0, "the strip scrolled to reveal a card that was already there")
     }
 
     function test_thereAreCardsToMeasure() {

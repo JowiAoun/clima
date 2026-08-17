@@ -83,6 +83,14 @@ TestCase {
         }
     }
 
+    // Today, whatever ran before this. `Data` is one object for the whole
+    // process, so the day another test file selected is the day this one would
+    // measure — and on a day window `nowIndex` is an offset outside the window,
+    // which is a different set of numbers entirely.
+    function initTestCase() {
+        Data.selectedDay = Data.todayIndex
+    }
+
     // The chart's Flickable, found by what it carries rather than by where it
     // sits: the path down to it runs through three items that are layout and
     // could be rearranged without changing anything this test is about.

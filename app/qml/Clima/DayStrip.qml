@@ -63,7 +63,10 @@ Item {
     // RestoreNone: there is nothing to restore to — the value this replaces is
     // the one it just sent.
     property int currentIndex: Data.selectedDay
-    onCurrentIndexChanged: Data.selectedDay = root.currentIndex
+    onCurrentIndexChanged: {
+        Data.selectedDay = root.currentIndex
+        root.showSelected()
+    }
     Binding {
         target: root
         property: "currentIndex"
@@ -141,6 +144,48 @@ Item {
         root.rightCover = right
     }
 
+    // Bring the selected card into the strip, at the size it is about to be.
+    //
+    // The obvious case is a selection this strip did not make — `--day 10`, or
+    // a place change putting the selection back on today while the strip is
+    // scrolled into next week — where the chart below draws a day whose card is
+    // nowhere on screen. MetricTabBar has carried the same rule for its pills
+    // since it was written, for the same reason: a control that cannot show its
+    // own state is a control lying about it.
+    //
+    // The case that is easier to miss is a card the reader clicks themselves.
+    // Selecting widens it by `selectedExtra`, so the rightmost card you can see
+    // is one you can select and then not see — it grows out of the strip under
+    // your own cursor.
+    //
+    // Hence the *final* extent rather than the live one. Every card except the
+    // selected one is `cardWidth` wide, so where this one will end up is exact
+    // arithmetic and does not have to be watched for 190 ms: a chase would also
+    // fight the widening it is reacting to.
+    function showSelected() {
+        var index = root.currentIndex
+        if (index < 0 || index >= Data.days.length)
+            return
+        if (flick.width <= 0 || flick.contentWidth <= flick.width)
+            return
+
+        var from = index * (root.cardWidth + root.spacing)
+        var to   = from + root.cardWidth + root.selectedExtra
+
+        // One gap of air beside it, so a card revealed by this does not arrive
+        // flush against the edge looking like it was cut off. At the ends the
+        // clamp inside scrollTo takes it away again, which is right: the first
+        // and last cards *are* flush, and the panel below squares its corner
+        // under them.
+        var wanted = flick.contentX
+        if (to + root.spacing > wanted + flick.width)
+            wanted = to + root.spacing - flick.width
+        if (from - root.spacing < wanted)
+            wanted = from - root.spacing
+
+        flick.scrollTo(wanted, Theme.motion.move)
+    }
+
     implicitHeight: 130
     height: implicitHeight
 
@@ -168,23 +213,33 @@ Item {
         onWidthChanged: root.updateCover()
         Component.onCompleted: root.updateCover()
 
-        // `view` rather than `move`: a pager press swings the strip on by 70 % of
-        // its width, so it replaces most of what you were looking at instead of
-        // nudging it — one view becoming another.
+        // Not a Behavior on contentX: a Behavior would intercept every flick and
+        // drag too, and animating the content away from the finger is how a
+        // Flickable stops feeling like one. MetricTabBar says the same thing
+        // about its own strip.
         NumberAnimation {
             id: scrollAnim
             target: flick
             property: "contentX"
-            duration: Theme.motion.view
             easing.type: Easing.OutCubic
         }
 
-        function scrollBy(dx) {
-            var to = Math.max(0, Math.min(Math.max(0, contentWidth - width), contentX + dx))
+        function scrollTo(x, duration) {
+            var to = Math.max(0, Math.min(Math.max(0, contentWidth - width), x))
+            if (Math.abs(to - contentX) < 0.5)
+                return
             scrollAnim.stop()
+            scrollAnim.duration = duration
             scrollAnim.from = contentX
             scrollAnim.to = to
             scrollAnim.start()
+        }
+
+        // `view` rather than `move`: a pager press swings the strip on by 70 % of
+        // its width, so it replaces most of what you were looking at instead of
+        // nudging it — one view becoming another.
+        function scrollBy(dx) {
+            scrollTo(contentX + dx, Theme.motion.view)
         }
 
         Row {
