@@ -168,10 +168,14 @@ void TestForecastData::anotherDayIsThatDayFromMidnight()
     QCOMPARE(data.count(), 24);
     QCOMPARE(data.startHour(), 0);
 
-    // Labels start at midnight rather than keeping the phase "Now" needed.
-    QCOMPARE(data.firstLabelIndex(), 0);
+    // The first label is one column in, not on the edge. The header band
+    // centres a two-column entry on each label, and a day window opens at column
+    // 0 with nowhere further left to go — so a label in column 0 is a label
+    // sliced down the middle by the plot's clip. Today's window puts its first
+    // one column inside the edge for the same reason.
+    QCOMPARE(data.firstLabelIndex(), 1);
     QVERIFY(!data.labelIndices().isEmpty());
-    QCOMPARE(data.labelIndices().first().toInt(), 0);
+    QCOMPARE(data.labelIndices().first().toInt(), 1);
 
     // And it is the RIGHT twenty-four hours, checked against the window it
     // came out of rather than against this class's own arithmetic repeated.

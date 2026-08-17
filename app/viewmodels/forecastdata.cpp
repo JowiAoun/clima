@@ -345,11 +345,19 @@ void ForecastData::buildWindow(const QDateTime &now)
     // of the label sequence is chosen by where now landed rather than fixed —
     // which is the one thing that has to move when the window's start does.
     //
-    // On a day window there is no "Now" to land on and the window starts at
-    // midnight, so the phase is midnight's: labels on even hours, which is what
-    // a reader expects of a chart of a date.
+    // On a day window there is no "Now" to land on, so the phase is chosen by
+    // the other rule the chart lives by: the header band centres a two-column
+    // entry on each label, so a label in column 0 is a label half outside the
+    // plot. A day window opens at column 0 — it has nowhere further left to go —
+    // so its first label is column 1, one column inside the edge, which is
+    // exactly where today's window puts its first one.
+    //
+    // The cost is odd hours: 1 AM, 3 AM, and so on. That is not a new look. A
+    // today window takes its phase from where the present landed and is odd half
+    // the time already, and the alternative here is a chart of Friday that opens
+    // with "AM" sliced down the middle.
     m_labelStep       = 2;
-    m_firstLabelIndex = nowInWindow() ? m_nowIndex % m_labelStep : 0;
+    m_firstLabelIndex = nowInWindow() ? m_nowIndex % m_labelStep : 1;
 
     const QDateTime first = localTimeAt(0);
     m_startHour = first.isValid() ? first.time().hour() : 0;
