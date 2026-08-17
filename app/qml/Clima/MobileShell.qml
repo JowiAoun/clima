@@ -53,8 +53,31 @@ Item {
     // a metric chosen on the hourly screen should survive a trip to the map.
     property string metricId: "overview"
     property bool listView: false
-    property int dayIndex: 1
     property bool feelsLike: false
+
+    // The day is the exception, and it is not forwarded to anything.
+    //
+    // The other three are the shell's to remember because nothing else holds
+    // them; the day the chart is of belongs to `Data`, which every strip in
+    // both shells reads and writes — see DayStrip, which says why that number
+    // cannot be kept in two places. This is the entry point `--day` and
+    // `--poke day` write to and nothing else, so it pushes and reads back the
+    // same way a strip does, and the clamped answer wins.
+    //
+    // A remembered copy here was actively wrong twice over. It survived a place
+    // change, so a shell still holding "5" pushed it back over the new
+    // location's today the next time the Hourly tab was built; and its default
+    // of 1 was a guess at `Data.todayIndex`, right only for a provider that
+    // sends a past day. MET Norway sends none, so on the fallback path the
+    // phone opened the Hourly screen on Tomorrow.
+    property int dayIndex: Data.selectedDay
+    onDayIndexChanged: Data.selectedDay = root.dayIndex
+    Binding {
+        target: root
+        property: "dayIndex"
+        value: Data.selectedDay
+        restoreMode: Binding.RestoreNone
+    }
 
     // Ambient motion, forwarded the same way. The precipitation field behind
     // the hourly chart is the only thing under this shell that moves when
@@ -159,8 +182,6 @@ Item {
             page.navigate.connect(root.go)
         if (page.metricRequested !== undefined)
             page.metricRequested.connect(function (id) { root.metricId = id })
-        if (page.dayRequested !== undefined)
-            page.dayRequested.connect(function (i) { root.dayIndex = i })
         if (page.pickerRequested !== undefined)
             page.pickerRequested.connect(function () { picker.open = !picker.open })
     }
@@ -196,14 +217,12 @@ Item {
         if (page.pickerOpen !== undefined) page.pickerOpen = picker.open
         if (page.metricId !== undefined)  page.metricId = root.metricId
         if (page.listView !== undefined)  page.listView = root.listView
-        if (page.dayIndex !== undefined)  page.dayIndex = root.dayIndex
         if (page.feelsLike !== undefined) page.feelsLike = root.feelsLike
         if (page.animated !== undefined)  page.animated = root.animated
     }
 
     onMetricIdChanged: push(pageLoader.item)
     onListViewChanged: push(pageLoader.item)
-    onDayIndexChanged: push(pageLoader.item)
     onFeelsLikeChanged: push(pageLoader.item)
     onAnimatedChanged: push(pageLoader.item)
 

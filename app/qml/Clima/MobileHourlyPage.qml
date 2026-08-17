@@ -37,19 +37,17 @@ MobilePage {
     // desktop page carries, onto the same component.
     property alias animated: chart.animated
 
-    // The shell owns both, so a metric picked here survives a trip to the map
-    // and back. See MobileShell's note on why these travel as requests rather
-    // than as bindings.
+    // The shell owns it, so a metric picked here survives a trip to the map and
+    // back. See MobileShell's note on why it travels as a request rather than as
+    // a binding — and on why the day does not travel at all: the strip below
+    // reads and writes `Data.selectedDay`, which outlives this page by itself.
     signal metricRequested(string id)
-    signal dayRequested(int index)
-
-    onDayIndexChanged: root.dayRequested(dayIndex)
 
     // The selected day, guarded. A live series is as long as the provider sent
-    // and the shell remembers a selection across tab changes, so the index can
-    // outlive the row it pointed at — MET Norway serves nine and a half days
-    // where Open-Meteo serves sixteen, and a fallback that shortened the strip
-    // under a selection of 12 would take the page down with it.
+    // and the selection outlives the page, so the index can outlive the row it
+    // pointed at — MET Norway serves nine and a half days where Open-Meteo
+    // serves sixteen, and a fallback that shortened the strip under a selection
+    // of 12 would take the page down with it.
     readonly property var day:
         (root.dayIndex >= 0 && root.dayIndex < Data.days.length) ? Data.days[root.dayIndex] : null
 
