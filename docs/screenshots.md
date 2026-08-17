@@ -88,6 +88,27 @@ Every profile captures against a **fixture at a frozen clock**, never live data
 — `--grab` implies `--fixture toronto` unless told otherwise. A live capture is
 a picture of the weather that afternoon and cannot be compared to anything.
 
+### What a fixture hides
+
+A fixture is published **before the QML engine loads** — `main.cpp` puts
+`AppEngine::configure()` ahead of it so the first frame has data in it, and a
+fixture's futures are finished inside that call. A live first fetch is not: the
+answer is delivered on the next pass of the event loop, which is after the whole
+scene has been built and every binding in it evaluated.
+
+So **anything whose correctness depends on data arriving after construction is
+invisible to all three profiles**, at every scene, for ever. The hourly chart
+positioned itself in `Component.onCompleted`; on a cold live start that ran
+against an empty window, where the content width is zero and every position
+clamps to zero, and the card opened on last night. Fifty golden images, six
+showcase sheets and the store grabs all showed it opening on now, because all of
+them are fixtures.
+
+The rule that follows: if a component computes something once, at construction,
+from data or from layout, that is a thing this suite cannot check. Assert the
+relationship in `tests/qml/` instead — `tst_hourlychart.qml` is that for this
+one, and it builds a card with no width and then gives it one.
+
 `Theme.stillness` collapses every animation duration to zero for a still
 capture. This exists because `--grab` once had a race with `PagerButton`'s
 150 ms opacity fade: two alternating outputs 35 pixels apart, invisible to the

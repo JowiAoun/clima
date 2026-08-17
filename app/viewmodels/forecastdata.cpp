@@ -207,6 +207,13 @@ void ForecastData::clear()
 void ForecastData::setSnapshot(const Forecast &forecast, const AirQuality &airQuality,
                                const QDateTime &now, const Place &place)
 {
+    // Captured before clear() zeroes it. A refresh that leaves the selection
+    // where it was must not announce a change: the chart re-opens on
+    // `selectedDayChanged` and a signal every ten minutes would haul a reader
+    // who had scrolled back to this morning forward again, on a timer, for no
+    // reason they could see.
+    const int previousDay = m_selectedDay;
+
     m_forecast = forecast;
     m_air      = airQuality;
     m_place    = place;
@@ -251,7 +258,8 @@ void ForecastData::setSnapshot(const Forecast &forecast, const AirQuality &airQu
     buildSunEvents();
     buildBuckets();
 
-    Q_EMIT selectedDayChanged();
+    if (m_selectedDay != previousDay)
+        Q_EMIT selectedDayChanged();
     Q_EMIT changed();
 }
 

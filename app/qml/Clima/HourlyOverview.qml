@@ -412,37 +412,82 @@ Item {
                 // and the hatch are what say so — and a chart that opens
                 // exactly on the now line never shows it at all.
                 //
-                // How many is not a taste: it is one label interval, put one
-                // column inside the left edge. The header band draws an entry
-                // per labelled hour, so landing on a label rather than between
-                // two is the difference between opening with a legible column
-                // and opening with half a glyph and "AM" sliced off by the
-                // clip. `nowIndex` is itself a labelled index — it has to be,
-                // or "Now" would never be drawn — so stepping back by
-                // `labelStep` lands on the label before it.
+                // ---- how many, and why it is odd ------------------------
                 //
-                // Assigned on completion rather than bound: this is where the
-                // chart opens, not where it has to stay, and a binding would
-                // haul the reader back here after every flick.
-                // A function rather than a one-off, because the window is no
-                // longer fixed for the life of the card: the day strip replaces
-                // it, and a chart of Friday left at yesterday's contentX opens
-                // on whichever hours happened to sit at that many pixels.
+                // Enough to say the past is there, and not one column more:
+                // this is the section called *Hourly*, and every observed hour
+                // on screen is a forecast hour that is not.
+                //
+                // It cannot be any number. The header band draws an entry per
+                // labelled hour, two columns wide and centred on its label, so
+                // the left edge has to fall exactly one column before a label
+                // or the card opens with half a glyph and "AM" sliced off by
+                // the clip. Labels run every `labelStep` from "Now", which is
+                // itself always one — so the count of observed hours has to be
+                // ODD, and the choice is between one and three. Two is not
+                // available, whatever a screen's width would prefer.
+                //
+                // Three at a desktop's twenty-five visible columns is an eighth
+                // of the view. Three at a phone's eight is more than a third,
+                // which is the thing that made this worth changing.
+                readonly property int visibleColumns:
+                    Math.max(1, Math.floor(width / root.hourWidth))
+                readonly property int openPastHours: visibleColumns >= 15 ? 3 : 1
+
+                // ---- and when -------------------------------------------
+                //
+                // Assigned rather than bound: this is where the chart opens,
+                // not where it has to stay. What decides "still where it opens"
+                // is whether the reader has moved it — not how many times it
+                // has been positioned — so the guard is `touched` and every
+                // input that scrolls this card sets it.
+                //
+                // That is what `Component.onCompleted` alone could not do, and
+                // it was wrong in two separate ways at once:
+                //
+                // A COLD START HAS NO DATA. main.cpp puts AppEngine's
+                // configure() ahead of the QML engine so a cache hit is
+                // published before the first frame, and a live fetch is not —
+                // appengine.cpp says so where it pumps an already-finished
+                // future. So on a real first run this positioned against an
+                // empty window, where contentWidth is 0 and everything clamps
+                // to 0, and the card opened on last night. Invisible in every
+                // capture ever taken of it, because `--grab` implies a fixture
+                // and a fixture lands before the scene is built.
+                //
+                // AND LAYOUT ARRIVES IN STAGES. A card in a tablet's grid is
+                // handed a narrow width and then its real one, and
+                // `openPastHours` divides by that width — so a position
+                // computed at the first is a position computed for a phone.
+                property bool touched: false
+
+                onMovementStarted: flick.touched = true
+
                 function openOnStart() {
+                    if (width <= 0 || contentWidth <= 0)
+                        return
                     contentX = ChartMath.clamp(
-                        root.xForIndex(Data.nowIndex - Data.labelStep) - root.hourWidth,
+                        root.xForIndex(Data.nowIndex - openPastHours),
                         0, Math.max(0, contentWidth - width))
                 }
 
                 Component.onCompleted: openOnStart()
+                onWidthChanged: if (!flick.touched) openOnStart()
 
                 // On a day that is not today the clamp does the work: `nowIndex`
                 // is negative for a day ahead, so this asks for a negative
                 // contentX and gets 0 — midnight, which is where a chart of a
                 // date should open. For a day behind it asks for more than
                 // there is and gets the end of the day.
+                //
+                // A day change re-opens whether or not the card has been
+                // scrolled, because it is a different chart. A refresh does not
+                // announce one: ForecastData emits `selectedDayChanged` only
+                // when the day actually changed, so a ten-minute poll cannot
+                // walk a reader back to now on a timer.
                 Connections {
                     target: Data
+                    function onChanged() { if (!flick.touched) flick.openOnStart() }
                     function onSelectedDayChanged() { flick.openOnStart() }
                 }
 
@@ -459,6 +504,13 @@ Item {
                 }
 
                 function scrollBy(dx) {
+                    // A pager press is the reader moving the chart, and it has
+                    // to say so here: it animates `contentX` directly, which
+                    // never raises `movementStarted`, so without this a window
+                    // resize would walk the page back to now under someone who
+                    // had just paged forward.
+                    flick.touched = true
+
                     var to = Math.max(0, Math.min(contentWidth - width, contentX + dx))
                     scrollAnim.stop()
                     scrollAnim.from = contentX
