@@ -70,6 +70,14 @@ TestCase {
             y: 140
             width: 950
         }
+
+        // A third strip, built on demand and *without* a width, because the
+        // bug below only exists before one arrives. `strip` and `ends` are laid
+        // out by the time a test runs and cannot reproduce it.
+        Component {
+            id: unsizedStrip
+            DayStrip { }
+        }
     }
 
     property bool wasStill: false
@@ -269,6 +277,63 @@ TestCase {
 
         ends.width = was
         wait(50)
+    }
+
+    // The startup path, which is not the click path.
+    //
+    // `--day 9` and a selection restored with the window both land in
+    // Component.onCompleted, where the Flickable is 0 px wide and there is
+    // nothing to scroll against. That used to be the end of it — the request
+    // returned, nobody asked again, and the strip opened on its first page with
+    // the selected card off the right-hand edge. The flag looked inert and the
+    // selection looked absent, which is two symptoms of one missed replay.
+    function test_aSelectionMadeBeforeTheStripHasAWidthIsNotLost() {
+        var late = createTemporaryObject(unsizedStrip, host, { y: 340 })
+        verify(late !== null, "the strip did not build")
+        compare(late.width, 0, "the strip already has a width, so this measures nothing")
+
+        var last = Data.days.length - 1
+        late.currentIndex = last
+        wait(50)
+
+        // Nothing could have been computed yet, and nothing should have been
+        // guessed: an unsized strip that has already decided where it sits is
+        // one that will not correct itself when it finds out how wide it is.
+        verify(!late.placed, "the strip called itself placed with no geometry")
+
+        late.width = 950
+        wait(50)
+
+        var flick = scrollerOf(late)
+        var card = cardsOf(late)[last]
+        var from = card.x - flick.contentX
+        var to = from + card.width
+
+        verify(from >= 0 && to <= flick.width + 0.5,
+               "the card selected before the strip had a width sits at "
+               + from.toFixed(1) + ".." + to.toFixed(1) + " in a strip "
+               + flick.width + " px wide")
+    }
+
+    // And once it has placed itself, a later width change is not a second
+    // chance to move the view. A reader who scrolls away from the selection and
+    // then resizes the window has not asked to be taken back to it.
+    function test_aResizeDoesNotDragTheViewBackToTheSelection() {
+        var flick = scrollerOf(ends)
+        ends.currentIndex = Data.todayIndex
+        wait(50)
+
+        flick.contentX = flick.contentWidth - flick.width   // scrolled to the far end
+        var was = flick.contentX
+        verify(was > 0, "the strip does not overflow, so there is nothing to scroll away from")
+
+        ends.width = 900
+        wait(50)
+        ends.width = 950
+        wait(50)
+
+        compare(flick.contentX, was,
+                "a resize moved the strip back to the selection at " + flick.contentX)
     }
 
     function test_selectingACardWithRoomAlreadyDoesNotScroll() {

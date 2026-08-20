@@ -162,11 +162,33 @@ Item {
     // selected one is `cardWidth` wide, so where this one will end up is exact
     // arithmetic and does not have to be watched for 190 ms: a chase would also
     // fight the widening it is reacting to.
+    // A selection that arrives before the strip has a width is remembered
+    // rather than dropped.
+    //
+    // Both of the ways a day is chosen without a click land in
+    // `Component.onCompleted` — `--day 9` from ScreenshotController, and the
+    // model's own selection when the window is rebuilt — and at that point the
+    // Flickable is 0 px wide and this function can compute nothing. It used to
+    // return, and nothing ever asked again: `--day 9` set the selection, the
+    // strip stayed on the first page, and the card the whole flag is about was
+    // off the right-hand edge with no sign that it existed.
+    //
+    // So the first call that has geometry to work with sets `placed`, and until
+    // then the Flickable replays the request as its width and content arrive.
+    // After that this is only ever the click path, and a later resize does not
+    // yank the view back to a selection the reader has deliberately scrolled
+    // away from.
+    property bool placed: false
+
     function showSelected() {
         var index = root.currentIndex
         if (index < 0 || index >= Data.days.length)
             return
-        if (flick.width <= 0 || flick.contentWidth <= flick.width)
+        if (flick.width <= 0)
+            return
+
+        root.placed = true
+        if (flick.contentWidth <= flick.width)
             return
 
         var from = index * (root.cardWidth + root.spacing)
@@ -210,7 +232,12 @@ Item {
         // Scrolling moves a tab on or off an end as surely as selecting one
         // does, so the panel's corners follow the strip's position too.
         onContentXChanged: root.updateCover()
-        onWidthChanged: root.updateCover()
+        onWidthChanged: {
+            root.updateCover()
+            if (!root.placed)
+                root.showSelected()
+        }
+        onContentWidthChanged: if (!root.placed) root.showSelected()
         Component.onCompleted: root.updateCover()
 
         // Not a Behavior on contentX: a Behavior would intercept every flick and
