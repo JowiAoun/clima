@@ -298,20 +298,20 @@ void TestOpenMeteoAdapter::theWmoCodeBecomesAPrecipitationTypeAndAGlyph()
     QCOMPARE(conditionKindName(conditionFor(0, false)), QStringLiteral("clear-night"));
     QCOMPARE(conditionKindName(conditionFor(61, false)), QStringLiteral("rain-night"));
 
-    // And the seven names WeatherGlyph.qml can draw today are closed under
-    // drawableToday(), so nothing renders as an empty item.
-    const QStringList drawable = { QStringLiteral("clear-day"),   QStringLiteral("clear-night"),
-                                   QStringLiteral("partly-day"),  QStringLiteral("partly-night"),
-                                   QStringLiteral("cloudy"),      QStringLiteral("rain"),
-                                   QStringLiteral("rain-night") };
-    for (int code = 0; code <= 99; ++code) {
-        for (bool day : { true, false }) {
-            const QString name = conditionKindName(drawableToday(conditionFor(code, day)));
-            QVERIFY2(drawable.contains(name), qPrintable(QStringLiteral("%1 -> %2")
-                                                             .arg(code)
-                                                             .arg(name)));
-        }
+    // And a recorded thunderstorm reaches QML still calling itself one. This
+    // fixture is the reason the file is named `miami-thunder`: it holds WMO 95
+    // and 96 in both its hourly and daily columns, and for as long as the glyph
+    // set stopped at seven kinds every one of them was relabelled `rain` on the
+    // way out of the engine.
+    QCOMPARE(conditionKindName(conditionFor(95, true)), QStringLiteral("thunder"));
+    QCOMPARE(conditionKindName(conditionFor(96, true)), QStringLiteral("hail"));
+
+    bool sawThunder = false;
+    for (const DailyPoint &day : miami.daily) {
+        if (day.weatherCode && *day.weatherCode == 95)
+            sawThunder = true;
     }
+    QVERIFY2(sawThunder, "miami-thunder.json no longer has a WMO 95 day in it");
 }
 
 void TestOpenMeteoAdapter::everyCodeInTheRecordedResponsesIsRecognised()

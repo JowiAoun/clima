@@ -75,7 +75,7 @@ QString Wx::glyphKind(const QVariant &code, const QVariant &isDay) const
     const std::optional<int> wmo = codeOf(code);
     if (!wmo)
         return {};
-    return conditionKindName(drawableToday(conditionFor(*wmo, dayOf(isDay))));
+    return conditionKindName(conditionFor(*wmo, dayOf(isDay)));
 }
 
 QString Wx::conditionText(const QVariant &code, const QVariant &isDay) const

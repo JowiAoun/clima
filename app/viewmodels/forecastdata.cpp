@@ -460,11 +460,9 @@ void ForecastData::buildDays(const QDateTime &now)
         // DayStrip has drawn since the prototype.
         const int code = day.weatherCode ? *day.weatherCode : -1;
         entry[QStringLiteral("icon")] =
-            code < 0 ? QString()
-                     : conditionKindName(drawableToday(clima::conditionFor(code, true)));
+            code < 0 ? QString() : conditionKindName(clima::conditionFor(code, true));
         entry[QStringLiteral("nightIcon")] =
-            code < 0 ? QString()
-                     : conditionKindName(drawableToday(clima::conditionFor(code, false)));
+            code < 0 ? QString() : conditionKindName(clima::conditionFor(code, false));
 
         if (day.date == today)
             todayRow = int(all.size());
@@ -649,10 +647,7 @@ QString ForecastData::conditionFor(int index) const
     if (!code)
         return {};
 
-    // drawableToday() degrades to the seven kinds WeatherGlyph.qml can
-    // actually draw. Without it, snow and fog render as an empty item, which
-    // reads as "no data" rather than as "weather we have no picture for".
-    return conditionKindName(drawableToday(clima::conditionFor(*code, !isNight(index))));
+    return conditionKindName(clima::conditionFor(*code, !isNight(index)));
 }
 
 QString ForecastData::conditionText(int index) const
@@ -698,7 +693,7 @@ QVariantMap ForecastData::ahead(int offset) const
     out[QStringLiteral("night")]      = night;
     out[QStringLiteral("condition")] =
         hour.weatherCode
-            ? conditionKindName(drawableToday(clima::conditionFor(*hour.weatherCode, !night)))
+            ? conditionKindName(clima::conditionFor(*hour.weatherCode, !night))
             : QString();
     out[QStringLiteral("label")] =
         offset == 0 ? tr("Now") : hourOf(hour.time.toTimeZone(m_zone));

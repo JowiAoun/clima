@@ -249,7 +249,28 @@ var glyph = {
     cloudTopOnLight:    "#c3d2e6",
     cloudBottomOnLight: "#6b83a8",
 
+    // The falling marks. Every one of them deepens rather than brightens, which
+    // is the same move the precipitation drops make thirty lines down and for
+    // the same reason: on a light ground "more" is darker.
+    //
+    // The OnLight pair is the day plate, and in this scheme the plate is a warm
+    // gold disc rather than a white one — so these go a further step down than
+    // their card values, exactly as the clouds above do.
     rain:               "#3d7fb8",
+    rainOnLight:        "#2a5580",
+
+    // Snow is the awkward one in a light theme: white ice on a white page is
+    // nothing at all, so it is a shade here where it is a tint in dark. It
+    // stays visibly cooler and paler than `rain` so a sleet glyph still reads
+    // as two different things falling.
+    snow:               "#4a6b98",
+    snowOnLight:        "#3f5c85",
+
+    // Lightning cannot be brighter than the page, so the bolt deepens into
+    // amber — the same inversion §10.11 records for the storm band's flash.
+    bolt:               "#a85c0a",
+    boltOnLight:        "#7a4406",
+
     droplet:            "#3f86c4"
 };
 

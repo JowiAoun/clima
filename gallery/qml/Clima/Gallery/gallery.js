@@ -468,7 +468,9 @@ var groups = [
         name: "Glyphs",
         items: [
             { name: "Weather glyph", file: "WeatherGlyph.qml",
-              blurb: "Condition icons, drawn rather than shipped as raster.",
+              blurb: "Condition icons, drawn rather than shipped as raster. All thirteen "
+                     + "of ConditionKind — the six at the end were folded into their "
+                     + "neighbours until the pictures existed.",
               variants: [
                   { label: "clear-day",    props: { kind: "clear-day",    glyphSize: 44 } },
                   { label: "clear-night",  props: { kind: "clear-night",  glyphSize: 44 } },
@@ -476,13 +478,25 @@ var groups = [
                   { label: "partly-night", props: { kind: "partly-night", glyphSize: 44 } },
                   { label: "cloudy",       props: { kind: "cloudy",       glyphSize: 44 } },
                   { label: "rain",         props: { kind: "rain",         glyphSize: 44 } },
-                  { label: "rain-night",   props: { kind: "rain-night",   glyphSize: 44 } }
+                  { label: "rain-night",   props: { kind: "rain-night",   glyphSize: 44 } },
+                  { label: "fog",          props: { kind: "fog",          glyphSize: 44 } },
+                  { label: "drizzle",      props: { kind: "drizzle",      glyphSize: 44 } },
+                  { label: "sleet",        props: { kind: "sleet",        glyphSize: 44 } },
+                  { label: "snow",         props: { kind: "snow",         glyphSize: 44 } },
+                  { label: "thunder",      props: { kind: "thunder",      glyphSize: 44 } },
+                  { label: "hail",         props: { kind: "hail",         glyphSize: 44 } }
               ] },
             { name: "Day icon badge", file: "DayIconBadge.qml",
-              blurb: "The glyph on its pale day plate — clouds get a darker variant there or they vanish.",
+              blurb: "The glyph on its pale day plate — every mark gets a darker variant "
+                     + "there or it vanishes.",
               variants: [
-                  { label: "day",   props: { kind: "partly-day",   night: false, badgeSize: 56 } },
-                  { label: "night", props: { kind: "partly-night", night: true,  badgeSize: 56 } }
+                  { label: "day",     props: { kind: "partly-day",   night: false, badgeSize: 56 } },
+                  { label: "night",   props: { kind: "partly-night", night: true,  badgeSize: 56 } },
+                  // The three marks the plate is hardest on, staged so the
+                  // OnLight tokens are reviewable rather than only measurable.
+                  { label: "rain",    props: { kind: "rain",         night: false, badgeSize: 56 } },
+                  { label: "snow",    props: { kind: "snow",         night: false, badgeSize: 56 } },
+                  { label: "thunder", props: { kind: "thunder",      night: false, badgeSize: 56 } }
               ] },
             { name: "Moon glyph", file: "MoonGlyph.qml",
               blurb: "Illumination is a real parameter, not three fixed pictures.",

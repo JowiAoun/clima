@@ -1311,7 +1311,7 @@ void ConditionsData::buildSummary()
     m_current = QVariantMap{
         { QStringLiteral("conditionKind"),
           now.weatherCode
-              ? conditionKindName(drawableToday(clima::conditionFor(*now.weatherCode, daylight)))
+              ? conditionKindName(clima::conditionFor(*now.weatherCode, daylight))
               : QString() },
         { QStringLiteral("unitLabel"), units->bareSymbol(Units::Quantity::Temperature) },
         { QStringLiteral("summary"), sentences.join(QLatin1Char(' ')) },

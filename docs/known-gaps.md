@@ -111,6 +111,34 @@ do not are dated.
 
 ---
 
+## A glyph on the night plate is measured against a ground it never touches
+
+`WeatherGlyph` takes one boolean, `onLightBackground`, and it means "the thing
+under me is pale". Exactly one caller sets it: `DayIconBadge`, for the near-white
+day plate on the selected day card. Every mark therefore has two values — a card
+one and an `…OnLight` one — and `Theme.qml`'s contrast table scores the second
+against `badge.dayTop`, which is what it is actually drawn on.
+
+**The same badge has a night plate, and nothing measures against it.** It is a
+mid-blue disc, `badge.nightTop` `#6d9ae8` down to `#3f63bd`, and a glyph on it is
+drawn in the card colours because a boolean cannot say "pale, mid, or dark".
+`glyph.rain` `#7fb6e8` on that plate is **1.31:1** — the night half of a rainy
+day card has raindrops that are, measurably, not visible. The cloud carries the
+glyph on its own, which is why nobody noticed.
+
+The audit cannot see it either: `glyph.rain`'s declared ground is `surface.base`,
+where it measures 5.26:1 and passes. A token is only ever scored against one
+ground, and this one has three.
+
+Closing it means the flag stops being a boolean. `onLightBackground: bool`
+becomes something like `plate: color` — the actual ground, defaulting to
+transparent for "the card" — and each mark picks its ink from the measured
+contrast rather than from a name. That is a change to thirteen call sites and to
+how the contrast contract is written, which is why it is not folded into the
+commit that found it.
+
+---
+
 ## The desktop page is not touch-audited
 
 `tests/qml/tst_hittargets.qml` measures every tappable area on every screen the

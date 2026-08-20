@@ -427,12 +427,22 @@ void TestWidgets::glyphKindDegradesRatherThanVanishing()
 {
     // WeatherGlyph draws nothing for a kind it does not know, and an empty
     // glyph reads as "no data" rather than as "snow". Every code the WMO tables
-    // map has to come back as one of the seven the component can draw.
+    // map has to come back as one of the thirteen the component can draw.
+    //
+    // It used to be seven, and a `drawableToday()` in the engine folded the
+    // other six into them on the way here — so a widget showing a thunderstorm
+    // drew an ordinary shower, and this test passed. Thirteen is the whole of
+    // ConditionKind now, so the assertion is only that the widget host and the
+    // app read the same table; tests/qml/tst_weatherglyph.qml is the one that
+    // checks the pictures exist.
     static const QSet<QString> drawable{
         QStringLiteral("clear-day"),  QStringLiteral("clear-night"),
         QStringLiteral("partly-day"), QStringLiteral("partly-night"),
-        QStringLiteral("cloudy"),     QStringLiteral("rain"),
-        QStringLiteral("rain-night"),
+        QStringLiteral("cloudy"),     QStringLiteral("fog"),
+        QStringLiteral("drizzle"),    QStringLiteral("rain"),
+        QStringLiteral("rain-night"), QStringLiteral("sleet"),
+        QStringLiteral("snow"),       QStringLiteral("thunder"),
+        QStringLiteral("hail"),
     };
 
     for (int code = 0; code <= 99; ++code) {
@@ -452,6 +462,13 @@ void TestWidgets::glyphKindDegradesRatherThanVanishing()
     // more obviously broken picture than a sun over a clear night.
     QCOMPARE(m_wx->glyphKind(QVariant(0), QVariant()), QStringLiteral("clear-day"));
     QCOMPARE(m_wx->glyphKind(QVariant(0), QVariant(0)), QStringLiteral("clear-night"));
+
+    // And a storm reaches a tile as a storm. The widget host runs its own copy
+    // of this lookup, so a fold reintroduced on one side of the D-Bus wire and
+    // not the other is a real way for the tray to disagree with the window.
+    QCOMPARE(m_wx->glyphKind(QVariant(95), QVariant(1)), QStringLiteral("thunder"));
+    QCOMPARE(m_wx->glyphKind(QVariant(96), QVariant(1)), QStringLiteral("hail"));
+    QCOMPARE(m_wx->glyphKind(QVariant(75), QVariant(0)), QStringLiteral("snow"));
 }
 
 void TestWidgets::clockIsTwelveHourWithASeparateSuffix()

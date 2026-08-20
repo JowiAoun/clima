@@ -279,8 +279,39 @@ var glyph = {
     cloudTopOnLight:    "#fbfdff",
     cloudBottomOnLight: "#7b95bb",
 
-    rain:      "#7fb6e8",
-    droplet:   "#93c6f2"
+    // ---- the marks that fall ------------------------------------------------
+    //
+    // Five paints, not eight, because the six precipitating kinds are built out
+    // of each other rather than each getting a colour of its own. Rain and
+    // drizzle are the same drop at two lengths; sleet is a `rain` drop and a
+    // `snow` pellet alternating, which is the whole of what sleet is; hail is
+    // `snow` pellets under a `bolt`, because WMO 96 and 99 — the only two codes
+    // that reach ConditionKind::Hail — are thunderstorms with hail in them and
+    // not a separate sky.
+    //
+    // Each mark needs a second value for the one pale ground in the app: the
+    // day plate under DayIconBadge. This is the same argument cloudTopOnLight
+    // makes one block up, and the numbers say it louder here — a `rain` drop on
+    // dark's #fdfefe plate measures 2.13:1, under the 3:1 an essential mark
+    // owes its background, which is why the selected day card in the ten-day
+    // strip has been drawing raindrops nobody could see.
+    rain:         "#7fb6e8",
+    rainOnLight:  "#3f7fc4",
+
+    // Ice reads as near-white against the sky and cannot on the plate. Snow is
+    // the one mark whose two values are a shade apart rather than a tint apart,
+    // for the reason the light palette gives about snow drops further down.
+    snow:         "#e8f2ff",
+    snowOnLight:  "#6a83aa",
+
+    // The only warm thing that falls. Deliberately not `sunWarm` reused: a bolt
+    // is drawn *over* the white cloud it comes out of, so it is the one mark
+    // whose ground is another glyph, and it wants more saturation than a sun
+    // that is only ever seen against the page.
+    bolt:         "#ffd15c",
+    boltOnLight:  "#b26400",
+
+    droplet:      "#93c6f2"
 };
 
 // ---- badge -------------------------------------------------------------------

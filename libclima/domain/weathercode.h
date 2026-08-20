@@ -23,7 +23,9 @@
 //
 //   2. WHICH GLYPH goes above the hour?  ->  ConditionKind
 //      A different question, because the answer depends on the sun: code 0 is
-//      a sun at noon and a moon at midnight. Hence the `isDay` argument.
+//      a sun at noon and a moon at midnight. Hence the `isDay` argument. Only
+//      the four kinds you can see sky through take it — see
+//      `dayAndNightDifferOnlyWhereTheSkyIsVisible` in the tests.
 //
 //   3. WHAT DO I CALL IT?  ->  conditionText()
 //      One short localised phrase. Translated here rather than in QML because
@@ -84,27 +86,26 @@ enum class ConditionKind {
 // ---- the strings QML matches on ---------------------------------------------
 //
 // These are contracts with app/qml/Clima/, not debug output. `WeatherGlyph.qml`
-// switches on the string, and `mockdata.js` already uses the seven spellings it
-// understands, so the names below are chosen to be those seven verbatim:
+// switches on the string, and every one of the thirteen below has a picture
+// there:
 //
-//     clear-day  clear-night  partly-day  partly-night  cloudy  rain  rain-night
+//     clear-day  clear-night  partly-day  partly-night  cloudy
+//     fog  drizzle  rain  rain-night  sleet  snow  thunder  hail
 //
-// The six that are new — fog, drizzle, sleet, snow, thunder, hail — are the
-// ones real data has and a hand-written mock never did. WeatherGlyph.qml draws
-// *nothing* for a kind it does not recognise (every one of its `hasSun`,
-// `hasCloud`, `hasRain` booleans is false and the item renders empty), so until
-// its vocabulary grows, a caller should pass anything it gets through
-// `drawableToday()` below. That function is here rather than in QML so the day
-// the glyph set is completed, deleting it is one commit in one place.
+// Six of them did not, for as long as the glyph set was the seven the prototype
+// had drawn against mock data. A `drawableToday()` used to stand here and fold
+// the other six into those seven — fog and snow to cloudy, drizzle, sleet,
+// thunder and hail to rain — so that nothing rendered as an empty item. It was
+// always meant to be deleted the day the glyphs existed, and they do now.
+//
+// What it cost while it stood is worth recording, because it is the failure
+// mode of every "degrade for now" helper: the app drew an ordinary shower over
+// a WMO 95, and a shower is a *plausible* picture of a thunderstorm, so nothing
+// looked broken. The default Toronto fixture has carried a WMO 95 in its ten-day
+// strip the whole time, and fifty recorded golden images went past it without
+// one of them being the thing that noticed.
 QString precipitationTypeName(PrecipitationType type);
 QString conditionKindName(ConditionKind kind);
-
-// The nearest kind WeatherGlyph.qml can currently draw. Degrades by one step
-// and never by more: snow and fog become cloudy (both are a sky you cannot see
-// through), sleet, thunder, hail and drizzle become rain (all of them are
-// falling water). An empty glyph would be a worse lie than a slightly wrong
-// one, because an empty glyph reads as "no data".
-ConditionKind drawableToday(ConditionKind kind);
 
 // ---- the tables --------------------------------------------------------------
 //

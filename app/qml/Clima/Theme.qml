@@ -260,6 +260,14 @@ QtObject {
         "glyph.cloudBottom":        { pair: "glyph.cloudTop" },
         "glyph.cloudTopOnLight":    { pair: "glyph.cloudBottomOnLight", on: "badge.dayTop" },
         "glyph.cloudBottomOnLight": { pair: "glyph.cloudTopOnLight",    on: "badge.dayTop" },
+
+        // Three marks that fall, in their day-plate form. Not paired with their
+        // card values: a drop and its OnLight twin are never drawn together, so
+        // "the better of the two" would let the plate variant pass on the
+        // strength of a colour that is not on the plate.
+        "glyph.rainOnLight":        { on: "badge.dayTop" },
+        "glyph.snowOnLight":        { on: "badge.dayTop" },
+        "glyph.boltOnLight":        { on: "badge.dayTop" },
         // The shaded limb is what makes a crescent read as a crescent, so it is
         // measured against the lit face rather than against the card behind it.
         "glyph.moonShade":          { on: "glyph.moon" },
@@ -531,6 +539,11 @@ QtObject {
         readonly property string cloudTopOnLight:    src.cloudTopOnLight
         readonly property string cloudBottomOnLight: src.cloudBottomOnLight
         readonly property string rain:               src.rain
+        readonly property string rainOnLight:        src.rainOnLight
+        readonly property string snow:               src.snow
+        readonly property string snowOnLight:        src.snowOnLight
+        readonly property string bolt:               src.bolt
+        readonly property string boltOnLight:        src.boltOnLight
         readonly property string droplet:            src.droplet
     }
     readonly property GlyphTokens glyph: GlyphTokens { src: theme.isLight ? LightTokens.glyph : Tokens.glyph }

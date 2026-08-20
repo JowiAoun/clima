@@ -40,7 +40,7 @@ private Q_SLOTS:
     void theSixTypesAreSpelledThePrecipJsWay();
     void dayAndNightDifferOnlyWhereTheSkyIsVisible();
     void anUnknownCodeIsCloudyAndSilent();
-    void drawableTodayIsClosedOverWhatTheGlyphCanDraw();
+    void everyGlyphNameIsOneWeatherGlyphDraws();
 };
 
 void TestWeatherCode::everyEmittedCodeHasAPhrase()
@@ -129,45 +129,47 @@ void TestWeatherCode::anUnknownCodeIsCloudyAndSilent()
     }
 }
 
-void TestWeatherCode::drawableTodayIsClosedOverWhatTheGlyphCanDraw()
+void TestWeatherCode::everyGlyphNameIsOneWeatherGlyphDraws()
 {
-    // WeatherGlyph.qml switches on seven strings and renders an empty item for
-    // anything else — every one of its hasSun/hasCloud/hasRain booleans is
-    // false. An empty glyph reads as "no data", which is a worse lie than a
-    // slightly wrong picture, so everything degrades into the seven.
-    const QSet<QString> drawable = {
-        QStringLiteral("clear-day"),   QStringLiteral("clear-night"),
-        QStringLiteral("partly-day"),  QStringLiteral("partly-night"),
-        QStringLiteral("cloudy"),      QStringLiteral("rain"),
-        QStringLiteral("rain-night"),
+    // The other half of a contract QML holds up on its own side. This list is
+    // the thirteen strings WeatherGlyph.qml switches on; the QML test
+    // tests/qml/tst_weatherglyph.qml asserts each of them paints pixels and
+    // that no two of them paint the same ones. Together they close the loop: a
+    // kind here with no picture there fails in QML, and a picture there for a
+    // name nothing produces fails here.
+    //
+    // This used to be a much weaker assertion, because six of the thirteen had
+    // no picture and `drawableToday()` folded them away before QML ever saw
+    // them. Thunder became rain, and the ten-day strip drew a shower over a day
+    // the forecast said would have lightning in it.
+    const QSet<QString> drawn = {
+        QStringLiteral("clear-day"), QStringLiteral("clear-night"),
+        QStringLiteral("partly-day"), QStringLiteral("partly-night"),
+        QStringLiteral("cloudy"),    QStringLiteral("fog"),
+        QStringLiteral("drizzle"),   QStringLiteral("rain"),
+        QStringLiteral("rain-night"), QStringLiteral("sleet"),
+        QStringLiteral("snow"),      QStringLiteral("thunder"),
+        QStringLiteral("hail"),
     };
 
     for (int code = 0; code <= 99; ++code) {
         for (bool day : { true, false }) {
-            const ConditionKind kind = drawableToday(conditionFor(code, day));
-            QVERIFY2(drawable.contains(conditionKindName(kind)),
-                     qPrintable(QStringLiteral("WMO %1 (%2) degrades to %3")
+            const QString name = conditionKindName(conditionFor(code, day));
+            QVERIFY2(drawn.contains(name),
+                     qPrintable(QStringLiteral("WMO %1 (%2) is \"%3\", which "
+                                               "WeatherGlyph.qml renders as an empty item")
                                     .arg(code)
                                     .arg(day ? QStringLiteral("day") : QStringLiteral("night"))
-                                    .arg(conditionKindName(kind))));
+                                    .arg(name)));
         }
     }
 
-    // Idempotent: a kind that is already drawable is left alone, so a caller
-    // that pipes everything through it does not slowly turn the whole forecast
-    // into rain.
-    for (int code = 0; code <= 99; ++code) {
-        const ConditionKind once = drawableToday(conditionFor(code, true));
-        QCOMPARE(drawableToday(once), once);
-    }
-
-    // And it degrades by one step rather than to a single value: snow becomes
-    // cloudy, not rain, because a sky you cannot see through is nearer to
-    // snow than falling water is.
-    QCOMPARE(drawableToday(ConditionKind::Snow), ConditionKind::Cloudy);
-    QCOMPARE(drawableToday(ConditionKind::Fog), ConditionKind::Cloudy);
-    QCOMPARE(drawableToday(ConditionKind::Thunder), ConditionKind::Rain);
-    QCOMPARE(drawableToday(ConditionKind::Hail), ConditionKind::Rain);
+    // And a thunderstorm keeps its lightning all the way to the string. The
+    // three severe codes are spelled out because they are the ones that were
+    // silently downgraded, and a regression here is invisible in a screenshot.
+    QCOMPARE(conditionKindName(conditionFor(95, true)), QStringLiteral("thunder"));
+    QCOMPARE(conditionKindName(conditionFor(96, true)), QStringLiteral("hail"));
+    QCOMPARE(conditionKindName(conditionFor(99, false)), QStringLiteral("hail"));
 }
 
 QTEST_MAIN(TestWeatherCode)

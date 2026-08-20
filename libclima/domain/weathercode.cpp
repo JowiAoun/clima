@@ -54,31 +54,6 @@ QString conditionKindName(ConditionKind kind)
     return QStringLiteral("cloudy");
 }
 
-ConditionKind drawableToday(ConditionKind kind)
-{
-    switch (kind) {
-    case ConditionKind::Fog:
-    case ConditionKind::Snow:
-        return ConditionKind::Cloudy;
-
-    case ConditionKind::Drizzle:
-    case ConditionKind::Sleet:
-    case ConditionKind::Thunder:
-    case ConditionKind::Hail:
-        return ConditionKind::Rain;
-
-    case ConditionKind::ClearDay:
-    case ConditionKind::ClearNight:
-    case ConditionKind::PartlyDay:
-    case ConditionKind::PartlyNight:
-    case ConditionKind::Cloudy:
-    case ConditionKind::Rain:
-    case ConditionKind::RainNight:
-        return kind;
-    }
-    return kind;
-}
-
 PrecipitationType precipitationTypeFor(int wmoCode)
 {
     // WMO 4677, as Open-Meteo emits it. Grouped by what falls out of the sky
