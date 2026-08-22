@@ -97,12 +97,36 @@ QString pollutantLabel(const QString &id)
     // into a QML Text with no styled-text parsing and into a widget tile that
     // has room for four glyphs. Not translated: a chemical formula is the same
     // in every language this app will ever ship in.
+    //
+    // Both spellings of each species, and that is not redundancy.
+    //
+    // The left column is what `clima::pollutantId()` emits — "ozone",
+    // "nitrogen_dioxide" — because that is what the two callers actually pass:
+    // app/viewmodels/conditionsdata.cpp calls pollutantLabel(pollutantId(...))
+    // and widgets/wx.cpp calls it on the id that arrived over the wire. This
+    // table opened with only the chemical short forms, which pollutantId() has
+    // never produced, so four of the six species fell through to the fallback
+    // and the air-quality card printed OZONE, NITROGEN_DIOXIDE,
+    // SULPHUR_DIOXIDE and CARBON_MONOXIDE — the same defect this function was
+    // written to fix, surviving in the four rows nobody spot-checked.
+    //
+    // The short forms stay because a snapshot written by another version of
+    // Clima may carry them, and a widget reading one should get a chemist's
+    // name rather than a shout. Two rows are cheaper than a wire migration.
     static const QHash<QString, QString> names{
         { QStringLiteral("pm2_5"), QStringLiteral("PM2.5") },
         { QStringLiteral("pm10"), QStringLiteral("PM10") },
+
+        { QStringLiteral("ozone"), QStringLiteral("O₃") },
         { QStringLiteral("o3"), QStringLiteral("O₃") },
+
+        { QStringLiteral("nitrogen_dioxide"), QStringLiteral("NO₂") },
         { QStringLiteral("no2"), QStringLiteral("NO₂") },
+
+        { QStringLiteral("sulphur_dioxide"), QStringLiteral("SO₂") },
         { QStringLiteral("so2"), QStringLiteral("SO₂") },
+
+        { QStringLiteral("carbon_monoxide"), QStringLiteral("CO") },
         { QStringLiteral("co"), QStringLiteral("CO") },
     };
     return names.value(id.toLower(), id.toUpper());

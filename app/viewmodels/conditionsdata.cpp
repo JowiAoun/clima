@@ -944,9 +944,14 @@ void ConditionsData::buildAirQuality()
           worst ? pollutantUnit(*worst) : QString() },
         { QStringLiteral("trend"), trendOf(index, later, 3) },
         { QStringLiteral("status"), qIsNaN(index) ? tr("No reading") : aqiBand(index) },
+        // Through pollutantLabel(), like the `pollutant` field six lines up.
+        // `pollutantId(...).toUpper()` was a second, private copy of the same
+        // table and it produced NITROGEN_DIOXIDE where the field beside it
+        // said NO₂ — two spellings of one species, in one card, one of them a
+        // machine identifier.
         { QStringLiteral("body"),
           worst ? tr("%1 is the main pollutant right now.")
-                      .arg(pollutantId(*worst).toUpper())
+                      .arg(scales::pollutantLabel(pollutantId(*worst)))
                 : tr("No pollutant breakdown available here.") },
     };
 }
