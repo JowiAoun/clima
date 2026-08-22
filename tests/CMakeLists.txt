@@ -191,7 +191,7 @@ set_tests_properties(tst_forecastdata PROPERTIES
 # not of the sixth; pinning the locale is what makes a regression to
 # QLocale::ShortFormat fail here rather than pass on a developer's machine and
 # fail in CI.
-foreach(clima_app_test tst_timeformat tst_units)
+foreach(clima_app_test tst_timeformat tst_units tst_settings)
     add_executable(${clima_app_test} ${clima_app_test}.cpp)
 
     target_link_libraries(${clima_app_test} PRIVATE climaqml clima_testsupport Qt6::Test)
