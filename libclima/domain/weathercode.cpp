@@ -70,6 +70,8 @@ PrecipitationType precipitationTypeFor(int wmoCode)
         return PrecipitationType::Rain;
 
     case 66: case 67:                   // freezing rain — ice, and it reads as sleet
+    case 68: case 69:                   // rain or drizzle and snow, mixed
+    case 83: case 84:                   // showers of rain and snow, mixed
         return PrecipitationType::Sleet;
 
     case 71: case 73: case 75:          // snowfall, slight → heavy
@@ -116,6 +118,8 @@ ConditionKind conditionFor(int wmoCode, bool isDay)
         return isDay ? ConditionKind::Rain : ConditionKind::RainNight;
 
     case 66: case 67:
+    case 68: case 69:
+    case 83: case 84:
         return ConditionKind::Sleet;
 
     case 71: case 73: case 75:
@@ -165,6 +169,16 @@ QString conditionText(int wmoCode, bool isDay)
     case 66: return tr("Light freezing rain");
     case 67: return tr("Freezing rain");
 
+    // Mixed rain and snow. Open-Meteo never emits these four — MET Norway does,
+    // and libclima/providers/metno/symbolcode.h maps its eight sleet symbols
+    // onto them. They were missing here for as long as the tables were checked
+    // against Open-Meteo's vocabulary alone, and the day MET Norway served
+    // instead every sleet hour drew a plain overcast cloud with no wording and
+    // no wash — the fallback path failing quietly, which is the failure mode
+    // the fallback exists to avoid.
+    case 68: return tr("Light sleet");
+    case 69: return tr("Sleet");
+
     case 71: return tr("Light snow");
     case 73: return tr("Snow");
     case 75: return tr("Heavy snow");
@@ -173,6 +187,9 @@ QString conditionText(int wmoCode, bool isDay)
     case 80: return tr("Light rain showers");
     case 81: return tr("Rain showers");
     case 82: return tr("Heavy rain showers");
+
+    case 83: return tr("Light sleet showers");
+    case 84: return tr("Sleet showers");
 
     case 85: return tr("Light snow showers");
     case 86: return tr("Snow showers");

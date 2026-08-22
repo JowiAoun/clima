@@ -12,6 +12,8 @@
 
 #include "libclima/domain/weathercode.h"
 
+#include "libclima/providers/metno/symbolcode.h"
+
 #include <QSet>
 #include <QTest>
 
@@ -41,6 +43,7 @@ private Q_SLOTS:
     void dayAndNightDifferOnlyWhereTheSkyIsVisible();
     void anUnknownCodeIsCloudyAndSilent();
     void everyGlyphNameIsOneWeatherGlyphDraws();
+    void everyCodeTheFallbackCanEmitIsAlsoKnownHere();
 };
 
 void TestWeatherCode::everyEmittedCodeHasAPhrase()
@@ -170,6 +173,31 @@ void TestWeatherCode::everyGlyphNameIsOneWeatherGlyphDraws()
     QCOMPARE(conditionKindName(conditionFor(95, true)), QStringLiteral("thunder"));
     QCOMPARE(conditionKindName(conditionFor(96, true)), QStringLiteral("hail"));
     QCOMPARE(conditionKindName(conditionFor(99, false)), QStringLiteral("hail"));
+}
+
+void TestWeatherCode::everyCodeTheFallbackCanEmitIsAlsoKnownHere()
+{
+    // The list above is Open-Meteo's, and for as long as it was the only list
+    // these tables were checked against, four codes went unnoticed: MET Norway
+    // maps its eight sleet symbols onto WMO 68, 69, 83 and 84 — real mixed
+    // precipitation codes that Open-Meteo does not use — and every one of them
+    // fell through to the default. On the fallback provider a sleet hour drew a
+    // plain overcast cloud, carried no precipitation type so the chart's wash
+    // skipped it, and had no wording so the row read "—".
+    //
+    // It is exactly the failure the fallback exists to avoid, and it could only
+    // be found by asking the fallback what it can say. So this asks.
+    for (int code : metNoWeatherCodes()) {
+        QVERIFY2(!conditionText(code, true).isEmpty(),
+                 qPrintable(QStringLiteral("MET Norway can emit WMO %1 and nothing names it")
+                                .arg(code)));
+
+        if (code == 3)
+            continue;   // overcast really is the cloudy glyph
+        QVERIFY2(conditionFor(code, true) != ConditionKind::Cloudy,
+                 qPrintable(QStringLiteral("MET Norway can emit WMO %1 and it has no glyph")
+                                .arg(code)));
+    }
 }
 
 QTEST_MAIN(TestWeatherCode)
