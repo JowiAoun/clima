@@ -35,14 +35,39 @@ const auto precipitationUnit = QStringLiteral("units/precipitation");
 const auto acknowledgedAlerts = QStringLiteral("alerts/acknowledged");
 } // namespace key
 
-// The directory QSettings would use for a given identity. Constructing a
-// QSettings does not create anything on disk — it only computes a path — so
-// this is safe to call for an identity that has never existed.
-QString configDirectoryFor(const SettingsIdentity &identity)
+// The file QSettings would use for a given identity. Constructing a QSettings
+// does not create anything on disk — it only computes a path — so this is safe
+// to call for an identity that has never existed.
+QString configFileFor(const SettingsIdentity &identity)
 {
     const QSettings probe(QSettings::IniFormat, QSettings::UserScope,
                           identity.organization, identity.application);
-    return QFileInfo(probe.fileName()).absolutePath();
+    return probe.fileName();
+}
+
+// And the directory that file sits in.
+//
+// ---- these are two questions, not one ---------------------------------------
+//
+// The path QSettings computes is <config>/<organisation>/<application>.ini, so
+// the DIRECTORY is named after the organisation alone and every application
+// under one organisation shares it. That is the whole reason the migration
+// below asks about the file as well:
+//
+//   * a directory that exists proves nothing about whether THIS application has
+//     ever been run, only that something under the same organisation has
+//
+//   * two identities differing only in application name resolve to the same
+//     directory, so a migration keyed on the directory sees no move to make and
+//     skips a rename that renamed the file out from under the reader
+//
+// Both were live: this function used to be the only one, and an application
+// rename — the likelier half of a rebrand, since the organisation is a domain —
+// silently reverted every preference to its default with the old file sitting
+// unread in the same directory.
+QString configDirectoryFor(const SettingsIdentity &identity)
+{
+    return QFileInfo(configFileFor(identity)).absolutePath();
 }
 
 // Recursive copy that refuses to overwrite. The migration only ever runs into
@@ -124,23 +149,53 @@ bool Settings::migrateConfigDirectory(const QList<SettingsIdentity> &superseded)
     if (superseded.isEmpty())
         return false;
 
-    const QString current = configDirectoryFor(
-        { QCoreApplication::organizationName(), QCoreApplication::applicationName() });
+    const SettingsIdentity self{ QCoreApplication::organizationName(),
+                                 QCoreApplication::applicationName() };
+    const QString currentFile = configFileFor(self);
+    const QString currentDir  = configDirectoryFor(self);
 
-    // A directory that exists is a user who has already run this version. Never
-    // copy over it: their current preferences win over an older copy, always.
-    if (QDir(current).exists())
+    // A settings FILE that exists is a user who has already run this version.
+    // Never copy over it: their current preferences win over an older copy,
+    // always, and getting this branch backwards would revert a user's settings
+    // on every single launch.
+    //
+    // The file and not the directory, because the directory is named after the
+    // organisation and is shared — see configDirectoryFor(). Asking about the
+    // directory meant a rename within one organisation was refused as "already
+    // migrated" on the strength of a file belonging to something else.
+    if (QFile::exists(currentFile))
         return false;
 
     for (const SettingsIdentity &identity : superseded) {
-        const QString legacy = configDirectoryFor(identity);
-        if (legacy == current || !QDir(legacy).exists())
+        const QString legacyFile = configFileFor(identity);
+        const QString legacyDir  = configDirectoryFor(identity);
+
+        if (legacyFile == currentFile || !QFile::exists(legacyFile))
             continue;
-        if (copyTree(legacy, current)) {
-            qInfo("settings: carried preferences forward from %s", qPrintable(legacy));
+
+        // Everything beside the settings file comes forward too — a per-widget
+        // layout, a cached place list — but only when it is somewhere else. An
+        // application rename leaves the directory where it was, and copying a
+        // directory onto itself is not a thing to attempt.
+        bool ok = true;
+        if (legacyDir != currentDir)
+            ok = copyTree(legacyDir, currentDir);
+        else
+            ok = QDir().mkpath(currentDir);
+
+        // And then the settings file itself, under the name THIS build will look
+        // for. This is the half a directory copy cannot do: after a rename the
+        // bytes are already in the right directory under the wrong filename, and
+        // QSettings reads a filename.
+        if (ok && !QFile::exists(currentFile))
+            ok = QFile::copy(legacyFile, currentFile);
+
+        if (ok) {
+            qInfo("settings: carried preferences forward from %s", qPrintable(legacyFile));
             return true;
         }
-        qWarning("settings: could not copy %s to %s", qPrintable(legacy), qPrintable(current));
+        qWarning("settings: could not copy %s to %s", qPrintable(legacyFile),
+                 qPrintable(currentFile));
         return false;
     }
     return false;
