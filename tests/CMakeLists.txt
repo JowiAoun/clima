@@ -207,6 +207,31 @@ foreach(clima_app_test tst_timeformat tst_units)
     )
 endforeach()
 
+# ---- the alert view model ---------------------------------------------------
+#
+# Here rather than through clima_add_test() for tst_conditionsdata's reason: the
+# subject is a view model in app/ and clima_forbid_gui() would refuse the link.
+#
+# TZ is load-bearing rather than hygienic, as it is for tst_widgets. Half of
+# what this file asserts is which words a banner puts under a headline, and one
+# of them is a weekday — "Until Fri 11:00 PM" for a hazard ending on a different
+# day from the one the reader is in. Which day that is depends on the zone the
+# instant is read in, so a runner in Tokyo would disagree with a runner in
+# Toronto about a string neither of them chose.
+add_executable(tst_alertsdata tst_alertsdata.cpp)
+
+target_link_libraries(tst_alertsdata PRIVATE climaqml clima_testsupport Qt6::Test)
+target_compile_definitions(tst_alertsdata PRIVATE
+    CLIMA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+add_test(NAME tst_alertsdata COMMAND tst_alertsdata)
+
+set_tests_properties(tst_alertsdata PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
+    TIMEOUT 60
+)
+
 # ---- the golden images' canary ----------------------------------------------
 #
 # Links climaqml for AppFont and therefore links Qt6::Gui, which is why it is
