@@ -44,6 +44,16 @@ private Q_SLOTS:
     void anUnknownCodeIsCloudyAndSilent();
     void everyGlyphNameIsOneWeatherGlyphDraws();
     void everyCodeTheFallbackCanEmitIsAlsoKnownHere();
+
+    void nothingToFoldHasNoPicture();
+    void oneCodeFoldsToItself();
+    void aWholeDayIsNamedByItsLargestCode();
+    void theWholeDayRuleRanksAShowerAboveHeavySnowAndThatIsKnown();
+    void aLabelledSpanShowsTheHourItNames();
+    void aLabelledSpanNeverDropsAnEventItCovers();
+    void aLabelledSpanTakesTheWorstOfSeveralEvents();
+    void fogCountsAsSomethingHappening();
+    void aFoldedCodeIsStillACodeTheTablesKnow();
 };
 
 void TestWeatherCode::everyEmittedCodeHasAPhrase()
@@ -197,6 +207,115 @@ void TestWeatherCode::everyCodeTheFallbackCanEmitIsAlsoKnownHere()
         QVERIFY2(conditionFor(code, true) != ConditionKind::Cloudy,
                  qPrintable(QStringLiteral("MET Norway can emit WMO %1 and it has no glyph")
                                 .arg(code)));
+    }
+}
+
+// ---- folding several hours into one picture ---------------------------------
+//
+// Two rules, and the whole point is that they differ. Anything that asserts one
+// of them has to say which, or the next person collapses them back into one.
+
+void TestWeatherCode::nothingToFoldHasNoPicture()
+{
+    // Absent, not clear sky. An hour with no code and an hour of code 0 are
+    // different facts and a fold that returned 0 for the first would draw a sun
+    // over a gap in the data.
+    QVERIFY(!mostSignificantCode({}).has_value());
+    QVERIFY(!codeForLabelledSpan({}).has_value());
+}
+
+void TestWeatherCode::oneCodeFoldsToItself()
+{
+    for (int code : emittedCodes()) {
+        QCOMPARE(mostSignificantCode({ code }), std::optional<int>(code));
+        QCOMPARE(codeForLabelledSpan({ code }), std::optional<int>(code));
+    }
+}
+
+void TestWeatherCode::aWholeDayIsNamedByItsLargestCode()
+{
+    // What Open-Meteo's own daily `weather_code` is — measured, see the header.
+    // The order of the argument must not matter: a day is a set, not a sequence.
+    QCOMPARE(mostSignificantCode({ 0, 3, 61, 95, 2 }), std::optional<int>(95));
+    QCOMPARE(mostSignificantCode({ 95, 2, 61, 3, 0 }), std::optional<int>(95));
+    QCOMPARE(mostSignificantCode({ 0, 1, 2, 3 }),      std::optional<int>(3));
+}
+
+void TestWeatherCode::theWholeDayRuleRanksAShowerAboveHeavySnowAndThatIsKnown()
+{
+    // Recorded rather than fixed. Table 4677 is only roughly ordered by how
+    // much a reader needs to know, and 82 sitting above 75 is where that shows.
+    // Asserting it means the day somebody hand-ranks the table they have to
+    // come here and delete this on purpose.
+    QCOMPARE(mostSignificantCode({ 75, 82 }), std::optional<int>(82));
+}
+
+void TestWeatherCode::aLabelledSpanShowsTheHourItNames()
+{
+    // The label says 2 PM, so 2 PM's sky is what is drawn — NOT the cloudier of
+    // the two hours it covers. Folding cloud cover by maximum is what turned
+    // the reference capture of a clear afternoon into a cloudy one.
+    QCOMPARE(codeForLabelledSpan({ 0, 3 }), std::optional<int>(0));
+    QCOMPARE(codeForLabelledSpan({ 1, 2 }), std::optional<int>(1));
+
+    // And it is not "the clearer" either — the first hour wins whichever way
+    // round the pair is.
+    QCOMPARE(codeForLabelledSpan({ 3, 0 }), std::optional<int>(3));
+}
+
+void TestWeatherCode::aLabelledSpanNeverDropsAnEventItCovers()
+{
+    // The bug this function exists for. A thunderstorm in the second hour of a
+    // column is a thunderstorm the column has to show, wherever in the span it
+    // falls — the band draws one glyph per two hours and for as long as it
+    // asked only about the hour it landed on, 7 of 79 forecast days whose own
+    // day card said thunderstorm drew no bolt anywhere in it.
+    QCOMPARE(codeForLabelledSpan({ 0, 95 }), std::optional<int>(95));
+    QCOMPARE(codeForLabelledSpan({ 95, 0 }), std::optional<int>(95));
+    QCOMPARE(codeForLabelledSpan({ 3, 61 }), std::optional<int>(61));
+}
+
+void TestWeatherCode::aLabelledSpanTakesTheWorstOfSeveralEvents()
+{
+    // Once there is more than one event in the span the day rule applies among
+    // them — the labelled hour has no special claim on a column that has two
+    // different things falling in it.
+    QCOMPARE(codeForLabelledSpan({ 51, 95 }), std::optional<int>(95));
+    QCOMPARE(codeForLabelledSpan({ 95, 51 }), std::optional<int>(95));
+    QCOMPARE(codeForLabelledSpan({ 61, 80 }), std::optional<int>(80));
+}
+
+void TestWeatherCode::fogCountsAsSomethingHappening()
+{
+    // 45 is the first code on the far side of the line, and it is on that side
+    // deliberately: fog is the one sky state a reader changes plans over.
+    QCOMPARE(codeForLabelledSpan({ 0, 45 }),  std::optional<int>(45));
+    QCOMPARE(codeForLabelledSpan({ 0, 48 }),  std::optional<int>(48));
+
+    // 3 is the last code on the near side. A span of overcast and clear is
+    // still just sky, and answers with the hour it names.
+    QCOMPARE(codeForLabelledSpan({ 0, 3 }),   std::optional<int>(0));
+}
+
+void TestWeatherCode::aFoldedCodeIsStillACodeTheTablesKnow()
+{
+    // A fold that could return something outside the tables would draw the
+    // default overcast cloud and look like a forecast. Both rules return one of
+    // their inputs, and this walks every pair to say so.
+    for (int a : emittedCodes()) {
+        for (int b : emittedCodes()) {
+            const QList<int> pair = { a, b };
+            for (const std::optional<int> folded :
+                 { mostSignificantCode(pair), codeForLabelledSpan(pair) }) {
+                QVERIFY(folded.has_value());
+                QVERIFY2(pair.contains(*folded),
+                         qPrintable(QStringLiteral("fold of %1,%2 invented %3")
+                                        .arg(a).arg(b).arg(*folded)));
+                QVERIFY2(!conditionText(*folded, true).isEmpty(),
+                         qPrintable(QStringLiteral("fold of %1,%2 has no wording")
+                                        .arg(a).arg(b)));
+            }
+        }
     }
 }
 

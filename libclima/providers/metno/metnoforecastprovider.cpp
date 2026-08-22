@@ -6,6 +6,7 @@
 #include "libclima/cache/payloadcache.h"
 #include "libclima/core/clock.h"
 #include "libclima/net/httpclient.h"
+#include "libclima/domain/weathercode.h"
 #include "libclima/providers/metno/symbolcode.h"
 
 #include <QJsonArray>
@@ -124,21 +125,13 @@ Period readPeriod(const QJsonObject &data, const QString &name, int hours)
     return period;
 }
 
-// The daily rollup's weather code: the most significant of the day.
-//
-// Approximated by the numerically largest WMO code, which is what Open-Meteo's
-// own daily `weather_code` amounts to, and which works because table 4677 is
-// ordered roughly by severity — clear below cloud below fog below rain below
-// snow below showers below thunder. "Roughly" is doing real work in that
-// sentence: 45 (fog) outranks 3 (overcast) correctly and 61 (light rain)
-// outranks 45 arguably. It is an approximation and it is labelled as one, and
-// the alternative — a bespoke severity ranking of a hundred codes — is a table
-// nobody can check against anything.
+// The daily rollup's weather code. The rule lives in
+// libclima/domain/weathercode.h beside the one the chart's header band folds a
+// two-hour column with, so that the two answers to "several codes, one picture"
+// are written down together and the difference between them is arguable.
 WeatherCode mostSignificant(const QList<int> &codes)
 {
-    if (codes.isEmpty())
-        return std::nullopt;
-    return *std::max_element(codes.cbegin(), codes.cend());
+    return mostSignificantCode(codes);
 }
 
 // max/min over the Readings that are present. Absent when none are, which is

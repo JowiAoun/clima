@@ -271,6 +271,29 @@ public:
     // above — so a refresh rebuilds the delegates and the calls happen again.
     [[nodiscard]] Q_INVOKABLE bool    isNight(int index) const;
     [[nodiscard]] Q_INVOKABLE QString conditionFor(int index) const;
+
+    // The glyph for a *labelled* column of the chart's header band, which is
+    // not the same thing as the glyph for an hour.
+    //
+    // The band cannot draw twenty-four 27 px icons across a plot, so it labels
+    // every second column — and for as long as it asked `conditionFor` for the
+    // single hour it happened to land on, the other twelve hours of the day had
+    // no icon anywhere. Which twelve is arbitrary: a day window's labels start
+    // at column 1 and a today window's phase comes from where the present fell,
+    // so the same forecast showed or hid the same storm depending on the time
+    // of day it was opened.
+    //
+    // Measured against Open-Meteo on 2026-08-22, 7 of 79 forecast days whose
+    // daily code was a thunderstorm drew no thunderstorm glyph anywhere in this
+    // band — including Houston's Thursday, where the ten-day strip's card said
+    // thunderstorm and every hour beside it said rain.
+    //
+    // So a labelled column answers for the whole span it stands for, under
+    // libclima/domain/weathercode.h's `codeForLabelledSpan` — its own hour's
+    // sky, and anything that is happening anywhere in the span. The day/night
+    // form comes from the hour that won, not from the column's first hour: a
+    // 7 p.m. storm in July is a day glyph.
+    [[nodiscard]] Q_INVOKABLE QString conditionForLabel(int index) const;
     [[nodiscard]] Q_INVOKABLE QString conditionText(int index) const;
     [[nodiscard]] Q_INVOKABLE QString hourLabel(int index) const;
     [[nodiscard]] Q_INVOKABLE QString clockLabel(int index) const;

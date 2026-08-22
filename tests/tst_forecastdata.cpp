@@ -41,11 +41,71 @@
 #include "libclima/providers/fixture/fixtureprovider.h"
 
 #include <QDate>
+#include <QSet>
 #include <QSignalSpy>
 #include <QStandardPaths>
+#include <QStringList>
 #include <QTest>
+#include <QTime>
+#include <QTimeZone>
 
 using namespace clima;
+
+namespace {
+
+// The six glyph names that are only a statement about how much sky is showing.
+// Everything else in `ConditionKind` is a thing happening — fog, something
+// falling, lightning — and the difference is the line
+// libclima/domain/weathercode.h folds a labelled column across.
+bool isSky(const QString &kind)
+{
+    static const QSet<QString> sky = {
+        QStringLiteral("clear-day"),  QStringLiteral("clear-night"),
+        QStringLiteral("partly-day"), QStringLiteral("partly-night"),
+        QStringLiteral("cloudy"),
+    };
+    return sky.contains(kind);
+}
+
+// Four days of overcast with one thunderstorm in it, stamped at `stormHour` on
+// the third day. UTC throughout, so a local hour and an index are the same
+// number and the test can say which column it means.
+//
+// Four days and not three because libclima/domain/hourconvention.h's shift
+// costs the series its last hour: day 2 keeps its 11 p.m. only if day 3 exists
+// to supply it.
+Forecast oneStormyHour(int stormHour)
+{
+    const QDate first(2026, 8, 20);
+
+    Forecast forecast;
+    forecast.timeZone   = QTimeZone::UTC;
+    forecast.providerId = QStringLiteral("test");
+
+    for (int day = 0; day < 4; ++day) {
+        const QDate date = first.addDays(day);
+
+        DailyPoint daily;
+        daily.date           = date;
+        daily.temperatureMax = 20.0;
+        daily.temperatureMin = 10.0;
+        daily.weatherCode    = day == 2 ? 95 : 3;
+        forecast.daily.append(daily);
+
+        for (int hour = 0; hour < 24; ++hour) {
+            HourlyPoint point;
+            point.time        = QDateTime(date, QTime(hour, 0), QTimeZone::UTC);
+            point.temperature = 15.0;
+            point.isDay       = hour >= 6 && hour < 20;
+            point.weatherCode = (day == 2 && hour == stormHour) ? 95 : 3;
+            forecast.hourly.append(point);
+        }
+    }
+
+    return forecast;
+}
+
+} // namespace
 
 class TestForecastData : public QObject
 {
@@ -68,6 +128,11 @@ private Q_SLOTS:
 
     void anOutOfRangeSelectionIsClampedRatherThanObeyed();
     void reselectingTheSameDayRebuildsNothing();
+
+    void everyLabelledColumnHasAGlyph();
+    void aColumnNeverDrawsPlainSkyOverAnHourWithWeatherInIt();
+    void aThunderstormOnAColumnTheBandSkipsIsStillDrawn();
+    void theLastLabelDoesNotReadPastItsOwnDay();
 
 private:
     // One fixture, loaded once: Toronto is the one every capture uses and its
@@ -372,6 +437,129 @@ void TestForecastData::reselectingTheSameDayRebuildsNothing()
     QCOMPARE(data.temperature().size(), count);
     QCOMPARE(data.sunEvents().size(), marks);
     QCOMPARE(data.precipBuckets().size(), buckets);
+}
+
+// ---- the header band's glyphs -----------------------------------------------
+//
+// The band draws one icon per *label*, and it labels every second column,
+// because two dozen 27 px glyphs will not fit across a plot. For as long as
+// each label asked `conditionFor` about the single hour it happened to land on,
+// half of every day had no icon anywhere — and which half was arbitrary, since
+// a day window's labels start at column 1 while today's take their phase from
+// where the present fell. The visible result was a ten-day card that said
+// thunderstorm above an hourly row that said rain all evening.
+
+void TestForecastData::everyLabelledColumnHasAGlyph()
+{
+    ForecastData data(nullptr);
+    load(data);
+
+    for (int day = 0; day < data.days().size(); ++day) {
+        data.setSelectedDay(day);
+        const QVariantList labels = data.labelIndices();
+        QVERIFY(!labels.isEmpty());
+
+        for (const QVariant &label : labels) {
+            QVERIFY2(!data.conditionForLabel(label.toInt()).isEmpty(),
+                     qPrintable(QStringLiteral("day %1 column %2 has no glyph")
+                                    .arg(day).arg(label.toInt())));
+        }
+    }
+}
+
+void TestForecastData::aColumnNeverDrawsPlainSkyOverAnHourWithWeatherInIt()
+{
+    // The property behind the fix, stated as a property. A column may show a
+    // different glyph from one of its hours — two events in one span, and the
+    // louder wins — but it may never show *sky* over a span with weather in it,
+    // because that is the case where a reader is told nothing is happening.
+    ForecastData data(nullptr);
+    load(data);
+
+    for (int day = 0; day < data.days().size(); ++day) {
+        data.setSelectedDay(day);
+        const QVariantList labels = data.labelIndices();
+
+        for (int n = 0; n < labels.size(); ++n) {
+            const int from = labels.at(n).toInt();
+            const int to   = n + 1 < labels.size() ? labels.at(n + 1).toInt() : data.count();
+
+            const QString drawn = data.conditionForLabel(from);
+            if (!isSky(drawn))
+                continue;
+
+            for (int hour = from; hour < to; ++hour) {
+                const QString covered = data.conditionFor(hour);
+                QVERIFY2(covered.isEmpty() || isSky(covered),
+                         qPrintable(QStringLiteral("day %1 column %2 draws %3 over hour %4, "
+                                                   "which is %5")
+                                        .arg(day).arg(from).arg(drawn).arg(hour).arg(covered)));
+            }
+        }
+    }
+}
+
+void TestForecastData::aThunderstormOnAColumnTheBandSkipsIsStillDrawn()
+{
+    // The reported bug, built rather than borrowed. The Toronto fixture cannot
+    // catch this: its thunderstorm runs 3 p.m. to 6 p.m., four consecutive
+    // hours, so it lands on a labelled column whatever the phase and the band
+    // drew it even when the band was wrong.
+    //
+    // One hour is what it takes. A day window labels columns 1, 3, 5 … so the
+    // even columns are the ones nothing asks about, and column 12 is the hour
+    // starting at noon — WMO 95 stamped 1 p.m. under Open-Meteo's convention.
+    // Before this fix that storm had no glyph anywhere in its own day.
+    const Forecast forecast = oneStormyHour(13);
+
+    ForecastData data(nullptr);
+    data.setSnapshot(forecast, AirQuality(), forecast.hourly.at(36).time, Place());
+
+    // Yesterday, today, tomorrow, and the spare day the shift needs. Tomorrow
+    // is the day the storm is on.
+    QCOMPARE(data.days().size(), 4);
+    data.setSelectedDay(2);
+    QCOMPARE(data.days().at(2).toMap().value(QStringLiteral("label")).toString(),
+             QStringLiteral("Tomorrow"));
+    QCOMPARE(data.count(), 24);
+
+    QVERIFY2(!data.labelIndices().contains(12),
+             "column 12 is labelled after all — this test no longer tests anything");
+    QCOMPARE(data.conditionFor(12), QStringLiteral("thunder"));
+
+    bool drawn = false;
+    for (const QVariant &label : data.labelIndices()) {
+        if (data.conditionForLabel(label.toInt()) == QLatin1String("thunder"))
+            drawn = true;
+    }
+    QVERIFY2(drawn, "the day's only thunderstorm has no glyph in the day's own band");
+}
+
+void TestForecastData::theLastLabelDoesNotReadPastItsOwnDay()
+{
+    // The final column spans fewer hours than the step, and reading the hour
+    // after it would put tomorrow morning on tonight's last glyph.
+    ForecastData data(nullptr);
+    load(data);
+
+    for (int day = 0; day < data.days().size(); ++day) {
+        data.setSelectedDay(day);
+        const QVariantList labels = data.labelIndices();
+        QVERIFY(!labels.isEmpty());
+
+        const int last = labels.constLast().toInt();
+        QVERIFY(last < data.count());
+
+        QSet<QString> mine;
+        for (int i = last; i < data.count(); ++i)
+            mine.insert(data.conditionFor(i));
+
+        const QString drawn = data.conditionForLabel(last);
+        QVERIFY2(drawn.isEmpty() || mine.contains(drawn),
+                 qPrintable(QStringLiteral("day %1 last column draws %2; its own hours are %3")
+                                .arg(day)
+                                .arg(drawn, QStringList(mine.values()).join(QLatin1Char(',')))));
+    }
 }
 
 QTEST_MAIN(TestForecastData)

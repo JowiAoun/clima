@@ -5,6 +5,8 @@
 
 #include <QCoreApplication>
 
+#include <algorithm>
+
 namespace clima {
 namespace {
 
@@ -88,6 +90,37 @@ PrecipitationType precipitationTypeFor(int wmoCode)
     default:
         return PrecipitationType::None;
     }
+}
+
+std::optional<int> mostSignificantCode(const QList<int> &codes)
+{
+    if (codes.isEmpty())
+        return std::nullopt;
+    return *std::max_element(codes.cbegin(), codes.cend());
+}
+
+std::optional<int> codeForLabelledSpan(const QList<int> &codes)
+{
+    if (codes.isEmpty())
+        return std::nullopt;
+
+    // Where the cloud-cover ramp ends and the events begin. 45 is fog, and fog
+    // belongs on this side of the line: it is the one sky state a reader
+    // changes plans over. Nothing between 4 and 44 is emitted by any provider
+    // Clima reads — see symbolcode.h for MET Norway's four extras, which are
+    // sleet codes and land above it.
+    constexpr int kFirstEvent = 45;
+
+    QList<int> events;
+    for (const int code : codes) {
+        if (code >= kFirstEvent)
+            events.append(code);
+    }
+
+    if (!events.isEmpty())
+        return mostSignificantCode(events);
+
+    return codes.constFirst();
 }
 
 ConditionKind conditionFor(int wmoCode, bool isDay)

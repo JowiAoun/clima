@@ -44,7 +44,10 @@
 
 #pragma once
 
+#include <QList>
 #include <QString>
+
+#include <optional>
 
 namespace clima {
 
@@ -116,6 +119,53 @@ QString conditionKindName(ConditionKind kind);
 
 PrecipitationType precipitationTypeFor(int wmoCode);
 ConditionKind     conditionFor(int wmoCode, bool isDay);
+
+// ---- folding several hours into one picture ---------------------------------
+//
+// One glyph often has to stand for more than one hour. The ten-day strip's day
+// card is a whole day in one icon; the chart's header band draws a glyph every
+// second column, because two dozen 27 px icons will not fit across a plot. Both
+// are the same question — given several codes, which one is the picture? — and
+// they take different answers, for a reason worth writing down.
+//
+// The table is two scales end to end. 0-3 is a cloud-cover ramp: clear, mainly
+// clear, partly cloudy, overcast. From 45 up it stops describing how much sky
+// is showing and starts naming a thing that is happening — fog, drizzle, rain,
+// snow, showers, lightning. Only the second half is ordered by how much a
+// reader needs to know.
+
+// A whole day, or any span where no single hour has a claim on the label.
+// The numerically largest, which is exactly what Open-Meteo's own daily
+// `weather_code` is: measured against its own hourly series over 8 places and
+// 16 days on 2026-08-22, the daily value was the maximum of that day's 24
+// hourly codes on 125 of 125 complete days.
+//
+// "Ordered by severity" is doing real work and it is only roughly true: 82
+// (violent rain showers) outranks 75 (heavy snow), so a snowy day with one
+// shower in it is drawn as a shower. The alternative is a hand-ranked table of
+// a hundred codes that nobody can check against anything, and over a whole day
+// the approximation is the same one the provider already made.
+//
+// Absent in, absent out: an empty list has no picture, which is different from
+// a clear sky.
+[[nodiscard]] std::optional<int> mostSignificantCode(const QList<int> &codes);
+
+// A short span that one label names, where `codes` is in time order and
+// `codes.first()` is the labelled hour.
+//
+// The label says "2 PM" and the reader reads the glyph beside it as two o'clock,
+// so two o'clock's sky is what it shows — unless something is happening
+// somewhere in the span, in which case that is shown instead, because a column
+// that quietly drops the only stormy hour it covers is the failure this exists
+// to prevent.
+//
+// Folding the whole span with `mostSignificantCode` instead was tried and is
+// wrong in the common case: it takes the cloudier of two adjacent hours every
+// time, so an afternoon that is clear until four reports overcast from two, and
+// the reference capture of the app's own front page changed from a sunny
+// afternoon to a cloudy one. Cloud cover is a ramp and reading its maximum is
+// not a severity judgement; rain is an event and missing one is.
+[[nodiscard]] std::optional<int> codeForLabelledSpan(const QList<int> &codes);
 
 // One short phrase, localised. Empty for a code we have no wording for, which
 // the UI already renders as "—".

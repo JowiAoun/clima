@@ -579,7 +579,7 @@ Item {
                             }
 
                             WeatherGlyph {
-                                kind: Data.conditionFor(hourIndex)
+                                kind: Data.conditionForLabel(hourIndex)
                                 glyphSize: 27
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 y: 26

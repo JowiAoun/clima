@@ -650,6 +650,44 @@ QString ForecastData::conditionFor(int index) const
     return conditionKindName(clima::conditionFor(*code, !isNight(index)));
 }
 
+QString ForecastData::conditionForLabel(int index) const
+{
+    // The span this label stands for: itself and the columns up to the next
+    // label. Clamped to the window, so the last label answers for whatever is
+    // left rather than reading past the end of the day.
+    const int last = qMin(index + m_labelStep, m_count);
+
+    QList<int> codes;
+    for (int i = index; i < last; ++i) {
+        const int absolute = m_start + i;
+        if (absolute < 0 || absolute >= m_hours.size())
+            continue;
+        if (const WeatherCode code = m_hours.at(absolute).weatherCode)
+            codes.append(*code);
+    }
+
+    const std::optional<int> worst = codeForLabelledSpan(codes);
+    if (!worst)
+        return {};
+
+    // Whichever hour carried the winning code decides day or night. Taking the
+    // first hour's would put a moon over an evening thunderstorm whenever the
+    // span opened after sunset and the storm was in its second hour.
+    int at = index;
+    for (int i = index; i < last; ++i) {
+        const int absolute = m_start + i;
+        if (absolute < 0 || absolute >= m_hours.size())
+            continue;
+        const WeatherCode code = m_hours.at(absolute).weatherCode;
+        if (code && *code == *worst) {
+            at = i;
+            break;
+        }
+    }
+
+    return conditionKindName(clima::conditionFor(*worst, !isNight(at)));
+}
+
 QString ForecastData::conditionText(int index) const
 {
     const int absolute = m_start + index;
