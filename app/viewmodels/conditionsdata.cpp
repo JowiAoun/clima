@@ -810,6 +810,21 @@ void ConditionsData::buildWind()
     const int     force = beaufortForce(kmh);
     const double  degrees = value(now.windDirection);
 
+    // Whether there is a wind reading at all, asked once.
+    //
+    // beaufortForce() is the only function in libclima/domain/scales.h that
+    // returns a number rather than a word, so it has nowhere to put the empty
+    // string the others answer NaN with — it returns 0, and beaufortName(0) is
+    // "Calm". That made a missing reading indistinguishable from still air:
+    // `reading` said "—" and the verdict beside it said Calm, in the same card.
+    //
+    // ECMWF omits variables at some coordinates (see
+    // tests/fixtures/openmeteo/toronto-ecmwf-gaps.json), so this is reachable
+    // rather than theoretical. neutralWind() above has always spelled the
+    // honest answer — an empty name — and this is what puts the built map back
+    // in step with it.
+    const bool measured = !qIsNaN(kmh);
+
     m_wind = QVariantMap{
         { QStringLiteral("speed"), roundedDisplay(now.windSpeed, Units::Quantity::Wind) },
         { QStringLiteral("reading"), readingOf(now.windSpeed, Units::Quantity::Wind) },
@@ -823,17 +838,21 @@ void ConditionsData::buildWind()
         { QStringLiteral("directionDeg"), qIsNaN(degrees) ? 0 : int(std::lround(degrees)) },
         { QStringLiteral("directionLabel"), compassPoint(degrees) },
         { QStringLiteral("beaufort"), force },
-        { QStringLiteral("beaufortName"), beaufortName(force) },
+        { QStringLiteral("beaufortName"), measured ? beaufortName(force) : QString() },
         { QStringLiteral("trend"),
           trendOf(kmh, value(m_hours.value(qMin(m_hourNow + 3, int(m_hours.size()) - 1)).windSpeed),
                   3) },
-        { QStringLiteral("status"), beaufortName(force) },
+        // "No reading" rather than an empty status, matching buildAirQuality
+        // three cards up: the status line is the one a reader looks at to find
+        // out whether the card has anything to say.
+        { QStringLiteral("status"), measured ? beaufortName(force) : tr("No reading") },
         { QStringLiteral("body"),
-          tr("%1 from the %2, gusting to %3 %4.")
-              .arg(beaufortName(force))
-              .arg(compassPoint(degrees))
-              .arg(roundedDisplay(now.windGust, Units::Quantity::Wind))
-              .arg(units->bareSymbol(Units::Quantity::Wind)) },
+          measured ? tr("%1 from the %2, gusting to %3 %4.")
+                         .arg(beaufortName(force))
+                         .arg(compassPoint(degrees))
+                         .arg(roundedDisplay(now.windGust, Units::Quantity::Wind))
+                         .arg(units->bareSymbol(Units::Quantity::Wind))
+                   : QString() },
     };
 }
 
