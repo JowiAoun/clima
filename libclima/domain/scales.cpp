@@ -56,10 +56,29 @@ QString visibilityBand(double km)
 
 int beaufortForce(double kmh)
 {
+    // NaN is "no reading", and 0 is the only int that can carry that. The
+    // caller has to test the reading rather than the force — see the header;
+    // this is the one function here that cannot answer with an empty string.
     if (qIsNaN(kmh))
         return 0;
-    const double ms = kmh / 3.6;
-    return qBound(0, int(std::floor(std::pow(ms / 0.836, 2.0 / 3.0) + 0.5)), 12);
+
+    // Below the scale. There is no negative half, and pow() of a negative base
+    // to a fractional exponent is NaN, which the cast below cannot survive.
+    if (kmh <= 0)
+        return 0;
+
+    // Above what an int can hold. `int(...)` on an infinity or on a value past
+    // INT_MAX is undefined behaviour, and the way it actually failed was worse
+    // than a crash: on x86-64 the cast yields INT_MIN, qBound clamps that to 0,
+    // and an infinite wind speed was reported as "Calm". Saturating at the top
+    // of the scale is the only end an unbounded number can honestly be at.
+    if (!qIsFinite(kmh))
+        return 12;
+
+    const double force = std::floor(std::pow((kmh / 3.6) / 0.836, 2.0 / 3.0) + 0.5);
+    if (force >= 12.0)
+        return 12;
+    return int(force);
 }
 
 QString beaufortName(int force)
