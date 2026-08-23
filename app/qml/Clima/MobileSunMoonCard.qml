@@ -77,6 +77,7 @@ Item {
                         visible: readingCell.modelData.glyph === "moon"
                         glyphSize: 24
                         illuminated: Detail.moon.illumination
+                        waxing: Detail.moon.waxing
                         anchors.centerIn: parent
                     }
                 }
@@ -161,6 +162,7 @@ Item {
             mark: MoonGlyph {
                 glyphSize: 14
                 illuminated: Detail.moon.illumination
+                        waxing: Detail.moon.waxing
             }
         }
     }

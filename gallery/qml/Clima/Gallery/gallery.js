@@ -239,7 +239,8 @@ var groups = [
             { name: "Visibility",    file: "DetailVisibilityCard.qml",    blurb: "A sight line down the long axis of the box." },
             { name: "Pressure",      file: "DetailPressureCard.qml",      blurb: "Sparkline against a fixed 1005–1020 mb scale." },
             { name: "Sun",           file: "DetailSunCard.qml",           blurb: "Altitude as a sinusoid; the horizon is zero, so daylight's width is the day length." },
-            { name: "Moon",          file: "DetailMoonCard.qml",          blurb: "The sun card's twin, on the night ramp." }
+            { name: "Moon",          file: "DetailMoonCard.qml",          blurb: "The sun card's twin, on the night ramp." },
+            { name: "Moon phase",    file: "DetailMoonPhaseCard.qml",     blurb: "The face rather than the night: the disc at the size a gibbous can be told from a quarter, and the date the month is navigated by." }
         ]
     },
     {

@@ -40,6 +40,7 @@ set(clima_qml_files
     qml/Clima/DetailFeelsLikeCard.qml
     qml/Clima/DetailHumidityCard.qml
     qml/Clima/DetailMoonCard.qml
+    qml/Clima/DetailMoonPhaseCard.qml
     qml/Clima/DetailPrecipitationCard.qml
     qml/Clima/DetailPressureCard.qml
     qml/Clima/DetailSunCard.qml

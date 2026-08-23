@@ -173,7 +173,12 @@ Item {
                           root.width  * (root.kind === "clear-night" ? 0.50 : 0.34),
                           root.height * (root.kind === "clear-night" ? 0.47 : 0.34),
                           root.width  * (root.kind === "clear-night" ? 0.34 : 0.26),
-                          0.42)
+                          0.42,
+                          // Not a phase. This crescent means "night", and the
+                          // sky it is drawn over is a forecast hour rather than
+                          // a date — so it says which way it points rather than
+                          // taking a default that would look like a claim.
+                          false)
             }
         }
     }

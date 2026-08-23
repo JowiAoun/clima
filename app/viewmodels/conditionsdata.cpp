@@ -404,6 +404,26 @@ QVariantMap neutralMoon()
         { QStringLiteral("upLength"), QString() },
         { QStringLiteral("phase"), QString() },
         { QStringLiteral("illumination"), 0.0 },
+        { QStringLiteral("waxing"), true },
+        { QStringLiteral("trend"), noTrend() },
+        { QStringLiteral("status"), QString() },
+        { QStringLiteral("body"), QString() },
+    };
+}
+
+// `available` false rather than absent, for the same reason the pollen block
+// carries one: MET Norway has no moon product at all, and 0% illuminated is not
+// "we were not told" — it is a new moon, which is a reading, and a card is not
+// allowed to assert one it does not have.
+QVariantMap neutralMoonPhase()
+{
+    return QVariantMap{
+        { QStringLiteral("available"), false },
+        { QStringLiteral("illumination"), 0.0 },
+        { QStringLiteral("percent"), 0 },
+        { QStringLiteral("waxing"), true },
+        { QStringLiteral("nextFullLabel"), QString() },
+        { QStringLiteral("nextFullDays"), -1 },
         { QStringLiteral("trend"), noTrend() },
         { QStringLiteral("status"), QString() },
         { QStringLiteral("body"), QString() },
@@ -498,6 +518,7 @@ void ConditionsData::clear()
     m_pressure      = neutralPressure();
     m_sun           = neutralSun();
     m_moon          = neutralMoon();
+    m_moonPhase     = neutralMoonPhase();
     m_pollen        = neutralPollen();
 
     // The one member that needs no neutral shape: a QVariantList is already a
@@ -1126,6 +1147,11 @@ void ConditionsData::buildSunMoon()
           tr("%1 hrs %2 mins").arg(upMinutes / 60).arg(upMinutes % 60) },
         { QStringLiteral("phase"), ForecastData::moonPhaseLabel(moonPhaseName(day.moonPhase)) },
         { QStringLiteral("illumination"), lit.value_or(0.0) },
+        // Which limb is lit. The illuminated fraction cannot say: a waxing and
+        // a waning gibbous are the same number and mirror images of each other,
+        // and a disc drawn from the fraction alone gets one of the two
+        // backwards for half of every month.
+        { QStringLiteral("waxing"), isWaxing(day.moonPhase) },
         { QStringLiteral("trend"), QStringLiteral("none") },
         { QStringLiteral("status"), ForecastData::moonPhaseLabel(moonPhaseName(day.moonPhase)) },
         { QStringLiteral("body"),
@@ -1135,6 +1161,67 @@ void ConditionsData::buildSunMoon()
                     .arg(sentenceTime(day.moonrise, m_zone))
               : tr("The moon is %1% illuminated. It does not rise today.")
                     .arg(int(std::lround(lit.value_or(0.0) * 100))) },
+    };
+
+    buildMoonPhase(day, reference);
+}
+
+// ---- the phase, as its own card ------------------------------------------------------
+
+void ConditionsData::buildMoonPhase(const DailyPoint &day, const QDate &reference)
+{
+    if (!day.moonPhase)
+        return;
+
+    const Reading lit     = moonIllumination(day.moonPhase);
+    const int     percent = int(std::lround(lit.value_or(0.0) * 100));
+    const bool    waxing  = isWaxing(day.moonPhase);
+
+    // The next full moon, from the provider's own phase readings where the
+    // horizon reaches it and from the mean cycle where it does not — see
+    // libclima/domain/forecast.h, which explains which of the two answered and
+    // how far out the second one can be.
+    const std::optional<QDate> nextFull = nextFullMoon(m_forecast.daily, reference);
+
+    // Days from today rather than a stamp, because "in 5 days" is the reading a
+    // sentence wants and the date is the reading the card's own line wants, and
+    // deriving one from the other in QML would put date arithmetic in a view.
+    const int days = nextFull ? int(reference.daysTo(*nextFull)) : -1;
+
+    m_moonPhase = QVariantMap{
+        { QStringLiteral("available"), true },
+        { QStringLiteral("illumination"), lit.value_or(0.0) },
+        { QStringLiteral("percent"), percent },
+        { QStringLiteral("waxing"), waxing },
+        // Month and day, and no year: the far end of the fallback is a month
+        // out, so a year would be the same one every time it was printed and
+        // would take room from the part that varies.
+        //
+        // The pattern is translatable rather than fixed. "MMM d" localises the
+        // month NAME and not the order, so every locale would read "Aug 28"
+        // however it writes a date; a translator supplies "d. MMM" or "M月d日"
+        // instead. The default is the reference's own order.
+        { QStringLiteral("nextFullLabel"),
+          nextFull ? QLocale().toString(
+                         *nextFull,
+                         tr("MMM d", "abbreviated month and day, for the next full moon"))
+                   : QString() },
+        { QStringLiteral("nextFullDays"), days },
+        { QStringLiteral("trend"), QStringLiteral("none") },
+        { QStringLiteral("status"),
+          ForecastData::moonPhaseLabel(moonPhaseName(day.moonPhase)) },
+        // `%n` and not `%3`: the last day before a full moon is one day, and a
+        // card whose whole job is that sentence read "It is full again in 1
+        // days" on it — once every twenty-nine and a half nights.
+        { QStringLiteral("body"),
+          days < 0
+              ? tr("The moon is %1% illuminated tonight.").arg(percent)
+              : (days == 0
+                     ? tr("The moon is %1% illuminated, and full tonight.").arg(percent)
+                     : tr("The moon is %1% illuminated and %2. It is full again in %n day(s).",
+                          nullptr, days)
+                           .arg(percent)
+                           .arg(waxing ? tr("waxing") : tr("waning"))) },
     };
 }
 
@@ -1351,7 +1438,8 @@ QVariantList ConditionsData::order() const
              QStringLiteral("wind"),        QStringLiteral("humidity"),
              QStringLiteral("uv"),          QStringLiteral("airQuality"),
              QStringLiteral("visibility"),  QStringLiteral("pressure"),
-             QStringLiteral("sun"),         QStringLiteral("moon") };
+             QStringLiteral("sun"),         QStringLiteral("moon"),
+             QStringLiteral("moonPhase") };
 }
 
 QVariantMap ConditionsData::bands() const

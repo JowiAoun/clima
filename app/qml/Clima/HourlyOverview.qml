@@ -980,6 +980,7 @@ Item {
             MoonGlyph {
                 glyphSize: 15
                 illuminated: Data.moonPhase.illuminated
+                waxing: Data.moonPhase.waxing
                 anchors.verticalCenter: parent.verticalCenter
             }
             Text {

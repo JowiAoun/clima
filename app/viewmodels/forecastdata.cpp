@@ -103,6 +103,7 @@ QVariantMap neutralMoonPhase()
     return QVariantMap{
         { QStringLiteral("name"), QString() },
         { QStringLiteral("illuminated"), 0.0 },
+        { QStringLiteral("waxing"), true },
     };
 }
 
@@ -597,6 +598,11 @@ void ForecastData::buildSunEvents()
         const Reading lit = moonIllumination(day.moonPhase);
         m_moonPhase[QStringLiteral("name")]        = moonPhaseLabel(moonPhaseName(day.moonPhase));
         m_moonPhase[QStringLiteral("illuminated")] = lit.has_value() ? *lit : 0.0;
+        // Which limb is lit. The fraction alone cannot say — see
+        // libclima/domain/forecast.h — and the legend's disc is small enough
+        // that drawing it mirrored looks like nothing at all until you compare
+        // it with the card that has it right.
+        m_moonPhase[QStringLiteral("waxing")]      = isWaxing(day.moonPhase);
         break;
     }
 }

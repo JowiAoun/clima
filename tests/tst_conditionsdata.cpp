@@ -100,6 +100,7 @@ QList<TestConditionsData::Block> TestConditionsData::blocks()
         { "pressure",      &ConditionsData::pressure },
         { "sun",           &ConditionsData::sun },
         { "moon",          &ConditionsData::moon },
+        { "moonPhase",     &ConditionsData::moonPhase },
         { "pollen",        &ConditionsData::pollen },
         { "location",      &ConditionsData::location },
     };

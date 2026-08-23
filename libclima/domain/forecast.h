@@ -230,6 +230,45 @@ Reading moonIllumination(Reading moonPhase);
 // somebody looks up.
 QString moonPhaseName(Reading moonPhase);
 
+// Whether the lit fraction is growing — the first half of the cycle, new to
+// full. It is the half of the phase that the illuminated fraction throws away:
+// a waxing and a waning gibbous are the same number and mirror images, so a
+// disc drawn from the fraction alone is lit on the wrong limb for half of every
+// month. Absent reads as waxing, which is the same default the disc had before
+// anyone asked the question.
+bool isWaxing(Reading moonPhase);
+
+// The mean interval between one new moon and the next, in days. The real one
+// varies by up to about seven hours either side — the orbit is an ellipse and
+// the Earth is moving along its own — so this is the average and not a period.
+inline constexpr double kSynodicMonth = 29.530588853;
+
+// The date of the next full moon at or after `from`, in whatever calendar the
+// dates in `days` are expressed in.
+//
+// Answered from the daily series wherever it reaches that far: each row carries
+// the provider's own phase reading, so the day whose phase is nearest 0.5 in
+// the pair that brackets it is the day the moon is full, computed by an
+// ephemeris rather than by us.
+//
+// It usually does not reach. The cycle is 29.5 days and a forecast horizon is
+// sixteen at best, so a little under half the time the answer is past the end
+// of the series — and "we cannot say" is a bad answer to a question with a
+// known arithmetic. So the fallback advances the first reading along the mean
+// cycle above, which puts the answer between zero and thirty days out. That is
+// accurate to within a few hours, which lands on the right calendar date except
+// when the full moon falls near midnight; a card printing a date, which is the
+// caller this exists for, is wrong about one in twenty of the far ones and
+// never about the near ones.
+//
+// `days` is expected in ascending date order, which is what every provider
+// gives. Out of order, no pair brackets and the fallback answers instead.
+//
+// Absent if no row at or after `from` carries a phase at all — MET Norway
+// carries none, and a card that read a missing moon as a new one would say the
+// next full moon is a fortnight away every day of the month.
+std::optional<QDate> nextFullMoon(const QList<DailyPoint> &days, const QDate &from);
+
 // ---- the whole answer -------------------------------------------------------
 
 struct Forecast {

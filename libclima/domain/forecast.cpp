@@ -4,6 +4,8 @@
 #include "libclima/domain/forecast.h"
 
 #include <cmath>
+#include <optional>
+#include <utility>
 
 namespace clima {
 
@@ -90,6 +92,69 @@ QString moonPhaseName(Reading moonPhase)
     if (phase < 0.75)
         return QStringLiteral("waning-gibbous");
     return QStringLiteral("waning-crescent");
+}
+
+bool isWaxing(Reading moonPhase)
+{
+    if (!moonPhase)
+        return true;
+
+    double phase = std::fmod(*moonPhase, 1.0);
+    if (phase < 0.0)
+        phase += 1.0;
+    return phase < 0.5;
+}
+
+std::optional<QDate> nextFullMoon(const QList<DailyPoint> &days, const QDate &from)
+{
+    // Wrapped the way moonPhaseName wraps it, and for the same reason: a
+    // provider is entitled to answer 1.0, or a hair over it, for a new moon.
+    const auto cyclePosition = [](Reading phase) {
+        double p = std::fmod(*phase, 1.0);
+        if (p < 0.0)
+            p += 1.0;
+        return p;
+    };
+
+    // Rows at or after `from` that actually carry a phase, in date order.
+    QList<std::pair<QDate, double>> readings;
+    for (const DailyPoint &day : days) {
+        if (!day.date.isValid() || !day.moonPhase)
+            continue;
+        if (from.isValid() && day.date < from)
+            continue;
+        readings.append({ day.date, cyclePosition(day.moonPhase) });
+    }
+
+    if (readings.isEmpty())
+        return std::nullopt;
+
+    // The first day the series says the moon is full: the pair that brackets
+    // 0.5, and of that pair the reading nearer to full.
+    //
+    // `phaseA <= 0.5 <= phaseB` is the whole test, and it is written on the raw
+    // positions rather than on their difference because the difference is what
+    // gets a pair straddling the NEW moon wrong: 0.97 then 0.02 is a negative
+    // step across a gap in which the moon is dark, and a bracket test on the
+    // step reads it as containing 0.5. Here `phaseA > 0.5` rejects it outright.
+    //
+    // `readings` is in the order the daily series arrived in, which every
+    // provider we have gives ascending by date. A shuffled series would find no
+    // bracket and fall through to the extrapolation below.
+    for (int i = 0; i + 1 < readings.size(); ++i) {
+        const auto &[dateA, phaseA] = readings.at(i);
+        const auto &[dateB, phaseB] = readings.at(i + 1);
+        if (phaseA > 0.5 || phaseB < 0.5)
+            continue;
+        return (0.5 - phaseA) <= (phaseB - 0.5) ? dateA : dateB;
+    }
+
+    // Past the horizon. How far round the cycle the first reading still has to
+    // go, on the mean month — zero when it is already full, a whole month when
+    // it has just been.
+    const auto &[date, phase] = readings.constFirst();
+    const double toFull = std::fmod(0.5 - phase + 1.0, 1.0) * kSynodicMonth;
+    return date.addDays(qRound(toFull));
 }
 
 } // namespace clima

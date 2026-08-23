@@ -42,7 +42,7 @@ Item {
             // Fixed order, so the layout does not depend on key order.
             model: ["Temperature", "FeelsLike", "CloudCover", "Precipitation",
                     "Wind", "Humidity", "Uv", "AirQuality", "Visibility",
-                    "Pressure", "Sun", "Moon"]
+                    "Pressure", "Sun", "Moon", "MoonPhase"]
 
             delegate: Loader {
                 required property string modelData

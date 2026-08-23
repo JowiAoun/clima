@@ -11,6 +11,10 @@ Item {
     property real glyphSize: 15
     property real illuminated: 0.74
 
+    // Which limb is lit — see chartmath.js. Waxing by default so a caller that
+    // has not got the answer draws what this glyph always drew.
+    property bool waxing: true
+
     implicitWidth: glyphSize
     implicitHeight: glyphSize
     width: glyphSize
@@ -31,7 +35,8 @@ Item {
             strokeColor: "transparent"
             PathSvg {
                 path: ChartMath.moonPath(root.width / 2, root.height / 2,
-                                         root.width / 2, root.illuminated)
+                                         root.width / 2, root.illuminated,
+                                         root.waxing)
             }
         }
     }

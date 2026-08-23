@@ -154,14 +154,37 @@ function _parseHex(c) {
             parseInt(s.substr(4, 2), 16), parseInt(s.substr(6, 2), 16)];
 }
 
-// Lit limb of the moon, centred on (cx, cy), lit side to the left.
-// illum is the illuminated fraction: 0.5 = half, >0.5 = gibbous, <0.5 = crescent.
-function moonPath(cx, cy, r, illum) {
+// Lit limb of the moon, centred on (cx, cy). `illum` is the illuminated
+// fraction — 0.5 half, above it gibbous, below it crescent — and `waxing` is
+// which side of the disc that fraction is on.
+function moonPath(cx, cy, r, illum, waxing) {
     var k = clamp(illum, 0.03, 0.97);
     var rx = n(r * Math.abs(2 * k - 1));
-    var sweep = k > 0.5 ? 0 : 1;   // gibbous bulges away from the lit side
+
+    // WHICH LIMB IS LIT, which the fraction alone cannot say: a waxing and a
+    // waning gibbous are the same number and mirror images of each other, so a
+    // disc drawn from `illum` alone is backwards for half of every month.
+    //
+    // Waxing is lit on the right and waning on the left. That is the northern
+    // hemisphere's sky and it is deliberately not made a setting: south of the
+    // equator both are mirrored, and a preference nobody finds is worse than a
+    // convention stated plainly. This is the same simplification every major
+    // weather app ships.
+    //
+    // For as long as the argument did not exist this function drew every moon
+    // lit on the LEFT — so the historical picture was the waning one, and the
+    // caller that still does not pass a flag (WeatherGlyph's decorative night
+    // crescent, which is not claiming a phase at all) says so explicitly rather
+    // than leaning on that.
+    var rightLit = (waxing === undefined) ? true : !!waxing;
+
+    // Mirroring the figure across the vertical through cx is one flag on each
+    // arc: an SVG sweep flag IS which way the arc bends, so flipping both is
+    // the reflection and nothing else has to move.
+    var outer = rightLit ? 1 : 0;
+    var inner = ((k > 0.5) === rightLit) ? 1 : 0;   // gibbous bulges away from the lit side
     return "M " + n(cx) + " " + n(cy - r)
-         + " A " + n(r) + " " + n(r) + " 0 0 0 " + n(cx) + " " + n(cy + r)
-         + " A " + rx + " " + n(r) + " 0 0 " + sweep + " " + n(cx) + " " + n(cy - r)
+         + " A " + n(r) + " " + n(r) + " 0 0 " + outer + " " + n(cx) + " " + n(cy + r)
+         + " A " + rx + " " + n(r) + " 0 0 " + inner + " " + n(cx) + " " + n(cy - r)
          + " Z";
 }

@@ -241,7 +241,7 @@ DetailCard {
                     strokeColor: "transparent"
                     PathSvg {
                         path: ChartMath.moonPath(viz.markR, viz.markR, viz.markR,
-                                                 root.d.illumination)
+                                                 root.d.illumination, root.d.waxing)
                     }
                 }
             }

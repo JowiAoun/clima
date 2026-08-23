@@ -93,6 +93,12 @@ class ConditionsData : public QObject
     Q_PROPERTY(QVariantMap sun READ sun NOTIFY changed)
     Q_PROPERTY(QVariantMap moon READ moon NOTIFY changed)
 
+    // The phase, as its own card. `moon` above is where the moon is — rise,
+    // set, how long it is up — and this is what it looks like, which is a
+    // different question with a different answer on the same night. Splitting
+    // them is what lets each card draw one picture instead of two.
+    Q_PROPERTY(QVariantMap moonPhase READ moonPhase NOTIFY changed)
+
     Q_PROPERTY(QVariantMap pollen READ pollen NOTIFY changed)
     Q_PROPERTY(QVariantList activities READ activities NOTIFY changed)
 
@@ -145,6 +151,7 @@ public:
     [[nodiscard]] QVariantMap pressure() const { return m_pressure; }
     [[nodiscard]] QVariantMap sun() const { return m_sun; }
     [[nodiscard]] QVariantMap moon() const { return m_moon; }
+    [[nodiscard]] QVariantMap moonPhase() const { return m_moonPhase; }
 
     [[nodiscard]] QVariantMap  pollen() const { return m_pollen; }
     [[nodiscard]] QVariantList activities() const { return m_activities; }
@@ -169,6 +176,7 @@ private:
     void buildVisibility();
     void buildPressure();
     void buildSunMoon();
+    void buildMoonPhase(const clima::DailyPoint &day, const QDate &reference);
     void buildPollen(bool hasPollen);
     void buildActivities();
     void buildSummary();
@@ -213,6 +221,7 @@ private:
 
     QVariantMap m_temperature, m_feelsLike, m_cloudCover, m_precipitation, m_wind;
     QVariantMap m_humidity, m_uv, m_airQuality, m_visibility, m_pressure, m_sun, m_moon;
+    QVariantMap m_moonPhase;
 
     QVariantMap  m_pollen;
     QVariantList m_activities;
