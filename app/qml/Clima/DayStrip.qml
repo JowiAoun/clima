@@ -85,6 +85,21 @@ Item {
     // show as a lighter band across the junction. They abut instead.
     readonly property real mergeDepth: 0
     readonly property real unselectedInset: 20   // how much shorter the others are
+
+    // How much of the neighbouring card to leave showing beside the selected
+    // one, when scrolling to it.
+    //
+    // A gap of air was enough to say the selected card had not been cut off,
+    // and not enough to say there was another day past it: scrolled to the last
+    // card that fits, the strip came to rest with 14 px of background beside it
+    // and read as the end of the forecast. A slice of the next card is the
+    // thing that says "keep going" — the same reason any horizontally
+    // scrolling row leaves a partial item at its edge rather than a clean one.
+    //
+    // At the ends of the strip the clamp inside scrollTo takes it away again,
+    // which is still right: the first and last cards ARE flush, and the panel
+    // below squares its corner under them.
+    readonly property real peek: spacing + 40
     readonly property real filletRadius: Theme.metric.filletRadius
 
     // Where the card stops travelling and the junction starts forming, as a
@@ -194,16 +209,13 @@ Item {
         var from = index * (root.cardWidth + root.spacing)
         var to   = from + root.cardWidth + root.selectedExtra
 
-        // One gap of air beside it, so a card revealed by this does not arrive
-        // flush against the edge looking like it was cut off. At the ends the
-        // clamp inside scrollTo takes it away again, which is right: the first
-        // and last cards *are* flush, and the panel below squares its corner
-        // under them.
+        // A slice of the neighbour beside it rather than a gap of air — see
+        // `peek`, which is where the argument for the number is.
         var wanted = flick.contentX
-        if (to + root.spacing > wanted + flick.width)
-            wanted = to + root.spacing - flick.width
-        if (from - root.spacing < wanted)
-            wanted = from - root.spacing
+        if (to + root.peek > wanted + flick.width)
+            wanted = to + root.peek - flick.width
+        if (from - root.peek < wanted)
+            wanted = from - root.peek
 
         flick.scrollTo(wanted, Theme.motion.move)
     }
