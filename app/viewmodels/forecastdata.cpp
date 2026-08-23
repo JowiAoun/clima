@@ -18,14 +18,20 @@ using namespace clima;
 
 namespace {
 
-// The window mockdata.js drew, in the two numbers that describe it.
-constexpr int kWindowHours = 48;
-constexpr int kPastHours   = 15;
-
-// And the window for any day that is not today: the day itself, midnight to
-// midnight. Not 48 with the day in the middle — a chart of Friday that opens on
-// Thursday evening is a chart of Friday you have to scroll to find.
-constexpr int kDayHours = 24;
+// The window: one calendar day, midnight to midnight, of whichever day the
+// strip has selected — today included.
+//
+// It used to be forty-eight hours starting fifteen behind the present, and only
+// for today; every other day was already the day itself. What removed the
+// asymmetry is that the chart's arrows step the day now instead of scrolling
+// the hours. A window running past midnight would be a chart of Friday with
+// Saturday morning on the end of it, and no arrow that could mean "the rest of
+// Saturday" without also meaning "the part you can already see".
+// The most hours a calendar day can hold. Twenty-five on the night a fall-back
+// DST transition repeats an hour — the window is counted by date rather than by
+// this number, and the bound is only so that a provider handing over a series
+// with a repeating or broken date cannot make it unbounded.
+constexpr int kMaxDayHours = 26;
 
 // Below this an hour is dry. precip.js's TRACE, and the only number from that
 // file repeated here — repeated because the question "is this hour wet" is
@@ -185,6 +191,8 @@ void ForecastData::clearWindow()
     m_cloud.clear(); m_humidity.clear(); m_windSpeed.clear(); m_windGust.clear();
     m_windDirection.clear(); m_pressure.clear(); m_uvIndex.clear(); m_visibility.clear();
     m_airQuality.clear(); m_precipTypes.clear();
+    m_hourLabels.clear(); m_conditions.clear(); m_conditionTexts.clear();
+    m_labelConditions.clear();
     m_hasApparent = false;
     m_sunEvents.clear();
     m_labelIndices.clear(); m_precipBuckets.clear();
@@ -255,6 +263,7 @@ void ForecastData::setSnapshot(const Forecast &forecast, const AirQuality &airQu
 
     buildWindow(now);
     buildSeries();
+    buildLabels();
     buildMonth(now);
     buildSunEvents();
     buildBuckets();
@@ -278,11 +287,21 @@ void ForecastData::setSelectedDay(int index)
     Q_EMIT changed();
 }
 
+// The arrows either side of the chart, and the reason they are not two lines of
+// QML: "the next day" is a fact about `days`, both shells ask for it, and the
+// setter above is what clamps. A view that did the arithmetic itself would be a
+// second opinion about how many days there are.
+void ForecastData::stepDay(int delta)
+{
+    setSelectedDay(m_selectedDay + delta);
+}
+
 void ForecastData::retarget()
 {
     clearWindow();
     buildWindow(m_now);
     buildSeries();
+    buildLabels();
     buildSunEvents();
     buildBuckets();
 }
@@ -307,32 +326,84 @@ void ForecastData::buildWindow(const QDateTime &now)
     }
     m_nowAbsolute = current;
 
-    // Today keeps the window described at the top of the header, to the hour.
-    // Any other day is that day, and `firstOfDay` returning -1 falls back to
-    // today's rather than to an empty chart: the strip draws eleven cards off
-    // the *daily* series and a provider whose hourly horizon is shorter than
-    // its daily one — MET Norway's is, by days — would otherwise have cards on
-    // it that select nothing.
-    const QDate today = now.toTimeZone(m_zone).date();
-    const QDate wanted = m_dayDates.value(m_selectedDay);
+    // The selected day, from its first hour. Falling back to today rather than
+    // to an empty chart, because the strip draws eleven cards off the *daily*
+    // series and a provider whose hourly horizon is shorter than its daily one
+    // — MET Norway's is, by days — would otherwise have cards on it that select
+    // nothing.
+    //
+    // A day the series only partly covers gives a partly covered window, and
+    // that is the honest answer rather than a case to pad: MET Norway's hourly
+    // series begins at the current hour, so its "today" genuinely has no
+    // morning in it.
+    const auto dateAt = [this](int index) {
+        return m_hours.at(index).time.toTimeZone(m_zone).date();
+    };
 
-    int firstOfDay = -1;
-    if (wanted.isValid() && wanted != today) {
+    const auto firstHourOn = [&](const QDate &date) {
+        if (!date.isValid())
+            return -1;
         for (int i = 0; i < m_hours.size(); ++i) {
-            if (m_hours.at(i).time.toTimeZone(m_zone).date() == wanted) {
-                firstOfDay = i;
-                break;
-            }
+            if (dateAt(i) == date)
+                return i;
         }
+        return -1;
+    };
+
+    // A day the series does not reach is clamped to the nearest one it does,
+    // rather than falling back to today. The strip draws eleven cards off the
+    // *daily* series and a provider whose hourly horizon is shorter than its
+    // daily one — MET Norway's is, by days — has cards on it that no hour
+    // answers for. Falling back to today put a column labelled "Now" and a live
+    // past veil under a card that says "Sun", which is a chart lying about
+    // which day it is of; clamping shows the nearest day there is data for and
+    // says nothing untrue.
+    const QDate firstDate = dateAt(0);
+    const QDate lastDate  = dateAt(int(m_hours.size()) - 1);
+
+    // Clamped by hand rather than with qBound. This class deliberately does not
+    // assume the series is sorted — the scan above says so at length — and
+    // qBound asserts when its two bounds arrive the wrong way round, so a
+    // provider handing back a descending series would abort a debug build
+    // instead of degrading.
+    QDate wanted = m_dayDates.value(m_selectedDay);
+    if (wanted.isValid()) {
+        if (firstDate.isValid() && wanted < firstDate)
+            wanted = firstDate;
+        if (lastDate.isValid() && wanted > lastDate)
+            wanted = lastDate;
     }
 
+    int firstOfDay = firstHourOn(wanted);
     if (firstOfDay < 0) {
-        m_start = qMax(0, current - kPastHours);
-        m_count = qMin(kWindowHours, int(m_hours.size()) - m_start);
-    } else {
-        m_start = firstOfDay;
-        m_count = qMin(kDayHours, int(m_hours.size()) - m_start);
+        // Inside the horizon and still missing — a gap in the series. The last
+        // day there is data for is the honest place to land.
+        wanted     = lastDate;
+        firstOfDay = firstHourOn(wanted);
     }
+
+    m_start = qMax(0, firstOfDay);
+
+    // What the window is actually of, which is not always what was asked for:
+    // the clamp above moves a selection past the hourly horizon onto the last
+    // day there is data for. The moon in the legend reads this rather than
+    // `selectedDay`, or a chart of Friday's hours would carry Sunday's phase
+    // under it.
+    m_windowDate = wanted;
+
+    // Counted forward while the date holds, NOT `qMin(24, …)`.
+    //
+    // Twenty-four entries from the first hour of a day is twenty-four hours of
+    // *series*, which is a different thing from the day in three cases that all
+    // occur: a spring-forward day is 23 hours long and a fall-back day is 25, so
+    // a fixed 24 spills into the next date or drops the last hour of this one;
+    // and MET Norway's series begins at the current hour, so its "today" starts
+    // at 05:00 and twenty-four entries would run to 04:00 tomorrow under a card
+    // labelled today. The window is a calendar day or it is not one.
+    m_count = 0;
+    while (m_start + m_count < m_hours.size() && m_count < kMaxDayHours
+           && dateAt(m_start + m_count) == wanted)
+        ++m_count;
 
     // Deliberately not clamped. See the header: this is an offset to the
     // present, and the chart's past veil is `xForIndex(nowIndex)` wide — so a
@@ -341,31 +412,47 @@ void ForecastData::buildWindow(const QDateTime &now)
     // without a single branch in the QML.
     m_nowIndex = current - m_start;
 
-    // "Now" has to be a labelled column or the word is never drawn, and the
-    // labels run every `labelStep` hours from `firstLabelIndex`. So the phase
-    // of the label sequence is chosen by where now landed rather than fixed —
-    // which is the one thing that has to move when the window's start does.
+    // Every second hour, and never the outermost column at either end.
     //
-    // On a day window there is no "Now" to land on, so the phase is chosen by
-    // the other rule the chart lives by: the header band centres a two-column
-    // entry on each label, so a label in column 0 is a label half outside the
-    // plot. A day window opens at column 0 — it has nowhere further left to go —
-    // so its first label is column 1, one column inside the edge, which is
-    // exactly where today's window puts its first one.
+    // The header band centres a two-column entry on its label, so a label in
+    // column 0 or in the last column is half outside the plot — which did not
+    // show while the chart scrolled and the clip took it, and does now that the
+    // day is drawn to the plot's exact width.
     //
-    // The cost is odd hours: 1 AM, 3 AM, and so on. That is not a new look. A
-    // today window takes its phase from where the present landed and is odd half
-    // the time already, and the alternative here is a chart of Friday that opens
-    // with "AM" sliced down the middle.
+    // "Now" is one of the labels wherever the window has a now in it, or the
+    // word is never drawn. That fixes the phase to the parity of `nowIndex`, and
+    // the sequence starts at whichever of 1 and 2 shares it.
+    //
+    // The exact invariant is `0 < nowIndex < count - 1`, and both ends of it
+    // cost something real. Between 11 p.m. and midnight the present is the last
+    // column and goes unlabelled; on MET Norway, whose series begins at the
+    // current hour, the present is column 0 of its own day and goes unlabelled
+    // every time. In both the now line and the past veil still mark it, and the
+    // alternative — an entry centred on an outermost column — is half a glyph
+    // and a sliced "AM" over the neighbouring label, which is worse in the case
+    // it fixes and worse again in the eleven it does not.
+    //
+    // A day the reader is not living through has no such constraint and takes
+    // the even phase — 2 AM, 4 AM, 6 AM — which is how a clock reads.
     m_labelStep       = 2;
-    m_firstLabelIndex = nowInWindow() ? m_nowIndex % m_labelStep : 1;
+    m_firstLabelIndex = (nowInWindow() && (m_nowIndex % m_labelStep) != 0) ? 1 : 2;
 
     const QDateTime first = localTimeAt(0);
     m_startHour = first.isValid() ? first.time().hour() : 0;
 
     m_labelIndices.clear();
-    for (int i = m_firstLabelIndex; i < m_count; i += m_labelStep)
+    for (int i = m_firstLabelIndex; i < m_count - 1; i += m_labelStep)
         m_labelIndices.append(i);
+
+    // A stub of a day — three columns, which is what the last day of MET
+    // Norway's hourly horizon can come to — has no index that is both inside
+    // the edges and on the phase, and comes out with no labels at all. That is
+    // a chart with no hours on it, no condition glyphs and no vertical guides.
+    // One label in the middle is the whole of what will fit.
+    if (m_labelIndices.isEmpty() && m_count >= 3) {
+        m_firstLabelIndex = m_count / 2;
+        m_labelIndices.append(m_firstLabelIndex);
+    }
 }
 
 QDateTime ForecastData::localTimeAt(int index) const
@@ -548,6 +635,24 @@ int ForecastData::weekdayOf(int date) const
     return (m_month.value(QStringLiteral("firstWeekday")).toInt() + date - 1) % 7;
 }
 
+void ForecastData::buildLabels()
+{
+    // Straight off the three helpers, so there is one implementation of each
+    // answer and the arrays cannot drift from the functions the tests read.
+    for (int i = 0; i < m_count; ++i) {
+        m_hourLabels.append(hourLabel(i));
+        m_conditions.append(conditionFor(i));
+        m_conditionTexts.append(conditionText(i));
+        m_labelConditions.append(QString());
+    }
+
+    for (const QVariant &label : std::as_const(m_labelIndices)) {
+        const int index = label.toInt();
+        if (index >= 0 && index < m_labelConditions.size())
+            m_labelConditions[index] = conditionForLabel(index);
+    }
+}
+
 // ---- the sun and the moon ---------------------------------------------------------
 
 void ForecastData::buildSunEvents()
@@ -583,15 +688,16 @@ void ForecastData::buildSunEvents()
         place(day.sunset, QStringLiteral("sunset"));
     }
 
-    // The moon of the day the window is of, which is today until the day strip
-    // says otherwise. It is read by one thing — the chart's own legend, right
+    // The moon of the day the window IS OF — `m_windowDate`, not
+    // `selectedDay` — which are the same thing except where the strip has a
+    // card the hourly series cannot reach and the window clamped. It is read by one thing — the chart's own legend, right
     // under the plot — so a legend naming today's phase over Friday's hours
     // would be the chart contradicting itself. The phase is a position in the
     // cycle and the illumination is the lit fraction, which is not linear in
     // it: libclima computes the second from the first so that a waxing crescent
     // is not reported as a quarter lit.
-    const QDate today = m_now.toTimeZone(m_zone).date();
-    const QDate wanted = m_dayDates.value(m_selectedDay, today);
+    const QDate today  = m_now.toTimeZone(m_zone).date();
+    const QDate wanted = m_windowDate.isValid() ? m_windowDate : today;
     for (const DailyPoint &day : m_forecast.daily) {
         if (day.date != wanted)
             continue;
@@ -611,19 +717,39 @@ void ForecastData::buildSunEvents()
 
 void ForecastData::buildBuckets()
 {
-    // One bucket per label interval, carrying the interval's peak probability —
-    // mockdata.js's rule, kept because the strip is a row of two-hour columns
+    // One bucket per two-hour interval, carrying the interval's peak probability
+    // — mockdata.js's rule, kept because the strip is a row of two-hour columns
     // and the honest number for a column is the worst hour in it.
-    for (int i = m_firstLabelIndex; i < m_count - 1; i += m_labelStep) {
+    //
+    // From midnight, not from the first label. The strip tiles the window and
+    // the labels no longer do: they skip the outermost columns so the header
+    // band's entries stay inside the plot, and buckets that followed them would
+    // leave the first hours of the day with no cell over them.
+    // The last cell takes what is left over, which is one column more than the
+    // rest. The plot maps hour `i` to `i * columnWidth`, so a window of N hours
+    // is N-1 intervals wide — and N-1 does not divide by the step. A cell of the
+    // usual span at the end therefore ran past the plot and was clipped to half
+    // its width, with its droplet and percentage spilling out of it.
+    for (int i = 0; i < m_count - 1;) {
+        const int  remaining = m_count - 1 - i;
+        const bool last      = remaining < 2 * m_labelStep;
+        const int  span      = last ? remaining : m_labelStep;
+
+        // Inclusive of the final hour on the last cell: that cell reaches the
+        // plot's right edge, and the right edge IS the last hour.
+        const int through = last ? m_count - 1 : i + span - 1;
+
         double peak = m_precipProb.value(i).toDouble();
-        for (int k = 1; k < m_labelStep && i + k < m_count; ++k)
-            peak = qMax(peak, m_precipProb.value(i + k).toDouble());
+        for (int k = i + 1; k <= through && k < m_count; ++k)
+            peak = qMax(peak, m_precipProb.value(k).toDouble());
 
         QVariantMap bucket;
         bucket[QStringLiteral("index")] = i;
-        bucket[QStringLiteral("span")]  = m_labelStep;
+        bucket[QStringLiteral("span")]  = span;
         bucket[QStringLiteral("prob")]  = qIsNaN(peak) ? 0 : int(peak);
         m_precipBuckets.append(bucket);
+
+        i += span;
     }
 }
 
@@ -661,10 +787,22 @@ QString ForecastData::conditionForLabel(int index) const
     // The span this label stands for: itself and the columns up to the next
     // label. Clamped to the window, so the last label answers for whatever is
     // left rather than reading past the end of the day.
-    const int last = qMin(index + m_labelStep, m_count);
+    //
+    // BOTH OUTERMOST labels reach to the window's own edge. Labels start at
+    // column 1 or 2 and stop one short of the end, so that the header band's
+    // entries stay inside the plot — and a span that ran only from label to
+    // label left the day's first and last hours covered by nothing, which is
+    // the same defect this function exists to fix, moved to the ends of the
+    // day. A storm at midnight, or at 11 p.m. on an odd-phased today, had no
+    // glyph anywhere in its own band.
+    const bool isLast = !m_labelIndices.isEmpty()
+                        && m_labelIndices.constLast().toInt() == index;
+
+    const int first = (index == m_firstLabelIndex) ? 0 : index;
+    const int last  = isLast ? m_count : qMin(index + m_labelStep, m_count);
 
     QList<int> codes;
-    for (int i = index; i < last; ++i) {
+    for (int i = first; i < last; ++i) {
         const int absolute = m_start + i;
         if (absolute < 0 || absolute >= m_hours.size())
             continue;
@@ -680,7 +818,7 @@ QString ForecastData::conditionForLabel(int index) const
     // first hour's would put a moon over an evening thunderstorm whenever the
     // span opened after sunset and the storm was in its second hour.
     int at = index;
-    for (int i = index; i < last; ++i) {
+    for (int i = first; i < last; ++i) {
         const int absolute = m_start + i;
         if (absolute < 0 || absolute >= m_hours.size())
             continue;

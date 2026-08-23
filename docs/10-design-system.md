@@ -414,8 +414,10 @@ back — or sample the pixel directly and check the curve is monotonic.
 Two states are currently unreachable by `--poke`, so their transitions cannot be
 filmed as they stand:
 
-- **A pager fade.** `PagerButton.enabledState` derives from a Flickable's
-  `contentX`, which only a drag or a pager press changes.
+- **A pager fade on the hourly list.** `PagerButton.enabledState` there derives
+  partly from a Flickable's `contentX`, which only a drag or a pager press
+  changes. The chart's own pagers are reachable: they fade off `Data.selectedDay`,
+  and `--poke day=` sets it.
 - **The page's scroll thumb.** `--poke scroll=` assigns `contentY`, and
   `QQuickFlickable::setContentY()` calls `movementEnding()`, so `moving` never
   becomes true. `--poke flick=` exists for this: it uses `flick()` so the view
@@ -700,7 +702,8 @@ Three layers, and each carries a different piece of the reading:
   square without it.
 - **The cost is proportional to the weather, not to the chart.** Particles are
   generated per wet hour, so a dry forecast draws nothing. The mock's four
-  spells come to 54 drops and 20 splashes across 48 hours.
+  spells came to 54 drops and 20 splashes across the forty-eight-hour window the
+  chart drew then; it draws one day now, and the arithmetic is the same per hour.
 - **A splash is four rectangles and the arrangement matters.** Puddle line,
   rebound jet, and two droplets thrown clear of it. Left at the jet's own height
   and leaning the same few degrees, the three resolve into one downward arrow —

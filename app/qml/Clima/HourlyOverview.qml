@@ -43,11 +43,15 @@ Item {
     readonly property bool supportsFeelsLike: metric.id === "overview" && Data.hasApparent
 
     // ---- scales and metrics ---------------------------------------------
+    // The NARROWEST a column may be, not the width one will be — see
+    // `columnWidth` below, which is what the chart is actually drawn on.
+    //
     // Settable, not readonly: the mobile shell runs this same card at 362 px,
-    // where the token's 48 px column leaves room for six hours and a gutter.
-    // It is still the token by default — a caller overriding it is stating a
-    // width the token cannot know about, not disagreeing with it.
-    property real hourWidth: Theme.metric.hourWidth
+    // where a day cannot be fitted legibly at all and the floor is what decides
+    // how much of it is on screen. It is still the token by default — a caller
+    // overriding it is stating a width the token cannot know about, not
+    // disagreeing with it.
+    property real hourWidth: Theme.metric.minHourWidth
     readonly property real axisTopPad: Theme.metric.axisTopPad
     readonly property real headerBandHeight: Theme.metric.headerBandHeight
     readonly property real stripHeight: Theme.metric.stripHeight
@@ -56,7 +60,35 @@ Item {
     readonly property real cardPadding: Theme.metric.cardPadding
     readonly property real gutterWidth: Theme.metric.gutterWidth
 
-    readonly property real contentW: (Data.count - 1) * hourWidth
+    // ---- the day fits the plot ---------------------------------------------
+    //
+    // The window is one calendar day (forecastdata.h) and the arrows either
+    // side step to the next one, so the plot has one job: show all of that day.
+    // A day that has to be scrolled to be read is a day the arrows cannot be
+    // about.
+    //
+    // So the column width is the plot's width divided among the day's hours,
+    // and `hourWidth` becomes the floor under it rather than the answer. The
+    // floor is what a phone hits — its plot is 268 px, which puts 24 hours at
+    // 11.6 px a column, narrower than the 27 px glyphs drawn on them — and
+    // there the chart keeps scrolling, with the arrows still meaning days. That
+    // is the honest split: the desktop shows the whole day because it fits, and
+    // the phone shows as much of it as is legible.
+    //
+    // The floor has to be low enough that the desktop never lands on it, or
+    // there is content the reader cannot reach: the arrows step days, so a
+    // desktop chart that scrolls has no scroll control on it. At the token's
+    // 24 px the day stops fitting below 734 px of window, which is 290 px below
+    // the width at which this shell exists at all.
+    //
+    // Derived here rather than inside the panel because everything that plots a
+    // point reads it, and the panel is a Component that half of them are not in.
+    readonly property real plotWidth:
+        Math.max(1, width - 2 * cardPadding - (2 + gutterWidth) - 8)
+    readonly property real columnWidth:
+        Data.count > 1 ? Math.max(hourWidth, plotWidth / (Data.count - 1)) : hourWidth
+
+    readonly property real contentW: (Data.count - 1) * columnWidth
     readonly property var labelIndices: Data.labelIndices
     // Where the present falls on the plot. `Data.nowIndex` is an offset that
     // may sit outside the window — see forecastdata.h — so this can be negative
@@ -186,7 +218,7 @@ Item {
         ready = true
     }
 
-    function xForIndex(i) { return i * hourWidth }
+    function xForIndex(i) { return i * columnWidth }
 
     function yForValue(v) {
         var span = axisMax - axisMin
@@ -252,8 +284,8 @@ Item {
     // rather than heavy rain.
     readonly property var precipCells: Precip.cellsTyped(Data.precipMm, Data.precipTypes)
 
-    readonly property var curvePoints: buildPoints(feelsBlend, plotHeight, hourWidth, metric)
-    readonly property var overlayPoints: buildOverlay(plotHeight, hourWidth, metric)
+    readonly property var curvePoints: buildPoints(feelsBlend, plotHeight, columnWidth, metric)
+    readonly property var overlayPoints: buildOverlay(plotHeight, columnWidth, metric)
 
     // How completely the raised day card above is standing on this card's top
     // corners, 0 to 1 — see DayStrip, which computes it and is the only caller.
@@ -426,17 +458,14 @@ Item {
                 flickableDirection: Flickable.HorizontalFlick
                 boundsBehavior: Flickable.StopAtBounds
 
-                // Open on now, not on the start of the series.
+                // Where a chart too narrow to hold the whole day opens.
                 //
-                // The series begins at 21:00 the evening before, so at midday
-                // fifteen of its forty-eight hours have already happened —
-                // which is the shape a provider hands over, not an artefact of
-                // the mock. Opening at contentX 0 therefore opens the section
-                // called *Hourly* on last night. `HourlyList` has scrolled to
-                // now on mount since it was written; this is the same rule for
-                // the other half of the same card, and the two views of one
-                // series disagreeing about where they start was only invisible
-                // while "now" was three columns in.
+                // On anything wide enough there is nothing to decide: the day
+                // is drawn to the plot's exact width, contentWidth equals width,
+                // and every position below clamps to 0. This is the phone's
+                // path — 24 hours at its own 40 px floor is 920 px of content
+                // in a 268 px view — and there the honest place to open is the
+                // hour the reader is in, with a little of the day behind it.
                 //
                 // Observed hours are kept on screen rather than none. The past
                 // treatment is a reading — those hours happened, and the veil
@@ -453,16 +482,17 @@ Item {
                 // labelled hour, two columns wide and centred on its label, so
                 // the left edge has to fall exactly one column before a label
                 // or the card opens with half a glyph and "AM" sliced off by
-                // the clip. Labels run every `labelStep` from "Now", which is
-                // itself always one — so the count of observed hours has to be
+                // the clip. Labels run every `labelStep` from "Now" where the
+                // window has one — so the count of observed hours has to be
                 // ODD, and the choice is between one and three. Two is not
                 // available, whatever a screen's width would prefer.
                 //
-                // Three at a desktop's twenty-five visible columns is an eighth
-                // of the view. Three at a phone's eight is more than a third,
-                // which is the thing that made this worth changing.
+                // Three at a desktop's twenty-three visible columns is an
+                // eighth of the view — and moot there, because the desktop
+                // fits the day and never scrolls. Three at a phone's six is
+                // half of it, which is the thing that made this worth having.
                 readonly property int visibleColumns:
-                    Math.max(1, Math.floor(width / root.hourWidth))
+                    Math.max(1, Math.floor(width / root.columnWidth))
                 readonly property int openPastHours: visibleColumns >= 15 ? 3 : 1
 
                 // ---- and when -------------------------------------------
@@ -522,33 +552,6 @@ Item {
                     function onSelectedDayChanged() { flick.openOnStart() }
                 }
 
-                // A pager step is three quarters of the plot: one view of the day
-                // becoming another, hence `view`. A *drag* is not animated — the
-                // content tracks the finger, and interposing an easing between
-                // the two is what makes a scroll feel like it is on elastic.
-                NumberAnimation {
-                    id: scrollAnim
-                    target: flick
-                    property: "contentX"
-                    duration: Theme.motion.view
-                    easing.type: Easing.OutCubic
-                }
-
-                function scrollBy(dx) {
-                    // A pager press is the reader moving the chart, and it has
-                    // to say so here: it animates `contentX` directly, which
-                    // never raises `movementStarted`, so without this a window
-                    // resize would walk the page back to now under someone who
-                    // had just paged forward.
-                    flick.touched = true
-
-                    var to = Math.max(0, Math.min(contentWidth - width, contentX + dx))
-                    scrollAnim.stop()
-                    scrollAnim.from = contentX
-                    scrollAnim.to = to
-                    scrollAnim.start()
-                }
-
                 Item {
                     id: content
                     width: root.contentW
@@ -566,11 +569,19 @@ Item {
 
                             x: root.xForIndex(hourIndex) - width / 2
                             y: 0
-                            width: root.hourWidth * 2
+                            width: root.columnWidth * 2
                             height: root.headerBandHeight
 
                             Text {
-                                text: Data.hourLabel(hourIndex)
+                                // The array, not `Data.hourLabel(hourIndex)`.
+                                // A binding subscribes to the properties it
+                                // reads and a method call is not one, and this
+                                // Repeater's model is the same list on two
+                                // different days — so the call was evaluated
+                                // once and the band kept saying "Now" over a
+                                // day that had already happened. See
+                                // forecastdata.h.
+                                text: Data.hourLabels[hourIndex]
                                 color: parent.isNow ? Theme.ink.primary : Theme.ink.muted
                                 font.pixelSize: 12
                                 font.bold: parent.isNow
@@ -579,7 +590,7 @@ Item {
                             }
 
                             WeatherGlyph {
-                                kind: Data.conditionForLabel(hourIndex)
+                                kind: Data.labelConditions[hourIndex]
                                 glyphSize: 27
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 y: 26
@@ -644,7 +655,7 @@ Item {
                         PrecipBands {
                             anchors.fill: parent
                             cells: root.precipCells
-                            hourWidth: root.hourWidth
+                            hourWidth: root.columnWidth
                             contentWidth: root.contentW
                         }
 
@@ -666,7 +677,7 @@ Item {
                             anchors.fill: parent
                             values: visible ? root.seriesValues(root.metric) : []
                             growth: root.seriesExtent
-                            hourWidth: root.hourWidth
+                            hourWidth: root.columnWidth
                             axisTop: root.yForValue(root.axisMax)
                             axisBottom: root.yForValue(root.axisMin)
                             minValue: root.axisMin
@@ -681,7 +692,7 @@ Item {
                         PrecipField {
                             anchors.fill: parent
                             cells: root.precipCells
-                            hourWidth: root.hourWidth
+                            hourWidth: root.columnWidth
                             contentWidth: root.contentW
                             // Nothing worth animating behind the list view, and
                             // --grab wants a frame it can hold against a golden
@@ -779,7 +790,7 @@ Item {
                             property int heldIdx: 0
 
                             onPositionChanged: (mouse) => {
-                                var i = Math.round(mouse.x / root.hourWidth)
+                                var i = Math.round(mouse.x / root.columnWidth)
                                 idx = ChartMath.clamp(i, 0, Data.count - 1)
                                 heldIdx = idx
                             }
@@ -868,7 +879,7 @@ Item {
                         y: root.headerBandHeight + root.plotHeight + root.stripGap
                         width: parent.width
                         height: root.stripHeight
-                        hourWidth: root.hourWidth
+                        hourWidth: root.columnWidth
                         nowX: root.nowX
                         contentWidth: root.contentW
                     }
@@ -876,22 +887,31 @@ Item {
             }
 
             // ---- pagers ------------------------------------------------------
+            //
+            // Days, not hours. The plot draws one whole day, so there is no
+            // "further along this day" left for an arrow to mean, and the thing
+            // a reader wants next from a chart of Wednesday is Thursday.
+            //
+            // They write `Data`, which the day strip above reads back — so
+            // paging here slides the strip's selection with it, and the strip's
+            // own pagers and these are two controls over one number rather than
+            // two ideas of which day is on screen.
             PagerButton {
                 pointsLeft: true
-                enabledState: flick.contentX > 1
+                enabledState: Data.selectedDay > 0
                 anchors.left: flick.left
                 anchors.leftMargin: -4
                 y: root.panelPadding + root.headerBandHeight + root.plotHeight / 2 - height / 2
-                onActivated: flick.scrollBy(-flick.width * 0.75)
+                onActivated: Data.stepDay(-1)
             }
 
             PagerButton {
                 pointsLeft: false
-                enabledState: flick.contentX < flick.contentWidth - flick.width - 1
+                enabledState: Data.selectedDay < Data.days.length - 1
                 anchors.right: flick.right
                 anchors.rightMargin: -4
                 y: root.panelPadding + root.headerBandHeight + root.plotHeight / 2 - height / 2
-                onActivated: flick.scrollBy(flick.width * 0.75)
+                onActivated: Data.stepDay(1)
             }
         }
     }

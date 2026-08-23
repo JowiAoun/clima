@@ -492,6 +492,19 @@ var star = {
 
 var metric = {
     hourWidth:        48,
+
+    // The narrowest a chart column may be, which is a different number from the
+    // one above and a much smaller one. `hourWidth` is a column the reader is
+    // meant to scroll through; this is the floor under a plot that is fitting a
+    // whole day into whatever width it has, and it is set by what a two-column
+    // header entry has to hold: a 27 px condition glyph, an "11 PM" and a "23°",
+    // all centred in 2 x this.
+    //
+    // 48 was the floor to begin with, and it put a cliff at 1286 px of window:
+    // below that the desktop stopped fitting the day and started scrolling —
+    // with no scroll control, because the arrows step days. 24 moves the cliff
+    // to 734, which is below the width the desktop shell exists at at all.
+    minHourWidth:     24,
     plotHeight:       252,
     axisTopPad:       12,
     headerBandHeight: 78,

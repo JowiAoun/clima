@@ -26,44 +26,37 @@
 // that a Repeater bound to one rebuilds when a refresh lands.
 //
 // ============================================================================
-// THE WINDOW: FORTY-EIGHT HOURS, FIFTEEN OF THEM BEHIND
+// THE WINDOW: ONE DAY, MIDNIGHT TO MIDNIGHT
 //
-// A provider hands over several hundred hours. The chart draws forty-eight of
-// them, starting fifteen before now — which is not a number chosen here. It is
-// mockdata.js's, and mockdata.js explains it:
+// A provider hands over several hundred hours. The window is twenty-four of
+// them — the calendar day `selectedDay` names, in the place's own zone — and
+// the day strip above the chart is what moves it.
 //
-//     "Fifteen observed hours is a lot of past to carry, and it is the honest
-//      amount — the series starts at 21:00 the evening before."
+// It was not always. Today used to get a rolling forty-eight-hour window
+// starting fifteen hours behind the present, and only every *other* day was a
+// day. The asymmetry had a real argument behind it: "today" is the present
+// rather than a date, the hours behind you are ones you lived through, and
+// "later" does not stop at midnight.
 //
-// The one difference is that `nowIndex` is computed rather than fixed at 15.
-// It has to be: MET Norway's series begins at the current hour and has no past
-// at all, and a window that insisted on fifteen observed hours would open on
-// data that does not exist. So the window starts at whichever is later — the
-// series' own first hour, or fifteen hours ago — and `nowIndex` says where
-// "now" landed. `firstLabelIndex` follows from it, because "Now" has to be a
-// labelled column or it is never drawn.
+// What ended it is the pair of arrows either side of the chart. They step the
+// day now instead of scrolling the hours, so the chart shows a whole day at
+// once and nothing else — and a window that ran past midnight would put
+// Saturday morning on the end of a chart of Friday, where no arrow can reach it
+// without also meaning the part already on screen. One window per day is the
+// shape that makes "left is yesterday, right is tomorrow" true.
 //
-// ============================================================================
-// …AND WHICH DAY THE WINDOW IS OF
+// A day the series only partly covers gives a partly covered window. MET
+// Norway's hourly series begins at the current hour, so its today has no
+// morning in it, and padding one in would be inventing hours.
 //
-// The paragraph above describes the window when the day strip is on Today, and
-// that is still exactly what it does. `selectedDay` moves it: pick any other
-// card and the window becomes that day's own hours, midnight to midnight.
-//
-// The asymmetry is deliberate. "Today" is not a date here, it is the present —
-// the reason for fifteen hours of past is that they are hours you have lived
-// through, and the reason the window runs 48 forward is that "later" does not
-// stop at midnight. Neither sentence is true of Friday. Friday is a date, and
-// the honest unit of a date is the day.
-//
-// `nowIndex` therefore stops being an index into the window and becomes an
-// offset that MAY FALL OUTSIDE IT: negative when the whole window is still
-// ahead, `>= count` when it is all behind. That is not a degenerate case to
-// guard against, it is the answer — the chart's past veil runs from the plot's
-// left edge to `nowIndex`, so a future day veils nothing and a past day veils
-// everything, with no branch anywhere. `nowInWindow` is for the two things that
-// cannot be expressed as a width: whether to draw the now line, and whether any
-// column is labelled "Now".
+// `nowIndex` is therefore an offset to the present rather than an index into
+// the window, and it MAY FALL OUTSIDE IT: negative when the whole window is
+// still ahead, `>= count` when it is all behind. That is not a degenerate case
+// to guard against, it is the answer — the chart's past veil runs from the
+// plot's left edge to `nowIndex`, so a future day veils nothing and a past day
+// veils everything, with no branch anywhere. `nowInWindow` is for the two
+// things that cannot be expressed as a width: whether to draw the now line, and
+// whether any column is labelled "Now".
 //
 // What does NOT move with it: `days`, `todayIndex`, the calendar, the moon —
 // all of those are about dates rather than about the window — and `ahead()`,
@@ -154,6 +147,37 @@ class ForecastData : public QObject
     // a switch whose only effect is to claim something untrue.
     Q_PROPERTY(bool hasApparent READ hasApparent NOTIFY changed)
 
+    // ---- the per-hour strings, as arrays ------------------------------------
+    //
+    // The same three answers `hourLabel()`, `conditionFor()` and
+    // `conditionText()` give, and the reason both shapes exist is the same one
+    // `labelIndices` is a property for, one paragraph down: A BINDING SUBSCRIBES
+    // TO THE PROPERTIES IT READS, AND A METHOD CALL IS NOT ONE.
+    //
+    // The functions are safe inside a view whose model changes with the data,
+    // because a changed model rebuilds the delegates and the calls happen
+    // again. The window stopped being that. It is one calendar day now, so
+    // `count` is 24 on Thursday and 24 on Friday and `labelIndices` is the same
+    // list on both — and Qt's item views return early from `setModel` when the
+    // new model equals the old one. Nothing was rebuilt, so nothing re-ran, and
+    // the day strip moved Friday's temperatures under Thursday's weather glyph
+    // and Thursday's hour labels. The chart's header band said "Now" over a day
+    // that had already happened, which is how it was found.
+    //
+    // Arrays, `count` long, exactly like the series above and notified by the
+    // same signal. That also fixes a second thing quietly: a reader changing
+    // the clock to 24-hour used to see the labels update only after the next
+    // fetch, because nothing re-evaluated those calls either.
+    Q_PROPERTY(QVariantList hourLabels READ hourLabels NOTIFY changed)
+    Q_PROPERTY(QVariantList conditions READ conditions NOTIFY changed)
+    Q_PROPERTY(QVariantList conditionTexts READ conditionTexts NOTIFY changed)
+
+    // The header band's glyph per LABELLED column, which is not the glyph for
+    // an hour — see `conditionForLabel` below for what it folds and why. Indexed
+    // by hour like the three above, and empty at every column that carries no
+    // label.
+    Q_PROPERTY(QVariantList labelConditions READ labelConditions NOTIFY changed)
+
     // One of precip.js's six type names per hour, empty where the hour is dry.
     // The provider's WMO code decides, which is the whole reason it is here:
     // thunder and hail cannot be derived from an amount and a temperature, and
@@ -219,6 +243,11 @@ public:
 
     [[nodiscard]] int  selectedDay() const { return m_selectedDay; }
     void               setSelectedDay(int index);
+
+    // One day earlier or later, clamped by the setter. The chart's arrows, and
+    // in C++ rather than in QML because "the next day" is a fact about `days`
+    // that two shells would otherwise each have their own arithmetic for.
+    Q_INVOKABLE void stepDay(int delta);
     [[nodiscard]] bool nowInWindow() const { return m_nowIndex >= 0 && m_nowIndex < m_count; }
 
     [[nodiscard]] int aheadCount() const
@@ -248,6 +277,10 @@ public:
     [[nodiscard]] QVariantList visibility() const { return m_visibility; }
     [[nodiscard]] QVariantList airQuality() const { return m_airQuality; }
     [[nodiscard]] QVariantList precipTypes() const { return m_precipTypes; }
+    [[nodiscard]] QVariantList hourLabels() const { return m_hourLabels; }
+    [[nodiscard]] QVariantList conditions() const { return m_conditions; }
+    [[nodiscard]] QVariantList conditionTexts() const { return m_conditionTexts; }
+    [[nodiscard]] QVariantList labelConditions() const { return m_labelConditions; }
     [[nodiscard]] bool         hasApparent() const { return m_hasApparent; }
 
     [[nodiscard]] QVariantList days() const { return m_days; }
@@ -327,6 +360,12 @@ private:
 
     void buildWindow(const QDateTime &now);
     void buildSeries();
+
+    // The array forms of the three per-hour helpers, and of the header band's
+    // per-label glyph. Separate from buildSeries() because it has to run after
+    // buildWindow() has settled `labelIndices`, and because the three it fills
+    // are strings rather than readings.
+    void buildLabels();
     void buildDays(const QDateTime &now);
     void buildMonth(const QDateTime &now);
     void buildSunEvents();
@@ -347,11 +386,17 @@ private:
     // whole app where that shift happens.
     QList<clima::HourlyPoint> m_hours;
 
+    // The calendar day the window is of. Not derivable from `m_selectedDay`:
+    // a card the hourly series cannot reach clamps onto the last day there is
+    // data for, and the moon in the chart's legend has to follow the hours
+    // rather than the card.
+    QDate m_windowDate;
+
     int m_start           = 0;   // index into m_hours of column 0
     int m_count           = 0;
     int m_nowIndex        = 0;   // may fall outside [0, count) — see the header
     int m_startHour       = 0;
-    int m_firstLabelIndex = 1;
+    int m_firstLabelIndex = 2;
     int m_labelStep       = 2;
 
     // Where the present is in `m_hours`, which is what `nowIndex` is measured
@@ -362,6 +407,7 @@ private:
     QVariantList m_temperature, m_apparent, m_precipProb, m_precipMm, m_cloud, m_humidity;
     QVariantList m_windSpeed, m_windGust, m_windDirection, m_pressure, m_uvIndex;
     QVariantList m_visibility, m_airQuality, m_precipTypes;
+    QVariantList m_hourLabels, m_conditions, m_conditionTexts, m_labelConditions;
     bool         m_hasApparent = false;
 
     QVariantList m_days;

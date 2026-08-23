@@ -115,7 +115,11 @@ private Q_SLOTS:
     void initTestCase();
 
     void aFreshSnapshotOpensOnToday();
-    void todaysWindowIsTheOneAroundNow();
+    void todaysWindowIsTodayFromMidnight();
+    void theOutermostColumnsAreNeverLabelled();
+    void nowIsALabelledColumnWhereverThereIsOne();
+    void theStripCoversEveryHourOfTheDay();
+    void steppingWalksTheStripAndStopsAtItsEnds();
     void anotherDayIsThatDayFromMidnight();
     void everyDayInTheStripSelectsRealHours();
 
@@ -132,6 +136,8 @@ private Q_SLOTS:
     void everyLabelledColumnHasAGlyph();
     void aColumnNeverDrawsPlainSkyOverAnHourWithWeatherInIt();
     void aThunderstormOnAColumnTheBandSkipsIsStillDrawn();
+    void noHourOfTheDayIsAnHourNoColumnAnswersFor();
+    void theMoonFollowsTheHoursRatherThanTheCard();
     void theLastLabelDoesNotReadPastItsOwnDay();
 
 private:
@@ -203,19 +209,121 @@ void TestForecastData::aFreshSnapshotOpensOnToday()
     QVERIFY(data.nowInWindow());
 }
 
-void TestForecastData::todaysWindowIsTheOneAroundNow()
+void TestForecastData::todaysWindowIsTodayFromMidnight()
 {
     ForecastData data(nullptr);
     load(data);
 
-    // 48 hours with 15 of them behind — the window this class has always drawn,
-    // asserted here so that the day-aware branch cannot quietly change it. A
-    // provider with less than 15 hours of past would land on fewer, which is
-    // why this is a bound rather than an equality.
-    QCOMPARE(data.count(), 48);
-    QVERIFY(data.nowIndex() > 0);
-    QVERIFY(data.nowIndex() <= 15);
+    // Today is a day like any other, and that is the change. It used to be
+    // forty-eight hours with fifteen of them behind the present — a rolling
+    // window that ran past midnight into tomorrow — and the arrows either side
+    // of the chart are what ended it: they step the day, so a window that
+    // spilled into the next one had hours no arrow could be about.
+    //
+    // `nowIndex` is the giveaway. On a window that starts at midnight it is not
+    // an arbitrary offset any more, it IS the hour of the day, and asserting
+    // that is asserting the window's left edge without repeating the lookup
+    // that found it.
+    QCOMPARE(data.count(), 24);
+    QCOMPARE(data.startHour(), 0);
     QVERIFY(data.nowInWindow());
+
+    const QDateTime nowLocal = m_fixture.recordedAt.toTimeZone(zone());
+    QCOMPARE(data.nowIndex(), nowLocal.time().hour());
+}
+
+// The header band draws an entry per label, two columns wide and centred on it,
+// so a label on either outermost column is an entry half outside the plot. That
+// did not show while the chart scrolled and the clip took it; it shows now that
+// the day is drawn to the plot's exact width.
+void TestForecastData::theOutermostColumnsAreNeverLabelled()
+{
+    ForecastData data(nullptr);
+    load(data);
+
+    for (int day = 0; day < data.days().size(); ++day) {
+        data.setSelectedDay(day);
+        if (data.count() < 3)
+            continue;
+
+        const QVariantList labels = data.labelIndices();
+        QVERIFY2(!labels.isEmpty(),
+                 qPrintable(QStringLiteral("day %1 has no labelled column at all").arg(day)));
+
+        for (const QVariant &label : labels) {
+            const int index = label.toInt();
+            QVERIFY2(index > 0 && index < data.count() - 1,
+                     qPrintable(QStringLiteral("day %1 labels column %2 of %3, which is on the edge")
+                                    .arg(day).arg(index).arg(data.count())));
+        }
+    }
+}
+
+// …and the constraint that pulls the other way: "Now" has to be one of the
+// labels, or the word is never drawn. Midnight is the one hour it cannot be,
+// because column 0 is not available — and a now line with no label under it is
+// a smaller loss than a label sliced in half.
+void TestForecastData::nowIsALabelledColumnWhereverThereIsOne()
+{
+    ForecastData data(nullptr);
+    load(data);
+
+    QVERIFY(data.nowInWindow());
+    QVERIFY(data.nowIndex() > 0);
+
+    const QVariantList labels = data.labelIndices();
+    QVERIFY2(labels.contains(QVariant(data.nowIndex())),
+             qPrintable(QStringLiteral("column %1 is now and is not labelled").arg(data.nowIndex())));
+}
+
+// The precipitation strip tiles the window in two-hour cells and the labels no
+// longer do — they skip the outermost columns. Buckets that followed the labels
+// left the first hours of the day with no cell over them, which is a gap at the
+// left of the strip on every day of the forecast.
+void TestForecastData::theStripCoversEveryHourOfTheDay()
+{
+    ForecastData data(nullptr);
+    load(data);
+
+    const QVariantList buckets = data.precipBuckets();
+    QVERIFY(!buckets.isEmpty());
+    QCOMPARE(buckets.constFirst().toMap().value(QStringLiteral("index")).toInt(), 0);
+
+    int covered = 0;
+    for (const QVariant &entry : buckets) {
+        const QVariantMap bucket = entry.toMap();
+        QCOMPARE(bucket.value(QStringLiteral("index")).toInt(), covered);
+        covered += bucket.value(QStringLiteral("span")).toInt();
+    }
+    // Exactly, not "at least". The plot maps hour i to i * columnWidth, so a
+    // window of N hours is N-1 intervals wide — and a cell that ran past that
+    // was clipped to half its width with its droplet spilling out of it.
+    QCOMPARE(covered, data.count() - 1);
+}
+
+// What the chart's arrows do. Clamped by the setter rather than by the caller,
+// which is the whole reason this is a method and not two lines of QML.
+void TestForecastData::steppingWalksTheStripAndStopsAtItsEnds()
+{
+    ForecastData data(nullptr);
+    load(data);
+
+    const int today = data.selectedDay();
+    const int last  = int(data.days().size()) - 1;
+    QVERIFY(last > today);
+
+    data.stepDay(1);
+    QCOMPARE(data.selectedDay(), today + 1);
+    data.stepDay(-1);
+    QCOMPARE(data.selectedDay(), today);
+
+    data.setSelectedDay(0);
+    data.stepDay(-1);
+    QCOMPARE(data.selectedDay(), 0);
+
+    data.setSelectedDay(last);
+    data.stepDay(1);
+    QCOMPARE(data.selectedDay(), last);
 }
 
 void TestForecastData::anotherDayIsThatDayFromMidnight()
@@ -233,38 +341,35 @@ void TestForecastData::anotherDayIsThatDayFromMidnight()
     QCOMPARE(data.count(), 24);
     QCOMPARE(data.startHour(), 0);
 
-    // The first label is one column in, not on the edge. The header band
-    // centres a two-column entry on each label, and a day window opens at column
-    // 0 with nowhere further left to go — so a label in column 0 is a label
-    // sliced down the middle by the plot's clip. Today's window puts its first
-    // one column inside the edge for the same reason.
-    QCOMPARE(data.firstLabelIndex(), 1);
+    // A day nobody is living through has no "Now" to anchor the label phase to,
+    // so it takes the even one — 2 AM, 4 AM, 6 AM — which is how a clock reads.
+    // Two rather than zero because column 0 is on the edge; see
+    // theOutermostColumnsAreNeverLabelled.
+    QCOMPARE(data.firstLabelIndex(), 2);
     QVERIFY(!data.labelIndices().isEmpty());
-    QCOMPARE(data.labelIndices().first().toInt(), 1);
+    QCOMPARE(data.labelIndices().first().toInt(), 2);
 
-    // And it is the RIGHT twenty-four hours, checked against the window it
-    // came out of rather than against this class's own arithmetic repeated.
+    // And it is the RIGHT twenty-four hours, checked against a reading that
+    // does not move with the window rather than against this class's own
+    // arithmetic repeated.
     //
-    // Today's window runs from fifteen hours before the fixture's midday to
-    // thirty-two after it, so it already contains most of tomorrow. The hours
-    // tomorrow's window publishes have to be the same readings, at the offset
-    // where tomorrow's midnight falls in today's. If the day lookup were off by
-    // one — a UTC date compared against a local one is the obvious way — this
-    // is the assertion that says so.
-    const QDateTime nowLocal = m_fixture.recordedAt.toTimeZone(zone());
+    // `ahead()` indexes the whole series from the present and is unaffected by
+    // which day is selected, so tomorrow's first column has to be the hour
+    // `24 - now` hours from now, and every column after it the hour after that.
+    // If the day lookup were off by one — a UTC date compared against a local
+    // one is the obvious way — this is the assertion that says so.
+    const QDateTime nowLocal   = m_fixture.recordedAt.toTimeZone(zone());
     const int       toMidnight = 24 - nowLocal.time().hour();
 
-    data.setSelectedDay(data.todayIndex());
-    const QVariantList todays = data.temperature();
-    const int          offset = data.nowIndex() + toMidnight;
-
-    data.setSelectedDay(tomorrow);
     const QVariantList tomorrows = data.temperature();
+    QCOMPARE(tomorrows.size(), 24);
 
-    const int overlap = qMin(int(tomorrows.size()), int(todays.size()) - offset);
-    QVERIFY(overlap > 12);
-    for (int i = 0; i < overlap; ++i)
-        QCOMPARE(tomorrows.at(i), todays.at(offset + i));
+    for (int i = 0; i < tomorrows.size(); ++i) {
+        const QVariantMap hour = data.ahead(toMidnight + i);
+        QVERIFY2(!hour.isEmpty(),
+                 qPrintable(QStringLiteral("the series runs out %1 hours into tomorrow").arg(i)));
+        QCOMPARE(tomorrows.at(i), hour.value(QStringLiteral("temperature")));
+    }
 }
 
 void TestForecastData::everyDayInTheStripSelectsRealHours()
@@ -506,11 +611,12 @@ void TestForecastData::aThunderstormOnAColumnTheBandSkipsIsStillDrawn()
     // hours, so it lands on a labelled column whatever the phase and the band
     // drew it even when the band was wrong.
     //
-    // One hour is what it takes. A day window labels columns 1, 3, 5 … so the
-    // even columns are the ones nothing asks about, and column 12 is the hour
-    // starting at noon — WMO 95 stamped 1 p.m. under Open-Meteo's convention.
-    // Before this fix that storm had no glyph anywhere in its own day.
-    const Forecast forecast = oneStormyHour(13);
+    // One hour is what it takes. A day nobody is living through labels columns
+    // 2, 4, 6 … so the odd columns are the ones nothing asks about, and column
+    // 13 is the hour starting at 1 p.m. — WMO 95 stamped 2 p.m. under
+    // Open-Meteo's convention. Before this fix that storm had no glyph anywhere
+    // in its own day.
+    const Forecast forecast = oneStormyHour(14);
 
     ForecastData data(nullptr);
     data.setSnapshot(forecast, AirQuality(), forecast.hourly.at(36).time, Place());
@@ -523,9 +629,9 @@ void TestForecastData::aThunderstormOnAColumnTheBandSkipsIsStillDrawn()
              QStringLiteral("Tomorrow"));
     QCOMPARE(data.count(), 24);
 
-    QVERIFY2(!data.labelIndices().contains(12),
-             "column 12 is labelled after all — this test no longer tests anything");
-    QCOMPARE(data.conditionFor(12), QStringLiteral("thunder"));
+    QVERIFY2(!data.labelIndices().contains(13),
+             "column 13 is labelled after all — this test no longer tests anything");
+    QCOMPARE(data.conditionFor(13), QStringLiteral("thunder"));
 
     bool drawn = false;
     for (const QVariant &label : data.labelIndices()) {
@@ -533,6 +639,98 @@ void TestForecastData::aThunderstormOnAColumnTheBandSkipsIsStillDrawn()
             drawn = true;
     }
     QVERIFY2(drawn, "the day's only thunderstorm has no glyph in the day's own band");
+}
+
+// The general form of the test above, and the one that would have caught both
+// times this was wrong at an end rather than in the middle.
+//
+// The band labels every second column and skips the outermost one at each end,
+// so the day's first hours and its last are covered by a label's span or by
+// nothing. It was nothing at the start of the day, and then — once the first
+// label was made to reach back — still nothing at the end, on any day whose
+// label phase is odd. Sweeping the storm across all twenty-four hours is what
+// makes "no hour is an hour no column answers for" a property rather than a
+// case somebody remembered.
+void TestForecastData::noHourOfTheDayIsAnHourNoColumnAnswersFor()
+{
+    for (int stormHour = 0; stormHour < 24; ++stormHour) {
+        const Forecast forecast = oneStormyHour(stormHour);
+
+        ForecastData data(nullptr);
+        data.setSnapshot(forecast, AirQuality(), forecast.hourly.at(36).time, Place());
+        data.setSelectedDay(2);
+        QCOMPARE(data.count(), 24);
+
+        // The hour the storm lands on after the accumulation shift, which is one
+        // index earlier than the code was stamped on.
+        const int column = stormHour - 1;
+        if (column < 0)
+            continue;
+
+        bool drawn = false;
+        for (const QVariant &label : data.labelIndices()) {
+            if (data.conditionForLabel(label.toInt()) == QLatin1String("thunder"))
+                drawn = true;
+        }
+
+        QVERIFY2(drawn,
+                 qPrintable(QStringLiteral("a storm in column %1 has no glyph in the day's band")
+                                .arg(column)));
+    }
+}
+
+// The chart's legend names a moon, and it has to be the moon of the hours on
+// the plot. Those are the same day except where the strip carries a card the
+// hourly series cannot reach — MET Norway's daily horizon runs days past its
+// hourly one — and there the window clamps onto the last day it has hours for
+// while the card stays where it was put.
+void TestForecastData::theMoonFollowsTheHoursRatherThanTheCard()
+{
+    // Four daily rows, two days of hours. Cards 2 and 3 select nothing of their
+    // own, and each daily row carries a phase far enough from its neighbours to
+    // be named differently.
+    Forecast forecast;
+    forecast.timeZone   = QTimeZone::UTC;
+    forecast.providerId = QStringLiteral("test");
+
+    const QDate first(2026, 8, 20);
+    const double phases[] = { 0.00, 0.25, 0.50, 0.75 };
+
+    for (int day = 0; day < 4; ++day) {
+        DailyPoint daily;
+        daily.date           = first.addDays(day);
+        daily.temperatureMax = 20.0;
+        daily.temperatureMin = 10.0;
+        daily.weatherCode    = 3;
+        daily.moonPhase      = phases[day];
+        forecast.daily.append(daily);
+
+        if (day > 1)
+            continue;
+
+        for (int hour = 0; hour < 24; ++hour) {
+            HourlyPoint point;
+            point.time        = QDateTime(daily.date, QTime(hour, 0), QTimeZone::UTC);
+            point.temperature = 15.0;
+            point.isDay       = hour >= 6 && hour < 20;
+            point.weatherCode = 3;
+            forecast.hourly.append(point);
+        }
+    }
+
+    ForecastData data(nullptr);
+    data.setSnapshot(forecast, AirQuality(), forecast.hourly.at(12).time, Place());
+
+    // The last day the hours reach. asHourStarting drops the final point, so
+    // the 21st is the last date with a full set.
+    data.setSelectedDay(1);
+    const QString reachable = data.moonPhase().value(QStringLiteral("name")).toString();
+    QVERIFY(!reachable.isEmpty());
+
+    // A card past the horizon draws the reachable day's hours, and must draw its
+    // moon with them.
+    data.setSelectedDay(3);
+    QCOMPARE(data.moonPhase().value(QStringLiteral("name")).toString(), reachable);
 }
 
 void TestForecastData::theLastLabelDoesNotReadPastItsOwnDay()

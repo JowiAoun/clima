@@ -632,6 +632,7 @@ QtObject {
     // roles and they did not move when the colours became roles.
     component MetricTokens: QtObject {
         readonly property int hourWidth:        Tokens.metric.hourWidth
+        readonly property int minHourWidth:     Tokens.metric.minHourWidth
         readonly property int plotHeight:       Tokens.metric.plotHeight
         readonly property int axisTopPad:       Tokens.metric.axisTopPad
         readonly property int headerBandHeight: Tokens.metric.headerBandHeight

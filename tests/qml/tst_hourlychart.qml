@@ -1,7 +1,26 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Where the hourly chart opens, and how much of the past it spends doing it.
+// What the hourly chart is a chart OF, and — where it cannot show all of it —
+// where it opens.
+//
+// ============================================================================
+// THE RULE THE CARD IS BUILT ON
+//
+// The window is one calendar day (app/viewmodels/forecastdata.h) and the arrows
+// either side step to the next one. So the plot has exactly one job: show all of
+// that day. A day that has to be scrolled to be read is a day the arrows cannot
+// be about, and the pair of controls would then mean two different things at two
+// window widths.
+//
+// The column width is therefore derived — the plot's width divided among the
+// day's hours — with `hourWidth` as the floor under it rather than the answer.
+// A desktop card lands well above the floor and draws the day whole; a phone
+// lands on it and scrolls, because its 268 px plot puts 24 hours at 11.6 px a
+// column and the glyphs drawn on them are 27. That is the split this file
+// asserts at both ends — including at 1024, the narrowest window this shell
+// exists at, which is where the floor was originally set too high and left a
+// third of the desktop range scrolling with no scroll control on it.
 //
 // ============================================================================
 // WHY THIS IS NOT A GOLDEN IMAGE
@@ -51,10 +70,20 @@ TestCase {
         height: 900
         visible: true
 
-        // The desktop card, at the width WeatherPage gives it.
+        // The desktop card, at the width WeatherPage gives it in a default
+        // window: 1340 less the page's own margins.
         HourlyOverview {
             id: wide
-            width: 1280
+            width: 1252
+            height: 420
+        }
+
+        // …and at the narrowest window this shell runs in. The one that used to
+        // scroll.
+        HourlyOverview {
+            id: narrowDesktop
+            y: 1250
+            width: 936
             height: 420
         }
 
@@ -114,12 +143,40 @@ TestCase {
         verify(scroller(narrow) !== null, "the phone card has no flickable")
     }
 
-    // The user-visible rule, at the two widths it distinguishes: three observed
-    // hours where three is an eighth of the view, one where it would be a third.
-    function test_awideCardOpensOnThreeObservedHours() {
-        compare(scroller(wide).openPastHours, 3)
+    // The rule the whole card is built on: a desktop card is a chart of the
+    // day and of nothing else, so there is nothing left over to scroll.
+    function test_aWideCardDrawsTheWholeDayWithNothingLeftOver() {
+        var flick = scroller(wide)
+        fuzzyCompare(flick.contentWidth, flick.width, 0.5,
+                     "the desktop chart does not fill its plot exactly")
+        compare(flick.contentX, 0, "a chart of a whole day opened part-way along it")
+        verify(wide.columnWidth > wide.hourWidth,
+               "the fitted column came out narrower than the floor at 1252 px")
     }
 
+    // The cliff. The arrows step days, so a desktop chart that scrolls has
+    // content on it the reader has no control to reach — which means the floor
+    // has to stay under the fitted width at every width this shell runs at, not
+    // just at the default one.
+    function test_theWholeDayStillFitsAtTheNarrowestDesktop() {
+        var flick = scroller(narrowDesktop)
+        fuzzyCompare(flick.contentWidth, flick.width, 0.5,
+                     "at a 1024 px window the desktop chart scrolls, and nothing scrolls it")
+    }
+
+    // And the other end of it. A phone cannot show 24 legible columns, so the
+    // floor takes over and the chart scrolls — with the arrows still meaning
+    // days, which is what keeps the control honest at both widths.
+    function test_aNarrowCardFallsBackToTheFloorAndScrolls() {
+        compare(narrow.columnWidth, narrow.hourWidth,
+                "a 362 px card fitted the day instead of falling back to the floor")
+        var flick = scroller(narrow)
+        verify(flick.contentWidth > flick.width,
+               "the phone chart has the whole day inside its plot, which cannot be legible")
+    }
+
+    // Where a card too narrow for the day opens: on now, with a little of the
+    // past behind it. One observed hour where three would be a third of the view.
     function test_aNarrowCardOpensOnOne() {
         compare(scroller(narrow).openPastHours, 1)
     }
@@ -138,14 +195,73 @@ TestCase {
     }
 
     // And what odd is *for*: the label immediately inside the left edge is a
-    // labelled hour, so it is drawn whole.
+    // labelled hour, so it is drawn whole. Only the scrolling card has a left
+    // edge that can land anywhere — the wide one opens at column 0 and stays
+    // there, because there is nowhere else for a chart of a whole day to be.
     function test_theLeftEdgeLandsOneColumnBeforeALabel() {
-        for (var i = 0; i < 2; ++i) {
-            var flick = scroller(i === 0 ? wide : narrow)
-            var firstWholeLabel = Data.nowIndex - flick.openPastHours + 1
-            compare((firstWholeLabel - Data.firstLabelIndex) % Data.labelStep, 0,
-                    "column " + firstWholeLabel + " is inside the left edge and is not a label")
+        var flick = scroller(narrow)
+        var firstWholeLabel = Data.nowIndex - flick.openPastHours + 1
+        compare((firstWholeLabel - Data.firstLabelIndex) % Data.labelStep, 0,
+                "column " + firstWholeLabel + " is inside the left edge and is not a label")
+    }
+
+    // ---- the arrows ---------------------------------------------------------
+    //
+    // They step the day, so what they have to track is how much strip is left
+    // either side rather than how much plot. Asserted through `enabledState`,
+    // which is the binding that would go stale: the press itself is
+    // `Data.stepDay`, and what that does is tests/tst_forecastdata.cpp's.
+    function pagers(chart) {
+        var found = []
+        function walk(item) {
+            for (var i = 0; i < item.children.length; ++i) {
+                var child = item.children[i]
+                if (child.pointsLeft !== undefined)
+                    found.push(child)
+                else
+                    walk(child)
+            }
         }
+        walk(chart)
+        return found
+    }
+
+    function test_theArrowsRunOutAtTheEndsOfTheStrip() {
+        var found = pagers(wide)
+        compare(found.length, 2, "the chart does not carry a pair of arrows")
+
+        var back = found[0].pointsLeft ? found[0] : found[1]
+        var forward = found[0].pointsLeft ? found[1] : found[0]
+
+        Data.selectedDay = 0
+        compare(back.enabledState, false, "there is a day before the first one")
+        compare(forward.enabledState, true)
+
+        Data.selectedDay = Data.days.length - 1
+        compare(back.enabledState, true)
+        compare(forward.enabledState, false, "there is a day after the last one")
+
+        // Off `selectedDay` rather than off today's position in the strip:
+        // Open-Meteo is fetched with a past day and MET Norway is not, so
+        // whether today has a day before it is a property of the provider.
+        Data.selectedDay = Data.todayIndex
+        compare(back.enabledState, Data.selectedDay > 0)
+        compare(forward.enabledState, Data.selectedDay < Data.days.length - 1)
+    }
+
+    // A day change is not a scroll. Whichever day it is on, the desktop card
+    // still draws that day whole — which is the property that lets the arrows
+    // mean one thing at that width.
+    function test_everyDayFillsTheWideCardExactly() {
+        for (var day = 0; day < Data.days.length; ++day) {
+            Data.selectedDay = day
+            var flick = scroller(wide)
+            if (Data.count < 24)
+                continue          // a horizon that runs out mid-day; see forecastdata.h
+            fuzzyCompare(flick.contentWidth, flick.width, 0.5,
+                         "day " + day + " does not fill the plot")
+        }
+        Data.selectedDay = Data.todayIndex
     }
 
     // The tablet defect. A card given its width after it was built has to
@@ -164,7 +280,7 @@ TestCase {
 
         compare(flick.openPastHours, 3)
         var expected = Math.max(0, Math.min(flick.contentWidth - flick.width,
-                                            (Data.nowIndex - 3) * late.hourWidth))
+                                            (Data.nowIndex - 3) * late.columnWidth))
         fuzzyCompare(flick.contentX, expected, 0.5)
         verify(flick.contentX > 0, "a late-laid-out card never left the start of the series")
     }
