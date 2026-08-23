@@ -262,8 +262,8 @@ var groups = [
                   { label: "wind",     props: { metricId: "wind" } },
                   { label: "uv",       props: { metricId: "uv" } }
               ] },
-            { name: "Hourly list", file: "HourlyList.qml", stage: { w: 1000, h: 330 },
-              blurb: "The same hours as rows, for scanning rather than shape-reading." },
+            { name: "Hourly list", file: "HourlyList.qml", stage: { w: 1000, h: 372 },
+              blurb: "The same hours as cards along the day, for reading a number rather than a shape. Its arrows walk the hours and then step the day." },
             { name: "Day strip", file: "DayStrip.qml", stage: { w: 1100, h: 130 },
               blurb: "Seven days; the selected card abuts the panel below rather than overlapping it." },
             { name: "Metric tab bar", file: "MetricTabBar.qml", stage: { w: 900, h: 38 },
