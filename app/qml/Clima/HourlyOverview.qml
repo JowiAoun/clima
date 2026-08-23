@@ -925,7 +925,7 @@ Item {
         anchors.leftMargin: root.cardPadding
         anchors.rightMargin: root.cardPadding
         anchors.bottomMargin: root.cardPadding - 4
-        height: 18
+        height: 20
 
         Row {
             spacing: 16
@@ -997,8 +997,16 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
 
+            // Bigger than the 15 px it was, because the thing it is a picture
+            // OF is a fraction of a disc. At 15 px a moon 85% lit has a
+            // terminator two pixels wide and draws as a plain gold circle —
+            // the same picture a full moon draws — so the legend showed one
+            // moon while the words beside it and the Moon phase card below
+            // said another. It is the same component the card uses; the only
+            // thing that was wrong with it here was that it was too small to
+            // carry its own reading.
             MoonGlyph {
-                glyphSize: 15
+                glyphSize: 19
                 illuminated: Data.moonPhase.illuminated
                 waxing: Data.moonPhase.waxing
                 anchors.verticalCenter: parent.verticalCenter

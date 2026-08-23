@@ -1210,18 +1210,27 @@ void ConditionsData::buildMoonPhase(const DailyPoint &day, const QDate &referenc
         { QStringLiteral("trend"), QStringLiteral("none") },
         { QStringLiteral("status"),
           ForecastData::moonPhaseLabel(moonPhaseName(day.moonPhase)) },
-        // `%n` and not `%3`: the last day before a full moon is one day, and a
-        // card whose whole job is that sentence read "It is full again in 1
-        // days" on it — once every twenty-nine and a half nights.
+        // Three sentences and not one with `%n` in it. Qt only chooses a plural
+        // form from a TRANSLATION, so in the source language `%n day(s)` stays
+        // literally "day(s)" — which is how the card came to read "It is full
+        // again in 28 day(s)". Branching gives every language a whole sentence
+        // to translate and gives this one the words it actually uses; the case
+        // that made it necessary is `days == 1`, once every twenty-nine and a
+        // half nights, which read "in 1 days".
         { QStringLiteral("body"),
           days < 0
               ? tr("The moon is %1% illuminated tonight.").arg(percent)
               : (days == 0
                      ? tr("The moon is %1% illuminated, and full tonight.").arg(percent)
-                     : tr("The moon is %1% illuminated and %2. It is full again in %n day(s).",
-                          nullptr, days)
-                           .arg(percent)
-                           .arg(waxing ? tr("waxing") : tr("waning"))) },
+                     : (days == 1
+                            ? tr("The moon is %1% illuminated and %2. It is full tomorrow.")
+                                  .arg(percent)
+                                  .arg(waxing ? tr("waxing") : tr("waning"))
+                            : tr("The moon is %1% illuminated and %2. It is full again in "
+                                 "%3 days.")
+                                  .arg(percent)
+                                  .arg(waxing ? tr("waxing") : tr("waning"))
+                                  .arg(days))) },
     };
 }
 
