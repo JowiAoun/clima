@@ -210,8 +210,9 @@ void AppEngine::configure(const QString &fixtureName)
     } else {
         m_clock = std::make_unique<SystemClock>();
 
-        // Live only. A FrozenClock would tick the same reading for ever, and a
-        // running timer is the one thing --grab cannot settle.
+        // Live only: a FrozenClock would tick the same reading for ever. See the
+        // member's declaration for what that does and does not promise about
+        // captures.
         armMinuteTimer();
     }
 

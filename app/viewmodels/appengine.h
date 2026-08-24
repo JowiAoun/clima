@@ -298,9 +298,14 @@ private:
 
     std::unique_ptr<clima::Clock>       m_clock;
 
-    // Never started under --fixture: the clock is frozen there, so a tick would
-    // publish the same reading for ever, and --grab must settle to a still frame
-    // rather than to a window with a timer running in it.
+    // Never started under --fixture, where the clock is frozen and a tick would
+    // publish the same reading for ever.
+    //
+    // Which is also what keeps a capture still, though not directly: --grab and
+    // --film default to a fixture, so the timer is not running in any capture
+    // this repository takes. A capture that has explicitly asked for live data
+    // — --place, or --fixture off — does tick, and appoptions.cpp has already
+    // said in so many words that such a capture is not reproducible.
     QTimer                              m_minute;
     std::unique_ptr<clima::CacheStore>  m_cache;
     std::unique_ptr<clima::HttpClient>  m_http;

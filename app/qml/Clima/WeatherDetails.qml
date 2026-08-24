@@ -27,7 +27,14 @@ Item {
     SectionHeader {
         id: header
         title: qsTr("Weather details")
-        stamp: Detail.observedAt
+
+        // Qualified, unlike the card above, because the two are different
+        // readings and used to be the same one. That card carries the clock at
+        // the place and it ticks; this carries the hour these twelve cards
+        // describe, which moves only when a new observation lands. Two bare
+        // times a finger apart, disagreeing by half an hour and neither saying
+        // which it is, is a worse screen than either of them alone.
+        stamp: Detail.observedAt === "" ? "" : qsTr("as of %1").arg(Detail.observedAt)
     }
 
     Grid {
