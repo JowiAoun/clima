@@ -71,6 +71,7 @@
 #include <QObject>
 #include <QQmlEngine>
 #include <QString>
+#include <QTimer>
 #include <QVariantList>
 
 #include <memory>
@@ -117,13 +118,30 @@ class AppEngine : public QObject
     Q_PROPERTY(bool hasData READ hasData NOTIFY forecastChanged)
     Q_PROPERTY(bool loading READ isLoading NOTIFY loadingChanged)
 
+    // ---- what time it is there ---------------------------------------------
+    //
+    // "10:31 PM" — the wall clock at the *place*, not at this machine. MSN's
+    // overview card carries exactly this and nothing else beside it; fetched
+    // for Seattle and Toronto in the same second it reads 7:31 PM and 10:31 PM,
+    // so it is the location's clock rather than the reader's.
+    //
+    // It used to be `Detail.observedAt`, the observation's own timestamp, which
+    // is a defensible thing to show and is not what anybody reads it as. A time
+    // on a weather screen is taken for the time, and this one sat at whatever
+    // quarter-hour the provider last stamped and never moved again — a clock
+    // that has stopped, which is worse than no clock at all.
+    //
+    // Empty until a place with a zone is known, and the line it belongs to drops
+    // empty fields, so nothing shows rather than the wrong city's evening.
+    Q_PROPERTY(QString localTime READ localTime NOTIFY freshnessChanged)
+
     // "Updated 12 minutes ago". The §4.5 affordance, and the reason
     // `Forecast::fetchedAt` is a field rather than a detail.
-    Q_PROPERTY(QString updatedLabel READ updatedLabel NOTIFY forecastChanged)
+    Q_PROPERTY(QString updatedLabel READ updatedLabel NOTIFY freshnessChanged)
 
     // True once the data on screen is older than its TTL. Not an error state:
     // a stale forecast is the right thing to be showing, it just has to say so.
-    Q_PROPERTY(bool stale READ isStale NOTIFY forecastChanged)
+    Q_PROPERTY(bool stale READ isStale NOTIFY freshnessChanged)
 
     // Empty on the common path. A sentence when the last refresh failed, shown
     // *beside* the data rather than instead of it.
@@ -191,6 +209,7 @@ public:
 
     [[nodiscard]] bool    hasData() const;
     [[nodiscard]] bool    isLoading() const { return m_inFlight > 0; }
+    [[nodiscard]] QString localTime() const;
     [[nodiscard]] QString updatedLabel() const;
     [[nodiscard]] bool    isStale() const;
     [[nodiscard]] QString problem() const { return m_problem; }
@@ -241,6 +260,16 @@ Q_SIGNALS:
     void forecastChanged();
     void loadingChanged();
 
+    // Everything whose answer changes because time passed rather than because
+    // data arrived: the clock at the place, how long ago the forecast was
+    // fetched, and whether that has aged past its TTL.
+    //
+    // A signal of its own because the alternative is re-emitting
+    // forecastChanged() once a minute, and forecastChanged() means "there is new
+    // weather" — every view model rebuilds its whole snapshot on it. Wiring the
+    // minute timer to it would rebuild twelve detail cards to move one colon.
+    void freshnessChanged();
+
     // "Location services are unavailable", "Permission denied". A sentence for
     // a human; the picker shows it inline rather than in a dialog.
     void locationFailed(const QString &reason);
@@ -256,6 +285,11 @@ private:
     void load();
     void fetch(bool cachedOnly);
 
+    // Re-arms `m_minute` on the next minute boundary. Single-shot and re-armed
+    // rather than periodic, because a 60 s repeating timer started at :17 fires
+    // at :17 for ever and the displayed minute changes 17 s late.
+    void armMinuteTimer();
+
     void applyForecast(const clima::Forecast &forecast, const QString &servedBy, bool fromFallback);
     void applyAirQuality(const clima::AirQuality &airQuality);
     void publish();
@@ -263,6 +297,11 @@ private:
     void setInFlight(int delta);
 
     std::unique_ptr<clima::Clock>       m_clock;
+
+    // Never started under --fixture: the clock is frozen there, so a tick would
+    // publish the same reading for ever, and --grab must settle to a still frame
+    // rather than to a window with a timer running in it.
+    QTimer                              m_minute;
     std::unique_ptr<clima::CacheStore>  m_cache;
     std::unique_ptr<clima::HttpClient>  m_http;
     std::unique_ptr<clima::ProviderRegistry> m_registry;

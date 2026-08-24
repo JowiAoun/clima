@@ -23,6 +23,7 @@
 #include "libclima/providers/registry.h"
 
 #include "settings.h"
+#include "timeformat.h"
 
 #include <QCoreApplication>
 #include <QEventLoop>
@@ -107,6 +108,32 @@ AppEngine::AppEngine()
         if (hasPlace())
             fetch(/*cachedOnly=*/false);
     });
+
+    // ---- the minute hand ---------------------------------------------------
+    //
+    // Three things on screen go out of date on their own, with no new data
+    // involved: the clock at the place, "Updated 4 minutes ago", and whether the
+    // forecast has aged past its TTL. Nothing was telling them, so the first sat
+    // stopped and the second said "just now" an hour later — a line whose whole
+    // job is to tell you how much to trust what is above it, quietly lying.
+    m_minute.setSingleShot(true);
+    m_minute.setTimerType(Qt::CoarseTimer);
+    connect(&m_minute, &QTimer::timeout, this, [this]() {
+        Q_EMIT freshnessChanged();
+        armMinuteTimer();
+    });
+
+    // Connected rather than emitted alongside, so a third emit site of
+    // forecastChanged() cannot be added without this following it. New data is
+    // also newer data.
+    connect(this, &AppEngine::forecastChanged, this, &AppEngine::freshnessChanged);
+
+    // A different place is a different clock, and 12-versus-24-hour is a
+    // different spelling of the same one. Both change the reading with no
+    // minute having passed.
+    connect(this, &AppEngine::placeChanged, this, &AppEngine::freshnessChanged);
+    connect(TimeFormat::instance(), &TimeFormat::changed,
+            this, &AppEngine::freshnessChanged);
 }
 
 AppEngine::~AppEngine()
@@ -182,6 +209,10 @@ void AppEngine::configure(const QString &fixtureName)
         m_clock   = std::make_unique<FrozenClock>(m_fixture.recordedAt);
     } else {
         m_clock = std::make_unique<SystemClock>();
+
+        // Live only. A FrozenClock would tick the same reading for ever, and a
+        // running timer is the one thing --grab cannot settle.
+        armMinuteTimer();
     }
 
     // ---- 2. storage --------------------------------------------------------
@@ -744,6 +775,44 @@ void AppEngine::selectByQuery(const QString &query, int timeoutMs)
 bool AppEngine::hasData() const
 {
     return !m_forecast.isEmpty();
+}
+
+void AppEngine::armMinuteTimer()
+{
+    if (m_clock == nullptr)
+        return;
+
+    const QTime now = m_clock->now().time();
+    const int   msecs = 60000 - (now.second() * 1000 + now.msec());
+
+    // Floored at a second. Armed at :59.94 the remainder is 60 ms, and a timer
+    // that short re-arms itself on the same minute it just announced — this
+    // lands early into the next minute instead, which is the minute meant.
+    m_minute.start(qMax(1000, msecs));
+}
+
+// The clock at the place. See the property's header for why it is not the
+// observation's timestamp any more.
+QString AppEngine::localTime() const
+{
+    if (m_clock == nullptr)
+        return {};
+
+    // The forecast's zone first and the place's second — the same order
+    // ConditionsData resolves it in, so the two never disagree about which
+    // evening this is. Unlike that one there is no fall back to UTC: a clock
+    // reading is only worth showing when it is the right city's.
+    QTimeZone zone = m_forecast.timeZone;
+    if (!zone.isValid()) {
+        const Place current = place();
+        if (current.timezone.isEmpty())
+            return {};
+        zone = QTimeZone(current.timezone.toUtf8());
+    }
+    if (!zone.isValid())
+        return {};
+
+    return TimeFormat::instance()->clock(m_clock->now().toTimeZone(zone).time());
 }
 
 QString AppEngine::updatedLabel() const

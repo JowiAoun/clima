@@ -107,7 +107,7 @@ Item {
     // facts share one line because they answer one question — how much should I
     // trust this:
     //
-    //   the observation's own time      12:28 PM
+    //   the time where the weather is   12:28 PM
     //   how long ago we fetched it      Updated 4 minutes ago
     //   who answered, when it was not   via MET Norway
     //       the primary
@@ -121,7 +121,7 @@ Item {
     // timestamp, never a spinner and never an empty screen.
     Text {
         id: stamp
-        text: [Detail.observedAt,
+        text: [Engine.localTime,
               Engine.updatedLabel,
               Engine.fromFallback ? qsTr("via %1").arg(Engine.sourceName) : "",
               Engine.problem].filter(function (s) { return s !== "" }).join("  ·  ")
