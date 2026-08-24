@@ -150,6 +150,23 @@ function family(type) {
     return _FAMILY[type] ? _FAMILY[type] : type;
 }
 
+// Which of two types in one family wins the run's name when they arrive with
+// the same amount. Only the rain family holds more than one type, so this is
+// only ever asked about drizzle against rain — and rain wins, because the
+// alternative is a run containing rain being captioned "Drizzle".
+//
+// It settles ties rather than being a second opinion about strength: the amount
+// decides first, always. Without it the answer depended on which hour came
+// first, so 51@3.0 then 63@3.0 read "Drizzle" and the same two hours the other
+// way round read "Rain" — and providers round consecutive hours to the same
+// tenth of a millimetre often enough that this was the common case, not the
+// pathological one.
+var _RANK = { drizzle: 0, rain: 1, sleet: 1, snow: 1, hail: 2, thunder: 2 };
+
+function _rank(type) {
+    return _RANK[type] !== undefined ? _RANK[type] : 0;
+}
+
 // Contiguous hours of one family. Intensity varies hour to hour inside a run and
 // the field shows that variation; the run as a whole is labelled by its peak,
 // because "heavy rain, 2 to 6" is what you would say out loud about a spell
@@ -161,9 +178,9 @@ function family(type) {
 //
 // The peak carries the type as well as the amount, so a drizzly stretch with one
 // proper rain hour in it is named for that hour rather than for the drizzle
-// either side. Both spell the wash the same colour (theme.js gives drizzle and
-// rain one hue on purpose), so this decides the caption and the alpha, not the
-// paint.
+// either side — and where two hours tie on the amount, for the stronger of them.
+// Both spell the wash the same colour (theme.js gives drizzle and rain one hue
+// on purpose), so this decides the caption and the alpha, not the paint.
 function spans(cs) {
     var out = [];
     var cur = null;
@@ -174,6 +191,10 @@ function spans(cs) {
             if (c.mm > cur.peakMm) {
                 cur.peakMm = c.mm;
                 cur.type   = c.type;
+            } else if (c.mm === cur.peakMm && _rank(c.type) > _rank(cur.type)) {
+                // Same amount, stronger word. The peak is unchanged — this is
+                // the tie-break, not a new peak.
+                cur.type = c.type;
             }
         } else {
             if (cur)

@@ -59,6 +59,33 @@ TestCase {
         compare(s[0].label, "Light rain")
     }
 
+    // Providers round consecutive hours to the same tenth of a millimetre often
+    // enough that a tie is the common case rather than the odd one, and a tie
+    // broken by arrival order made the same two hours read "Drizzle" or "Rain"
+    // depending which came first. The amount still decides first; this only
+    // settles a draw.
+    function test_aTieOnTheAmountIsBrokenTowardsTheStrongerWord_data() {
+        return [
+            { tag: "drizzle first", a: "drizzle", b: "rain" },
+            { tag: "rain first",    a: "rain",    b: "drizzle" },
+        ]
+    }
+
+    function test_aTieOnTheAmountIsBrokenTowardsTheStrongerWord(data) {
+        var s = Precip.spans(cells([[data.a, 3.0], [data.b, 3.0]]))
+        compare(s.length, 1)
+        compare(s[0].type, "rain", data.tag + ": a run holding rain is not named drizzle")
+    }
+
+    // The tie-break is not a second opinion about strength. A heavier drizzle
+    // hour beside a lighter rain one is still named for the heavier.
+    function test_theAmountStillOutranksTheTieBreak() {
+        var s = Precip.spans(cells([["drizzle", 4.0], ["rain", 0.5]]))
+        compare(s.length, 1)
+        compare(s[0].type, "drizzle")
+        compare(s[0].peakMm, 4.0)
+    }
+
     // Nothing else merges. Rain turning to snow is the change the seam between
     // two bands was invented to say, and thunder has to stay its own band for a
     // second reason: PrecipField flashes the band whose type is `thunder`, so a
@@ -101,10 +128,11 @@ TestCase {
         compare(s[0].intensity, "heavy")
     }
 
-    // The bands tile the hours they cover with no overlap and no gap, which is
-    // the other half of "two overlays on the same hour" — one that measured clean
-    // when it was reported, and stays that way only if something checks.
-    function test_bandsTileTheDayAndNeverOverlap() {
+    // Bands never overlap — the other half of "two overlays on the same hour",
+    // and the half that measured clean when it was reported. Only overlap, not
+    // "no gap": a gap between two bands is a dry hour, which is the one thing
+    // the wash is required to leave alone.
+    function test_bandsNeverOverlap() {
         var spec = [null, ["drizzle", 0.1], ["rain", 2.0], ["drizzle", 0.2], null,
                     ["snow", 1.0], ["snow", 2.0], null, ["thunder", 5.0]]
         var s = Precip.spans(cells(spec))
