@@ -96,10 +96,16 @@ Item {
     // thing that says "keep going" — the same reason any horizontally
     // scrolling row leaves a partial item at its edge rather than a clean one.
     //
+    // Eighty rather than the forty it started at, because the slice is not only
+    // a hint that the strip continues — it is the target you press to get
+    // there. Forty put the neighbour's edge on screen and left the arrow as the
+    // only thing big enough to aim at; eighty is half a card, which is a card
+    // you can hit.
+    //
     // At the ends of the strip the clamp inside scrollTo takes it away again,
     // which is still right: the first and last cards ARE flush, and the panel
     // below squares its corner under them.
-    readonly property real peek: spacing + 40
+    readonly property real peek: spacing + 80
     readonly property real filletRadius: Theme.metric.filletRadius
 
     // Where the card stops travelling and the junction starts forming, as a
