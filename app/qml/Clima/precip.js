@@ -124,26 +124,62 @@ function label(type, intensity) {
 // Runs
 // ---------------------------------------------------------------------------
 
-// Contiguous hours of one type. Intensity varies hour to hour inside a run and
+// What a run is grouped by. Not the type — the *kind of weather event* the type
+// belongs to.
+//
+// Drizzle and rain are the same event seen at two strengths, and a provider
+// switches between their codes hour by hour through one wet afternoon: 51, 51,
+// 61, 51, 51 is a perfectly ordinary Open-Meteo day. Split on the type, that
+// afternoon becomes three runs, and three runs abutting look exactly like one
+// wash laid twice over the same hours — each draws its own pair of edges, so
+// every seam is a doubled line, and each is captioned, so "Drizzle" is printed
+// twice over what is plainly one spell. That is a real report from a real
+// screen, and it is the reason this function groups by family.
+//
+// Everything else keeps its own family, because everything else is genuinely a
+// different event. Rain turning to snow is the thing the seam was invented to
+// say. Thunder has to stay separate for a second reason as well: PrecipField
+// flashes a band whose type is `thunder`, and a storm hour folded into the rain
+// around it would light up the whole afternoon.
+var _FAMILY = {
+    drizzle: "rain", rain: "rain",
+    sleet: "sleet", snow: "snow", hail: "hail", thunder: "thunder"
+};
+
+function family(type) {
+    return _FAMILY[type] ? _FAMILY[type] : type;
+}
+
+// Contiguous hours of one family. Intensity varies hour to hour inside a run and
 // the field shows that variation; the run as a whole is labelled by its peak,
 // because "heavy rain, 2 to 6" is what you would say out loud about a spell
 // with one heavy hour in it.
 //
-// Runs split on type and not on intensity: rain easing off is still the same
+// Runs split on family and not on intensity: rain easing off is still the same
 // rain, and cutting the wash at every step change would draw four events where
 // there is one.
+//
+// The peak carries the type as well as the amount, so a drizzly stretch with one
+// proper rain hour in it is named for that hour rather than for the drizzle
+// either side. Both spell the wash the same colour (theme.js gives drizzle and
+// rain one hue on purpose), so this decides the caption and the alpha, not the
+// paint.
 function spans(cs) {
     var out = [];
     var cur = null;
     for (var i = 0; i < cs.length; ++i) {
         var c = cs[i];
-        if (c && cur && c.type === cur.type) {
+        if (c && cur && family(c.type) === cur.family) {
             cur.to = i;
-            cur.peakMm = Math.max(cur.peakMm, c.mm);
+            if (c.mm > cur.peakMm) {
+                cur.peakMm = c.mm;
+                cur.type   = c.type;
+            }
         } else {
             if (cur)
                 out.push(cur);
-            cur = c ? { from: i, to: i, type: c.type, peakMm: c.mm } : null;
+            cur = c ? { from: i, to: i, family: family(c.type), type: c.type, peakMm: c.mm }
+                    : null;
         }
     }
     if (cur)

@@ -52,6 +52,11 @@ Item {
             // Both edges, always — including where two spells abut. A wash that
             // changes from snow to rain in one step is two events, and the seam
             // between them is the only thing on the chart that says so.
+            //
+            // Which is exactly why precip.js groups runs by family rather than by
+            // type: a seam is a claim that the weather changed, and drawing one
+            // between drizzle and the rain it is part of made a doubled line and
+            // a repeated caption in the middle of a single wet afternoon.
             Rectangle {
                 width: 1
                 height: parent.height
