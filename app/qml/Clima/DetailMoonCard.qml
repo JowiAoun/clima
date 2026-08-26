@@ -146,21 +146,7 @@ DetailCard {
         // that has not been drawn yet.
         readonly property real tPenL: tRise - (tRise - tMin) * root.reveal
         readonly property real tPenR: tRise + (tMax - tRise) * root.reveal
-
-        // ---- the hover -------------------------------------------------------
-        // The sun card's hover, unchanged, because the pair has to move alike —
-        // the argument for it is over there and the rule it keeps is in
-        // DetailCard.qml. The mark runs on to the crossing its stretch is
-        // measured by and comes back.
-        //
-        // On this card the third case is the usual one rather than the corner.
-        // The moon set at 8:03 and does not rise again until 9:25 tonight, so
-        // the mark is parked on the dim tail and the target is the set behind
-        // it: it walks back to the horizon it left, which is how long ago that
-        // was, and returns to where it actually is.
-        readonly property real tTarget: tNow < tRise ? tRise : tSet
         readonly property real tMark: tRise + (tNow - tRise) * root.reveal
-                                    + (tTarget - tNow) * root.hoverWalk
 
         // Sub-minute spans are dropped rather than drawn: a zero-length subpath
         // under a round cap paints a bead the width of the stroke, which at

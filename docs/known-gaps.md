@@ -85,34 +85,6 @@ screen next to the toggle that controls them.
 
 ---
 
-## The QML tests see one fixture, so one hover gesture is never exercised
-
-`tests/qml/main.cpp` configures `AppEngine` with `clima::fixtures::defaultName()`
-— Toronto in July — and there is no way for a test file to ask for another. Every
-QML test therefore asserts against one day's weather.
-
-That is mostly fine, and for one assertion it is not. `tst_detailhover.qml`
-checks that each detail card's hover gesture actually moves the visualisation,
-and four of the eight walk from the reading to a second number in the same
-block. On this fixture the sight line's two numbers are the same: visibility
-runs 23–40 km against a scale that stops at 20, because past 20 a public
-forecast stops distinguishing, so both ends of its walk clamp to full. The card
-is correctly still, the test derives that from the data rather than demanding
-movement — and `DetailVisibilityCard`'s gesture is consequently built, asserted
-to return to rest, and never once seen to run.
-
-The same hole is open for any card whose reading happens to equal what its trend
-badge points at, which on some other day is the UV dial or either of the other
-two rings. It is a coverage gap rather than a defect: the arithmetic is the same
-three lines in all four cards and three of them are exercised.
-
-Closing it means letting a QML test choose its fixture — a `Q_INVOKABLE` on the
-setup object, or one test executable per fixture — and then asserting the sight
-line against a hazy one. `andes-snow` and `miami-thunder` are both already in
-`tests/fixtures/openmeteo/` and neither has been checked for it.
-
----
-
 ## The detail cards are about now, whichever day the chart is showing
 
 The day strip moves the hourly window: pick Friday and the chart, the list and

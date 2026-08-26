@@ -23,6 +23,11 @@
 // bearing, the wedge grows out to its reach, and the gust band opens to its
 // width — one gesture on the card's one-shot `reveal`. The two numbers do not
 // move. A speed is a reading and a reading is legible from the first frame.
+//
+// And point at the card and the wedge sets off downwind, because a drawing of
+// wind that holds perfectly still is missing the only thing everybody already
+// knows about wind. That is the one hover gesture in the grid; the rule it is
+// kept to is in DetailCard.qml and the mechanics are further down.
 // A card is a `DetailCard { content: Item { id: viz } }`, so everything drawn
 // here lives inside a Component and reaches the two ids around it — `root` for
 // the card and `viz` for the visualisation — across that boundary. Without this
@@ -41,6 +46,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Shapes
+import "chartmath.js" as ChartMath
 
 DetailCard {
     id: root
@@ -73,83 +79,10 @@ DetailCard {
         // an arrival on this page must not look like. `dirDelta` is the signed
         // turn, folded into (-180, 180].
         readonly property real dirDelta: ((dirDeg + 180) % 360) - 180
-
-        // Where the bearing has got to. The band is centred here and the vane
-        // rests here; only the hover separates the two.
-        readonly property real bearingDeg: {
+        readonly property real vaneDeg: {
             var a = dirDelta * root.reveal
             return (a % 360 + 360) % 360
         }
-
-        // ---- the hover: air that will not hold still -------------------------
-        // Everything on this rose is drawn at the mean, and the mean is the one
-        // thing wind never is. The card already knows by how much it is not:
-        // the gust band's half-width *is* the direction's unsteadiness, and the
-        // gap between the two numbers on the right is the speed's. Both are
-        // stated and neither is shown.
-        //
-        // So on hover the vane wanders inside its own band while the wedge
-        // surges between the mean's reach and the gust's. The band itself does
-        // not move — it is the envelope being wandered in, and a band that
-        // swung along with the vane would leave the two in exactly the same
-        // relation they are in at rest, which is no reading at all. A steady
-        // hour barely stirs; 8 gusting 12 is a 33% excess and swings a third of
-        // the ring, which is the whole point of driving the amplitude off the
-        // data rather than off a number chosen here.
-        //
-        // Two oscillators rather than one, because a veer and a surge that peak
-        // together every time read as a mechanism; their periods are below.
-        //
-        // `stirring` is `hoverPhase > 0` rather than `hovered`, so the pair go
-        // on running while the envelope closes and the vane spirals back onto
-        // the bearing instead of being cut off wherever it was.
-        // The periods are literals here rather than `Theme.motion.*`, which §10.6
-        // otherwise forbids outright, and it is the same exception §10.1 makes
-        // for `windAccent` eight lines up: these are not the length of a
-        // transition, they are the character of wind, and they belong to this
-        // one visualisation. A token called `veerPeriod` would be a token with
-        // exactly one caller and a name that could only ever describe air.
-        //
-        // Neither divides into the other — 2600 against 2400 — so the two drift
-        // in and out of step over about half a minute instead of striking
-        // together on every swing. The surge rises faster than it falls because
-        // that is the shape of a gust, not a preference about easing.
-        readonly property int veerPeriod:  1300
-        readonly property int surgeRise:    900
-        readonly property int surgeFall:   1500
-
-        readonly property bool stirring: root.hoverPhase > 0
-        property real veer: 0
-        property real surge: 0
-
-        SequentialAnimation on veer {
-            running: viz.stirring
-            loops: Animation.Infinite
-            NumberAnimation { to:  1; duration: viz.veerPeriod; easing.type: Easing.InOutSine }
-            NumberAnimation { to: -1; duration: viz.veerPeriod; easing.type: Easing.InOutSine }
-        }
-
-        SequentialAnimation on surge {
-            running: viz.stirring
-            loops: Animation.Infinite
-            NumberAnimation { to: 1; duration: viz.surgeRise; easing.type: Easing.InOutSine }
-            NumberAnimation { to: 0; duration: viz.surgeFall; easing.type: Easing.InOutSine }
-        }
-
-        // Kept inside the band rather than filling it: a vane that touched both
-        // ends of the arc would be claiming the extremes are where the wind
-        // spends its time, and the band is a spread, not a pair of stops.
-        readonly property real vaneDeg: {
-            var a = bearingDeg + gustHalf * 0.6 * veer * root.hoverPhase
-            return (a % 360 + 360) % 360
-        }
-
-        // The speed the wedge is drawn at. The mean at rest; on hover it runs
-        // up toward the gust and falls back, which is what the second number
-        // on this card means.
-        readonly property real shownSpeed:
-            root.d.speed + Math.max(0, root.d.gust - root.d.speed)
-                           * surge * root.hoverPhase
 
         // The cardinal labels sit *on* the ring, so the radius has to leave
         // half a line of type above N and below S.
@@ -171,6 +104,64 @@ DetailCard {
             return (8 + 30 * Math.min(excess, 1)) * root.reveal
         }
 
+        // ---- the hover: which way the air is going ----------------------------
+        // The rose draws a bearing and the numbers draw two speeds. All three
+        // are correct and all three are standing still, and standing still is
+        // the one thing wind is not: a vane on a roof tells you the air is
+        // *going* somewhere before you have read anything off it. Pointing at
+        // this card asks that question, so the wedge does what the air does and
+        // travels downwind.
+        //
+        // A drift and not a turn. The bearing is a measurement — turning the
+        // wedge off it would be drawing a wind that is not blowing — so nothing
+        // rotates. The wedge keeps its angle and moves along the one axis the
+        // reading already names, from the upwind side of the dial to the
+        // downwind side, and then starts again from where it came in. The reset
+        // is instant and deliberately so; a wedge that eased back upwind would
+        // be drawing air going the wrong way for half the loop.
+        //
+        // The travel is bounded by the dial rather than chosen: `driftBack` and
+        // `driftOn` are the room actually left between the wedge and the ring at
+        // either end, so it sweeps everything available to it and never crosses
+        // out. That falls out well — a light wind is a stub with most of the
+        // dial to cross, and a gale already fills it and barely moves, which is
+        // the same fact the wedge's length is carrying.
+        //
+        // The rate is the speed. It is the honest binding and the one the still
+        // card cannot make: 6 km/h ambles across and anything near the ceiling
+        // crosses in a third of the time.
+        readonly property real driftBack:
+            Math.max(0, ringR * 0.95 - (wedgeBaseR + ringR * 0.26))
+        readonly property real driftOn: Math.max(0, ringR * 0.95 - wedgeApexR)
+
+        readonly property int driftPeriod:
+            2600 - 1700 * Math.min(root.d.speed / root.d.scaleMax, 1)
+
+        // 0 at the upwind limit, 1 at the downwind one. A property value source,
+        // so it holds wherever it stopped; `hoverPhase` is what takes the
+        // displacement back to nothing when the pointer leaves, and it runs on
+        // `hoverPhase > 0` rather than on `hovered` so the wedge is still
+        // drifting while that happens instead of being cut off mid-dial.
+        property real drift: 0
+
+        NumberAnimation on drift {
+            running: root.hoverPhase > 0
+            loops: Animation.Infinite
+            from: 0
+            to: 1
+            duration: viz.driftPeriod
+            // The one place in this file that is not OutCubic, and §10.6 asks
+            // for the reason: air does not decelerate into the far side of a
+            // compass rose. A drift that eased would be reporting a gust at one
+            // end and a lull at the other, neither of which is in the data.
+            easing.type: Easing.Linear
+        }
+
+        // How far downwind the wedge has been carried. Zero at rest, which is
+        // what keeps the resting card the card the golden images hold.
+        readonly property real driftBy:
+            (-driftBack + (driftBack + driftOn) * drift) * root.hoverPhase
+
         // Wedge reach downwind, against the working ceiling `Detail.wind` carries —
         // a ceiling that decides what the reader sees is data, not styling. At
         // 30 km/h it puts 13 km/h a little past halfway out, and anything at or
@@ -181,7 +172,7 @@ DetailCard {
         // that the way a bar grows off its baseline, rather than swelling out of
         // a point that means nothing.
         readonly property real wedgeApexR:
-            ringR * (0.46 + 0.42 * Math.min(shownSpeed / root.d.scaleMax, 1)
+            ringR * (0.46 + 0.42 * Math.min(root.d.speed / root.d.scaleMax, 1)
                                  * root.reveal)
         readonly property real wedgeBaseR: ringR * 0.40
         readonly property real wedgeHalfW: ringR * 0.25
@@ -202,29 +193,26 @@ DetailCard {
         }
 
         // Four arcs, one per quadrant, broken where a cardinal label sits.
-        readonly property string ringPath: {
+        function spansPath(a0, a1) {
+            var spans = ChartMath.compassSpans(a0, a1, gapHalf)
             var p = ""
-            for (var k = 0; k < 4; ++k)
-                p += arcPath(k * 90 + gapHalf, (k + 1) * 90 - gapHalf, ringR) + " "
+            for (var i = 0; i < spans.length; ++i)
+                p += arcPath(spans[i].from, spans[i].to, ringR) + " "
             return p.trim()
         }
 
-        // The gust band is trimmed at any label break it would otherwise run
-        // through, so the ring's four gaps stay four gaps. Re-trimmed as the
-        // bearing swings onto its reading: the gaps are fixed to the ring, so a
-        // band that arrives by rotating has to be trimmed the whole way round.
-        readonly property string gustPath: {
-            var a0 = bearingDeg - gustHalf
-            var a1 = bearingDeg + gustHalf
-            for (var k = -1; k <= 5; ++k) {
-                var c = 90 * k
-                if (c + gapHalf <= bearingDeg && c + gapHalf > a0)
-                    a0 = c + gapHalf
-                if (c - gapHalf >= bearingDeg && c - gapHalf < a1)
-                    a1 = c - gapHalf
-            }
-            return arcPath(a0, a1, ringR)
-        }
+        readonly property string ringPath: spansPath(0, 360)
+
+        // The band is the ring painted green wherever the gusts reach, so it is
+        // literally the ring's own call with a narrower span — which is why the
+        // two cannot disagree about where a letter sits. The argument, and the
+        // bug that made it necessary, are in ChartMath.compassSpans.
+        //
+        // Where that leaves a stub on one side of a letter and nothing on the
+        // other, the stub is the truth: the ring has no arc in the gap, so
+        // neither can the band.
+        readonly property string gustPath: spansPath(vaneDeg - gustHalf,
+                                                     vaneDeg + gustHalf)
 
         // A leaf: rounded and broad on the upwind side, drawn to a point
         // downwind. Sides bow out very slightly so the tip reads as a taper
@@ -234,8 +222,14 @@ DetailCard {
             var ux = Math.sin(t), uy = -Math.cos(t)      // toward where it blows from
             var px = -uy, py = ux                        // across that axis
 
-            var bx = roseX + ux * wedgeBaseR, by = roseY + uy * wedgeBaseR
-            var ax = roseX - ux * wedgeApexR, ay = roseY - uy * wedgeApexR
+            // The whole leaf is drawn about a centre that the hover carries
+            // downwind. Offsetting the centre rather than each point is what
+            // keeps this a translation: the shape is identical at every step,
+            // which is the difference between air moving and a wedge growing.
+            var cx = roseX - ux * driftBy, cy = roseY - uy * driftBy
+
+            var bx = cx + ux * wedgeBaseR, by = cy + uy * wedgeBaseR
+            var ax = cx - ux * wedgeApexR, ay = cy - uy * wedgeApexR
             var c1x = bx + px * wedgeHalfW, c1y = by + py * wedgeHalfW
             var c2x = bx - px * wedgeHalfW, c2y = by - py * wedgeHalfW
 

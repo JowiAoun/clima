@@ -157,6 +157,35 @@ function _parseHex(c) {
 // Lit limb of the moon, centred on (cx, cy). `illum` is the illuminated
 // fraction — 0.5 half, above it gibbous, below it crescent — and `waxing` is
 // which side of the disc that fraction is on.
+// The drawn stretches of a broken compass ring, intersected with a span.
+//
+// A compass ring is four quadrant arcs with a gap at each cardinal for the
+// letter that sits in it. Anything painted *on* that ring — the wind card's
+// gust band — has to be broken in the same four places, so it is those same
+// four arcs cut down to whatever span it covers. Asking one function for both
+// is what stops the two from ever disagreeing: `compassSpans(0, 360, gap)` is
+// the ring itself.
+//
+// Returns {from, to} pairs in degrees, in order, possibly none at all. The
+// quadrant list runs one either side of the four that are drawn, so a span that
+// wraps past north is clipped by north's gap like any other.
+//
+// It replaces a version that took the span's two ends and pushed each one clear
+// of any gap it had landed in. That can only ever move an end, and a span whose
+// *centre* is in a gap has both ends outside it and nothing to push — so a wind
+// blowing from within `gapHalf` of a cardinal drew its band straight through the
+// letter. A quarter of the compass is inside a gap, so that was not a corner.
+function compassSpans(a0, a1, gapHalf) {
+    var out = [];
+    for (var k = -1; k <= 4; ++k) {
+        var s = Math.max(a0, k * 90 + gapHalf);
+        var e = Math.min(a1, (k + 1) * 90 - gapHalf);
+        if (e > s)
+            out.push({ from: s, to: e });
+    }
+    return out;
+}
+
 function moonPath(cx, cy, r, illum, waxing) {
     var k = clamp(illum, 0.03, 0.97);
     var rx = n(r * Math.abs(2 * k - 1));

@@ -91,19 +91,7 @@ DetailCard {
         // as the UV and cloud-cover dials, because the three share a geometry
         // and should not arrive three different ways; the long version of why
         // is in DetailUvCard.qml. The number in the middle does not count up.
-        // ---- the hover -------------------------------------------------------
-        // The same gesture as the UV dial and for the same reason — see there,
-        // and see DetailCard.qml's hover block for the rule both are keeping.
-        // What differs is what the badge points at: this one is worked out
-        // against the index three hours from now, which unlike a peak can be
-        // *below* the reading. It is allowed to be. A falling index is the good
-        // direction for air, and a ring shrinking back down through its bands is
-        // that news drawn rather than asserted.
-        readonly property real soonFrac: ChartMath.clamp(root.d.soon / root.d.max, 0, 1)
-
-        readonly property real shown: reading + (soonFrac - reading) * root.hoverWalk
-
-        readonly property real t: shown * root.reveal
+        readonly property real t: reading * root.reveal
 
         readonly property real markAngle: startAngle + t * sweepAngle
         readonly property color markColor: ChartMath.sampleRamp(Detail.bands.aqi, t)
@@ -142,34 +130,6 @@ DetailCard {
                 out.push({ from: reading * i / n,
                            to:   reading * (i + 1) / n,
                            mid:  reading * (i + 0.5) / n })
-            return out
-        }
-
-        // ---- the stretch the hover reaches on to -----------------------------
-        // A run of its own rather than more of the one above, and that is not
-        // tidiness. Extending the run above means moving where its last segment
-        // ends, which moves the point that segment's colour is sampled at, which
-        // repaints a resting card that nothing asked to change. This run tiles
-        // the stretch between the reading and where the hover walks to, exists
-        // only when there is one, and is clipped to the head exactly as its
-        // neighbour is. At rest the head is the reading, every segment here is
-        // empty, and the card is the card it has always been — which is what
-        // lets the golden images go on asserting it.
-        //
-        // Only ever forward. This card's walk can also go the other way — a
-        // falling index is the good news — and that direction needs nothing: the
-        // head retreats and the run above simply clips shorter, which is the
-        // same arithmetic the arrival already does.
-        readonly property var aheadSegs: {
-            var span = soonFrac - reading
-            if (span <= 0.005)
-                return []
-            var out = []
-            var n = Math.max(2, Math.round(span * segments))
-            for (var i = 0; i < n; ++i)
-                out.push({ from: reading + span * i / n,
-                           to:   reading + span * (i + 1) / n,
-                           mid:  reading + span * (i + 0.5) / n })
             return out
         }
 
@@ -217,33 +177,6 @@ DetailCard {
                     strokeWidth: viz.ringWidth
                     capStyle: ShapePath.RoundCap
                     PathSvg { path: viz.arcSeg(seg.modelData.from, seg.segTo) }
-                }
-            }
-        }
-
-
-        // The stretch beyond the reading, painted only as far as the hover has
-        // walked. Empty at rest.
-        Repeater {
-            model: viz.aheadSegs
-
-            Shape {
-                id: ahead
-                anchors.fill: parent
-                preferredRendererType: Shape.CurveRenderer
-
-                required property var modelData
-
-                readonly property real segTo: Math.max(modelData.from,
-                                                       Math.min(modelData.to, viz.t))
-                opacity: segTo > modelData.from ? 1 : 0
-
-                ShapePath {
-                    fillColor: "transparent"
-                    strokeColor: ChartMath.sampleRamp(Detail.bands.aqi, ahead.modelData.mid)
-                    strokeWidth: viz.ringWidth
-                    capStyle: ShapePath.RoundCap
-                    PathSvg { path: viz.arcSeg(ahead.modelData.from, ahead.segTo) }
                 }
             }
         }

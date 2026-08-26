@@ -83,52 +83,39 @@ Item {
 
     // ---- the hover ---------------------------------------------------------
     // The second occasion for motion on a card, and the reveal block above
-    // rules out the first premise it was written on: these cards do have an
-    // interaction after all. Pointing at one is a question, and the question
-    // is "tell me more".
+    // rules out the premise it was written on: these cards do have an
+    // interaction after all. Pointing at one is a question.
     //
-    // What a card may answer with is narrow, and the rule has to be written
-    // down or the grid becomes twelve fidgets:
+    // Exactly one card answers it today, and the rule that keeps it that way is
+    // worth writing down, because the alternative is a grid of twelve fidgets:
     //
-    //   **Hover says the one true thing the resting card leaves out.**
+    //   **A card moves on hover only where the still card is silent about
+    //   something the reading itself does.**
     //
-    // For most of them that thing is already on the card, unsaid. Every card
-    // carries a trend badge; a badge is a direction with no magnitude, and the
-    // value it was computed against is sitting in the same data. So the cards
-    // whose visualisation is a scale walk their paint head from the reading to
-    // that value and back — the UV dial climbs to today's peak, the air-quality
-    // and cloud dials to where they will be in three hours, the sight line out
-    // to the day's clearest. Sun and Moon walk their mark to the crossing their
-    // stretch is measured by, which is the same sentence told in time rather
-    // than in units. Moon phase advances the terminator two nights, because a
-    // waxing crescent and a waning one are the same picture. Wind is the only
-    // card that answers with something that is not a number: its second fact is
-    // that wind does not hold still, and on this card it is holding still.
-    //
-    // Four cards answer with the tint and nothing else, and that is a finding
-    // rather than an omission. Temperature, Feels like and Pressure draw twelve
-    // hours of history and their badge points at an hour three ahead — off the
-    // right-hand edge of a chart that does not hold the future, and a card must
-    // not draw data it does not have. Precipitation's columns are already the
-    // whole story, and Humidity's comparison hour is one of the eight bars it
-    // has drawn.
+    // The wind rose is the case. It draws a bearing and two speeds, all three
+    // correct and all three still, and the one thing it cannot say standing
+    // still is the thing a weather vane says at a glance: the air is going
+    // somewhere. So the wedge travels downwind. Everything else on this page is
+    // a level, a history or a fraction — quantities that do not *do* anything —
+    // and a level that jiggles under a pointer is decoration.
     //
     // Two rules, and like the reveal's they are not negotiable:
     //
     //   - Everything a card moves on hover is multiplied by `hoverPhase`, which
     //     is exactly 0 at rest. That is what keeps a resting card identical to
-    //     the card before any of this existed, which is what the golden images
-    //     assert and how they can go on asserting it.
+    //     the card before any of this existed — which is what the golden images
+    //     assert — and it is what retires a gesture along the shortest path from
+    //     wherever it had got to when the pointer left, so no gesture has to
+    //     know how to finish itself.
     //   - `hoverPhase` is pinned to 0 under `Theme.stillness`, so a reader who
-    //     asked their desktop for less movement gets the tint alone, and a
+    //     asked their desktop for less movement gets nothing moving, and a
     //     capture cannot be caught mid-gesture even with something under the
-    //     pointer. The tint itself survives, because a colour is a state and
-    //     not a movement.
+    //     pointer.
     //
     // Mouse and touchpad only. A touch screen delivers a synthetic hover that
-    // arrives with the press and never leaves, so on a phone every card the
-    // reader had ever touched would still be lit — and the phone does not draw
-    // this grid to be pointed at in the first place.
+    // arrives with the press and never leaves, so on a phone a card the reader
+    // had once touched would go on drifting — and the phone does not draw this
+    // grid to be pointed at in the first place.
     HoverHandler {
         id: cardHover
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
@@ -136,10 +123,6 @@ Item {
 
     readonly property alias hovered: cardHover.hovered
 
-    // The envelope. Every hover gesture in the grid is scaled by it, so leaving
-    // the card retires the gesture along the shortest path from wherever it had
-    // got to — no gesture has to know how to finish itself, and none of them
-    // can be left standing off their reading.
     property real hoverPhase: (root.hovered && !Theme.stillness) ? 1 : 0
 
     Behavior on hoverPhase {
@@ -147,28 +130,6 @@ Item {
             duration: Theme.motion.move
             easing.type: Easing.OutCubic
         }
-    }
-
-    // The rhythm the walking cards share, and the reason they share it: seven
-    // cards each timing their own out-and-back would be seven cards that agree
-    // about what hover means and disagree about how long it takes.
-    //
-    // Out over the reveal's own duration, because it is the reveal's gesture
-    // being made a second time; a pause at the far end long enough to read the
-    // value it went to; back a little quicker; and then the longest pause of
-    // the four at rest, so the card spends most of a cycle showing the reading
-    // it actually has. `hoverBeat` is the rhythm alone — cards want `hoverWalk`,
-    // which is the rhythm inside the envelope.
-    property real hoverBeat: 0
-    readonly property real hoverWalk: root.hoverBeat * root.hoverPhase
-
-    SequentialAnimation on hoverBeat {
-        running: root.hoverPhase > 0
-        loops: Animation.Infinite
-        NumberAnimation { to: 1; duration: Theme.motion.reveal; easing.type: Easing.OutCubic }
-        PauseAnimation { duration: Theme.motion.dwell }
-        NumberAnimation { to: 0; duration: Theme.motion.view; easing.type: Easing.InOutSine }
-        PauseAnimation { duration: Theme.motion.rest }
     }
 
     readonly property real contentWidth: card.width - Theme.metric.detailPadH * 2
@@ -201,24 +162,7 @@ Item {
         id: card
         anchors.fill: parent
         radius: Theme.metric.detailRadius
-
-        // One rectangle changing colour, not a hover wash laid over the card:
-        // two washes composite to a patch lighter than either and the seam is
-        // exactly what you notice (§10.1). The next rung of the surface ladder
-        // rather than a tint invented here, and the same pair the hourly list
-        // uses on its rows, so the two surfaces that respond to a pointer
-        // respond by the same amount.
-        color: root.hovered ? Theme.surface.raised : Theme.surface.base
-
-        // A state and not a gesture, so it is left out of `hoverPhase` and
-        // survives stillness — where the duration collapses to zero and the
-        // card simply is the other colour.
-        Behavior on color {
-            ColorAnimation {
-                duration: Theme.motion.tint
-                easing.type: Easing.OutCubic
-            }
-        }
+        color: Theme.surface.base
     }
 
     Text {

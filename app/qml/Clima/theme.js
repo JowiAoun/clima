@@ -660,23 +660,7 @@ var motion = {
     // Between one sibling's reveal and the next. Deliberately small: twelve
     // cards at 45 ms is a 500 ms wave that reads as one gesture, where the
     // same wave at 150 ms reads as twelve separate things going off.
-    stagger:  45,
-
-    // The two rests in an out-and-back gesture — a hover walking a dial to the
-    // value its trend badge points at, holding there, and coming home. `dwell`
-    // is long enough to read what it went to; `rest` is the longest of the
-    // four legs, so a card the reader has parked the pointer on spends most of
-    // each cycle showing the reading it actually has.
-    //
-    // These two do NOT collapse under stillness, and that is the only
-    // exception in this group. Every other token here is the length of a
-    // transition, and a transition of zero is just the end state. These are
-    // rests inside an infinite loop: at zero the loop has no length at all and
-    // spins the event thread. Nothing should ever run it under stillness —
-    // `hoverPhase` is pinned to 0 there, which is the guard — but a guard and
-    // a value that cannot spin are not the same amount of safety.
-    dwell:   700,
-    rest:    900
+    stagger:  45
 };
 
 var scale = {

@@ -88,27 +88,7 @@ DetailCard {
         //
         // No stagger and no second clock: there is one shape, so the card's own
         // reveal is the whole animation, and it is eased by `DetailCard`.
-        // ---- the hover -------------------------------------------------------
-        // `peak` is the clearest the next twelve hours get, and `peakAt` is when
-        // — the card names the hour in its body sentence and then draws the
-        // present. On hover the sight line goes on lighting out to that
-        // distance and comes back, which is the one reading a still picture of a
-        // distance cannot give: not how far you can see, but how much further
-        // you will be able to.
-        //
-        // Length only. The colour stays sampled at the reading, exactly as it
-        // stays put during the arrival and for the same reason — the greens
-        // between here and the clearest hour are readings nobody took. Length is
-        // the reveal, length is the hover, colour is the reading.
-        //
-        // Never shorter than the reading: `peak` is a maximum over a window that
-        // starts now, so at the clearest hour the two coincide and the line
-        // holds still.
-        readonly property real peakFrac:
-            Math.max(frac, ChartMath.clamp(root.d.peak / root.d.scaleMax, 0, 1))
-        readonly property real shown: frac + (peakFrac - frac) * root.hoverWalk
-
-        readonly property real litFrac: shown * root.reveal
+        readonly property real litFrac: frac * root.reveal
 
         // The sight line lives above the reading and uses the width it is given.
         // Thickness is perspective, not data: near ground fills more of the view

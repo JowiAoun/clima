@@ -71,23 +71,7 @@ DetailCard {
         // Behavior could never once fire. It was a transition written for a
         // state change this card does not have, at a duration that was not a
         // token. An 8% ring drawing itself in is the motion that was wanted.
-        // ---- the hover -------------------------------------------------------
-        // Clouding over or clearing, which is what the body sentence says in
-        // words and the badge says as an arrow — neither of them says by how
-        // much. On hover the ring runs to the cover three hours out, the hour
-        // both of those were worked out against, and comes back.
-        //
-        // `shown` is the value being drawn before the arrival scales it, and it
-        // exists so the ring's colour can follow the hover without following
-        // the reveal. Those are different: during the arrival the value is not
-        // changing, so a hue that climbed with the sweep would be animating a
-        // number that stands still (which is the argument below). During a hover
-        // the value genuinely is a different one, and a ring that changed length
-        // while holding an overcast grey would be drawing half of it.
-        readonly property real soonFrac: ChartMath.clamp(root.d.soon / 100, 0, 1)
-        readonly property real shown: reading + (soonFrac - reading) * root.hoverWalk
-
-        readonly property real t: shown * root.reveal
+        readonly property real t: reading * root.reveal
 
         // Ring colour comes off the cloud ramp, so it is the reading and not a
         // decoration: p = 0 is the top of the value axis, so a clear sky picks
@@ -99,7 +83,7 @@ DetailCard {
         // shifted hue while it grew would be animating a number that is not
         // changing.
         readonly property color coverInk:
-            ChartMath.sampleRamp(Theme.ramp.cloud.line, 1 - shown)
+            ChartMath.sampleRamp(Theme.ramp.cloud.line, 1 - reading)
 
         // The dial reaches a full radius above its centre but only sin(115°)
         // below, because of the mouth. Fit the shape it actually is.

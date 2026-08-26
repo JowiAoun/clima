@@ -799,13 +799,6 @@ QtObject {
         readonly property int reveal:  still ? 0 : Tokens.motion.reveal
         readonly property int stagger: still ? 0 : Tokens.motion.stagger
 
-        // Not collapsed by stillness, unlike every line above. The reason is in
-        // theme.js next to the values: these are rests inside a loop rather
-        // than the length of a transition, and a zero-length rest in an
-        // infinite loop is a spin.
-        readonly property int dwell:   Tokens.motion.dwell
-        readonly property int rest:    Tokens.motion.rest
-
         readonly property int easing:  Easing.OutCubic
     }
     readonly property MotionTokens motion: MotionTokens { still: theme.stillness }

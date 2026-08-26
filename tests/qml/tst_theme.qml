@@ -29,7 +29,6 @@ import "qrc:/qt/qml/Clima/sky.js" as Sky
 import "qrc:/qt/qml/Clima/Gallery/contrast.js" as Contrast
 
 TestCase {
-    id: testCase
     name: "Theme"
 
     // Both raw tables, built the way the palette page builds them.
@@ -360,18 +359,6 @@ TestCase {
     // who asked their desktop for less movement. Both want the same thing:
     // every duration at zero, with none missed. A single animation left running
     // is a golden image that fails one run in twenty.
-    //
-    // Two tokens are exempt and they are named rather than pattern-matched, so
-    // adding a third is a decision somebody has to write down here. `dwell` and
-    // `rest` are the pauses in an out-and-back gesture — see theme.js — and
-    // they are rests inside a loop rather than the length of a transition. A
-    // transition of zero is its own end state and is exactly what stillness
-    // wants; a rest of zero inside an infinite loop is a spin. Nothing runs
-    // them under stillness because `DetailCard`'s `hoverPhase` is pinned to 0
-    // there, and that guard is the reason they are safe, not the reason they
-    // are exempt.
-    readonly property var restsNotTransitions: ["dwell", "rest"]
-
     function test_stillnessZeroesEveryDuration() {
         var was = Theme.stillness
         Theme.stillness = true
@@ -381,12 +368,6 @@ TestCase {
         for (var i = 0; i < names.length; ++i) {
             if (names[i] === "easing")
                 continue
-            if (testCase.restsNotTransitions.indexOf(names[i]) >= 0) {
-                verify(Theme.motion[names[i]] > 0,
-                       "Theme.motion." + names[i] + " is exempt from stillness because a "
-                       + "zero-length rest in a loop spins — so it must not be zero")
-                continue
-            }
             compare(Theme.motion[names[i]], 0, "Theme.motion." + names[i] + " still runs when still")
         }
 
