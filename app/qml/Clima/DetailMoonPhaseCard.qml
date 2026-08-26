@@ -21,6 +21,22 @@
 // is where one edge has got to. It also degrades correctly: at reveal 0 the
 // card is a thin crescent rather than an empty box, so the moon is on the card
 // before the animation starts, which is what "readable at reveal = 0" asks for.
+// A card is a `DetailCard { content: Item { id: viz } }`, so everything drawn
+// here lives inside a Component and reaches the two ids around it — `root` for
+// the card and `viz` for the visualisation — across that boundary. Without this
+// pragma neither is resolvable at compile time: qmllint reports every one of
+// them as an unqualified access, and qmlcachegen, which is the half that costs
+// something, cannot ahead-of-time compile the binding and leaves it to be
+// interpreted on every evaluation. That is the first-paint budget in
+// docs/03-tech-stack.md §3.4 being spent on lookups the compiler could have
+// done.
+//
+// Bound makes the enclosing scope's ids lexical, which is what they already
+// read as. It is safe here because every delegate in this file declares its
+// `required property` — that is the one thing Bound takes away, and none of
+// these were relying on it.
+pragma ComponentBehavior: Bound
+
 import QtQuick
 
 DetailCard {
