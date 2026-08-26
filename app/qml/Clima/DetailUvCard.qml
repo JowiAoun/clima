@@ -97,7 +97,27 @@ DetailCard {
         // frame it grows a second digit, which is the air-quality dial's 25
         // sliding sideways under its own ring, and §10.6 does not allow text to
         // slide. The arc carries the journey; the number carries the value.
-        readonly property real t: reading * root.reveal
+        // ---- the hover -------------------------------------------------------
+        // The badge on this card is worked out against today's peak, and a badge
+        // is a direction with no magnitude: it says the index is climbing and
+        // never says how far. On hover the head of the paint carries on up to
+        // the peak and comes back — and because the mark takes the colour of the
+        // band it is crossing, "3 now, 8 at two" is told in the scale's own
+        // language instead of only in the sentence underneath.
+        //
+        // Never below the reading, because a peak is a maximum over the whole
+        // day. By late afternoon the two coincide and the dial holds still,
+        // which is the correct thing for it to say then.
+        readonly property real peakFrac:
+            Math.max(reading, ChartMath.clamp(root.d.peak / root.d.max, 0, 1))
+
+        // The value being drawn, before the arrival scales it. Splitting the two
+        // is what keeps the hover out of the reveal: at rest `shown` is the
+        // reading exactly, so the resting dial is the dial this card has always
+        // drawn.
+        readonly property real shown: reading + (peakFrac - reading) * root.hoverWalk
+
+        readonly property real t: shown * root.reveal
 
         readonly property real markAngle: startAngle + t * sweepAngle
         readonly property color markColor: ChartMath.sampleRamp(Detail.bands.uv, t)
@@ -130,6 +150,29 @@ DetailCard {
             var a = []
             for (var i = 0; i < splitSeg; ++i) a.push(i)
             return a
+        }
+
+        // ---- the stretch the hover reaches on to -----------------------------
+        // A run of its own rather than more of the one above, and that is not
+        // tidiness. Extending the run above means moving where its last segment
+        // ends, which moves the point that segment's colour is sampled at, which
+        // repaints a resting card that nothing asked to change. This run tiles
+        // the stretch between the reading and where the hover walks to, exists
+        // only when there is one, and is clipped to the head exactly as its
+        // neighbour is. At rest the head is the reading, every segment here is
+        // empty, and the card is the card it has always been — which is what
+        // lets the golden images go on asserting it.
+        readonly property var aheadSegs: {
+            var span = peakFrac - reading
+            if (span <= 0.005)
+                return []
+            var out = []
+            var n = Math.max(2, Math.round(span * segments))
+            for (var i = 0; i < n; ++i)
+                out.push({ from: reading + span * i / n,
+                           to:   reading + span * (i + 1) / n,
+                           mid:  reading + span * (i + 0.5) / n })
+            return out
         }
 
         Component {
@@ -206,6 +249,32 @@ DetailCard {
         Repeater {
             model: viz.reachedSegs
             delegate: bandSegment
+        }
+
+        // The stretch beyond the reading, painted only as far as the hover has
+        // walked. Empty at rest.
+        Repeater {
+            model: viz.aheadSegs
+
+            Shape {
+                id: ahead
+                anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
+
+                required property var modelData
+
+                readonly property real segTo: Math.max(modelData.from,
+                                                       Math.min(modelData.to, viz.t))
+                opacity: segTo > modelData.from ? 1 : 0
+
+                ShapePath {
+                    fillColor: "transparent"
+                    strokeColor: ChartMath.sampleRamp(Detail.bands.uv, ahead.modelData.mid)
+                    strokeWidth: viz.ringWidth
+                    capStyle: ShapePath.RoundCap
+                    PathSvg { path: viz.arcSeg(ahead.modelData.from, ahead.segTo) }
+                }
+            }
         }
 
         // The reading, ringed in white so it stays legible over any band.

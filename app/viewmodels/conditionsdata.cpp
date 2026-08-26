@@ -254,6 +254,7 @@ QVariantMap neutralCloudCover()
         { QStringLiteral("reading"), QString() },
         { QStringLiteral("unit"), QString() },
         { QStringLiteral("condition"), QString() },
+        { QStringLiteral("soon"), 0 },
         { QStringLiteral("trend"), noTrend() },
         { QStringLiteral("status"), QString() },
         { QStringLiteral("body"), QString() },
@@ -317,6 +318,7 @@ QVariantMap neutralUv()
         { QStringLiteral("reading"), QString() },
         { QStringLiteral("max"), 0 },
         { QStringLiteral("band"), QString() },
+        { QStringLiteral("peak"), 0 },
         { QStringLiteral("peakAt"), QString() },
         { QStringLiteral("trend"), noTrend() },
         { QStringLiteral("status"), QString() },
@@ -334,6 +336,7 @@ QVariantMap neutralAirQuality()
         { QStringLiteral("pollutant"), QString() },
         { QStringLiteral("pollutantValue"), 0.0 },
         { QStringLiteral("pollutantUnit"), QString() },
+        { QStringLiteral("soon"), 0 },
         { QStringLiteral("trend"), noTrend() },
         { QStringLiteral("status"), QString() },
         { QStringLiteral("body"), QString() },
@@ -754,6 +757,13 @@ void ConditionsData::buildCloud()
         { QStringLiteral("reading"), readingOf(now.cloudCover, Units::Quantity::Percentage) },
         { QStringLiteral("unit"), QStringLiteral("%") },
         { QStringLiteral("condition"), condition },
+        // What the badge above is pointing at: the cover three hours out, which
+        // is the same hour `trend` was worked out against. A direction with no
+        // magnitude is half a reading, and the dial is able to show the other
+        // half — DetailCard.qml's hover block is where that is argued.
+        { QStringLiteral("soon"),
+          qIsNaN(later) ? (qIsNaN(value(now.cloudCover)) ? 0 : cover)
+                        : int(std::lround(later)) },
         { QStringLiteral("trend"), trend },
         { QStringLiteral("status"), condition },
         { QStringLiteral("body"), trend == QLatin1String("up")
@@ -928,6 +938,11 @@ void ConditionsData::buildUv()
         if (*hour.uvIndex > peak) { peak = *hour.uvIndex; peakAt = hour.time; }
     }
 
+    // Daily max first and the hourly scan second, which is the order the body
+    // sentence below already prefers.
+    const double bestUv    = qIsNaN(maxUv) ? peak : maxUv;
+    const int    peakIndex = (bestUv < 0 || qIsNaN(bestUv)) ? 0 : int(std::lround(bestUv));
+
     m_uv = QVariantMap{
         { QStringLiteral("value"), qIsNaN(nowUv) ? 0 : int(std::lround(nowUv)) },
         { QStringLiteral("reading"), qIsNaN(nowUv) ? QStringLiteral("\u2014")
@@ -936,6 +951,11 @@ void ConditionsData::buildUv()
         // "extreme", which makes it the right ceiling for a bar.
         { QStringLiteral("max"), 11 },
         { QStringLiteral("band"), uvBand(qIsNaN(nowUv) ? 0 : nowUv) },
+        // The peak as a number, beside the time it is reached. The body sentence
+        // has always named both; until now only the time was a field, so the
+        // dial could say "you are at 3" and not "it reaches 8 at 2 PM" — see
+        // DetailCard.qml's hover block.
+        { QStringLiteral("peak"), peakIndex },
         { QStringLiteral("peakAt"), sentenceTime(peakAt, m_zone) },
         { QStringLiteral("trend"), trendOf(nowUv, peak, 0.5) },
         { QStringLiteral("status"), uvBand(qIsNaN(nowUv) ? 0 : nowUv) },
@@ -982,6 +1002,12 @@ void ConditionsData::buildAirQuality()
           now.dominantConcentration().value_or(0.0) },
         { QStringLiteral("pollutantUnit"),
           worst ? pollutantUnit(*worst) : QString() },
+        // The index three hours out — the hour `trend` is worked out against,
+        // and the magnitude the badge cannot carry. Unlike UV's peak this one
+        // can be lower than the reading, and should be: a falling index is the
+        // good direction and the ring shrinking back down its bands says so.
+        { QStringLiteral("soon"),
+          qIsNaN(later) ? (qIsNaN(index) ? 0 : int(index)) : int(later) },
         { QStringLiteral("trend"), trendOf(index, later, 3) },
         { QStringLiteral("status"), qIsNaN(index) ? tr("No reading") : aqiBand(index) },
         // Through pollutantLabel(), like the `pollutant` field six lines up.

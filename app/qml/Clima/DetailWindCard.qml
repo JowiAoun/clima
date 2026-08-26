@@ -73,10 +73,83 @@ DetailCard {
         // an arrival on this page must not look like. `dirDelta` is the signed
         // turn, folded into (-180, 180].
         readonly property real dirDelta: ((dirDeg + 180) % 360) - 180
-        readonly property real vaneDeg: {
+
+        // Where the bearing has got to. The band is centred here and the vane
+        // rests here; only the hover separates the two.
+        readonly property real bearingDeg: {
             var a = dirDelta * root.reveal
             return (a % 360 + 360) % 360
         }
+
+        // ---- the hover: air that will not hold still -------------------------
+        // Everything on this rose is drawn at the mean, and the mean is the one
+        // thing wind never is. The card already knows by how much it is not:
+        // the gust band's half-width *is* the direction's unsteadiness, and the
+        // gap between the two numbers on the right is the speed's. Both are
+        // stated and neither is shown.
+        //
+        // So on hover the vane wanders inside its own band while the wedge
+        // surges between the mean's reach and the gust's. The band itself does
+        // not move — it is the envelope being wandered in, and a band that
+        // swung along with the vane would leave the two in exactly the same
+        // relation they are in at rest, which is no reading at all. A steady
+        // hour barely stirs; 8 gusting 12 is a 33% excess and swings a third of
+        // the ring, which is the whole point of driving the amplitude off the
+        // data rather than off a number chosen here.
+        //
+        // Two oscillators rather than one, because a veer and a surge that peak
+        // together every time read as a mechanism; their periods are below.
+        //
+        // `stirring` is `hoverPhase > 0` rather than `hovered`, so the pair go
+        // on running while the envelope closes and the vane spirals back onto
+        // the bearing instead of being cut off wherever it was.
+        // The periods are literals here rather than `Theme.motion.*`, which §10.6
+        // otherwise forbids outright, and it is the same exception §10.1 makes
+        // for `windAccent` eight lines up: these are not the length of a
+        // transition, they are the character of wind, and they belong to this
+        // one visualisation. A token called `veerPeriod` would be a token with
+        // exactly one caller and a name that could only ever describe air.
+        //
+        // Neither divides into the other — 2600 against 2400 — so the two drift
+        // in and out of step over about half a minute instead of striking
+        // together on every swing. The surge rises faster than it falls because
+        // that is the shape of a gust, not a preference about easing.
+        readonly property int veerPeriod:  1300
+        readonly property int surgeRise:    900
+        readonly property int surgeFall:   1500
+
+        readonly property bool stirring: root.hoverPhase > 0
+        property real veer: 0
+        property real surge: 0
+
+        SequentialAnimation on veer {
+            running: viz.stirring
+            loops: Animation.Infinite
+            NumberAnimation { to:  1; duration: viz.veerPeriod; easing.type: Easing.InOutSine }
+            NumberAnimation { to: -1; duration: viz.veerPeriod; easing.type: Easing.InOutSine }
+        }
+
+        SequentialAnimation on surge {
+            running: viz.stirring
+            loops: Animation.Infinite
+            NumberAnimation { to: 1; duration: viz.surgeRise; easing.type: Easing.InOutSine }
+            NumberAnimation { to: 0; duration: viz.surgeFall; easing.type: Easing.InOutSine }
+        }
+
+        // Kept inside the band rather than filling it: a vane that touched both
+        // ends of the arc would be claiming the extremes are where the wind
+        // spends its time, and the band is a spread, not a pair of stops.
+        readonly property real vaneDeg: {
+            var a = bearingDeg + gustHalf * 0.6 * veer * root.hoverPhase
+            return (a % 360 + 360) % 360
+        }
+
+        // The speed the wedge is drawn at. The mean at rest; on hover it runs
+        // up toward the gust and falls back, which is what the second number
+        // on this card means.
+        readonly property real shownSpeed:
+            root.d.speed + Math.max(0, root.d.gust - root.d.speed)
+                           * surge * root.hoverPhase
 
         // The cardinal labels sit *on* the ring, so the radius has to leave
         // half a line of type above N and below S.
@@ -108,7 +181,7 @@ DetailCard {
         // that the way a bar grows off its baseline, rather than swelling out of
         // a point that means nothing.
         readonly property real wedgeApexR:
-            ringR * (0.46 + 0.42 * Math.min(root.d.speed / root.d.scaleMax, 1)
+            ringR * (0.46 + 0.42 * Math.min(shownSpeed / root.d.scaleMax, 1)
                                  * root.reveal)
         readonly property real wedgeBaseR: ringR * 0.40
         readonly property real wedgeHalfW: ringR * 0.25
@@ -137,17 +210,17 @@ DetailCard {
         }
 
         // The gust band is trimmed at any label break it would otherwise run
-        // through, so the ring's four gaps stay four gaps. Trimmed against the
-        // vane's current angle, not the bearing: the gaps are fixed to the ring,
-        // so a band that swings has to be re-trimmed as it goes.
+        // through, so the ring's four gaps stay four gaps. Re-trimmed as the
+        // bearing swings onto its reading: the gaps are fixed to the ring, so a
+        // band that arrives by rotating has to be trimmed the whole way round.
         readonly property string gustPath: {
-            var a0 = vaneDeg - gustHalf
-            var a1 = vaneDeg + gustHalf
+            var a0 = bearingDeg - gustHalf
+            var a1 = bearingDeg + gustHalf
             for (var k = -1; k <= 5; ++k) {
                 var c = 90 * k
-                if (c + gapHalf <= vaneDeg && c + gapHalf > a0)
+                if (c + gapHalf <= bearingDeg && c + gapHalf > a0)
                     a0 = c + gapHalf
-                if (c - gapHalf >= vaneDeg && c - gapHalf < a1)
+                if (c - gapHalf >= bearingDeg && c - gapHalf < a1)
                     a1 = c - gapHalf
             }
             return arcPath(a0, a1, ringR)

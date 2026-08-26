@@ -126,7 +126,26 @@ DetailCard {
         // been drawn yet. Both cards in the pair move exactly this way.
         readonly property real tPenL: tRise - (tRise - tMin) * root.reveal
         readonly property real tPenR: tRise + (tMax - tRise) * root.reveal
+
+        // ---- the hover -------------------------------------------------------
+        // The mark stands at now, and "now" on an arc is half an answer: what
+        // the card is actually asked is how much of the stretch is left. So on
+        // hover the mark runs on to the crossing that stretch is measured by and
+        // comes back. The distance it covers is the answer, drawn on the same
+        // curve at the same scale as the journey it already made from the rise.
+        //
+        // Three cases and one expression. Before the rise the target is the
+        // rise: how long until it comes up. Between them it is the set: how much
+        // daylight is left. Past the set it is the set again, so the mark walks
+        // *back* to it — down there the honest reading is how long ago it went,
+        // and the next rise is outside the drawn window by construction.
+        //
+        // The tint comes along for free. It is sampled at `tMark`'s altitude, so
+        // the mark deepens to sunset-orange as it goes, which is the same thing
+        // the ribbon under it is saying at that end.
+        readonly property real tTarget: tNow < tRise ? tRise : tSet
         readonly property real tMark: tRise + (tNow - tRise) * root.reveal
+                                    + (tTarget - tNow) * root.hoverWalk
 
         // Sub-minute spans are dropped rather than drawn: a zero-length subpath
         // under a round cap paints a bead the width of the stroke, which at

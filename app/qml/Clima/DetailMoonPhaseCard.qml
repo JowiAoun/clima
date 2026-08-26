@@ -58,6 +58,48 @@ DetailCard {
         // which the 14 px mark on DetailMoonCard's arc cannot.
         readonly property real discSize: Math.min(height, 84)
 
+        // ---- the hover -------------------------------------------------------
+        // Which way it is going. The status line says "waning gibbous" in words
+        // and the disc says nothing: a waxing crescent and a waning one are the
+        // same picture, and the only difference between them is where the
+        // terminator will be tomorrow. So on hover the disc advances two nights
+        // and settles back, and the direction the shadow moves in is the answer.
+        //
+        // Advanced in the phase angle, not in the fraction. Illumination is
+        // (1 - cos θ) / 2 for an angle that runs one full turn over the synodic
+        // month, so equal nights are equal steps in θ and are emphatically not
+        // equal steps in the percentage — which is why stepping the percentage
+        // would draw a moon that moves fastest at full, where the real one
+        // barely moves at all. That the gesture goes quiet near full and near
+        // new is the geometry being honest rather than the card being broken:
+        // those are the two nights of the month when tomorrow does look like
+        // today.
+        //
+        // θ = 0 at new and π at full, so the waning half of the cycle is the
+        // reflection past π and `waxing` is which side of it we are on. At rest
+        // hoverWalk is 0, cos(acos(x)) is x, and the disc is exactly the disc
+        // this card has always drawn.
+        readonly property real synodic: 29.53
+        readonly property real nights: 2
+
+        readonly property real phaseAngle: {
+            var f = Math.max(0, Math.min(1, root.d.illumination))
+            var a = Math.acos(1 - 2 * f)
+            return root.d.waxing ? a : 2 * Math.PI - a
+        }
+
+        readonly property real shownAngle:
+            phaseAngle + 2 * Math.PI * nights / synodic * root.hoverWalk
+
+        readonly property real shownIllum: (1 - Math.cos(shownAngle)) / 2
+
+        // Crossing full or new inside those two nights flips the sense, and the
+        // glyph draws the lit limb on the side this says. Without it a moon
+        // hovered a night before full would advance past it and keep lighting
+        // the wrong edge.
+        readonly property bool shownWaxing:
+            ((shownAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) < Math.PI
+
         MoonGlyph {
             id: disc
             glyphSize: viz.discSize
@@ -68,8 +110,8 @@ DetailCard {
             // fraction IS the picture, so growing it is the card drawing its
             // own reading; a fade would just delay it.
             visible: root.d.available
-            illuminated: root.d.illumination * root.reveal
-            waxing: root.d.waxing
+            illuminated: viz.shownIllum * root.reveal
+            waxing: viz.shownWaxing
         }
 
         Column {

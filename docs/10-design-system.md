@@ -287,6 +287,23 @@ A range is not a rule; this is the same lesson §10.4 learned about type.
 | One view becoming another | `view` | 340 |
 | A value finding its place | `reveal` | 520 |
 | Between one sibling's reveal and the next | `stagger` | 45 |
+| A gesture holding at the value it went to | `dwell` | 700 |
+| A gesture back at its reading, before repeating | `rest` | 900 |
+
+`dwell` and `rest` are the two rests in an out-and-back — a hover walking a dial
+to what its trend badge points at and coming home. They are the only two that
+**do not** collapse under `Theme.stillness`: everything above is the length of a
+transition and a transition of zero is simply the end state, while these are
+rests inside a loop, and a zero-length rest in an infinite loop is a spin.
+`hoverPhase` already guards it; a value that cannot spin is the second half.
+
+The one exception to the token rule is the same one §10.1 makes for colour: a
+duration that belongs to **one** visualisation and could not describe anything
+else stays in that file, named, with the argument beside it. `DetailWindCard`'s
+veer and surge periods are the case — they are the character of wind rather than
+the length of a transition, and a token called `veerPeriod` would have exactly
+one caller. If a second component ever wants the number, that is the signal it
+was a token all along.
 
 **Easing is `Easing.OutCubic` unless you have a stated reason.** Things
 decelerate into place because they are arriving, not departing. It is written
@@ -303,7 +320,9 @@ Restraint is most of the work here. A page where everything moves is a page
 where nothing is legible, and every one of these has a specific failure mode.
 
 - **Nothing animates on a timer.** No pulsing, breathing, shimmering, drifting
-  or looping. If it moves while the user is doing nothing, it is wrong. This
+  or looping. If it moves while the user is doing nothing, it is wrong — and
+  "doing nothing" is the whole of the test, which is why the wind rose's veer
+  under a pointer is not covered by this and the precipitation field is. This
   also destroys golden-image tests, which are the only regression net this
   prototype has.
 - **No reveal is ever re-triggered.** In particular, nothing fires on scrolling
@@ -367,6 +386,67 @@ it.
 is built, over `Theme.motion.reveal`; bind whatever should grow or sweep to it.
 `WeatherDetails` sets `revealDelay` per card so the grid arrives as one wave
 rather than twelve separate events.
+
+### The hover
+
+The paragraph above opens on a premise that is no longer true. A detail card
+does have an interaction: the reader can point at it. That is a question, and it
+deserves a narrow answer.
+
+**Hover says the one true thing the resting card leaves out.** Not a replay of
+the arrival — the reader has seen that — and not a flourish. Something the card
+knows, is drawn from, and cannot show while it is still.
+
+For most of the grid that thing is already there, unsaid. Every card carries a
+trend badge, a badge is a direction with no magnitude, and the value it was
+computed against is in the same block of data. So the cards whose visualisation
+is a scale walk their paint head from the reading to that value and back: the UV
+dial climbs to today's peak, the air-quality and cloud dials to where they will
+be in three hours, the sight line out to the day's clearest. Sun and Moon walk
+their mark to the crossing their stretch is measured by — the same sentence told
+in time rather than in units — and Moon phase advances the terminator two nights,
+because a waxing crescent and a waning one are the same picture.
+
+Wind is the one that answers with something that is not a number, and it is the
+argument §10.6 demands of anything that wants to loop. Its second fact is that
+wind does not hold still, and this card holds it still: the rose is drawn at the
+mean, and the mean is the one thing wind never is. The card already knows by how
+much — the gust band's half-width *is* the direction's unsteadiness and the gap
+between the two figures is the speed's — so on hover the vane wanders inside its
+own band while the wedge surges between the mean's reach and the gust's. Both
+amplitudes come from the data, so a steady hour barely stirs. Two oscillators at
+periods that do not divide into each other, because a veer and a surge that peak
+together read as a mechanism rather than as weather.
+
+Five cards answer with the tint alone, and that is a finding rather than an
+omission. Temperature, Feels like and Pressure draw twelve hours of history and
+their badge points at an hour three ahead — off the right-hand edge of a chart
+that does not hold the future, and a card must not draw data it has not got.
+Precipitation's columns are already the whole story. Humidity's comparison hour
+is one of the eight bars it has drawn.
+
+`DetailCard` provides three hooks and two rules. `hovered` is the state, and the
+card's own background takes the next rung of the surface ladder from it.
+`hoverPhase` is the envelope, 0 → 1 over `Theme.motion.move`. `hoverWalk` is the
+shared out-and-back rhythm inside that envelope, so seven cards that agree about
+what hover means do not disagree about how long it takes.
+
+- **Everything a card moves on hover is multiplied by `hoverPhase`.** It is
+  exactly 0 at rest, which is what keeps a resting card identical to the card
+  before hover existed — what the golden images assert — and what lets a gesture
+  retire along the shortest path from wherever it had got to when the pointer
+  left. No gesture has to know how to finish itself.
+- **`hoverPhase` is pinned to 0 under `Theme.stillness`.** A reader who asked
+  their desktop for less movement gets the tint and nothing else, and a capture
+  cannot be caught mid-gesture. The tint survives, because a colour is a state
+  and not a movement. This is what keeps §10.6's ban on standing animation
+  honest: nothing here runs unless someone is pointing at it, and nothing runs
+  for a reader who has asked it not to.
+
+Reviewing it needs pixels rather than a contact sheet, because `--poke` does not
+carry a pointer. `tests/qml/tst_detailhover.qml` grabs each card at rest, again
+mid-gesture and again after the pointer leaves, and asserts that the eight move,
+the five do not, and all thirteen come back byte-identical.
 
 ### Reviewing motion
 
