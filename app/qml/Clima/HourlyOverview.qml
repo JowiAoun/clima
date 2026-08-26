@@ -142,11 +142,23 @@ Item {
     // incoming half, which is the other thing on this card that replaces the
     // series without moving the frame around it. It was 430 ms, one of the eight
     // strays §10.6 was written to end.
-    property real feelsBlend: (supportsFeelsLike && toggle.checked) ? 1 : 0
-    Behavior on feelsBlend {
-        // A metric handover already animates the series; feels-like is
-        // meaningless anywhere but Overview, so let it snap into place under
-        // cover of the handover rather than run a second tween through it.
+    // Whether the second line is drawn. Overview's is the reader's to turn on;
+    // every other metric that declares an overlay draws it always.
+    //
+    // It used to be a *blend*, morphing the filled curve from temperature to
+    // apparent — which showed one of the two readings at a time and so could
+    // not show the thing the toggle is for. 30° means something next to the 27°
+    // it is being compared with, and a chart that replaces one with the other
+    // has drawn neither comparison.
+    readonly property bool overlayWanted:
+        metric.overlay === undefined ? false
+      : metric.id === "overview"     ? (supportsFeelsLike && toggle.checked)
+                                     : true
+
+    property real overlayFade: overlayWanted ? 1 : 0
+    Behavior on overlayFade {
+        // A metric handover already animates the series, so let the line arrive
+        // under cover of it rather than run a second tween through it.
         enabled: !handover.running
         NumberAnimation { duration: Theme.motion.view; easing.type: Easing.OutCubic }
     }
@@ -235,20 +247,7 @@ Item {
     // through Metrics, which is the only thing here that knows which is which —
     // a curve plotted in millimetres against an axis in inches draws perfectly
     // and is off by a factor of twenty-five.
-    function seriesValue(i, blend) {
-        if (supportsFeelsLike) {
-            var t = Data.temperature[i]
-            var a = Data.apparent[i]
-            // MET Norway carries no apparent temperature. `t * 1 + NaN * 0` is
-            // NaN in JavaScript, so a blend of ZERO over an absent series erased
-            // a temperature curve that was completely intact — an empty chart
-            // under a hero reading 28°. Seen the first time the fallback served.
-            if (isNaN(a))
-                return Metrics.display(metric, t)
-            if (isNaN(t))
-                return Metrics.display(metric, a)
-            return Metrics.display(metric, t * (1 - blend) + a * blend)
-        }
+    function seriesValue(i) {
         var arr = Data[metric.series]
         return arr ? Metrics.display(metric, arr[i]) : 0
     }
@@ -263,6 +262,9 @@ Item {
     // definition, so an axis fitted to the series alone drew them off the top of
     // the box — the same defect as a fixed axis clipping, arrived at from the
     // other direction.
+    // Counted whether or not the line is currently drawn: the axis is the frame
+    // the reading is read against, and a frame that jumped every time the reader
+    // turned the second line on would make the first one look like it moved.
     function axisValues(m) {
         var out = seriesValues(m)
         if (m.overlay && Data[m.overlay])
@@ -271,10 +273,10 @@ Item {
     }
 
     // Explicit arguments so the binding re-evaluates on every input that moves.
-    function buildPoints(blend, ph, hw, m) {
+    function buildPoints(ph, hw, m) {
         var pts = []
         for (var i = 0; i < Data.count; ++i)
-            pts.push({ x: i * hw, y: yForValue(seriesValue(i, blend)) })
+            pts.push({ x: i * hw, y: yForValue(seriesValue(i)) })
         return pts
     }
 
@@ -298,7 +300,7 @@ Item {
     // rather than heavy rain.
     readonly property var precipCells: Precip.cellsTyped(Data.precipMm, Data.precipTypes)
 
-    readonly property var curvePoints: buildPoints(feelsBlend, plotHeight, columnWidth, metric)
+    readonly property var curvePoints: buildPoints(plotHeight, columnWidth, metric)
     readonly property var overlayPoints: buildOverlay(plotHeight, columnWidth, metric)
 
     // How completely the raised day card above is standing on this card's top
@@ -612,7 +614,7 @@ Item {
 
                             Text {
                                 text: Metrics.formatDisplay(root.metric,
-                                                     root.seriesValue(hourIndex, root.feelsBlend))
+                                                     root.seriesValue(hourIndex))
                                 color: Theme.ink.primary
                                 font.pixelSize: 13
                                 font.bold: true
@@ -678,6 +680,8 @@ Item {
                             anchors.fill: parent
                             points: visible ? root.curvePoints : []
                             overlayPoints: visible ? root.overlayPoints : []
+                            overlayDashed: root.metric.overlayDashed === true
+                            overlayOpacity: root.overlayFade
                             growth: root.seriesExtent
                             baselineY: root.yForValue(root.axisMin)
                             gradientTop: root.yForValue(root.axisMax)
@@ -883,7 +887,7 @@ Item {
                                 text: probe.idx < 0 ? "" :
                                       Data.clockLabel(probe.idx) + "   "
                                       + Metrics.formatDisplay(root.metric,
-                                                       root.seriesValue(probe.idx, root.feelsBlend))
+                                                       root.seriesValue(probe.idx))
                             }
                         }
                     }
@@ -979,8 +983,7 @@ Item {
                     }
                 }
                 Text {
-                    text: root.supportsFeelsLike && toggle.checked
-                          ? qsTr("Feels like") : root.metric.legend
+                    text: root.metric.legend
                     color: Theme.ink.muted
                     font.pixelSize: 12
                     anchors.verticalCenter: parent.verticalCenter
@@ -989,7 +992,8 @@ Item {
 
             Row {
                 spacing: 8
-                visible: root.metric.overlay !== undefined && !root.listView
+                visible: root.overlayFade > 0 && !root.listView
+                opacity: root.overlayFade
                 Rectangle {
                     width: 14
                     height: 2

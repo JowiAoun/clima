@@ -42,6 +42,14 @@ desktop-uv-light|app|1340x762|--scheme light --metric uv
 # gives way by whole steps; this is the picture of it doing so.
 desktop-visibility|app|1340x762|--scheme dark --metric visibility
 
+# The temperature pair, which is one comparison told from both sides: whichever
+# reading the reader asked for is the filled area and the other is a line over
+# it. Two cases because the roles swap, and the swap is the whole feature — a
+# single case would photograph one half of it and pass while the other half drew
+# nothing. `--poke feels=true` is the toggle, which is the only way the
+# overview's line is reachable in a capture.
+desktop-feels|app|1340x762|--scheme dark --metric feels
+desktop-overview-feels|app|1340x762|--scheme dark --metric overview --poke feels=true
 desktop-list|app|1340x762|--scheme dark --list
 desktop-night|app|1340x762|--scheme dark --sky night
 

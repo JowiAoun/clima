@@ -14,6 +14,19 @@ Item {
 
     property var points: []
     property var overlayPoints: []      // optional second line, e.g. wind gusts
+
+    // Dashed for an envelope, solid for a second reading — see the wind
+    // metric in metrics.cpp, which is the only caller that asks for dashes.
+    property bool overlayDashed: false
+
+    // The overview's overlay is the reader's to turn off, so it fades rather
+    // than vanishing. Everything else leaves this at 1.
+    property real overlayOpacity: 1
+
+    // The token is a string, and a string has no `.r`. Coerced once here so the
+    // fade below is arithmetic on a colour rather than four lookups qmllint
+    // cannot resolve and qmlcachegen therefore cannot compile.
+    readonly property color overlayInk: Theme.line.series
     property real baselineY: height
     property real gradientTop: 0
     property real gradientBottom: height
@@ -97,11 +110,16 @@ Item {
             PathSvg { path: ChartMath.ribbonPath(root.drawnPoints, root.lineWidth / 2) }
         }
 
-        // ---- optional overlay line (dashed, no fill) ---------------------
+        // ---- optional overlay line (no fill) -----------------------------
         ShapePath {
-            strokeColor: Theme.line.series
-            strokeWidth: root.drawnOverlay.length > 1 ? 1.4 : -1
-            strokeStyle: ShapePath.DashLine
+            // Faded through the colour rather than through an `opacity` on a
+            // wrapper: a layer around half a Shape is an FBO the other half is
+            // not in, and the two ends of one chart can then disagree about
+            // edge quality (§10.8).
+            strokeColor: Qt.rgba(root.overlayInk.r, root.overlayInk.g, root.overlayInk.b,
+                                 root.overlayInk.a * root.overlayOpacity)
+            strokeWidth: root.drawnOverlay.length > 1 && root.overlayOpacity > 0 ? 1.4 : -1
+            strokeStyle: root.overlayDashed ? ShapePath.DashLine : ShapePath.SolidLine
             dashPattern: [4, 3]
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap

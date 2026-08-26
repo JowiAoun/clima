@@ -207,4 +207,18 @@ TestCase {
                row.tag + " overlays its own series on itself")
     }
 
+    // The temperature pair are one comparison told from both sides, so each has
+    // to point at the other. A Feels like chart that does not say what it is
+    // unlike is the missing comparison the toggle used to make by swapping the
+    // curve — showing one reading at a time and neither of them against
+    // anything.
+    function test_theTemperaturePairPointAtEachOther() {
+        var overview = Metrics.byId("overview")
+        var feels = Metrics.byId("feels")
+
+        compare(overview.series, "temperature")
+        compare(overview.overlay, "apparent")
+        compare(feels.series, "apparent")
+        compare(feels.overlay, "temperature")
+    }
 }

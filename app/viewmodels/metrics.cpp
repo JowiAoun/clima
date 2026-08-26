@@ -118,10 +118,26 @@ QVariantList Metrics::list() const
 
     QVariantList out;
 
-    out.append(scaled(entry(QStringLiteral("overview"), tr("Overview"), QStringLiteral("area"),
-                            QStringLiteral("temperature"), Quantity::Temperature,
-                            QStringLiteral("temp"), tr("Temperature")),
-                      0, 40, 10, 0));
+    // Overview and Feels like are the same pair of series with the roles
+    // swapped: whichever one the reader asked for is the filled area, and the
+    // other is a line over it. That is the comparison both charts exist to
+    // make — 30° only means something next to the 27° it is being compared
+    // with — and it is what the toggle used to do by *replacing* the curve,
+    // which showed one reading at a time and no comparison at all.
+    //
+    // On Overview the line is the toggle's; on Feels like it is always there,
+    // because a card called Feels like that does not say what it is unlike is
+    // the same missing comparison from the other side.
+    {
+        QVariantMap overview = scaled(entry(QStringLiteral("overview"), tr("Overview"),
+                                            QStringLiteral("area"),
+                                            QStringLiteral("temperature"), Quantity::Temperature,
+                                            QStringLiteral("temp"), tr("Temperature")),
+                                      0, 40, 10, 0);
+        overview[QStringLiteral("overlay")]       = QStringLiteral("apparent");
+        overview[QStringLiteral("overlayLegend")] = tr("Feels like");
+        out.append(overview);
+    }
 
     // autoScale: a fixed axis renders a drizzle as a flat line, which reads as
     // "no data" rather than "a little rain". Rain is the one variable whose
@@ -145,6 +161,12 @@ QVariantList Metrics::list() const
                                   0, 40, 10, 0);
         wind[QStringLiteral("overlay")]       = QStringLiteral("windGust");
         wind[QStringLiteral("overlayLegend")] = tr("Gusts");
+        // Dashed, and the only overlay that is. A gust line is the *envelope*
+        // of the series under it — same quantity, upper bound — and a dash is
+        // how a bound is conventionally drawn. The temperature pair are two
+        // readings of two different things that happen to share an axis, and a
+        // second reading is a solid line.
+        wind[QStringLiteral("overlayDashed")] = true;
         out.append(wind);
     }
 
@@ -178,10 +200,16 @@ QVariantList Metrics::list() const
                             QStringLiteral("visibility"), tr("Visibility")),
                       0, 25, 5, 0));
 
-    out.append(scaled(entry(QStringLiteral("feels"), tr("Feels like"), QStringLiteral("area"),
-                            QStringLiteral("apparent"), Quantity::Temperature,
-                            QStringLiteral("temp"), tr("Feels like")),
-                      0, 40, 10, 0));
+    {
+        QVariantMap feels = scaled(entry(QStringLiteral("feels"), tr("Feels like"),
+                                         QStringLiteral("area"),
+                                         QStringLiteral("apparent"), Quantity::Temperature,
+                                         QStringLiteral("temp"), tr("Feels like")),
+                                   0, 40, 10, 0);
+        feels[QStringLiteral("overlay")]       = QStringLiteral("temperature");
+        feels[QStringLiteral("overlayLegend")] = tr("Temperature");
+        out.append(feels);
+    }
 
     return out;
 }
