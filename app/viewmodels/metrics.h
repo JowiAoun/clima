@@ -75,6 +75,16 @@ public:
     // The axis, honouring autoScale. `values` are DISPLAY values — the same
     // ones the chart is about to plot — because a "nice maximum" chosen from
     // millimetres and then converted to inches is not a nice maximum.
+    //
+    // Pass everything that will be DRAWN, not just the series: the wind chart's
+    // gust line sits above its mean by definition, and an axis fitted to the
+    // mean alone puts the gusts off the top of the box.
+    //
+    // A fixed min/max in the registry is the axis a reader should normally see
+    // and not a promise about the weather. Both ends give way when the data
+    // needs them to — see the comment on the definitions.
+    [[nodiscard]] Q_INVOKABLE double       axisMin(const QVariantMap &metric,
+                                                   const QVariantList &values) const;
     [[nodiscard]] Q_INVOKABLE double       axisMax(const QVariantMap &metric,
                                                    const QVariantList &values) const;
     [[nodiscard]] Q_INVOKABLE QVariantList axisTicks(const QVariantMap &metric,

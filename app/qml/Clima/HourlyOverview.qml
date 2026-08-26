@@ -99,10 +99,12 @@ Item {
     readonly property real nowX:
         ChartMath.clamp(xForIndex(Data.nowIndex), 0, contentW)
 
-    // Axis bounds come from the metric, except where it opts into auto-scaling.
-    readonly property real axisMin: metric.min
-    readonly property real axisMax: Metrics.axisMax(metric, seriesValues(metric))
-    readonly property var valueTicks: Metrics.axisTicks(metric, seriesValues(metric))
+    // Axis bounds come from the metric, which carries a preferred range rather
+    // than a hard one: both ends give way by whole steps when the weather leaves
+    // it. See Metrics::axisMin for why that is not the same as auto-scaling.
+    readonly property real axisMin: Metrics.axisMin(metric, axisValues(metric))
+    readonly property real axisMax: Metrics.axisMax(metric, axisValues(metric))
+    readonly property var valueTicks: Metrics.axisTicks(metric, axisValues(metric))
 
     readonly property real plotHeight: Math.max(
         170, body.height - 2 * panelPadding - headerBandHeight - stripGap - stripHeight)
@@ -254,6 +256,18 @@ Item {
     function seriesValues(m) {
         var arr = Data[m.series]
         return arr ? Metrics.displayAll(m, arr) : []
+    }
+
+    // Everything the axis has to hold, which is not the same as the series. The
+    // wind chart draws a gust line over its mean and gusts are above the mean by
+    // definition, so an axis fitted to the series alone drew them off the top of
+    // the box — the same defect as a fixed axis clipping, arrived at from the
+    // other direction.
+    function axisValues(m) {
+        var out = seriesValues(m)
+        if (m.overlay && Data[m.overlay])
+            out = out.concat(Metrics.displayAll(m, Data[m.overlay]))
+        return out
     }
 
     // Explicit arguments so the binding re-evaluates on every input that moves.

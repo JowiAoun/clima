@@ -58,6 +58,22 @@ double niceMax(const QVariantList &values, double floor)
     return std::ceil(most);
 }
 
+// The largest or smallest finite value, or NaN if there is not one. Written out
+// rather than std::minmax_element because the list is QVariants and a third of
+// them can be NaN where the provider had no reading.
+double extremeOf(const QVariantList &values, bool wantMax)
+{
+    double best = qQNaN();
+    for (const QVariant &value : values) {
+        const double number = value.toDouble();
+        if (qIsNaN(number))
+            continue;
+        if (qIsNaN(best) || (wantMax ? number > best : number < best))
+            best = number;
+    }
+    return best;
+}
+
 } // namespace
 
 Metrics::Metrics()
@@ -201,33 +217,88 @@ QVariantList Metrics::displayAll(const QVariantMap &metric, const QVariantList &
     return out;
 }
 
+// ---- the axis, and why a fixed one still moves ------------------------------
+//
+// Nine of the eleven metrics carry a fixed min/max, and that is right: an axis
+// that means the same thing every time you look at it is what lets a reader
+// compare Tuesday with Friday, and an auto axis makes a flat day look dramatic.
+// What it must not be is a *clip*. Every one of those nine was written down as
+// the range the weather usually sits in, and weather leaves it — 32 km of
+// visibility against a 25 km axis, gusts past 40, an August afternoon past 40°,
+// a January morning below zero, a deep low under 995 hPa. The curve was drawn
+// anyway, off the top of the plot box, past the last gridline and out of the
+// card, which is a chart lying about a number it has.
+//
+// So the fixed bounds are a *preferred* range: the axis shows at least that
+// much, and gives way at either end by whole steps when the data asks. Whole
+// steps, because the labelled rhythm is the other half of what makes a fixed
+// axis readable — an axis running to 32.4 is not one anybody chose.
+//
+// autoScale is untouched. Precipitation asked for its axis to follow the data
+// and this is not that question.
+double Metrics::axisMin(const QVariantMap &metric, const QVariantList &values) const
+{
+    const double fixed = metric.value(QStringLiteral("min")).toDouble();
+    if (metric.value(QStringLiteral("autoScale")).toBool())
+        return fixed;
+
+    const double least = extremeOf(values, /*wantMax=*/false);
+    if (qIsNaN(least) || least >= fixed)
+        return fixed;
+
+    const double step = metric.value(QStringLiteral("step")).toDouble();
+    if (step <= 0)
+        return least;
+    return fixed - std::ceil((fixed - least) / step) * step;
+}
+
 double Metrics::axisMax(const QVariantMap &metric, const QVariantList &values) const
 {
-    if (!metric.value(QStringLiteral("autoScale")).toBool())
-        return metric.value(QStringLiteral("max")).toDouble();
-    return niceMax(values, metric.value(QStringLiteral("step")).toDouble());
+    const double step = metric.value(QStringLiteral("step")).toDouble();
+    if (metric.value(QStringLiteral("autoScale")).toBool())
+        return niceMax(values, step);
+
+    const double fixed = metric.value(QStringLiteral("max")).toDouble();
+    const double most  = extremeOf(values, /*wantMax=*/true);
+    if (qIsNaN(most) || most <= fixed)
+        return fixed;
+
+    if (step <= 0)
+        return most;
+    return fixed + std::ceil((most - fixed) / step) * step;
 }
 
 QVariantList Metrics::axisTicks(const QVariantMap &metric, const QVariantList &values) const
 {
-    const double min = metric.value(QStringLiteral("min")).toDouble();
-
     QVariantList ticks;
 
     if (metric.value(QStringLiteral("autoScale")).toBool()) {
         // Four divisions of whatever the data needed. Rounded to two places
         // because an auto axis over inches produces 0.0125 and a label that
         // long is a label nobody reads.
+        const double min = metric.value(QStringLiteral("min")).toDouble();
         const double max = axisMax(metric, values);
         for (int i = 0; i <= 4; ++i)
             ticks.append(std::round((min + (max - min) * i / 4.0) * 1000.0) / 1000.0);
         return ticks;
     }
 
-    const double max  = metric.value(QStringLiteral("max")).toDouble();
-    const double step = metric.value(QStringLiteral("step")).toDouble();
+    // Off the resolved bounds and not the registry's, or an axis that gave way
+    // would grow a stretch with no gridlines on it — which is the same defect
+    // as clipping, one step further out.
+    const double min = axisMin(metric, values);
+    const double max = axisMax(metric, values);
+
+    double step = metric.value(QStringLiteral("step")).toDouble();
     if (step <= 0)
         return { min, max };
+
+    // A range that has given way at both ends can carry more labels than the
+    // gutter has room for, and eleven gridlines is a hatch rather than a scale.
+    // Doubling keeps them on round numbers, which halving the count any other
+    // way would not.
+    while ((max - min) / step > 8.0)
+        step *= 2.0;
 
     for (double value = min; value <= max + 0.001; value += step)
         ticks.append(std::round(value * 100.0) / 100.0);
