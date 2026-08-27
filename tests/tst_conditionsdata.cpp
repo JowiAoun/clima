@@ -53,6 +53,8 @@
 
 #include "conditionsdata.h"
 
+#include "libclima/domain/hourconvention.h"
+#include "libclima/domain/weathercode.h"
 #include "libclima/providers/fixture/fixtureprovider.h"
 
 #include <QSet>
@@ -70,6 +72,8 @@ private Q_SLOTS:
     void initTestCase();
 
     void everyBlockCarriesItsKeysBeforeTheFirstSnapshot();
+    void theConditionComesFromTheHourWeAreStandingIn();
+    void aRainAlreadyFallingIsNotAnnouncedAsStartingLater();
     void nothingInTheNeutralShapeIsUndefined();
     void theNeutralShapeInventsNoWeather();
 
@@ -124,6 +128,151 @@ void TestConditionsData::initTestCase()
 // Berlin, because it is the fixture with pollen in it: outside the CAMS
 // European domain buildPollen() gates the block off and fills only `available`,
 // and a comparison against that would prove nothing about the other five keys.
+// ---- one definition of "now" -----------------------------------------------
+//
+// Two surfaces described the same instant from two sources and contradicted
+// each other: the card said "Mainly sunny" while the chart's Now column, a few
+// centimetres below, drew heavy rain — and it was raining.
+//
+// `weatherCode` describes a stretch of weather rather than a moment, which is
+// why hourconvention.cpp moves it with the accumulations it belongs to. The
+// chart, the hour strip, the precipitation wash and this card's own next-rain
+// clause all read that series. The `current` block is a separate product on its
+// own convention, so it is trusted for the instants — the temperature at 4:47
+// rather than at four — and not for the stretch.
+//
+// Two things had to be arranged for this to be a test of anything, and both are
+// findings in their own right.
+//
+// The fixture's `current` block is stamped 06:30 against a `recordedAt` of
+// 12:28 — six hours stale — so `buildContext` rejects it and rebuilds the
+// observation from the standing hour. Every golden image and every other test
+// therefore runs the *fallback*, where the card and the chart agree because
+// they are already the same value. The branch the live app takes has never been
+// exercised, which is most of why this reached a screenshot. So the clock is
+// moved to the block's own time here, which is what makes it current.
+//
+// And no fixture reproduces the disagreement even then: all four carry a
+// `current` code equal to the standing hour's. The contradiction is introduced
+// rather than recorded, which states the rule more plainly than a fixture could
+// — the current block is overruled on this field however loudly it disagrees.
+void TestConditionsData::theConditionComesFromTheHourWeAreStandingIn()
+{
+    const Fixture fixture = fixtures::load(QStringLiteral("toronto"));
+    QVERIFY(fixture.isValid());
+
+    ForecastRequest request;
+    request.coord = fixture.place.coordinate;
+
+    FixtureForecastProvider   forecasts(fixture);
+    FixtureAirQualityProvider air(fixture);
+
+    const QFuture<Result<Forecast>>   forecastFuture = forecasts.fetchForecast(request);
+    const QFuture<Result<AirQuality>> airFuture      = air.fetchAirQuality(request);
+    QVERIFY(forecastFuture.isFinished());
+    QVERIFY(airFuture.isFinished());
+
+    Forecast forecast = forecastFuture.result().value();
+    const AirQuality quality = airFuture.result().value();
+
+    // What the standing hour says, taken through the same conversion the app
+    // applies — index i carries the code for the hour STARTING at its stamp.
+    QVERIFY(forecast.current.time.isValid());
+    const QDateTime now = forecast.current.time;
+
+    const QList<HourlyPoint> hours = asHourStarting(forecast.hourly);
+    int standing = 0;
+    for (int i = 0; i < hours.size(); ++i) {
+        if (hours.at(i).time <= now)
+            standing = i;
+        else
+            break;
+    }
+    QVERIFY(hours.at(standing).weatherCode.has_value());
+    const int hourCode = *hours.at(standing).weatherCode;
+
+    // A code the standing hour certainly does not carry. 95 is thunderstorm;
+    // 0 is clear sky. One of the two is always a contradiction.
+    const int provocation = hourCode == 95 ? 0 : 95;
+    forecast.current.weatherCode = provocation;
+
+    // A temperature the hourly series certainly does not carry either, and it
+    // is not decoration: it is what proves this test is exercising the branch it
+    // claims to. Without moving the clock above, the card falls back to the
+    // standing hour, agrees with it for a reason that has nothing to do with the
+    // fix, and passes whether or not the fix is there — which is what the first
+    // draft of this test did. Asserting the temperature comes back says the
+    // block was in play, and states the other half of the rule while it is at
+    // it: instants are exactly what the block is kept for.
+    forecast.current.temperature = -41.0;
+
+    ConditionsData data(nullptr);
+    data.setSnapshot(forecast, quality, now, fixture.place, /*hasPollen=*/false);
+
+    QCOMPARE(data.temperature().value(QStringLiteral("value")).toInt(), -41);
+
+    const QString kind = data.current().value(QStringLiteral("conditionKind")).toString();
+    const bool    day  = forecast.current.isDay.value_or(true);
+
+    QCOMPARE(kind, conditionKindName(conditionFor(hourCode, day)));
+    QVERIFY2(kind != conditionKindName(conditionFor(provocation, day)),
+             "the card is drawing the `current` block's weather code. It describes a "
+             "stretch, the hourly series is what every other surface on the page reads, "
+             "and the two contradicting each other is what the reader sees.");
+}
+
+// The clause says "from", and "from" names a time to act on. A rain that has
+// been falling for two hours does not have one — announcing it as starting at
+// five is the same sentence a dry afternoon would get, which is what the card
+// said while it was raining.
+void TestConditionsData::aRainAlreadyFallingIsNotAnnouncedAsStartingLater()
+{
+    // Toronto, and the rain is put there rather than found: the point is the
+    // sentence's arithmetic, not any particular afternoon's weather, and a
+    // fixture chosen for being wet would still have to be edited to guarantee
+    // an unbroken run through the hour we are standing in.
+    const Fixture fixture = fixtures::load(fixtures::defaultName());
+    QVERIFY(fixture.isValid());
+
+    ForecastRequest request;
+    request.coord = fixture.place.coordinate;
+
+    FixtureForecastProvider   forecasts(fixture);
+    FixtureAirQualityProvider air(fixture);
+
+    const QFuture<Result<Forecast>>   forecastFuture = forecasts.fetchForecast(request);
+    const QFuture<Result<AirQuality>> airFuture      = air.fetchAirQuality(request);
+    QVERIFY(forecastFuture.isFinished());
+    QVERIFY(airFuture.isFinished());
+
+    Forecast forecast = forecastFuture.result().value();
+    const AirQuality quality = airFuture.result().value();
+
+    // Make it rain from the standing hour onward, so the run the reader is
+    // already in continues without a break.
+    QList<HourlyPoint> hours = asHourStarting(forecast.hourly);
+    int standing = 0;
+    for (int i = 0; i < hours.size(); ++i) {
+        if (hours.at(i).time <= fixture.recordedAt)
+            standing = i;
+        else
+            break;
+    }
+    // `forecast.hourly` is hour-ENDING, so the hour starting at index i is the
+    // raw sample at i + 1.
+    for (int i = standing + 1; i < qMin(int(forecast.hourly.size()), standing + 10); ++i)
+        forecast.hourly[i].precipitation = 3.0;
+
+    ConditionsData data(nullptr);
+    data.setSnapshot(forecast, quality, fixture.recordedAt, fixture.place, /*hasPollen=*/false);
+
+    const QString summary = data.current().value(QStringLiteral("summary")).toString();
+    QVERIFY2(!summary.contains(QStringLiteral(" from ")),
+             qPrintable(QStringLiteral(
+                 "it is already raining and the card says \"%1\". A run that has "
+                 "started has no onset to announce.").arg(summary)));
+}
+
 void TestConditionsData::everyBlockCarriesItsKeysBeforeTheFirstSnapshot()
 {
     ConditionsData data(nullptr);

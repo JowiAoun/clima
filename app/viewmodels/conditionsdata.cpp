@@ -593,6 +593,44 @@ void ConditionsData::buildContext()
 
     if (usable) {
         m_observation = m_forecast.current;
+
+        // ---- one definition of "now" --------------------------------------
+        //
+        // The `current` block is the right source for an *instant* — a
+        // temperature, a wind, a humidity read at 4:47 rather than on the hour
+        // — and the wrong one for anything describing a stretch.
+        //
+        // `weatherCode` is a stretch. forecast.h says so where it groups the
+        // code with the accumulations — it "describes a stretch of weather
+        // rather than a moment" — and hourconvention.cpp acts on it: every
+        // entry in `m_hours` carries the code for the hour *starting* at its
+        // stamp, which is the hour we are standing in. Open-Meteo's `current`
+        // block is a separate product on its own convention, and the two
+        // disagree often enough to matter: sampled across twelve cities on one
+        // afternoon, five of them.
+        //
+        // When they disagreed the app stated both at once. The card read
+        // "Mainly sunny" a few centimetres above a chart whose Now column drew
+        // heavy rain, and the sentence under the card announced a rain that had
+        // already started — while it was, in fact, raining. Whichever value is
+        // nearer the truth, saying both is a defect of ours, and the series the
+        // rest of the page is drawn from is the one to keep: the chart, the
+        // strip, the precipitation wash and this card's own next-rain clause
+        // all come out of `m_hours`.
+        //
+        // `precipitation` moves with it, for a sharper reason. This struct
+        // documents it as the *preceding* hour while `m_hours` has been
+        // converted to the hour starting, so reading the two side by side is
+        // the exact mistake asHourStarting exists to prevent.
+        //
+        // Everything else stays: the instants are why the `current` block is
+        // preferred in the first place, and they are what makes the reading
+        // 4:47's rather than four o'clock's.
+        if (m_hourNow < m_hours.size()) {
+            const HourlyPoint &standing = m_hours.at(m_hourNow);
+            m_observation.weatherCode   = standing.weatherCode;
+            m_observation.precipitation = standing.precipitation;
+        }
     } else if (m_hourNow < m_hours.size()) {
         // Rebuilt from the hour we are standing in. Field for field rather than
         // by any clever means, because the two structs differ in exactly one
@@ -1389,15 +1427,29 @@ void ConditionsData::buildSummary()
     // and how hard it gets. Both come out of the same series the chart draws,
     // which is what stops the sentence and the wash under it disagreeing about
     // whether it is going to rain.
+    // An onset, not merely the next wet hour: `from` names a time the reader is
+    // meant to act on, and an hour that is already raining does not have one.
+    // The scan therefore wants a wet hour whose predecessor was dry, which is
+    // what makes the clause hold when the standing hour is itself wet — before,
+    // a rain that had been falling since two o'clock was announced as starting
+    // at five, which is the same sentence a forecast would use for a dry
+    // afternoon.
+    const auto wet = [this](int i) {
+        return i >= 0 && i < m_hours.size()
+            && m_hours.at(i).precipitation.value_or(0.0) >= 0.1;
+    };
+
     int    startsAt = -1;
     double peakMm   = 0;
     for (int i = m_hourNow + 1; i < qMin(int(m_hours.size()), m_hourNow + 13); ++i) {
-        const double mm = m_hours.at(i).precipitation.value_or(0.0);
-        if (mm < 0.1)
+        if (!wet(i))
             continue;
-        if (startsAt < 0)
+        if (startsAt < 0) {
+            if (wet(i - 1))
+                continue;   // the run we are already standing in
             startsAt = i;
-        peakMm = qMax(peakMm, mm);
+        }
+        peakMm = qMax(peakMm, m_hours.at(i).precipitation.value_or(0.0));
     }
 
     // Assembled as whole sentences and joined, rather than concatenated with

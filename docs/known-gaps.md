@@ -85,6 +85,36 @@ screen next to the toggle that controls them.
 
 ---
 
+## Every capture runs the fallback observation, never the live one
+
+`ConditionsData::buildContext` has two ways to decide what "now" is. Open-Meteo
+sends a `current` block stamped to the quarter hour, and that is used whenever it
+is actually current — within an hour of the clock. When it is not, the
+observation is rebuilt from the hour the reader is standing in.
+
+**The fixtures always take the second branch.** `tests/fixtures/wire/toronto.json`
+carries `recordedAt: 12:28` and a `current.time` of `06:30`, six hours apart, so
+every one of the fifty-three golden images and every test that loads a fixture
+photographs the fallback. The branch the app takes on every real run has no
+picture of it anywhere.
+
+That is not academic. The card drawing `current.weather_code` while the chart
+drew the hourly series was a visible contradiction — "Mainly sunny" a few
+centimetres above a Now column showing heavy rain, in the rain — and it could
+not have been caught by any capture, because in a capture the two are the same
+value. It was found by someone looking at the running app. `tst_conditionsdata`
+now moves the clock onto the block's own stamp to reach the branch, which tests
+the arithmetic but photographs nothing.
+
+Closing it means re-recording the fixtures so `current.time` sits inside the
+hour `recordedAt` names — `scripts/` has the recorder — and then re-accepting
+the goldens, which will move: the hero would show the block's readings rather
+than the hour's, which differ by a degree or two. Worth doing next time the
+fixtures are refreshed for another reason, since the two changes land in the
+same images.
+
+---
+
 ## The detail cards are about now, whichever day the chart is showing
 
 The day strip moves the hourly window: pick Friday and the chart, the list and
