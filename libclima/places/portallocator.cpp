@@ -25,6 +25,17 @@ constexpr auto kSessionInterface  = "org.freedesktop.portal.Session";
 // org.freedesktop.portal.Location's accuracy enum. CITY: see the header.
 constexpr uint kAccuracyCity = 2;
 
+// How long the reader is given to answer the portal's permission dialog. Not
+// timeout(), which bounds the arrival of a POSITION: a dialog can sit open for
+// as long as somebody takes to read it, and a locator that gave up at fifteen
+// seconds would cancel a request the user was about to grant. Generous, and
+// still bounded, because a portal that never answers at all must not leave the
+// button dead for the life of the process.
+constexpr int kDialogTimeoutMs = 3 * 60 * 1000;
+
+// The property an outstanding reply carries its request's serial in.
+constexpr const char *kSerial = "clima_serial";
+
 // Response codes on org.freedesktop.portal.Request.
 constexpr uint kResponseSuccess   = 0;
 constexpr uint kResponseCancelled = 1;
@@ -40,8 +51,10 @@ PortalLocator::PortalLocator(const QDBusConnection &bus, QObject *parent)
     : DeviceLocator(parent)
     , m_bus(bus)
 {
+    // Single-shot, and its slot is chosen per phase rather than once here: the
+    // dialog and the fix are two different waits with two different bounds.
+    // See requestPosition() and onResponse().
     m_timer.setSingleShot(true);
-    connect(&m_timer, &QTimer::timeout, this, &PortalLocator::onTimeout);
 }
 
 PortalLocator::~PortalLocator()
@@ -103,18 +116,24 @@ QString PortalLocator::requestPathFor(const QString &token) const
 
 void PortalLocator::requestPosition()
 {
+    // The in-flight check comes FIRST, and the order is load-bearing. A second
+    // press while the first request is outstanding is the user being impatient,
+    // not a second question — and here a second question would be a second
+    // permission dialog. Asked the other way round, a bus that had gone away
+    // between the two presses reported Unavailable for the second one, which
+    // clears the in-flight flag without going through finish(): the first
+    // request is then orphaned with its match rules still installed, every
+    // later request early-returns out of subscribe(), and "use my location"
+    // times out for the rest of the process.
+    if (isRequestInFlight())
+        return;
+
     if (!isAvailable()) {
         reportFailure(Failure::Unavailable,
                       QStringLiteral("there is no session bus, so there is no location portal "
                                      "to ask"));
         return;
     }
-
-    // A second press while the first is outstanding is the user being
-    // impatient, not a second question — and here a second question would be
-    // a second permission dialog.
-    if (isRequestInFlight())
-        return;
 
     setRequestInFlight(true);
 
@@ -140,20 +159,42 @@ void PortalLocator::requestPosition()
     call << options;
 
     auto *watcher = new QDBusPendingCallWatcher(m_bus.asyncCall(call), this);
+    watcher->setProperty(kSerial, QVariant::fromValue(m_serial));
     connect(watcher, &QDBusPendingCallWatcher::finished, this, &PortalLocator::onSessionCreated);
 
-    m_timer.start(timeout());
+    // The DIALOG's clock, not the fix's. timeout() is how long to wait for a
+    // position, and until the reader has answered the portal's permission
+    // prompt there is no position to wait for — a request timed out at fifteen
+    // seconds while somebody was still reading the dialog, closed the session
+    // out from under it, and reported "no position arrived" for a request they
+    // were in the middle of granting. Restarted at timeout() the moment the
+    // portal says yes; see onResponse().
+    m_timer.disconnect(this);
+    connect(&m_timer, &QTimer::timeout, this, &PortalLocator::onDialogTimeout);
+    m_timer.start(kDialogTimeoutMs);
 }
 
 void PortalLocator::onSessionCreated(QDBusPendingCallWatcher *watcher)
 {
     watcher->deleteLater();
 
-    // A reply for a request that was cancelled or timed out in the meantime.
-    if (!isRequestInFlight())
-        return;
-
     const QDBusPendingReply<QDBusObjectPath> reply = *watcher;
+
+    // A reply for a request that was cancelled or timed out in the meantime —
+    // or, worse, for one that was, while a NEW request is now outstanding. The
+    // serial tells those apart; the in-flight flag alone cannot, and adopting
+    // a stale reply would point this locator at one session while leaving
+    // another open forever.
+    //
+    // The portal created that session before we lost interest, and nothing but
+    // this process will ever close it: xdg-desktop-portal reaps a session only
+    // when the owning bus name goes away, so an abandoned one keeps GeoClue
+    // reporting to nobody for the life of the program. Close it here.
+    if (watcher->property(kSerial).value<quint64>() != m_serial || !isRequestInFlight()) {
+        if (!reply.isError())
+            closePath(reply.value().path());
+        return;
+    }
     if (reply.isError()) {
         // The portal is not on this bus, or is too old to have a Location
         // portal. Both are "there is nothing to ask", which is Unavailable,
@@ -183,6 +224,7 @@ void PortalLocator::onSessionCreated(QDBusPendingCallWatcher *watcher)
     call << QVariant::fromValue(QDBusObjectPath(m_sessionPath)) << QString() << options;
 
     auto *start = new QDBusPendingCallWatcher(m_bus.asyncCall(call), this);
+    start->setProperty(kSerial, QVariant::fromValue(m_serial));
     connect(start, &QDBusPendingCallWatcher::finished, this, &PortalLocator::onStarted);
 }
 
@@ -190,7 +232,7 @@ void PortalLocator::onStarted(QDBusPendingCallWatcher *watcher)
 {
     watcher->deleteLater();
 
-    if (!isRequestInFlight())
+    if (watcher->property(kSerial).value<quint64>() != m_serial || !isRequestInFlight())
         return;
 
     const QDBusPendingReply<QDBusObjectPath> reply = *watcher;
@@ -218,8 +260,12 @@ void PortalLocator::onResponse(uint response, const QVariantMap &results)
 
     switch (response) {
     case kResponseSuccess:
-        // Granted. The fix follows on LocationUpdated; the timer is still
-        // running for it.
+        // Granted, so the dialog is answered and the wait becomes a wait for a
+        // POSITION. That is what timeout() bounds, and it starts here rather
+        // than when the request did — see requestPosition().
+        m_timer.disconnect(this);
+        connect(&m_timer, &QTimer::timeout, this, &PortalLocator::onTimeout);
+        m_timer.start(timeout());
         return;
 
     case kResponseCancelled:
@@ -268,6 +314,16 @@ void PortalLocator::onLocationUpdated(const QDBusObjectPath &session, const QVar
 
     finish();
     reportPosition(Coordinate{ latitude, longitude }, okAccuracy ? accuracy : -1.0);
+}
+
+void PortalLocator::onDialogTimeout()
+{
+    if (!isRequestInFlight())
+        return;
+    finish();
+    reportFailure(Failure::Timeout,
+                  QStringLiteral("the location portal never answered its own permission "
+                                 "request within %1 ms").arg(kDialogTimeoutMs));
 }
 
 void PortalLocator::onTimeout()
@@ -322,11 +378,18 @@ void PortalLocator::closeSession()
     if (!m_sessionOpen)
         return;
     m_sessionOpen = false;
+    closePath(m_sessionPath);
+}
+
+void PortalLocator::closePath(const QString &sessionPath)
+{
+    if (sessionPath.isEmpty())
+        return;
 
     // Fire and forget. A session left open keeps GeoClue reporting to a
     // client that has stopped listening, which costs the machine a radio it
     // does not need on; the reply to Close() is of no use to anybody.
-    QDBusMessage call = QDBusMessage::createMethodCall(service(), m_sessionPath,
+    QDBusMessage call = QDBusMessage::createMethodCall(service(), sessionPath,
                                                        sessionInterface(),
                                                        QStringLiteral("Close"));
     m_bus.asyncCall(call);

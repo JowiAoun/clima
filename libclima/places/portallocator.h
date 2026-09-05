@@ -114,6 +114,7 @@ public:
 private Q_SLOTS:
     void onSessionCreated(QDBusPendingCallWatcher *watcher);
     void onStarted(QDBusPendingCallWatcher *watcher);
+    void onDialogTimeout();
     void onResponse(uint response, const QVariantMap &results);
     void onLocationUpdated(const QDBusObjectPath &session, const QVariantMap &location);
     void onTimeout();
@@ -128,12 +129,23 @@ private:
     QDBusConnection m_bus;
     QTimer          m_timer;
 
+    // Closes a session by path, whoever owns it. Used for the session this
+    // request is finished with, and for one that arrived for a request that
+    // had already been cancelled — see onSessionCreated().
+    void closePath(const QString &sessionPath);
+
     QString m_token;
     QString m_sessionPath;
     QString m_requestPath;
     bool    m_sessionOpen = false;
     bool    m_subscribed  = false;
-    quint64 m_serial      = 0;
+
+    // Which request a reply belongs to. The in-flight flag alone cannot say:
+    // a CreateSession reply that arrives after its request was cancelled looks
+    // exactly like one belonging to the request that started next, and would
+    // be adopted by it. Every asynchronous reply carries the serial it was
+    // issued under and is dropped if that is no longer the current one.
+    quint64 m_serial = 0;
 };
 
 } // namespace clima
