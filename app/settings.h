@@ -40,8 +40,11 @@
 #include <QQmlEngine>
 #include <QScopedPointer>
 #include <QString>
+#include <QStringList>
 
+class QFileSystemWatcher;
 class QSettings;
+class QTimer;
 
 // An organisation/application pair, which together are all QSettings needs to
 // find a file. A superseded one is a place preferences might still be sitting.
@@ -124,6 +127,28 @@ public:
     // be able to answer it.
     Q_INVOKABLE QString filePath() const;
 
+    // ---- following another process's writes ----------------------------------
+    //
+    // The widget host reads the INI the app writes, and until these two
+    // existed it read it once, at start: switch to a 24-hour clock in the app
+    // and the tiles kept saying "3 PM" until the host was restarted.
+    //
+    // reloadFromDisk() re-reads the file and emits the change signal for every
+    // value that moved — and only those, so a reload that found nothing new is
+    // silent, and a binding on the clock format is not re-evaluated because
+    // somebody resized the window. watchForExternalChanges() arms a watcher on
+    // the file and its directory and calls reloadFromDisk() when they settle;
+    // it is opt-in because the process that *writes* the file has no use for
+    // being told about its own writes.
+    //
+    // The directory as well as the file, because QSettings writes through a
+    // temporary and a rename: the inode a watcher was told about is the one
+    // that just got replaced, and the second edit of the evening would
+    // otherwise be the one nobody hears. Same shape as the daemon's places
+    // watcher in daemon/snapshotservice.cpp, for the same reason.
+    void reloadFromDisk();
+    void watchForExternalChanges();
+
     QString appearance() const;
     void    setAppearance(const QString &value);
 
@@ -185,5 +210,39 @@ private:
     bool store(const QString &key, const QVariant &value);
     QVariant load(const QString &key, const QVariant &fallback) const;
 
+    // Re-adds whichever of the file and its directory the watcher has dropped.
+    // A path that was replaced rather than modified is forgotten by
+    // QFileSystemWatcher, so this runs on every notification as well as once
+    // at arming.
+    void rearmWatch();
+
+    // Every preference at once, for the comparison reloadFromDisk() makes. A
+    // struct rather than a QVariantMap so that the comparison is typed the way
+    // the getters are and a default is applied the way the getters apply it.
+    struct Values {
+        QString     appearance;
+        bool        dynamicBackground = true;
+        QString     clockFormat;
+        int         windowWidth  = 0;
+        int         windowHeight = 0;
+        int         windowX      = 0;
+        int         windowY      = 0;
+        QString     temperatureUnit;
+        QString     windUnit;
+        QString     pressureUnit;
+        QString     visibilityUnit;
+        QString     precipitationUnit;
+        QStringList acknowledgedAlerts;
+    };
+    [[nodiscard]] Values currentValues() const;
+
     QScopedPointer<QSettings> m_settings;
+
+    // What the change signals last announced. Kept by store() and by
+    // reloadFromDisk(), and compared by the latter — see its comment for why
+    // a read taken at reload time is not the same thing.
+    Values m_seen;
+
+    QFileSystemWatcher       *m_watch  = nullptr;
+    QTimer                   *m_settle = nullptr;
 };

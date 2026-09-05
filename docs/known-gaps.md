@@ -228,65 +228,7 @@ a time — which is most of them.
 
 ---
 
-## A widget host that starts cold has nothing to draw
 
-**Status: bounded, and narrower than it was — but the "never blank" promise is
-about a process that is already running.**
-
-A tile that has ever had a reading keeps it: the daemon can exit, be upgraded or
-crash, and the tiles go on drawing the last snapshot and counting minutes. That
-is `docs/README.md`'s non-negotiable 1 one process out, and it holds.
-
-What it does not cover is a widget host that starts when there is no daemon at
-all. Nothing has ever been delivered, so there is nothing to keep, and the tiles
-come up with a sentence saying why instead of a reading. D-Bus activation makes
-that rare — the bus starts a daemon for the host that asked — but it is still
-what a machine with no service installed shows, and the first snapshot after an
-activation is a fetch somebody is watching.
-
-The widget host deliberately does not read the cache: `widgets/CMakeLists.txt`
-asserts against the built binary that it links no provider and no store, and a
-second SQLite reader on one desktop is the arrangement the daemon exists to
-prevent.
-
-What closes it: the daemon writing its last published snapshot per subscription
-mask to a small file the host may read at startup, or — cheaper and probably
-better — the daemon answering `GetSnapshot` from its cache before its first
-fetch returns, which is one call already made on every path.
-
----
-
-## A preference change does not reach a running widget
-
-**Status: known, bounded, and the same shape as the units it inherits.**
-
-`clima-widget` is a second process. It reads the reader's units and clock format
-out of the same INI the app writes — that is why `app/settings.cpp`,
-`app/viewmodels/units.cpp` and `app/viewmodels/timeformat.cpp` are compiled into
-the widget host rather than reimplemented there — but it reads them at start.
-Switch to a 24-hour clock in the app and the tiles on the desktop keep saying
-"3 PM" until the host is restarted.
-
-Nothing pushes a settings change across processes today. The daemon's session-bus
-interface carries the *forecast*, not the reader's preferences, and adding a
-preference channel to it is a wire-format change that wants its own commit.
-
-This is not new with the clock: the units have behaved this way since the tiles
-first drew a temperature. What is new is that there is now a screen that makes
-the divergence easy to produce on purpose.
-
-What closes it: either a `SettingsChanged` signal on the existing bus interface,
-or a `QFileSystemWatcher` on the INI in the widget host — the second is a dozen
-lines and needs no wire-format change, which is probably the right first answer.
-
-There is now a worked example of exactly that shape one process over. The daemon
-watches the places database and re-reads it when it settles, so a change of home
-place reaches a running tile in about a second; `daemon/snapshotservice.cpp` has
-the watcher, the settle timer, the fingerprint that keeps its own writes from
-retriggering it, and the poll-tick re-read that covers a notification that never
-arrives. The INI wants the same four pieces and none of the bus work.
-
----
 
 ## The desktop widgets have never been pinned on a KDE session
 

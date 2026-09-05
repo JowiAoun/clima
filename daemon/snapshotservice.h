@@ -95,6 +95,11 @@ public:
     // clock and which providers. Everything downstream is identical.
     void configure(const QString &fixtureName);
 
+    // How far ahead every fetch asks. Public because the cache key is derived
+    // from the request, and a test that seeds the cache has to ask for the
+    // same thing this process will.
+    static constexpr int forecastDays = 10;
+
     [[nodiscard]] bool isFixtureMode() const { return !m_fixtureName.isEmpty(); }
 
     // ---- what the bus calls ------------------------------------------------
@@ -172,6 +177,18 @@ private:
     [[nodiscard]] QString      canonical(const QString &placeId) const;
 
     Watched &ensureWatched(const QString &placeId);
+
+    // The cache, synchronously, before the network. A widget host that starts
+    // beside a daemon that has never fetched — a login, an upgrade, a D-Bus
+    // activation — calls GetSnapshot in the same event-loop turn it subscribed
+    // in, and fetch() below cannot answer inside that turn: every provider
+    // future, even one served from the cache, is settled through the event
+    // loop. So this asks each provider in the chain for its cached bytes
+    // directly, takes the first answer that is already finished, and leaves
+    // the tile a stale reading rather than a gap. `fromCache` is set, so the
+    // snapshot says "cached" and the tile ages it honestly.
+    void warmFromCache(Watched &watched);
+
     void     fetch(const QString &placeId);
     void     publish(const QString &placeId);
     void     onPollTimeout();

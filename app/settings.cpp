@@ -7,7 +7,9 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QFileSystemWatcher>
 #include <QSettings>
+#include <QTimer>
 #include <QVariant>
 
 namespace {
@@ -34,6 +36,12 @@ const auto visibilityUnit    = QStringLiteral("units/visibility");
 const auto precipitationUnit = QStringLiteral("units/precipitation");
 const auto acknowledgedAlerts = QStringLiteral("alerts/acknowledged");
 } // namespace key
+
+// How long a burst of notifications is allowed to go quiet before the file is
+// re-read. One preference change is one QSettings::sync, which is a temporary
+// file, a rename and a directory entry — three events for one edit — and the
+// app may write several keys in a row when a unit preset is applied.
+constexpr int kSettleMs = 250;
 
 // The file QSettings would use for a given identity. Constructing a QSettings
 // does not create anything on disk — it only computes a path — so this is safe
@@ -101,6 +109,9 @@ Settings *g_instance = nullptr;
 Settings::Settings()
     : m_settings(new QSettings)
 {
+    // What the signals have "said" so far is what the file says now. See
+    // reloadFromDisk() for why this is kept rather than read on demand.
+    m_seen = currentValues();
 }
 
 Settings::~Settings() = default;
@@ -211,12 +222,126 @@ bool Settings::store(const QString &key, const QVariant &value)
     if (m_settings->value(key) == value)
         return false;
     m_settings->setValue(key, value);
+
+    // The caller emits for this write; a later reload must not emit for it
+    // again. Every value rather than the one key, because the keys are strings
+    // here and fields there, and one refresh is thirteen cheap reads.
+    m_seen = currentValues();
     return true;
 }
 
 QVariant Settings::load(const QString &key, const QVariant &fallback) const
 {
     return m_settings->value(key, fallback);
+}
+
+// ---- following another process's writes -------------------------------------
+
+Settings::Values Settings::currentValues() const
+{
+    // Through the public getters, so that a default applies on both sides of
+    // every comparison the same way: a key another process removed reads back
+    // as its default, and if that default is what was showing already, nothing
+    // moved and nothing is emitted.
+    Values values;
+    values.appearance        = appearance();
+    values.dynamicBackground = dynamicBackground();
+    values.clockFormat       = clockFormat();
+    values.windowWidth       = windowWidth();
+    values.windowHeight      = windowHeight();
+    values.windowX           = windowX();
+    values.windowY           = windowY();
+    values.temperatureUnit   = temperatureUnit();
+    values.windUnit          = windUnit();
+    values.pressureUnit      = pressureUnit();
+    values.visibilityUnit    = visibilityUnit();
+    values.precipitationUnit = precipitationUnit();
+    values.acknowledgedAlerts = acknowledgedAlerts();
+    return values;
+}
+
+void Settings::reloadFromDisk()
+{
+    // sync() is the reload as well as the flush: QSettings compares the file's
+    // size and modification time against what it last read or wrote, and
+    // re-parses when either has moved. Pending writes of our own, if any, go
+    // out first and are merged with what is on disk.
+    m_settings->sync();
+
+    // Compared against what this object last announced, NOT against a read
+    // taken just before the sync. QSettings syncs on its own as well — it
+    // posts itself an UpdateRequest after every setValue and flushes on the
+    // next turn of the event loop, and that flush re-reads a changed file
+    // exactly as ours does. A "before" taken here would then already carry
+    // the other process's value, and the change it represents would never be
+    // announced. m_seen is what the signals last said, kept by store() and by
+    // this function, so a change is announced once whichever sync found it.
+    const Values before = m_seen;
+    const Values after  = currentValues();
+    m_seen              = after;
+
+    if (before.appearance != after.appearance)
+        Q_EMIT appearanceChanged();
+    if (before.dynamicBackground != after.dynamicBackground)
+        Q_EMIT dynamicBackgroundChanged();
+    if (before.clockFormat != after.clockFormat)
+        Q_EMIT clockFormatChanged();
+    if (before.windowWidth != after.windowWidth || before.windowHeight != after.windowHeight
+        || before.windowX != after.windowX || before.windowY != after.windowY)
+        Q_EMIT windowGeometryChanged();
+    if (before.temperatureUnit != after.temperatureUnit)
+        Q_EMIT temperatureUnitChanged();
+    if (before.windUnit != after.windUnit)
+        Q_EMIT windUnitChanged();
+    if (before.pressureUnit != after.pressureUnit)
+        Q_EMIT pressureUnitChanged();
+    if (before.visibilityUnit != after.visibilityUnit)
+        Q_EMIT visibilityUnitChanged();
+    if (before.precipitationUnit != after.precipitationUnit)
+        Q_EMIT precipitationUnitChanged();
+    if (before.acknowledgedAlerts != after.acknowledgedAlerts)
+        Q_EMIT acknowledgedAlertsChanged();
+}
+
+void Settings::watchForExternalChanges()
+{
+    if (m_watch != nullptr)
+        return;
+
+    m_settle = new QTimer(this);
+    m_settle->setSingleShot(true);
+    m_settle->setInterval(kSettleMs);
+    connect(m_settle, &QTimer::timeout, this, &Settings::reloadFromDisk);
+
+    m_watch = new QFileSystemWatcher(this);
+    rearmWatch();
+
+    const auto touched = [this](const QString &) {
+        // Re-arm first, then wait for quiet. See rearmWatch().
+        rearmWatch();
+        m_settle->start();
+    };
+    connect(m_watch, &QFileSystemWatcher::fileChanged, this, touched);
+    connect(m_watch, &QFileSystemWatcher::directoryChanged, this, touched);
+}
+
+void Settings::rearmWatch()
+{
+    const QString file      = m_settings->fileName();
+    const QString directory = QFileInfo(file).absolutePath();
+
+    // A fresh install where the app has never written a preference has no
+    // file and may have no directory. The directory is created — QSettings
+    // would create it on the first write anyway, and an empty one is not a
+    // preference — so that there is something to watch for the file appearing
+    // in. The file itself is only added once it exists; QFileSystemWatcher
+    // refuses a path that does not.
+    QDir().mkpath(directory);
+
+    if (!m_watch->directories().contains(directory) && QDir(directory).exists())
+        m_watch->addPath(directory);
+    if (!m_watch->files().contains(file) && QFile::exists(file))
+        m_watch->addPath(file);
 }
 
 // ---- appearance -------------------------------------------------------------

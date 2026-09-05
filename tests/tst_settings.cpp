@@ -127,6 +127,11 @@ private Q_SLOTS:
 
     // ---- the file --------------------------------------------------------------
     void thePreferencesAreInAFileAnAnswerCanNameAndAUserCanRead();
+
+    // ---- following another process --------------------------------------
+    void aChangeAnotherProcessWroteIsNoticedOnReload();
+    void aReloadThatFindsNothingNewIsSilent();
+    void theWatcherReloadsWithoutBeingAsked();
 };
 
 void TestSettings::initTestCase()
@@ -600,6 +605,93 @@ void TestSettings::thePreferencesAreInAFileAnAnswerCanNameAndAUserCanRead()
     // file has been writing somewhere harmless.
     QVERIFY2(path.startsWith(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)),
              qPrintable(path));
+}
+
+// ============================================================================
+// Following another process.
+//
+// The widget host reads the INI the app writes. These three are the difference
+// between "reads it at start" and "follows it", and the discipline in all of
+// them is that the other process is simulated with BYTES rather than with a
+// second QSettings. Two QSettings on one path in one process share a parsed
+// copy of the file and agree with each other without a disk read in between —
+// a test written that way passes with reloadFromDisk() doing nothing at all.
+// ============================================================================
+
+void TestSettings::aChangeAnotherProcessWroteIsNoticedOnReload()
+{
+    Settings *settings = Settings::instance();
+
+    // The baseline on disk: what init() set, flushed. A reload with a pending
+    // write of our own would be testing the merge rather than the read. The
+    // temperature is set explicitly because init() does not touch the units
+    // and an earlier case in this file leaves it in Fahrenheit.
+    settings->setClockFormat(QStringLiteral("12h"));
+    settings->setTemperatureUnit(QStringLiteral("celsius"));
+    settings->reloadFromDisk();
+    QCOMPARE(settings->clockFormat(), QStringLiteral("12h"));
+    QCOMPARE(settings->temperatureUnit(), QStringLiteral("celsius"));
+
+    QSignalSpy clock(settings, &Settings::clockFormatChanged);
+    QSignalSpy temperature(settings, &Settings::temperatureUnitChanged);
+
+    // The reader flips the switch in the app. Written as the app would write
+    // it and as nothing else in this process would: straight to the file.
+    QVERIFY(writeFile(settings->filePath(),
+                      QByteArrayLiteral("[time]\nformat=24h\n\n[units]\ntemperature=fahrenheit\n")));
+
+    settings->reloadFromDisk();
+
+    QCOMPARE(settings->clockFormat(), QStringLiteral("24h"));
+    QCOMPARE(settings->temperatureUnit(), QStringLiteral("fahrenheit"));
+    QCOMPARE(clock.count(), 1);
+    QCOMPARE(temperature.count(), 1);
+}
+
+void TestSettings::aReloadThatFindsNothingNewIsSilent()
+{
+    // The other half of the contract. A binding on the clock format must not
+    // be re-evaluated because the window was resized by another process, and
+    // a reload that emits everything every time would do exactly that.
+    Settings *settings = Settings::instance();
+    settings->setClockFormat(QStringLiteral("12h"));
+    settings->reloadFromDisk();
+
+    QSignalSpy clock(settings, &Settings::clockFormatChanged);
+    QSignalSpy units(settings, &Settings::windUnitChanged);
+
+    settings->reloadFromDisk();
+    settings->reloadFromDisk();
+
+    QCOMPARE(clock.count(), 0);
+    QCOMPARE(units.count(), 0);
+}
+
+void TestSettings::theWatcherReloadsWithoutBeingAsked()
+{
+    Settings *settings = Settings::instance();
+    settings->setClockFormat(QStringLiteral("12h"));
+    settings->reloadFromDisk();
+
+    settings->watchForExternalChanges();
+
+    QSignalSpy clock(settings, &Settings::clockFormatChanged);
+
+    QVERIFY(writeFile(settings->filePath(), QByteArrayLiteral("[time]\nformat=24h\n")));
+
+    // The settle interval plus inotify's own latency, with room. A watcher that
+    // never fires is the failure this bounds, and three seconds of waiting for
+    // it is the price of not asserting a timing.
+    //
+    // This case found a second bug in the first draft, and it is the reason
+    // reloadFromDisk() compares against what it last announced rather than
+    // against a read taken just before its sync. QSettings flushes itself on
+    // the event loop after a setValue — init() made several — and that flush
+    // re-read the changed file before the settle timer fired, so a "before"
+    // read at reload time already said 24h and the change was never emitted.
+    // The wait below spins the loop, which is what makes this case reach it.
+    QVERIFY2(clock.wait(3000), "the file changed under the watcher and nothing was reloaded");
+    QCOMPARE(settings->clockFormat(), QStringLiteral("24h"));
 }
 
 QTEST_MAIN(TestSettings)

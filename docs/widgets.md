@@ -465,17 +465,36 @@ it started — never one that was already there. `--snapshot` is the other way,
 and the one CI uses: it reads a recorded file and never touches the bus at all,
 so the script stays out of the way when it sees that flag.
 
-### Preferences arrive at start, not while running
+### Preferences follow the app
 
 A tile shows the units and the clock format the reader chose in the app, because
-both processes read the same INI and share the code that interprets it. What
-neither shares is a *change*: the widget host reads the file when it starts.
-Switch to a 24-hour clock in the app and the tiles keep the old spelling until
-the host is restarted.
+both processes read the same INI and share the code that interprets it. A
+*change* follows too: the host watches the file and its directory, waits for
+the write to settle, and re-reads — `Settings::watchForExternalChanges()` in
+`app/settings.cpp`, the same four pieces the daemon uses to follow the places
+table. Switch to a 24-hour clock in the app and the tiles respell within a
+second.
 
-Nothing pushes a settings change across processes today — the daemon's bus
-interface carries the forecast, not the reader's preferences. `docs/known-gaps.md`
-has the entry, including the cheapest way to close it.
+Nothing crosses the bus for this. The daemon's interface carries the forecast,
+and a preference is a fact about the reader rather than about the weather; the
+INI was already the one place both processes agreed on, so it stays the
+channel. One consequence worth knowing: `Settings::reloadFromDisk()` announces a
+change against what its signals *last said*, not against a read taken just
+before it re-syncs — QSettings flushes itself on the event loop after any
+write, and that flush re-reads a changed file silently.
+
+### The first snapshot a cold daemon serves
+
+A daemon that has never fetched — a login, an upgrade, a D-Bus activation —
+answers its first `GetSnapshot` from the cache, synchronously, before its first
+fetch has returned. It has to be synchronous: the host subscribes and asks in
+the same turn of the event loop, and every future the provider registry hands
+back is settled one turn later. So `SnapshotService::warmFromCache()` asks each
+provider in the chain for its cached bytes directly and takes the first answer
+that is already finished. The snapshot says `cached`, the tile draws it and
+ages it, and the fetch that follows brings it up to date. A machine with no
+cache at all still gets `unknown` and a sentence — the case the old gap
+described is now the only case left, and it is the honest one.
 
 ### The second mechanism
 

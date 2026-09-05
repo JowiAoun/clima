@@ -127,6 +127,34 @@ if(TARGET climawidgetsqml)
     )
 endif()
 
+# ---- the daemon's service, without the bus -----------------------------------
+#
+# Registered by hand rather than through clima_add_test() because it links the
+# daemon's core library rather than libclima directly. clima_forbid_gui() is
+# applied all the same: the daemon's whole promise is that it draws nothing, and
+# a test binary that linked Qt Quick through it would be the first place that
+# promise broke.
+#
+# Guarded on the target, because daemon/ is only entered on Linux with Qt DBus.
+if(TARGET clima_daemon_core)
+    add_executable(tst_snapshotservice tst_snapshotservice.cpp)
+
+    target_link_libraries(tst_snapshotservice PRIVATE
+        clima_daemon_core clima_testsupport Qt6::Test)
+    target_compile_definitions(tst_snapshotservice PRIVATE
+        CLIMA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    )
+
+    clima_forbid_gui(tst_snapshotservice)
+
+    add_test(NAME tst_snapshotservice COMMAND tst_snapshotservice)
+
+    set_tests_properties(tst_snapshotservice PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
+        TIMEOUT 60
+    )
+endif()
+
 # ---- the one test that links app/ -------------------------------------------
 #
 # Registered by hand rather than through clima_add_test(), because it is the one

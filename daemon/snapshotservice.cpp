@@ -21,6 +21,8 @@
 #include <QSet>
 #include <QTimer>
 
+#include <algorithm>
+
 using namespace clima;
 
 namespace {
@@ -34,7 +36,6 @@ constexpr int kPollIntervalMs = 5 * 60 * 1000;
 
 // What the daemon keeps for a place that nobody has narrowed. A widget asks
 // for what it needs through the mask; these are the ceilings behind it.
-constexpr int kForecastDays = 10;
 
 // How long the places table has to hold still before it is re-read. Long
 // enough that the several writes behind one edit in the app are seen as one,
@@ -335,12 +336,108 @@ SnapshotService::Watched &SnapshotService::ensureWatched(const QString &placeId)
     fresh.place = resolve(placeId);
     it          = m_watched.insert(placeId, fresh);
 
-    // A place nobody has asked about before has nothing in memory. Kick a
-    // fetch, which will come back from the cache immediately if there is one —
-    // the first answer a widget gets should be a stale reading rather than a
-    // gap, which is the same rule the app's first frame follows.
+    // A place nobody has asked about before has nothing in memory. The cache
+    // first, synchronously, so that a GetSnapshot in this same turn — which is
+    // when a starting widget host makes it — gets a stale reading rather than
+    // a gap; then a fetch, which brings the reading up to date. The same rule
+    // the app's first frame follows, one process further out.
+    warmFromCache(*it);
     fetch(placeId);
     return *it;
+}
+
+void SnapshotService::warmFromCache(Watched &watched)
+{
+    if (!watched.place.coordinate.isValid())
+        return;
+
+    ForecastRequest request;
+    request.coord      = watched.place.coordinate;
+    request.days       = forecastDays;
+    request.timeZone   = QTimeZone(watched.place.timezone.toUtf8());
+    request.cachedOnly = true;
+
+    // Asked of the providers directly rather than through the registry's walk.
+    // The walk chains its attempts through QFuture::then with a context
+    // object, and a continuation with a context runs on the event loop — even
+    // when the future it hangs off finished before it was attached. A cached
+    // answer from a provider, on the other hand, is a promise finished before
+    // fetchForecast() returns, and isFinished() is what tells the two apart. A
+    // provider that read its cache asynchronously would simply not be here in
+    // time, which is the right outcome for a warm-up.
+    const QList<IForecastProvider *> forecasts = m_registry->forecastChain(request.coord);
+    for (IForecastProvider *provider : forecasts) {
+        QFuture<Result<Forecast>> answer = provider->fetchForecast(request);
+        if (!answer.isFinished())
+            continue;
+        const Result<Forecast> result = answer.result();
+        if (!result || result.value().isEmpty())
+            continue;
+        watched.forecast  = result.value();
+        watched.servedBy  = provider->id();
+        watched.fromCache = true;
+        break;
+    }
+
+    const QList<IAirQualityProvider *> airs = m_registry->airQualityChain(request.coord);
+    for (IAirQualityProvider *provider : airs) {
+        QFuture<Result<AirQuality>> answer = provider->fetchAirQuality(request);
+        if (!answer.isFinished())
+            continue;
+        const Result<AirQuality> result = answer.result();
+        if (!result)
+            continue;
+        watched.air = result.value();
+        break;
+    }
+
+    // Alerts fan out rather than fall back, so every covering provider's cached
+    // set is taken and merged, keyed the way the registry keys them. A set is
+    // only ever as complete as the providers that answered: one that has
+    // nothing cached is a provider that did not answer, and the merged set says
+    // so, which is what keeps a tile from claiming "no warnings" on the
+    // strength of the one service it happened to have bytes from.
+    AlertRequest alertRequest;
+    alertRequest.coord      = request.coord;
+    alertRequest.cachedOnly = true;
+
+    AlertSet    merged;
+    QStringList servedBy;
+    bool        anyAnswered = false;
+    bool        allAnswered = true;
+
+    const QList<IAlertProvider *> alerts = m_registry->alertChain(alertRequest.coord);
+    for (IAlertProvider *provider : alerts) {
+        QFuture<Result<AlertSet>> answer = provider->fetchAlerts(alertRequest);
+        if (!answer.isFinished() || !answer.result()) {
+            allAnswered = false;
+            continue;
+        }
+        const AlertSet &part = answer.result().value();
+        for (const Alert &alert : part.alerts) {
+            const bool known = std::any_of(merged.alerts.cbegin(), merged.alerts.cend(),
+                                           [&alert](const Alert &seen) {
+                                               return seen.isSameHazard(alert);
+                                           });
+            if (!known)
+                merged.alerts.append(alert);
+        }
+        servedBy.append(provider->id());
+        anyAnswered = true;
+        if (part.fetchedAt.isValid()
+            && (!merged.fetchedAt.isValid() || part.fetchedAt > merged.fetchedAt))
+            merged.fetchedAt = part.fetchedAt;
+        if (part.confirmedAt.isValid()
+            && (!merged.confirmedAt.isValid() || part.confirmedAt < merged.confirmedAt))
+            merged.confirmedAt = part.confirmedAt;
+    }
+
+    if (anyAnswered) {
+        merged.coordinate = alertRequest.coord;
+        merged.providerId = servedBy.join(QStringLiteral(", "));
+        merged.complete   = allAnswered;
+        watched.alerts    = merged;
+    }
 }
 
 QByteArray SnapshotService::snapshot(const QString    &placeId,
@@ -477,7 +574,7 @@ void SnapshotService::fetch(const QString &placeId)
 
     ForecastRequest request;
     request.coord    = it->place.coordinate;
-    request.days     = kForecastDays;
+    request.days     = forecastDays;
     request.timeZone = QTimeZone(it->place.timezone.toUtf8());
 
     auto *forecast = new QFutureWatcher<Result<ForecastAnswer>>(this);

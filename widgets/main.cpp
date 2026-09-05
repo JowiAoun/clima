@@ -75,6 +75,13 @@ int main(int argc, char *argv[])
 
     WidgetOptions::parseCommandLine(app);
 
+    // The app writes the INI; this process only reads it, and until it
+    // watched the file it read it once. A reader who switches to a 24-hour
+    // clock in the app should see the tiles follow, not restart the host —
+    // `Units` and `TimeFormat` are already bound to Settings' signals, so the
+    // reload is the whole of it.
+    Settings::instance()->watchForExternalChanges();
+
     // Decided here rather than in QML, because it changes whether this process
     // ever touches D-Bus. A recorded snapshot is how the tiles are reviewed in
     // the gallery and photographed in CI, and CI has no session bus.
