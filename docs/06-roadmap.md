@@ -198,6 +198,25 @@ Exit criteria
 - Clean install on Ubuntu, Fedora, Arch, Windows 11, macOS 14+ with no manual steps.
 - Every §5.7 parity target met or explicitly documented as not met.
 
+### Correction, 2026-09-05: three of M4's deliverables landed early
+
+`clima-cli`, the desktop notifications and the background-run permission flow
+are listed above under **M4**, and all three exist. They arrived out of order
+for the reason W8 came before W7: each one was blocked on something that had
+already been built for another reason, and doing them when the blocker cleared
+was cheaper than scheduling them.
+
+| Deliverable | What it turned out to be |
+|---|---|
+| `clima-cli … [--json\|--csv]` | `cli/`, one file over `libclima`. The conversion factors moved to `libclima/domain/units.h` so that a status-bar tool does not link a QML engine to print a temperature — the app's `Units` singleton is now the reader's *choice* and nothing else. |
+| Notifications with per-severity opt-in | `app/platform/notifier.h`, portal first and `org.freedesktop.Notifications` second. Opt-in rather than per-severity: the preference is one switch, and what is worth interrupting somebody for is `AlertsData`'s decision — a hazard they have not been told about, while the window is hidden. |
+| A background-run permission flow | **Not built, and not needed for this.** §4.5's own exception — a hidden window keeps polling, every fifteen minutes, when notifications are on — is enough while the app is running, and it needs no portal permission. Being notified when the app is *closed* is the daemon's job and is not scheduled. |
+
+What did not come with them is the alert coverage M4 is really about:
+MeteoAlarm, the CAP 1.2 parser and the region-routed chain beyond
+US/Canada are all still ahead, and R6 — MeteoAlarm's terms for third-party
+clients — is still unverified.
+
 ## 6.10 Post-1.0 backlog
 
 Satellite imagery (needs an open ingest story) · marine forecasts · flood/GloFAS ·

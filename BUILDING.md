@@ -80,12 +80,13 @@ carries its own Qt — see [`docs/known-gaps.md`](docs/known-gaps.md).
 | `CLIMA_MAINTAINER` | a noreply address | The Debian `Maintainer` field. |
 | `CLIMA_INSTALL_AUTOSTART` | `ON` | Installs the daemon's entry into `/etc/xdg/autostart` — an absolute path, because the XDG search path is a fixed list. `OFF` for a sandboxed or staged install that cannot write there; the Flatpak passes it. Switching it off does not leave the widgets without a service: the D-Bus activation file installs under the prefix regardless, and the bus starts one when a widget host asks. |
 
-Three optional dependencies are found if present and compiled out if not:
+Four optional dependencies are found if present and compiled out if not:
 
 | | What it buys | Without it |
 |---|---|---|
-| **Qt Positioning** | the "use my location" button | the user searches by name |
-| **Qt D-Bus** | the desktop's colour scheme over the XDG portal | `QStyleHints` answers instead |
+| **Qt Positioning** | "use my location" through GeoClue2 on a desktop | the portal below answers instead, and failing that the user searches by name |
+| **Qt D-Bus** | the desktop's colour scheme over the XDG portal; severe-weather notifications; "use my location" inside a Flatpak, where GeoClue2 is unreachable and the Location portal is the only route; and `clima-daemon`, which the desktop widgets read from | `QStyleHints` answers the colour question, the notifications preference is not shown at all rather than shown and inert, and there are no widgets |
+| **Qt LinguistTools** | compiles the language catalogues listed in `app/CMakeLists.txt` into the binary | the app speaks its source language. There are no catalogues yet, so this buys nothing today |
 | **layer-shell-qt** + `wayland-client` | `clima-widget --pin`: the tiles pin themselves under your windows on KDE Plasma, Sway, Hyprland and every other wlroots compositor | `--pin` says so and the tiles are an ordinary window. GNOME is unaffected — its shell extension does the pinning, and mutter implements no such protocol anyway. |
 
 ```sh

@@ -25,7 +25,10 @@ what the app actually draws.
   numbers.
 - **Severe weather warnings**, live, from Environment and Climate Change Canada
   and the United States National Weather Service. No API key, no account, no
-  server of ours in the middle.
+  server of ours in the middle. Off by default, they can also **interrupt you**:
+  a desktop notification when a warning arrives and Clima is not on screen,
+  through the XDG portal where there is one and the notification service where
+  there is not.
 - **Detail cards** for sunrise and sunset, the moon phase, and each measurement
   in turn.
 - **A dark and a light theme**, following the desktop's own setting through the
@@ -44,6 +47,16 @@ what the app actually draws.
   asking for it directly. One process fetches; every tile and the top-bar
   indicator read from it over the session bus, so a desktop full of widgets is
   one client of the forecast service and not eight.
+- **`clima-cli`** — the forecast for a status bar, a script or a terminal.
+  `clima-cli now`, `hourly`, `daily`, `places`; `--json` and `--csv` for a
+  script, in canonical units so a preference nobody opened cannot move a number
+  something parses. It reads the same cache the app fills, so a status bar
+  polling every minute is not a second client of the forecast service.
+
+- **"Use my location"** through GeoClue2 on a desktop and through the
+  `org.freedesktop.portal.Location` portal inside a Flatpak — your own desktop
+  asks you, once, and the app is told a city and never a street.
+
 - **Offline-first.** It renders from its cache and reconciles with the network,
   so a service being down is never an empty screen.
 - **No ads, no news feed, no telemetry, no account, no API key.**
@@ -57,16 +70,23 @@ if it were a feature list is the thing this project is trying not to be.
   so. This is the single largest gap against the goal in `docs/01-landscape.md`.
 - **No model comparison.** Showing ECMWF against GFS against ICON with ensemble
   ranges is the differentiator this project exists for, and it is not built.
-- **No macOS build** — notarisation needs an Apple Developer ID.
+- **No macOS build to download.** It compiles and its tests run on macOS in CI;
+  what is missing is notarisation, which needs an Apple Developer ID, and
+  without it Gatekeeper refuses a downloaded app rather than warning about it.
 - **The Windows build is unsigned**, so SmartScreen warns on first run.
 - **Android is plumbed and has never run on a device.** The gate is delivering
-  an alert to a sleeping phone, which Qt has no answer for.
+  an alert to a sleeping phone, which Qt has no answer for. The desktop answer
+  above does not port: it is a session bus and a window that can be hidden.
+
+- **No translations.** Every string is marked and the catalogue is kept current
+  by CI — 271 of them — and not one language has been translated. A machine
+  translation would be worse than none.
 - **The widgets have never been pinned on a KDE session.** They pin themselves
   on GNOME, which was measured by hand, and on wlroots, which is measured in CI
   against a headless compositor. KWin implements the same protocol and nobody
   has run it there.
 
-All six, with what would close them: [`docs/known-gaps.md`](docs/known-gaps.md).
+All of them, with what would close each: [`docs/known-gaps.md`](docs/known-gaps.md).
 
 ## Install
 
