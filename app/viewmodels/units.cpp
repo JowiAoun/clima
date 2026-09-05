@@ -3,6 +3,8 @@
 
 #include "units.h"
 
+#include "libclima/domain/units.h"
+
 #include "settings.h"
 
 #include <QQmlEngine>
@@ -15,41 +17,24 @@ QVariantMap choice(const QString &id, const QString &label)
     return QVariantMap{ { QStringLiteral("id"), id }, { QStringLiteral("label"), label } };
 }
 
-// The two presets, as the five spellings each one writes. In this order:
-// temperature, wind, pressure, visibility, precipitation.
-//
-// `metric` is the same five strings Settings falls back to when nothing has been
-// stored, and deliberately so — a reader who opens preferences on a fresh
-// install sees "°C" already selected rather than "custom", which is what a
-// second table drifting from Settings' defaults would show them.
-struct SystemSpec
+// The arithmetic lives in libclima/domain/units.h now — the factors, the
+// symbols, the decimals and the two presets — because clima-cli prints a
+// temperature and links no QML engine. This class is what is left: the
+// reader's CHOICE, read from Settings and pushed into those functions, and
+// the QML-facing shape of the result.
+clima::units::Quantity bridged(Units::Quantity quantity)
 {
-    const char *id;
-    QString temperature;
-    QString wind;
-    QString pressure;
-    QString visibility;
-    QString precipitation;
-};
-
-const SystemSpec &metricSpec()
-{
-    static const SystemSpec spec{ "metric",
-                                  QStringLiteral("celsius"), QStringLiteral("kmh"),
-                                  QStringLiteral("hpa"), QStringLiteral("km"),
-                                  QStringLiteral("mm") };
-    return spec;
-}
-
-const SystemSpec &imperialSpec()
-{
-    // inHg and not mb, miles and not km: this is the bundle a US reader means by
-    // "imperial", and every entry is one `choicesFor` already offers.
-    static const SystemSpec spec{ "imperial",
-                                  QStringLiteral("fahrenheit"), QStringLiteral("mph"),
-                                  QStringLiteral("inhg"), QStringLiteral("mi"),
-                                  QStringLiteral("in") };
-    return spec;
+    switch (quantity) {
+    case Units::Quantity::Temperature:   return clima::units::Quantity::Temperature;
+    case Units::Quantity::Wind:          return clima::units::Quantity::Wind;
+    case Units::Quantity::Pressure:      return clima::units::Quantity::Pressure;
+    case Units::Quantity::Visibility:    return clima::units::Quantity::Visibility;
+    case Units::Quantity::Precipitation: return clima::units::Quantity::Precipitation;
+    case Units::Quantity::Percentage:    return clima::units::Quantity::Percentage;
+    case Units::Quantity::Direction:     return clima::units::Quantity::Direction;
+    case Units::Quantity::None:          break;
+    }
+    return clima::units::Quantity::None;
 }
 
 } // namespace
@@ -84,6 +69,24 @@ Settings *Units::settings() const
     return Settings::instance();
 }
 
+// Which unit the reader chose for a quantity — the one thing this class knows
+// that libclima/domain/units.h does not.
+QString Units::unitFor(Quantity quantity) const
+{
+    switch (quantity) {
+    case Quantity::Temperature:   return temperatureUnit();
+    case Quantity::Wind:          return windUnit();
+    case Quantity::Pressure:      return pressureUnit();
+    case Quantity::Visibility:    return visibilityUnit();
+    case Quantity::Precipitation: return precipitationUnit();
+    case Quantity::Percentage:
+    case Quantity::Direction:
+    case Quantity::None:
+        break;
+    }
+    return {};
+}
+
 QString Units::temperatureUnit() const   { return settings()->temperatureUnit(); }
 QString Units::windUnit() const          { return settings()->windUnit(); }
 QString Units::pressureUnit() const      { return settings()->pressureUnit(); }
@@ -98,144 +101,19 @@ QString Units::precipitationUnit() const { return settings()->precipitationUnit(
 
 double Units::convert(Quantity quantity, double canonical) const
 {
-    switch (quantity) {
-    case Quantity::Temperature:
-        if (temperatureUnit() == QLatin1String("fahrenheit"))
-            return canonical * 9.0 / 5.0 + 32.0;
-        return canonical;
-
-    case Quantity::Wind: {
-        const QString unit = windUnit();
-        if (unit == QLatin1String("mph"))
-            return canonical * 0.621371;
-        if (unit == QLatin1String("ms"))
-            return canonical / 3.6;
-        if (unit == QLatin1String("kn"))
-            return canonical * 0.539957;
-        if (unit == QLatin1String("bft"))
-            // Beaufort from km/h, the inverse of the standard v = 0.836 B^1.5
-            // in m/s. Rounded by the caller like everything else; the fraction
-            // is meaningless but the truncation belongs at the formatting step
-            // so that a chart can still draw a smooth curve.
-            return std::pow(canonical / 3.6 / 0.836, 2.0 / 3.0);
-        return canonical;
-    }
-
-    case Quantity::Pressure: {
-        const QString unit = pressureUnit();
-        if (unit == QLatin1String("inhg"))
-            return canonical * 0.02952998;
-        if (unit == QLatin1String("mmhg"))
-            return canonical * 0.7500617;
-        // "mb" is hPa under another name — one millibar is one hectopascal
-        // exactly — and it is offered because that is the word half the world's
-        // forecasts use. detaildata.js labelled the pressure card "mb".
-        return canonical;
-    }
-
-    case Quantity::Visibility:
-        if (visibilityUnit() == QLatin1String("mi"))
-            return canonical * 0.621371;
-        return canonical;
-
-    case Quantity::Precipitation:
-        if (precipitationUnit() == QLatin1String("in"))
-            return canonical / 25.4;
-        return canonical;
-
-    case Quantity::None:
-    case Quantity::Percentage:
-    case Quantity::Direction:
-        return canonical;
-    }
-    return canonical;
+    return clima::units::convert(bridged(quantity), unitFor(quantity), canonical);
 }
 
 double Units::toCanonical(Quantity quantity, double display) const
 {
-    switch (quantity) {
-    case Quantity::Temperature:
-        if (temperatureUnit() == QLatin1String("fahrenheit"))
-            return (display - 32.0) * 5.0 / 9.0;
-        return display;
-
-    case Quantity::Wind: {
-        const QString unit = windUnit();
-        if (unit == QLatin1String("mph"))
-            return display / 0.621371;
-        if (unit == QLatin1String("ms"))
-            return display * 3.6;
-        if (unit == QLatin1String("kn"))
-            return display / 0.539957;
-        if (unit == QLatin1String("bft"))
-            return 0.836 * std::pow(display, 1.5) * 3.6;
-        return display;
-    }
-
-    case Quantity::Pressure: {
-        const QString unit = pressureUnit();
-        if (unit == QLatin1String("inhg"))
-            return display / 0.02952998;
-        if (unit == QLatin1String("mmhg"))
-            return display / 0.7500617;
-        return display;
-    }
-
-    case Quantity::Visibility:
-        if (visibilityUnit() == QLatin1String("mi"))
-            return display / 0.621371;
-        return display;
-
-    case Quantity::Precipitation:
-        if (precipitationUnit() == QLatin1String("in"))
-            return display * 25.4;
-        return display;
-
-    case Quantity::None:
-    case Quantity::Percentage:
-    case Quantity::Direction:
-        return display;
-    }
-    return display;
+    return clima::units::toCanonical(bridged(quantity), unitFor(quantity), display);
 }
 
 // ---- what it is called ----------------------------------------------------------
 
 QString Units::bareSymbol(Quantity quantity) const
 {
-    switch (quantity) {
-    case Quantity::Temperature:
-        return temperatureUnit() == QLatin1String("fahrenheit") ? QStringLiteral("°F")
-                                                                : QStringLiteral("°C");
-    case Quantity::Wind: {
-        const QString unit = windUnit();
-        if (unit == QLatin1String("mph")) return QStringLiteral("mph");
-        if (unit == QLatin1String("ms"))  return QStringLiteral("m/s");
-        if (unit == QLatin1String("kn"))  return QStringLiteral("kn");
-        if (unit == QLatin1String("bft")) return QStringLiteral("Bft");
-        return QStringLiteral("km/h");
-    }
-    case Quantity::Pressure: {
-        const QString unit = pressureUnit();
-        if (unit == QLatin1String("inhg")) return QStringLiteral("inHg");
-        if (unit == QLatin1String("mmhg")) return QStringLiteral("mmHg");
-        if (unit == QLatin1String("mb"))   return QStringLiteral("mb");
-        return QStringLiteral("hPa");
-    }
-    case Quantity::Visibility:
-        return visibilityUnit() == QLatin1String("mi") ? QStringLiteral("mi")
-                                                       : QStringLiteral("km");
-    case Quantity::Precipitation:
-        return precipitationUnit() == QLatin1String("in") ? QStringLiteral("in")
-                                                          : QStringLiteral("mm");
-    case Quantity::Percentage:
-        return QStringLiteral("%");
-    case Quantity::Direction:
-        return QStringLiteral("°");
-    case Quantity::None:
-        break;
-    }
-    return {};
+    return clima::units::symbol(bridged(quantity), unitFor(quantity));
 }
 
 QString Units::symbol(Quantity quantity) const
@@ -258,18 +136,7 @@ QString Units::symbol(Quantity quantity) const
 
 int Units::decimals(Quantity quantity) const
 {
-    switch (quantity) {
-    case Quantity::Precipitation:
-        // Two for inches, one for millimetres. 0.4 mm is 0.016 in: rounded to
-        // one place it is 0.0, which draws a bar and labels it as nothing.
-        return precipitationUnit() == QLatin1String("in") ? 2 : 1;
-    case Quantity::Pressure:
-        return pressureUnit() == QLatin1String("inhg") ? 2 : 0;
-    case Quantity::Wind:
-        return windUnit() == QLatin1String("ms") ? 1 : 0;
-    default:
-        return 0;
-    }
+    return clima::units::decimals(bridged(quantity), unitFor(quantity));
 }
 
 QString Units::format(Quantity quantity, double canonical) const
@@ -366,39 +233,26 @@ QVariantList Units::choicesFor(Quantity quantity) const
 
 QString Units::system() const
 {
-    const auto matches = [this](const SystemSpec &spec) {
-        return temperatureUnit() == spec.temperature && windUnit() == spec.wind
-            && pressureUnit() == spec.pressure && visibilityUnit() == spec.visibility
-            && precipitationUnit() == spec.precipitation;
-    };
-
-    if (matches(metricSpec()))
-        return QStringLiteral("metric");
-    if (matches(imperialSpec()))
-        return QStringLiteral("imperial");
-    return QStringLiteral("custom");
+    return clima::units::presetFor(temperatureUnit(), windUnit(), pressureUnit(),
+                                   visibilityUnit(), precipitationUnit());
 }
 
 void Units::applySystem(const QString &system)
 {
-    const SystemSpec *spec = system == QLatin1String("metric")     ? &metricSpec()
-                             : system == QLatin1String("imperial") ? &imperialSpec()
-                                                                   : nullptr;
-    if (spec == nullptr) {
+    const clima::units::Preset *preset =
+        system == QLatin1String("metric")     ? &clima::units::metric()
+        : system == QLatin1String("imperial") ? &clima::units::imperial()
+                                              : nullptr;
+    if (preset == nullptr) {
         qWarning("units: %s is not a unit system", qPrintable(system));
         return;
     }
-
-    // Five writes, each of which emits its own Settings signal and so five
-    // `changed()` in a row. That is not worth suppressing: every consumer of
-    // this signal rebuilds a snapshot, and rebuilding five times in one call
-    // stack costs a few hundred microseconds once, on a click.
     Settings *store = settings();
-    store->setTemperatureUnit(spec->temperature);
-    store->setWindUnit(spec->wind);
-    store->setPressureUnit(spec->pressure);
-    store->setVisibilityUnit(spec->visibility);
-    store->setPrecipitationUnit(spec->precipitation);
+    store->setTemperatureUnit(preset->temperature);
+    store->setWindUnit(preset->wind);
+    store->setPressureUnit(preset->pressure);
+    store->setVisibilityUnit(preset->visibility);
+    store->setPrecipitationUnit(preset->precipitation);
 }
 
 QVariantList Units::systemChoices() const

@@ -1,0 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Jowi Aoun
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Configured by cli/CMakeLists.txt. The same three values app/climaconfig.h.in
+// and daemon/daemonconfig.h.in carry, because the CLI has to name the same
+// application to find the same settings file and the same cache.
+#pragma once
+
+#define CLIMA_VERSION  "@PROJECT_VERSION@"
+#define CLIMA_APP_NAME "@PROJECT_NAME@"
+#define CLIMA_APP_ID   "@CLIMA_APP_ID@"

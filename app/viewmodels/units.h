@@ -198,4 +198,9 @@ private:
     Units();
 
     [[nodiscard]] Settings *settings() const;
+
+    // Which unit the reader chose for a quantity. The one thing this class
+    // knows that libclima/domain/units.h does not — the arithmetic moved there
+    // when clima-cli needed it, and what stayed here is the preference.
+    [[nodiscard]] QString unitFor(Quantity quantity) const;
 };

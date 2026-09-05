@@ -171,6 +171,7 @@ svg="$stage/share/icons/hicolor/scalable/apps/$app_id.svg"
 
 # ---- the binary -------------------------------------------------------------
 [ -x "$stage/bin/clima" ] || note "no executable at bin/clima"
+[ -x "$stage/bin/clima-cli" ] || note "no executable at bin/clima-cli"
 
 if [ "$fail" -ne 0 ]; then
   echo "packaging: FAILED" >&2

@@ -177,6 +177,11 @@ add_subdirectory(libclima)
 
 add_subdirectory(app)
 
+# The command-line client. Every platform, because everything it needs is in
+# libclima and Qt Core: a status bar on Windows wants the forecast as much as
+# waybar does. See cli/CMakeLists.txt.
+add_subdirectory(cli)
+
 # The daemon that widgets and the tray read from. Gated twice, and both gates
 # are real: the whole thing is a session-bus service, and Windows has no
 # session bus, so on Windows this is not a feature that is switched off but a

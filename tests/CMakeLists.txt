@@ -127,6 +127,27 @@ if(TARGET climawidgetsqml)
     )
 endif()
 
+# ---- clima-cli, run as a script would run it ---------------------------------
+#
+# The test starts the real binary, so it links nothing of the CLI's and needs
+# only to know where it is. clima_forbid_gui() applies to the test itself, and
+# `cli_has_no_gui` below asks the same question of the binary the test runs.
+add_executable(tst_cli tst_cli.cpp)
+
+target_link_libraries(tst_cli PRIVATE clima_testsupport Qt6::Test)
+target_compile_definitions(tst_cli PRIVATE
+    CLIMA_CLI_BINARY="$<TARGET_FILE:clima-cli>"
+)
+
+clima_forbid_gui(tst_cli)
+
+add_test(NAME tst_cli COMMAND tst_cli)
+
+set_tests_properties(tst_cli PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
+    TIMEOUT 120
+)
+
 # ---- the location portal, against a portal of our own -----------------------
 #
 # Needs a bus that is not the developer's, because the test OWNS the portal's
@@ -465,6 +486,21 @@ else()
     message(STATUS
         "clima: no objdump found, so the binary-level no-GUI test is not registered. "
         "The configure-time guard in cmake/ClimaEngineGuard.cmake still applies.")
+endif()
+
+# ---- the same question, asked of the command-line client ---------------------
+#
+# clima-cli exists to be started by a status bar every minute, and a GUI
+# library in its DT_NEEDED list would be a windowing stack initialised sixty
+# times an hour to print one temperature. The configure-time guard forbids it
+# on the target graph; this reads the binary.
+if(CLIMA_OBJDUMP)
+    add_test(NAME cli_has_no_gui
+        COMMAND ${CMAKE_COMMAND}
+            -DCLIMA_BINARY=$<TARGET_FILE:clima-cli>
+            -DCLIMA_OBJDUMP=${CLIMA_OBJDUMP}
+            -P ${CMAKE_SOURCE_DIR}/cmake/ClimaNoGuiBinaryCheck.cmake
+    )
 endif()
 
 # ---- and the opposite question, asked of the widget host ---------------------

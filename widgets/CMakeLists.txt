@@ -150,14 +150,23 @@ set(clima_widget_sources
     ${CMAKE_SOURCE_DIR}/app/devtools/screenshotcontroller.h
     ${CMAKE_SOURCE_DIR}/app/devtools/screenshotcontroller.cpp
 
-    # Two files out of libclima rather than the whole archive. Both are pure
-    # functions over QString with no I/O, no cache and no provider — see the
-    # header of each. This is what keeps the WMO tables and the published bands
-    # single-sourced without linking the engine.
+    # Three files out of libclima rather than the whole archive. All three are
+    # pure functions over QString and double with no I/O, no cache and no
+    # provider — see the header of each. This is what keeps the WMO tables, the
+    # published bands and the conversion factors single-sourced without linking
+    # the engine.
+    #
+    # units.cpp is the newest of the three and arrived by the same route: the
+    # factors used to live in app/viewmodels/units.cpp, which this target
+    # already compiles, and moved when clima-cli — which links no QML — needed
+    # them too. `Units` above is still the class QML binds to; what moved out
+    # from under it is the arithmetic, not the preference.
     ${CMAKE_SOURCE_DIR}/libclima/domain/weathercode.h
     ${CMAKE_SOURCE_DIR}/libclima/domain/weathercode.cpp
     ${CMAKE_SOURCE_DIR}/libclima/domain/scales.h
     ${CMAKE_SOURCE_DIR}/libclima/domain/scales.cpp
+    ${CMAKE_SOURCE_DIR}/libclima/domain/units.h
+    ${CMAKE_SOURCE_DIR}/libclima/domain/units.cpp
 )
 
 qt_add_library(climawidgetsqml STATIC)

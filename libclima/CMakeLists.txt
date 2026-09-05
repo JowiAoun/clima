@@ -64,6 +64,8 @@ add_library(libclima STATIC
     domain/scales.cpp
     domain/timeaxis.h
     domain/timeaxis.cpp
+    domain/units.h
+    domain/units.cpp
     domain/weathercode.h
     domain/weathercode.cpp
     providers/ialertprovider.h

@@ -113,7 +113,7 @@ private Q_SLOTS:
     void everyComponentHasAWidget();
     void everyComponentIsInTheModule();
     void everyDeclaredFieldIsOneTheDaemonSends();
-    void allThreeProcessesShareOneStorageIdentity();
+    void allFourProcessesShareOneStorageIdentity();
 
     // ---- what a tile with no data says -------------------------------------
     //
@@ -245,7 +245,7 @@ void TestWidgets::everyDeclaredFieldIsOneTheDaemonSends()
 
 // ---- and the fourth file, which is where the data lives ---------------------
 
-void TestWidgets::allThreeProcessesShareOneStorageIdentity()
+void TestWidgets::allFourProcessesShareOneStorageIdentity()
 {
     // QStandardPaths::AppDataLocation is <organizationName>/<applicationName>,
     // and libclima/cache/cachestore.cpp puts the database under it. So these
@@ -263,10 +263,24 @@ void TestWidgets::allThreeProcessesShareOneStorageIdentity()
     // and every screenshot of the tiles runs the daemon with --fixture, which
     // resolves its place out of a recorded file and never opens the places
     // table at all. The mode nobody automated was the only one a user runs.
+    // clima-cli is the fourth, and it is here for exactly the reason the daemon
+    // is: `clima-cli now` reads the places table to find out where "here" is
+    // and writes what it fetched back into the same cache, so a status bar
+    // polling every minute is one more client of the forecast service and not
+    // a second one. An identity of its own would give it an empty places table
+    // — every invocation answering "no saved place" on a machine with several.
+    //
+    // clima-gallery is deliberately absent. It sets the same organisation and a
+    // name of its OWN, which is the opposite requirement: it is a developer
+    // tool, it must read the reader's preferences so that a specimen is drawn
+    // the way the product draws it, and it must never write to the file or the
+    // database the product reads. Sharing the directory and not the name gets
+    // both.
     const QStringList mains = {
         QStringLiteral("app/main.cpp"),
         QStringLiteral("widgets/main.cpp"),
         QStringLiteral("daemon/main.cpp"),
+        QStringLiteral("cli/main.cpp"),
     };
 
     QString organisation;

@@ -92,7 +92,7 @@ clima/
 │   ├── fonts/                    # Inter, OFL-1.1 — the UI face, bundled
 │   └── assets/                   # Meteocons → generated QML
 ├── gallery/                      # `clima-gallery` — every component on one screen, ships nowhere
-├── cli/                          # `clima-cli` — scriptable forecast output
+├── cli/                          # `clima-cli` — scriptable forecast output (built)
 ├── platform/
 │   ├── linux/                    # desktop file, appstream, portals, tray, Plasma applet
 │   ├── windows/                  # manifest, MSIX, jump list
