@@ -33,3 +33,7 @@ Thumbs.db
 
 # Mission Control Recall (project memory) — private, do not commit
 CLAUDE.local.md
+
+# Mission Control — files it installs per session; managed by the app, do not commit
+.claude/skills/diagram/
+.claude/skills/git-workflow/
