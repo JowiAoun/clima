@@ -82,13 +82,6 @@ PrefGroup {
         interactive: false
     }
 
-    // ---- the clock ----------------------------------------------------------
-    //
-    // The ids are Settings' own spellings, so nothing here translates between a
-    // label and a stored value. app/viewmodels/timeformat.h is the only thing
-    // that reads the key, and it reaches every clock in the app and in the
-    // widgets — the hour axis, the hourly list, the observation stamp, both sun
-    // and moon readings, the nine body sentences and the alert banner.
     // ---- the interruption ---------------------------------------------------
     //
     // Hidden entirely where there is nothing to post to — a build with no Qt
@@ -113,6 +106,13 @@ PrefGroup {
         onActivated: Settings.alertNotifications = !Settings.alertNotifications
     }
 
+    // ---- the clock ----------------------------------------------------------
+    //
+    // The ids are Settings' own spellings, so nothing here translates between a
+    // label and a stored value. app/viewmodels/timeformat.h is the only thing
+    // that reads the key, and it reaches every clock in the app and in the
+    // widgets — the hour axis, the hourly list, the observation stamp, both sun
+    // and moon readings, the nine body sentences and the alert banner.
     PrefRow {
         title: qsTr("Time format")
         subtitle: qsTr("Used everywhere a time appears, including the desktop widgets.")
