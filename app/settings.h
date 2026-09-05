@@ -36,6 +36,8 @@
 // migration written under pressure.
 #pragma once
 
+#include "app/settingskeys.h"
+
 #include <QObject>
 #include <QQmlEngine>
 #include <QScopedPointer>
@@ -249,6 +251,11 @@ private:
         QStringList acknowledgedAlerts;
     };
     [[nodiscard]] Values currentValues() const;
+
+    // Emits for anything that has moved since the signals last said otherwise,
+    // WITHOUT re-reading the file. Called by reloadFromDisk() after its sync,
+    // and by store() before a write — see there for the window it closes.
+    void announceExternalChanges();
 
     QScopedPointer<QSettings> m_settings;
 

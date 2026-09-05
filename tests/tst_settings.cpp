@@ -39,10 +39,12 @@
 // install read?" is a question this file can actually ask.
 
 #include "app/settings.h"
+#include "app/settingskeys.h"
 
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
+#include <QLocale>
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QSettings>
@@ -132,6 +134,8 @@ private Q_SLOTS:
     void aChangeAnotherProcessWroteIsNoticedOnReload();
     void aReloadThatFindsNothingNewIsSilent();
     void theWatcherReloadsWithoutBeingAsked();
+    void theWatcherSurvivesTheFileBeingReplaced();
+    void aFreshInstallTakesItsClockFromTheLocale();
 };
 
 void TestSettings::initTestCase()
@@ -692,6 +696,77 @@ void TestSettings::theWatcherReloadsWithoutBeingAsked()
     // The wait below spins the loop, which is what makes this case reach it.
     QVERIFY2(clock.wait(3000), "the file changed under the watcher and nothing was reloaded");
     QCOMPARE(settings->clockFormat(), QStringLiteral("24h"));
+}
+
+void TestSettings::theWatcherSurvivesTheFileBeingReplaced()
+{
+    // The case the directory watch and rearmWatch() exist for, and the one the
+    // truncate-in-place test above does NOT reach. QSettings does not write
+    // through the file it is given: it writes a temporary and renames over the
+    // top, so the inode the watcher was told about is the one that has just
+    // been replaced. QFileSystemWatcher drops a path it can no longer see, and
+    // a watcher that did not re-arm would hear the first replacement and never
+    // another one.
+    //
+    // So this replaces TWICE and asserts on the second, which is the assertion
+    // that fails with the re-arm removed.
+    Settings *settings = Settings::instance();
+    settings->setClockFormat(QStringLiteral("12h"));
+    settings->reloadFromDisk();
+
+    settings->watchForExternalChanges();
+
+    const QString path = settings->filePath();
+
+    const auto replace = [&path](const QByteArray &contents) {
+        const QString beside = path + QStringLiteral(".incoming");
+        QFile::remove(beside);
+        QFile file(beside);
+        if (!file.open(QIODevice::WriteOnly))
+            return false;
+        if (file.write(contents) != contents.size())
+            return false;
+        file.close();
+        // Over the top, the way QSettings itself commits a write.
+        QFile::remove(path);
+        return QFile::rename(beside, path);
+    };
+
+    QSignalSpy first(settings, &Settings::clockFormatChanged);
+    QVERIFY(replace(QByteArrayLiteral("[time]\nformat=24h\n")));
+    QVERIFY2(first.wait(3000), "the first replacement was not noticed");
+    QCOMPARE(settings->clockFormat(), QStringLiteral("24h"));
+
+    QSignalSpy second(settings, &Settings::clockFormatChanged);
+    QVERIFY(replace(QByteArrayLiteral("[time]\nformat=12h\n")));
+    QVERIFY2(second.wait(3000),
+             "the second replacement was not noticed — the watcher was told about an inode "
+             "that no longer exists and nothing re-armed it");
+    QCOMPARE(settings->clockFormat(), QStringLiteral("12h"));
+}
+
+void TestSettings::aFreshInstallTakesItsClockFromTheLocale()
+{
+    // The default itself, which nothing tested: the tautology in
+    // aFreshInstallReadsTheDocumentedDefaults asserts values init() has just
+    // written, which is why it went on passing when this default stopped being
+    // a constant.
+    //
+    // Both directions, through QLocale rather than through the machine's own:
+    // a test that read the runner's locale would assert whatever CI happened
+    // to be set to.
+    QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
+    QCOMPARE(clima::settingskeys::defaultClockFormat(), QStringLiteral("12h"));
+
+    QLocale::setDefault(QLocale(QLocale::French, QLocale::France));
+    QCOMPARE(clima::settingskeys::defaultClockFormat(), QStringLiteral("24h"));
+
+    QLocale::setDefault(QLocale(QLocale::German, QLocale::Germany));
+    QCOMPARE(clima::settingskeys::defaultClockFormat(), QStringLiteral("24h"));
+
+    // And back to the one every capture and every other case in this file runs
+    // under, so nothing after this inherits a French clock.
+    QLocale::setDefault(QLocale::c());
 }
 
 QTEST_MAIN(TestSettings)

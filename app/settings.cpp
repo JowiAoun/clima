@@ -26,17 +26,23 @@ const auto appearance        = QStringLiteral("appearance");
 // and the file that comes out is one nobody can read at a glance — which is the
 // whole reason this app forces INI in the first place.
 const auto dynamicBackground = QStringLiteral("background/dynamic");
-const auto clockFormat       = QStringLiteral("time/format");
+
+// The four below are the ones clima-cli also reads, and they come from
+// app/settingskeys.h rather than being spelled again here. That header claims
+// to be the one list; it was not, and a rename would have moved the CLI while
+// leaving the app writing the old key — the exact "a preference the app wrote
+// and the CLI silently ignored" failure it was added to prevent.
+const auto clockFormat        = QString::fromLatin1(clima::settingskeys::clockFormat);
 const auto alertNotifications = QStringLiteral("alerts/notify");
 const auto windowWidth       = QStringLiteral("window/width");
 const auto windowHeight      = QStringLiteral("window/height");
 const auto windowX           = QStringLiteral("window/x");
 const auto windowY           = QStringLiteral("window/y");
-const auto temperatureUnit   = QStringLiteral("units/temperature");
-const auto windUnit          = QStringLiteral("units/wind");
-const auto pressureUnit      = QStringLiteral("units/pressure");
-const auto visibilityUnit    = QStringLiteral("units/visibility");
-const auto precipitationUnit = QStringLiteral("units/precipitation");
+const auto temperatureUnit   = QString::fromLatin1(clima::settingskeys::temperatureUnit);
+const auto windUnit          = QString::fromLatin1(clima::settingskeys::windUnit);
+const auto pressureUnit      = QString::fromLatin1(clima::settingskeys::pressureUnit);
+const auto visibilityUnit    = QString::fromLatin1(clima::settingskeys::visibilityUnit);
+const auto precipitationUnit = QString::fromLatin1(clima::settingskeys::precipitationUnit);
 const auto acknowledgedAlerts = QStringLiteral("alerts/acknowledged");
 } // namespace key
 
@@ -222,6 +228,17 @@ QString Settings::filePath() const
 
 bool Settings::store(const QString &key, const QVariant &value)
 {
+    // Anything ANOTHER process wrote, announced before this write buries it.
+    //
+    // The snapshot below is taken over every value, not the one key, so a write
+    // here would otherwise mark a change nobody has been told about as already
+    // announced. That is reachable: QSettings flushes itself on the event loop
+    // and re-reads a changed file while doing it, so between a watcher firing
+    // and its settle timer expiring the in-memory map can already hold another
+    // process's value. A setter running in that window silently swallowed it,
+    // and the reader's clock stayed wrong for the life of the process.
+    announceExternalChanges();
+
     if (m_settings->value(key) == value)
         return false;
     m_settings->setValue(key, value);
@@ -264,22 +281,11 @@ Settings::Values Settings::currentValues() const
     return values;
 }
 
-void Settings::reloadFromDisk()
+void Settings::announceExternalChanges()
 {
-    // sync() is the reload as well as the flush: QSettings compares the file's
-    // size and modification time against what it last read or wrote, and
-    // re-parses when either has moved. Pending writes of our own, if any, go
-    // out first and are merged with what is on disk.
-    m_settings->sync();
-
-    // Compared against what this object last announced, NOT against a read
-    // taken just before the sync. QSettings syncs on its own as well — it
-    // posts itself an UpdateRequest after every setValue and flushes on the
-    // next turn of the event loop, and that flush re-reads a changed file
-    // exactly as ours does. A "before" taken here would then already carry
-    // the other process's value, and the change it represents would never be
-    // announced. m_seen is what the signals last said, kept by store() and by
-    // this function, so a change is announced once whichever sync found it.
+    // Field by field rather than through a defaulted operator==: this header is
+    // compiled into the widget host too, which builds as C++17, and a defaulted
+    // comparison is C++20. Each branch below is the comparison anyway.
     const Values before = m_seen;
     const Values after  = currentValues();
     m_seen              = after;
@@ -307,6 +313,25 @@ void Settings::reloadFromDisk()
         Q_EMIT precipitationUnitChanged();
     if (before.acknowledgedAlerts != after.acknowledgedAlerts)
         Q_EMIT acknowledgedAlertsChanged();
+}
+
+void Settings::reloadFromDisk()
+{
+    // sync() is the reload as well as the flush: QSettings compares the file's
+    // size and modification time against what it last read or wrote, and
+    // re-parses when either has moved. Pending writes of our own, if any, go
+    // out first and are merged with what is on disk.
+    m_settings->sync();
+
+    // Compared against what this object last announced, NOT against a read
+    // taken just before the sync. QSettings syncs on its own as well — it
+    // posts itself an UpdateRequest after every setValue and flushes on the
+    // next turn of the event loop, and that flush re-reads a changed file
+    // exactly as ours does. A "before" taken here would then already carry
+    // the other process's value, and the change it represents would never be
+    // announced. m_seen is what the signals last said, kept by store() and by
+    // this function, so a change is announced once whichever sync found it.
+    announceExternalChanges();
 }
 
 void Settings::watchForExternalChanges()
