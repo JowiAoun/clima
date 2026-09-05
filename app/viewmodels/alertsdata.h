@@ -102,6 +102,7 @@
 #include <QDateTime>
 #include <QHash>
 #include <QObject>
+#include <QSet>
 #include <QQmlEngine>
 #include <QString>
 #include <QTimer>
@@ -229,6 +230,10 @@ Q_SIGNALS:
     // and needs no session bus to do it.
     void announced(const QString &key, const QString &severityKey);
 
+    // The other half: a hazard that ended, a reader who opened the window, or
+    // the preference being switched off.
+    void withdrawn(const QString &key);
+
     // Time to ask again. AppEngine connects this; this class does not know what
     // a provider is.
     void refreshRequested();
@@ -246,6 +251,12 @@ private:
     // Called from rebuild(), which is the one place that knows what is
     // displayable at this minute.
     void announce(const QList<clima::Alert> &shown);
+
+    // Takes one down, or all of them. Both emit `withdrawn`, so the half of
+    // the policy that removes a notification is as observable as the half that
+    // posts one — without either of them needing a desktop.
+    void withdraw(const QString &key);
+    void takeDownEverythingPosted();
 
     [[nodiscard]] QVariantMap toVariant(const clima::Alert &alert) const;
     [[nodiscard]] QDateTime   now() const;
@@ -290,4 +301,11 @@ private:
     // because a notification that survived a restart would be a notification
     // for something the reader has already been shown.
     QHash<QString, clima::AlertSeverity> m_announced;
+
+    // And which of those are on the screen right now, which is not the same
+    // list. Showing the window takes the notifications down — the banner is
+    // the better copy of the same news — but it must NOT forget that the
+    // reader has been told, or hiding the window again would announce
+    // everything a second time. m_announced is the memory; this is the state.
+    QSet<QString> m_posted;
 };

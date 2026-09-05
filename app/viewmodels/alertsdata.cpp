@@ -233,11 +233,17 @@ void AlertsData::announce(const QList<Alert> &shown)
     // Turning it off takes down what is already up, rather than leaving a
     // notification the reader can no longer explain.
     if (m_settings == nullptr || !m_settings->alertNotifications()) {
-        for (auto it = m_announced.cbegin(); it != m_announced.cend(); ++it) {
-            if (m_notifier != nullptr)
-                m_notifier->withdraw(it.key());
-        }
+        takeDownEverythingPosted();
         m_announced.clear();
+        return;
+    }
+
+    // The reader is looking at the banner, which says everything a
+    // notification would and says it better. Take them down — but keep
+    // m_announced, or hiding the window again would announce the same hazards
+    // a second time.
+    if (m_visible) {
+        takeDownEverythingPosted();
         return;
     }
 
@@ -245,26 +251,40 @@ void AlertsData::announce(const QList<Alert> &shown)
     QSet<QString> standing;
 
     for (const Alert &alert : shown) {
-        // The hazard, not the message. identityKeys() is a list because an
-        // alert may be recognised by several — the first is the one this
-        // keys on, and isSameHazard() is what made them a list.
+        // The hazard, not the message — and that means INTERSECTING the keys,
+        // the way isAcknowledged() below does, rather than taking the first.
+        //
+        // NWS re-sends an alert in full under a new id on every update, and
+        // nwsalertprovider.cpp builds identityKeys as the message's own id
+        // followed by every id it references. So the first key changes on every
+        // update of one hazard: keyed on it, the severity guard below would
+        // never match, and the reader would be re-interrupted by a fresh
+        // notification for each update — 24 of the 25 alerts in force in
+        // California on the recording afternoon were updates.
+        //
+        // The key already announced wins, so notify() and withdraw() go on
+        // addressing the notification that is actually on screen.
         if (alert.identityKeys.isEmpty())
             continue;
-        const QString key = alert.identityKeys.constFirst();
-        standing.insert(key);
 
-        // Only for a reader who cannot see the banner. A notification for
-        // something already on the screen in front of them is noise, and the
-        // whole point of the poll exception above is the window nobody is
-        // looking at.
-        if (m_visible)
-            continue;
+        QString key;
+        for (const QString &candidate : alert.identityKeys) {
+            if (m_announced.contains(candidate)) {
+                key = candidate;
+                break;
+            }
+        }
+        if (key.isEmpty())
+            key = alert.identityKeys.constFirst();
+
+        standing.insert(key);
 
         const auto seen = m_announced.constFind(key);
         if (seen != m_announced.cend() && alert.severity <= seen.value())
             continue;
 
         m_announced.insert(key, alert.severity);
+        m_posted.insert(key);
         Q_EMIT announced(key, alertSeverityKey(alert.severity));
 
         if (m_notifier == nullptr)
@@ -288,10 +308,25 @@ void AlertsData::announce(const QList<Alert> &shown)
             ++it;
             continue;
         }
-        if (m_notifier != nullptr)
-            m_notifier->withdraw(it.key());
+        withdraw(it.key());
         it = m_announced.erase(it);
     }
+}
+
+void AlertsData::withdraw(const QString &key)
+{
+    if (m_posted.remove(key) == 0)
+        return;
+    Q_EMIT withdrawn(key);
+    if (m_notifier != nullptr)
+        m_notifier->withdraw(key);
+}
+
+void AlertsData::takeDownEverythingPosted()
+{
+    const QSet<QString> posted = m_posted;
+    for (const QString &key : posted)
+        withdraw(key);
 }
 
 QVariantMap AlertsData::top() const
@@ -530,9 +565,37 @@ void AlertsData::setWindowState(bool visible, bool focused)
     if (m_visible == visible && m_focused == focused)
         return;
 
+    const bool wasHidden      = !m_visible;
+    const bool visibilityMoved = m_visible != visible;
+
     m_visible = visible;
     m_focused = focused;
     reschedule();
+
+    // Showing or hiding the window changes what is worth interrupting somebody
+    // for, so the announcement pass has to run again — opening the window is
+    // what takes a notification down, and nothing else would do it until the
+    // next minute tick. Only on the visibility change: focus moves several
+    // times a minute and does not affect it.
+    if (visibilityMoved)
+        rebuild();
+
+    // ---- and catch up on what was missed while nobody was looking ----------
+    //
+    // "Hidden means stopped" bounds the bandwidth, and on its own it also means
+    // the set on screen is as old as the moment the window was hidden. A
+    // warning issued while the app sat in the dock would then be absent from
+    // the banner for a further three minutes after the reader brought it back
+    // — which is the one moment the banner exists for.
+    //
+    // The minute tick does not cover this and cannot: it re-filters what is
+    // already held against the clock, so it retires a hazard that has ENDED and
+    // can never introduce one that has begun. Only a fetch does that.
+    //
+    // On the transition alone, so a window merely gaining or losing focus does
+    // not fetch, and only where there is somebody to ask.
+    if (wasHidden && m_visible && m_available)
+        Q_EMIT refreshRequested();
 }
 
 int AlertsData::pollIntervalMs() const

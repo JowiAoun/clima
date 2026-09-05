@@ -170,6 +170,9 @@ private Q_SLOTS:
     void theScheduleIsTheOneInTheArchitectureDocument_data();
     void theScheduleIsTheOneInTheArchitectureDocument();
     void aHiddenWindowKeepsPollingWhenItWasAskedToInterrupt();
+    void showingTheWindowAsksForWhatWasMissed();
+    void aWindowMerelyLosingFocusDoesNotFetch();
+    void aPlaceWithNoCoverageIsNotAskedOnShowing();
 
     // ---- what is worth interrupting somebody for -------------------------
     void nothingIsAnnouncedWhileTheBannerIsOnScreen();
@@ -177,6 +180,8 @@ private Q_SLOTS:
     void anUpdateAtTheSameGradeIsNotAnnouncedTwice();
     void aRaiseInSeverityIsAnnouncedAgain();
     void nothingIsAnnouncedWithThePreferenceOff();
+    void showingTheWindowTakesTheNotificationDown();
+    void aHazardThatEndsTakesItsNotificationWithIt();
     void aHiddenWindowStopsPollingAltogether();
     void aPlaceWithNoCoverageIsNotPolled();
 
@@ -786,6 +791,58 @@ void TestAlertsData::aHiddenWindowKeepsPollingWhenItWasAskedToInterrupt()
     QCOMPARE(m_alerts->pollIntervalMs(), 3 * 60 * 1000);
 }
 
+void TestAlertsData::showingTheWindowAsksForWhatWasMissed()
+{
+    // The other half of "hidden means stopped". Stopping bounds the bandwidth
+    // and also means the set on screen is as old as the moment the window was
+    // hidden, so bringing it back has to ask — otherwise a warning issued
+    // while the app sat in the dock is missing from the banner for a further
+    // three minutes, which is the one moment the banner is for.
+    //
+    // The minute tick cannot stand in for it: it re-filters what is held
+    // against the clock, so it retires a hazard that has ended and can never
+    // introduce one that has begun.
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    QSignalSpy asked(m_alerts, &AlertsData::refreshRequested);
+
+    m_alerts->setWindowState(false, false);
+    QCOMPARE(asked.count(), 0);
+
+    m_alerts->setWindowState(true, true);
+    QCOMPARE(asked.count(), 1);
+}
+
+void TestAlertsData::aWindowMerelyLosingFocusDoesNotFetch()
+{
+    // Focus changes several times a minute on a desktop. Only the hidden ->
+    // visible transition is a catch-up; everything else is a rate change.
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    QSignalSpy asked(m_alerts, &AlertsData::refreshRequested);
+
+    m_alerts->setWindowState(true, false);
+    m_alerts->setWindowState(true, true);
+    m_alerts->setWindowState(true, false);
+
+    QCOMPARE(asked.count(), 0);
+}
+
+void TestAlertsData::aPlaceWithNoCoverageIsNotAskedOnShowing()
+{
+    // There is nobody to ask. `available` is false before any set has been
+    // applied and after clear(false), and a fetch then would be a request on
+    // behalf of a feature the UI is hiding.
+    m_alerts->clear(/*available=*/false);
+
+    QSignalSpy asked(m_alerts, &AlertsData::refreshRequested);
+
+    m_alerts->setWindowState(false, false);
+    m_alerts->setWindowState(true, true);
+
+    QCOMPARE(asked.count(), 0);
+}
+
 // ============================================================================
 // What is worth interrupting somebody for.
 //
@@ -835,7 +892,7 @@ void TestAlertsData::anUpdateAtTheSameGradeIsNotAnnouncedTwice()
     // updates. Identity is the hazard, so this is not news.
     Alert again = heatAdvisory();
     again.id = QStringLiteral("urn:oid:siskiyou.001.2");
-    m_alerts->apply(setOf({ again }, at(6, 30)));
+    m_alerts->apply(setOf({ again }, at(6, 0, 30)));
 
     QCOMPARE(announced.count(), 0);
 }
@@ -853,7 +910,7 @@ void TestAlertsData::aRaiseInSeverityIsAnnouncedAgain()
     Alert worse   = heatAdvisory();
     worse.id       = QStringLiteral("urn:oid:siskiyou.001.3");
     worse.severity = AlertSeverity::Extreme;
-    m_alerts->apply(setOf({ worse }, at(6, 30)));
+    m_alerts->apply(setOf({ worse }, at(6, 0, 30)));
 
     QCOMPARE(announced.count(), 1);
     QCOMPARE(announced.constFirst().at(1).toString(), QStringLiteral("extreme"));
@@ -872,6 +929,48 @@ void TestAlertsData::nothingIsAnnouncedWithThePreferenceOff()
     m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
 
     QCOMPARE(announced.count(), 0);
+}
+
+void TestAlertsData::showingTheWindowTakesTheNotificationDown()
+{
+    // The banner says everything the notification does and says it better, so
+    // opening the window takes the notification down — but it must NOT forget
+    // that the reader has been told, or hiding the window again would announce
+    // the same hazard a second time.
+    Settings::instance()->setAlertNotifications(true);
+    m_alerts->setWindowState(false, false);
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    QSignalSpy withdrawn(m_alerts, &AlertsData::withdrawn);
+    QSignalSpy announced(m_alerts, &AlertsData::announced);
+
+    m_alerts->setWindowState(true, true);
+    QCOMPARE(withdrawn.count(), 1);
+    QCOMPARE(withdrawn.constFirst().at(0).toString(),
+             QStringLiteral("nws:siskiyou:heat-advisory"));
+
+    // Hidden again: still nothing new to say.
+    m_alerts->setWindowState(false, false);
+    QCOMPARE(announced.count(), 0);
+}
+
+void TestAlertsData::aHazardThatEndsTakesItsNotificationWithIt()
+{
+    // A reader should not have to dismiss a warning about weather that is
+    // over. The set is filtered against the clock every minute, so the hazard
+    // leaves the screen on its own; the notification has to follow it.
+    Settings::instance()->setAlertNotifications(true);
+    m_alerts->setWindowState(false, false);
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    QSignalSpy withdrawn(m_alerts, &AlertsData::withdrawn);
+
+    // Past `ends` — 06:00 on the 7th.
+    m_clock.setNow(at(7, 6, 1));
+    m_alerts->apply(setOf({ heatAdvisory() }, at(7, 6, 1)));
+
+    QCOMPARE(m_alerts->count(), 0);
+    QCOMPARE(withdrawn.count(), 1);
 }
 
 QTEST_MAIN(TestAlertsData)
