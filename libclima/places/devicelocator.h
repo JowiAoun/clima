@@ -31,19 +31,14 @@
 //
 // ============================================================================
 //
-// ---- Flatpak needs the Location portal, and that is packaging work ----------
+// ---- Flatpak goes through the Location portal ------------------------------
 //
-// Inside a Flatpak sandbox, GeoClue2 is not reachable on the session bus. The
-// route is `org.freedesktop.portal.Location`, which needs
-// `--talk-name=org.freedesktop.portal.Desktop` in the manifest and shows the
-// user a portal prompt on first use. Qt Positioning's GeoClue2 backend does not
-// use the portal, so under Flatpak this class will report Unavailable until
-// docs/07-packaging.md's manifest work either adds the permission GeoClue2
-// needs or a portal-backed source is written.
-//
-// That is noted rather than solved here: it is a manifest and a plugin, not an
-// interface change, and getting the interface right first is what makes it a
-// small change later.
+// Inside a Flatpak sandbox, GeoClue2 is not reachable on the session bus, and
+// Qt Positioning's GeoClue2 backend does not know about the portal that is.
+// So there are two backends behind this interface — qtpositioninglocator.h
+// for a desktop, portallocator.h for `org.freedesktop.portal.Location` — and
+// create() picks, in an order its comment gives. The manifest needs nothing
+// for it: Flatpak's default policy already permits `org.freedesktop.portal.*`.
 //
 // ---- what it does not do ----------------------------------------------------
 //

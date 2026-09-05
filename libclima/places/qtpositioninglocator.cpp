@@ -44,8 +44,7 @@ void QtPositioningLocator::requestPosition()
     if (m_source == nullptr) {
         reportFailure(Failure::Unavailable,
                       QStringLiteral("Qt Positioning found no source on this machine. On Linux "
-                                     "that usually means GeoClue2 is not running, or the app is "
-                                     "sandboxed and needs the Location portal instead."));
+                                     "that usually means GeoClue2 is not running."));
         return;
     }
 

@@ -127,6 +127,48 @@ if(TARGET climawidgetsqml)
     )
 endif()
 
+# ---- the location portal, against a portal of our own -----------------------
+#
+# Needs a bus that is not the developer's, because the test OWNS the portal's
+# well-known name. dbus-run-session starts one that lives exactly as long as
+# the test. Where it is not installed the test is not registered, and the
+# configure says so — a test that cannot run has not passed, and a runner
+# without dbus-daemon has said nothing about this code.
+#
+# Linked against Qt D-Bus directly as well as through libclima, because the
+# fake portal in it is itself a D-Bus service.
+if(TARGET Qt6::DBus AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_program(CLIMA_DBUS_RUN_SESSION dbus-run-session)
+
+    add_executable(tst_portallocator tst_portallocator.cpp)
+
+    target_link_libraries(tst_portallocator PRIVATE
+        libclima clima_testsupport Qt6::Test Qt6::DBus)
+    target_compile_definitions(tst_portallocator PRIVATE
+        CLIMA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    )
+
+    clima_forbid_gui(tst_portallocator)
+
+    # Through scripts/dbus-test.sh rather than through dbus-run-session
+    # directly: a private bus still activates the host's real portal out of
+    # /usr/share/dbus-1/services, and the wrapper is where that and two other
+    # environment traps are handled and written down.
+    if(CLIMA_DBUS_RUN_SESSION)
+        add_test(NAME tst_portallocator
+            COMMAND ${CMAKE_SOURCE_DIR}/scripts/dbus-test.sh $<TARGET_FILE:tst_portallocator>
+        )
+        set_tests_properties(tst_portallocator PROPERTIES
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
+            TIMEOUT 120
+        )
+    else()
+        message(STATUS
+            "clima: dbus-run-session was not found, so tst_portallocator is built and "
+            "NOT registered. Install dbus to run it.")
+    endif()
+endif()
+
 # ---- the notifications, against a desktop of our own -------------------------
 #
 # Same arrangement and the same gate as tst_portallocator: the test owns

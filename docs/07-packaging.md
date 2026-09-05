@@ -52,11 +52,12 @@ corresponding Qt source or a written offer from infrastructure we control**.
   already permits `org.freedesktop.portal.*`, so declaring it states a permission that was
   granted anyway — verified by `SystemAppearance` reading the colour scheme over the
   portal inside the sandbox today with nothing declared. `packaging/flatpak/` carries no
-  `--talk-name` at all. Until that is done, `clima-geocode`'s locator reports `Failure::Unavailable` under
-  Flatpak and the app falls back to manual search, which is a degraded feature and not a
-  broken one — see `libclima/places/devicelocator.h`. Nothing else needs location:
-  *reverse* geocoding is offline and bundled, so turning a coordinate into "Toronto,
-  Ontario" never leaves the sandbox.
+  `--talk-name` at all. **Done:** `libclima/places/portallocator.h` is a second locator
+  behind the same interface, speaking `org.freedesktop.portal.Location`, and
+  `DeviceLocator::create()` picks it first inside a sandbox — the reader gets their own
+  desktop's dialog, once, and the app gets a fix. Nothing else needs location: *reverse*
+  geocoding is offline and bundled, so turning a coordinate into "Toronto, Ontario" never
+  leaves the sandbox.
 
 ## 7.3 CI matrix
 

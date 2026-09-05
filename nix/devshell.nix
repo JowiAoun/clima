@@ -64,6 +64,12 @@ pkgs.mkShell {
     # zwlr_layer_shell_v1 at all? See widgets/layershell.cpp.
     wayland
 
+    # dbus-run-session, for the tests that own a well-known name — the
+    # location portal's, in tst_portallocator — and must therefore not run on
+    # the developer's own bus. tests/CMakeLists.txt registers those tests only
+    # where this is found.
+    dbus
+
     # The build. D8 in docs/03-tech-stack.md fixes the floor at CMake 3.21 and
     # the Qt6 CMake API; Ninja because qt_add_qml_module generates a lot of
     # small steps and make is slow at those.

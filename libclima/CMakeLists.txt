@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: 2026 Jowi Aoun
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# The engine. Qt Core, Qt Network, Qt Sql — and provably nothing else.
+# The engine. Qt Core, Qt Network, Qt Sql — and provably nothing that draws.
+# Two optional Core-only modules join them below: Qt Positioning and Qt D-Bus,
+# the two backends behind "use my location".
 #
 # Note the licence line above: this build file is GPL-3.0-or-later like the rest
 # of the build, while every source file it compiles is MPL-2.0. That is not an
@@ -225,6 +227,22 @@ if(TARGET Qt6::Positioning)
     )
     target_compile_definitions(libclima PRIVATE CLIMA_HAVE_POSITIONING)
     target_link_libraries(libclima PRIVATE Qt6::Positioning)
+endif()
+
+# ---- optional: the Location portal, over Qt D-Bus ---------------------------
+#
+# The second backend behind DeviceLocator, and the only one that works from
+# inside a Flatpak — see places/portallocator.h. Qt D-Bus links Qt Core and
+# nothing else, so clima_forbid_gui() at the bottom of this file still holds,
+# and it is a Linux-only feature by nature: there is no session bus anywhere
+# else. The find_package is at the top level for the reason Positioning's is.
+if(TARGET Qt6::DBus AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_sources(libclima PRIVATE
+        places/portallocator.h
+        places/portallocator.cpp
+    )
+    target_compile_definitions(libclima PRIVATE CLIMA_HAVE_PORTAL_LOCATION)
+    target_link_libraries(libclima PRIVATE Qt6::DBus)
 endif()
 
 # ---- include paths ----------------------------------------------------------
