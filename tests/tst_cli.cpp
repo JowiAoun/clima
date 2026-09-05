@@ -13,6 +13,7 @@
 // this test writes into a config directory of its own, because the whole
 // point of the text output is that it follows them.
 
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -47,6 +48,9 @@ private Q_SLOTS:
     void placesListsTheFixturePlace();
     void theReadersUnitsAreHonouredInTextAndNotInJson();
     void theOverrideBeatsThePreference();
+    void theObservationIsNotAStaleCurrentBlock();
+    void theHourlySeriesIsReadTheWayTheAppReadsIt();
+    void aPlaceCannotBeChosenAgainstAFixture();
     void anUnknownCommandIsAUsageError();
     void jsonAndCsvTogetherIsAUsageError();
 
@@ -199,12 +203,115 @@ void TestCli::theReadersUnitsAreHonouredInTextAndNotInJson()
 
 void TestCli::theOverrideBeatsThePreference()
 {
-    const Outcome got = run({ QStringLiteral("--fixture"), QStringLiteral("toronto"), QStringLiteral("now"),
-                              QStringLiteral("--units"), QStringLiteral("metric") },
-                            QByteArrayLiteral("[units]\ntemperature=fahrenheit\n"));
+    const Outcome metric = run({ QStringLiteral("--fixture"), QStringLiteral("toronto"),
+                                 QStringLiteral("now"), QStringLiteral("--units"),
+                                 QStringLiteral("metric") },
+                               QByteArrayLiteral("[units]\ntemperature=fahrenheit\n"));
+    QCOMPARE(metric.exitCode, 0);
+    QVERIFY2(metric.stdOut.contains("\xC2\xB0" "C"), metric.stdOut.constData());
+    QVERIFY(!metric.stdOut.contains("\xC2\xB0" "F"));
+
+    // The other direction, which is the one that cannot pass by accident:
+    // metric is already the built-in default, so the row above fails only if
+    // the PREFERENCE is read and the override ignored. This one fails if the
+    // override is dropped entirely.
+    const Outcome imperial = run({ QStringLiteral("--fixture"), QStringLiteral("toronto"),
+                                   QStringLiteral("now"), QStringLiteral("--units"),
+                                   QStringLiteral("imperial") },
+                                 QByteArrayLiteral("[units]\ntemperature=celsius\n"));
+    QCOMPARE(imperial.exitCode, 0);
+    QVERIFY2(imperial.stdOut.contains("\xC2\xB0" "F"), imperial.stdOut.constData());
+    QVERIFY(!imperial.stdOut.contains("\xC2\xB0" "C"));
+}
+
+void TestCli::theObservationIsNotAStaleCurrentBlock()
+{
+    // The bug this repository already fixed once, in the app, and which the
+    // first version of this tool reintroduced: Open-Meteo's `current` block is
+    // stamped to the quarter hour and a cached response can carry a very old
+    // one. toronto's block says 06:30 against a recording at 12:28, so `now`
+    // printed 15 °C and "Sunny" while `hourly` led with 23 °C — one process,
+    // one file, one instant, eight degrees apart.
+    const Outcome now = run({ QStringLiteral("--fixture"), QStringLiteral("toronto"),
+                              QStringLiteral("now"), QStringLiteral("--json") });
+    QCOMPARE(now.exitCode, 0);
+
+    const QJsonObject current =
+        QJsonDocument::fromJson(now.stdOut).object().value(QStringLiteral("current")).toObject();
+
+    const Outcome hourly = run({ QStringLiteral("--fixture"), QStringLiteral("toronto"),
+                                 QStringLiteral("hourly"), QStringLiteral("1"),
+                                 QStringLiteral("--json") });
+    QCOMPARE(hourly.exitCode, 0);
+
+    const QJsonObject standing = QJsonDocument::fromJson(hourly.stdOut).object()
+                                     .value(QStringLiteral("hourly")).toArray().at(0).toObject();
+
+    // The same instant described by the same process twice. Not identical —
+    // the block is a quarter-hour reading and the row is an hour — but they
+    // cannot be a different afternoon.
+    const double a = current.value(QStringLiteral("temperature")).toDouble();
+    const double b = standing.value(QStringLiteral("temperature")).toDouble();
+    QVERIFY2(qAbs(a - b) <= 3.0,
+             qPrintable(QStringLiteral("`now` says %1 and `hourly` says %2 for the same "
+                                       "instant").arg(a).arg(b)));
+
+    QCOMPARE(current.value(QStringLiteral("condition")).toString(),
+             standing.value(QStringLiteral("condition")).toString());
+}
+
+void TestCli::theHourlySeriesIsReadTheWayTheAppReadsIt()
+{
+    // libclima hands out Open-Meteo's convention, where the accumulations on
+    // the row stamped `t` describe the hour ENDING there; every screen in the
+    // app reads asHourStarting(), where they describe the hour beginning
+    // there. Windowed without converting, the CLI printed the right times
+    // against the wrong rainfall, an hour out from the app.
+    //
+    // kampala is the fixture with drizzle in it, so a shift shows up as a
+    // number rather than as a rounding.
+    const Outcome got = run({ QStringLiteral("--fixture"), QStringLiteral("kampala"),
+                              QStringLiteral("hourly"), QStringLiteral("6"),
+                              QStringLiteral("--json") });
     QCOMPARE(got.exitCode, 0);
-    QVERIFY2(got.stdOut.contains("\xC2\xB0" "C"), got.stdOut.constData());
-    QVERIFY(!got.stdOut.contains("\xC2\xB0" "F"));
+
+    const QJsonArray hours =
+        QJsonDocument::fromJson(got.stdOut).object().value(QStringLiteral("hourly")).toArray();
+    QVERIFY(!hours.isEmpty());
+
+    // The first row is the hour the reader is standing IN, so its stamp is at
+    // or before the fixture's recording instant and its successor is after it.
+    const QDateTime first =
+        QDateTime::fromString(hours.at(0).toObject().value(QStringLiteral("time")).toString(),
+                              Qt::ISODate);
+    QVERIFY(first.isValid());
+
+    const QJsonObject place =
+        QJsonDocument::fromJson(run({ QStringLiteral("--fixture"), QStringLiteral("kampala"),
+                                      QStringLiteral("now"), QStringLiteral("--json") }).stdOut)
+            .object().value(QStringLiteral("current")).toObject();
+    const QDateTime standing =
+        QDateTime::fromString(place.value(QStringLiteral("time")).toString(), Qt::ISODate);
+    QVERIFY(standing.isValid());
+
+    // The observation and the first hourly row describe the same hour. Before
+    // the conversion they were an hour apart, every time.
+    QVERIFY2(qAbs(first.secsTo(standing)) < 3600,
+             qPrintable(QStringLiteral("the first hourly row is %1 and the observation is %2")
+                            .arg(first.toString(Qt::ISODate), standing.toString(Qt::ISODate))));
+}
+
+void TestCli::aPlaceCannotBeChosenAgainstAFixture()
+{
+    // It used to be accepted and ignored: `--fixture toronto --place Berlin`
+    // printed Toronto and exited 0. A recorded forecast and a named place are
+    // two answers to one question, which is the rule app/appoptions.cpp
+    // already applies to the same pair of flags.
+    const Outcome got = run({ QStringLiteral("--fixture"), QStringLiteral("toronto"),
+                              QStringLiteral("--place"), QStringLiteral("Berlin"),
+                              QStringLiteral("now") });
+    QCOMPARE(got.exitCode, 2);
+    QVERIFY2(!got.stdOut.contains("Toronto"), got.stdOut.constData());
 }
 
 void TestCli::anUnknownCommandIsAUsageError()
@@ -222,6 +329,11 @@ void TestCli::jsonAndCsvTogetherIsAUsageError()
     const Outcome got = run({ QStringLiteral("--fixture"), QStringLiteral("toronto"), QStringLiteral("now"),
                               QStringLiteral("--json"), QStringLiteral("--csv") });
     QCOMPARE(got.exitCode, 2);
+
+    // The message too, not only the code: every other usage rejection returns
+    // the same 2, so a code on its own would pass for the wrong reason — a
+    // renamed fixture, a bad --units value, an unparsed count.
+    QVERIFY2(got.stdErr.contains("pick one"), got.stdErr.constData());
 }
 
 QTEST_GUILESS_MAIN(TestCli)

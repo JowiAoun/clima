@@ -50,6 +50,7 @@
 #include "libclima/core/result.h"
 #include "libclima/domain/alert.h"
 #include "libclima/domain/forecast.h"
+#include "libclima/domain/hourconvention.h"
 #include "libclima/domain/place.h"
 #include "libclima/domain/units.h"
 #include "libclima/domain/weathercode.h"
@@ -361,6 +362,25 @@ QString cell(const Reading &reading)
     return reading.has_value() ? QString::number(*reading, 'f', 1) : QString();
 }
 
+// A text cell, quoted the way RFC 4180 says when it has to be.
+//
+// The numeric and ISO columns can never need this; the text ones can and do.
+// A place name out of GeoNames is whatever the dataset holds — "Washington,
+// D.C." is a real row — and joined with a bare comma it shifts every later
+// column by one, so `places --csv` grew a tenth field and a parser read the
+// home flag as the timezone. Condition text and issuer names are the same
+// hazard from a different source.
+QString text(const QString &value)
+{
+    if (!value.contains(QLatin1Char(',')) && !value.contains(QLatin1Char('"'))
+        && !value.contains(QLatin1Char('\n')) && !value.contains(QLatin1Char('\r')))
+        return value;
+
+    QString quoted = value;
+    quoted.replace(QLatin1Char('"'), QLatin1String("\"\""));
+    return QLatin1Char('"') + quoted + QLatin1Char('"');
+}
+
 QString cell(const std::optional<int> &value)
 {
     return value.has_value() ? QString::number(*value) : QString();
@@ -521,10 +541,11 @@ int printPlaces(Engine &engine, const Run &run, QTextStream &out)
     if (run.csv) {
         out << "id,name,admin1,country,countryCode,latitude,longitude,timezone,home\n";
         for (const Place &place : all) {
-            out << place.id << ',' << place.name << ',' << place.admin1 << ',' << place.country
-                << ',' << place.countryCode << ',' << QString::number(place.coordinate.latitude, 'f', 5)
-                << ',' << QString::number(place.coordinate.longitude, 'f', 5) << ',' << place.timezone
-                << ',' << (place.isHome ? "1" : "0") << '\n';
+            out << place.id << ',' << text(place.name) << ',' << text(place.admin1) << ','
+                << text(place.country) << ',' << text(place.countryCode) << ','
+                << QString::number(place.coordinate.latitude, 'f', 5) << ','
+                << QString::number(place.coordinate.longitude, 'f', 5) << ','
+                << text(place.timezone) << ',' << (place.isHome ? "1" : "0") << '\n';
         }
         return 0;
     }
@@ -542,12 +563,62 @@ int printPlaces(Engine &engine, const Run &run, QTextStream &out)
     return 0;
 }
 
+// ---- one definition of "now" ------------------------------------------------
+//
+// The same rule app/viewmodels/conditionsdata.cpp follows, and for the same
+// reason it was written there. Open-Meteo's `current` block is stamped to the
+// quarter hour and is the better answer for an INSTANT — the temperature at
+// 4:47 rather than at four — but only while it is actually current. A cached
+// response is served for as long as its freshness window allows, so the block
+// inside it can be hours old, and the CLI was printing that as the conditions
+// and labelling it "just now" off the fetch time.
+//
+// Measured on the recorded fixtures: toronto's block says 06:30 against a
+// recording at 12:28, so `clima-cli now` reported 15 °C and "Sunny" while
+// `clima-cli hourly` led with 23 °C for the same instant, out of one process
+// and one file.
+//
+// Within the hour, the block. Otherwise the hour the reader is standing in,
+// which is what the chart and the hourly list draw.
+CurrentConditions observationAt(const Forecast &forecast, const QDateTime &now)
+{
+    const CurrentConditions &block = forecast.current;
+    if (block.time.isValid() && qAbs(block.time.secsTo(now)) <= 3600)
+        return block;
+
+    const QList<HourlyPoint> hours = asHourStarting(forecast.hourly);
+    for (int i = hours.size() - 1; i >= 0; --i) {
+        const HourlyPoint &hour = hours.at(i);
+        if (!hour.time.isValid() || hour.time > now)
+            continue;
+
+        CurrentConditions rebuilt;
+        rebuilt.time                = hour.time;
+        rebuilt.temperature         = hour.temperature;
+        rebuilt.apparentTemperature = hour.apparentTemperature;
+        rebuilt.relativeHumidity    = hour.relativeHumidity;
+        rebuilt.dewPoint            = hour.dewPoint;
+        rebuilt.precipitation       = hour.precipitation;
+        rebuilt.windSpeed           = hour.windSpeed;
+        rebuilt.windGust            = hour.windGust;
+        rebuilt.windDirection       = hour.windDirection;
+        rebuilt.pressureMsl         = hour.pressureMsl;
+        rebuilt.cloudCover          = hour.cloudCover;
+        rebuilt.visibility          = hour.visibility;
+        rebuilt.uvIndex             = hour.uvIndex;
+        rebuilt.weatherCode         = hour.weatherCode;
+        rebuilt.isDay               = hour.isDay;
+        return rebuilt;
+    }
+    return block;
+}
+
 int printNow(const Forecast &forecast, const QString &servedBy, const QList<Alert> &alerts,
              const Place &place, const Preferences &prefs, const Run &run, const QDateTime &now,
              QTextStream &out)
 {
-    const QTimeZone          zone = forecast.timeZone.isValid() ? forecast.timeZone : QTimeZone::utc();
-    const CurrentConditions &c    = forecast.current;
+    const QTimeZone         zone = forecast.timeZone.isValid() ? forecast.timeZone : QTimeZone::utc();
+    const CurrentConditions c    = observationAt(forecast, now);
 
     if (run.json) {
         QJsonObject root;
@@ -572,7 +643,7 @@ int printNow(const Forecast &forecast, const QString &servedBy, const QList<Aler
             << cell(c.precipitation) << ',' << cell(c.windSpeed) << ',' << cell(c.windGust) << ','
             << cell(c.windDirection) << ',' << cell(c.pressureMsl) << ',' << cell(c.cloudCover)
             << ',' << cell(c.visibility) << ',' << cell(c.uvIndex) << ',' << cell(c.weatherCode)
-            << ',' << condition(c.weatherCode, c.isDay) << '\n';
+            << ',' << text(condition(c.weatherCode, c.isDay)) << '\n';
         return 0;
     }
 
@@ -605,7 +676,11 @@ int printNow(const Forecast &forecast, const QString &servedBy, const QList<Aler
         out << '\n';
     }
 
-    out << "Updated " << ago(forecast.fetchedAt, now) << " · " << servedBy << '\n';
+    // The READING's age, not the transfer's. A response served from cache
+    // carries the moment its bytes arrived; what the reader wants to know is
+    // how old the number in front of them is.
+    out << "Updated " << ago(c.time.isValid() ? c.time : forecast.fetchedAt, now)
+        << " · " << servedBy << '\n';
     return 0;
 }
 
@@ -614,15 +689,31 @@ int printHourly(const Forecast &forecast, const Preferences &prefs, const Run &r
 {
     const QTimeZone zone = forecast.timeZone.isValid() ? forecast.timeZone : QTimeZone::utc();
 
+    // Converted first, then windowed, and the order is the whole of it.
+    // libclima hands out Open-Meteo's own convention, where the accumulations
+    // on the row stamped `t` describe the hour ENDING at `t`; every screen in
+    // the app reads asHourStarting(), where they describe the hour beginning
+    // there. Windowed without converting, this printed the right times against
+    // the wrong rainfall — kampala's 0.4 mm of drizzle sat in the CLI's 10:00
+    // row and the app's 09:00 row, from one file.
+    const QList<HourlyPoint> hours = asHourStarting(forecast.hourly);
+
     // From the hour we are standing in, forward. `past_days=1` puts yesterday
     // in the series so the app can draw behind the marker; a status bar wants
     // what is next.
     QList<HourlyPoint> ahead;
-    for (const HourlyPoint &hour : forecast.hourly) {
+    for (const HourlyPoint &hour : hours) {
         if (hour.time.isValid() && hour.time.addSecs(3600) > now)
             ahead.append(hour);
         if (ahead.size() >= run.count)
             break;
+    }
+
+    if (ahead.isEmpty()) {
+        // Not silence. A status bar cannot tell an empty answer from a calm
+        // one, and this forecast has no hours in it at all.
+        std::fputs("clima-cli: this forecast carries no hours.\n", stderr);
+        return kExitFetch;
     }
 
     if (run.json) {
@@ -646,7 +737,7 @@ int printHourly(const Forecast &forecast, const Preferences &prefs, const Run &r
                 << cell(h.snowfall) << ',' << cell(h.windSpeed) << ',' << cell(h.windGust) << ','
                 << cell(h.windDirection) << ',' << cell(h.pressureMsl) << ',' << cell(h.cloudCover)
                 << ',' << cell(h.visibility) << ',' << cell(h.uvIndex) << ',' << cell(h.weatherCode)
-                << ',' << condition(h.weatherCode, h.isDay) << '\n';
+                << ',' << text(condition(h.weatherCode, h.isDay)) << '\n';
         }
         return 0;
     }
@@ -684,6 +775,14 @@ int printDaily(const Forecast &forecast, const Preferences &prefs, const Run &ru
             break;
     }
 
+    if (ahead.isEmpty()) {
+        // openmeteoadapter only validates the daily block if it is present, so
+        // a response without one parses green and leaves this empty. Saying so
+        // is the difference between "no data" and "clear skies".
+        std::fputs("clima-cli: this forecast carries no days.\n", stderr);
+        return kExitFetch;
+    }
+
     if (run.json) {
         QJsonArray array;
         for (const DailyPoint &day : ahead)
@@ -704,7 +803,7 @@ int printDaily(const Forecast &forecast, const Preferences &prefs, const Run &ru
                 << cell(d.precipitationProbabilityMax) << ',' << cell(d.snowfallSum) << ','
                 << cell(d.windSpeedMax) << ',' << cell(d.windGustMax) << ','
                 << cell(d.windDirectionDominant) << ',' << cell(d.uvIndexMax) << ','
-                << cell(d.weatherCode) << ',' << condition(d.weatherCode, true) << ','
+                << cell(d.weatherCode) << ',' << text(condition(d.weatherCode, true)) << ','
                 << json(d.sunrise, zone).toString() << ',' << json(d.sunset, zone).toString() << '\n';
         }
         return 0;
@@ -813,6 +912,16 @@ int main(int argc, char *argv[])
                      qPrintable(run.unitsOverride));
         return kExitUsage;
     }
+    if (!run.fixture.isEmpty() && !run.place.isEmpty()) {
+        // A fixture is a recording of one place. Honouring --place would mean
+        // geocoding a second one and then answering with the first one's
+        // weather, which is app/appoptions.cpp's rule about the same pair of
+        // flags: a named place and a recorded forecast are two answers to one
+        // question.
+        std::fputs("clima-cli: --fixture is a recording of one place, so --place cannot "
+                   "choose another. Drop one of them.\n", stderr);
+        return kExitUsage;
+    }
     if (!run.fixture.isEmpty() && !fixtures::exists(run.fixture)) {
         std::fprintf(stderr, "clima-cli: no fixture called \"%s\". Known: %s\n", qPrintable(run.fixture),
                      qPrintable(fixtures::names().join(QStringLiteral(", "))));
@@ -878,10 +987,21 @@ int main(int argc, char *argv[])
     alertRequest.coord = place.value().coordinate;
 
     QList<Alert> inForce;
-    if (const std::optional<Result<AlertAnswer>> alerts =
-            await(engine->registry->fetchAlerts(alertRequest), run.timeoutMs);
-        alerts.has_value() && *alerts) {
+    const std::optional<Result<AlertAnswer>> alerts =
+        await(engine->registry->fetchAlerts(alertRequest), run.timeoutMs);
+
+    if (!alerts.has_value()) {
+        // Silence here would be indistinguishable from "no warnings", which is
+        // the one thing this feature must never say when it does not know.
+        std::fputs("clima-cli: the warnings could not be checked (timed out).\n", stderr);
+    } else if (*alerts) {
         inForce = alerts->value().value.displayableAt(now);
+    } else if (alerts->errorKind() != ErrorKind::Unsupported) {
+        // Unsupported is the ordinary case — most of the world has no covering
+        // provider and the app hides the feature. Anything else is a service
+        // we should have been able to reach and could not.
+        std::fprintf(stderr, "clima-cli: the warnings could not be checked: %s\n",
+                     qPrintable(alerts->error().toString()));
     }
 
     return printNow(forecast->value().value, forecast->value().servedBy, inForce, place.value(), prefs,
