@@ -27,24 +27,21 @@
 // it missed would look like the app ignoring it.
 //
 // ============================================================================
-// THE PREFERENCE, AND WHY ITS DEFAULT IS NOT THE LOCALE
+// THE PREFERENCE, AND WHERE ITS DEFAULT COMES FROM
 //
-// `Settings::clockFormat` is "12h" or "24h" and it defaults to "12h".
+// `Settings::clockFormat` is "12h" or "24h", and a reader who has never
+// touched it gets their own locale's answer — `settingskeys::defaultClockFormat`
+// asks QLocale, so a French desktop opens on 15:30 and an American one on
+// 3 PM.
 //
-// Deriving the default from QLocale is the obvious thing and it is wrong here,
-// for a reason that is about this repository rather than about clocks. Every
-// capture — the golden images, the README shots, the fixtures a bug report
-// attaches — runs under LC_ALL=C.UTF-8, whose short time format is 24-hour. So
-// a locale-derived default would mean the reference design renders one way for
-// the reader and another way in every picture of it, and the picture is what
-// review happens against. `scripts/golden.sh` pins the locale for exactly this
-// class of reason; a preference that read around the pin would undo it.
-//
-// The honest consequence is written down: a reader in France gets AM/PM until
-// they touch the switch, and docs/known-gaps.md says so. A locale-derived
-// *default* — as distinct from a locale-derived value — is a reasonable
-// improvement the day the capture path pins the format explicitly, which is one
-// line in scripts/grab.sh and a re-record of forty images.
+// It was a flat "12h" for longer than it should have been, and the reason was
+// the capture path rather than the clock: every picture this project takes of
+// itself runs under LC_ALL=C.UTF-8, whose short format is 24-hour, so a
+// locale-derived default would have made the reference images a picture of the
+// C locale. That is now pinned where it belongs — scripts/golden.sh and
+// scripts/shots.sh write the preference into their own scratch config, the way
+// Main.qml pins the colour scheme under `--grab` — which leaves the default
+// free to follow the reader and the pictures free to stay what they were.
 //
 // ============================================================================
 // IT TAKES A QTime, NOT A QDateTime

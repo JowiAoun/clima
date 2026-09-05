@@ -3,6 +3,8 @@
 
 #include "settings.h"
 
+#include "app/settingskeys.h"
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -380,7 +382,8 @@ QString Settings::clockFormat() const
     // and a key written by a future version that grew a third spelling. A clock
     // is not a setting that may fail closed: an unrecognised value has to still
     // put a time on the screen.
-    return load(key::clockFormat, QStringLiteral("12h")).toString() == QLatin1String("24h")
+    return load(key::clockFormat, clima::settingskeys::defaultClockFormat()).toString()
+                   == QLatin1String("24h")
                ? QStringLiteral("24h")
                : QStringLiteral("12h");
 }

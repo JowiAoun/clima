@@ -130,6 +130,33 @@ export XDG_CONFIG_HOME="$scratch/config"
 export XDG_DATA_HOME="$scratch/data"
 export XDG_CACHE_HOME="$scratch/cache"
 
+# ---- and the clock, pinned in the same spirit --------------------------------
+#
+# The reference images are 12-hour, and they have to be pinned to something
+# rather than inherited: `Settings::clockFormat` now defaults to the reader's
+# own locale — a French desktop writes 15:30 — while every capture runs under
+# LC_ALL=C.UTF-8, whose short format is 24-hour. Left to the default, the
+# pictures would be a picture of the C locale rather than of the product, and
+# they would change the day anybody touched the locale pin above.
+#
+# Written into the scratch config rather than passed as a flag, because that is
+# where the app already looks and it needs no code to know about captures. The
+# same rule the colour scheme follows in Main.qml, one preference over: a
+# capture pins what it photographs.
+# Both binaries, because both are photographed and they keep separate
+# preference files: `clima` and `clima-gallery` share an organisation and not an
+# application name, so a pin written for one leaves the other reading its
+# default. That is exactly how this was found — the seven gallery cards
+# carrying a time moved while every app image held still.
+#
+# clima-widget needs no line of its own: it deliberately answers to the app's
+# application name so that a tile prints the units and the clock the reader
+# chose, which is the whole of docs/widgets.md's preferences section.
+mkdir -p "$XDG_CONFIG_HOME/Clima"
+for clima_binary in clima clima-gallery; do
+  printf '[time]\nformat=12h\n' > "$XDG_CONFIG_HOME/Clima/$clima_binary.ini"
+done
+
 out="${target:-$scratch/images}"
 mkdir -p "$out"
 

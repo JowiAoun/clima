@@ -150,8 +150,10 @@ Preferences readPreferences(const QString &unitsOverride)
     prefs.chosen.visibility    = read(settingskeys::visibilityUnit, prefs.chosen.visibility);
     prefs.chosen.precipitation = read(settingskeys::precipitationUnit, prefs.chosen.precipitation);
 
-    prefs.twentyFourHour =
-        read(settingskeys::clockFormat, QStringLiteral("12h")) == QLatin1String("24h");
+    // The same default the app falls back to, from the same function, so the
+    // two cannot disagree about what time it is on one machine.
+    prefs.twentyFourHour = read(settingskeys::clockFormat, settingskeys::defaultClockFormat())
+                           == QLatin1String("24h");
 
     if (unitsOverride == QLatin1String("metric"))
         prefs.chosen = units::metric();

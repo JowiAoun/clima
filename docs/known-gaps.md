@@ -199,34 +199,6 @@ the gallery should keep the constant.
 
 ---
 
-## The clock format defaults to AM/PM everywhere, including where nobody writes it
-
-**Status: deliberate, and it is the wrong default outside North America.**
-
-`Settings.clockFormat` is `12h` or `24h` and it defaults to `12h`. The obvious
-default is the locale's — `QLocale().timeFormat()` already knows that a French
-or German desktop writes 15:30 — and it is not what this does.
-
-The reason is the capture path rather than the clock. Every picture this project
-takes of itself runs under `LC_ALL=C.UTF-8`, whose short time format is
-24-hour: the golden images, the README screenshots and the `--grab` a bug report
-attaches. A locale-derived default would mean the app renders one way for the
-reader and another way in every picture of it, and the picture is what review
-happens against. `scripts/golden.sh` pins the locale for exactly this class of
-reason, and a preference that read around the pin would undo it.
-
-The cost is a reader in Paris seeing "3 PM" until they open Preferences. The
-switch is the second row of the first group and it reaches every clock in the
-app and in the widgets, so it is one tap — but a default nobody has to correct
-would be better.
-
-What closes it: pin the format explicitly in `scripts/grab.sh` the way the
-colour scheme is already pinned under `--grab`, then default the preference from
-`QLocale`. That is one line in the capture script, one in
-`app/viewmodels/timeformat.cpp`, and a re-record of every golden image carrying
-a time — which is most of them.
-
----
 
 
 

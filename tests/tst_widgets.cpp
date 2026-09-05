@@ -31,6 +31,7 @@
 // that is looked at, and tests/fixtures/wire/ is what it is looked at against.
 
 #include "daemonlink.h"
+#include "app/settings.h"
 #include "widgetfeed.h"
 #include "wx.h"
 
@@ -487,6 +488,13 @@ void TestWidgets::glyphKindDegradesRatherThanVanishing()
 
 void TestWidgets::clockIsTwelveHourWithASeparateSuffix()
 {
+    // The preference, stated rather than assumed. It used to be assumed, and
+    // that held only while `Settings::clockFormat` defaulted to "12h" for
+    // everybody: it now defaults to the reader's own locale, and this file runs
+    // under LC_ALL=C.UTF-8, whose short format is 24-hour. The subject here is
+    // the 12-hour SPELLING, so the 12-hour preference is part of the setup.
+    Settings::instance()->setClockFormat(QStringLiteral("12h"));
+
     // The bug this exists for: QLocale's "h" is a 24-hour hour unless the format
     // also carries AP, so asking for "h:mm" and appending "PM" separately
     // produced "20:37 PM" under every sunset the first time the sun tile ran.

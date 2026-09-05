@@ -5,10 +5,22 @@
 // thing that does not.
 //
 // app/main.cpp calls Settings::prepareStorage() before anything else, because
-// the weather app remembers its window size and its units. This does not, and
-// that is a rule rather than an omission: a developer tool has no business
-// writing to the config directory the product reads. Open the gallery at
-// 1500x950 and the app must still open where the reader last left it.
+// the weather app remembers its window size and its units. This calls it too,
+// and the rule it used to state — a developer tool has no business writing to
+// the config directory the product reads — is kept by the FILE rather than by
+// the directory: `clima-gallery.ini` sits beside `clima.ini` and nothing in
+// this process can reach the second one. Open the gallery at 1500x950 and the
+// app still opens where the reader left it.
+//
+// It used to set no organisation at all, which meant it read no preferences
+// file whatsoever and every preference it showed was a default. That was
+// invisible until the clock format's default started following the reader's
+// locale: the seven gallery cards carrying a time went 24-hour under the
+// capture locale while every app image stayed 12-hour, so the component
+// browser was drawing something the product does not. A gallery that renders
+// the app's components in the app's typeface should read the app's
+// preferences too — and scripts/golden.sh pins them for a capture by writing
+// exactly this file.
 //
 // AppFont::install() is the opposite case — the one piece of app/main.cpp this
 // file must copy. The specimens on the stage are the app's own components out
@@ -18,6 +30,7 @@
 #include "appengine.h"
 #include "appfont.h"
 #include "galleryoptions.h"
+#include "settings.h"
 
 #include "climaconfig.h"
 
@@ -28,12 +41,21 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-    // Its own name, and no organisation. The name is what QCommandLineParser
-    // prints in front of an error and what --version prints; the organisation
-    // is what QStandardPaths would key a config directory off, and there is no
-    // config directory here to key.
+    // The app's organisation and a name of its own, which together are what
+    // QSettings keys a file off: `<config>/Clima/clima-gallery.ini`. Sharing
+    // the organisation is what puts it in the directory a capture redirects and
+    // pins; not sharing the name is what keeps it out of the app's own file.
+    QGuiApplication::setOrganizationName(QStringLiteral("Clima"));
+    QGuiApplication::setOrganizationDomain(QStringLiteral("github.io"));
     QGuiApplication::setApplicationName(QStringLiteral("clima-gallery"));
     QGuiApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
+
+    // INI on every platform, before anything constructs a QSettings — the same
+    // first line app/main.cpp runs, and for the same reason its header gives.
+    // Without it this process would read `.conf` through NativeFormat while
+    // every other Clima binary reads `.ini`, which is a preference that appears
+    // to be ignored.
+    Settings::prepareStorage();
 
     // Before the engine, for the reason app/main.cpp gives at the same line: a
     // Text item resolves its family from the application font when it is
