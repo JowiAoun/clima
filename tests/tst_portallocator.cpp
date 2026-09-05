@@ -36,6 +36,7 @@
 
 #include <QDBusAbstractAdaptor>
 #include <QDBusConnection>
+#include <QDBusMessage>
 #include <QDBusObjectPath>
 #include <QSignalSpy>
 #include <QTimer>
@@ -122,6 +123,10 @@ public:
     int         sessionsCreated = 0;
     QVariantMap lastSessionOptions;
 
+    // The path handed back by the most recent CreateSession, so a test can name
+    // a session it never got to hear about.
+    QString lastSessionPath;
+
     QDBusObjectPath createSession(const QVariantMap &options)
     {
         ++sessionsCreated;
@@ -138,6 +143,7 @@ public:
         new FakeSessionAdaptor(session);
         m_bus.registerObject(path, session);
         m_sessions.insert(path, session);
+        lastSessionPath = path;
         return QDBusObjectPath(path);
     }
 
@@ -245,6 +251,8 @@ private Q_SLOTS:
     void aStrangersSessionIsIgnored();
     void cancelReportsNothingAndClosesTheSession();
     void theAccuracyAskedForIsCity();
+    void aSessionCreatedForACancelledRequestIsClosed();
+    void aPermissionDialogNobodyAnswersIsBounded();
 
 private:
     void putThePortalOnTheBus();
@@ -556,6 +564,73 @@ void TestPortalLocator::theAccuracyAskedForIsCity()
     // than the feature uses, and the dialog says what was asked for.
     QCOMPARE(m_portal->lastSessionOptions.value(QStringLiteral("accuracy")).toUInt(), 2u);
     QVERIFY(m_portal->lastSessionOptions.contains(QStringLiteral("session_handle_token")));
+}
+
+void TestPortalLocator::aSessionCreatedForACancelledRequestIsClosed()
+{
+    // The window the serial exists for. A CreateSession reply that lands after
+    // its request was cancelled used to be dropped on the floor — but the
+    // portal had already created the session, and xdg-desktop-portal reaps one
+    // only when the owning bus name goes away, so it kept GeoClue reporting to
+    // nobody for the life of the process.
+    //
+    // Every other case in this file answers CreateSession before it can
+    // cancel, which is why this needs the reply held open.
+    PortalLocator locator(QDBusConnection::sessionBus());
+    m_portal->requestPathFor = [&locator](const QString &token) {
+        return locator.requestPathFor(token);
+    };
+
+    // Cancelled in the SAME turn of the event loop, before anything can have
+    // answered: an asyncCall cannot complete without the loop running, so the
+    // portal has not been asked yet and certainly has not replied. That is the
+    // window, and it needs no delayed reply to reach — it is simply the one
+    // sequence cancelReportsNothingAndClosesTheSession deliberately avoids by
+    // waiting for the session to exist first.
+    locator.requestPosition();
+    locator.cancel();
+    QVERIFY(!locator.isRequestInFlight());
+
+    // The portal now hears the call and creates a session for a request
+    // nobody wants any more...
+    QTRY_VERIFY_WITH_TIMEOUT(m_portal->sessionsCreated == 1, 3000);
+    QVERIFY(!m_portal->lastSessionPath.isEmpty());
+
+    // ...and it is closed rather than left running for the life of the
+    // process, which is what xdg-desktop-portal would otherwise do with it.
+    QTRY_COMPARE_WITH_TIMEOUT(m_portal->closesOf(m_portal->lastSessionPath), 1, 3000);
+}
+
+void TestPortalLocator::aPermissionDialogNobodyAnswersIsBounded()
+{
+    // The other new clock. timeout() bounds the arrival of a POSITION and does
+    // not start until the portal has said yes, so a dialog left open is
+    // covered by its own generous bound instead — which is three minutes in
+    // the product and has to be settable to be reachable here.
+    //
+    // Granted never, and the session created: the portal shows the prompt and
+    // nobody touches it.
+    PortalLocator locator(QDBusConnection::sessionBus());
+    locator.setDialogTimeout(300);
+    m_portal->requestPathFor = [&locator](const QString &token) {
+        return locator.requestPathFor(token);
+    };
+
+    QString sessionUsed;
+    m_portal->onStart = [&sessionUsed](FakePortal &, const QString &, const QString &session) {
+        sessionUsed = session;   // Start returns, and then silence.
+    };
+
+    QSignalSpy failed(&locator, &DeviceLocator::failed);
+    locator.requestPosition();
+
+    QVERIFY(failed.wait(3000));
+    QCOMPARE(failed.constFirst().at(0).value<DeviceLocator::Failure>(),
+             DeviceLocator::Failure::Timeout);
+
+    // And the session goes with it, rather than outliving a prompt nobody
+    // answered.
+    QTRY_COMPARE_WITH_TIMEOUT(m_portal->closesOf(sessionUsed), 1, 3000);
 }
 
 QTEST_GUILESS_MAIN(TestPortalLocator)

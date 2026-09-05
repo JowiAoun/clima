@@ -4,6 +4,7 @@
 #include "portallocator.h"
 
 #include <QDBusConnectionInterface>
+#include <QDBusError>
 #include <QDBusMessage>
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
@@ -24,14 +25,6 @@ constexpr auto kSessionInterface  = "org.freedesktop.portal.Session";
 
 // org.freedesktop.portal.Location's accuracy enum. CITY: see the header.
 constexpr uint kAccuracyCity = 2;
-
-// How long the reader is given to answer the portal's permission dialog. Not
-// timeout(), which bounds the arrival of a POSITION: a dialog can sit open for
-// as long as somebody takes to read it, and a locator that gave up at fifteen
-// seconds would cancel a request the user was about to grant. Generous, and
-// still bounded, because a portal that never answers at all must not leave the
-// button dead for the life of the process.
-constexpr int kDialogTimeoutMs = 3 * 60 * 1000;
 
 // The property an outstanding reply carries its request's serial in.
 constexpr const char *kSerial = "clima_serial";
@@ -55,6 +48,12 @@ PortalLocator::PortalLocator(const QDBusConnection &bus, QObject *parent)
     // dialog and the fix are two different waits with two different bounds.
     // See requestPosition() and onResponse().
     m_timer.setSingleShot(true);
+}
+
+void PortalLocator::setDialogTimeout(int milliseconds)
+{
+    if (milliseconds > 0)
+        m_dialogTimeoutMs = milliseconds;
 }
 
 PortalLocator::~PortalLocator()
@@ -171,7 +170,7 @@ void PortalLocator::requestPosition()
     // portal says yes; see onResponse().
     m_timer.disconnect(this);
     connect(&m_timer, &QTimer::timeout, this, &PortalLocator::onDialogTimeout);
-    m_timer.start(kDialogTimeoutMs);
+    m_timer.start(m_dialogTimeoutMs);
 }
 
 void PortalLocator::onSessionCreated(QDBusPendingCallWatcher *watcher)
@@ -191,7 +190,9 @@ void PortalLocator::onSessionCreated(QDBusPendingCallWatcher *watcher)
     // when the owning bus name goes away, so an abandoned one keeps GeoClue
     // reporting to nobody for the life of the program. Close it here.
     if (watcher->property(kSerial).value<quint64>() != m_serial || !isRequestInFlight()) {
-        if (!reply.isError())
+        if (reply.isError())
+            closeAfterAnErrorThatMayHaveCreatedOne(reply.error());
+        else
             closePath(reply.value().path());
         return;
     }
@@ -199,6 +200,14 @@ void PortalLocator::onSessionCreated(QDBusPendingCallWatcher *watcher)
         // The portal is not on this bus, or is too old to have a Location
         // portal. Both are "there is nothing to ask", which is Unavailable,
         // and neither is the user's doing.
+        //
+        // Except when the error is that it did not answer IN TIME, which is a
+        // different thing and leaks the same way a cancelled request used to:
+        // asyncCall() gives up after libdbus's default 25 seconds, and a cold
+        // or busy xdg-desktop-portal that answers at thirty has by then created
+        // a session nobody will ever close.
+        closeAfterAnErrorThatMayHaveCreatedOne(reply.error());
+
         const QString reason = QStringLiteral("the location portal did not answer: %1")
                                    .arg(reply.error().message());
         finish();
@@ -323,7 +332,7 @@ void PortalLocator::onDialogTimeout()
     finish();
     reportFailure(Failure::Timeout,
                   QStringLiteral("the location portal never answered its own permission "
-                                 "request within %1 ms").arg(kDialogTimeoutMs));
+                                 "request within %1 ms").arg(m_dialogTimeoutMs));
 }
 
 void PortalLocator::onTimeout()
@@ -379,6 +388,29 @@ void PortalLocator::closeSession()
         return;
     m_sessionOpen = false;
     closePath(m_sessionPath);
+}
+
+void PortalLocator::closeAfterAnErrorThatMayHaveCreatedOne(const QDBusError &error)
+{
+    // A reply that never came is not the same as a reply that said no. The
+    // portal answering "unknown service" or "unknown method" created nothing;
+    // one that timed out or lost its connection may well have created a session
+    // and been unable to tell us about it.
+    //
+    // The path is guessable precisely because we chose the token — see
+    // sessionPathFor() — and the portal only picks its own path when it can
+    // answer. Closing a path that was never created is a no-op error reply
+    // nobody reads, which is a good deal cheaper than a session that outlives
+    // the reader's interest by hours.
+    switch (error.type()) {
+    case QDBusError::NoReply:
+    case QDBusError::Timeout:
+    case QDBusError::TimedOut:
+        closePath(m_sessionPath);
+        return;
+    default:
+        return;
+    }
 }
 
 void PortalLocator::closePath(const QString &sessionPath)

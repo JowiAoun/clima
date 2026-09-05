@@ -70,6 +70,7 @@
 #include <QTimer>
 #include <QVariantMap>
 
+class QDBusError;
 class QDBusPendingCallWatcher;
 
 namespace clima {
@@ -87,6 +88,15 @@ public:
     PortalLocator(const QDBusConnection &bus, QObject *parent = nullptr);
     ~PortalLocator() override;
 
+    // How long the reader is given to answer the portal's permission dialog,
+    // which is a different wait from `timeout()` — that one bounds the arrival
+    // of a POSITION, and until the dialog is answered there is no position to
+    // wait for. Three minutes by default; a test sets it low to reach the
+    // path, which is otherwise only reachable by leaving a real dialog open.
+    void              setDialogTimeout(int milliseconds);
+    [[nodiscard]] int dialogTimeout() const { return m_dialogTimeoutMs; }
+
+    // How long to wait before giving up. Applies per request.
     [[nodiscard]] bool isAvailable() const override;
     void requestPosition() override;
     void cancel() override;
@@ -134,6 +144,10 @@ private:
     // had already been cancelled — see onSessionCreated().
     void closePath(const QString &sessionPath);
 
+    // And for the case where we cannot know whether there is one: a CreateSession
+    // that timed out rather than being refused. See the implementation.
+    void closeAfterAnErrorThatMayHaveCreatedOne(const QDBusError &error);
+
     QString m_token;
     QString m_sessionPath;
     QString m_requestPath;
@@ -146,6 +160,8 @@ private:
     // be adopted by it. Every asynchronous reply carries the serial it was
     // issued under and is dropped if that is no longer the current one.
     quint64 m_serial = 0;
+
+    int m_dialogTimeoutMs = 3 * 60 * 1000;
 };
 
 } // namespace clima
