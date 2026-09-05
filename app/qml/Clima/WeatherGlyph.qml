@@ -47,7 +47,27 @@ Item {
 
     property string kind: "clear-day"
     property real glyphSize: 26
-    property bool onLightBackground: false
+    // ---- how pale the thing under this glyph is -----------------------------
+    //
+    // Three answers, because there are three grounds in this app and a boolean
+    // could only ever name two of them. It used to be `onLightBackground`, and
+    // the third ground is what that missed: DayIconBadge's night plate is
+    // neither a card nor a pale disc, and a glyph on it was drawn in the card
+    // colours because there was no way to say "mid". `glyph.rain` measured
+    // 1.31:1 there — raindrops on the night half of a rainy day card that were
+    // arithmetically not visible, and that nothing could have caught, because a
+    // token is only ever scored against one ground and this one had three.
+    //
+    //   "card"   whatever surface this scheme's cards are. The default, and
+    //            what almost every glyph in the app sits on.
+    //   "pale"   a near-white or gold disc: DayIconBadge's day plate, and a
+    //            widget tile in the light scheme.
+    //   "deep"   the night plate, deepened in theme.js so that one pale ink
+    //            set reads on it in both schemes.
+    //
+    // The names are about the GROUND rather than about the caller, which is
+    // what lets a widget say "pale" honestly without claiming to be a badge.
+    property string ground: "card"
 
     implicitWidth: glyphSize
     implicitHeight: glyphSize
@@ -82,11 +102,26 @@ Item {
     // The marks are essential — they are the difference between snow and rain —
     // so each carries the pale-ground value the day plate needs. See the note
     // on `rainOnLight` in theme.js for the measurement that put it there.
-    readonly property color dropInk:   onLightBackground ? Theme.glyph.rainOnLight : Theme.glyph.rain
-    readonly property color iceInk:    onLightBackground ? Theme.glyph.snowOnLight : Theme.glyph.snow
-    readonly property color boltInk:   onLightBackground ? Theme.glyph.boltOnLight : Theme.glyph.bolt
-    readonly property color hazeInk:   onLightBackground ? Theme.glyph.cloudBottomOnLight
-                                                         : Theme.glyph.cloudBottom
+    readonly property bool onPale: ground === "pale"
+    readonly property bool onDeep: ground === "deep"
+
+    readonly property color dropInk: onPale ? Theme.glyph.rainOnLight
+                                   : onDeep ? Theme.glyph.rainOnNight
+                                            : Theme.glyph.rain
+    readonly property color iceInk:  onPale ? Theme.glyph.snowOnLight
+                                   : onDeep ? Theme.glyph.snowOnNight
+                                            : Theme.glyph.snow
+    readonly property color boltInk: onPale ? Theme.glyph.boltOnLight
+                                   : onDeep ? Theme.glyph.boltOnNight
+                                            : Theme.glyph.bolt
+    readonly property color hazeInk: onPale ? Theme.glyph.cloudBottomOnLight
+                                   : onDeep ? Theme.glyph.cloudBottomOnNight
+                                            : Theme.glyph.cloudBottom
+
+    // The moon only ever appears on a card or on the night plate — a clear or
+    // partly-cloudy NIGHT is what draws it, and those take the night badge —
+    // so it has two values rather than three.
+    readonly property color moonInk: onDeep ? Theme.glyph.moonOnNight : Theme.glyph.moon
 
     // ---- sun -------------------------------------------------------------
     Item {
@@ -165,7 +200,7 @@ Item {
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
-            fillColor: Theme.glyph.moon
+            fillColor: root.moonInk
             strokeColor: "transparent"
             // Crescent sits centred when alone, upper-left when a cloud is in front.
             PathSvg {
@@ -197,13 +232,15 @@ Item {
                 x2: 0; y2: root.height * (root.soloCloud ? 0.80 : 0.92)
                 GradientStop {
                     position: 0.0
-                    color: root.onLightBackground ? Theme.glyph.cloudTopOnLight
-                                                  : Theme.glyph.cloudTop
+                    color: root.onPale ? Theme.glyph.cloudTopOnLight
+                         : root.onDeep ? Theme.glyph.cloudTopOnNight
+                                       : Theme.glyph.cloudTop
                 }
                 GradientStop {
                     position: 1.0
-                    color: root.onLightBackground ? Theme.glyph.cloudBottomOnLight
-                                                  : Theme.glyph.cloudBottom
+                    color: root.onPale ? Theme.glyph.cloudBottomOnLight
+                         : root.onDeep ? Theme.glyph.cloudBottomOnNight
+                                       : Theme.glyph.cloudBottom
                 }
             }
             PathSvg { path: root.cloudPath(root.width, root.height, root.soloCloud) }

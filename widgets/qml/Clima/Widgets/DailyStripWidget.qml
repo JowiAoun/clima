@@ -76,7 +76,7 @@ WidgetSurface {
                     // sky. A moon over a summary of a whole day would be wrong
                     // for sixteen hours of it.
                     kind: Wx.glyphKind(root.codes[day.index], 1)
-                    onLightBackground: Theme.isLight
+                    ground: Theme.isLight ? "pale" : "card"
                 }
 
                 // The bar, spanning low to high inside the week's range.

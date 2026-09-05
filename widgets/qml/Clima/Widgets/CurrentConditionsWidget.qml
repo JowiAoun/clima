@@ -62,7 +62,7 @@ WidgetSurface {
             // on. A card is a card, but a glyph is drawn with highlights that
             // assume a dark surface underneath, and in light mode there is a
             // paler set already written for the day badge.
-            onLightBackground: Theme.isLight
+            ground: Theme.isLight ? "pale" : "card"
         }
 
         Text {

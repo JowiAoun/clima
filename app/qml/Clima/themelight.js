@@ -271,7 +271,26 @@ var glyph = {
     bolt:               "#a85c0a",
     boltOnLight:        "#7a4406",
 
-    droplet:            "#3f86c4"
+    droplet:            "#3f86c4",
+
+    // ---- and the marks for the night plate ----------------------------------
+    //
+    // The same five values in both schemes, which is not a copy-paste: the
+    // ground is the same in both schemes. `badge.nightTop`/`nightBottom` is one
+    // deep blue disc whether the app is light or dark, so the ink that reads on
+    // it is one ink, and a light-theme reader looking at a night badge is
+    // looking at exactly what a dark-theme reader sees.
+    //
+    // That is the whole reason these exist rather than the card values being
+    // reused. In dark they WOULD be the card values; in light the card values
+    // are dark ink for a pale card, and dark ink on a deep blue disc is the
+    // defect this set was added to fix, one plate over.
+    cloudTopOnNight:    "#ffffff",
+    cloudBottomOnNight: "#c1cddf",
+    rainOnNight:        "#7fb6e8",
+    snowOnNight:        "#e8f2ff",
+    boltOnNight:        "#ffd15c",
+    moonOnNight:        "#ffe9a8",
 };
 
 // The day plate warms rather than pales. Dark's #fdfefe→#dde5f0 is a white disc
@@ -280,8 +299,17 @@ var glyph = {
 var badge = {
     dayTop:      "#ffeeb8",
     dayBottom:   "#f6d98a",
-    nightTop:    "#6d9ae8",
-    nightBottom: "#3f63bd"
+    // Deepened, and the reason is measured rather than aesthetic. At the old
+    // #6d9ae8 → #3f63bd this plate sat in the middle of the luminance range,
+    // where neither a pale mark nor a dark one clears 3:1 — `glyph.rain` on it
+    // measured **1.31:1**, so the night half of a rainy day card had raindrops
+    // that were, arithmetically, not visible. A plate has to commit to being
+    // light or dark for anything to be legible on it, and a night plate that
+    // commits to dark is also the one that looks like night. Every mark in the
+    // OnNight set above clears 3:1 against the PALER of these two stops, which
+    // is the harder one for a pale ink.
+    nightTop:    "#2f4d96",
+    nightBottom: "#16265c"
 };
 
 var scaffold = {

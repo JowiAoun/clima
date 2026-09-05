@@ -83,8 +83,8 @@ TestCase {
     // there are. Comparing the mask rather than the colours is deliberate: two
     // kinds that differ only in a token's value are still two kinds, and a
     // palette edit should not be able to fail this test.
-    function maskOf(kind, onLight) {
-        glyph.onLightBackground = onLight === true
+    function maskOf(kind, ground) {
+        glyph.ground = ground === undefined ? "card" : ground
         glyph.kind = kind
         // No waitForRendering: under the offscreen platform it reports false
         // whether or not a frame arrived, and `grabImage` renders the subtree
@@ -111,8 +111,8 @@ TestCase {
     // Is `target` painted anywhere, give or take the fraction of a channel that
     // antialiasing moves an edge pixel by? Only ever asked about flat fills —
     // a gradient stop is reached at exactly one row and is not a safe needle.
-    function paints(kind, target, onLight) {
-        glyph.onLightBackground = onLight === true
+    function paints(kind, target, ground) {
+        glyph.ground = ground === undefined ? "card" : ground
         glyph.kind = kind
         // No waitForRendering: under the offscreen platform it reports false
         // whether or not a frame arrived, and `grabImage` renders the subtree
@@ -254,7 +254,7 @@ TestCase {
             verify(paints(data.kind, card, false),
                    "\"" + data.kind + "\" paints no Theme.glyph." + name + " on a card, so this "
                    + "row is measuring nothing")
-            verify(!paints(data.kind, card, true),
+            verify(!paints(data.kind, card, "pale"),
                    "\"" + data.kind + "\" still paints Theme.glyph." + name + " on the pale day "
                    + "plate, where it needs Theme.glyph." + name + "OnLight")
         }
@@ -266,6 +266,84 @@ TestCase {
         // legitimately drop below the threshold. Drizzle and snow — the two
         // finest marks, with the most edge per unit of area — failed it while
         // being pixel-perfect.
+    }
+
+    // ---- the deep plate ------------------------------------------------------
+
+    // The other half of the same story, and the one nothing measured at all
+    // until `ground` had three values. DayIconBadge's NIGHT disc is neither a
+    // card nor a pale plate: at its old mid-blue, `glyph.rain` measured 1.31:1
+    // on it — raindrops on the night half of a rainy day card that were
+    // arithmetically not visible, and which the audit could not see either,
+    // because a token is scored against one ground and this one had three.
+    //
+    // In the dark scheme the OnNight values happen to equal the card values,
+    // so this asserts the BINDING rather than the colours there: what it
+    // catches is a mark still reading `Theme.glyph.<name>` when the ground is
+    // deep. In the light scheme the two differ outright, and the row fails
+    // loudly if the binding is missed. Both schemes are driven below.
+    function test_everyMarkRespectsTheDeepGround_data() {
+        return [
+            { tag: "rain",    kind: "rain",    inks: ["rain"] },
+            { tag: "drizzle", kind: "drizzle", inks: ["rain"] },
+            { tag: "sleet",   kind: "sleet",   inks: ["rain", "snow"] },
+            { tag: "snow",    kind: "snow",    inks: ["snow"] },
+            { tag: "hail",    kind: "hail",    inks: ["snow", "bolt"] },
+            { tag: "thunder", kind: "thunder", inks: ["bolt"] },
+        ]
+    }
+
+    function test_everyMarkRespectsTheDeepGround(data) {
+        var was = Theme.scheme
+        Theme.scheme = "light"
+
+        try {
+            for (var i = 0; i < data.inks.length; ++i) {
+                var name = data.inks[i]
+                var card = Theme.glyph[name]
+                var deep = Theme.glyph[name + "OnNight"]
+
+                verify(String(card) !== String(deep),
+                       "in the light scheme Theme.glyph." + name + " and its OnNight value are "
+                       + "the same colour, so this row is measuring nothing")
+
+                verify(paints(data.kind, card, "card"),
+                       "\"" + data.kind + "\" paints no Theme.glyph." + name + " on a card, so "
+                       + "this row is measuring nothing")
+                verify(!paints(data.kind, card, "deep"),
+                       "\"" + data.kind + "\" still paints Theme.glyph." + name + " on the deep "
+                       + "night plate, where it needs Theme.glyph." + name + "OnNight")
+                verify(paints(data.kind, deep, "deep"),
+                       "\"" + data.kind + "\" paints no Theme.glyph." + name + "OnNight on the "
+                       + "night plate")
+            }
+        } finally {
+            // Restored whatever the assertions did, so a failure here cannot
+            // leave every later case in this file running in the wrong scheme.
+            Theme.scheme = was
+        }
+    }
+
+    // The moon is the one mark that reaches the night plate without falling out
+    // of the sky, and it was the easiest to forget for exactly that reason: it
+    // is not in the table above, and it is what a clear night draws.
+    function test_theMoonFollowsTheDeepGroundToo() {
+        var was = Theme.scheme
+        Theme.scheme = "light"
+
+        try {
+            verify(String(Theme.glyph.moon) !== String(Theme.glyph.moonOnNight),
+                   "the light scheme's moon and moonOnNight are the same colour")
+            verify(paints("clear-night", Theme.glyph.moon, "card"),
+                   "a clear night paints no Theme.glyph.moon on a card")
+            verify(!paints("clear-night", Theme.glyph.moon, "deep"),
+                   "a clear night still paints Theme.glyph.moon on the night plate, where it "
+                   + "needs Theme.glyph.moonOnNight")
+            verify(paints("clear-night", Theme.glyph.moonOnNight, "deep"),
+                   "a clear night paints no Theme.glyph.moonOnNight on the night plate")
+        } finally {
+            Theme.scheme = was
+        }
     }
 
     function test_anUnknownKindPaintsNothing() {

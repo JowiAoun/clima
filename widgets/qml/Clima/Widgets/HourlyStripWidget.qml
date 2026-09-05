@@ -87,7 +87,7 @@ WidgetSurface {
                     glyphSize: Math.min(hour.width * 0.8, 20)
                     kind: Wx.glyphKind(root.codes[hour.index],
                                        Wire.at(root.snap, "current.isDay"))
-                    onLightBackground: Theme.isLight
+                    ground: Theme.isLight ? "pale" : "card"
                 }
 
                 Text {

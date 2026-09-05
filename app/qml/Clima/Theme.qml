@@ -268,6 +268,22 @@ QtObject {
         "glyph.rainOnLight":        { on: "badge.dayTop" },
         "glyph.snowOnLight":        { on: "badge.dayTop" },
         "glyph.boltOnLight":        { on: "badge.dayTop" },
+
+        // And the same six for the other plate, which had nothing measuring it
+        // at all until this table gained these lines — the entry in
+        // docs/known-gaps.md that said so is closed by them.
+        //
+        // Against `badge.nightTop` and not `nightBottom`, and that is the
+        // strict choice rather than the convenient one: these inks are pale,
+        // and the harder ground for a pale ink is the PALER of the plate's two
+        // stops. Scoring them against the bottom stop would flatter every one
+        // of them by two or three points.
+        "glyph.cloudTopOnNight":    { pair: "glyph.cloudBottomOnNight", on: "badge.nightTop" },
+        "glyph.cloudBottomOnNight": { pair: "glyph.cloudTopOnNight",    on: "badge.nightTop" },
+        "glyph.rainOnNight":        { on: "badge.nightTop" },
+        "glyph.snowOnNight":        { on: "badge.nightTop" },
+        "glyph.boltOnNight":        { on: "badge.nightTop" },
+        "glyph.moonOnNight":        { on: "badge.nightTop" },
         // The shaded limb is what makes a crescent read as a crescent, so it is
         // measured against the lit face rather than against the card behind it.
         "glyph.moonShade":          { on: "glyph.moon" },
@@ -545,6 +561,13 @@ QtObject {
         readonly property string bolt:               src.bolt
         readonly property string boltOnLight:        src.boltOnLight
         readonly property string droplet:            src.droplet
+
+        readonly property string cloudTopOnNight:    src.cloudTopOnNight
+        readonly property string cloudBottomOnNight: src.cloudBottomOnNight
+        readonly property string rainOnNight:        src.rainOnNight
+        readonly property string snowOnNight:        src.snowOnNight
+        readonly property string boltOnNight:        src.boltOnNight
+        readonly property string moonOnNight:        src.moonOnNight
     }
     readonly property GlyphTokens glyph: GlyphTokens { src: theme.isLight ? LightTokens.glyph : Tokens.glyph }
 

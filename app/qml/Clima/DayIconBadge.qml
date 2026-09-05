@@ -36,7 +36,10 @@ Item {
         anchors.centerIn: parent
         kind: root.kind
         glyphSize: root.badgeSize * 0.68
-        // A white cloud on a near-white disc is invisible; shift its gradient down.
-        onLightBackground: !root.night
+        // Both plates, named. A white cloud on a near-white disc is invisible and
+        // a pale drop on the night disc measured 1.31:1 — see WeatherGlyph's
+        // `ground`, which exists because this one component has two grounds and
+        // neither of them is a card.
+        ground: root.night ? "deep" : "pale"
     }
 }
