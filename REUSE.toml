@@ -414,8 +414,12 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 # comment somebody put at the top — so a header there would be correct until
 # the next time anybody touched a user-facing string, which is exactly the kind
 # of licence statement that goes quietly missing.
+#
+# Globbed rather than named, because the argument applies to every catalogue
+# and not only to the template: the first clima_fr.ts would otherwise arrive
+# uncovered and break `reuse lint` in the commit that adds a translation.
 [[annotations]]
-path = ["app/translations/clima.ts"]
+path = ["app/translations/*.ts"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
 SPDX-License-Identifier = "GPL-3.0-or-later"

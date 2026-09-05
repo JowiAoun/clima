@@ -84,7 +84,8 @@ jobs:
 
       # The two licence questions only a linked binary can answer: is a
       # GPLv3-only Qt module in the DT_NEEDED list, and is Qt linked
-      # dynamically. cmake/ClimaLicenceGuard.cmake catches the way that mistake
+      # dynamically. All FOUR shipped binaries — clima-cli is installed by the
+      # .deb and the MSI like the rest. cmake/ClimaLicenceGuard.cmake catches the way that mistake
       # is normally made — a banned name in a find_package or a link line — and
       # cannot see a module that arrives through a QML import or another
       # module's dependency graph. This is risk R2 and R3 in
@@ -97,7 +98,8 @@ jobs:
       - name: Licence-compatible linking
         run: |
           nix develop --command bash scripts/check-licences.sh \
-            build/ci/app/clima build/ci/daemon/clima-daemon build/ci/widgets/clima-widget
+            build/ci/app/clima build/ci/cli/clima-cli \
+            build/ci/daemon/clima-daemon build/ci/widgets/clima-widget
 
       # The desktop entry, the AppStream component and the icons, checked from
       # a staged install rather than from the templates — so this covers the
@@ -247,6 +249,13 @@ jobs:
           version: '6.8.3'
           modules: 'qtdeclarative qtpositioning'
           cache: true
+
+      # The Linux jobs get ninja from the devshell or from apt, and the Windows
+      # one from the MSVC environment. This job installs Qt and nothing else, so
+      # it has to say where its generator comes from rather than hoping the
+      # runner image carries one.
+      - name: Install Ninja
+        run: brew install ninja
 
       - name: Configure
         run: >

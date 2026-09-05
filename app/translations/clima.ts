@@ -68,6 +68,23 @@
     </message>
 </context>
 <context>
+    <name>AlertsWidget</name>
+    <message numerus="yes">
+        <source>+%n more</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>No warnings in force</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Warnings unavailable</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>AppEngine</name>
     <message>
         <source>No town or city within range of where you are.</source>
@@ -506,6 +523,51 @@
     </message>
     <message>
         <source>Low</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>CurrentConditionsWidget</name>
+    <message>
+        <source>Feels like %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DaemonLink</name>
+    <message>
+        <source>The Clima weather service is not running.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Clima weather service is not answering.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 could not be read.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 carries schema %2; this build reads %3.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Clima daemon speaks schema %1; this build reads %2. Update both to the same release.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No place yet. Open Clima and choose one.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>That place is not in Clima any more.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DailyStripWidget</name>
+    <message>
+        <source>Today</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1049,6 +1111,17 @@
     </message>
 </context>
 <context>
+    <name>PrecipitationWidget</name>
+    <message>
+        <source>No rain figure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 expected</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PrefGeneral</name>
     <message>
         <source>General</source>
@@ -1182,6 +1255,24 @@
     </message>
 </context>
 <context>
+    <name>SunArcWidget</name>
+    <message>
+        <source>Sunrise</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sunset</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TemperatureSparklineWidget</name>
+    <message>
+        <source>%1 to %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>TimeFormat</name>
     <message>
         <source>AM</source>
@@ -1212,6 +1303,13 @@
     </message>
 </context>
 <context>
+    <name>UvDialWidget</name>
+    <message>
+        <source>max %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>WeatherDetails</name>
     <message>
         <source>Weather details</source>
@@ -1220,6 +1318,68 @@
     <message>
         <source>as of %1</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WidgetSurface</name>
+    <message>
+        <source>recorded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>no reading</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WidgetWindow</name>
+    <message>
+        <source>Clima widgets</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WindRoseWidget</name>
+    <message>
+        <source>N</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>gusting %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Wx</name>
+    <message>
+        <source>%1 h %2 min</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>just now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n min ago</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n h ago</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>yesterday</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n days ago</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 </TS>

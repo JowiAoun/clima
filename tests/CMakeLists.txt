@@ -134,6 +134,11 @@ endif()
 # `cli_has_no_gui` below asks the same question of the binary the test runs.
 add_executable(tst_cli tst_cli.cpp)
 
+# It runs the binary rather than linking it, so nothing in the link line would
+# make CMake build clima-cli first. Stated, or `--target tst_cli && ctest -R
+# tst_cli` tests a path that may hold no executable.
+add_dependencies(tst_cli clima-cli)
+
 target_link_libraries(tst_cli PRIVATE clima_testsupport Qt6::Test)
 target_compile_definitions(tst_cli PRIVATE
     CLIMA_CLI_BINARY="$<TARGET_FILE:clima-cli>"
@@ -213,6 +218,10 @@ if(TARGET Qt6::DBus AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
             ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
             TIMEOUT 120
         )
+    else()
+        message(STATUS
+            "clima: dbus-run-session was not found, so tst_notifier is built and "
+            "NOT registered. Install dbus to run it.")
     endif()
 endif()
 
@@ -475,7 +484,7 @@ find_program(CLIMA_OBJDUMP NAMES objdump llvm-objdump)
 # because the tool it needed was missing is worse than one that is absent: the
 # first is a guarantee nobody is checking, and the second is visible in the
 # ctest output as a test that is not there.
-if(CLIMA_OBJDUMP)
+if(CLIMA_OBJDUMP AND UNIX AND NOT APPLE)
     add_test(NAME engine_has_no_gui
         COMMAND ${CMAKE_COMMAND}
             -DCLIMA_BINARY=$<TARGET_FILE:tst_httpclient>
@@ -494,7 +503,13 @@ endif()
 # library in its DT_NEEDED list would be a windowing stack initialised sixty
 # times an hour to print one temperature. The configure-time guard forbids it
 # on the target graph; this reads the binary.
-if(CLIMA_OBJDUMP)
+# UNIX AND NOT APPLE, like licences_are_compatible below and for the same
+# reason: ClimaNoGuiBinaryCheck reads `objdump -p` for NEEDED lines, which is an
+# ELF spelling. macOS ships an objdump that prints LC_LOAD_DYLIB for a Mach-O,
+# so find_program succeeds, no NEEDED line is ever matched, and the script
+# correctly FATAL_ERRORs on a question it could not ask. A check that cannot run
+# is not a check that failed.
+if(CLIMA_OBJDUMP AND UNIX AND NOT APPLE)
     add_test(NAME cli_has_no_gui
         COMMAND ${CMAKE_COMMAND}
             -DCLIMA_BINARY=$<TARGET_FILE:clima-cli>

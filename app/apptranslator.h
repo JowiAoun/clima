@@ -19,6 +19,15 @@
 // below is by locale and not by a list of languages somebody has to remember
 // to extend.
 //
+// One thing that will need saying out loud on that day: the STRINGS of all
+// three binaries are collected — the app, the CLI and the desktop tiles — and
+// only the app installs a translator. The widget host is a second process with
+// a second QML module, so a compiled catalogue would have to be attached to
+// that module too and widgets/main.cpp would call this the way app/main.cpp
+// does. Collecting the tiles' sentences now is deliberate, because a
+// translator should be offered every string the product shows; the second half
+// is a line of CMake and a line of C++ when there is a catalogue to carry.
+//
 // ============================================================================
 // WHY IT ASKS QLocale AND NOT Settings
 //

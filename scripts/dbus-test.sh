@@ -65,7 +65,11 @@ if [ ! -r "$config" ]; then
 fi
 
 scratch="$(mktemp -d)"
-trap 'rm -rf "$scratch"' EXIT
+
+# Not `trap … EXIT` with an `exec` below it: exec replaces this shell's image
+# and the trap goes with it, so every ctest run leaked two mktemp trees. The
+# cleanup is explicit and the exit status is carried by hand instead.
+cleanup() { rm -rf "$scratch"; }
 
 # Empty, and existing: a directory the bus can scan and find nothing in.
 mkdir -p "$scratch/data/dbus-1/services" "$scratch/config" "$scratch/cache" "$scratch/runtime"
@@ -80,4 +84,7 @@ export XDG_RUNTIME_DIR="$scratch/runtime"
 # See 2 above.
 unset LD_LIBRARY_PATH
 
-exec dbus-run-session --config-file="$config" -- "$@"
+status=0
+dbus-run-session --config-file="$config" -- "$@" || status=$?
+cleanup
+exit "$status"

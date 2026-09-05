@@ -54,14 +54,20 @@ fi
 generate() {
   # Into a file of the caller's choosing, so that `check` can compare rather
   # than overwrite the thing it is checking.
-  lupdate -I "$root" -recursive "$root/app" "$root/cli" \
+  # widgets/ as well as app/ and cli/. The tiles carry their own qsTr() calls —
+  # a tile says "No weather service" and "Updated N min ago" — and leaving that
+  # directory out meant this gate reported "ok" for strings no translator would
+  # ever be offered, which is the failure it exists to prevent.
+  lupdate -I "$root" -recursive "$root/app" "$root/cli" "$root/widgets" \
     -ts "$1" -no-obsolete -locations none -silent
 }
 
 case "$mode" in
   update)
     generate "$template"
-    echo "i18n: wrote $(realpath --relative-to="$root" "$template")"
+    # Not `realpath --relative-to`, which is GNU coreutils only and aborts the
+    # script under `set -e` on a BSD or a Mac after the template was written.
+    echo "i18n: wrote ${template#"$root"/}"
     ;;
 
   check)
