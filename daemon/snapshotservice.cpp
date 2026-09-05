@@ -409,11 +409,25 @@ void SnapshotService::warmFromCache(Watched &watched)
     const QList<IAlertProvider *> alerts = m_registry->alertChain(alertRequest.coord);
     for (IAlertProvider *provider : alerts) {
         QFuture<Result<AlertSet>> answer = provider->fetchAlerts(alertRequest);
-        if (!answer.isFinished() || !answer.result()) {
+        if (!answer.isFinished()) {
             allAnswered = false;
             continue;
         }
-        const AlertSet &part = answer.result().value();
+
+        // By value, and that is not a style choice. QFuture::result() returns a
+        // Result BY VALUE, and Result::value() hands back a reference into it —
+        // so `const AlertSet &part = answer.result().value();` binds to a
+        // temporary that is destroyed at the end of that statement, and every
+        // read of it afterwards is a use-after-free. It survives only while the
+        // freed stack slot happens to still hold the old bits. The forecast and
+        // air-quality loops above already take theirs by value; this is the
+        // same, and it also drops the second full copy the old line made.
+        const Result<AlertSet> result = answer.result();
+        if (!result) {
+            allAnswered = false;
+            continue;
+        }
+        const AlertSet &part = result.value();
         for (const Alert &alert : part.alerts) {
             const bool known = std::any_of(merged.alerts.cbegin(), merged.alerts.cend(),
                                            [&alert](const Alert &seen) {
