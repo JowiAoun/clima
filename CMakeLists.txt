@@ -23,7 +23,7 @@ project(clima
     # number on any line carrying that comment, which is how a merged release PR
     # bumps CLIMA_VERSION, the AppStream <release>, the MSI ProductVersion and
     # the MET Norway User-Agent from one edit. See .github/release-please-config.json.
-    VERSION 0.1.0 # x-release-please-version
+    VERSION 0.2.0 # x-release-please-version
     DESCRIPTION "A native Qt 6 weather app"
     HOMEPAGE_URL "https://github.com/JowiAoun/clima"
     LANGUAGES CXX
