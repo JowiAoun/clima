@@ -198,6 +198,8 @@ qt_add_library(climaqml STATIC)
 set(clima_cpp_sources
     appfont.h
     appfont.cpp
+    apptranslator.h
+    apptranslator.cpp
     appoptions.h
     appoptions.cpp
     settings.h
@@ -370,6 +372,48 @@ clima_guard_target(climaqml)
 # links its backing library privately, so its usage requirements — Qt6::Quick,
 # and the three include directories below — stop there. Link only the plugin and
 # main.cpp cannot find <QQmlEngine>.
+# ---- translations -----------------------------------------------------------
+#
+# `app/translations/clima.ts` is the SOURCE catalogue — every translatable
+# string, no translations — kept current by scripts/i18n.sh and gated in CI. It
+# is deliberately NOT in the list below: compiling it would embed a catalogue
+# that translates English into English.
+#
+# The list below is the LANGUAGES, and it is empty, which is the honest state of
+# this project today — docs/known-gaps.md says so rather than shipping a machine
+# translation. Adding French is one line here and one file beside the template;
+# app/apptranslator.cpp already looks up whatever was compiled in, by locale, so
+# no code changes.
+#
+# Listed one by one rather than globbed, for the reason the QML list above
+# gives at length: a glob goes stale silently, and here it would go stale in the
+# direction of shipping a half-finished catalogue somebody left in the tree.
+set(clima_translations
+    # app/translations/clima_fr.ts
+)
+
+# LinguistTools is optional in the same way Qt Positioning and Qt D-Bus are: a
+# packager building from a distribution's Qt may not have `lrelease`, and a
+# missing translation is a build that speaks English rather than a build that
+# fails. It is QUIET for that reason, and the message says what was lost.
+if(clima_translations)
+    find_package(Qt6 6.8 QUIET COMPONENTS LinguistTools)
+
+    if(TARGET Qt6::lrelease)
+        # RESOURCE_PREFIX is where apptranslator.cpp looks. Stated rather than
+        # left to the default, because the two have to agree and only one of
+        # them is in this file.
+        qt_add_translations(climaqml
+            TS_FILES ${clima_translations}
+            RESOURCE_PREFIX "/i18n"
+        )
+    else()
+        message(STATUS
+            "clima: Qt LinguistTools was not found, so the translations are not compiled "
+            "in and the app speaks its source language. Everything else works.")
+    endif()
+endif()
+
 # ---- the Windows resource script --------------------------------------------
 #
 # Compiled into the executable, so it has to be decided before the target is

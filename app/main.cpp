@@ -10,6 +10,7 @@
 
 #include "appengine.h"
 #include "appfont.h"
+#include "apptranslator.h"
 #include "appoptions.h"
 #include "climaconfig.h"
 #include "settings.h"
@@ -57,6 +58,11 @@ int main(int argc, char *argv[])
     // off the application font as `Theme.type.family`, which is one source of
     // truth rather than two spellings of "Inter". See app/appfont.h.
     AppFont::install();
+
+    // Before the QML engine loads: a translator installed after a component is
+    // built does not reach the strings already in it. No-op today — there are
+    // no language catalogues yet, which app/apptranslator.h explains.
+    clima::AppTranslator::install(&app);
 
     // ---- 4. the command line -----------------------------------------------
     // Before the engine loads anything, because Main.qml reads AppOptions at

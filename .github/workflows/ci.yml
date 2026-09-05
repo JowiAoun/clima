@@ -298,6 +298,15 @@ jobs:
       # and adopt it in a commit that does nothing else — not to adopt a
       # standard style and reformat to meet it.
 
+      # The translatable strings against the source they came from. A string
+      # added to a .qml or a .cpp and not to the template is a string no
+      # translator is ever offered, and the template is committed precisely so
+      # that a pull request adding a user-facing sentence shows that sentence
+      # in its diff. scripts/i18n.sh explains the two lupdate flags that make
+      # this a gate rather than a nuisance.
+      - name: Translatable strings
+        run: nix develop --command bash scripts/i18n.sh check
+
       # Needs a configured build for the all_qmllint target, but not a compiled
       # one — qmllint reads sources and the module metadata that configuring
       # writes.

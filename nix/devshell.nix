@@ -24,6 +24,13 @@ let
     qt6.qtshadertools
     qt6.qtpositioning
 
+    # lupdate and lrelease. The translation catalogues under app/translations
+    # are regenerated from the sources by `update_translations` and compiled
+    # into the binary by the build; both tools are optional at configure time
+    # (a packager without them ships the .qm files already in the tree) and
+    # present here so that the catalogue cannot silently stop being refreshed.
+    qt6.qttools
+
     # The Wayland platform plugin. Not needed to build anything and needed to
     # run one thing: `clima-widget --pin`, which asks a compositor for a
     # desktop-layer surface and can only do that over Wayland. Without this
