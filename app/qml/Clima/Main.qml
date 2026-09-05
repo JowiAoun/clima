@@ -157,6 +157,25 @@ Window {
                || SystemAppearance.reduceMotion
     }
 
+    // ---- what the alert poll is told -----------------------------------------
+    //
+    // AlertsData's schedule — three minutes focused, ten idle, stopped when
+    // hidden — is only a schedule if something tells it which of those the
+    // window is in. Nothing did. The view model's defaults are "visible and
+    // focused", so from the day alerts landed the app polled every three
+    // minutes from launch to quit, minimised or not: precisely the bill
+    // alertsdata.h's arithmetic says it refuses to run up, and in Canada, where
+    // nothing revalidates, several megabytes a day for a window in the dock.
+    //
+    // Pushed rather than read, for the reason the view model gives — it can be
+    // tested without a QWindow. Minimised counts as hidden: a window in the
+    // dock is a window nobody is looking at, and it is the case that costs.
+    readonly property bool exposed:
+        win.visibility !== Window.Hidden && win.visibility !== Window.Minimized
+
+    onExposedChanged: Alerts.setWindowState(win.exposed, win.active)
+    onActiveChanged: Alerts.setWindowState(win.exposed, win.active)
+
     // The page background is painted as an item, not left to Window.color.
     // grabToImage() captures contentItem, which does not include the window's
     // clear colour — so every headless screenshot came out with a black page
@@ -258,6 +277,11 @@ Window {
         // which apply during this object's completion and so are in force
         // before the first frame — and, unlike the assignments they replaced,
         // stay in force when the desktop changes underneath them.
+        // The poll schedule's starting state. The two handlers above only fire
+        // on a change, and a window that opens exposed and active has not had
+        // one yet.
+        Alerts.setWindowState(win.exposed, win.active)
+
         if (win.geometryRemembered && Settings.hasWindowSize) {
             // Size only. Position is stored, and restoring it is a lie on
             // Wayland — the compositor places windows, and a client that
