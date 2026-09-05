@@ -50,6 +50,7 @@ private Q_SLOTS:
     void theOverrideBeatsThePreference();
     void theObservationIsNotAStaleCurrentBlock();
     void theHourlySeriesIsReadTheWayTheAppReadsIt();
+    void theConditionAgreesWithTheHourEvenOnAFreshBlock();
     void aPlaceCannotBeChosenAgainstAFixture();
     void anUnknownCommandIsAUsageError();
     void jsonAndCsvTogetherIsAUsageError();
@@ -262,14 +263,15 @@ void TestCli::theObservationIsNotAStaleCurrentBlock()
 
 void TestCli::theHourlySeriesIsReadTheWayTheAppReadsIt()
 {
-    // libclima hands out Open-Meteo's convention, where the accumulations on
-    // the row stamped `t` describe the hour ENDING there; every screen in the
-    // app reads asHourStarting(), where they describe the hour beginning
-    // there. Windowed without converting, the CLI printed the right times
-    // against the wrong rainfall, an hour out from the app.
+    // asHourStarting does NOT move a timestamp — it moves the accumulations and
+    // the weather code onto the row before, and drops the last point. So a test
+    // that compared stamps compared something the conversion never touches and
+    // passed either way; this asserts the value that actually moves.
     //
-    // kampala is the fixture with drizzle in it, so a shift shows up as a
-    // number rather than as a rounding.
+    // kampala is the fixture with drizzle in it. Converted, the 0.4 mm and the
+    // "Light drizzle" code sit on 09:00, which is where the app draws them;
+    // unconverted they sit on 10:00, an hour later than every screen in the
+    // app shows.
     const Outcome got = run({ QStringLiteral("--fixture"), QStringLiteral("kampala"),
                               QStringLiteral("hourly"), QStringLiteral("6"),
                               QStringLiteral("--json") });
@@ -279,26 +281,57 @@ void TestCli::theHourlySeriesIsReadTheWayTheAppReadsIt()
         QJsonDocument::fromJson(got.stdOut).object().value(QStringLiteral("hourly")).toArray();
     QVERIFY(!hours.isEmpty());
 
-    // The first row is the hour the reader is standing IN, so its stamp is at
-    // or before the fixture's recording instant and its successor is after it.
-    const QDateTime first =
-        QDateTime::fromString(hours.at(0).toObject().value(QStringLiteral("time")).toString(),
-                              Qt::ISODate);
-    QVERIFY(first.isValid());
+    QJsonObject wet;
+    for (const QJsonValue &value : hours) {
+        const QJsonObject hour = value.toObject();
+        if (hour.value(QStringLiteral("precipitation")).toDouble() > 0.0) {
+            wet = hour;
+            break;
+        }
+    }
+    QVERIFY2(!wet.isEmpty(), "no hour in this window carries any precipitation");
 
-    const QJsonObject place =
-        QJsonDocument::fromJson(run({ QStringLiteral("--fixture"), QStringLiteral("kampala"),
-                                      QStringLiteral("now"), QStringLiteral("--json") }).stdOut)
-            .object().value(QStringLiteral("current")).toObject();
-    const QDateTime standing =
-        QDateTime::fromString(place.value(QStringLiteral("time")).toString(), Qt::ISODate);
-    QVERIFY(standing.isValid());
+    const QDateTime when =
+        QDateTime::fromString(wet.value(QStringLiteral("time")).toString(), Qt::ISODate);
+    QVERIFY(when.isValid());
+    QCOMPARE(when.time().hour(), 9);
+    QCOMPARE(wet.value(QStringLiteral("precipitation")).toDouble(), 0.4);
+    QCOMPARE(wet.value(QStringLiteral("condition")).toString(), QStringLiteral("Light drizzle"));
+}
 
-    // The observation and the first hourly row describe the same hour. Before
-    // the conversion they were an hour apart, every time.
-    QVERIFY2(qAbs(first.secsTo(standing)) < 3600,
-             qPrintable(QStringLiteral("the first hourly row is %1 and the observation is %2")
-                            .arg(first.toString(Qt::ISODate), standing.toString(Qt::ISODate))));
+void TestCli::theConditionAgreesWithTheHourEvenOnAFreshBlock()
+{
+    // The other branch of observationAt(), and the one the stale-block test
+    // cannot reach. When Open-Meteo's `current` block IS within the hour it is
+    // still not the last word on the weather code or the precipitation: the
+    // code describes a stretch and the block's rainfall is the PRECEDING hour,
+    // where the series is the hour starting. Trusting it whole is how "Mainly
+    // sunny" came to sit above a Now column drawing heavy rain.
+    //
+    // berlin's block is inside the hour of its recording, so this drives the
+    // fresh branch; the assertion is that one process does not describe one
+    // hour two ways.
+    const Outcome now = run({ QStringLiteral("--fixture"), QStringLiteral("berlin"),
+                              QStringLiteral("now"), QStringLiteral("--json") });
+    QCOMPARE(now.exitCode, 0);
+
+    const QJsonObject current =
+        QJsonDocument::fromJson(now.stdOut).object().value(QStringLiteral("current")).toObject();
+
+    const Outcome hourly = run({ QStringLiteral("--fixture"), QStringLiteral("berlin"),
+                                 QStringLiteral("hourly"), QStringLiteral("1"),
+                                 QStringLiteral("--json") });
+    QCOMPARE(hourly.exitCode, 0);
+
+    const QJsonObject standing = QJsonDocument::fromJson(hourly.stdOut).object()
+                                     .value(QStringLiteral("hourly")).toArray().at(0).toObject();
+
+    QCOMPARE(current.value(QStringLiteral("weatherCode")).toInt(),
+             standing.value(QStringLiteral("weatherCode")).toInt());
+    QCOMPARE(current.value(QStringLiteral("condition")).toString(),
+             standing.value(QStringLiteral("condition")).toString());
+    QCOMPARE(current.value(QStringLiteral("precipitation")).toDouble(),
+             standing.value(QStringLiteral("precipitation")).toDouble());
 }
 
 void TestCli::aPlaceCannotBeChosenAgainstAFixture()

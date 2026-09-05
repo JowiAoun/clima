@@ -583,34 +583,64 @@ int printPlaces(Engine &engine, const Run &run, QTextStream &out)
 CurrentConditions observationAt(const Forecast &forecast, const QDateTime &now)
 {
     const CurrentConditions &block = forecast.current;
-    if (block.time.isValid() && qAbs(block.time.secsTo(now)) <= 3600)
-        return block;
+    const QList<HourlyPoint>  hours = asHourStarting(forecast.hourly);
 
-    const QList<HourlyPoint> hours = asHourStarting(forecast.hourly);
+    // The hour the reader is standing in, whether or not the block is usable —
+    // because it is needed in both branches.
+    const HourlyPoint *standing = nullptr;
     for (int i = hours.size() - 1; i >= 0; --i) {
         const HourlyPoint &hour = hours.at(i);
-        if (!hour.time.isValid() || hour.time > now)
-            continue;
-
-        CurrentConditions rebuilt;
-        rebuilt.time                = hour.time;
-        rebuilt.temperature         = hour.temperature;
-        rebuilt.apparentTemperature = hour.apparentTemperature;
-        rebuilt.relativeHumidity    = hour.relativeHumidity;
-        rebuilt.dewPoint            = hour.dewPoint;
-        rebuilt.precipitation       = hour.precipitation;
-        rebuilt.windSpeed           = hour.windSpeed;
-        rebuilt.windGust            = hour.windGust;
-        rebuilt.windDirection       = hour.windDirection;
-        rebuilt.pressureMsl         = hour.pressureMsl;
-        rebuilt.cloudCover          = hour.cloudCover;
-        rebuilt.visibility          = hour.visibility;
-        rebuilt.uvIndex             = hour.uvIndex;
-        rebuilt.weatherCode         = hour.weatherCode;
-        rebuilt.isDay               = hour.isDay;
-        return rebuilt;
+        if (hour.time.isValid() && hour.time <= now) {
+            standing = &hour;
+            break;
+        }
     }
-    return block;
+
+    if (block.time.isValid() && qAbs(block.time.secsTo(now)) <= 3600) {
+        CurrentConditions live = block;
+
+        // Even a current block does not get the last word on these two, and
+        // conditionsdata.cpp says why at length: a weather code describes a
+        // STRETCH of weather rather than a moment, which is why the hourly
+        // series shifts it, and the block's `precipitation` is the PRECEDING
+        // hour where the series is the hour starting. Two conventions in one
+        // process is how "Mainly sunny" came to sit above a Now column drawing
+        // heavy rain — measured on five of twelve cities in one afternoon.
+        //
+        // So the block is trusted for the instants it is genuinely better at
+        // and the interval fields come from the interval.
+        if (standing != nullptr) {
+            live.weatherCode   = standing->weatherCode;
+            live.precipitation = standing->precipitation;
+        }
+        return live;
+    }
+
+    // Not current. Rebuilt from the hour, exactly as the app does.
+    if (standing == nullptr) {
+        // No hour covers `now` either — a forecast with no usable series at
+        // all. Empty, rather than the stale block this function exists to
+        // suppress; the app leaves the observation empty here too.
+        return {};
+    }
+
+    CurrentConditions rebuilt;
+    rebuilt.time                = standing->time;
+    rebuilt.temperature         = standing->temperature;
+    rebuilt.apparentTemperature = standing->apparentTemperature;
+    rebuilt.relativeHumidity    = standing->relativeHumidity;
+    rebuilt.dewPoint            = standing->dewPoint;
+    rebuilt.precipitation       = standing->precipitation;
+    rebuilt.windSpeed           = standing->windSpeed;
+    rebuilt.windGust            = standing->windGust;
+    rebuilt.windDirection       = standing->windDirection;
+    rebuilt.pressureMsl         = standing->pressureMsl;
+    rebuilt.cloudCover          = standing->cloudCover;
+    rebuilt.visibility          = standing->visibility;
+    rebuilt.uvIndex             = standing->uvIndex;
+    rebuilt.weatherCode         = standing->weatherCode;
+    rebuilt.isDay               = standing->isDay;
+    return rebuilt;
 }
 
 int printNow(const Forecast &forecast, const QString &servedBy, const QList<Alert> &alerts,
@@ -676,11 +706,15 @@ int printNow(const Forecast &forecast, const QString &servedBy, const QList<Aler
         out << '\n';
     }
 
-    // The READING's age, not the transfer's. A response served from cache
-    // carries the moment its bytes arrived; what the reader wants to know is
-    // how old the number in front of them is.
-    out << "Updated " << ago(c.time.isValid() ? c.time : forecast.fetchedAt, now)
-        << " · " << servedBy << '\n';
+    // fetchedAt, which is what the app's own "Updated N minutes ago" reports.
+    //
+    // This briefly measured the reading instead, to stop a six-hour-old
+    // `current` block being called "just now". That was the wrong half of the
+    // fix: observationAt() above now makes the reading current by
+    // construction, so its stamp is under an hour old whenever any row covers
+    // the moment — and a line derived from it could never say a cached
+    // response was stale, which is the one thing this line is for.
+    out << "Updated " << ago(forecast.fetchedAt, now) << " · " << servedBy << '\n';
     return 0;
 }
 
