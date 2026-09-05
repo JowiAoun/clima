@@ -197,10 +197,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The same modules the release job installs — release.yml adds
+      # qtpositioning, and for a while this job did not, so the build CI
+      # exercised was not the one the MSI ships: "use my location" was
+      # compiled out here and in on the release runner. One list, both places.
       - uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.3'
-          modules: 'qtdeclarative'
+          modules: 'qtdeclarative qtpositioning'
           cache: true
 
       - uses: ilammy/msvc-dev-cmd@v1
@@ -218,6 +222,45 @@ jobs:
 
       - name: Test, without the golden images
         run: ctest --test-dir build/win -LE golden --output-on-failure
+
+  # ---- the third desktop, as far as a runner can take it --------------------
+  #
+  # docs/07 §7.3 has listed a macos-arm64 job since the plan was written and
+  # this file never had one, so "there is no macOS build" in docs/known-gaps.md
+  # was true twice over: nothing shipped, and nothing was ever compiled. This
+  # job makes the second half a measurement. It builds an unsigned .app and
+  # runs the suite without the golden images — CoreText is not FreeType, for
+  # the reason the Windows job gives — and it ships nothing, because shipping
+  # needs the Developer ID the gap entry is about.
+  #
+  # Like the Windows job above, this has never been run. Treat its first run
+  # as the test of it.
+  macos-arm64:
+    name: build (macos, arm64)
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          modules: 'qtdeclarative qtpositioning'
+          cache: true
+
+      - name: Configure
+        run: >
+          cmake -S . -B build/mac -G Ninja
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCLIMA_BUILD_TESTS=ON
+          -DCLIMA_BUILD_GALLERY=ON
+          -DCLIMA_DEV_TOOLS=ON
+
+      - name: Build
+        run: cmake --build build/mac
+
+      - name: Test, without the golden images
+        run: ctest --test-dir build/mac -LE golden --output-on-failure
 
   # ---- everything that reads the tree rather than building it ---------------
   lint:
