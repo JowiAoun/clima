@@ -93,8 +93,9 @@ jobs:
       # application.
       #
       # The script existed and nothing called it, which for a compliance check
-      # is the same as it not existing. All three shipped binaries, because
-      # clima-widget and clima-daemon are as much a release artefact as the app.
+      # is the same as it not existing. All FOUR shipped binaries, because
+      # clima-cli, clima-widget and clima-daemon are as much a release artefact
+      # as the app.
       - name: Licence-compatible linking
         run: |
           nix develop --command bash scripts/check-licences.sh \

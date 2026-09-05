@@ -414,28 +414,31 @@ void TestSettings::theShippedTableIsEmptyAndThatIsTheCorrectAnswer()
 
 void TestSettings::aFreshInstallReadsTheDocumentedDefaults()
 {
-    // A Settings with nothing stored. Read through a second QSettings on an
-    // identity of its own rather than by deleting the singleton's file, because
-    // the singleton is already open on it.
-    QTemporaryDir dir;
-    QVERIFY(dir.isValid());
-
-    QSettings fresh(dir.path() + QStringLiteral("/fresh.conf"), QSettings::IniFormat);
-    QVERIFY(fresh.allKeys().isEmpty());
-
-    // The three defaults with an argument behind them, each asserted against
-    // the value its own header names:
+    // Through the object that reads them, on a store with nothing in it.
     //
-    //   appearance "system"   follow the desktop until told otherwise
-    //   dynamicBackground on  "which is what this app has always done"
-    //   clockFormat "12h"     app/viewmodels/timeformat.h carries the argument
-    //
-    // Read from the live Settings after clearing those keys, which is the code
-    // path a fresh install actually takes.
+    // This used to build a QSettings on a QTemporaryDir, assert it was empty,
+    // and then never use it again — the three assertions below read the live
+    // singleton, whose init() had just written every value they checked. So it
+    // asserted what the test itself had set, and went on passing when the
+    // clock's default stopped being a constant. An empty file and a reload is
+    // what makes "what does a fresh install read?" a question this can ask.
     Settings *settings = Settings::instance();
+
+    QVERIFY(writeFile(settings->filePath(), QByteArray()));
+    settings->reloadFromDisk();
+
     QCOMPARE(settings->appearance(), QStringLiteral("system"));
     QCOMPARE(settings->dynamicBackground(), true);
-    QCOMPARE(settings->clockFormat(), QStringLiteral("12h"));
+    QCOMPARE(settings->alertNotifications(), false);
+
+    // The clock is deliberately not here: it follows the reader's locale now,
+    // and aFreshInstallTakesItsClockFromTheLocale drives both answers.
+    QCOMPARE(settings->temperatureUnit(), QStringLiteral("celsius"));
+    QCOMPARE(settings->windUnit(), QStringLiteral("kmh"));
+    QCOMPARE(settings->pressureUnit(), QStringLiteral("hpa"));
+    QCOMPARE(settings->visibilityUnit(), QStringLiteral("km"));
+    QCOMPARE(settings->precipitationUnit(), QStringLiteral("mm"));
+    QCOMPARE(settings->acknowledgedAlerts(), QStringList());
 }
 
 void TestSettings::anAbsentWindowSizeIsReportedAsAbsentRatherThanAsZero()
@@ -763,6 +766,25 @@ void TestSettings::aFreshInstallTakesItsClockFromTheLocale()
 
     QLocale::setDefault(QLocale(QLocale::German, QLocale::Germany));
     QCOMPARE(clima::settingskeys::defaultClockFormat(), QStringLiteral("24h"));
+
+    // And through Settings, on a store with the key ABSENT, which is the wiring
+    // rather than the constant. Without this the case passes against
+    // `load(key::clockFormat, "12h")` — the exact regression it is named for —
+    // because init() writes 12h before every test and the assertions above
+    // never touch the object that reads it.
+    Settings *settings = Settings::instance();
+
+    QLocale::setDefault(QLocale(QLocale::French, QLocale::France));
+    QVERIFY(writeFile(settings->filePath(),
+                      QByteArrayLiteral("[units]\ntemperature=celsius\n")));
+    settings->reloadFromDisk();
+    QCOMPARE(settings->clockFormat(), QStringLiteral("24h"));
+
+    QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
+    QVERIFY(writeFile(settings->filePath(),
+                      QByteArrayLiteral("[units]\ntemperature=celsius\n")));
+    settings->reloadFromDisk();
+    QCOMPARE(settings->clockFormat(), QStringLiteral("12h"));
 
     // And back to the one every capture and every other case in this file runs
     // under, so nothing after this inherits a French clock.

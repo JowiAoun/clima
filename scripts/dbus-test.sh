@@ -71,6 +71,11 @@ scratch="$(mktemp -d)"
 # cleanup is explicit and the exit status is carried by hand instead.
 cleanup() { rm -rf "$scratch"; }
 
+# Both: the trap covers this script being killed — a ctest timeout, a Ctrl-C —
+# and the explicit call at the end covers the ordinary path. `rm -rf` on a
+# directory already gone is silent, so running twice costs nothing.
+trap cleanup EXIT
+
 # Empty, and existing: a directory the bus can scan and find nothing in.
 mkdir -p "$scratch/data/dbus-1/services" "$scratch/config" "$scratch/cache" "$scratch/runtime"
 chmod 700 "$scratch/runtime"
