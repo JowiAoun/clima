@@ -51,14 +51,38 @@
 // teaches people to ignore banners.
 //
 // ============================================================================
+// WHAT IS WORTH INTERRUPTING SOMEBODY FOR
+//
+// A notification goes out for a hazard the reader has not been told about, and
+// only while the window is hidden — the banner is already on the screen
+// otherwise, and a desktop notification for something two centimetres away is
+// noise. `announced` carries every one, so the policy is testable without a
+// desktop; app/platform/notifier.h carries it to one.
+//
+// Re-announcement follows exactly the rule dismissal follows, and for the same
+// reason: NWS re-sends an alert in full under a new id on every update, so
+// identity is the hazard rather than the message, and a grade that has not
+// risen is not news. Higher severity re-announces and replaces; the same or
+// lower does nothing. A hazard that stops being displayable is withdrawn.
+//
+// ============================================================================
 // THE POLL SCHEDULE, AND WHAT IT ACTUALLY COSTS
 //
 // docs/04-architecture.md §4.5: three minutes in the foreground. Then:
 //
 //     visible and focused      3 min
 //     visible, not focused    10 min
-//     hidden                  stopped
+//     hidden                  stopped — unless notifications are on
+//     hidden, notifying       15 min
 //     metered                 15 min
+//
+// The fourth line is §4.5's own exception — "no background polling while the
+// window is hidden *unless the user enabled alert notifications*" — and it is
+// what makes the notification worth having. A warning that only arrives while
+// the reader is already looking at the banner is not a warning, and stopping
+// the poll for a window somebody asked to be interrupted from would be
+// answering a question they did not ask. Off by default, so the schedule above
+// is what almost every run does.
 //
 // The plan estimated ~264 KB/day. That assumed both services revalidate, and
 // only one does: api.weather.gov sends an ETag and most of its polls come back
@@ -76,6 +100,7 @@
 #include "libclima/domain/alert.h"
 
 #include <QDateTime>
+#include <QHash>
 #include <QObject>
 #include <QQmlEngine>
 #include <QString>
@@ -88,6 +113,7 @@ namespace clima {
 class Clock;
 }
 
+class Notifier;
 class Settings;
 
 class AlertsData : public QObject
@@ -181,6 +207,10 @@ public:
     // Expand it again. The user asking to see it is always allowed.
     Q_INVOKABLE void reveal();
 
+    // Where an announcement goes. Not owned: the app hands in one Notifier for
+    // the process, and a test hands in nothing and watches `announced`.
+    void setNotifier(Notifier *notifier);
+
     // How the QML says what state the window is in, which is what decides the
     // poll interval. Pushed rather than read, because a view model that reached
     // for a QWindow would be a view model that cannot be tested without one.
@@ -194,6 +224,11 @@ public:
 Q_SIGNALS:
     void changed();
 
+    // One per hazard actually announced, with the grade it was announced at.
+    // The policy above, made observable — tst_alertsdata asserts against this
+    // and needs no session bus to do it.
+    void announced(const QString &key, const QString &severityKey);
+
     // Time to ask again. AppEngine connects this; this class does not know what
     // a provider is.
     void refreshRequested();
@@ -206,6 +241,11 @@ private:
     void rebuild();
 
     void reschedule();
+
+    // Posts for what is newly worth posting for, withdraws what has ended.
+    // Called from rebuild(), which is the one place that knows what is
+    // displayable at this minute.
+    void announce(const QList<clima::Alert> &shown);
 
     [[nodiscard]] QVariantMap toVariant(const clima::Alert &alert) const;
     [[nodiscard]] QDateTime   now() const;
@@ -242,4 +282,12 @@ private:
     QTimer m_poll;
     bool   m_visible = true;
     bool   m_focused = true;
+
+    Notifier *m_notifier = nullptr;
+
+    // Hazard key -> the grade it was announced at. The same shape the
+    // acknowledgement store has, and for the same reason; kept in memory only,
+    // because a notification that survived a restart would be a notification
+    // for something the reader has already been shown.
+    QHash<QString, clima::AlertSeverity> m_announced;
 };

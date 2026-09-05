@@ -89,6 +89,30 @@ PrefGroup {
     // that reads the key, and it reaches every clock in the app and in the
     // widgets — the hour axis, the hourly list, the observation stamp, both sun
     // and moon readings, the nine body sentences and the alert banner.
+    // ---- the interruption ---------------------------------------------------
+    //
+    // Hidden entirely where there is nothing to post to — a build with no Qt
+    // D-Bus, or a session with no bus — because a switch that cannot do
+    // anything is worse than an absent one: it teaches the reader that the
+    // preferences lie. `Engine.notificationsAvailable` is the same question
+    // Notifier::available() answers.
+    //
+    // The subtitle says what it costs, because it is the only preference here
+    // that changes what the app does when nobody is looking at it. A reader
+    // who is on a metered connection deserves to know that before they tap.
+    PrefRow {
+        title: qsTr("Warn me about severe weather")
+        subtitle: qsTr("A desktop notification when a warning arrives and Clima is not "
+                       + "on screen. Checks every 15 minutes while it is hidden.")
+        visible: Engine.notificationsAvailable
+        height: visible ? implicitHeight : 0
+        control: PrefSwitch {
+            checked: Settings.alertNotifications
+            onToggled: Settings.alertNotifications = !Settings.alertNotifications
+        }
+        onActivated: Settings.alertNotifications = !Settings.alertNotifications
+    }
+
     PrefRow {
         title: qsTr("Time format")
         subtitle: qsTr("Used everywhere a time appears, including the desktop widgets.")

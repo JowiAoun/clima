@@ -4,6 +4,7 @@
 #include "appengine.h"
 
 #include "alertsdata.h"
+#include "notifier.h"
 #include "conditionsdata.h"
 #include "forecastdata.h"
 
@@ -240,6 +241,15 @@ void AppEngine::configure(const QString &fixtureName)
     // against the wrong `now` otherwise.
     m_alerts->setClock(m_clock.get());
     m_alerts->setSettings(Settings::instance());
+
+    // The one notifier in the process. Built here rather than by AlertsData so
+    // that the view model can be tested without a session bus — it takes one
+    // or it takes none, and with none it still emits `announced`.
+    if (Notifier::available()) {
+        if (m_notifier == nullptr)
+            m_notifier = new Notifier(this);
+        m_alerts->setNotifier(m_notifier);
+    }
 
     if (isFixtureMode())
         buildFixtureProviders();
@@ -720,6 +730,11 @@ void AppEngine::toggleHome(int row)
 {
     if (m_places != nullptr)
         m_places->toggleHome(row);
+}
+
+bool AppEngine::notificationsAvailable() const
+{
+    return Notifier::available();
 }
 
 bool AppEngine::locationAvailable() const

@@ -240,6 +240,14 @@ set(clima_cpp_sources
     # Qt6::DBus is absent, and QStyleHints still answers the colour question.
     platform/systemappearance.h
     platform/systemappearance.cpp
+
+    # A warning for the reader who is not looking at the window. Not a
+    # QML_ELEMENT — nothing in QML constructs one; AlertsData owns the only
+    # instance and decides what is worth interrupting somebody for. Here
+    # rather than beside it because it is a platform service, like the one
+    # above, and its D-Bus half compiles out the same way.
+    platform/notifier.h
+    platform/notifier.cpp
 )
 
 # ---- the typeface -----------------------------------------------------------

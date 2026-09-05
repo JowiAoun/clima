@@ -77,6 +77,7 @@
 #include <memory>
 
 class AlertsData;
+class Notifier;
 class ConditionsData;
 class ForecastData;
 
@@ -150,6 +151,13 @@ class AppEngine : public QObject
     // ---- who answered ------------------------------------------------------
     Q_PROPERTY(QString sourceName READ sourceName NOTIFY forecastChanged)
     Q_PROPERTY(bool fromFallback READ isFromFallback NOTIFY forecastChanged)
+
+    // Whether a desktop notification can be posted at all: this build has Qt
+    // D-Bus and there is a session bus. CONSTANT because neither answer
+    // changes while the process runs. The preferences row is hidden when it is
+    // false — a switch that cannot do anything teaches the reader that the
+    // preferences lie.
+    Q_PROPERTY(bool notificationsAvailable READ notificationsAvailable CONSTANT)
 
     // ---- what this build is doing ------------------------------------------
     Q_PROPERTY(bool fixtureMode READ isFixtureMode CONSTANT)
@@ -245,6 +253,8 @@ public:
     Q_INVOKABLE void useMyLocation();
 
     [[nodiscard]] Q_INVOKABLE bool locationAvailable() const;
+
+    [[nodiscard]] bool notificationsAvailable() const;
 
     // For the C++ side of the app: the current snapshot, canonical units.
     [[nodiscard]] const clima::Forecast   &forecast() const { return m_forecast; }
@@ -356,4 +366,8 @@ private:
     // schedule, which is why it owns its own poll timer rather than riding this
     // class's refresh.
     AlertsData *m_alerts = nullptr;
+
+    // One per process, handed to AlertsData, which decides what is worth
+    // interrupting somebody for. Parented to this; nothing else posts.
+    Notifier *m_notifier = nullptr;
 };

@@ -25,6 +25,7 @@ const auto appearance        = QStringLiteral("appearance");
 // whole reason this app forces INI in the first place.
 const auto dynamicBackground = QStringLiteral("background/dynamic");
 const auto clockFormat       = QStringLiteral("time/format");
+const auto alertNotifications = QStringLiteral("alerts/notify");
 const auto windowWidth       = QStringLiteral("window/width");
 const auto windowHeight      = QStringLiteral("window/height");
 const auto windowX           = QStringLiteral("window/x");
@@ -247,6 +248,7 @@ Settings::Values Settings::currentValues() const
     values.appearance        = appearance();
     values.dynamicBackground = dynamicBackground();
     values.clockFormat       = clockFormat();
+    values.alertNotifications = alertNotifications();
     values.windowWidth       = windowWidth();
     values.windowHeight      = windowHeight();
     values.windowX           = windowX();
@@ -286,6 +288,8 @@ void Settings::reloadFromDisk()
         Q_EMIT dynamicBackgroundChanged();
     if (before.clockFormat != after.clockFormat)
         Q_EMIT clockFormatChanged();
+    if (before.alertNotifications != after.alertNotifications)
+        Q_EMIT alertNotificationsChanged();
     if (before.windowWidth != after.windowWidth || before.windowHeight != after.windowHeight
         || before.windowX != after.windowX || before.windowY != after.windowY)
         Q_EMIT windowGeometryChanged();
@@ -386,6 +390,19 @@ void Settings::setClockFormat(const QString &value)
     if (store(key::clockFormat, value == QLatin1String("24h") ? QStringLiteral("24h")
                                                               : QStringLiteral("12h")))
         Q_EMIT clockFormatChanged();
+}
+
+// ---- the warnings that interrupt --------------------------------------------
+
+bool Settings::alertNotifications() const
+{
+    return load(key::alertNotifications, false).toBool();
+}
+
+void Settings::setAlertNotifications(bool value)
+{
+    if (store(key::alertNotifications, value))
+        Q_EMIT alertNotificationsChanged();
 }
 
 // ---- window geometry --------------------------------------------------------

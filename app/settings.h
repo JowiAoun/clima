@@ -89,6 +89,15 @@ class Settings : public QObject
     Q_PROPERTY(int  windowY      READ windowY      WRITE setWindowY      NOTIFY windowGeometryChanged)
     Q_PROPERTY(bool hasWindowSize READ hasWindowSize NOTIFY windowGeometryChanged)
 
+    // Whether a warning interrupts the reader when they are not looking at the
+    // window. Off by default and deliberately: it is the one preference here
+    // that changes what this process does when nobody is watching it — see
+    // app/viewmodels/alertsdata.h on the poll schedule — and a weather app that
+    // started notifying without being asked is one people turn off once and
+    // never turn on again.
+    Q_PROPERTY(bool alertNotifications READ alertNotifications WRITE setAlertNotifications
+                   NOTIFY alertNotificationsChanged)
+
     // Per quantity, never bundled. Values are the spellings libclima's unit
     // conversion will take, lowercase and unpunctuated so they are safe in an
     // INI file and in a URL query string.
@@ -158,6 +167,9 @@ public:
     QString clockFormat() const;
     void    setClockFormat(const QString &value);
 
+    bool alertNotifications() const;
+    void setAlertNotifications(bool value);
+
     int  windowWidth() const;
     void setWindowWidth(int value);
     int  windowHeight() const;
@@ -191,6 +203,7 @@ Q_SIGNALS:
     void appearanceChanged();
     void dynamicBackgroundChanged();
     void clockFormatChanged();
+    void alertNotificationsChanged();
     void windowGeometryChanged();
     void temperatureUnitChanged();
     void windUnitChanged();
@@ -223,6 +236,7 @@ private:
         QString     appearance;
         bool        dynamicBackground = true;
         QString     clockFormat;
+        bool        alertNotifications = false;
         int         windowWidth  = 0;
         int         windowHeight = 0;
         int         windowX      = 0;

@@ -3,11 +3,13 @@
 
 #include "app/viewmodels/alertsdata.h"
 
+#include "app/platform/notifier.h"
 #include "app/settings.h"
 #include "app/viewmodels/timeformat.h"
 #include "libclima/core/clock.h"
 
 #include <QLocale>
+#include <QSet>
 
 #if __has_include(<QNetworkInformation>)
 #    include <QNetworkInformation>
@@ -26,6 +28,12 @@ constexpr int kTickMs = 60 * 1000;
 constexpr int kPollActiveMs  = 3 * 60 * 1000;
 constexpr int kPollIdleMs    = 10 * 60 * 1000;
 constexpr int kPollMeteredMs = 15 * 60 * 1000;
+
+// A hidden window that somebody asked to be interrupted from. The same
+// fifteen minutes a metered connection gets, because the two are the same
+// judgement: keep the feature alive at the lowest rate that still makes it
+// true. docs/04-architecture.md §4.5's exception, and alertsdata.h's schedule.
+constexpr int kPollHiddenNotifyingMs = 15 * 60 * 1000;
 
 // The separator inside one stored acknowledgement. A unit separator rather than
 // a comma or a pipe, because the key it has to survive is an NWS URN — colons,
@@ -120,10 +128,24 @@ void AlertsData::setClock(Clock *clock)
     m_clock = clock;
 }
 
+void AlertsData::setNotifier(Notifier *notifier)
+{
+    m_notifier = notifier;
+}
+
 void AlertsData::setSettings(Settings *settings)
 {
     m_settings = settings;
     loadAcknowledgements();
+
+    // Switching notifications on is what starts a hidden window polling again,
+    // and off is what stops it. Without this the change would take effect the
+    // next time the window was shown and hidden, which is a preference that
+    // appears not to work.
+    if (m_settings != nullptr) {
+        connect(m_settings, &Settings::alertNotificationsChanged, this,
+                &AlertsData::reschedule, Qt::UniqueConnection);
+    }
 }
 
 QDateTime AlertsData::now() const
@@ -193,7 +215,83 @@ void AlertsData::rebuild()
     // handful of maps and this runs once a minute; a diff here would be an
     // optimisation whose only measurable effect is a place for a bug.
     m_list = built;
+    announce(shown);
     Q_EMIT changed();
+}
+
+// ---- what is worth interrupting somebody for ------------------------------------
+
+void AlertsData::announce(const QList<Alert> &shown)
+{
+    // The preference first, and it gates the bookkeeping as well as the
+    // posting. rebuild() runs every minute whether or not anything was
+    // fetched — that is what makes an alert leave the screen when its hazard
+    // ends — so a hazard reaching its onset under a hidden window would
+    // otherwise announce itself with the switch turned off, having never been
+    // polled for at all.
+    //
+    // Turning it off takes down what is already up, rather than leaving a
+    // notification the reader can no longer explain.
+    if (m_settings == nullptr || !m_settings->alertNotifications()) {
+        for (auto it = m_announced.cbegin(); it != m_announced.cend(); ++it) {
+            if (m_notifier != nullptr)
+                m_notifier->withdraw(it.key());
+        }
+        m_announced.clear();
+        return;
+    }
+
+    // Everything still on the screen, so that what has gone can be withdrawn.
+    QSet<QString> standing;
+
+    for (const Alert &alert : shown) {
+        // The hazard, not the message. identityKeys() is a list because an
+        // alert may be recognised by several — the first is the one this
+        // keys on, and isSameHazard() is what made them a list.
+        if (alert.identityKeys.isEmpty())
+            continue;
+        const QString key = alert.identityKeys.constFirst();
+        standing.insert(key);
+
+        // Only for a reader who cannot see the banner. A notification for
+        // something already on the screen in front of them is noise, and the
+        // whole point of the poll exception above is the window nobody is
+        // looking at.
+        if (m_visible)
+            continue;
+
+        const auto seen = m_announced.constFind(key);
+        if (seen != m_announced.cend() && alert.severity <= seen.value())
+            continue;
+
+        m_announced.insert(key, alert.severity);
+        Q_EMIT announced(key, alertSeverityKey(alert.severity));
+
+        if (m_notifier == nullptr)
+            continue;
+
+        // The banner's own two lines: what it is, and until when. Not the
+        // description — a notification is a summons to look, and CAP
+        // descriptions run to paragraphs.
+        const QVariantMap shape = toVariant(alert);
+        m_notifier->notify(key, alert.event, shape.value(QStringLiteral("when")).toString(),
+                           alert.severity == AlertSeverity::Extreme ? Notifier::Priority::Urgent
+                           : alert.severity == AlertSeverity::Severe ? Notifier::Priority::High
+                                                                     : Notifier::Priority::Normal);
+    }
+
+    // A hazard that has ended, or that this place no longer has, takes its
+    // notification with it. The reader should not have to dismiss a warning
+    // about weather that is over.
+    for (auto it = m_announced.begin(); it != m_announced.end();) {
+        if (standing.contains(it.key())) {
+            ++it;
+            continue;
+        }
+        if (m_notifier != nullptr)
+            m_notifier->withdraw(it.key());
+        it = m_announced.erase(it);
+    }
 }
 
 QVariantMap AlertsData::top() const
@@ -442,8 +540,15 @@ int AlertsData::pollIntervalMs() const
     // Hidden means stopped, and this is the line that makes the bandwidth
     // arithmetic in the header come out. A window nobody is looking at does not
     // need a three-minute poll, and Canada's half of it cannot be revalidated.
-    if (!m_visible)
-        return 0;
+    //
+    // Unless the reader asked to be interrupted, which is §4.5's own exception
+    // and the only thing that makes a notification worth having: a warning
+    // that arrives only while the banner is already on screen is not a
+    // warning. Fifteen minutes, the slowest rate that keeps it true.
+    if (!m_visible) {
+        const bool notifying = m_settings != nullptr && m_settings->alertNotifications();
+        return notifying ? kPollHiddenNotifyingMs : 0;
+    }
 
     if (metered())
         return kPollMeteredMs;

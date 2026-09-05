@@ -169,6 +169,14 @@ private Q_SLOTS:
     // ---- the schedule ---------------------------------------------------------
     void theScheduleIsTheOneInTheArchitectureDocument_data();
     void theScheduleIsTheOneInTheArchitectureDocument();
+    void aHiddenWindowKeepsPollingWhenItWasAskedToInterrupt();
+
+    // ---- what is worth interrupting somebody for -------------------------
+    void nothingIsAnnouncedWhileTheBannerIsOnScreen();
+    void aHiddenWindowAnnouncesAHazardTheReaderHasNotSeen();
+    void anUpdateAtTheSameGradeIsNotAnnouncedTwice();
+    void aRaiseInSeverityIsAnnouncedAgain();
+    void nothingIsAnnouncedWithThePreferenceOff();
     void aHiddenWindowStopsPollingAltogether();
     void aPlaceWithNoCoverageIsNotPolled();
 
@@ -203,15 +211,26 @@ void TestAlertsData::init()
     // dismissals — which passes or fails depending on which order QTest happens
     // to run the slots in, and that is the worst kind of test to debug.
     Settings::instance()->setAcknowledgedAlerts({});
+
+    // Off, and before setSettings: it gates the announcements, and a case that
+    // inherited it from the one before would announce or stay silent depending
+    // on the order QTest happened to run the slots in.
+    Settings::instance()->setAlertNotifications(false);
+
     m_alerts->setSettings(Settings::instance());
     m_alerts->setRefreshFailed(false);
     m_alerts->setWindowState(true, true);
+
+    // With the preference off this also empties what has been announced, so no
+    // case starts holding the previous one's notifications.
     m_alerts->clear(false);
 }
 
 void TestAlertsData::cleanup()
 {
     Settings::instance()->setAcknowledgedAlerts({});
+    Settings::instance()->setAlertNotifications(false);
+    m_alerts->setWindowState(true, true);
     m_alerts->clear(false);
 }
 
@@ -745,6 +764,114 @@ void TestAlertsData::aPlaceWithNoCoverageIsNotPolled()
     // and that the model reports an unavailable place.
     QVERIFY(!m_alerts->isAvailable());
     QCOMPARE(refreshes.count(), 0);
+}
+
+void TestAlertsData::aHiddenWindowKeepsPollingWhenItWasAskedToInterrupt()
+{
+    // §4.5's own exception, and the thing that makes a notification worth
+    // having: a warning that only ever arrives while the reader is already
+    // looking at the banner is not a warning. Fifteen minutes — the slowest
+    // rate that keeps the feature true.
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    m_alerts->setWindowState(false, false);
+    QCOMPARE(m_alerts->pollIntervalMs(), 0);
+
+    Settings::instance()->setAlertNotifications(true);
+    QCOMPARE(m_alerts->pollIntervalMs(), 15 * 60 * 1000);
+
+    // And a visible window is unaffected: the preference buys a floor under a
+    // hidden one, not a different schedule for everybody.
+    m_alerts->setWindowState(true, true);
+    QCOMPARE(m_alerts->pollIntervalMs(), 3 * 60 * 1000);
+}
+
+// ============================================================================
+// What is worth interrupting somebody for.
+//
+// The POLICY, asserted through `announced` — which is why that signal exists.
+// Whether a notification reaches a desktop is tst_notifier's question and needs
+// a session bus; whether one should be posted at all is this file's, and needs
+// nothing.
+// ============================================================================
+
+void TestAlertsData::nothingIsAnnouncedWhileTheBannerIsOnScreen()
+{
+    Settings::instance()->setAlertNotifications(true);
+    QSignalSpy announced(m_alerts, &AlertsData::announced);
+
+    m_alerts->setWindowState(true, true);
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    // The banner is right there. A desktop notification for something two
+    // centimetres away is noise.
+    QCOMPARE(announced.count(), 0);
+}
+
+void TestAlertsData::aHiddenWindowAnnouncesAHazardTheReaderHasNotSeen()
+{
+    Settings::instance()->setAlertNotifications(true);
+    QSignalSpy announced(m_alerts, &AlertsData::announced);
+
+    m_alerts->setWindowState(false, false);
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    QCOMPARE(announced.count(), 1);
+    QCOMPARE(announced.constFirst().at(0).toString(),
+             QStringLiteral("nws:siskiyou:heat-advisory"));
+    QCOMPARE(announced.constFirst().at(1).toString(), QStringLiteral("moderate"));
+}
+
+void TestAlertsData::anUpdateAtTheSameGradeIsNotAnnouncedTwice()
+{
+    Settings::instance()->setAlertNotifications(true);
+    m_alerts->setWindowState(false, false);
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    QSignalSpy announced(m_alerts, &AlertsData::announced);
+
+    // NWS re-sends an alert in full under a new id on every update — 24 of the
+    // 25 alerts in force in California on the recording afternoon were
+    // updates. Identity is the hazard, so this is not news.
+    Alert again = heatAdvisory();
+    again.id = QStringLiteral("urn:oid:siskiyou.001.2");
+    m_alerts->apply(setOf({ again }, at(6, 30)));
+
+    QCOMPARE(announced.count(), 0);
+}
+
+void TestAlertsData::aRaiseInSeverityIsAnnouncedAgain()
+{
+    Settings::instance()->setAlertNotifications(true);
+    m_alerts->setWindowState(false, false);
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    QSignalSpy announced(m_alerts, &AlertsData::announced);
+
+    // The same hazard, graded worse. That is news, and it replaces rather than
+    // stacks — the same rule the banner's dismissal follows.
+    Alert worse   = heatAdvisory();
+    worse.id       = QStringLiteral("urn:oid:siskiyou.001.3");
+    worse.severity = AlertSeverity::Extreme;
+    m_alerts->apply(setOf({ worse }, at(6, 30)));
+
+    QCOMPARE(announced.count(), 1);
+    QCOMPARE(announced.constFirst().at(1).toString(), QStringLiteral("extreme"));
+}
+
+void TestAlertsData::nothingIsAnnouncedWithThePreferenceOff()
+{
+    // The default, and the case that was wrong first: rebuild() runs every
+    // minute whether or not anything was fetched, so a hazard reaching its
+    // onset under a hidden window announced itself with the switch off and
+    // with nothing having polled for it at all.
+    Settings::instance()->setAlertNotifications(false);
+    QSignalSpy announced(m_alerts, &AlertsData::announced);
+
+    m_alerts->setWindowState(false, false);
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    QCOMPARE(announced.count(), 0);
 }
 
 QTEST_MAIN(TestAlertsData)

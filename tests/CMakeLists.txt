@@ -127,6 +127,32 @@ if(TARGET climawidgetsqml)
     )
 endif()
 
+# ---- the notifications, against a desktop of our own -------------------------
+#
+# Same arrangement and the same gate as tst_portallocator: the test owns
+# org.freedesktop.portal.Desktop and org.freedesktop.Notifications on a bus
+# dbus-run-session started for it. It links climaqml because Notifier is
+# compiled into the app's module, so clima_forbid_gui() is deliberately not
+# applied — the thing under test lives in a binary that draws.
+if(TARGET Qt6::DBus AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_executable(tst_notifier tst_notifier.cpp)
+
+    target_link_libraries(tst_notifier PRIVATE climaqml clima_testsupport Qt6::Test Qt6::DBus)
+    target_compile_definitions(tst_notifier PRIVATE
+        CLIMA_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+    )
+
+    if(CLIMA_DBUS_RUN_SESSION)
+        add_test(NAME tst_notifier
+            COMMAND ${CMAKE_SOURCE_DIR}/scripts/dbus-test.sh $<TARGET_FILE:tst_notifier>
+        )
+        set_tests_properties(tst_notifier PROPERTIES
+            ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
+            TIMEOUT 120
+        )
+    endif()
+endif()
+
 # ---- the daemon's service, without the bus -----------------------------------
 #
 # Registered by hand rather than through clima_add_test() because it links the
