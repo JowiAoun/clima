@@ -277,9 +277,15 @@ Window {
         // which apply during this object's completion and so are in force
         // before the first frame — and, unlike the assignments they replaced,
         // stay in force when the desktop changes underneath them.
-        // The poll schedule's starting state. The two handlers above only fire
-        // on a change, and a window that opens exposed and active has not had
-        // one yet.
+        // The poll schedule's starting state, belt and braces.
+        //
+        // `onExposedChanged` does in fact fire during this window's own
+        // completion, before this line runs — measured, against the offscreen
+        // platform, after an earlier version of this comment claimed otherwise
+        // — so on this Qt the push has already happened. It is kept because
+        // that is a property of when Qt happens to evaluate the binding rather
+        // than a promise, and the cost of being wrong about it is a poll that
+        // never starts.
         Alerts.setWindowState(win.exposed, win.active)
 
         if (win.geometryRemembered && Settings.hasWindowSize) {

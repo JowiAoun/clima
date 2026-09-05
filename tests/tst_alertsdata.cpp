@@ -178,9 +178,11 @@ private Q_SLOTS:
     void nothingIsAnnouncedWhileTheBannerIsOnScreen();
     void aHiddenWindowAnnouncesAHazardTheReaderHasNotSeen();
     void anUpdateAtTheSameGradeIsNotAnnouncedTwice();
+    void anNwsUpdateChainIsOneHazardAllTheWayDown();
     void aRaiseInSeverityIsAnnouncedAgain();
     void nothingIsAnnouncedWithThePreferenceOff();
     void showingTheWindowTakesTheNotificationDown();
+    void aWarningTheReaderWasLookingAtIsNotAnnouncedOnMinimising();
     void aHazardThatEndsTakesItsNotificationWithIt();
     void aHiddenWindowStopsPollingAltogether();
     void aPlaceWithNoCoverageIsNotPolled();
@@ -897,6 +899,57 @@ void TestAlertsData::anUpdateAtTheSameGradeIsNotAnnouncedTwice()
     QCOMPARE(announced.count(), 0);
 }
 
+void TestAlertsData::anNwsUpdateChainIsOneHazardAllTheWayDown()
+{
+    // The shape NWS actually sends, which the helper above cannot express: an
+    // update carries its OWN id first and the one id it replaces second, so
+    // identityKeys is a two-element chain one hop long. Every recorded NWS
+    // fixture in this repository has references of length 1, and
+    // tst_alertproviders pins identityKeys.size() == 2.
+    //
+    // Recognising that chain takes two things and the first version of this
+    // fix did only one. Looking the incoming keys up in what has been
+    // announced is necessary; RECORDING every one of them is what makes the
+    // next hop match. Keyed on one, k1 -> [k2,k1] -> [k3,k2] recognises the
+    // second message and not the third, and a long-running warning
+    // re-interrupts the reader on every other update.
+    const auto message = [](const QString &own, const QString &replaces) {
+        Alert alert        = heatAdvisory();
+        alert.id           = own;
+        alert.identityKeys = replaces.isEmpty() ? QStringList{ own }
+                                                : QStringList{ own, replaces };
+        return alert;
+    };
+
+    Settings::instance()->setAlertNotifications(true);
+    m_alerts->setWindowState(false, false);
+
+    QSignalSpy announced(m_alerts, &AlertsData::announced);
+
+    m_alerts->apply(setOf({ message(QStringLiteral("k1"), QString()) }, at(6, 0)));
+    QCOMPARE(announced.count(), 1);
+
+    // Four updates, none of them news. Without every key recorded, the third
+    // and the fifth announce again.
+    m_alerts->apply(setOf({ message(QStringLiteral("k2"), QStringLiteral("k1")) }, at(6, 0, 15)));
+    m_alerts->apply(setOf({ message(QStringLiteral("k3"), QStringLiteral("k2")) }, at(6, 0, 30)));
+    m_alerts->apply(setOf({ message(QStringLiteral("k4"), QStringLiteral("k3")) }, at(6, 0, 45)));
+    m_alerts->apply(setOf({ message(QStringLiteral("k5"), QStringLiteral("k4")) }, at(6, 0, 50)));
+
+    QCOMPARE(announced.count(), 1);
+
+    // And the notification stays addressed to the key it was posted under, so
+    // the update that finally raises the grade replaces it rather than opening
+    // a second one beside it.
+    Alert worse        = message(QStringLiteral("k6"), QStringLiteral("k5"));
+    worse.severity     = AlertSeverity::Extreme;
+    m_alerts->apply(setOf({ worse }, at(6, 0, 55)));
+
+    QCOMPARE(announced.count(), 2);
+    QCOMPARE(announced.at(1).at(0).toString(), announced.at(0).at(0).toString());
+    QCOMPARE(announced.at(1).at(1).toString(), QStringLiteral("extreme"));
+}
+
 void TestAlertsData::aRaiseInSeverityIsAnnouncedAgain()
 {
     Settings::instance()->setAlertNotifications(true);
@@ -950,6 +1003,26 @@ void TestAlertsData::showingTheWindowTakesTheNotificationDown()
              QStringLiteral("nws:siskiyou:heat-advisory"));
 
     // Hidden again: still nothing new to say.
+    m_alerts->setWindowState(false, false);
+    QCOMPARE(announced.count(), 0);
+}
+
+void TestAlertsData::aWarningTheReaderWasLookingAtIsNotAnnouncedOnMinimising()
+{
+    // Minimising must not fire a notification for every warning the reader was
+    // just reading. Announcing is gated on the window being hidden, so a
+    // hazard that stood only while it was visible would otherwise be "new" the
+    // instant it was hidden — which is what running the announcement pass on
+    // the visibility change made possible.
+    //
+    // The answer is that a hazard on the banner is RECORDED as told without
+    // being posted. This is the case that says so.
+    Settings::instance()->setAlertNotifications(true);
+    m_alerts->setWindowState(true, true);
+    m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
+
+    QSignalSpy announced(m_alerts, &AlertsData::announced);
+
     m_alerts->setWindowState(false, false);
     QCOMPARE(announced.count(), 0);
 }

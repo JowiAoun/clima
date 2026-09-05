@@ -296,11 +296,26 @@ private:
 
     Notifier *m_notifier = nullptr;
 
-    // Hazard key -> the grade it was announced at. The same shape the
-    // acknowledgement store has, and for the same reason; kept in memory only,
-    // because a notification that survived a restart would be a notification
-    // for something the reader has already been shown.
-    QHash<QString, clima::AlertSeverity> m_announced;
+    // What one hazard's announcement remembers. Held against EVERY key the
+    // hazard answers to, so an update that leads with a new message id still
+    // finds it — NWS re-sends under a new id and carries only the id it
+    // replaces, so the keys form a chain one hop long and a record kept
+    // against a single key goes stale after two.
+    struct Announcement {
+        // The key the notification was actually posted under. Every later
+        // update addresses that one, so the desktop replaces the popup on
+        // screen rather than opening a second beside it. Re-derived from the
+        // incoming keys it would drift down the chain, which is a fresh
+        // notification for a hazard the reader has already been told about.
+        QString canonical;
+
+        // And the grade they were told at, which only ever rises.
+        clima::AlertSeverity severity = clima::AlertSeverity::Unknown;
+    };
+
+    // Kept in memory only, because a notification that survived a restart
+    // would be a notification for something the reader has already been shown.
+    QHash<QString, Announcement> m_announced;
 
     // And which of those are on the screen right now, which is not the same
     // list. Showing the window takes the notifications down — the banner is

@@ -11,6 +11,8 @@
 #include <QLocale>
 #include <QSet>
 
+#include <algorithm>
+
 #if __has_include(<QNetworkInformation>)
 #    include <QNetworkInformation>
 #    define CLIMA_HAVE_NETWORK_INFORMATION 1
@@ -143,8 +145,14 @@ void AlertsData::setSettings(Settings *settings)
     // next time the window was shown and hidden, which is a preference that
     // appears not to work.
     if (m_settings != nullptr) {
-        connect(m_settings, &Settings::alertNotificationsChanged, this,
-                &AlertsData::reschedule, Qt::UniqueConnection);
+        connect(m_settings, &Settings::alertNotificationsChanged, this, [this]() {
+            reschedule();
+            // And take down, or put up, what the switch has just changed the
+            // answer for. reschedule() alone left a notification on screen
+            // after the reader turned the preference off, until whatever
+            // happened next called rebuild().
+            rebuild();
+        }, Qt::UniqueConnection);
     }
 }
 
@@ -238,54 +246,75 @@ void AlertsData::announce(const QList<Alert> &shown)
         return;
     }
 
-    // The reader is looking at the banner, which says everything a
-    // notification would and says it better. Take them down — but keep
-    // m_announced, or hiding the window again would announce the same hazards
-    // a second time.
-    if (m_visible) {
-        takeDownEverythingPosted();
-        return;
-    }
-
-    // Everything still on the screen, so that what has gone can be withdrawn.
+    // Every key of everything on screen, so that what has gone can be
+    // withdrawn. Every key and not the canonical one: an entry recorded under
+    // an older message id must not be pruned while the hazard it names is
+    // still in force.
     QSet<QString> standing;
 
     for (const Alert &alert : shown) {
-        // The hazard, not the message — and that means INTERSECTING the keys,
-        // the way isAcknowledged() below does, rather than taking the first.
+        // The hazard, not the message. NWS re-sends an alert in full under a
+        // new id on every update and carries the id it replaces in
+        // `references`, so nwsalertprovider builds identityKeys as [own id,
+        // referenced id] — a two-element chain, one hop long.
         //
-        // NWS re-sends an alert in full under a new id on every update, and
-        // nwsalertprovider.cpp builds identityKeys as the message's own id
-        // followed by every id it references. So the first key changes on every
-        // update of one hazard: keyed on it, the severity guard below would
-        // never match, and the reader would be re-interrupted by a fresh
-        // notification for each update — 24 of the 25 alerts in force in
-        // California on the recording afternoon were updates.
-        //
-        // The key already announced wins, so notify() and withdraw() go on
-        // addressing the notification that is actually on screen.
+        // Which means recognising an update takes two things, and the first
+        // version of this did only one of them. Looking the incoming keys up
+        // in what has been announced is necessary; RECORDING every one of them
+        // is what makes the next hop match. Keyed on one, the chain
+        // k1 → [k2,k1] → [k3,k2] recognised the second message and not the
+        // third, because k2 was never written down — so a long-running warning
+        // re-interrupted the reader on every other update instead of every
+        // update. acknowledge() below has always stored an entry per key; this
+        // now does the same.
         if (alert.identityKeys.isEmpty())
             continue;
 
-        QString key;
+        for (const QString &key : alert.identityKeys)
+            standing.insert(key);
+
+        // What this hazard's announcement already knows, found through any of
+        // the keys it answers to. The canonical key is CARRIED rather than
+        // re-derived: picking "the first incoming key that is already known"
+        // walks down the chain — k1, then k1, then k2, then k3 — so the raise
+        // at the end of a long chain addressed a key the notification was
+        // never posted under, and the desktop opened a second popup beside the
+        // first instead of replacing it.
+        QString       canonical;
+        AlertSeverity told  = AlertSeverity::Unknown;
+        bool          known = false;
+
         for (const QString &candidate : alert.identityKeys) {
-            if (m_announced.contains(candidate)) {
-                key = candidate;
+            const auto seen = m_announced.constFind(candidate);
+            if (seen != m_announced.cend()) {
+                canonical = seen->canonical;
+                told      = seen->severity;
+                known     = true;
                 break;
             }
         }
-        if (key.isEmpty())
-            key = alert.identityKeys.constFirst();
+        if (!known)
+            canonical = alert.identityKeys.constFirst();
 
-        standing.insert(key);
+        // The grade the reader has been told about, which only ever goes up: a
+        // downgrade is not news and must not lower the bar for the next raise.
+        const AlertSeverity record = known ? std::max(told, alert.severity) : alert.severity;
+        for (const QString &key : alert.identityKeys)
+            m_announced.insert(key, Announcement{ canonical, record });
 
-        const auto seen = m_announced.constFind(key);
-        if (seen != m_announced.cend() && alert.severity <= seen.value())
+        // Already told, at this grade or worse.
+        if (known && alert.severity <= told)
             continue;
 
-        m_announced.insert(key, alert.severity);
-        m_posted.insert(key);
-        Q_EMIT announced(key, alertSeverityKey(alert.severity));
+        // The reader is looking at the banner, which says everything a
+        // notification would and says it better. Recorded as told all the same
+        // — that is what stops a minimise from firing a notification for every
+        // warning they were just reading.
+        if (m_visible)
+            continue;
+
+        m_posted.insert(canonical);
+        Q_EMIT announced(canonical, alertSeverityKey(alert.severity));
 
         if (m_notifier == nullptr)
             continue;
@@ -294,23 +323,40 @@ void AlertsData::announce(const QList<Alert> &shown)
         // description — a notification is a summons to look, and CAP
         // descriptions run to paragraphs.
         const QVariantMap shape = toVariant(alert);
-        m_notifier->notify(key, alert.event, shape.value(QStringLiteral("when")).toString(),
+        m_notifier->notify(canonical, alert.event,
+                           shape.value(QStringLiteral("when")).toString(),
                            alert.severity == AlertSeverity::Extreme ? Notifier::Priority::Urgent
                            : alert.severity == AlertSeverity::Severe ? Notifier::Priority::High
                                                                      : Notifier::Priority::Normal);
     }
 
+    // And with the window open, nothing stays up: the banner is the better
+    // copy of the same news. m_announced is kept, so hiding it again is quiet.
+    if (m_visible)
+        takeDownEverythingPosted();
+
     // A hazard that has ended, or that this place no longer has, takes its
     // notification with it. The reader should not have to dismiss a warning
     // about weather that is over.
+    //
+    // Collected first and erased before anything is emitted: withdraw() emits
+    // a public signal, and a slot that reached back into this object — any
+    // path to rebuild(), apply(), clear() or acknowledge() — would invalidate
+    // an iterator being held across it.
+    // The CANONICAL keys of what has gone, deduplicated: one hazard holds an
+    // entry per id it answers to, and only one of those was ever posted.
+    QSet<QString> gone;
     for (auto it = m_announced.begin(); it != m_announced.end();) {
         if (standing.contains(it.key())) {
             ++it;
             continue;
         }
-        withdraw(it.key());
+        gone.insert(it->canonical);
         it = m_announced.erase(it);
     }
+
+    for (const QString &key : std::as_const(gone))
+        withdraw(key);
 }
 
 void AlertsData::withdraw(const QString &key)
