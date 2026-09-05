@@ -37,6 +37,16 @@ TestCase {
     }
 
     function test_theWindowPushesItsStateAtStartup() {
+        // The singleton is put somewhere the window has to move it FROM, which
+        // is the whole of this case. AlertsData's own defaults are visible and
+        // focused, so asserting "an open window polls" against a fresh
+        // singleton asserts nothing at all: it passes with the
+        // Component.onCompleted line — the one caller this file exists to
+        // protect — deleted outright. That was the first version of this test,
+        // and it is the same class of bug as the one the branch started from.
+        Alerts.setWindowState(false, false)
+        compare(Alerts.pollIntervalMs(), 0, "the singleton did not start from stopped")
+
         var win = createTemporaryObject(mainComponent, testCase)
         verify(win !== null, "Main did not instantiate")
 
@@ -46,7 +56,8 @@ TestCase {
         // exposed means polling, at one of the two visible rates.
         var interval = Alerts.pollIntervalMs()
         verify(interval === 3 * 60 * 1000 || interval === 10 * 60 * 1000,
-               "an exposed window polls at 3 or 10 minutes, not " + interval)
+               "the window did not push its state at startup — the poll is at "
+               + interval + ", where an exposed window should be at 3 or 10 minutes")
     }
 
     function test_hidingTheWindowStopsThePollAndShowingItResumes() {

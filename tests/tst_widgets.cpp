@@ -32,10 +32,12 @@
 
 #include "daemonlink.h"
 #include "app/settings.h"
+#include "app/settingskeys.h"
 #include "widgetfeed.h"
 #include "wx.h"
 
 #include <QDir>
+#include <QStandardPaths>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -115,6 +117,7 @@ private Q_SLOTS:
     void everyComponentIsInTheModule();
     void everyDeclaredFieldIsOneTheDaemonSends();
     void allFourProcessesShareOneStorageIdentity();
+    void theWidgetHostWatchesTheFileItReads();
 
     // ---- what a tile with no data says -------------------------------------
     //
@@ -143,6 +146,11 @@ private:
 
 void TestWidgets::initTestCase()
 {
+    // Before anything constructs a Settings. This file writes a preference now
+    // — clockIsTwelveHourWithASeparateSuffix states the format it asserts — and
+    // without this it would write the developer's real one.
+    QStandardPaths::setTestModeEnabled(true);
+
     const QJsonObject catalogue = readJson(QStringLiteral("widgets/catalogue.json"));
     QVERIFY2(!catalogue.isEmpty(), "widgets/catalogue.json did not parse");
 
@@ -242,6 +250,25 @@ void TestWidgets::everyDeclaredFieldIsOneTheDaemonSends()
                                     .arg(id, path)));
         }
     }
+}
+
+void TestWidgets::theWidgetHostWatchesTheFileItReads()
+{
+    // tst_settings proves the watcher works. Nothing proved that the widget
+    // host arms it, and that is the shape of the bug this whole branch started
+    // from — AlertsData::setWindowState was written, documented and tested,
+    // and had no caller for as long as it existed.
+    //
+    // Read out of the source for the reason the identity check above is: the
+    // fact worth asserting is that a particular line is in a particular main(),
+    // and there is no way to observe that from inside a test process that is
+    // not the widget host.
+    const QString source = withoutComments(readFile(QStringLiteral("widgets/main.cpp")));
+    QVERIFY(!source.isEmpty());
+
+    QVERIFY2(source.contains(QStringLiteral("watchForExternalChanges")),
+             "widgets/main.cpp does not arm the settings watcher, so a preference changed in "
+             "the app reaches the tiles only when the host is restarted");
 }
 
 // ---- and the fourth file, which is where the data lives ---------------------
@@ -523,6 +550,11 @@ void TestWidgets::clockIsTwelveHourWithASeparateSuffix()
     // A body that sets before it rises sets the NEXT day. The moon does this
     // most nights and a naive subtraction gives a negative span.
     QCOMPARE(m_wx->spanBetween(evening, morning), QStringLiteral("9 h 15 min"));
+
+    // Put back, because this file has no cleanup() and the singleton outlives
+    // the case. A test added after this one would otherwise inherit a 12-hour
+    // clock it never asked for.
+    Settings::instance()->setClockFormat(clima::settingskeys::defaultClockFormat());
 }
 
 void TestWidgets::instantsAreReadInThePlacesOwnZone()

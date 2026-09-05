@@ -121,6 +121,7 @@ private Q_SLOTS:
     void aPortalThatRefusesIsNotGoneAround();
     void nothingOnTheBusIsReportedNotSwallowed();
     void withdrawingReachesWhicheverRouteCarriedIt();
+    void withdrawingClosesTheServiceNotificationItOpened();
 
 private:
     void putThePortalUp();
@@ -275,6 +276,33 @@ void TestNotifier::withdrawingReachesWhicheverRouteCarriedIt()
     // Never posted through the service, so never closed there either.
     QTest::qWait(100);
     QVERIFY(m_service->closed.isEmpty());
+}
+
+void TestNotifier::withdrawingClosesTheServiceNotificationItOpened()
+{
+    // The half the case above cannot reach. With a portal up, the portal
+    // carries the notification and m_serviceIds is never populated — so its
+    // `m_service->closed.isEmpty()` assertion passes whether or not withdraw()
+    // has a service branch at all. Only the service, then, and the id it
+    // handed back is the id that must come back.
+    putTheServiceUp();
+
+    Notifier   notifier;
+    QSignalSpy posted(&notifier, &Notifier::posted);
+
+    notifier.notify(QStringLiteral("eccc:w"), QStringLiteral("Wind Warning"), QString(),
+                    Notifier::Priority::High);
+    QVERIFY(posted.wait(3000));
+    QCOMPARE(posted.constFirst().at(1).toString(), QStringLiteral("service"));
+
+    notifier.withdraw(QStringLiteral("eccc:w"));
+    QTRY_COMPARE_WITH_TIMEOUT(m_service->closed, QList<uint>{ 42u }, 3000);
+
+    // And the id is forgotten, so a second withdraw is not a second close on a
+    // number the server has already reused.
+    notifier.withdraw(QStringLiteral("eccc:w"));
+    QTest::qWait(150);
+    QCOMPARE(m_service->closed.size(), 1);
 }
 
 QTEST_GUILESS_MAIN(TestNotifier)

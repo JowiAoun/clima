@@ -219,12 +219,12 @@ TestCase {
     // thunder differed from rain by one extra raindrop, and the thing a reader
     // is looking for on a stormy Saturday is a bolt.
     function test_aStormHasLightningInIt() {
-        verify(paints("thunder", Theme.glyph.bolt, false),
+        verify(paints("thunder", Theme.glyph.bolt, "card"),
                "the thunder glyph paints no Theme.glyph.bolt anywhere")
-        verify(paints("hail", Theme.glyph.bolt, false),
+        verify(paints("hail", Theme.glyph.bolt, "card"),
                "the hail glyph paints no bolt — WMO 96 and 99 are the only codes that reach it "
                + "and both of them are thunderstorms")
-        verify(!paints("rain", Theme.glyph.bolt, false),
+        verify(!paints("rain", Theme.glyph.bolt, "card"),
                "the plain rain glyph has a bolt in it")
     }
 
@@ -251,7 +251,7 @@ TestCase {
             var name = data.inks[i]
             var card = Theme.glyph[name]
 
-            verify(paints(data.kind, card, false),
+            verify(paints(data.kind, card, "card"),
                    "\"" + data.kind + "\" paints no Theme.glyph." + name + " on a card, so this "
                    + "row is measuring nothing")
             verify(!paints(data.kind, card, "pale"),
