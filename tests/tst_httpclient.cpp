@@ -10,9 +10,9 @@
 // provider and is never retried, duplicate requests become one request, and a
 // stored ETag comes back out as If-None-Match.
 
-#include "climaidentity.h"
-#include "libclima/core/clock.h"
-#include "libclima/net/httpclient.h"
+#include "climatidentity.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/net/httpclient.h"
 #include "support/httpstub.h"
 #include "support/networkguard.h"
 
@@ -20,7 +20,7 @@
 #include <QSignalSpy>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 using namespace std::chrono_literals;
 
 namespace {
@@ -142,8 +142,8 @@ void TestHttpClient::userAgentIsWellFormedAndCarriesTheBuildVersion()
     const QByteArray agent = HttpClient::userAgent();
 
     // The shape docs/02-data-sources.md §2.9 records:
-    //     Clima/<version> (+<project url>; <contact>)
-    QVERIFY2(agent.startsWith(QByteArrayLiteral("Clima/")), agent.constData());
+    //     Climat/<version> (+<project url>; <contact>)
+    QVERIFY2(agent.startsWith(QByteArrayLiteral("Climat/")), agent.constData());
     QVERIFY2(agent.contains(QByteArrayLiteral(" (+")), agent.constData());
     QVERIFY2(agent.endsWith(QByteArrayLiteral(")")), agent.constData());
 
@@ -151,9 +151,9 @@ void TestHttpClient::userAgentIsWellFormedAndCarriesTheBuildVersion()
     // fails it is because the identity header stopped coming from CMake, and
     // the symptom in the wild would be a client misidentifying itself to MET
     // Norway for a whole release.
-    QVERIFY2(agent.contains(QByteArrayLiteral(CLIMA_ENGINE_VERSION)), agent.constData());
-    QVERIFY2(agent.contains(QByteArrayLiteral(CLIMA_PROJECT_URL)), agent.constData());
-    QVERIFY2(agent.contains(QByteArrayLiteral(CLIMA_CONTACT)), agent.constData());
+    QVERIFY2(agent.contains(QByteArrayLiteral(CLIMAT_ENGINE_VERSION)), agent.constData());
+    QVERIFY2(agent.contains(QByteArrayLiteral(CLIMAT_PROJECT_URL)), agent.constData());
+    QVERIFY2(agent.contains(QByteArrayLiteral(CLIMAT_CONTACT)), agent.constData());
 
     // Not the empty User-Agent that api.weather.gov answers with 403 today, and
     // not Qt's default either.

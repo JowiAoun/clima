@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// clima-daemon: fetches the weather once, and serves it to everything else on
+// climat-daemon: fetches the weather once, and serves it to everything else on
 // the desktop over the session bus.
 //
 // ============================================================================
@@ -9,11 +9,11 @@
 //
 // Because it has to be able to run when the app is not, and it must not carry
 // a GUI when it does. A widget on a desktop is useful precisely on the days
-// nobody opens the weather app, and `clima --daemon` would mean linking Qt
+// nobody opens the weather app, and `climat --daemon` would mean linking Qt
 // Quick into a process that draws nothing and paying its startup cost.
 //
-// It links libclima and Qt DBus. No Gui, no Quick, no QML — and
-// clima_forbid_gui() in the build file makes that a configure-time error
+// It links libclimat and Qt DBus. No Gui, no Quick, no QML — and
+// climat_forbid_gui() in the build file makes that a configure-time error
 // rather than a rule in a document.
 //
 // ============================================================================
@@ -24,7 +24,7 @@
 // disappears after five idle minutes is a daemon whose widgets go stale in a
 // way that looks like a bug in the widget.
 //
-// It IS D-Bus-activatable — packaging/linux/clima-daemon.service.in — and this
+// It IS D-Bus-activatable — packaging/linux/climat-daemon.service.in — and this
 // comment used to say the opposite, at length, so it is worth being clear about
 // what changed and what did not.
 //
@@ -36,7 +36,7 @@
 // to own. The constraint was carried one process too far, and the cost of
 // carrying it was a desktop full of tiles that had nothing to read: the GNOME
 // extension starts this daemon, and on KDE, Sway, Hyprland, Wayfire and river —
-// where `clima-widget --pin` needs no extension at all — nothing did.
+// where `climat-widget --pin` needs no extension at all — nothing did.
 //
 // So there are now three ways it starts, in order of how little they ask of the
 // user: the bus activates it when a widget host or the extension looks for it,
@@ -48,7 +48,7 @@
 #include "daemonconfig.h"
 #include "snapshotservice.h"
 
-#include "libclima/providers/fixture/fixtureprovider.h"
+#include "libclimat/providers/fixture/fixtureprovider.h"
 
 #include <QCommandLineOption>
 #include <QCommandLineParser>
@@ -68,15 +68,15 @@ int main(int argc, char *argv[])
     // ---- the same two names the app sets, and it is load-bearing ------------
     //
     // QStandardPaths::AppDataLocation is <organizationName>/<applicationName>,
-    // and libclima/cache/cachestore.cpp resolves the database under it. So
+    // and libclimat/cache/cachestore.cpp resolves the database under it. So
     // these two lines are not identity — they are the address of the places
     // table, and a process that gets them wrong opens a different file and
     // finds an empty world.
     //
-    // Which is what happened. This said organizationName("clima") and
-    // applicationName("clima-daemon"), so the daemon opened
-    // ~/.local/share/clima/clima-daemon/cache.sqlite while the app wrote
-    // ~/.local/share/Clima/clima/cache.sqlite. Every Subscribe answered "the
+    // Which is what happened. This said organizationName("climat") and
+    // applicationName("climat-daemon"), so the daemon opened
+    // ~/.local/share/climat/climat-daemon/cache.sqlite while the app wrote
+    // ~/.local/share/Climat/climat/cache.sqlite. Every Subscribe answered "the
     // daemon has no such place", every tile stayed empty, and nothing was
     // wrong with either process on its own.
     //
@@ -90,19 +90,19 @@ int main(int argc, char *argv[])
     // that wants to see what the app saved has to be the app as far as they
     // are concerned. tests/tst_widgets.cpp now asserts all three agree.
     //
-    // The cost is that `--version` prints "clima 0.1.0" rather than
-    // "clima-daemon 0.1.0", since QCommandLineParser reads applicationName.
-    // clima-widget has spelled it that way since it was written; a process
+    // The cost is that `--version` prints "climat 0.1.0" rather than
+    // "climat-daemon 0.1.0", since QCommandLineParser reads applicationName.
+    // climat-widget has spelled it that way since it was written; a process
     // says which it is in argv[0] and in --help's description, and neither of
     // those decides where the data lives.
-    QCoreApplication::setOrganizationName(QStringLiteral("Clima"));
+    QCoreApplication::setOrganizationName(QStringLiteral("Climat"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("github.io"));
-    QCoreApplication::setApplicationName(QStringLiteral(CLIMA_APP_NAME));
-    QCoreApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
+    QCoreApplication::setApplicationName(QStringLiteral(CLIMAT_APP_NAME));
+    QCoreApplication::setApplicationVersion(QStringLiteral(CLIMAT_VERSION));
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
-        QStringLiteral("Fetches the weather once and serves it to Clima's widgets and tray."));
+        QStringLiteral("Fetches the weather once and serves it to Climat's widgets and tray."));
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
         QStringLiteral("fixture"),
         QStringLiteral("Serve a recorded fixture at a frozen clock instead of the network. "
                        "One of: %1")
-            .arg(clima::fixtures::names().join(QStringLiteral(", "))),
+            .arg(climat::fixtures::names().join(QStringLiteral(", "))),
         QStringLiteral("name"));
     parser.addOption(fixtureOption);
 
@@ -138,16 +138,16 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     if (parser.isSet(printOption)) {
-        std::printf("service   %s\npath      %s\ninterface %s\n", CLIMA_DAEMON_SERVICE,
-                    CLIMA_DAEMON_PATH, CLIMA_DAEMON_INTERFACE);
+        std::printf("service   %s\npath      %s\ninterface %s\n", CLIMAT_DAEMON_SERVICE,
+                    CLIMAT_DAEMON_PATH, CLIMAT_DAEMON_INTERFACE);
         return 0;
     }
 
     const QString fixtureName = parser.value(fixtureOption);
-    if (!fixtureName.isEmpty() && !clima::fixtures::exists(fixtureName)) {
-        std::fprintf(stderr, "clima-daemon: no fixture called \"%s\". Known: %s\n",
+    if (!fixtureName.isEmpty() && !climat::fixtures::exists(fixtureName)) {
+        std::fprintf(stderr, "climat-daemon: no fixture called \"%s\". Known: %s\n",
                      qPrintable(fixtureName),
-                     qPrintable(clima::fixtures::names().join(QStringLiteral(", "))));
+                     qPrintable(climat::fixtures::names().join(QStringLiteral(", "))));
         return 2;
     }
 
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
         const QString place = parser.value(placeOption);
         const QString token = service->subscribe(place, {}, -1, -1);
         if (token.isEmpty()) {
-            std::fprintf(stderr, "clima-daemon: could not resolve a place called \"%s\".\n",
+            std::fprintf(stderr, "climat-daemon: could not resolve a place called \"%s\".\n",
                          qPrintable(place));
             return 6;
         }
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
         // recording script cannot hang a CI job. Exiting non-zero rather than
         // writing a half-empty file is the point.
         QTimer::singleShot(30000, &app, []() {
-            std::fprintf(stderr, "clima-daemon: no snapshot arrived within 30 s.\n");
+            std::fprintf(stderr, "climat-daemon: no snapshot arrived within 30 s.\n");
             QCoreApplication::exit(7);
         });
 
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
     QDBusConnection bus = QDBusConnection::sessionBus();
     if (!bus.isConnected()) {
         std::fprintf(stderr,
-                     "clima-daemon: there is no session bus to serve on.\n"
+                     "climat-daemon: there is no session bus to serve on.\n"
                      "  %s\n",
                      qPrintable(bus.lastError().message()));
         return 3;
@@ -234,8 +234,8 @@ int main(int argc, char *argv[])
 
     new DaemonAdaptor(service);
 
-    if (!bus.registerObject(QStringLiteral(CLIMA_DAEMON_PATH), service)) {
-        std::fprintf(stderr, "clima-daemon: could not export %s: %s\n", CLIMA_DAEMON_PATH,
+    if (!bus.registerObject(QStringLiteral(CLIMAT_DAEMON_PATH), service)) {
+        std::fprintf(stderr, "climat-daemon: could not export %s: %s\n", CLIMAT_DAEMON_PATH,
                      qPrintable(bus.lastError().message()));
         return 4;
     }
@@ -250,16 +250,16 @@ int main(int argc, char *argv[])
     const auto replacementOption = QDBusConnectionInterface::AllowReplacement;
 
     const QDBusReply<QDBusConnectionInterface::RegisterServiceReply> reply =
-        bus.interface()->registerService(QStringLiteral(CLIMA_DAEMON_SERVICE), queueOption,
+        bus.interface()->registerService(QStringLiteral(CLIMAT_DAEMON_SERVICE), queueOption,
                                          replacementOption);
 
     if (!reply.isValid() || reply.value() != QDBusConnectionInterface::ServiceRegistered) {
         // The overwhelmingly common cause is a daemon already running, which is
         // not an error worth a stack trace — it is the system working.
         std::fprintf(stderr,
-                     "clima-daemon: %s is already owned. Another daemon is running;\n"
+                     "climat-daemon: %s is already owned. Another daemon is running;\n"
                      "              pass --replace to take over from it.\n",
-                     CLIMA_DAEMON_SERVICE);
+                     CLIMAT_DAEMON_SERVICE);
         return 5;
     }
 

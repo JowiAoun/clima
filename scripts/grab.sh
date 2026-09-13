@@ -26,9 +26,9 @@
 # two above and nothing else; the rest of its behaviour is environment, and it
 # is dev-run.sh's environment because dev-run.sh is what ends up running:
 #
-#   CLIMA_PRESET=golden   capture from the RelWithDebInfo build
-#   CLIMA_NO_BUILD=1      skip the build; CI has already done it
-#   CLIMA_BINARY=<path>   capture a different executable out of the same build,
+#   CLIMAT_PRESET=golden   capture from the RelWithDebInfo build
+#   CLIMAT_NO_BUILD=1      skip the build; CI has already done it
+#   CLIMAT_BINARY=<path>   capture a different executable out of the same build,
 #                         the component gallery being the one that wants it
 #
 # --env runs any command under the same pinned environment. film.sh is the
@@ -223,7 +223,7 @@ case "$out" in
     *.png | *.PNG) ;;
     *)
         echo "grab.sh: the last argument is the file to write and has to end in .png — got \"$out\"." >&2
-        echo "         usage: scripts/grab.sh [clima options…] <out.png>" >&2
+        echo "         usage: scripts/grab.sh [climat options…] <out.png>" >&2
         exit 1 ;;
 esac
 

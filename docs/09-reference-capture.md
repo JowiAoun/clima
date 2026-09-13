@@ -238,4 +238,4 @@ purpose and say so.
 
 Layout, proportion, interaction and information architecture are fair to learn
 from. Icons, illustrations, fonts and markup are not ours to ship — `reference/`
-is gitignored for that reason, and Clima's icons come from Meteocons (MIT).
+is gitignored for that reason, and Climat's icons come from Meteocons (MIT).

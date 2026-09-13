@@ -18,7 +18,7 @@
 # The tool list and the shell hook are in nix/devshell.nix, shared with
 # shell.nix so that flake and non-flake users get the same shell.
 {
-  description = "Clima — development shell for a native Qt 6 / QML weather app";
+  description = "Climat — development shell for a native Qt 6 / QML weather app";
 
   # A release branch, not nixpkgs-unstable: unstable moves under you between
   # `nix develop` invocations on two machines on the same afternoon, and the

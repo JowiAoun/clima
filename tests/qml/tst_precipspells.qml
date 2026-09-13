@@ -17,7 +17,7 @@
 import QtQuick
 import QtTest
 
-import "qrc:/qt/qml/Clima/precip.js" as Precip
+import "qrc:/qt/qml/Climat/precip.js" as Precip
 
 TestCase {
     name: "PrecipSpells"

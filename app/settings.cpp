@@ -27,22 +27,22 @@ const auto appearance        = QStringLiteral("appearance");
 // whole reason this app forces INI in the first place.
 const auto dynamicBackground = QStringLiteral("background/dynamic");
 
-// The four below are the ones clima-cli also reads, and they come from
+// The four below are the ones climat-cli also reads, and they come from
 // app/settingskeys.h rather than being spelled again here. That header claims
 // to be the one list; it was not, and a rename would have moved the CLI while
 // leaving the app writing the old key — the exact "a preference the app wrote
 // and the CLI silently ignored" failure it was added to prevent.
-const auto clockFormat        = QString::fromLatin1(clima::settingskeys::clockFormat);
+const auto clockFormat        = QString::fromLatin1(climat::settingskeys::clockFormat);
 const auto alertNotifications = QStringLiteral("alerts/notify");
 const auto windowWidth       = QStringLiteral("window/width");
 const auto windowHeight      = QStringLiteral("window/height");
 const auto windowX           = QStringLiteral("window/x");
 const auto windowY           = QStringLiteral("window/y");
-const auto temperatureUnit   = QString::fromLatin1(clima::settingskeys::temperatureUnit);
-const auto windUnit          = QString::fromLatin1(clima::settingskeys::windUnit);
-const auto pressureUnit      = QString::fromLatin1(clima::settingskeys::pressureUnit);
-const auto visibilityUnit    = QString::fromLatin1(clima::settingskeys::visibilityUnit);
-const auto precipitationUnit = QString::fromLatin1(clima::settingskeys::precipitationUnit);
+const auto temperatureUnit   = QString::fromLatin1(climat::settingskeys::temperatureUnit);
+const auto windUnit          = QString::fromLatin1(climat::settingskeys::windUnit);
+const auto pressureUnit      = QString::fromLatin1(climat::settingskeys::pressureUnit);
+const auto visibilityUnit    = QString::fromLatin1(climat::settingskeys::visibilityUnit);
+const auto precipitationUnit = QString::fromLatin1(climat::settingskeys::precipitationUnit);
 const auto acknowledgedAlerts = QStringLiteral("alerts/acknowledged");
 } // namespace key
 
@@ -154,9 +154,9 @@ void Settings::prepareStorage()
 
 QList<SettingsIdentity> Settings::supersededIdentities()
 {
-    // Empty, and correct: Clima has written preferences under exactly one
+    // Empty, and correct: Climat has written preferences under exactly one
     // organisation and application name, the one main() sets today. This is the
-    // list a rename appends to — `{ QStringLiteral("Clima"), QStringLiteral("clima") }`
+    // list a rename appends to — `{ QStringLiteral("Climat"), QStringLiteral("climat") }`
     // would be the entry if the identity moved tomorrow — and the reason the
     // machinery below exists before there is anything for it to do is that a
     // migration written after the rename has already lost the data it was
@@ -407,7 +407,7 @@ QString Settings::clockFormat() const
     // and a key written by a future version that grew a third spelling. A clock
     // is not a setting that may fail closed: an unrecognised value has to still
     // put a time on the screen.
-    return load(key::clockFormat, clima::settingskeys::defaultClockFormat()).toString()
+    return load(key::clockFormat, climat::settingskeys::defaultClockFormat()).toString()
                    == QLatin1String("24h")
                ? QStringLiteral("24h")
                : QStringLiteral("12h");

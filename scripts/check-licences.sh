@@ -7,7 +7,7 @@
 #
 #   scripts/check-licences.sh <binary> [binary…]
 #
-# ---- why this exists alongside cmake/ClimaLicenceGuard.cmake ----------------
+# ---- why this exists alongside cmake/ClimatLicenceGuard.cmake ----------------
 #
 # That file refuses at configure time if a banned Qt module is named in a
 # find_package component list or a target_link_libraries call. It is the right
@@ -29,7 +29,7 @@
 # R2. No GPLv3-or-commercial Qt module. Qt Charts, Graphs, Lottie, Quick3D and
 #     VirtualKeyboard are licensed GPLv3-or-commercial rather than
 #     LGPLv3 — so linking one does not merely add a dependency, it relicenses
-#     the result. The app is GPL-3.0-or-later and would survive that; libclima
+#     the result. The app is GPL-3.0-or-later and would survive that; libclimat
 #     is MPL-2.0 and would not, and neither would any downstream reuse of it,
 #     which is the entire point of the split in D6.
 #
@@ -64,7 +64,7 @@ if [[ -z "$objdump" ]]; then
     exit 2
 fi
 
-# The same five as cmake/ClimaLicenceGuard.cmake, spelled as the shared-object
+# The same five as cmake/ClimatLicenceGuard.cmake, spelled as the shared-object
 # names a linker actually records. Kept in step by hand, and the comment there
 # says so too — two spellings of one list is the price of asking the question in
 # two places, and the list changes about once a Qt major.
@@ -104,7 +104,7 @@ for binary in "$@"; do
             echo "check-licences: $binary links $lib" >&2
             echo "  That module is GPLv3-or-commercial, not LGPLv3. See R2 in" >&2
             echo "  docs/08-risks.md; draw the chart with QQuickItem and QSGNode" >&2
-            echo "  instead — that is what ClimaCharts is for." >&2
+            echo "  instead — that is what ClimatCharts is for." >&2
             status=1
         fi
     done

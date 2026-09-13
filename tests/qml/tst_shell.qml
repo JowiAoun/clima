@@ -17,9 +17,9 @@
 // touched a control.
 import QtQuick
 import QtTest
-import Clima
+import Climat
 
-import "qrc:/qt/qml/Clima/mobiletabs.js" as Tabs
+import "qrc:/qt/qml/Climat/mobiletabs.js" as Tabs
 
 TestCase {
     name: "MobileShell"
@@ -39,7 +39,7 @@ TestCase {
     }
 
     function build(w, h, cls) {
-        var c = Qt.createComponent("Clima", "MobileShell")
+        var c = Qt.createComponent("Climat", "MobileShell")
         verify(c !== null && c.status !== Component.Error,
                c === null ? "no such type" : c.errorString())
         var shell = c.createObject(host, { width: w, height: h, viewportClass: cls })

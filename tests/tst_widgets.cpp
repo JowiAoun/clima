@@ -27,7 +27,7 @@
 //
 // What is NOT here is rendering. A tile is QML and its layout is a property of
 // a running scene graph; the answer to "does the hourly strip fit in 360 px" is
-// a screenshot, not an assertion. `clima-widget --snapshot … --grab` is how
+// a screenshot, not an assertion. `climat-widget --snapshot … --grab` is how
 // that is looked at, and tests/fixtures/wire/ is what it is looked at against.
 
 #include "daemonlink.h"
@@ -50,7 +50,7 @@ namespace {
 
 QString readFile(const QString &relative)
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR "/") + relative);
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR "/") + relative);
     if (!file.open(QIODevice::ReadOnly))
         return {};
     return QString::fromUtf8(file.readAll());
@@ -78,8 +78,8 @@ QString withoutComments(const QString &source)
 
 // The argument to a QCoreApplication/QGuiApplication setter, verbatim — the
 // text, not the value, because two of these are a macro and comparing what
-// each file WROTE is the question. `QStringLiteral(CLIMA_APP_NAME)` in one
-// file and `QStringLiteral("clima")` in another would be equal at run time on
+// each file WROTE is the question. `QStringLiteral(CLIMAT_APP_NAME)` in one
+// file and `QStringLiteral("climat")` in another would be equal at run time on
 // the day it was written and would drift the day the macro moved.
 QString identitySetTo(const QString &source, const QString &setter)
 {
@@ -158,7 +158,7 @@ void TestWidgets::initTestCase()
         m_catalogueIds.append(entry.toObject().value(QStringLiteral("id")).toString());
     QVERIFY(!m_catalogueIds.isEmpty());
 
-    m_dispatch = readFile(QStringLiteral("widgets/qml/Clima/Widgets/WidgetTile.qml"));
+    m_dispatch = readFile(QStringLiteral("widgets/qml/Climat/Widgets/WidgetTile.qml"));
     QVERIFY2(!m_dispatch.isEmpty(), "WidgetTile.qml is missing");
 
     m_buildFile = readFile(QStringLiteral("widgets/CMakeLists.txt"));
@@ -211,7 +211,7 @@ void TestWidgets::everyComponentIsInTheModule()
     // registers no type, and produces "X is not a type" against whichever file
     // used it. scripts/check-qml-files.sh catches the general case; this is the
     // specific one, so a broken build says which widget.
-    const QDir dir(QStringLiteral(CLIMA_SOURCE_DIR "/widgets/qml/Clima/Widgets"));
+    const QDir dir(QStringLiteral(CLIMAT_SOURCE_DIR "/widgets/qml/Climat/Widgets"));
     const QStringList files = dir.entryList(QStringList{ QStringLiteral("*Widget.qml") },
                                             QDir::Files, QDir::Name);
     QVERIFY2(files.size() == m_catalogueIds.size(),
@@ -220,7 +220,7 @@ void TestWidgets::everyComponentIsInTheModule()
                             .arg(m_catalogueIds.size())));
 
     for (const QString &file : files) {
-        QVERIFY2(m_buildFile.contains(QStringLiteral("qml/Clima/Widgets/") + file),
+        QVERIFY2(m_buildFile.contains(QStringLiteral("qml/Climat/Widgets/") + file),
                  qPrintable(QStringLiteral("%1 is on disk and not in widgets/CMakeLists.txt")
                                 .arg(file)));
     }
@@ -276,14 +276,14 @@ void TestWidgets::theWidgetHostWatchesTheFileItReads()
 void TestWidgets::allFourProcessesShareOneStorageIdentity()
 {
     // QStandardPaths::AppDataLocation is <organizationName>/<applicationName>,
-    // and libclima/cache/cachestore.cpp puts the database under it. So these
+    // and libclimat/cache/cachestore.cpp puts the database under it. So these
     // two calls in three main() functions are not identity, they are an
     // address — and three processes that are supposed to share one database
     // agree about it in three separate files with nothing joining them up.
     //
-    // The daemon disagreed. It set organizationName("clima") and
-    // applicationName("clima-daemon"), opened
-    // ~/.local/share/clima/clima-daemon/cache.sqlite, and found no places in
+    // The daemon disagreed. It set organizationName("climat") and
+    // applicationName("climat-daemon"), opened
+    // ~/.local/share/climat/climat-daemon/cache.sqlite, and found no places in
     // it — so every Subscribe answered "no such place" and every tile on every
     // desktop stayed empty, while both processes ran perfectly.
     //
@@ -291,14 +291,14 @@ void TestWidgets::allFourProcessesShareOneStorageIdentity()
     // and every screenshot of the tiles runs the daemon with --fixture, which
     // resolves its place out of a recorded file and never opens the places
     // table at all. The mode nobody automated was the only one a user runs.
-    // clima-cli is the fourth, and it is here for exactly the reason the daemon
-    // is: `clima-cli now` reads the places table to find out where "here" is
+    // climat-cli is the fourth, and it is here for exactly the reason the daemon
+    // is: `climat-cli now` reads the places table to find out where "here" is
     // and writes what it fetched back into the same cache, so a status bar
     // polling every minute is one more client of the forecast service and not
     // a second one. An identity of its own would give it an empty places table
     // — every invocation answering "no saved place" on a machine with several.
     //
-    // clima-gallery is deliberately absent. It sets the same organisation and a
+    // climat-gallery is deliberately absent. It sets the same organisation and a
     // name of its OWN, which is the opposite requirement: it is a developer
     // tool, it must read the reader's preferences so that a specimen is drawn
     // the way the product draws it, and it must never write to the file or the
@@ -380,7 +380,7 @@ void TestWidgets::anUnreadableSnapshotNamesTheFile()
     feed.classBegin();
     feed.componentComplete();
 
-    const QString missing = QStringLiteral(CLIMA_SOURCE_DIR "/tests/fixtures/wire/nowhere.json");
+    const QString missing = QStringLiteral(CLIMAT_SOURCE_DIR "/tests/fixtures/wire/nowhere.json");
     DaemonLink::instance()->useSnapshotFile(missing);
 
     // Attached BEFORE the change, so this also covers the push: a feed that is
@@ -395,7 +395,7 @@ void TestWidgets::anUnreadableSnapshotNamesTheFile()
 void TestWidgets::aReadableSnapshotLeavesNothingToExplain()
 {
     DaemonLink::instance()->useSnapshotFile(
-        QStringLiteral(CLIMA_SOURCE_DIR "/tests/fixtures/wire/toronto.json"));
+        QStringLiteral(CLIMAT_SOURCE_DIR "/tests/fixtures/wire/toronto.json"));
 
     WidgetFeed feed;
     feed.classBegin();
@@ -554,7 +554,7 @@ void TestWidgets::clockIsTwelveHourWithASeparateSuffix()
     // Put back, because this file has no cleanup() and the singleton outlives
     // the case. A test added after this one would otherwise inherit a 12-hour
     // clock it never asked for.
-    Settings::instance()->setClockFormat(clima::settingskeys::defaultClockFormat());
+    Settings::instance()->setClockFormat(climat::settingskeys::defaultClockFormat());
 }
 
 void TestWidgets::instantsAreReadInThePlacesOwnZone()

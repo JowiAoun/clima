@@ -26,7 +26,7 @@
 // starts at now rather than at index 0. Each has a test, and each was proved
 // to fail by breaking the encoder before being trusted.
 
-#include "libclima/wire/snapshot.h"
+#include "libclimat/wire/snapshot.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -35,7 +35,7 @@
 #include <QTest>
 #include <QTimeZone>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -133,7 +133,7 @@ QSet<QString> flatten(const QJsonObject &root)
 
 QJsonObject catalogue()
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR "/widgets/catalogue.json"));
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR "/widgets/catalogue.json"));
     if (!file.open(QIODevice::ReadOnly))
         return {};
     QJsonParseError error{};

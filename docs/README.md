@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
-# Clima — Plan Index
+# Climat — Plan Index
 
 Planning baseline: **2026-07-30**.
 
@@ -32,7 +32,7 @@ See [`02-data-sources.md`](02-data-sources.md).
 
 **The differentiator is trust, not features.** You noted MSN is good except its predictions.
 We can't out-forecast ECMWF, but Open-Meteo exposes ECMWF IFS, ECMWF AIFS, GFS, ICON,
-AROME, UKMO and full ensembles from one API — so Clima can show *model disagreement and
+AROME, UKMO and full ensembles from one API — so Climat can show *model disagreement and
 confidence ranges* instead of one confident wrong number. Nothing mainstream does this.
 See [`05-feature-parity.md`](05-feature-parity.md) §5.6.
 

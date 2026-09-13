@@ -43,7 +43,7 @@ LGPLv3, but several add-ons — including *both charting modules* — are **GPLv
 Choosing them silently forces our whole app to GPLv3 and permanently closes the iOS App
 Store (and complicates the Mac App Store).
 
-| Module | Open-source licence | Verified | Use in Clima |
+| Module | Open-source licence | Verified | Use in Climat |
 |---|---|---|---|
 | Qt Core, GUI, Network, QML, Quick, Quick Controls, Quick Layouts, Widgets, Test, Concurrent, D-Bus, Sql | **LGPLv3 / GPLv2+** | ✅ | ✅ Core of the app |
 | **Qt SVG** | **LGPLv3 / GPLv2** | ✅ quoted | ✅ Icon rendering |
@@ -63,7 +63,7 @@ Store (and complicates the Mac App Store).
 - Ship the **complete corresponding source of the Qt libraries used, including any of our
   patches**, or a written offer — hosted *by us*. A link to qt.io is **not sufficient**.
 - Provide **relink/installation information** so a user can substitute their own build of
-  Qt and still run Clima. (Practically: dynamic linking + documented build instructions +
+  Qt and still run Climat. (Practically: dynamic linking + documented build instructions +
   no library pinning tricks.)
 - Ship the **LGPLv3 licence text** and a prominent in-app notice ("About → Licences").
 - Non-compliance terminates our distribution rights, so treat this as CI-enforced, not
@@ -81,7 +81,7 @@ Flatpak runtime ship; requiring 6.10+ would exclude most distro builds. Newer fe
 gradients/shadows in 6.11, Qt OpenAPI in 6.11) are used behind version guards only.
 Because Flatpak is our primary Linux channel, users get a modern Qt regardless.
 
-### D3 — Build our own chart kit ("ClimaCharts"). Do not use Qt Charts or Qt Graphs
+### D3 — Build our own chart kit ("ClimatCharts"). Do not use Qt Charts or Qt Graphs
 Three independent reasons:
 1. **Licence** — both are GPLv3-only (§3.1).
 2. **Design** — MSN-class weather charts (temperature bands with day/night shading,
@@ -116,8 +116,8 @@ Interfaces (`IForecastProvider`, `IAirQualityProvider`, `IAlertProvider`, `IRada
 ### D6 — Licensing of our own code: GPL-3.0-or-later app, MPL-2.0 core
 | Component | Licence | Why |
 |---|---|---|
-| `libclima` (engine: providers, models, cache, units) | **MPL-2.0** | File-level copyleft. Reusable by a Plasma applet, a GNOME extension, a CLI, or a future App Store build. Keeps the iOS door open. |
-| `clima` (QML UI, app shell) | **GPL-3.0-or-later** | Standard for Linux desktop apps; strong copyleft where it matters. |
+| `libclimat` (engine: providers, models, cache, units) | **MPL-2.0** | File-level copyleft. Reusable by a Plasma applet, a GNOME extension, a CLI, or a future App Store build. Keeps the iOS door open. |
+| `climat` (QML UI, app shell) | **GPL-3.0-or-later** | Standard for Linux desktop apps; strong copyleft where it matters. |
 | Assets we author (icons, styles) | **CC-BY-SA-4.0** | |
 
 This mirrors Vremenar's GPL-3.0/MPL-2.0 dual approach. **This decision is cheap now and
@@ -129,7 +129,7 @@ Require a **DCO sign-off** (`Signed-off-by:`) on contributions, not a CLA.
 
 ### D7 — No mandatory backend service
 See §2.8. Per-user API calls stay far under Open-Meteo's 10 000/day non-commercial limit,
-so the app works with zero infrastructure and zero telemetry. `clima-relay` stays an
+so the app works with zero infrastructure and zero telemetry. `climat-relay` stays an
 optional, self-hostable component for radar/alert normalisation.
 
 ### D8 — Build system: CMake ≥ 3.21, minimal vendored dependencies
@@ -140,7 +140,7 @@ can build with system libraries — a hard requirement for getting into Fedora/D
 ### D9 — Bespoke design system, platform-adaptive
 Do not adopt one Qt Quick Controls style per platform (FluentWinUI3 / macOS / Basic) for the
 main surfaces — the app is mostly custom cards and charts, and per-platform styles would
-fragment the design. Instead: one **Clima design system** (tokens for colour, type, spacing,
+fragment the design. Instead: one **Climat design system** (tokens for colour, type, spacing,
 elevation, motion) that *reads* platform signals — system dark/light, accent colour,
 reduced-motion, font DPI — and uses native styles only for standard dialogs and the
 settings surface. FluentWinUI3 remains available for Windows chrome; note it is still

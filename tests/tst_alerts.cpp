@@ -17,11 +17,11 @@
 // hours before ends — is the shape 19 of the 25 alerts in force in California
 // that afternoon had.
 
-#include "libclima/domain/alert.h"
+#include "libclimat/domain/alert.h"
 
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 

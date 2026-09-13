@@ -3,7 +3,7 @@
 
 #include "widgetclock.h"
 
-namespace clima::widgets {
+namespace climat::widgets {
 namespace {
 
 // File-scope rather than a class, because there is one process and one clock in
@@ -28,4 +28,4 @@ bool clockIsFrozen()
     return g_frozen.isValid();
 }
 
-} // namespace clima::widgets
+} // namespace climat::widgets

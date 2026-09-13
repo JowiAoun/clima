@@ -27,13 +27,13 @@ rule() { printf '%.0s=' {1..78}; printf '\n'; }
 
 {
   rule
-  echo "  CLIMA ${version} — THIRD-PARTY LICENCES"
+  echo "  CLIMAT ${version} — THIRD-PARTY LICENCES"
   rule
   echo
   cat <<'PREAMBLE'
-Clima is GNU GPL v3 or later. This file is about everything else it contains.
+Climat is GNU GPL v3 or later. This file is about everything else it contains.
 
-The clima executable is statically linked and carries, inside the binary, a
+The climat executable is statically linked and carries, inside the binary, a
 typeface, a place-name database and several recorded weather-service payloads.
 Each arrives under its own licence, and none of them is ours. Qt is linked
 dynamically and is covered separately by the written offer in

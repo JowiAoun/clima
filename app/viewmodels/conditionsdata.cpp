@@ -8,10 +8,10 @@
 #include "timeformat.h"
 #include "units.h"
 
-#include "libclima/domain/hourconvention.h"
-#include "libclima/domain/scales.h"
-#include "libclima/domain/timeaxis.h"
-#include "libclima/domain/weathercode.h"
+#include "libclimat/domain/hourconvention.h"
+#include "libclimat/domain/scales.h"
+#include "libclimat/domain/timeaxis.h"
+#include "libclimat/domain/weathercode.h"
 
 #include <QLocale>
 #include <QStringList>
@@ -20,7 +20,7 @@
 #include <cmath>
 #include <limits>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -72,17 +72,17 @@ QString sentenceTime(const QDateTime &instant, const QTimeZone &zone)
 // judgement of ours, and none of them may be adjusted to make a card look
 // better balanced.
 //
-// They used to be defined here, and they moved to libclima/domain/scales.h the
+// They used to be defined here, and they moved to libclimat/domain/scales.h the
 // day a second thing had to draw weather. A UV dial on the desktop has to put
 // the same word under the same number as the card in the app, and the only way
 // to guarantee that is for there to be one table. See that header.
 
-using clima::scales::aqiBand;
-using clima::scales::beaufortForce;
-using clima::scales::beaufortName;
-using clima::scales::compassPoint;
-using clima::scales::uvBand;
-using clima::scales::visibilityBand;
+using climat::scales::aqiBand;
+using climat::scales::beaufortForce;
+using climat::scales::beaufortName;
+using climat::scales::compassPoint;
+using climat::scales::uvBand;
+using climat::scales::visibilityBand;
 
 // up | down | steady, from the difference between now and three hours out.
 // The badge tracks the *number*; whether that direction is good news is the
@@ -108,7 +108,7 @@ QString toneFor(bool good, bool caution)
 
 // ---- absent is not zero, and the screen has to say so ---------------------
 //
-// libclima/domain/forecast.h opens with this argument and it lands here: "a
+// libclimat/domain/forecast.h opens with this argument and it lands here: "a
 // plain double for a field MET Norway does not carry means the gust row reads
 // '0 km/h' during a gale and nothing anywhere goes red." Every block below
 // therefore carries a `reading` — the value and its unit, already formatted, or
@@ -781,7 +781,7 @@ void ConditionsData::buildCloud()
 
     const bool day = now.isDay.value_or(true);
     const QString condition = now.weatherCode
-        ? clima::conditionText(*now.weatherCode, day)
+        ? climat::conditionText(*now.weatherCode, day)
         : QStringLiteral("—");
 
     const double later = value(m_hours.value(qMin(m_hourNow + 3, int(m_hours.size()) - 1)).cloudCover);
@@ -871,7 +871,7 @@ void ConditionsData::buildWind()
 
     // Whether there is a wind reading at all, asked once.
     //
-    // beaufortForce() is the only function in libclima/domain/scales.h that
+    // beaufortForce() is the only function in libclimat/domain/scales.h that
     // returns a number rather than a word, so it has nowhere to put the empty
     // string the others answer NaN with — it returns 0, and beaufortName(0) is
     // "Calm". That made a missing reading indistinguishable from still air:
@@ -1111,7 +1111,7 @@ void ConditionsData::buildSunMoon()
     const QDate      reference = m_now.toTimeZone(m_zone).date();
 
     // Minutes from local midnight, measured from ONE reference date — not from
-    // each instant's own midnight. libclima/domain/timeaxis.h exists for this:
+    // each instant's own midnight. libclimat/domain/timeaxis.h exists for this:
     // above the Arctic circle in summer, sunrise is that day's midnight and
     // sunset is the *next* day's, and an arc measured from two midnights comes
     // out zero minutes long.
@@ -1217,7 +1217,7 @@ void ConditionsData::buildMoonPhase(const DailyPoint &day, const QDate &referenc
 
     // The next full moon, from the provider's own phase readings where the
     // horizon reaches it and from the mean cycle where it does not — see
-    // libclima/domain/forecast.h, which explains which of the two answered and
+    // libclimat/domain/forecast.h, which explains which of the two answered and
     // how far out the second one can be.
     const std::optional<QDate> nextFull = nextFullMoon(m_forecast.daily, reference);
 
@@ -1420,7 +1420,7 @@ void ConditionsData::buildSummary()
     const Units             *units = Units::instance();
 
     const bool    daylight  = now.isDay.value_or(true);
-    const QString condition = now.weatherCode ? clima::conditionText(*now.weatherCode, daylight)
+    const QString condition = now.weatherCode ? climat::conditionText(*now.weatherCode, daylight)
                                               : QString();
 
     // The next run of precipitation, if there is one in the next twelve hours,
@@ -1483,7 +1483,7 @@ void ConditionsData::buildSummary()
     m_current = QVariantMap{
         { QStringLiteral("conditionKind"),
           now.weatherCode
-              ? conditionKindName(clima::conditionFor(*now.weatherCode, daylight))
+              ? conditionKindName(climat::conditionFor(*now.weatherCode, daylight))
               : QString() },
         { QStringLiteral("unitLabel"), units->bareSymbol(Units::Quantity::Temperature) },
         { QStringLiteral("summary"), sentences.join(QLatin1Char(' ')) },

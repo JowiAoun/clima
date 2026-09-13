@@ -68,6 +68,6 @@ Don't, unless a field is being added. Every assertion in `tests/tst_alertprovide
 specific county, a specific colour and a specific minute. If you must, run `record.sh`, expect to
 re-choose the coordinates, and expect every literal in that file to need re-checking by hand.
 
-`libclima/providers/fixture/data/seattle/alerts.json` is byte-identical to `nws/seattle-four.json`
+`libclimat/providers/fixture/data/seattle/alerts.json` is byte-identical to `nws/seattle-four.json`
 on purpose: the parser test and the app's own banner are assertions about the same four alerts, one
 at the boundary and one on the screen.

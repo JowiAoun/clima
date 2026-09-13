@@ -10,7 +10,7 @@ Legend: ✅ ship it · ⭕ partial / region-gated · ❌ deliberately not doing 
 
 ## 5.1 Core forecast
 
-| MSN feature | Clima | Milestone | Data source | Notes |
+| MSN feature | Climat | Milestone | Data source | Notes |
 |---|---|---|---|---|
 | Current conditions (temp, feels-like, condition icon) | ✅ | M1 | Open-Meteo `current` | |
 | Hourly forecast | ✅ **better** — 15-min where available | M2 | `hourly`, `minutely_15` | 15-min is Central Europe + North America only |
@@ -32,7 +32,7 @@ Legend: ✅ ship it · ⭕ partial / region-gated · ❌ deliberately not doing 
 
 ## 5.2 Maps
 
-| MSN feature | Clima | Milestone | Source |
+| MSN feature | Climat | Milestone | Source |
 |---|---|---|---|
 | Radar observation (animated past 2 h) | ✅ | M3 | LibreWXR / IEM WMS-T / ECCC GeoMet |
 | Radar **forecast** (nowcast) | ⭕ | M3 | Nowcast frames where the provider offers them |
@@ -46,7 +46,7 @@ Legend: ✅ ship it · ⭕ partial / region-gated · ❌ deliberately not doing 
 
 ## 5.3 Air quality and health
 
-| MSN feature | Clima | Milestone | Notes |
+| MSN feature | Climat | Milestone | Notes |
 |---|---|---|---|
 | AQI with pollutant breakdown | ✅ **better** — both US and European AQI | M4 | |
 | AQI forecast | ✅ | M4 | 4–5 days depending on CAMS domain |
@@ -56,7 +56,7 @@ Legend: ✅ ship it · ⭕ partial / region-gated · ❌ deliberately not doing 
 
 ## 5.4 Historical and climate
 
-| MSN feature | Clima | Milestone | Notes |
+| MSN feature | Climat | Milestone | Notes |
 |---|---|---|---|
 | Historical averages for the location | ✅ | M5 | ERA5 via Open-Meteo Archive (1940→) |
 | Same-day history across ~3 decades | ✅ **equal** | M5 | `HistoryDecades` chart |
@@ -66,7 +66,7 @@ Legend: ✅ ship it · ⭕ partial / region-gated · ❌ deliberately not doing 
 
 ## 5.5 Where we deliberately diverge from MSN
 
-| MSN behaviour | Clima |
+| MSN behaviour | Climat |
 |---|---|
 | MSN news feed injected into the weather app | ❌ **Never.** This is the most-complained-about thing about the app |
 | Ads | ❌ Never |
@@ -87,7 +87,7 @@ These are the reasons someone switches, not just the reasons they don't complain
 | **Radar on Linux, properly** | The single loudest documented gap; people keep Windows machines for this | **M3** |
 | **Offline-first** | Works on a plane, in a tent, on hotel wifi. No competitor on Linux does this | **M1** |
 | **Plasma applet + GNOME extension from the same engine** | Real desktop citizenship, not a window that happens to run on Linux | **M6** |
-| **`clima-cli`** — scriptable forecast for status bars, waybar, tmux, scripts | The Linux audience will love this and it costs us little | M4 |
+| **`climat-cli`** — scriptable forecast for status bars, waybar, tmux, scripts | The Linux audience will love this and it costs us little | M4 |
 | **Per-quantity units** (°C with mph, mm with inHg) | Everyone gets this wrong | M2 |
 | **Full data export** (CSV/JSON of everything on screen) | Enthusiasts and researchers | M6 |
 | **Accessible charts** (screen-reader data tables, colour-blind-safe, keyboard scrubbing) | Nobody in this category does it | M2 onward |

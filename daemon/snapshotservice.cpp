@@ -3,16 +3,16 @@
 
 #include "snapshotservice.h"
 
-#include "libclima/cache/cachestore.h"
-#include "libclima/core/clock.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/places/locationcontroller.h"
-#include "libclima/providers/airquality/openmeteoairqualityprovider.h"
-#include "libclima/providers/eccc/ecccalertprovider.h"
-#include "libclima/providers/metno/metnoforecastprovider.h"
-#include "libclima/providers/nws/nwsalertprovider.h"
-#include "libclima/providers/openmeteo/openmeteoforecastprovider.h"
-#include "libclima/providers/registry.h"
+#include "libclimat/cache/cachestore.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/places/locationcontroller.h"
+#include "libclimat/providers/airquality/openmeteoairqualityprovider.h"
+#include "libclimat/providers/eccc/ecccalertprovider.h"
+#include "libclimat/providers/metno/metnoforecastprovider.h"
+#include "libclimat/providers/nws/nwsalertprovider.h"
+#include "libclimat/providers/openmeteo/openmeteoforecastprovider.h"
+#include "libclimat/providers/registry.h"
 
 #include <QFile>
 #include <QFileInfo>
@@ -23,12 +23,12 @@
 
 #include <algorithm>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
 // One timer for every watched place. It is deliberately not the TTL: the
-// providers consult libclima's own cache policy and only open a socket when
+// providers consult libclimat's own cache policy and only open a socket when
 // what they hold has actually gone stale, so this is how often we *ask*, not
 // how often we fetch. Putting a second TTL here would be a second policy that
 // could disagree with the first.
@@ -75,7 +75,7 @@ void SnapshotService::configure(const QString &fixtureName)
     if (!opened) {
         // Same posture as the app: a cache that will not open is a daemon that
         // asks the network more often, not a daemon that cannot serve.
-        qWarning("clima-daemon: the cache could not be opened (%s); "
+        qWarning("climat-daemon: the cache could not be opened (%s); "
                  "widgets will not survive going offline",
                  qPrintable(opened.error().toString()));
     }
@@ -132,7 +132,7 @@ void SnapshotService::registerProviders()
 {
     const auto complain = [](const Status &status, const char *what) {
         if (!status) {
-            qFatal("clima-daemon: %s could not be registered: %s", what,
+            qFatal("climat-daemon: %s could not be registered: %s", what,
                    qPrintable(status.error().toString()));
         }
     };
@@ -515,7 +515,7 @@ QString SnapshotService::subscribe(const QString    &placeId,
     // emitted before anybody is listening for it, and a widget then shows its
     // waiting skeleton until the next poll five minutes later.
     //
-    // Measured, not reasoned about. Every tile in clima-widget came up blank
+    // Measured, not reasoned about. Every tile in climat-widget came up blank
     // against a live daemon while `gdbus monitor` showed the signals going out.
     //
     // The subscriber calls GetSnapshot once after its match rule is in place,
@@ -545,7 +545,7 @@ QByteArray SnapshotService::catalogue() const
     // ListWidgets answers the same thing whether the daemon was started from a
     // build directory, a .deb or inside a Flatpak. It is the same bytes the
     // test in tests/tst_wiresnapshot.cpp checks.
-    QFile file(QStringLiteral(":/clima/catalogue.json"));
+    QFile file(QStringLiteral(":/climat/catalogue.json"));
     if (!file.open(QIODevice::ReadOnly))
         return {};
     return file.readAll();

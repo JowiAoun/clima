@@ -12,9 +12,9 @@
 # nobody reviewed; an explicit list fails loudly instead.
 
 version = 1
-SPDX-PackageName = "Clima"
+SPDX-PackageName = "Climat"
 SPDX-PackageSupplier = "Jowi Aoun"
-SPDX-PackageDownloadLocation = "https://github.com/JowiAoun/clima"
+SPDX-PackageDownloadLocation = "https://github.com/JowiAoun/climat"
 
 # Prototype screenshots. These are authored artwork — hand-tuned layout and
 # colour rendered to a PNG — so they take the same licence as the design docs
@@ -37,7 +37,7 @@ SPDX-License-Identifier = "CC-BY-SA-4.0"
 
 # The application icon at the hicolor sizes.
 #
-# CC-BY-SA-4.0, matching packaging/icons/clima.svg, which carries the licence in
+# CC-BY-SA-4.0, matching packaging/icons/climat.svg, which carries the licence in
 # a header of its own and which these are cut from by scripts/icons.sh. The same
 # reasoning the golden-image block at the bottom of this file sets out, applied
 # to a different source: a rendering inherits the licence of the thing it is a
@@ -50,15 +50,15 @@ SPDX-License-Identifier = "CC-BY-SA-4.0"
 # drifting from the master. PNG has nowhere to put a header.
 [[annotations]]
 path = [
-    "packaging/icons/clima-16.png",
-    "packaging/icons/clima-24.png",
-    "packaging/icons/clima-32.png",
-    "packaging/icons/clima-48.png",
-    "packaging/icons/clima-64.png",
-    "packaging/icons/clima-128.png",
-    "packaging/icons/clima-256.png",
-    "packaging/icons/clima-512.png",
-    "packaging/icons/clima.ico",
+    "packaging/icons/climat-16.png",
+    "packaging/icons/climat-24.png",
+    "packaging/icons/climat-32.png",
+    "packaging/icons/climat-48.png",
+    "packaging/icons/climat-64.png",
+    "packaging/icons/climat-128.png",
+    "packaging/icons/climat-256.png",
+    "packaging/icons/climat-512.png",
+    "packaging/icons/climat.ico",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
@@ -119,7 +119,7 @@ SPDX-License-Identifier = "OFL-1.1"
 # cities15000.cgx is tools/geonames/pack.mjs's output: the cities15000 dump
 # reduced to seven columns and deflated. A transformation of a CC-BY work is a
 # work under the same licence; trimming columns and changing the container does
-# not make it ours. See libclima/providers/geocoding/geonamesindex.h for what
+# not make it ours. See libclimat/providers/geocoding/geonamesindex.h for what
 # it is for, which begins with Nominatim answering 403 to the first
 # reverse-geocoding request a properly identified client sends it.
 #
@@ -134,7 +134,7 @@ SPDX-License-Identifier = "OFL-1.1"
 # return the credit line from attribution() for the About → Data sources screen.
 [[annotations]]
 path = [
-    "libclima/providers/geocoding/data/cities15000.cgx",
+    "libclimat/providers/geocoding/data/cities15000.cgx",
     "tests/fixtures/geocoding/get-toronto.json",
     "tests/fixtures/geocoding/search-kigali.json",
     "tests/fixtures/geocoding/search-no-results.json",
@@ -163,7 +163,7 @@ SPDX-License-Identifier = "CC-BY-4.0"
 # The two Open-Meteo files are the whole reason the pollen gate can be tested
 # without a network: Toronto's six pollen series are null 72/72 and Berlin's are
 # null 0/72, recorded on the same afternoon. See
-# libclima/providers/airquality/openmeteoairqualityprovider.h.
+# libclimat/providers/airquality/openmeteoairqualityprovider.h.
 #
 # Both providers' credit lines are returned by attribution() and rendered on the
 # About → Data sources screen, which is where the obligation is actually
@@ -206,13 +206,13 @@ SPDX-License-Identifier = "CC-BY-4.0"
 
 # The fixtures the SHIPPED BINARY carries, as distinct from the ones the tests
 # read. Same service, same licence, and a separate block because the obligation
-# is a different one: these bytes are compiled into `clima` and are redistributed
+# is a different one: these bytes are compiled into `climat` and are redistributed
 # with it, so CC-BY 4.0 attaches to the release rather than to the repository.
 #
 # The app discharges the credit at run time — Engine.sources is generated from
 # the provider registry and the recorded provider's attribution() returns
 # Open-Meteo's exact credit line plus a note saying which afternoon it is. See
-# libclima/providers/fixture/data/README.md for what each one is evidence of.
+# libclimat/providers/fixture/data/README.md for what each one is evidence of.
 #
 # `kampala/forecast.json` is byte-identical to
 # tests/fixtures/openmeteo/kampala-precip-spike.json, deliberately: the adapter
@@ -220,13 +220,13 @@ SPDX-License-Identifier = "CC-BY-4.0"
 # 0.40 mm, one at the parser and one at the chart.
 [[annotations]]
 path = [
-    "libclima/providers/fixture/data/berlin/airquality.json",
-    "libclima/providers/fixture/data/berlin/forecast.json",
-    "libclima/providers/fixture/data/kampala/forecast.json",
-    "libclima/providers/fixture/data/seattle/airquality.json",
-    "libclima/providers/fixture/data/seattle/forecast.json",
-    "libclima/providers/fixture/data/toronto/airquality.json",
-    "libclima/providers/fixture/data/toronto/forecast.json",
+    "libclimat/providers/fixture/data/berlin/airquality.json",
+    "libclimat/providers/fixture/data/berlin/forecast.json",
+    "libclimat/providers/fixture/data/kampala/forecast.json",
+    "libclimat/providers/fixture/data/seattle/airquality.json",
+    "libclimat/providers/fixture/data/seattle/forecast.json",
+    "libclimat/providers/fixture/data/toronto/airquality.json",
+    "libclimat/providers/fixture/data/toronto/forecast.json",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Open-Meteo (https://open-meteo.com)"
@@ -251,13 +251,13 @@ SPDX-License-Identifier = "CC-BY-4.0"
 #                       somebody issued. `LicenseRef-` is the mechanism REUSE
 #                       provides for exactly this case.
 #
-# The `libclima/providers/fixture/data/**/alerts.json` files are compiled into
+# The `libclimat/providers/fixture/data/**/alerts.json` files are compiled into
 # the shipped binary, so both obligations attach to the release and not only to
 # the repository — discharged at run time through Engine.sources, the same way
 # the forecast recordings' are.
 [[annotations]]
 path = [
-    "libclima/providers/fixture/data/toronto/alerts.json",
+    "libclimat/providers/fixture/data/toronto/alerts.json",
     "tests/fixtures/alerts/eccc/annapolis-heat.json",
     "tests/fixtures/alerts/eccc/fraser-valley-air-quality.json",
     "tests/fixtures/alerts/eccc/toronto-clear.json",
@@ -268,7 +268,7 @@ SPDX-License-Identifier = "LicenseRef-OGL-Canada-2.0"
 
 [[annotations]]
 path = [
-    "libclima/providers/fixture/data/seattle/alerts.json",
+    "libclimat/providers/fixture/data/seattle/alerts.json",
     "tests/fixtures/alerts/nws/denver-air-quality.json",
     "tests/fixtures/alerts/nws/minneapolis-clear.json",
     "tests/fixtures/alerts/nws/out-of-bounds.json",
@@ -285,12 +285,12 @@ SPDX-License-Identifier = "LicenseRef-US-Public-Domain"
 # like every other JSON file in the repository. The extension's own code carries
 # ordinary SPDX headers.
 [[annotations]]
-path = ["packaging/gnome-shell/clima@JowiAoun.github.io/metadata.json"]
+path = ["packaging/gnome-shell/climat@JowiAoun.github.io/metadata.json"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
-# The wire snapshots: what clima-daemon SENDS, recorded by driving it against
+# The wire snapshots: what climat-daemon SENDS, recorded by driving it against
 # the fixtures above (tests/fixtures/wire/record.sh).
 #
 # Derived rather than captured, and the annotation says so by naming all three
@@ -326,10 +326,10 @@ SPDX-License-Identifier = "GPL-3.0-or-later AND CC-BY-4.0 AND LicenseRef-US-Publ
 # annotated here rather than inline.
 [[annotations]]
 path = [
-    "libclima/providers/fixture/data/berlin/fixture.json",
-    "libclima/providers/fixture/data/kampala/fixture.json",
-    "libclima/providers/fixture/data/seattle/fixture.json",
-    "libclima/providers/fixture/data/toronto/fixture.json",
+    "libclimat/providers/fixture/data/berlin/fixture.json",
+    "libclimat/providers/fixture/data/kampala/fixture.json",
+    "libclimat/providers/fixture/data/seattle/fixture.json",
+    "libclimat/providers/fixture/data/toronto/fixture.json",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
@@ -373,7 +373,7 @@ SPDX-License-Identifier = "CC0-1.0"
 # GPL-3.0-or-later rather than the CC0 that the other machine-generated files
 # above take, and rather than the CC-BY-SA-4.0 that assets take, because these
 # are neither. A golden image is a rendering of the application's own source: it
-# is derived from the QML in app/qml/Clima, it is regenerated by
+# is derived from the QML in app/qml/Climat, it is regenerated by
 # scripts/golden.sh whenever that changes, and it has no existence apart from
 # it. Licensing the output of GPL sources more permissively than the sources
 # would be a way of publishing them under another licence by photographing them.
@@ -394,7 +394,7 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 # gnome-shell parses — it rejects an unknown key and JSON has nowhere to put a
 # comment — so the header goes here. extension.js next to it carries its own.
 [[annotations]]
-path = ["tests/shell/clima-window-probe@clima.invalid/metadata.json"]
+path = ["tests/shell/climat-window-probe@climat.invalid/metadata.json"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
 SPDX-License-Identifier = "GPL-3.0-or-later"
@@ -416,7 +416,7 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 # of licence statement that goes quietly missing.
 #
 # Globbed rather than named, because the argument applies to every catalogue
-# and not only to the template: the first clima_fr.ts would otherwise arrive
+# and not only to the template: the first climat_fr.ts would otherwise arrive
 # uncovered and break `reuse lint` in the commit that adds a translation.
 [[annotations]]
 path = ["app/translations/*.ts"]

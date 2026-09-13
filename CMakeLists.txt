@@ -7,7 +7,7 @@
 #
 #   nix develop -c cmake --preset dev
 #   nix develop -c cmake --build build/dev
-#   nix develop -c ./build/dev/app/clima
+#   nix develop -c ./build/dev/app/climat
 #
 # 3.21 is the floor and it is not arbitrary: it is the first release with the
 # `qt_standard_project_setup` story we depend on and the first that ships
@@ -17,15 +17,15 @@
 # that, the answer is to fix the dependency, not to lower this number.
 cmake_minimum_required(VERSION 3.21)
 
-project(clima
+project(climat
     # The single source of truth for the version, and the marker is load-bearing
     # rather than decorative: release-please's generic updater rewrites the
     # number on any line carrying that comment, which is how a merged release PR
-    # bumps CLIMA_VERSION, the AppStream <release>, the MSI ProductVersion and
+    # bumps CLIMAT_VERSION, the AppStream <release>, the MSI ProductVersion and
     # the MET Norway User-Agent from one edit. See .github/release-please-config.json.
     VERSION 0.1.0 # x-release-please-version
     DESCRIPTION "A native Qt 6 weather app"
-    HOMEPAGE_URL "https://github.com/JowiAoun/clima"
+    HOMEPAGE_URL "https://github.com/JowiAoun/climat"
     LANGUAGES CXX
 )
 
@@ -38,7 +38,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # file that would otherwise carry its own copy of the string. A cache variable
 # rather than a plain `set` so a downstream packager can rename the app without
 # patching sources — a fork, a nightly channel, a distro rebrand.
-set(CLIMA_APP_ID "io.github.JowiAoun.Clima" CACHE STRING
+set(CLIMAT_APP_ID "io.github.JowiAoun.Climat" CACHE STRING
     "Reverse-DNS application ID: desktop file, AppStream, D-Bus, icon name")
 
 # Where a weather service can reach a human about our traffic.
@@ -50,59 +50,59 @@ set(CLIMA_APP_ID "io.github.JowiAoun.Clima" CACHE STRING
 # User-Agent is refused outright.
 #
 # A cache variable, and this is the one that a downstream packager genuinely
-# should override. A distribution shipping a rebuilt Clima will be the source of
+# should override. A distribution shipping a rebuilt Climat will be the source of
 # that traffic, and a rate-limit complaint about it should arrive in an inbox
 # they read rather than in ours.
-set(CLIMA_CONTACT "https://github.com/JowiAoun/clima/issues" CACHE STRING
+set(CLIMAT_CONTACT "https://github.com/JowiAoun/climat/issues" CACHE STRING
     "Contact channel in the outbound User-Agent. Packagers: point this at yours")
 
 # The daemon's object path: the app ID with its dots turned into slashes.
 #
 # Computed here rather than in daemon/ because there are two ends of that bus
-# and both have to spell it identically — clima-daemon exports the object and
-# clima-widget calls it. A path they disagree about is a service that registers
+# and both have to spell it identically — climat-daemon exports the object and
+# climat-widget calls it. A path they disagree about is a service that registers
 # successfully and then answers nothing, which looks like a daemon bug from one
 # side and a widget bug from the other. Both configure the same
 # daemon/daemonconfig.h.in from this variable, so there is one spelling.
-string(REPLACE "." "/" CLIMA_DAEMON_PATH "/${CLIMA_APP_ID}")
-set(CLIMA_DAEMON_PATH "${CLIMA_DAEMON_PATH}/Daemon")
+string(REPLACE "." "/" CLIMAT_DAEMON_PATH "/${CLIMAT_APP_ID}")
+set(CLIMAT_DAEMON_PATH "${CLIMAT_DAEMON_PATH}/Daemon")
 
 # ---- options ----------------------------------------------------------------
 # Declared now, wired up as each lands. An option that appears the same day as
 # the feature it guards is an option nobody remembered to check for, so they go
 # in first and are honoured as the code arrives.
-option(CLIMA_DEV_TOOLS    "Build development-only tooling (gallery, harnesses)" ON)
-option(CLIMA_BUILD_GALLERY "Build the component gallery"                        ON)
-option(CLIMA_BUILD_TESTS  "Build the test suite"                                ON)
+option(CLIMAT_DEV_TOOLS    "Build development-only tooling (gallery, harnesses)" ON)
+option(CLIMAT_BUILD_GALLERY "Build the component gallery"                        ON)
+option(CLIMAT_BUILD_TESTS  "Build the test suite"                                ON)
 
 # ---- Qt ---------------------------------------------------------------------
 # 6.8 is the LTS floor from D2. Ask for exactly the components the code uses:
 # an unused `find_package` component is a dependency the packager has to satisfy
 # for nothing, and — more to the point here — a chance to pull in a module whose
-# licence we cannot accept. See cmake/ClimaLicenceGuard.cmake.
-include(ClimaLicenceGuard)
-include(ClimaEngineGuard)
+# licence we cannot accept. See cmake/ClimatLicenceGuard.cmake.
+include(ClimatLicenceGuard)
+include(ClimatEngineGuard)
 
-# Network and Sql are libclima's, not the app's. Test is the test suite's, and
+# Network and Sql are libclimat's, not the app's. Test is the test suite's, and
 # it is Qt Test rather than Catch2 or GoogleTest on purpose: D8 in
 # docs/03-tech-stack.md rules out Conan and vcpkg so that a distribution
 # packager can build this from what their distribution already ships, and a
 # test framework fetched at configure time is exactly the dependency that rules
 # out. Qt Test comes with the Qt they already have, and QSignalSpy and
 # QTRY_COMPARE are the two shapes an asynchronous network client is tested with.
-set(clima_qt_components Core Gui Quick Network Sql)
-if(CLIMA_BUILD_TESTS)
+set(climat_qt_components Core Gui Quick Network Sql)
+if(CLIMAT_BUILD_TESTS)
     # QuickTest as well as Test, because the 13,400 lines this project is mostly
     # made of are QML and a C++ test can only reach them through a keyhole. It
     # is the runner, not a second framework: QUICK_TEST_MAIN_WITH_SETUP builds a
     # QQmlEngine per test file and reports through the same QTestLib that every
     # other test here already reports through, so ctest sees one list.
-    list(APPEND clima_qt_components Test QuickTest)
+    list(APPEND climat_qt_components Test QuickTest)
 endif()
 
-clima_guard_qt_components(${clima_qt_components})
+climat_guard_qt_components(${climat_qt_components})
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS ${clima_qt_components})
+find_package(Qt6 6.8 REQUIRED COMPONENTS ${climat_qt_components})
 qt_standard_project_setup(REQUIRES 6.8)
 
 # ---- the one optional Qt module ---------------------------------------------
@@ -112,24 +112,24 @@ qt_standard_project_setup(REQUIRES 6.8)
 # deliberate:
 #
 #   * Optional, because a packager should not have to satisfy a dependency for
-#     a feature their users may never press. libclima compiles the backend out
+#     a feature their users may never press. libclimat compiles the backend out
 #     when this is absent and DeviceLocator::create() hands back a locator that
 #     reports Unavailable — the same branch a user who denied permission takes,
 #     so there is one code path and it is exercised either way.
 #
-#   * Here rather than in libclima/, where the code that uses it lives, because
+#   * Here rather than in libclimat/, where the code that uses it lives, because
 #     a find_package in a subdirectory creates targets only that subdirectory
 #     can see. Qt Positioning brings plugin targets that Qt's own executable
 #     finalizer resolves from app/ and gallery/, and those are siblings.
 #
 # It goes through the licence guard like everything else. Qt Positioning is
 # LGPLv3-or-commercial, not one of the GPLv3-only modules.
-clima_guard_qt_components(Positioning)
+climat_guard_qt_components(Positioning)
 find_package(Qt6 6.8 QUIET COMPONENTS Positioning)
 
 if(NOT TARGET Qt6::Positioning)
     message(STATUS
-        "clima: Qt6::Positioning was not found, so \"use my location\" is compiled out. "
+        "climat: Qt6::Positioning was not found, so \"use my location\" is compiled out. "
         "Everything else works; the user searches for a place by name.")
 endif()
 
@@ -146,12 +146,12 @@ endif()
 # the floor under both. See app/platform/systemappearance.h for the order.
 #
 # LGPLv3-or-commercial, so it clears the guard.
-clima_guard_qt_components(DBus)
+climat_guard_qt_components(DBus)
 find_package(Qt6 6.8 QUIET COMPONENTS DBus)
 
 if(NOT TARGET Qt6::DBus)
     message(STATUS
-        "clima: Qt6::DBus was not found, so the desktop's colour scheme and "
+        "climat: Qt6::DBus was not found, so the desktop's colour scheme and "
         "reduced-motion preference are read from QStyleHints alone. The three-way "
         "override in Settings still works.")
 endif()
@@ -160,7 +160,7 @@ endif()
 # preference — it is what makes the build's own QML modules discoverable as
 # modules rather than as resources baked into one executable:
 #
-#   * `all_qmllint` can resolve `import Clima`
+#   * `all_qmllint` can resolve `import Climat`
 #   * qmlls (the language server) resolves it too, so an editor stops
 #     underlining every type in the module
 #   * QML_IMPORT_PATH=build/dev/qml qml … loads our types without a build of the
@@ -172,13 +172,13 @@ set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
 
 # The engine first, because app/ links it. It is also the only directory here
 # whose sources are MPL-2.0 rather than GPL-3.0-or-later — see D6, and
-# libclima/CMakeLists.txt, which explains why the build file itself is not.
-add_subdirectory(libclima)
+# libclimat/CMakeLists.txt, which explains why the build file itself is not.
+add_subdirectory(libclimat)
 
 add_subdirectory(app)
 
 # The command-line client. Every platform, because everything it needs is in
-# libclima and Qt Core: a status bar on Windows wants the forecast as much as
+# libclimat and Qt Core: a status bar on Windows wants the forecast as much as
 # waybar does. See cli/CMakeLists.txt.
 add_subdirectory(cli)
 
@@ -201,29 +201,29 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET Qt6::DBus)
     add_subdirectory(widgets)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS
-        "clima: Qt6::DBus was not found, so clima-daemon is not built and the "
+        "climat: Qt6::DBus was not found, so climat-daemon is not built and the "
         "desktop widgets have nothing to read from. The app is unaffected.")
 endif()
 
 # The component gallery is a separate executable and not a mode of the app, so
-# `CLIMA_BUILD_GALLERY=OFF` is a directory that is never entered rather than a
+# `CLIMAT_BUILD_GALLERY=OFF` is a directory that is never entered rather than a
 # preprocessor symbol threaded through the product. That is the whole point of
 # it having moved: a storybook shipping inside a weather app is wrong on
 # principle, and it also costs about eleven hundred lines against the <15 MB
 # budget in docs/03-tech-stack.md §3.4.
 #
-# It depends on `climaqml`, which app/ defines, so it is entered second.
-if(CLIMA_BUILD_GALLERY)
+# It depends on `climatqml`, which app/ defines, so it is entered second.
+if(CLIMAT_BUILD_GALLERY)
     add_subdirectory(gallery)
 endif()
 
 # A harness that prints what the provider adapters make of a recorded fixture.
 # The gallery is for looking at components; this is for looking at data, and it
 # exists because the pollen gate in
-# libclima/providers/airquality/openmeteoairqualityprovider.h is the kind of
+# libclimat/providers/airquality/openmeteoairqualityprovider.h is the kind of
 # rule a test can satisfy while the screen still says something untrue. Guarded
-# by CLIMA_DEV_TOOLS, which is what that option was declared for.
-if(CLIMA_DEV_TOOLS)
+# by CLIMAT_DEV_TOOLS, which is what that option was declared for.
+if(CLIMAT_DEV_TOOLS)
     add_subdirectory(tools/provider-probe)
 
     # And its opposite number: the same shape of report, built from a *live*
@@ -237,7 +237,7 @@ if(CLIMA_DEV_TOOLS)
     # forward search, and an offline reverse lookup that prints the distance
     # and whether the point was inside the settlement's modelled footprint.
     # The second half is there because the ranking rule in
-    # libclima/providers/geocoding/geonamesindex.h is exactly the kind of
+    # libclimat/providers/geocoding/geonamesindex.h is exactly the kind of
     # heuristic that passes four test coordinates and says something silly
     # about the fifth.
     add_subdirectory(tools/geonames)
@@ -248,7 +248,7 @@ endif()
 # that cannot be installed is not a build anybody can package, and the
 # directory returns immediately on every platform that has no use for it.
 #
-# It reads CLIMA_APP_ID and PROJECT_VERSION and defines no targets, so it could
+# It reads CLIMAT_APP_ID and PROJECT_VERSION and defines no targets, so it could
 # go anywhere after the identity block above. It is here, last of the product
 # directories, because it is the only one whose output is not code.
 add_subdirectory(packaging)
@@ -257,7 +257,7 @@ add_subdirectory(packaging)
 # --test-dir build/dev` finds no tests at all and says so in a way that reads
 # like the tests failed to build. It is guarded by the same option as the
 # directory below so that a packaging build asks for neither.
-if(CLIMA_BUILD_TESTS)
+if(CLIMAT_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
@@ -276,5 +276,5 @@ endif()
 # tree — so there is no route to a Windows archive that has not been through
 # it. See .github/workflows/release.yml and packaging/QT-SOURCE-OFFER.txt.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    include(ClimaCPack)
+    include(ClimatCPack)
 endif()

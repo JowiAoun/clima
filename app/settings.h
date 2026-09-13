@@ -68,7 +68,7 @@ class Settings : public QObject
 
     // Whether the page gradient follows the sky over the place on screen —
     // night, dawn, day, dusk — or holds at one palette. On by default, which is
-    // what this app has always done. See app/qml/Clima/Main.qml, which owns the
+    // what this app has always done. See app/qml/Climat/Main.qml, which owns the
     // rule this switches between, and which pins it under `--grab` for the same
     // reason it pins the colour scheme there.
     Q_PROPERTY(bool dynamicBackground READ dynamicBackground WRITE setDynamicBackground
@@ -81,7 +81,7 @@ class Settings : public QObject
                    NOTIFY clockFormatChanged)
 
     // Window geometry. Position is stored as well as size, because a
-    // multi-monitor user who always puts Clima on the left screen wants it
+    // multi-monitor user who always puts Climat on the left screen wants it
     // there again; whether it can be honoured is a platform question — see
     // Main.qml, which restores the size and deliberately does not restore the
     // position on Wayland.
@@ -100,7 +100,7 @@ class Settings : public QObject
     Q_PROPERTY(bool alertNotifications READ alertNotifications WRITE setAlertNotifications
                    NOTIFY alertNotificationsChanged)
 
-    // Per quantity, never bundled. Values are the spellings libclima's unit
+    // Per quantity, never bundled. Values are the spellings libclimat's unit
     // conversion will take, lowercase and unpunctuated so they are safe in an
     // INI file and in a URL query string.
     Q_PROPERTY(QString temperatureUnit   READ temperatureUnit   WRITE setTemperatureUnit   NOTIFY temperatureUnitChanged)
@@ -120,8 +120,8 @@ public:
     // forward if there is one.
     static void prepareStorage();
 
-    // Identities Clima has used and no longer writes to, newest first. Empty
-    // today, because Clima has only ever had one. A rename adds a line here and
+    // Identities Climat has used and no longer writes to, newest first. Empty
+    // today, because Climat has only ever had one. A rename adds a line here and
     // nothing else changes.
     static QList<SettingsIdentity> supersededIdentities();
 

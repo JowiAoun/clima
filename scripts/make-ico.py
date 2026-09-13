@@ -13,7 +13,7 @@ the alternative is asking every contributor to install ImageMagick to convert
 eight PNGs into one file.
 
 It is deliberately not a rasteriser. It cannot invent a size that is not
-already beside it, which keeps clima.svg the single master: change the drawing,
+already beside it, which keeps climat.svg the single master: change the drawing,
 run `scripts/icons.sh render`, and the .ico follows because its inputs did.
 """
 
@@ -38,7 +38,7 @@ def main() -> int:
 
     images = []
     for size in SIZES:
-        png = icons_dir / f"clima-{size}.png"
+        png = icons_dir / f"climat-{size}.png"
         if not png.is_file():
             print(f"make-ico: {png} is missing — run scripts/icons.sh render", file=sys.stderr)
             return 1

@@ -2,9 +2,9 @@ SPDX-FileCopyrightText: 2026 Jowi Aoun
 SPDX-License-Identifier: CC0-1.0
 
                 WRITTEN OFFER FOR THE CORRESPONDING SOURCE
-                       OF THE Qt LIBRARIES IN CLIMA
+                       OF THE Qt LIBRARIES IN CLIMAT
 
-Clima is built on the Qt framework, which is used here under the GNU Lesser
+Climat is built on the Qt framework, which is used here under the GNU Lesser
 General Public License, version 3 (LGPLv3). LGPLv3 incorporates section 6 of
 the GNU General Public License version 3, which requires that anyone who
 conveys the library in object-code form also convey the Corresponding Source,
@@ -38,7 +38,7 @@ misleading in the opposite direction.
 
   THE OFFER
 
-For any Clima release listed above, and for a period of at least THREE YEARS
+For any Climat release listed above, and for a period of at least THREE YEARS
 from the date that release was published, the copyright holder named below
 will provide, to anyone who possesses that release, a complete machine-readable
 copy of the Corresponding Source for the Qt libraries distributed within it.
@@ -62,7 +62,7 @@ the Qt shared libraries that ship beside the executable.
 
 To request the source, open an issue at:
 
-    https://github.com/JowiAoun/clima/issues
+    https://github.com/JowiAoun/climat/issues
 
 or write to the address in the Maintainer field of the package.
 
@@ -72,4 +72,4 @@ above stands regardless, for the full three years, because a release asset is a
 convenience and an offer is a commitment.
 
 Copyright holder:  Jowi Aoun
-Project:           https://github.com/JowiAoun/clima
+Project:           https://github.com/JowiAoun/climat

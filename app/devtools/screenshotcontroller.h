@@ -12,10 +12,10 @@
 // longest one.
 //
 // ---- why this compiles at all in a packaged build ---------------------------
-// Only just. `--grab` ships — the issue template says "attach `clima --grab
+// Only just. `--grab` ships — the issue template says "attach `climat --grab
 // bug.png`", and a flag that only exists in a developer build cannot be in an
 // issue template — so the code that implements --grab has to ship with it, and
-// that code is here. Everything past it is behind CLIMA_DEV_TOOLS: the film
+// that code is here. Everything past it is behind CLIMAT_DEV_TOOLS: the film
 // timer, the poke table, the walk and the scroll are compiled out, and what a
 // packaged binary carries is one QTimer and one grabToImage.
 //
@@ -60,14 +60,14 @@
 // It did, once: every value below was an `AppOptions::instance()->...` call
 // three frames deep in a private slot. That was fine while there was one
 // executable, and it stopped being fine the moment there were two —
-// `clima-gallery` parses its own flags into its own GalleryOptions, and a
+// `climat-gallery` parses its own flags into its own GalleryOptions, and a
 // harness that reaches for the weather app's singleton would have read an
 // AppOptions nobody ever filled and quietly photographed nothing.
 //
 // So the inputs are bound, like `window` and `shell` always were. What this
 // class knows is "photograph that window, having first done these things to
 // that item"; which flag asked for it is the caller's business. Both Main.qml
-// and Clima.Gallery's Main.qml are that caller, and neither has to explain
+// and Climat.Gallery's Main.qml are that caller, and neither has to explain
 // itself twice.
 //
 // QQuickItem and QQuickWindow are included rather than forward-declared: moc
@@ -125,7 +125,7 @@ class ScreenshotController : public QObject
     // ---- what to do to the scene first -------------------------------------
     //
     // Declared in every build, like AppOptions' are and for the same reason:
-    // only their *use* is behind CLIMA_DEV_TOOLS, so a packaged build still
+    // only their *use* is behind CLIMAT_DEV_TOOLS, so a packaged build still
     // loads a Main.qml that binds them. See appoptions.h.
     Q_PROPERTY(QStringList pokes  MEMBER m_pokes  NOTIFY pokesChanged)
     Q_PROPERTY(int         walk   MEMBER m_walk   NOTIFY walkChanged)
@@ -219,7 +219,7 @@ private:
     int           m_day     = -1;
     bool          m_list    = false;
 
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
     // The state flags — metric, day, list — applied as soon as there is a shell
     // to apply them to.
     void applyOpeningState();

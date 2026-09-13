@@ -27,15 +27,15 @@
 //                and what it returns is a decision this file records:
 //                ErrorKind::Unsupported, not a city on another continent.
 
-#include "libclima/providers/geocoding/geocodingparser.h"
-#include "libclima/providers/geocoding/geonamesindex.h"
-#include "libclima/providers/geocoding/offlinereversegeocoder.h"
+#include "libclimat/providers/geocoding/geocodingparser.h"
+#include "libclimat/providers/geocoding/geonamesindex.h"
+#include "libclimat/providers/geocoding/offlinereversegeocoder.h"
 
 #include <QFile>
 #include <QFileInfo>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -49,7 +49,7 @@ Coordinate at(double latitude, double longitude)
 
 QByteArray fixture(const QString &name)
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR) + QStringLiteral("/tests/fixtures/geocoding/")
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR) + QStringLiteral("/tests/fixtures/geocoding/")
                + name);
     if (!file.open(QIODevice::ReadOnly))
         return {};

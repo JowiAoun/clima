@@ -73,7 +73,7 @@ offline-first cache, multi-provider fallback.
 
 ## 1.5 Positioning statement
 
-> **Clima** is a native, ad-free, open-source weather app for Linux, Windows and macOS
+> **Climat** is a native, ad-free, open-source weather app for Linux, Windows and macOS
 > that shows you not just a forecast but *how much to trust it* — by comparing the
 > world's major forecast models side by side, on top of a global radar map.
 

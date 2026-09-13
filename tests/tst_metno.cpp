@@ -21,10 +21,10 @@
 //      between hiding the gust row and telling somebody in a gale that the wind
 //      is steady.
 
-#include "libclima/core/clock.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/providers/metno/metnoforecastprovider.h"
-#include "libclima/providers/metno/symbolcode.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/providers/metno/metnoforecastprovider.h"
+#include "libclimat/providers/metno/symbolcode.h"
 #include "support/httpstub.h"
 #include "support/networkguard.h"
 
@@ -35,13 +35,13 @@
 #include <QSignalSpy>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
 QByteArray fixture()
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR)
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR)
                + QStringLiteral("/tests/fixtures/metno/toronto.json"));
     if (!file.open(QIODevice::ReadOnly))
         return {};
@@ -145,7 +145,7 @@ void TestMetNo::everySymbolInTheLegendMaps()
 
     QVERIFY2(unmapped.isEmpty(),
              qPrintable(QStringLiteral("MET symbols with no WMO code: %1\n\n"
-                                       "  Add them to libclima/providers/metno/symbolcode.cpp. "
+                                       "  Add them to libclimat/providers/metno/symbolcode.cpp. "
                                        "An unmapped symbol is a\n"
                                        "  missing icon in one weather condition on the fallback "
                                        "path, which is the\n"

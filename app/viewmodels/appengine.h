@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Where libclima is assembled, and where the offline-first loop lives.
+// Where libclimat is assembled, and where the offline-first loop lives.
 //
 // ============================================================================
 // THE LOOP, WHICH IS THE WHOLE FILE
@@ -42,10 +42,10 @@
 // Nothing downstream of that line branches on which one happened. The TTL
 // table, the backoff, the "now" marker, the past veil, the sky phase and the
 // "updated N minutes ago" line all read the clock they were handed and behave
-// identically — which is the argument libclima/core/clock.h makes at length and
+// identically — which is the argument libclimat/core/clock.h makes at length and
 // this class is the place it pays off.
 //
-// Fixture is the DEFAULT under `--grab`, under `--film`, in clima-gallery and
+// Fixture is the DEFAULT under `--grab`, under `--film`, in climat-gallery and
 // in CI. Not because those are tests but because those are the four situations
 // where a picture is going to be compared against another picture.
 //
@@ -63,10 +63,10 @@
 
 #pragma once
 
-#include "libclima/domain/airquality.h"
-#include "libclima/domain/forecast.h"
-#include "libclima/domain/place.h"
-#include "libclima/providers/fixture/fixtureprovider.h"
+#include "libclimat/domain/airquality.h"
+#include "libclimat/domain/forecast.h"
+#include "libclimat/domain/place.h"
+#include "libclimat/providers/fixture/fixtureprovider.h"
 
 #include <QObject>
 #include <QQmlEngine>
@@ -81,7 +81,7 @@ class Notifier;
 class ConditionsData;
 class ForecastData;
 
-namespace clima {
+namespace climat {
 class CacheStore;
 class Clock;
 class DeviceLocator;
@@ -99,7 +99,7 @@ class OpenMeteoForecastProvider;
 class OpenMeteoGeocoder;
 class PlaceSearchModel;
 class ProviderRegistry;
-} // namespace clima
+} // namespace climat
 
 class AppEngine : public QObject
 {
@@ -257,10 +257,10 @@ public:
     [[nodiscard]] bool notificationsAvailable() const;
 
     // For the C++ side of the app: the current snapshot, canonical units.
-    [[nodiscard]] const clima::Forecast   &forecast() const { return m_forecast; }
-    [[nodiscard]] const clima::AirQuality &airQuality() const { return m_airQuality; }
-    [[nodiscard]] clima::Place             place() const;
-    [[nodiscard]] clima::Clock            *clock() const { return m_clock.get(); }
+    [[nodiscard]] const climat::Forecast   &forecast() const { return m_forecast; }
+    [[nodiscard]] const climat::AirQuality &airQuality() const { return m_airQuality; }
+    [[nodiscard]] climat::Place             place() const;
+    [[nodiscard]] climat::Clock            *clock() const { return m_clock.get(); }
 
     [[nodiscard]] ForecastData   *forecastData() const { return m_forecastData; }
     [[nodiscard]] ConditionsData *conditionsData() const { return m_conditionsData; }
@@ -300,13 +300,13 @@ private:
     // at :17 for ever and the displayed minute changes 17 s late.
     void armMinuteTimer();
 
-    void applyForecast(const clima::Forecast &forecast, const QString &servedBy, bool fromFallback);
-    void applyAirQuality(const clima::AirQuality &airQuality);
+    void applyForecast(const climat::Forecast &forecast, const QString &servedBy, bool fromFallback);
+    void applyAirQuality(const climat::AirQuality &airQuality);
     void publish();
 
     void setInFlight(int delta);
 
-    std::unique_ptr<clima::Clock>       m_clock;
+    std::unique_ptr<climat::Clock>       m_clock;
 
     // Never started under --fixture, where the clock is frozen and a tick would
     // publish the same reading for ever.
@@ -317,35 +317,35 @@ private:
     // — --place, or --fixture off — does tick, and appoptions.cpp has already
     // said in so many words that such a capture is not reproducible.
     QTimer                              m_minute;
-    std::unique_ptr<clima::CacheStore>  m_cache;
-    std::unique_ptr<clima::HttpClient>  m_http;
-    std::unique_ptr<clima::ProviderRegistry> m_registry;
+    std::unique_ptr<climat::CacheStore>  m_cache;
+    std::unique_ptr<climat::HttpClient>  m_http;
+    std::unique_ptr<climat::ProviderRegistry> m_registry;
 
     // Live. Null in fixture mode, and vice versa: the two sets are never both
     // registered, because a chain containing a fixture and a network provider
     // would fall through from one to the other and produce a screen that is
     // half recorded and half not.
-    clima::OpenMeteoForecastProvider   *m_openMeteo   = nullptr;
-    clima::MetNoForecastProvider       *m_metNo       = nullptr;
-    clima::OpenMeteoAirQualityProvider *m_openMeteoAq = nullptr;
+    climat::OpenMeteoForecastProvider   *m_openMeteo   = nullptr;
+    climat::MetNoForecastProvider       *m_metNo       = nullptr;
+    climat::OpenMeteoAirQualityProvider *m_openMeteoAq = nullptr;
 
-    clima::EcccAlertProvider *m_eccc = nullptr;
-    clima::NwsAlertProvider  *m_nws  = nullptr;
+    climat::EcccAlertProvider *m_eccc = nullptr;
+    climat::NwsAlertProvider  *m_nws  = nullptr;
 
-    clima::FixtureForecastProvider   *m_fixtureForecast = nullptr;
-    clima::FixtureAirQualityProvider *m_fixtureAq       = nullptr;
-    clima::FixtureAlertProvider      *m_fixtureAlerts   = nullptr;
+    climat::FixtureForecastProvider   *m_fixtureForecast = nullptr;
+    climat::FixtureAirQualityProvider *m_fixtureAq       = nullptr;
+    climat::FixtureAlertProvider      *m_fixtureAlerts   = nullptr;
 
-    clima::OpenMeteoGeocoder      *m_geocoder = nullptr;
-    clima::OfflineReverseGeocoder *m_reverse  = nullptr;
-    clima::LocationController     *m_places   = nullptr;
-    clima::PlaceSearchModel       *m_search   = nullptr;
-    clima::DeviceLocator          *m_locator  = nullptr;
+    climat::OpenMeteoGeocoder      *m_geocoder = nullptr;
+    climat::OfflineReverseGeocoder *m_reverse  = nullptr;
+    climat::LocationController     *m_places   = nullptr;
+    climat::PlaceSearchModel       *m_search   = nullptr;
+    climat::DeviceLocator          *m_locator  = nullptr;
 
-    clima::Fixture m_fixture;
+    climat::Fixture m_fixture;
 
-    clima::Forecast   m_forecast;
-    clima::AirQuality m_airQuality;
+    climat::Forecast   m_forecast;
+    climat::AirQuality m_airQuality;
 
     QString m_sourceName;
     QString m_problem;

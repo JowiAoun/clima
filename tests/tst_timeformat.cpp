@@ -20,10 +20,10 @@
 // arithmetic gets wrong. Midnight is 12 AM and not 0 AM; noon is 12 PM and not
 // 0 PM; and an hourly axis is guaranteed to reach both.
 //
-// ---- why it links climaqml ---------------------------------------------------
+// ---- why it links climatqml ---------------------------------------------------
 //
-// Same reason tst_conditionsdata does: its subject is app/, not libclima.
-// `clima_forbid_gui()` is deliberately not applied, which the function in
+// Same reason tst_conditionsdata does: its subject is app/, not libclimat.
+// `climat_forbid_gui()` is deliberately not applied, which the function in
 // tests/CMakeLists.txt cannot express — so this is registered by hand there.
 #include "settings.h"
 #include "timeformat.h"

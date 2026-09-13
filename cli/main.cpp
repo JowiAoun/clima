@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// clima-cli — the forecast for a status bar, a script or a terminal.
+// climat-cli — the forecast for a status bar, a script or a terminal.
 //
-//   clima-cli now                  the current conditions, and any warning
-//   clima-cli hourly [N]           the next N hours (12)
-//   clima-cli daily [N]            the next N days (7)
-//   clima-cli places               the saved places, home marked
+//   climat-cli now                  the current conditions, and any warning
+//   climat-cli hourly [N]           the next N hours (12)
+//   climat-cli daily [N]            the next N days (7)
+//   climat-cli places               the saved places, home marked
 //
 //   --place <id|name>   a saved place by id, or anywhere by name (a search)
 //   --json / --csv      machine output, always in canonical units
@@ -26,14 +26,14 @@
 // JSON and CSV are canonical: °C, km/h, hPa, km, mm, ISO 8601 in the place's
 // own zone. A script reads a number and wants the same number tomorrow after
 // somebody flipped a switch in a dialog it never opened. Anything that wants
-// the reader's units can convert with the factors in libclima/domain/units.h
+// the reader's units can convert with the factors in libclimat/domain/units.h
 // or ask for text.
 //
 // ============================================================================
 // WHAT IT SHARES WITH THE APP, AND WHAT IT DOES NOT
 //
 // The engine: the same providers, the same fallback chain, the same cache at
-// the same path, the same saved places. `clima-cli now` on a laptop the app
+// the same path, the same saved places. `climat-cli now` on a laptop the app
 // runs on answers from the app's cache when it is fresh and asks the network
 // otherwise, exactly as the app would, and writes what it fetched back for
 // the app to find. One cache, one set of requests against the free tier.
@@ -45,24 +45,24 @@
 #include "cliconfig.h"
 
 #include "app/settingskeys.h"
-#include "libclima/cache/cachestore.h"
-#include "libclima/core/clock.h"
-#include "libclima/core/result.h"
-#include "libclima/domain/alert.h"
-#include "libclima/domain/forecast.h"
-#include "libclima/domain/hourconvention.h"
-#include "libclima/domain/place.h"
-#include "libclima/domain/units.h"
-#include "libclima/domain/weathercode.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/places/locationcontroller.h"
-#include "libclima/providers/eccc/ecccalertprovider.h"
-#include "libclima/providers/fixture/fixtureprovider.h"
-#include "libclima/providers/geocoding/openmeteogeocoder.h"
-#include "libclima/providers/metno/metnoforecastprovider.h"
-#include "libclima/providers/nws/nwsalertprovider.h"
-#include "libclima/providers/openmeteo/openmeteoforecastprovider.h"
-#include "libclima/providers/registry.h"
+#include "libclimat/cache/cachestore.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/core/result.h"
+#include "libclimat/domain/alert.h"
+#include "libclimat/domain/forecast.h"
+#include "libclimat/domain/hourconvention.h"
+#include "libclimat/domain/place.h"
+#include "libclimat/domain/units.h"
+#include "libclimat/domain/weathercode.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/places/locationcontroller.h"
+#include "libclimat/providers/eccc/ecccalertprovider.h"
+#include "libclimat/providers/fixture/fixtureprovider.h"
+#include "libclimat/providers/geocoding/openmeteogeocoder.h"
+#include "libclimat/providers/metno/metnoforecastprovider.h"
+#include "libclimat/providers/nws/nwsalertprovider.h"
+#include "libclimat/providers/openmeteo/openmeteoforecastprovider.h"
+#include "libclimat/providers/registry.h"
 
 #include <QCommandLineOption>
 #include <QCommandLineParser>
@@ -84,7 +84,7 @@
 #include <memory>
 #include <optional>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -427,7 +427,7 @@ std::unique_ptr<Engine> buildEngine(const QString &fixtureName)
     if (const Status opened = engine->cache->open(CacheStore::defaultDatabasePath()); !opened) {
         // The same posture as the app and the daemon: a cache that will not
         // open is a tool that asks the network, not a tool that cannot answer.
-        std::fprintf(stderr, "clima-cli: the cache could not be opened (%s); answering from "
+        std::fprintf(stderr, "climat-cli: the cache could not be opened (%s); answering from "
                              "the network\n",
                      qPrintable(opened.error().toString()));
     }
@@ -477,7 +477,7 @@ Result<Place> resolvePlace(Engine &engine, const QString &asked, int timeoutMs)
         if (home >= 0)
             return engine.places->placeAt(home);
         return Error(ErrorKind::NotFound,
-                     QStringLiteral("no saved place: open Clima once and choose one, or pass "
+                     QStringLiteral("no saved place: open Climat once and choose one, or pass "
                                     "--place <name>"));
     }
 
@@ -490,7 +490,7 @@ Result<Place> resolvePlace(Engine &engine, const QString &asked, int timeoutMs)
                 return place;
         }
         return Error(ErrorKind::NotFound,
-                     QStringLiteral("no saved place has id %1 — `clima-cli places` lists them")
+                     QStringLiteral("no saved place has id %1 — `climat-cli places` lists them")
                          .arg(id));
     }
 
@@ -551,7 +551,7 @@ int printPlaces(Engine &engine, const Run &run, QTextStream &out)
     }
 
     if (all.isEmpty()) {
-        out << "No saved places. Open Clima once and choose one, or pass --place <name>.\n";
+        out << "No saved places. Open Climat once and choose one, or pass --place <name>.\n";
         return 0;
     }
     for (const Place &place : all) {
@@ -574,8 +574,8 @@ int printPlaces(Engine &engine, const Run &run, QTextStream &out)
 // and labelling it "just now" off the fetch time.
 //
 // Measured on the recorded fixtures: toronto's block says 06:30 against a
-// recording at 12:28, so `clima-cli now` reported 15 °C and "Sunny" while
-// `clima-cli hourly` led with 23 °C for the same instant, out of one process
+// recording at 12:28, so `climat-cli now` reported 15 °C and "Sunny" while
+// `climat-cli hourly` led with 23 °C for the same instant, out of one process
 // and one file.
 //
 // Within the hour, the block. Otherwise the hour the reader is standing in,
@@ -724,7 +724,7 @@ int printHourly(const Forecast &forecast, const Preferences &prefs, const Run &r
     const QTimeZone zone = forecast.timeZone.isValid() ? forecast.timeZone : QTimeZone::utc();
 
     // Converted first, then windowed, and the order is the whole of it.
-    // libclima hands out Open-Meteo's own convention, where the accumulations
+    // libclimat hands out Open-Meteo's own convention, where the accumulations
     // on the row stamped `t` describe the hour ENDING at `t`; every screen in
     // the app reads asHourStarting(), where they describe the hour beginning
     // there. Windowed without converting, this printed the right times against
@@ -746,7 +746,7 @@ int printHourly(const Forecast &forecast, const Preferences &prefs, const Run &r
     if (ahead.isEmpty()) {
         // Not silence. A status bar cannot tell an empty answer from a calm
         // one, and this forecast has no hours in it at all.
-        std::fputs("clima-cli: this forecast carries no hours.\n", stderr);
+        std::fputs("climat-cli: this forecast carries no hours.\n", stderr);
         return kExitFetch;
     }
 
@@ -813,7 +813,7 @@ int printDaily(const Forecast &forecast, const Preferences &prefs, const Run &ru
         // openmeteoadapter only validates the daily block if it is present, so
         // a response without one parses green and leaves this empty. Saying so
         // is the difference between "no data" and "clear skies".
-        std::fputs("clima-cli: this forecast carries no days.\n", stderr);
+        std::fputs("climat-cli: this forecast carries no days.\n", stderr);
         return kExitFetch;
     }
 
@@ -869,10 +869,10 @@ int main(int argc, char *argv[])
     // The same names the app, the daemon and the widget host use, because they
     // are what QSettings and QStandardPaths key on: this process has to find
     // the INI the app wrote and the cache the app filled.
-    QCoreApplication::setOrganizationName(QStringLiteral("Clima"));
+    QCoreApplication::setOrganizationName(QStringLiteral("Climat"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("github.io"));
-    QCoreApplication::setApplicationName(QStringLiteral(CLIMA_APP_NAME));
-    QCoreApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
+    QCoreApplication::setApplicationName(QStringLiteral(CLIMAT_APP_NAME));
+    QCoreApplication::setApplicationVersion(QStringLiteral(CLIMAT_VERSION));
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
@@ -932,17 +932,17 @@ int main(int argc, char *argv[])
 
     const bool wantsCount = run.command == QLatin1String("hourly") || run.command == QLatin1String("daily");
     if (run.command != QLatin1String("now") && run.command != QLatin1String("places") && !wantsCount) {
-        std::fprintf(stderr, "clima-cli: \"%s\" is not a command. Try: now, hourly, daily, places.\n",
+        std::fprintf(stderr, "climat-cli: \"%s\" is not a command. Try: now, hourly, daily, places.\n",
                      qPrintable(run.command));
         return kExitUsage;
     }
     if (run.json && run.csv) {
-        std::fputs("clima-cli: --json and --csv are two answers to one question; pick one.\n", stderr);
+        std::fputs("climat-cli: --json and --csv are two answers to one question; pick one.\n", stderr);
         return kExitUsage;
     }
     if (!run.unitsOverride.isEmpty() && run.unitsOverride != QLatin1String("metric")
         && run.unitsOverride != QLatin1String("imperial")) {
-        std::fprintf(stderr, "clima-cli: --units takes metric or imperial, not \"%s\".\n",
+        std::fprintf(stderr, "climat-cli: --units takes metric or imperial, not \"%s\".\n",
                      qPrintable(run.unitsOverride));
         return kExitUsage;
     }
@@ -952,17 +952,17 @@ int main(int argc, char *argv[])
         // weather, which is app/appoptions.cpp's rule about the same pair of
         // flags: a named place and a recorded forecast are two answers to one
         // question.
-        std::fputs("clima-cli: --fixture is a recording of one place, so --place cannot "
+        std::fputs("climat-cli: --fixture is a recording of one place, so --place cannot "
                    "choose another. Drop one of them.\n", stderr);
         return kExitUsage;
     }
     if (!run.fixture.isEmpty() && !fixtures::exists(run.fixture)) {
-        std::fprintf(stderr, "clima-cli: no fixture called \"%s\". Known: %s\n", qPrintable(run.fixture),
+        std::fprintf(stderr, "climat-cli: no fixture called \"%s\". Known: %s\n", qPrintable(run.fixture),
                      qPrintable(fixtures::names().join(QStringLiteral(", "))));
         return kExitUsage;
     }
     if (run.timeoutMs <= 0) {
-        std::fputs("clima-cli: --timeout wants a positive number of milliseconds.\n", stderr);
+        std::fputs("climat-cli: --timeout wants a positive number of milliseconds.\n", stderr);
         return kExitUsage;
     }
 
@@ -971,7 +971,7 @@ int main(int argc, char *argv[])
         bool      ok  = false;
         const int got = positional.at(1).toInt(&ok);
         if (!ok || got <= 0) {
-            std::fprintf(stderr, "clima-cli: \"%s\" is not a count.\n", qPrintable(positional.at(1)));
+            std::fprintf(stderr, "climat-cli: \"%s\" is not a count.\n", qPrintable(positional.at(1)));
             return kExitUsage;
         }
         run.count = got;
@@ -986,7 +986,7 @@ int main(int argc, char *argv[])
 
     const Result<Place> place = resolvePlace(*engine, run.place, run.timeoutMs);
     if (!place) {
-        std::fprintf(stderr, "clima-cli: %s\n", qPrintable(place.error().toString()));
+        std::fprintf(stderr, "climat-cli: %s\n", qPrintable(place.error().toString()));
         return place.errorKind() == ErrorKind::Timeout ? kExitTimeout : kExitNoPlace;
     }
 
@@ -998,11 +998,11 @@ int main(int argc, char *argv[])
     const std::optional<Result<ForecastAnswer>> forecast =
         await(engine->registry->fetchForecast(request), run.timeoutMs);
     if (!forecast.has_value()) {
-        std::fprintf(stderr, "clima-cli: no answer within %d ms.\n", run.timeoutMs);
+        std::fprintf(stderr, "climat-cli: no answer within %d ms.\n", run.timeoutMs);
         return kExitTimeout;
     }
     if (!*forecast) {
-        std::fprintf(stderr, "clima-cli: %s\n", qPrintable(forecast->error().toString()));
+        std::fprintf(stderr, "climat-cli: %s\n", qPrintable(forecast->error().toString()));
         return kExitFetch;
     }
 
@@ -1027,14 +1027,14 @@ int main(int argc, char *argv[])
     if (!alerts.has_value()) {
         // Silence here would be indistinguishable from "no warnings", which is
         // the one thing this feature must never say when it does not know.
-        std::fputs("clima-cli: the warnings could not be checked (timed out).\n", stderr);
+        std::fputs("climat-cli: the warnings could not be checked (timed out).\n", stderr);
     } else if (*alerts) {
         inForce = alerts->value().value.displayableAt(now);
     } else if (alerts->errorKind() != ErrorKind::Unsupported) {
         // Unsupported is the ordinary case — most of the world has no covering
         // provider and the app hides the feature. Anything else is a service
         // we should have been able to reach and could not.
-        std::fprintf(stderr, "clima-cli: the warnings could not be checked: %s\n",
+        std::fprintf(stderr, "climat-cli: the warnings could not be checked: %s\n",
                      qPrintable(alerts->error().toString()));
     }
 

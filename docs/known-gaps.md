@@ -178,17 +178,17 @@ measurement was taken on Plasma.**
 
 The tiles reach a desktop two different ways and both of them work:
 
-- **GNOME.** A shell extension spawns `clima-widget`, adopts the window,
+- **GNOME.** A shell extension spawns `climat-widget`, adopts the window,
   re-types it as a dock and lowers it. Mutter exposes no protocol for this, so
   there is no other way in. Measured by hand on GNOME Shell 46, Wayland — see
   `docs/widgets.md`.
-- **Everywhere else.** `clima-widget --pin` asks the compositor for a
+- **Everywhere else.** `climat-widget --pin` asks the compositor for a
   `zwlr_layer_shell_v1` surface and places itself. Measured in CI, against a
   real headless wlroots compositor, by `scripts/check-layer-shell.sh`.
 
 The gap is in the second row. **wlroots is not KWin.** It is the reference
 implementation of that protocol, KWin was written against the same protocol, and
-the surface `clima-widget` creates uses nothing outside version 1 of it — which
+the surface `climat-widget` creates uses nothing outside version 1 of it — which
 is a good argument and is not a measurement. `docs/widgets.md` exists because
 the GNOME mechanism was measured before anything was built on it, and the same
 standard applies here.
@@ -200,7 +200,7 @@ recovery in `widgets/layershell.cpp` — unplug the screen a pinned surface live
 on and the tiles come back on another one — has been exercised against sway's
 `output … unplug`, which is a developer command, not a cable.
 
-**What closes it:** `clima-widget --pin on` on a Plasma 6 session and on one
+**What closes it:** `climat-widget --pin on` on a Plasma 6 session and on one
 other wlroots compositor that is not sway, with the results written into
 `packaging/plasma/README.md`. Nothing is expected to need changing; what is
 missing is somebody having looked.
@@ -262,7 +262,7 @@ downloaded app at all — not a warning, a refusal — and the workaround is a
 right-click-open dance that changes with every release. Shipping a DMG nobody
 can open would be worse than shipping none.
 
-The engine is licensed to keep the door open: `libclima` is MPL-2.0 precisely
+The engine is licensed to keep the door open: `libclimat` is MPL-2.0 precisely
 so that a macOS build is a packaging decision later rather than a licensing
 problem. The Mac App Store stays ruled out regardless — D6, GPLv3 against the
 App Store terms.
@@ -296,7 +296,7 @@ cannot satisfy the floor cannot prove the packager build path works.
 The same footing as the Android job, and recorded here for the same reason. The
 development environment for this work is a Nix devshell on Linux: there is no
 MSVC, no Windows, no `wix`, and no 22.04 userland with `linuxdeploy` in it. So
-`packaging/windows/clima.wxs` has never been compiled by `wix build`, and the
+`packaging/windows/climat.wxs` has never been compiled by `wix build`, and the
 AppImage job has never produced an AppImage.
 
 Both are written against the documented behaviour of their tools, which is a

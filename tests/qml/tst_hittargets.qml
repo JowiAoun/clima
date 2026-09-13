@@ -29,10 +29,10 @@
 import QtQuick
 import QtQuick.Window
 import QtTest
-import Clima
-import Clima.Gallery
+import Climat
+import Climat.Gallery
 
-import "qrc:/qt/qml/Clima/Gallery/gallery.js" as Catalogue
+import "qrc:/qt/qml/Climat/Gallery/gallery.js" as Catalogue
 
 TestCase {
     name: "HitTargets"
@@ -116,7 +116,7 @@ TestCase {
     // would turn every assertion below into a scan that found nothing and passed
     // — which is the exact way the first version of HitTargets failed.
     function test_theScannerFindsHandlers() {
-        var nav = Qt.createComponent("Clima", "ShellNav").createObject(stage, {})
+        var nav = Qt.createComponent("Climat", "ShellNav").createObject(stage, {})
         verify(nav !== null)
         nav.width = stageWidth
         wait(0)
@@ -137,7 +137,7 @@ TestCase {
 
     function test_everyTargetClearsTheFloor(data) {
         var typeName = data.file.replace(/\.qml$/, "")
-        var component = Qt.createComponent("Clima", typeName)
+        var component = Qt.createComponent("Climat", typeName)
         verify(component !== null && component.status !== Component.Error,
                data.file + " does not build")
 

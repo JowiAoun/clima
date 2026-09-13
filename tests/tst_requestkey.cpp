@@ -6,12 +6,12 @@
 // inherits its notion of "the same request" from, and it is worth asserting on
 // its own before it is asserted through three other classes.
 
-#include "libclima/domain/coordinate.h"
-#include "libclima/net/requestkey.h"
+#include "libclimat/domain/coordinate.h"
+#include "libclimat/net/requestkey.h"
 
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 class TestRequestKey : public QObject
 {

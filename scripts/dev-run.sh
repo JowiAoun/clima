@@ -24,14 +24,14 @@
 # Knobs, all environment because they are not the app's business and the app's
 # parser rejects flags it does not know:
 #
-#   CLIMA_PRESET=golden     which CMake preset to build and run (default: dev)
-#   CLIMA_NO_BUILD=1        skip the build; CI has already done it
-#   CLIMA_BINARY=<path>     run a different executable out of the same build —
+#   CLIMAT_PRESET=golden     which CMake preset to build and run (default: dev)
+#   CLIMAT_NO_BUILD=1        skip the build; CI has already done it
+#   CLIMAT_BINARY=<path>     run a different executable out of the same build —
 #                           the component gallery is its own binary, and this is
 #                           how it and anything after it get the same launcher
 #                           rather than a second copy of this file
-#   CLIMA_VERBOSE=1         say which Qt and which binary
-#   CLIMA_QML=/path/to/qml  pin the Qt, as in the prototype
+#   CLIMAT_VERBOSE=1         say which Qt and which binary
+#   CLIMAT_QML=/path/to/qml  pin the Qt, as in the prototype
 #   QT_QPA_PLATFORM=xcb     force X11 if Wayland misbehaves
 #
 # Do NOT call this directly for a capture that has to be reproducible. Call
@@ -43,9 +43,9 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(cd "$here/.." && pwd)"
 
-preset="${CLIMA_PRESET:-dev}"
+preset="${CLIMAT_PRESET:-dev}"
 build_dir="$repo/build/$preset"
-binary="${CLIMA_BINARY:-$build_dir/app/clima}"
+binary="${CLIMAT_BINARY:-$build_dir/app/climat}"
 
 # ---- reaching the toolchain -------------------------------------------------
 #
@@ -58,7 +58,7 @@ binary="${CLIMA_BINARY:-$build_dir/app/clima}"
 # The check is `command -v` rather than a $IN_NIX_SHELL test on purpose, since a
 # machine with its own cmake and Qt is a supported way to build this and should
 # not be dragged through Nix for it.
-clima_cmake() {
+climat_cmake() {
     if command -v cmake >/dev/null 2>&1; then
         cmake "$@"
     elif command -v nix >/dev/null 2>&1; then
@@ -81,20 +81,20 @@ EOF
 # runs from the repo root — in a subshell, because the app inherits our working
 # directory and `--grab shot.png` has to mean the directory the user typed it
 # in, not this one.
-if [[ -z "${CLIMA_NO_BUILD:-}" ]]; then
+if [[ -z "${CLIMAT_NO_BUILD:-}" ]]; then
     (
         cd "$repo"
-        [[ -f "$build_dir/CMakeCache.txt" ]] || clima_cmake --preset "$preset"
-        clima_cmake --build --preset "$preset"
+        [[ -f "$build_dir/CMakeCache.txt" ]] || climat_cmake --preset "$preset"
+        climat_cmake --build --preset "$preset"
     )
 fi
 
 if [[ ! -x "$binary" ]]; then
     echo "error: no executable at $binary" >&2
-    if [[ -n "${CLIMA_BINARY:-}" ]]; then
-        echo "       CLIMA_BINARY names it — check the path, or unset it for the app." >&2
-    elif [[ -n "${CLIMA_NO_BUILD:-}" ]]; then
-        echo "       CLIMA_NO_BUILD is set — unset it, or build the '$preset' preset first." >&2
+    if [[ -n "${CLIMAT_BINARY:-}" ]]; then
+        echo "       CLIMAT_BINARY names it — check the path, or unset it for the app." >&2
+    elif [[ -n "${CLIMAT_NO_BUILD:-}" ]]; then
+        echo "       CLIMAT_NO_BUILD is set — unset it, or build the '$preset' preset first." >&2
     else
         echo "       the build reported success and produced nothing; check the preset name." >&2
     fi
@@ -113,8 +113,8 @@ fi
 # shellcheck source-path=SCRIPTDIR source=qt-env.sh
 source "$repo/scripts/qt-env.sh"
 
-if ! clima_qt_env; then
-    clima_qt_env_hint >&2
+if ! climat_qt_env; then
+    climat_qt_env_hint >&2
     exit 1
 fi
 
@@ -130,11 +130,11 @@ for _a in "$@"; do
 done
 
 # Which Qt got picked matters only when something is wrong with the pick, so it
-# is opt-in. CLIMA_VERBOSE=1 scripts/dev-run.sh to see it.
-if [[ -n "${CLIMA_VERBOSE:-}" ]]; then
+# is opt-in. CLIMAT_VERBOSE=1 scripts/dev-run.sh to see it.
+if [[ -n "${CLIMAT_VERBOSE:-}" ]]; then
     echo "preset:   $preset" >&2
     echo "binary:   $binary" >&2
-    echo "qt:       ${CLIMA_QT_PREFIX:-<unknown prefix>}" >&2
+    echo "qt:       ${CLIMAT_QT_PREFIX:-<unknown prefix>}" >&2
     echo "platform: ${QT_QPA_PLATFORM:-<default>}" >&2
 fi
 

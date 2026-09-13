@@ -26,13 +26,13 @@
 
 #include "daemon/snapshotservice.h"
 
-#include "libclima/cache/cachestore.h"
-#include "libclima/cache/payloadcache.h"
-#include "libclima/core/clock.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/net/requestkey.h"
-#include "libclima/places/locationcontroller.h"
-#include "libclima/providers/openmeteo/openmeteoforecastprovider.h"
+#include "libclimat/cache/cachestore.h"
+#include "libclimat/cache/payloadcache.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/net/requestkey.h"
+#include "libclimat/places/locationcontroller.h"
+#include "libclimat/providers/openmeteo/openmeteoforecastprovider.h"
 #include "support/networkguard.h"
 
 #include <QDir>
@@ -44,13 +44,13 @@
 #include <QTimeZone>
 #include <QtTest>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
 QByteArray recordedForecast()
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR)
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR)
                + QStringLiteral("/tests/fixtures/openmeteo/toronto-summer.json"));
     if (!file.open(QIODevice::ReadOnly))
         return {};

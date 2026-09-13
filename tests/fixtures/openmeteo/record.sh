@@ -27,9 +27,9 @@ forecast="https://api.open-meteo.com/v1/forecast"
 archive="https://archive-api.open-meteo.com/v1/archive"
 
 # The variable lists. These must stay identical to
-# libclima/providers/openmeteo/openmeteovariables.cpp, with four exceptions
+# libclimat/providers/openmeteo/openmeteovariables.cpp, with four exceptions
 # that are deliberate: cloud_cover_low/mid/high and snow_depth are recorded but
-# not requested in production. Nothing in app/qml/Clima/ reads them today, so
+# not requested in production. Nothing in app/qml/Climat/ reads them today, so
 # asking for them on every refresh would be waste — but a fixture that already
 # contains them means the day a card wants one, the golden files have the
 # answer and only the production list has to change.

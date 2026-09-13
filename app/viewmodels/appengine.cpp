@@ -8,20 +8,20 @@
 #include "conditionsdata.h"
 #include "forecastdata.h"
 
-#include "libclima/cache/cachestore.h"
-#include "libclima/core/clock.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/places/devicelocator.h"
-#include "libclima/places/locationcontroller.h"
-#include "libclima/places/placesearchmodel.h"
-#include "libclima/providers/airquality/openmeteoairqualityprovider.h"
-#include "libclima/providers/eccc/ecccalertprovider.h"
-#include "libclima/providers/geocoding/offlinereversegeocoder.h"
-#include "libclima/providers/nws/nwsalertprovider.h"
-#include "libclima/providers/geocoding/openmeteogeocoder.h"
-#include "libclima/providers/metno/metnoforecastprovider.h"
-#include "libclima/providers/openmeteo/openmeteoforecastprovider.h"
-#include "libclima/providers/registry.h"
+#include "libclimat/cache/cachestore.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/places/devicelocator.h"
+#include "libclimat/places/locationcontroller.h"
+#include "libclimat/places/placesearchmodel.h"
+#include "libclimat/providers/airquality/openmeteoairqualityprovider.h"
+#include "libclimat/providers/eccc/ecccalertprovider.h"
+#include "libclimat/providers/geocoding/offlinereversegeocoder.h"
+#include "libclimat/providers/nws/nwsalertprovider.h"
+#include "libclimat/providers/geocoding/openmeteogeocoder.h"
+#include "libclimat/providers/metno/metnoforecastprovider.h"
+#include "libclimat/providers/openmeteo/openmeteoforecastprovider.h"
+#include "libclimat/providers/registry.h"
 
 #include "settings.h"
 #include "timeformat.h"
@@ -35,7 +35,7 @@
 #include <QTimer>
 #include <QUrl>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -46,7 +46,7 @@ constexpr int kForecastDays = 11;
 
 // ---- forcing a failure, for review ------------------------------------------
 //
-// `CLIMA_FAIL_PROVIDERS=open-meteo` points the named providers at a port
+// `CLIMAT_FAIL_PROVIDERS=open-meteo` points the named providers at a port
 // nothing listens on, so the chain fails over for real: a genuine connection
 // refusal through the real HttpClient, the real backoff and the real registry.
 //
@@ -57,12 +57,12 @@ constexpr int kForecastDays = 11;
 // path nobody tests".
 //
 // Environment rather than a command-line flag, because it belongs to the run
-// and not to the product: `CLIMA_FAIL_PROVIDERS=open-meteo ./clima` is a
+// and not to the product: `CLIMAT_FAIL_PROVIDERS=open-meteo ./climat` is a
 // sentence about this terminal.
 QStringList forcedFailures()
 {
     const QString value =
-        QProcessEnvironment::systemEnvironment().value(QStringLiteral("CLIMA_FAIL_PROVIDERS"));
+        QProcessEnvironment::systemEnvironment().value(QStringLiteral("CLIMAT_FAIL_PROVIDERS"));
     if (value.isEmpty())
         return {};
     return value.split(QLatin1Char(','), Qt::SkipEmptyParts);
@@ -224,7 +224,7 @@ void AppEngine::configure(const QString &fixtureName)
         // A cache that will not open is a slower app, not a broken one: every
         // read through payloadcache.h treats a closed store as a miss. Say so
         // once and carry on.
-        qWarning("clima: the forecast cache could not be opened (%s); "
+        qWarning("climat: the forecast cache could not be opened (%s); "
                  "this session will not survive going offline",
                  qPrintable(opened.error().toString()));
     }
@@ -380,7 +380,7 @@ void AppEngine::registerProviders()
             // about. Fatal here rather than a warning: a provider that did not
             // register cannot serve, and a silent one would come up as a blank
             // screen with no explanation.
-            qFatal("clima: %s could not be registered: %s", what,
+            qFatal("climat: %s could not be registered: %s", what,
                    qPrintable(status.error().toString()));
         }
     };
@@ -511,7 +511,7 @@ void AppEngine::fetch(bool cachedOnly)
                     // place being opened for the first time, and step 2 is
                     // already on its way.
                     if (!cachedOnly) {
-                        qWarning("clima: forecast failed: %s",
+                        qWarning("climat: forecast failed: %s",
                                  qPrintable(result.error().toString()));
                         m_problem = tr("Could not refresh: %1")
                                         .arg(result.error().message());
@@ -556,7 +556,7 @@ void AppEngine::fetch(bool cachedOnly)
     // A request of its own rather than a field of the forecast one: an alert
     // provider needs a point and a language and nothing else, and threading a
     // day count and a model list through it would be four ignored fields — see
-    // libclima/providers/ialertprovider.h.
+    // libclimat/providers/ialertprovider.h.
     //
     // Not counted in `loading`. A spinner over the whole window because a
     // warning poll is in flight would make the app feel busy every three
@@ -745,7 +745,7 @@ bool AppEngine::locationAvailable() const
 void AppEngine::useMyLocation()
 {
     if (m_locator == nullptr || !m_locator->isAvailable()) {
-        Q_EMIT locationFailed(tr("This system has no location service Clima can use."));
+        Q_EMIT locationFailed(tr("This system has no location service Climat can use."));
         return;
     }
     m_locator->requestPosition();
@@ -773,13 +773,13 @@ void AppEngine::selectByQuery(const QString &query, int timeoutMs)
     loop.exec();
 
     if (!watcher.isFinished()) {
-        qWarning("clima: --place %s timed out", qPrintable(query));
+        qWarning("climat: --place %s timed out", qPrintable(query));
         return;
     }
 
     const Result<QList<Place>> found = watcher.result();
     if (!found || found.value().isEmpty()) {
-        qWarning("clima: --place %s found nothing", qPrintable(query));
+        qWarning("climat: --place %s found nothing", qPrintable(query));
         return;
     }
 

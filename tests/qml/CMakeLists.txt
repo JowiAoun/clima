@@ -10,11 +10,11 @@ qt_add_executable(tst_qml
 )
 
 # QmlWarnings carries QML_ELEMENT and QML_SINGLETON, so it needs a module to be
-# registered into. A module of its own, `Clima.Test`, rather than adding it to
-# `Clima`: the app's module is what ships, and a type whose only purpose is to
+# registered into. A module of its own, `Climat.Test`, rather than adding it to
+# `Climat`: the app's module is what ships, and a type whose only purpose is to
 # let a test assert about stderr has no business being importable from it.
 qt_add_qml_module(tst_qml
-    URI Clima.Test
+    URI Climat.Test
     VERSION 1.0
 )
 
@@ -28,9 +28,9 @@ target_compile_definitions(tst_qml PRIVATE
 
 target_link_libraries(tst_qml PRIVATE
     Qt6::QuickTest
-    climaqml           climaqmlplugin
-    climagalleryqml    climagalleryqmlplugin
-    clima_testsupport
+    climatqml           climatqmlplugin
+    climatgalleryqml    climatgalleryqmlplugin
+    climat_testsupport
 )
 
 add_test(NAME tst_qml COMMAND tst_qml)

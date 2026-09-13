@@ -48,7 +48,7 @@ done
 # of being in it have to work — see the matching note in dev-run.sh. A capture
 # that succeeds and then dies on `ffmpeg: command not found` has wasted the only
 # expensive part of this script.
-clima_ffmpeg() {
+climat_ffmpeg() {
     if command -v ffmpeg >/dev/null 2>&1; then
         ffmpeg "$@"
     elif command -v nix >/dev/null 2>&1; then
@@ -86,7 +86,7 @@ fi
 cols=$(( count < 4 ? count : 4 ))
 rows=$(( (count + cols - 1) / cols ))
 
-clima_ffmpeg -v error -y -framerate 1 -i "$tmp/f-%02d.png" \
+climat_ffmpeg -v error -y -framerate 1 -i "$tmp/f-%02d.png" \
     -vf "scale=${width}:-1,tile=${cols}x${rows}:padding=6:margin=6:color=0x2a2f57" \
     -frames:v 1 "$out"
 

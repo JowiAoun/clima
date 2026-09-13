@@ -30,7 +30,7 @@
 //      platform surface appears; a window that already has a surface has
 //      already committed to xdg-shell. layer-shell-qt warns and carries on, so
 //      getting this wrong produces an ordinary window and no error — which is
-//      why widgets/qml/Clima/Widgets/WidgetWindow.qml is `visible: false` and
+//      why widgets/qml/Climat/Widgets/WidgetWindow.qml is `visible: false` and
 //      widgets/main.cpp does the showing.
 //
 //   2. The layer, anchors and margins must be set on that object before the
@@ -55,7 +55,7 @@
 
 class QWindow;
 
-namespace clima::widgets::layershell {
+namespace climat::widgets::layershell {
 
 // Where on the screen, and how far in. Both are strings as typed on the
 // command line: parsed here so that `--anchor` validates identically in a
@@ -84,4 +84,4 @@ struct Placement
 // unavailableReason() is not empty.
 bool pin(QWindow *window, const Placement &placement);
 
-} // namespace clima::widgets::layershell
+} // namespace climat::widgets::layershell

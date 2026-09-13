@@ -7,7 +7,7 @@
 #
 #   scripts/check-packaging.sh          exit 1 on anything a store would reject
 #
-# CLIMA_BUILD_DIR selects the build to install from; it defaults to build/dev.
+# CLIMAT_BUILD_DIR selects the build to install from; it defaults to build/dev.
 # The build has to exist and be built, because `cmake --install` needs the
 # binary it was told to install.
 #
@@ -28,8 +28,8 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "$here/.." && pwd)"
 
-build_dir="${CLIMA_BUILD_DIR:-$root/build/dev}"
-app_id="io.github.JowiAoun.Clima"
+build_dir="${CLIMAT_BUILD_DIR:-$root/build/dev}"
+app_id="io.github.JowiAoun.Climat"
 
 for tool in desktop-file-validate appstreamcli; do
   if ! command -v "$tool" > /dev/null 2>&1; then
@@ -45,7 +45,7 @@ fi
 
 # The app ID is a build variable, so read it back rather than assuming the
 # default. A fork that renamed the app should still be able to run this.
-cached_id="$(sed -n 's/^CLIMA_APP_ID:STRING=//p' "$build_dir/CMakeCache.txt" || true)"
+cached_id="$(sed -n 's/^CLIMAT_APP_ID:STRING=//p' "$build_dir/CMakeCache.txt" || true)"
 [ -n "$cached_id" ] && app_id="$cached_id"
 
 root="$(mktemp -d)"
@@ -79,7 +79,7 @@ note() {
 # the prefix. Checked only when the daemon was built, which is the same gate
 # packaging/CMakeLists.txt puts on installing it — a build without Qt D-Bus has
 # no daemon and correctly installs no entry for one.
-if [ -x "$build_dir/daemon/clima-daemon" ]; then
+if [ -x "$build_dir/daemon/climat-daemon" ]; then
   autostart="$root/etc/xdg/autostart/$app_id.Daemon.desktop"
   if [ ! -f "$autostart" ]; then
     note "the daemon was built but installed no autostart entry at etc/xdg/autostart/$app_id.Daemon.desktop"
@@ -112,7 +112,7 @@ if [ -x "$build_dir/daemon/clima-daemon" ]; then
   if [ ! -f "$service" ]; then
     note "the daemon was built but installed no D-Bus service file at share/dbus-1/services/$app_id.Daemon.service"
   else
-    registers="$("$build_dir/daemon/clima-daemon" --print-address | awk '$1 == "service" { print $2 }')"
+    registers="$("$build_dir/daemon/climat-daemon" --print-address | awk '$1 == "service" { print $2 }')"
     declared="$(awk -F= '$1 == "Name" { print $2 }' "$service")"
     exec_line="$(awk -F= '$1 == "Exec" { print $2 }' "$service")"
 
@@ -135,7 +135,7 @@ if [ ! -f "$desktop" ]; then
 else
   desktop-file-validate "$desktop" || note "desktop-file-validate rejected the entry"
 
-  # The Icon= key has to name the app ID, not a file path and not `clima`.
+  # The Icon= key has to name the app ID, not a file path and not `climat`.
   # An icon name that does not match an installed hicolor entry falls back to
   # a generic square, and nothing reports it.
   if ! grep -qx "Icon=$app_id" "$desktop"; then
@@ -170,8 +170,8 @@ svg="$stage/share/icons/hicolor/scalable/apps/$app_id.svg"
 "$here/icons.sh" check || fail=1
 
 # ---- the binary -------------------------------------------------------------
-[ -x "$stage/bin/clima" ] || note "no executable at bin/clima"
-[ -x "$stage/bin/clima-cli" ] || note "no executable at bin/clima-cli"
+[ -x "$stage/bin/climat" ] || note "no executable at bin/climat"
+[ -x "$stage/bin/climat-cli" ] || note "no executable at bin/climat-cli"
 
 if [ "$fail" -ne 0 ]; then
   echo "packaging: FAILED" >&2

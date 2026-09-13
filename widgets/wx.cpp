@@ -7,15 +7,15 @@
 
 #include "timeformat.h"
 
-#include "libclima/domain/scales.h"
-#include "libclima/domain/weathercode.h"
+#include "libclimat/domain/scales.h"
+#include "libclimat/domain/weathercode.h"
 
 #include <QDateTime>
 #include <QLocale>
 
 #include <optional>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -83,7 +83,7 @@ QString Wx::conditionText(const QVariant &code, const QVariant &isDay) const
     const std::optional<int> wmo = codeOf(code);
     if (!wmo)
         return {};
-    return clima::conditionText(*wmo, dayOf(isDay));
+    return climat::conditionText(*wmo, dayOf(isDay));
 }
 
 QString Wx::precipType(const QVariant &code) const
@@ -193,7 +193,7 @@ int Wx::nowMinutesInZoneOf(const QVariant &iso) const
     if (!reference.isValid())
         return -1;
 
-    const QDateTime here = clima::widgets::now().toOffsetFromUtc(reference.offsetFromUtc());
+    const QDateTime here = climat::widgets::now().toOffsetFromUtc(reference.offsetFromUtc());
     return here.time().hour() * 60 + here.time().minute();
 }
 

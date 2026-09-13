@@ -24,12 +24,12 @@
 // No network: tests/support/networkguard.h makes that a property of the
 // process, and OpenMeteoGeocoder::setBaseUrl points the provider at the stub.
 
-#include "libclima/cache/cachestore.h"
-#include "libclima/core/clock.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/places/placesearchmodel.h"
-#include "libclima/providers/geocoding/geocodingparser.h"
-#include "libclima/providers/geocoding/openmeteogeocoder.h"
+#include "libclimat/cache/cachestore.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/places/placesearchmodel.h"
+#include "libclimat/providers/geocoding/geocodingparser.h"
+#include "libclimat/providers/geocoding/openmeteogeocoder.h"
 #include "support/httpstub.h"
 #include "support/networkguard.h"
 
@@ -37,14 +37,14 @@
 #include <QSignalSpy>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 using namespace std::chrono_literals;
 
 namespace {
 
 QByteArray fixture(const QString &name)
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR) + QStringLiteral("/tests/fixtures/geocoding/")
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR) + QStringLiteral("/tests/fixtures/geocoding/")
                + name);
     if (!file.open(QIODevice::ReadOnly))
         return {};

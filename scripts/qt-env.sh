@@ -8,7 +8,7 @@
 # variables into the caller's environment, which a subprocess cannot do.
 #
 #   source scripts/qt-env.sh
-#   clima_qt_env || { clima_qt_env_hint >&2; exit 1; }
+#   climat_qt_env || { climat_qt_env_hint >&2; exit 1; }
 #
 # It reports a failure by returning non-zero rather than exiting, and it sets no
 # shell options of its own. A library that called `set -e` would silently change
@@ -17,9 +17,9 @@
 #
 # After a successful call:
 #
-#   CLIMA_QML_BIN            the `qml` runtime, absolute
-#   CLIMA_QT_PREFIX          qtbase's prefix — the first CMAKE_PREFIX_PATH entry
-#   CLIMA_QT_QML_PREFIX      qtdeclarative's prefix, which on Nix is a different
+#   CLIMAT_QML_BIN            the `qml` runtime, absolute
+#   CLIMAT_QT_PREFIX          qtbase's prefix — the first CMAKE_PREFIX_PATH entry
+#   CLIMAT_QT_QML_PREFIX      qtdeclarative's prefix, which on Nix is a different
 #                            store path and therefore a second prefix entry
 #   QML_IMPORT_PATH          \
 #   QML2_IMPORT_PATH          }  set for a Nix-store Qt only, see below
@@ -28,8 +28,8 @@
 #   QT_FORCE_STDERR_LOGGING  always
 #
 # Every export honours a value that was already set, so any one of them can be
-# overridden from outside without editing anything here. CLIMA_QML picks the
-# runtime; CLIMA_QT_PREFIX pins the prefix when the guess is wrong.
+# overridden from outside without editing anything here. CLIMAT_QML picks the
+# runtime; CLIMAT_QT_PREFIX pins the prefix when the guess is wrong.
 #
 # This logic used to live in prototype/hourly-overview/run.sh, which is still
 # its main caller. It moved because the CMake build needs the same answer, and
@@ -38,7 +38,7 @@
 # What to tell a user who has no Qt 6. The caller prints it, because only the
 # caller knows whether a missing Qt is fatal — inside `nix develop` it is a bug,
 # in a bare terminal it is a Tuesday.
-clima_qt_env_hint() {
+climat_qt_env_hint() {
     cat <<'EOF'
 error: could not find Qt 6's `qml` runtime.
 
@@ -49,13 +49,13 @@ error: could not find Qt 6's `qml` runtime.
                   nix shell nixpkgs#qt6.qtdeclarative
   macOS         : brew install qt
 
-Or point CLIMA_QML at a `qml` binary.
+Or point CLIMAT_QML at a `qml` binary.
 EOF
 }
 
-_clima_find_qml() {
-    if [[ -n "${CLIMA_QML:-}" ]]; then
-        printf '%s\n' "$CLIMA_QML"
+_climat_find_qml() {
+    if [[ -n "${CLIMAT_QML:-}" ]]; then
+        printf '%s\n' "$CLIMAT_QML"
         return 0
     fi
     local c
@@ -80,7 +80,7 @@ _clima_find_qml() {
 # A distro Qt knows its own prefix and will tell you if asked. Insist on 6.x:
 # on a machine with both Qt versions installed, plain `qmake` is usually Qt 5
 # and would hand back a prefix that has no Qt6Config.cmake under it at all.
-_clima_qt_prefix_from_qmake() {
+_climat_qt_prefix_from_qmake() {
     local q v p
     for q in qmake6 qmake; do
         command -v "$q" >/dev/null 2>&1 || continue
@@ -98,7 +98,7 @@ _clima_qt_prefix_from_qmake() {
 # of the filesystem layout, it is whatever directory CMake can find
 # Qt6Config.cmake beneath, so look for that file rather than guessing at how
 # many `lib/x86_64-linux-gnu` levels to strip off.
-_clima_qt_prefix_by_search() {
+_climat_qt_prefix_by_search() {
     local d
     d="$(cd "$1" 2>/dev/null && pwd)" || return 1
     while [[ -n "$d" && "$d" != "/" ]]; do
@@ -111,13 +111,13 @@ _clima_qt_prefix_by_search() {
     return 1
 }
 
-clima_qt_env() {
+climat_qt_env() {
     local qml_bin qtd qtbase qroot guess
 
-    if ! qml_bin=$(_clima_find_qml); then
+    if ! qml_bin=$(_climat_find_qml); then
         return 1
     fi
-    export CLIMA_QML_BIN="$qml_bin"
+    export CLIMAT_QML_BIN="$qml_bin"
 
     if [[ "$qml_bin" == /nix/store/* ]]; then
         # A raw binary out of the Nix store is not env-wrapped, so it cannot find
@@ -153,8 +153,8 @@ clima_qt_env() {
         # under it. A CMake configure needs both of these on CMAKE_PREFIX_PATH.
         # Empty when ldd told us nothing — an empty prefix is honest, a wrong one
         # sends CMake somewhere plausible and wrong.
-        export CLIMA_QT_PREFIX="${CLIMA_QT_PREFIX:-$qtbase}"
-        export CLIMA_QT_QML_PREFIX="${CLIMA_QT_QML_PREFIX:-$qtd}"
+        export CLIMAT_QT_PREFIX="${CLIMAT_QT_PREFIX:-$qtbase}"
+        export CLIMAT_QT_QML_PREFIX="${CLIMAT_QT_QML_PREFIX:-$qtd}"
     else
         # A distro or Flatpak Qt is already wrapped and knows where its modules
         # and plugins live. Setting QML_IMPORT_PATH or QT_PLUGIN_PATH here would
@@ -163,13 +163,13 @@ clima_qt_env() {
         # So: read the prefix, touch nothing else.
         qroot="$(cd "$(dirname "$qml_bin")/.." 2>/dev/null && pwd)" || qroot=""
         guess=""
-        if ! guess=$(_clima_qt_prefix_from_qmake); then
+        if ! guess=$(_climat_qt_prefix_from_qmake); then
             if [[ -n "$qroot" ]]; then
-                guess=$(_clima_qt_prefix_by_search "$qroot") || guess=""
+                guess=$(_climat_qt_prefix_by_search "$qroot") || guess=""
             fi
         fi
-        export CLIMA_QT_PREFIX="${CLIMA_QT_PREFIX:-$guess}"
-        export CLIMA_QT_QML_PREFIX="${CLIMA_QT_QML_PREFIX:-$CLIMA_QT_PREFIX}"
+        export CLIMAT_QT_PREFIX="${CLIMAT_QT_PREFIX:-$guess}"
+        export CLIMAT_QT_QML_PREFIX="${CLIMAT_QT_QML_PREFIX:-$CLIMAT_QT_PREFIX}"
     fi
 
     # Without this, Qt decides stderr has no console and silently swallows QML

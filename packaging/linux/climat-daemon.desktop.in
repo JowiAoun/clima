@@ -1,0 +1,79 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The autostart entry for climat-daemon, installed into /etc/xdg/autostart.
+#
+# ---- why the daemon needs one and the app does not --------------------------
+#
+# Because the whole point of a desktop widget is the days nobody opens the
+# weather app. The tiles read from this process over the session bus; without it
+# they come up, find nothing, and show ten skeletons — which is a broken
+# installation that looks like broken code.
+#
+# This is not the only way it starts, and it is no longer the only way that
+# matters. climat-daemon.service.in beside this file makes the daemon
+# D-Bus-activatable, so the bus starts one the moment a widget host or the GNOME
+# extension looks for it — which is what covers a Flatpak (nothing in a sandbox
+# can write to /etc/xdg/autostart) and the first run of any install, where this
+# entry does nothing at all until the next login.
+#
+# What this file is still for is the other direction: the daemon exists to serve
+# the days nobody opens the weather app, and a tile that is pinned to a desktop
+# wants its reading to be current when the desktop appears rather than fetched
+# after something asks. That is a login-time job and activation is not one.
+#
+# The two cannot collide. Whichever loses the race finds the name owned and
+# exits 5 without touching anything.
+#
+# ---- what it costs a user who has no widgets --------------------------------
+#
+# One process, under 25 MB, that polls on a timer. That is not nothing, so
+# `X-GNOME-Autostart-enabled` and the equivalent switch in every other desktop's
+# startup-applications list are the honest control, and they work: this is a
+# plain autostart entry with no special handling anywhere.
+
+[Desktop Entry]
+Type=Application
+Version=1.5
+
+Name=Climat weather service
+Comment=Fetches the weather once and serves it to Climat's desktop widgets
+
+# Not an absolute path: a Flatpak, an AppImage and a .deb put the binary in
+# three different prefixes.
+Exec=climat-daemon
+Icon=@CLIMAT_APP_ID@
+Terminal=false
+
+# Nothing to show in a menu. This is a background service, and a "Climat weather
+# service" entry beside "Climat" in the launcher is two things where the user
+# installed one.
+NoDisplay=true
+
+# ---- there is deliberately no OnlyShowIn ------------------------------------
+#
+# There used to be, and it was wrong twice over.
+#
+# The reason given for it was "Linux desktops only — there is no session bus on
+# Windows or macOS". That is already true by construction: packaging/CMakeLists.txt
+# installs this file only when CMAKE_SYSTEM_NAME is Linux and climat-daemon was
+# built at all. A .desktop that is not installed is not shown anywhere.
+#
+# What the list actually did was the opposite of its stated purpose. OnlyShowIn
+# on an *autostart* entry is not a menu filter — the session refuses to start
+# the program unless XDG_CURRENT_DESKTOP matches one of the names. The list was
+# GNOME, KDE, XFCE, MATE, Cinnamon, LXQt, Budgie, Unity and Pantheon, and
+# XDG_CURRENT_DESKTOP on Sway is `sway`, on Hyprland `Hyprland`, on Wayfire
+# `wayfire`, and so on for river, labwc, niri and COSMIC. So on every wlroots
+# compositor the daemon never started, and the tiles that read from it — the
+# ones that pin themselves there without any extension at all — would have sat
+# on "waiting" forever with nothing anywhere saying why.
+#
+# An enumerated allow-list of desktops is a list that is wrong the moment
+# somebody writes a new one, which for Wayland compositors is roughly annually.
+
+# The two flags every desktop's startup-applications UI writes into a copy of
+# this file when somebody switches it off. Written here as the default so that
+# the switch has something to toggle rather than a file to create.
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel

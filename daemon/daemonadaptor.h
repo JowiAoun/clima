@@ -24,7 +24,7 @@
 // EVERYTHING IS A STRING OF JSON
 //
 // GetSnapshot and ListWidgets both return `s`, not a typed structure. The
-// reasoning is in libclima/wire/snapshot.h and it is about version skew: the
+// reasoning is in libclimat/wire/snapshot.h and it is about version skew: the
 // GNOME extension ships from extensions.gnome.org and the app from Flathub,
 // they will routinely disagree by a version, and an unknown key must be
 // ignorable rather than an unmarshalling error.
@@ -46,7 +46,7 @@ class SnapshotService;
 class DaemonAdaptor : public QDBusAbstractAdaptor
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", CLIMA_DAEMON_INTERFACE)
+    Q_CLASSINFO("D-Bus Interface", CLIMAT_DAEMON_INTERFACE)
 
 public:
     // `service` is also the parent: QDBusAbstractAdaptor has to be a child of

@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// clima-geocode — look at what geocoding actually returns.
+// climat-geocode — look at what geocoding actually returns.
 //
-//   clima-geocode Kigali                  forward search, over the network
-//   clima-geocode "New York" --count 3    ditto, fewer rows
-//   clima-geocode 43.65,-79.38            reverse, from the bundled index
-//   clima-geocode --id 6167865            resolve one place by GeoNames id
+//   climat-geocode Kigali                  forward search, over the network
+//   climat-geocode "New York" --count 3    ditto, fewer rows
+//   climat-geocode 43.65,-79.38            reverse, from the bundled index
+//   climat-geocode --id 6167865            resolve one place by GeoNames id
 //
 // An argument that parses as "lat,lon" is a reverse lookup and anything else
 // is a search, because that is the distinction a person holds in their head
@@ -29,11 +29,11 @@
 // prints the distance and whether the point was inside the settlement's
 // modelled reach, so a wrong answer is legible rather than merely wrong.
 
-#include "libclima/cache/cachestore.h"
-#include "libclima/core/clock.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/providers/geocoding/offlinereversegeocoder.h"
-#include "libclima/providers/geocoding/openmeteogeocoder.h"
+#include "libclimat/cache/cachestore.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/providers/geocoding/offlinereversegeocoder.h"
+#include "libclimat/providers/geocoding/openmeteogeocoder.h"
 
 #include <QCoreApplication>
 #include <QFutureWatcher>
@@ -41,7 +41,7 @@
 #include <QTextStream>
 #include <QTimer>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -125,9 +125,9 @@ int main(int argc, char **argv)
     arguments.removeFirst();
 
     if (arguments.isEmpty()) {
-        out() << "usage: clima-geocode <name> [--count N] [--language xx]" << Qt::endl;
-        out() << "       clima-geocode <lat>,<lon>" << Qt::endl;
-        out() << "       clima-geocode --id <geonames id>" << Qt::endl;
+        out() << "usage: climat-geocode <name> [--count N] [--language xx]" << Qt::endl;
+        out() << "       climat-geocode <lat>,<lon>" << Qt::endl;
+        out() << "       climat-geocode --id <geonames id>" << Qt::endl;
         return 2;
     }
 

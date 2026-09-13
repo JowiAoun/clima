@@ -30,7 +30,7 @@
 // the subscription order closes, refusal against error against timeout, a
 // stranger's session ignored, the session closed after the fix — is here.
 
-#include "libclima/places/portallocator.h"
+#include "libclimat/places/portallocator.h"
 
 #include "support/networkguard.h"
 
@@ -45,7 +45,7 @@
 
 #include <functional>
 
-using namespace clima;
+using namespace climat;
 
 // ---- the fake portal, in three objects ---------------------------------------
 

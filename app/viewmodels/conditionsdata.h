@@ -40,7 +40,7 @@
 //                 `hasPollen` comes from Capability::Pollen at this coordinate
 //                 and the card is *hidden* outside the CAMS European domain
 //                 rather than drawn empty. See
-//                 libclima/providers/airquality/openmeteoairqualityprovider.h,
+//                 libclimat/providers/airquality/openmeteoairqualityprovider.h,
 //                 which argues that the payload is a better witness than a
 //                 bounding box.
 //
@@ -53,9 +53,9 @@
 
 #pragma once
 
-#include "libclima/domain/airquality.h"
-#include "libclima/domain/forecast.h"
-#include "libclima/domain/place.h"
+#include "libclimat/domain/airquality.h"
+#include "libclimat/domain/forecast.h"
+#include "libclimat/domain/place.h"
 
 #include <QDateTime>
 #include <QObject>
@@ -125,13 +125,13 @@ public:
 
     static ConditionsData *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 
-    void setSnapshot(const clima::Forecast &forecast, const clima::AirQuality &airQuality,
-                     const QDateTime &now, const clima::Place &place, bool hasPollen);
+    void setSnapshot(const climat::Forecast &forecast, const climat::AirQuality &airQuality,
+                     const QDateTime &now, const climat::Place &place, bool hasPollen);
 
     // For the one case where there is a place but no forecast yet — the
     // location bar has to say where it is pointing before the data arrives, or
     // the first frame has a hole in it where the name goes.
-    void setPlace(const clima::Place &place);
+    void setPlace(const climat::Place &place);
 
     [[nodiscard]] QString     observedAt() const { return m_observedAt; }
     [[nodiscard]] QString     observedOn() const { return m_observedOn; }
@@ -176,17 +176,17 @@ private:
     void buildVisibility();
     void buildPressure();
     void buildSunMoon();
-    void buildMoonPhase(const clima::DailyPoint &day, const QDate &reference);
+    void buildMoonPhase(const climat::DailyPoint &day, const QDate &reference);
     void buildPollen(bool hasPollen);
     void buildActivities();
     void buildSummary();
 
     // The twelve-hour window every sparkline draws, as indices into m_hours.
-    [[nodiscard]] QVariantList window(clima::Reading clima::HourlyPoint::*field,
+    [[nodiscard]] QVariantList window(climat::Reading climat::HourlyPoint::*field,
                                       int quantity) const;
 
     // Today's daily row, or a default-constructed one.
-    [[nodiscard]] clima::DailyPoint today() const;
+    [[nodiscard]] climat::DailyPoint today() const;
 
     // What "now" reads, which is not always the provider's `current` block.
     //
@@ -200,15 +200,15 @@ private:
     // So: the provider's block when it is within an hour of the clock, and the
     // hour we are standing in otherwise. One rule, no fixture branch, and the
     // live path is unchanged because live `current` is always within the hour.
-    clima::CurrentConditions m_observation;
+    climat::CurrentConditions m_observation;
 
-    clima::Forecast   m_forecast;
-    clima::AirQuality m_air;
-    clima::Place      m_place;
+    climat::Forecast   m_forecast;
+    climat::AirQuality m_air;
+    climat::Place      m_place;
     QTimeZone         m_zone = QTimeZone::UTC;
     QDateTime         m_now;
 
-    QList<clima::HourlyPoint> m_hours;      // hour-starting, like ForecastData's
+    QList<climat::HourlyPoint> m_hours;      // hour-starting, like ForecastData's
     int                       m_hourNow  = 0; // index of the hour containing now
     int                       m_from     = 0; // first index of the twelve-hour window
     int                       m_nowIndex = 6;

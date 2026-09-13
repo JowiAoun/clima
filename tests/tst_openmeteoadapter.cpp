@@ -14,10 +14,10 @@
 // about what a timestamp means — and a fixture somebody wrote by hand encodes
 // the same beliefs as the parser and agrees with it happily.
 
-#include "libclima/domain/hourconvention.h"
-#include "libclima/domain/timeaxis.h"
-#include "libclima/domain/weathercode.h"
-#include "libclima/providers/openmeteo/openmeteoadapter.h"
+#include "libclimat/domain/hourconvention.h"
+#include "libclimat/domain/timeaxis.h"
+#include "libclimat/domain/weathercode.h"
+#include "libclimat/providers/openmeteo/openmeteoadapter.h"
 
 #include <QFile>
 #include <QJsonArray>
@@ -26,13 +26,13 @@
 #include <QTest>
 #include <QTimeZone>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
 QByteArray fixture(const QString &name)
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR "/tests/fixtures/openmeteo/") + name);
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR "/tests/fixtures/openmeteo/") + name);
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning("cannot open fixture %s", qPrintable(name));
         return {};
@@ -100,7 +100,7 @@ private Q_SLOTS:
 
 void TestOpenMeteoAdapter::fixturesAreReadable()
 {
-    // A guard against the whole file passing because CLIMA_SOURCE_DIR is wrong
+    // A guard against the whole file passing because CLIMAT_SOURCE_DIR is wrong
     // and every fixture is empty — which would make every assertion below
     // compare two default-constructed things and succeed.
     const QStringList names = {
@@ -141,7 +141,7 @@ void TestOpenMeteoAdapter::torontoParsesEveryBlock()
 
     // The response labels its first hour "2026-07-30T00:00" with
     // utc_offset_seconds = -14400. That is 04:00 UTC, and it is the instant
-    // that gets stored — see libclima/domain/timeaxis.h.
+    // that gets stored — see libclimat/domain/timeaxis.h.
     QCOMPARE(forecast.hourly.first().time, utc(2026, 7, 30, 4));
     QCOMPARE(*forecast.hourly.first().temperature, 17.8);
 

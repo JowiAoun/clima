@@ -57,7 +57,7 @@ $ …/v1/archive?…&timezone=auto&start_date=2026-01-10&end_date=2026-01-12
 
 Toronto is UTC-5 in January and the sun rose at 07:50.
 
-`libclima/domain/timeaxis.h` carries the reasoning and the fix: reconstruct the UTC instant
+`libclimat/domain/timeaxis.h` carries the reasoning and the fix: reconstruct the UTC instant
 (`naive − utc_offset_seconds`, exact, because that is how the label was made) and re-express it in
 the real zone. Doing so is what turns a uniformly spaced series into a local day of 25 or 23 hours,
 which is what `tst_openmeteoadapter.cpp` asserts.

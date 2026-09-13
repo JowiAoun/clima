@@ -117,7 +117,7 @@ function gainOnly(hex) {
     return fmt({ ...c, a: Math.min(1, c.a * ALPHA_GAIN) });
 }
 
-const src = readFileSync(new URL("../../app/qml/Clima/theme.js", import.meta.url), "utf8")
+const src = readFileSync(new URL("../../app/qml/Climat/theme.js", import.meta.url), "utf8")
     .replace(/^\.pragma library\s*$/m, "");
 const { ramp } = new Function(src + "; return { ramp };")();
 

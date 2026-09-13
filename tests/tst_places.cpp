@@ -15,17 +15,17 @@
 // and the same GeoNames id cannot be saved twice (a unique index over
 // geonames_id).
 
-#include "libclima/cache/cachestore.h"
-#include "libclima/core/clock.h"
-#include "libclima/places/devicelocator.h"
-#include "libclima/places/locationcontroller.h"
-#include "libclima/providers/geocoding/offlinereversegeocoder.h"
+#include "libclimat/cache/cachestore.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/places/devicelocator.h"
+#include "libclimat/places/locationcontroller.h"
+#include "libclimat/providers/geocoding/offlinereversegeocoder.h"
 
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 

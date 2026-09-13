@@ -48,13 +48,13 @@
 
 #include "app/settings.h"
 #include "app/viewmodels/alertsdata.h"
-#include "libclima/core/clock.h"
+#include "libclimat/core/clock.h"
 
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QtTest>
 
-using namespace clima;
+using namespace climat;
 using namespace std::chrono_literals;
 
 namespace {
@@ -389,7 +389,7 @@ void TestAlertsData::aModelWithNoClockShowsNothingRatherThanGuessing()
     // for, so nothing is displayed.
     m_alerts->setClock(nullptr);
 
-    QTest::ignoreMessage(QtWarningMsg, "clima: the alert model has no clock; no alert can be displayed");
+    QTest::ignoreMessage(QtWarningMsg, "climat: the alert model has no clock; no alert can be displayed");
     m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
 
     QCOMPARE(m_alerts->count(), 0);
@@ -656,7 +656,7 @@ void TestAlertsData::anAcknowledgementForAnEndedHazardIsPrunedOnLoad()
 void TestAlertsData::aStoredLineWithTheWrongShapeIsSkippedRatherThanCrashing()
 {
     // A settings file edited by hand, truncated by a full disk, or written by a
-    // version of Clima with a different format. Every one of these has to be
+    // version of Climat with a different format. Every one of these has to be
     // dropped quietly: refusing to start because a dismissal is unreadable
     // would be the worst possible trade.
     const QChar sep(0x1f);

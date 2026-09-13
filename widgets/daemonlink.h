@@ -6,7 +6,7 @@
 // ============================================================================
 // WHAT THIS IS FOR
 //
-// clima-daemon fetches the weather once and serves it to everything on the
+// climat-daemon fetches the weather once and serves it to everything on the
 // desktop (daemon/snapshotservice.h). This is the reader: it finds the daemon —
 // asking the bus to start one if nothing else has — re-finds it when it
 // restarts, keeps one subscription per tile, and hands each tile its own

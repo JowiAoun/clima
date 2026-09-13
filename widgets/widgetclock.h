@@ -25,7 +25,7 @@
 // ============================================================================
 // SO: ONE FUNCTION, FROZEN ONLY WHEN ASKED
 //
-// The same shape as libclima's injectable Clock and for the same reason: it is
+// The same shape as libclimat's injectable Clock and for the same reason: it is
 // the single mechanism that makes a capture deterministic without one
 // `if (testing)` anywhere in the drawing code. Unfrozen — which is every run
 // that is not a screenshot — `now()` is `QDateTime::currentDateTimeUtc()` and
@@ -35,7 +35,7 @@
 
 #include <QDateTime>
 
-namespace clima::widgets {
+namespace climat::widgets {
 
 // UTC, always. Every caller converts into the place's own offset, which comes
 // off the wire rather than from here.
@@ -47,4 +47,4 @@ void freezeClock(const QDateTime &instant);
 
 [[nodiscard]] bool clockIsFrozen();
 
-} // namespace clima::widgets
+} // namespace climat::widgets

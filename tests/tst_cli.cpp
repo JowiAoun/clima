@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// clima-cli, run as a script would run it.
+// climat-cli, run as a script would run it.
 //
 // The binary, not its functions: every case here starts a process with an
 // argv and reads what came out, because that is the interface. A script that
@@ -63,8 +63,8 @@ private:
 
 void TestCli::initTestCase()
 {
-    QVERIFY2(QFile::exists(QStringLiteral(CLIMA_CLI_BINARY)),
-             "clima-cli was not built at " CLIMA_CLI_BINARY);
+    QVERIFY2(QFile::exists(QStringLiteral(CLIMAT_CLI_BINARY)),
+             "climat-cli was not built at " CLIMAT_CLI_BINARY);
     QVERIFY(m_config.isValid());
 }
 
@@ -73,8 +73,8 @@ Outcome TestCli::run(const QStringList &arguments, const QByteArray &ini)
     // The INI where QSettings will look for it under XDG_CONFIG_HOME: the
     // organisation's directory, the application's file. Written fresh — or
     // removed — for every run so that a case cannot inherit another's.
-    const QString directory = m_config.path() + QStringLiteral("/Clima");
-    const QString file      = directory + QStringLiteral("/clima.ini");
+    const QString directory = m_config.path() + QStringLiteral("/Climat");
+    const QString file      = directory + QStringLiteral("/climat.ini");
     QDir().mkpath(directory);
     QFile::remove(file);
     if (!ini.isEmpty()) {
@@ -90,11 +90,11 @@ Outcome TestCli::run(const QStringList &arguments, const QByteArray &ini)
 
     QProcess process;
     process.setProcessEnvironment(env);
-    process.start(QStringLiteral(CLIMA_CLI_BINARY), arguments);
+    process.start(QStringLiteral(CLIMAT_CLI_BINARY), arguments);
 
     Outcome outcome;
     if (!process.waitForFinished(20000)) {
-        outcome.stdErr = QByteArrayLiteral("clima-cli did not finish in 20 s");
+        outcome.stdErr = QByteArrayLiteral("climat-cli did not finish in 20 s");
         process.kill();
         return outcome;
     }

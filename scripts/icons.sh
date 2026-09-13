@@ -4,7 +4,7 @@
 #
 # The hicolor icon sizes, cut from one SVG.
 #
-#   scripts/icons.sh render     re-render packaging/icons/clima-<n>.png
+#   scripts/icons.sh render     re-render packaging/icons/climat-<n>.png
 #   scripts/icons.sh check      re-render to a temp dir and diff (CI gate)
 #
 # Why the PNGs are committed at all, when there is a generator right here:
@@ -26,7 +26,7 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "$here/.." && pwd)"
 
 icons_dir="$root/packaging/icons"
-master="$icons_dir/clima.svg"
+master="$icons_dir/climat.svg"
 
 # The hicolor sizes that matter, and why this list stops where it does.
 #
@@ -51,19 +51,19 @@ fi
 render_one() {
   local size="$1" dest="$2"
   rsvg-convert --width "$size" --height "$size" --format png \
-    --output "$dest/clima-$size.png" "$master"
+    --output "$dest/climat-$size.png" "$master"
 }
 
 case "$command" in
   render)
     for size in "${sizes[@]}"; do
       render_one "$size" "$icons_dir"
-      echo "icons: clima-$size.png"
+      echo "icons: climat-$size.png"
     done
     # And the Windows container, which is those same PNGs in one file. It is
     # built from the rendered sizes rather than from the SVG, so it cannot
     # describe a drawing the PNGs do not.
-    python3 "$here/make-ico.py" "$icons_dir" "$icons_dir/clima.ico"
+    python3 "$here/make-ico.py" "$icons_dir" "$icons_dir/climat.ico"
     ;;
 
   check)
@@ -73,20 +73,20 @@ case "$command" in
     drift=0
     for size in "${sizes[@]}"; do
       render_one "$size" "$tmp"
-      committed="$icons_dir/clima-$size.png"
+      committed="$icons_dir/climat-$size.png"
 
       if [ ! -f "$committed" ]; then
-        echo "icons: clima-$size.png is missing" >&2
+        echo "icons: climat-$size.png is missing" >&2
         drift=1
-      elif ! cmp -s "$tmp/clima-$size.png" "$committed"; then
-        echo "icons: clima-$size.png does not match what clima.svg renders to" >&2
+      elif ! cmp -s "$tmp/climat-$size.png" "$committed"; then
+        echo "icons: climat-$size.png does not match what climat.svg renders to" >&2
         drift=1
       fi
     done
 
-    python3 "$here/make-ico.py" "$tmp" "$tmp/clima.ico" > /dev/null
-    if ! cmp -s "$tmp/clima.ico" "$icons_dir/clima.ico"; then
-      echo "icons: clima.ico does not match the rendered sizes" >&2
+    python3 "$here/make-ico.py" "$tmp" "$tmp/climat.ico" > /dev/null
+    if ! cmp -s "$tmp/climat.ico" "$icons_dir/climat.ico"; then
+      echo "icons: climat.ico does not match the rendered sizes" >&2
       drift=1
     fi
 

@@ -3,7 +3,7 @@
 //
 // The variable lists, closed against the responses they produce.
 //
-// libclima/providers/openmeteo/openmeteovariables.h opens by naming the failure
+// libclimat/providers/openmeteo/openmeteovariables.h opens by naming the failure
 // this file exists to catch:
 //
 //     "Every name below is asked for in a query string and read out of a JSON
@@ -32,7 +32,7 @@
 // and every detail card down together. The subset check below is what stops a
 // variable being added to `current` because it looked useful in `hourly`.
 
-#include "libclima/providers/openmeteo/openmeteovariables.h"
+#include "libclimat/providers/openmeteo/openmeteovariables.h"
 
 #include <QFile>
 #include <QJsonArray>
@@ -41,13 +41,13 @@
 #include <QSet>
 #include <QTest>
 
-using namespace clima::openmeteo;
+using namespace climat::openmeteo;
 
 namespace {
 
 QJsonObject fixture(const QString &name)
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR "/tests/fixtures/openmeteo/") + name);
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR "/tests/fixtures/openmeteo/") + name);
     if (!file.open(QIODevice::ReadOnly))
         return {};
     return QJsonDocument::fromJson(file.readAll()).object();
@@ -351,7 +351,7 @@ void TestOpenMeteoVariables::theQueryParametersCarryNothingAUrlWouldHaveToEscape
 void TestOpenMeteoVariables::theVariablesTheCardsDoNotReadAreStillAbsent()
 {
     // "`cloud_cover_low` / `_mid` / `_high` and `snow_depth`. Open-Meteo serves
-    // all four and the plan called for them; nothing in app/qml/Clima/ reads
+    // all four and the plan called for them; nothing in app/qml/Climat/ reads
     // them … so asking for them would be four columns fetched, parsed, cached
     // and thrown away on every refresh, forever, against a free service's rate
     // limit."

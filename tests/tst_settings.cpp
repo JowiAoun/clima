@@ -174,7 +174,7 @@ void TestSettings::anOrganisationRenameCarriesThePreferencesForward()
 {
     // The shape that always worked: the organisation moves, so the config
     // directory moves with it and the whole tree is copied.
-    const SettingsIdentity old{ QStringLiteral("ClimaTestOldOrg"),
+    const SettingsIdentity old{ QStringLiteral("ClimatTestOldOrg"),
                                 QCoreApplication::applicationName() };
 
     const QString legacyFile  = configFileFor(old);
@@ -216,7 +216,7 @@ void TestSettings::anApplicationRenameCarriesThemForwardToo()
     // precisely the data-loss event app/settings.h says this helper exists to
     // prevent.
     const SettingsIdentity old{ QCoreApplication::organizationName(),
-                                QStringLiteral("clima-before-the-rename") };
+                                QStringLiteral("climat-before-the-rename") };
 
     QVERIFY2(configDirectoryFor(old) == configDirectoryFor(currentIdentity()),
              "this test needs one shared directory to be testing anything");
@@ -246,7 +246,7 @@ void TestSettings::aFileThatAlreadyExistsIsNeverOverwritten()
     // others never got one. A user who has already run this version has current
     // preferences in the current file; copying an older identity over them
     // would revert their settings on every launch, silently, forever.
-    const SettingsIdentity old{ QStringLiteral("ClimaTestStale"),
+    const SettingsIdentity old{ QStringLiteral("ClimatTestStale"),
                                 QCoreApplication::applicationName() };
 
     const QString legacyFile  = configFileFor(old);
@@ -276,7 +276,7 @@ void TestSettings::aSharedDirectoryIsNotMistakenForHavingAlreadyMigrated()
     // like a completed migration, which is the same silent revert as above with
     // a different cause.
     const SettingsIdentity old{ QCoreApplication::organizationName(),
-                                QStringLiteral("clima-sibling-test") };
+                                QStringLiteral("climat-sibling-test") };
 
     const QString legacyFile  = configFileFor(old);
     const QString currentFile = configFileFor(currentIdentity());
@@ -299,8 +299,8 @@ void TestSettings::aSharedDirectoryIsNotMistakenForHavingAlreadyMigrated()
 
 void TestSettings::anIdentityThatNeverWroteAnythingIsSkipped()
 {
-    const SettingsIdentity ghost{ QStringLiteral("ClimaTestGhost"),
-                                  QStringLiteral("clima-never-existed") };
+    const SettingsIdentity ghost{ QStringLiteral("ClimatTestGhost"),
+                                  QStringLiteral("climat-never-existed") };
     const QString currentFile = configFileFor(currentIdentity());
 
     QDir(configDirectoryFor(ghost)).removeRecursively();
@@ -321,9 +321,9 @@ void TestSettings::theFirstIdentityThatExistsWins()
     // Two different ORGANISATIONS, so the two are genuinely two places: within
     // one organisation the earlier write would simply be a different filename
     // in the same directory, which tests less.
-    const SettingsIdentity newer{ QStringLiteral("ClimaTestV2"),
+    const SettingsIdentity newer{ QStringLiteral("ClimatTestV2"),
                                   QCoreApplication::applicationName() };
-    const SettingsIdentity older{ QStringLiteral("ClimaTestV1"),
+    const SettingsIdentity older{ QStringLiteral("ClimatTestV1"),
                                   QCoreApplication::applicationName() };
 
     const QString currentFile = configFileFor(currentIdentity());
@@ -365,9 +365,9 @@ void TestSettings::anIdentityEqualToTheCurrentOneIsNotCopiedOntoItself()
 void TestSettings::everySubdirectoryComesForwardToo()
 {
     // copyTree recurses, and it has to: the config location is a directory, not
-    // a file, and anything Clima later puts beside clima.ini — a cached place
+    // a file, and anything Climat later puts beside climat.ini — a cached place
     // list, a per-widget layout — lives in it.
-    const SettingsIdentity old{ QStringLiteral("ClimaTestNested"),
+    const SettingsIdentity old{ QStringLiteral("ClimatTestNested"),
                                 QCoreApplication::applicationName() };
     const QString legacyDir   = configDirectoryFor(old);
     const QString currentDir  = configDirectoryFor(currentIdentity());
@@ -401,7 +401,7 @@ void TestSettings::everySubdirectoryComesForwardToo()
 
 void TestSettings::theShippedTableIsEmptyAndThatIsTheCorrectAnswer()
 {
-    // Clima has written preferences under exactly one identity. This asserts
+    // Climat has written preferences under exactly one identity. This asserts
     // the table has not grown a speculative entry — an identity in this list
     // that never existed is a file probe on every launch, and one that is wrong
     // is a migration from somebody else's application.
@@ -759,13 +759,13 @@ void TestSettings::aFreshInstallTakesItsClockFromTheLocale()
     // a test that read the runner's locale would assert whatever CI happened
     // to be set to.
     QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
-    QCOMPARE(clima::settingskeys::defaultClockFormat(), QStringLiteral("12h"));
+    QCOMPARE(climat::settingskeys::defaultClockFormat(), QStringLiteral("12h"));
 
     QLocale::setDefault(QLocale(QLocale::French, QLocale::France));
-    QCOMPARE(clima::settingskeys::defaultClockFormat(), QStringLiteral("24h"));
+    QCOMPARE(climat::settingskeys::defaultClockFormat(), QStringLiteral("24h"));
 
     QLocale::setDefault(QLocale(QLocale::German, QLocale::Germany));
-    QCOMPARE(clima::settingskeys::defaultClockFormat(), QStringLiteral("24h"));
+    QCOMPARE(climat::settingskeys::defaultClockFormat(), QStringLiteral("24h"));
 
     // And through Settings, on a store with the key ABSENT, which is the wiring
     // rather than the constant. Without this the case passes against

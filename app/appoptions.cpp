@@ -3,7 +3,7 @@
 
 #include "appoptions.h"
 
-#include "libclima/providers/fixture/fixtureprovider.h"
+#include "libclimat/providers/fixture/fixtureprovider.h"
 
 #include <QCommandLineOption>
 #include <QProcessEnvironment>
@@ -23,15 +23,15 @@ namespace {
 //   --grab --size --viewport
 //
 // They are small, they cost nothing to carry, and they are how a bug report
-// gets a screenshot: the issue template says "attach `clima --grab bug.png`",
+// gets a screenshot: the issue template says "attach `climat --grab bug.png`",
 // and a user cannot do that with a flag that only exists in a developer build.
 //
-// Everything else is CLIMA_DEV_TOOLS-only. --film, --poke and --scroll drive
+// Everything else is CLIMAT_DEV_TOOLS-only. --film, --poke and --scroll drive
 // the capture harness; --sky, --metric, --day, --list and --tab put the app
 // into a state a screenshot wants to catch.
 //
 // --gallery, --card and --details are gone rather than conditional. They opened
-// the three preview modes, the preview modes are `clima-gallery` now, and a
+// the three preview modes, the preview modes are `climat-gallery` now, and a
 // weather app that still answered to `--gallery` by opening a component library
 // would be the same mistake in a smaller font.
 //
@@ -49,7 +49,7 @@ namespace {
     std::exit(EXIT_FAILURE);
 }
 
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
 // Not an error: the run continues and does something reasonable. Said out loud
 // anyway, because the thing it is reporting is a flag NOT taking effect, and a
 // default that quietly declines to apply is indistinguishable from one that was
@@ -67,9 +67,9 @@ void note(const QString &message)
     std::fprintf(stderr, "%s: %s\n", qPrintable(QCoreApplication::applicationName()),
                  qPrintable(message));
 }
-#endif // CLIMA_DEV_TOOLS
+#endif // CLIMAT_DEV_TOOLS
 
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
 // Every numeric flag in this parser wants the same three things: the value has
 // to be a whole number, it has to clear a floor, and a failure has to name the
 // flag rather than the number. Written once because it was written five times
@@ -91,7 +91,7 @@ int requireInt(const QCommandLineParser &parser, const QCommandLineOption &optio
                  .arg(option.names().constFirst(), QString::fromUtf8(what), raw));
     return value;
 }
-#endif // CLIMA_DEV_TOOLS
+#endif // CLIMAT_DEV_TOOLS
 
 AppOptions *g_instance = nullptr;
 
@@ -151,7 +151,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
-        QStringLiteral("Clima — a native Qt 6 weather app.\n"
+        QStringLiteral("Climat — a native Qt 6 weather app.\n"
                        "\n"
                        "With no options it opens the forecast. The window's width chooses the\n"
                        "layout: a phone gets five tabs under a nav bar, a desktop gets one\n"
@@ -172,8 +172,8 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("Replay a recorded forecast at the instant it was recorded, instead of "
                        "fetching one: %1. Use \"off\" to force the live network. Defaults to "
                        "\"%2\" under --grab and --film, and to the live network otherwise; "
-                       "CLIMA_FIXTURE sets it for a whole session.")
-            .arg(clima::fixtures::names().join(QStringLiteral(", ")), clima::fixtures::defaultName()),
+                       "CLIMAT_FIXTURE sets it for a whole session.")
+            .arg(climat::fixtures::names().join(QStringLiteral(", ")), climat::fixtures::defaultName()),
         QStringLiteral("name"));
     parser.addOption(fixtureOption);
 
@@ -190,7 +190,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("id"));
     parser.addOption(viewportOption);
 
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
     // ---- filming -----------------------------------------------------------
     const QCommandLineOption filmOption(
         QStringLiteral("film"),
@@ -276,7 +276,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("px"));
     parser.addOption(scrollOption);
 
-#endif // CLIMA_DEV_TOOLS
+#endif // CLIMAT_DEV_TOOLS
 
     // Handles --help and --version, and exits on an unknown flag. That last one
     // is the behaviour change worth naming: `--vieport mobile` used to open the
@@ -289,9 +289,9 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
 
     if (parser.isSet(fixtureOption)) {
         const QString name = parser.value(fixtureOption);
-        if (name != QLatin1String("off") && !clima::fixtures::exists(name)) {
+        if (name != QLatin1String("off") && !climat::fixtures::exists(name)) {
             fail(QStringLiteral("unknown fixture \"%1\" — try one of: %2, or \"off\"")
-                     .arg(name, clima::fixtures::names().join(QStringLiteral(", "))));
+                     .arg(name, climat::fixtures::names().join(QStringLiteral(", "))));
         }
         self->m_fixture = name;
     }
@@ -319,7 +319,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         self->m_viewport = id;
     }
 
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
     // ---- filming -----------------------------------------------------------
     if (parser.isSet(framesOption))
         self->m_frames = requireInt(parser, framesOption, 1, "a count > 0");
@@ -372,13 +372,13 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         // line, because reproducibility is the entire reason the default exists.
         if (self->m_fixture.isEmpty()) {
             const QString session =
-                QProcessEnvironment::systemEnvironment().value(QStringLiteral("CLIMA_FIXTURE"));
+                QProcessEnvironment::systemEnvironment().value(QStringLiteral("CLIMAT_FIXTURE"));
             const bool sessionFixture =
                 !session.isEmpty() && session != QLatin1String("off")
-                && clima::fixtures::exists(session);
+                && climat::fixtures::exists(session);
 
             if (sessionFixture) {
-                note(QStringLiteral("--place %1 overrides CLIMA_FIXTURE=%2 for this run; "
+                note(QStringLiteral("--place %1 overrides CLIMAT_FIXTURE=%2 for this run; "
                                     "fetching live.")
                          .arg(self->m_place, session));
             } else if (self->capturing()) {
@@ -429,19 +429,19 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         self->m_scroll = distance;
     }
 
-#endif // CLIMA_DEV_TOOLS
+#endif // CLIMAT_DEV_TOOLS
 
     // This program takes no positional arguments at all — it took one, and that
     // one was the gallery's component name, which left with the gallery. A
     // stray word is therefore a typo, most likely a flag that lost its dashes,
     // and saying so beats opening the forecast and ignoring it.
     //
-    // Outside the CLIMA_DEV_TOOLS block because it is not a dev-tools rule: a
-    // packaged `clima Toronto` should be told that this is not how you pick a
+    // Outside the CLIMAT_DEV_TOOLS block because it is not a dev-tools rule: a
+    // packaged `climat Toronto` should be told that this is not how you pick a
     // location either.
     const QStringList words = parser.positionalArguments();
     if (!words.isEmpty())
-        fail(QStringLiteral("unexpected argument \"%1\" — clima takes options, not arguments")
+        fail(QStringLiteral("unexpected argument \"%1\" — climat takes options, not arguments")
                  .arg(words.constFirst()));
 }
 
@@ -466,10 +466,10 @@ QString AppOptions::fixture() const
     const bool named = !m_place.isEmpty();
 
     const QString fromEnvironment =
-        QProcessEnvironment::systemEnvironment().value(QStringLiteral("CLIMA_FIXTURE"));
+        QProcessEnvironment::systemEnvironment().value(QStringLiteral("CLIMAT_FIXTURE"));
     if (fromEnvironment == QLatin1String("off"))
         return {};
-    if (!fromEnvironment.isEmpty() && clima::fixtures::exists(fromEnvironment))
+    if (!fromEnvironment.isEmpty() && climat::fixtures::exists(fromEnvironment))
         return named ? QString() : fromEnvironment;
 
     // A capture defaults to the recording. Not because a capture is a test, but
@@ -477,7 +477,7 @@ QString AppOptions::fixture() const
     // and two pictures of two different afternoons compare as a diff in every
     // pixel.
     if (capturing())
-        return named ? QString() : clima::fixtures::defaultName();
+        return named ? QString() : climat::fixtures::defaultName();
 
     return {};
 }

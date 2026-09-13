@@ -4,7 +4,7 @@
 // Fetch a real forecast and print what the adapter made of it.
 //
 // GPL-3.0-or-later and not MPL, despite living next to code that is: this is a
-// development tool, not part of the reusable engine. It links libclima the way
+// development tool, not part of the reusable engine. It links libclimat the way
 // any consumer would.
 //
 // ---- why a tool and not another test -----------------------------------------
@@ -22,22 +22,22 @@
 // check by eye. That is a different kind of confidence and there is no
 // automated substitute for it that does not involve a network in CI.
 //
-//     nix develop --command cmake --build build/dev --target clima-openmeteo-probe
-//     ./build/dev/tools/openmeteo-probe/clima-openmeteo-probe
-//     ./build/dev/tools/openmeteo-probe/clima-openmeteo-probe --lat 60.39 --lon 5.32 --hours 12
+//     nix develop --command cmake --build build/dev --target climat-openmeteo-probe
+//     ./build/dev/tools/openmeteo-probe/climat-openmeteo-probe
+//     ./build/dev/tools/openmeteo-probe/climat-openmeteo-probe --lat 60.39 --lon 5.32 --hours 12
 //
 // It goes out over the real HttpClient, which means it also exercises the real
 // User-Agent, the real coordinate rounding and the real conditional-GET path.
 // If that is refused, this is where you find out, and the 403 arrives here
 // rather than in front of a user.
 
-#include "libclima/core/clock.h"
-#include "libclima/domain/hourconvention.h"
-#include "libclima/domain/timeaxis.h"
-#include "libclima/domain/weathercode.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/providers/openmeteo/openmeteoadapter.h"
-#include "libclima/providers/openmeteo/openmeteoforecastprovider.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/domain/hourconvention.h"
+#include "libclimat/domain/timeaxis.h"
+#include "libclimat/domain/weathercode.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/providers/openmeteo/openmeteoadapter.h"
+#include "libclimat/providers/openmeteo/openmeteoforecastprovider.h"
 
 #include <QCommandLineParser>
 #include <QCoreApplication>
@@ -45,7 +45,7 @@
 #include <QTextStream>
 #include <QTimeZone>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -55,7 +55,7 @@ QTextStream &out()
     return stream;
 }
 
-// A Reading, or a dash. The same choice app/qml/Clima/metrics.js's format()
+// A Reading, or a dash. The same choice app/qml/Climat/metrics.js's format()
 // makes for a value it does not have, so that a column of dashes here looks
 // like the column of dashes the UI would draw.
 QString show(Reading value, int decimals = 1)
@@ -180,7 +180,7 @@ void printForecast(const Forecast &forecast, int hours)
 
     // The local day lengths, which is where a DST window shows itself. Every
     // day is 24 hours except the two a year that are not, and Open-Meteo's own
-    // labels never say so — see libclima/domain/timeaxis.h.
+    // labels never say so — see libclimat/domain/timeaxis.h.
     out() << "\n=== local day lengths (25 or 23 means a DST transition) =========\n  ";
     QList<QDateTime> instants;
     for (const HourlyPoint &point : forecast.hourly)
@@ -204,7 +204,7 @@ void printForecast(const Forecast &forecast, int hours)
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    QCoreApplication::setApplicationName(QStringLiteral("clima-openmeteo-probe"));
+    QCoreApplication::setApplicationName(QStringLiteral("climat-openmeteo-probe"));
 
     QCommandLineParser parser;
     parser.setApplicationDescription(

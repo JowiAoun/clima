@@ -22,14 +22,14 @@
 // WHY THE SNAPSHOT IS A QVariantMap AND NOT A TYPED OBJECT
 //
 // Because the daemon's JSON keeps *absent* distinguishable from *zero* (rule 2
-// in libclima/wire/snapshot.h), and QVariantMap is the shape that survives the
+// in libclimat/wire/snapshot.h), and QVariantMap is the shape that survives the
 // trip: a JSON null becomes a null QVariant, which QML reads as `null`, and
 // `wire.js` turns that into an em dash rather than into 0.
 //
 // A typed C++ object would mean a property per field, which is 40-odd
 // properties that all have to answer "I do not know" somehow, and the somehow
 // would be a sentinel. We have been here before — see the header of
-// libclima/domain/forecast.h, where a plain double for a missing gust made the
+// libclimat/domain/forecast.h, where a plain double for a missing gust made the
 // hero read "Feels like 0°" on a 28 °C afternoon.
 //
 // ============================================================================

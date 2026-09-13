@@ -3,7 +3,7 @@
 
 #include "daemonadaptor.h"
 
-#include "libclima/wire/snapshot.h"
+#include "libclimat/wire/snapshot.h"
 #include "snapshotservice.h"
 
 DaemonAdaptor::DaemonAdaptor(SnapshotService *service)
@@ -19,7 +19,7 @@ DaemonAdaptor::DaemonAdaptor(SnapshotService *service)
 
 int DaemonAdaptor::SchemaVersion() const
 {
-    return clima::wire::kSchemaVersion;
+    return climat::wire::kSchemaVersion;
 }
 
 QString DaemonAdaptor::GetSnapshot(const QString    &placeId,

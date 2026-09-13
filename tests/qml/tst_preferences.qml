@@ -23,7 +23,7 @@
 import QtQuick
 import QtQuick.Window
 import QtTest
-import Clima
+import Climat
 
 TestCase {
     name: "Preferences"
@@ -58,7 +58,7 @@ TestCase {
     property var built: []
 
     function build(type, props) {
-        var c = Qt.createComponent("Clima", type)
+        var c = Qt.createComponent("Climat", type)
         verify(c !== null && c.status !== Component.Error,
                c === null ? "no such type" : c.errorString())
         var o = c.createObject(stage, props)

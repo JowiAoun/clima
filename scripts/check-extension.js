@@ -65,7 +65,7 @@ if (xmlMatch) {
 
         const iface = node.interfaces[0];
         check('dbus-xml: names the daemon interface',
-              iface && iface.name === 'io.github.JowiAoun.Clima.Daemon1',
+              iface && iface.name === 'io.github.JowiAoun.Climat.Daemon1',
               `got ${iface ? iface.name : '(none)'}`);
 
         // Every method the extension calls, against what the XML declares. The
@@ -142,7 +142,7 @@ if (metadata) {
           `uuid is ${metadata.uuid}; gnome-shell will not load a mismatched directory`);
 
     check('metadata: names its settings schema',
-          metadata['settings-schema'] === 'org.gnome.shell.extensions.clima',
+          metadata['settings-schema'] === 'org.gnome.shell.extensions.climat',
           'getSettings() resolves through this');
 
     check('metadata: declares shell versions',

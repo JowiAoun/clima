@@ -1,5 +1,5 @@
 {
-  "name": "clima-refcap",
+  "name": "climat-refcap",
   "private": true,
   "type": "module",
   "description": "Reference-capture harness for UI replication work",

@@ -13,7 +13,7 @@
 // correctly.
 //
 // This one is about the fixture reaching the app with that fact intact. Between
-// the two lives a shift — libclima/domain/hourconvention.h — that has to happen
+// the two lives a shift — libclimat/domain/hourconvention.h — that has to happen
 // exactly once, and the failure when it does not is invisible: the chart draws,
 // the axis is right, the curve is right, and the wash sits one column over. The
 // forecast says it starts raining at ten when it starts raining at nine, and
@@ -32,15 +32,15 @@
 // turns "somebody edited a manifest" from a silent re-rendering of every golden
 // image into a failing test.
 
-#include "libclima/domain/hourconvention.h"
-#include "libclima/providers/fixture/fixtureprovider.h"
+#include "libclimat/domain/hourconvention.h"
+#include "libclimat/providers/fixture/fixtureprovider.h"
 
 #include "support/networkguard.h"
 
 #include <QTest>
 #include <QTimeZone>
 
-using namespace clima;
+using namespace climat;
 
 class TestFixtureProvider : public QObject
 {
@@ -117,7 +117,7 @@ void TestFixtureProvider::torontoIsFrozenAtTheInstantTheMockDescribed()
     const Fixture fixture = fixtures::load(QStringLiteral("toronto"));
     QVERIFY(fixture.isValid());
 
-    // 12:28 PM in Toronto — the observation app/qml/Clima's mock data always
+    // 12:28 PM in Toronto — the observation app/qml/Climat's mock data always
     // claimed to be describing, and therefore the instant that keeps the
     // committed screenshots comparable to the ones taken before there was any
     // live data. The date is the payload's own; see below for why that is not

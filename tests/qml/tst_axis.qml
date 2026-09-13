@@ -20,7 +20,7 @@
 // range: **the axis contains the data.** Every metric, both ends, always.
 import QtQuick
 import QtTest
-import Clima
+import Climat
 
 TestCase {
     id: testCase

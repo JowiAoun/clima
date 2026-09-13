@@ -11,12 +11,12 @@
 
 #include <iterator> // std::size, over the two tables below
 
-#ifdef CLIMA_HAS_LAYER_SHELL
+#ifdef CLIMAT_HAS_LAYER_SHELL
 #include <LayerShellQt/Window>
 #include <wayland-client.h>
 #endif
 
-namespace clima::widgets::layershell {
+namespace climat::widgets::layershell {
 
 namespace {
 
@@ -75,7 +75,7 @@ int layerIndex(const QString &name)
     return 1; // bottom
 }
 
-#ifdef CLIMA_HAS_LAYER_SHELL
+#ifdef CLIMAT_HAS_LAYER_SHELL
 
 void registryGlobal(void *data, wl_registry *, uint32_t, const char *interface, uint32_t)
 {
@@ -158,7 +158,7 @@ private:
             return;
 
         if (m_remapped && m_since.elapsed() < 2000) {
-            qWarning("clima-widget: the compositor dismissed the tiles twice in "
+            qWarning("climat-widget: the compositor dismissed the tiles twice in "
                      "two seconds — giving up rather than spinning");
             m_stopping = true;
             QCoreApplication::quit();
@@ -166,7 +166,7 @@ private:
         }
 
         if (QGuiApplication::primaryScreen() == nullptr) {
-            qWarning("clima-widget: no screens left to put the tiles on");
+            qWarning("climat-widget: no screens left to put the tiles on");
             m_stopping = true;
             QCoreApplication::quit();
             return;
@@ -219,11 +219,11 @@ private:
     bool          m_stopping = false;
 };
 
-#endif // CLIMA_HAS_LAYER_SHELL
+#endif // CLIMAT_HAS_LAYER_SHELL
 
 QString computeUnavailableReason()
 {
-#ifndef CLIMA_HAS_LAYER_SHELL
+#ifndef CLIMAT_HAS_LAYER_SHELL
     return QStringLiteral(
         "this build was configured without layer-shell-qt, so it cannot ask a "
         "compositor for a desktop-layer surface");
@@ -242,7 +242,7 @@ QString computeUnavailableReason()
     // takes ownership of that file descriptor and *unsets the variable*. That
     // is exactly the fd a GNOME Shell extension hands us: extension identity on
     // Wayland is an inherited socket from a socketpair the shell made, and it
-    // is the whole reason clima-widget is spawned rather than D-Bus activated
+    // is the whole reason climat-widget is spawned rather than D-Bus activated
     // (docs/widgets.md, finding 2).
     //
     // So probing here would consume the handshake, Qt would find no socket to
@@ -302,7 +302,7 @@ bool pin([[maybe_unused]] QWindow *window, [[maybe_unused]] const Placement &pla
     if (window == nullptr || !unavailableReason().isEmpty())
         return false;
 
-#ifdef CLIMA_HAS_LAYER_SHELL
+#ifdef CLIMAT_HAS_LAYER_SHELL
     using LayerShellQt::Window;
 
     Window *surface = Window::get(window);
@@ -331,7 +331,7 @@ bool pin([[maybe_unused]] QWindow *window, [[maybe_unused]] const Placement &pla
     // scripts/check-layer-shell.sh asserts on, KWin matches window rules
     // against it, and a user writing their own rule needs a name that does not
     // change between releases.
-    surface->setScope(QStringLiteral("clima-widgets"));
+    surface->setScope(QStringLiteral("climat-widgets"));
 
     // Parented to the window, so it lives exactly as long as the thing it is
     // watching. `new` without a delete is not a leak here for the same reason
@@ -344,4 +344,4 @@ bool pin([[maybe_unused]] QWindow *window, [[maybe_unused]] const Placement &pla
 #endif
 }
 
-} // namespace clima::widgets::layershell
+} // namespace climat::widgets::layershell

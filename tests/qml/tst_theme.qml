@@ -16,9 +16,9 @@
 // for CI noticing that it stopped being that.
 import QtQuick
 import QtTest
-import Clima
+import Climat
 
-import "qrc:/qt/qml/Clima/sky.js" as Sky
+import "qrc:/qt/qml/Climat/sky.js" as Sky
 
 // The audit arithmetic, out of the gallery module rather than reimplemented.
 // By resource URL and not by a relative path: this file is loaded off disk by
@@ -26,7 +26,7 @@ import "qrc:/qt/qml/Clima/sky.js" as Sky
 // day the test moves, while the resource path is the module's own address and
 // is the same one Gallery.qml resolves. A second copy of WCAG's transfer
 // function is the one thing that would make this test agree with a bug.
-import "qrc:/qt/qml/Clima/Gallery/contrast.js" as Contrast
+import "qrc:/qt/qml/Climat/Gallery/contrast.js" as Contrast
 
 TestCase {
     name: "Theme"

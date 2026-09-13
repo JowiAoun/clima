@@ -33,12 +33,12 @@
 // The same reason tst_conditionsdata does, and tests/CMakeLists.txt has the
 // argument at length: the subject is a view model, which lives in app/, is
 // GPL-3.0-or-later rather than MPL-2.0, and is allowed to depend on QML because
-// being read by QML is its whole job. `clima_forbid_gui()` is not applied here
-// and libclima's no-GUI promise is still read off tst_httpclient.
+// being read by QML is its whole job. `climat_forbid_gui()` is not applied here
+// and libclimat's no-GUI promise is still read off tst_httpclient.
 
 #include "forecastdata.h"
 
-#include "libclima/providers/fixture/fixtureprovider.h"
+#include "libclimat/providers/fixture/fixtureprovider.h"
 
 #include <QDate>
 #include <QSet>
@@ -49,14 +49,14 @@
 #include <QTime>
 #include <QTimeZone>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
 // The six glyph names that are only a statement about how much sky is showing.
 // Everything else in `ConditionKind` is a thing happening — fog, something
 // falling, lightning — and the difference is the line
-// libclima/domain/weathercode.h folds a labelled column across.
+// libclimat/domain/weathercode.h folds a labelled column across.
 bool isSky(const QString &kind)
 {
     static const QSet<QString> sky = {
@@ -71,7 +71,7 @@ bool isSky(const QString &kind)
 // the third day. UTC throughout, so a local hour and an index are the same
 // number and the test can say which column it means.
 //
-// Four days and not three because libclima/domain/hourconvention.h's shift
+// Four days and not three because libclimat/domain/hourconvention.h's shift
 // costs the series its last hour: day 2 keeps its 11 p.m. only if day 3 exists
 // to supply it.
 Forecast oneStormyHour(int stormHour)

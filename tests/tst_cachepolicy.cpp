@@ -37,14 +37,14 @@
 // integer precisely so inserting a value in the middle of the enum cannot
 // silently reinterpret every stored row.
 
-#include "libclima/cache/cachepolicy.h"
+#include "libclimat/cache/cachepolicy.h"
 
 #include <QSet>
 #include <QTest>
 
 #include <chrono>
 
-using namespace clima;
+using namespace climat;
 using namespace std::chrono_literals;
 
 namespace {
@@ -92,7 +92,7 @@ private Q_SLOTS:
     void everyKindHasItsOwnStableName();
     void everyNameSurvivesTheRoundTripThroughTheDatabase_data();
     void everyNameSurvivesTheRoundTripThroughTheDatabase();
-    void aNameFromANewerClimaIsRejectedRatherThanGuessed();
+    void aNameFromANewerClimatIsRejectedRatherThanGuessed();
     void theOkPointerIsOptional();
     void aKindOutsideTheEnumIsNamedRatherThanLeftEmpty();
 
@@ -339,9 +339,9 @@ void TestCachePolicy::everyNameSurvivesTheRoundTripThroughTheDatabase()
     QVERIFY(ok);
 }
 
-void TestCachePolicy::aNameFromANewerClimaIsRejectedRatherThanGuessed()
+void TestCachePolicy::aNameFromANewerClimatIsRejectedRatherThanGuessed()
 {
-    // "An unrecognised name is a row written by a newer Clima than this one, or
+    // "An unrecognised name is a row written by a newer Climat than this one, or
     // by a corrupted file. Reporting it as Forecast with ok=false lets the
     // caller drop the row rather than crash, and callers do drop it."
     //

@@ -37,7 +37,7 @@
 import QtQuick
 import QtQuick.Window
 import QtTest
-import Clima
+import Climat
 
 TestCase {
     name: "DayStrip"

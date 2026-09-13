@@ -27,11 +27,11 @@
 // There are two executables. The gallery exists to review the components the app
 // draws, and a gallery drawing them in a different typeface reviews something
 // the product does not ship. Both mains call install(); the font files are in
-// the binary once, because both link `climaqml`, which is where the resource
+// the binary once, because both link `climatqml`, which is where the resource
 // lives.
 
-#ifndef CLIMA_APPFONT_H
-#define CLIMA_APPFONT_H
+#ifndef CLIMAT_APPFONT_H
+#define CLIMAT_APPFONT_H
 
 #include <QString>
 
@@ -51,4 +51,4 @@ QString install();
 
 } // namespace AppFont
 
-#endif // CLIMA_APPFONT_H
+#endif // CLIMAT_APPFONT_H

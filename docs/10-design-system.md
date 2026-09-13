@@ -3,10 +3,10 @@
 
 # 10 — Design system
 
-The rules every Clima component follows. Measured off the reference where a
+The rules every Climat component follows. Measured off the reference where a
 number was worth copying, decided on purpose where it was not.
 
-`app/qml/Clima/theme.js` is the single source of truth for values, and
+`app/qml/Climat/theme.js` is the single source of truth for values, and
 `Theme.qml` republishes it as the singleton every component reads.
 **Never hard-code a token's value in a component** — if a colour or radius is
 missing from `theme.js`, that is a change to `theme.js`, not a literal in a QML

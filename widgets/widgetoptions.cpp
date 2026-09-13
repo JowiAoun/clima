@@ -16,7 +16,7 @@
 
 #include <cstdio>
 
-namespace layershell = clima::widgets::layershell;
+namespace layershell = climat::widgets::layershell;
 
 namespace {
 
@@ -74,7 +74,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
-        QStringLiteral("Draws Clima's weather tiles. Reads from clima-daemon; fetches nothing."));
+        QStringLiteral("Draws Climat's weather tiles. Reads from climat-daemon; fetches nothing."));
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -177,11 +177,11 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     if (!frozen.isEmpty()) {
         const QDateTime instant = QDateTime::fromString(frozen, Qt::ISODate);
         if (!instant.isValid()) {
-            std::fprintf(stderr, "clima-widget: --now takes an ISO 8601 instant, "
+            std::fprintf(stderr, "climat-widget: --now takes an ISO 8601 instant, "
                                  "for example 2026-08-06T15:00:00-07:00.\n");
             std::exit(2);
         }
-        clima::widgets::freezeClock(instant);
+        climat::widgets::freezeClock(instant);
     }
 
     const QVariantList catalogue = DaemonLink::instance()->catalogue();
@@ -215,7 +215,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
             // Loud, and with the list, because the alternative is a desktop
             // quietly one tile short of what somebody configured.
             std::fprintf(stderr,
-                         "clima-widget: there is no widget called \"%s\".\n"
+                         "climat-widget: there is no widget called \"%s\".\n"
                          "              Known: %s\n",
                          qPrintable(trimmed), qPrintable(known.join(QStringLiteral(", "))));
             std::exit(2);
@@ -229,7 +229,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     const QString scheme = parser.value(schemeOption);
     if (!scheme.isEmpty() && scheme != QStringLiteral("dark")
         && scheme != QStringLiteral("light")) {
-        std::fprintf(stderr, "clima-widget: --scheme takes \"dark\" or \"light\".\n");
+        std::fprintf(stderr, "climat-widget: --scheme takes \"dark\" or \"light\".\n");
         std::exit(2);
     }
     self->m_scheme = scheme;
@@ -237,7 +237,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     bool      ok      = false;
     const int columns = parser.value(columnsOption).toInt(&ok);
     if (!ok || columns < 1) {
-        std::fprintf(stderr, "clima-widget: --columns takes a positive whole number.\n");
+        std::fprintf(stderr, "climat-widget: --columns takes a positive whole number.\n");
         std::exit(2);
     }
     self->m_columns = columns;
@@ -249,11 +249,11 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     self->m_every        = parser.value(everyOption).toInt();
 
     if (self->m_frames < 1 || self->m_every < 1) {
-        std::fprintf(stderr, "clima-widget: --frames and --every take positive numbers.\n");
+        std::fprintf(stderr, "climat-widget: --frames and --every take positive numbers.\n");
         std::exit(2);
     }
 
-    // A capture holds still, for the same reason app/qml/Clima/Main.qml gives:
+    // A capture holds still, for the same reason app/qml/Climat/Main.qml gives:
     // otherwise the shutter catches whichever frame of a reveal it happened to
     // land on, and two runs of the same command produce two different files.
     // A single capture holds still so two runs of the same command produce the
@@ -276,7 +276,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     } else if (pin == QLatin1String("off")) {
         self->m_pin = Pin::Off;
     } else {
-        std::fprintf(stderr, "clima-widget: --pin takes auto, on or off.\n");
+        std::fprintf(stderr, "climat-widget: --pin takes auto, on or off.\n");
         std::exit(2);
     }
 
@@ -290,7 +290,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
 
     self->m_placement.anchor = parser.value(anchorOption);
     if (!layershell::anchorNames().contains(self->m_placement.anchor)) {
-        std::fprintf(stderr, "clima-widget: unknown --anchor \"%s\". Known: %s\n",
+        std::fprintf(stderr, "climat-widget: unknown --anchor \"%s\". Known: %s\n",
                      qUtf8Printable(self->m_placement.anchor),
                      qUtf8Printable(layershell::anchorNames().join(u' ')));
         std::exit(2);
@@ -298,7 +298,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
 
     self->m_placement.layer = parser.value(layerOption);
     if (!layershell::layerNames().contains(self->m_placement.layer)) {
-        std::fprintf(stderr, "clima-widget: unknown --layer \"%s\". Known: %s\n",
+        std::fprintf(stderr, "climat-widget: unknown --layer \"%s\". Known: %s\n",
                      qUtf8Printable(self->m_placement.layer),
                      qUtf8Printable(layershell::layerNames().join(u' ')));
         std::exit(2);
@@ -307,7 +307,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     bool      marginOk = false;
     const int margin   = parser.value(marginOption).toInt(&marginOk);
     if (!marginOk || margin < 0) {
-        std::fprintf(stderr, "clima-widget: --margin takes a number of pixels, zero or more.\n");
+        std::fprintf(stderr, "climat-widget: --margin takes a number of pixels, zero or more.\n");
         std::exit(2);
     }
     self->m_placement.margin = margin;

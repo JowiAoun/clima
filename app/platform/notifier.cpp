@@ -3,9 +3,9 @@
 
 #include "notifier.h"
 
-#include "climaconfig.h"
+#include "climatconfig.h"
 
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
 #include <QDBusArgument>
 #include <QDBusConnection>
 #include <QDBusError>
@@ -17,7 +17,7 @@
 
 namespace {
 
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
 constexpr auto portalService   = "org.freedesktop.portal.Desktop";
 constexpr auto portalPath      = "/org/freedesktop/portal/desktop";
 constexpr auto portalInterface = "org.freedesktop.portal.Notification";
@@ -81,7 +81,7 @@ Notifier::~Notifier() = default;
 
 bool Notifier::available()
 {
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
     return true;
 #else
     return false;
@@ -91,7 +91,7 @@ bool Notifier::available()
 void Notifier::notify(const QString &id, const QString &title, const QString &body,
                       Priority priority)
 {
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
     if (!QDBusConnection::sessionBus().isConnected()) {
         Q_EMIT failed(id, QStringLiteral("there is no session bus"));
         return;
@@ -104,7 +104,7 @@ void Notifier::notify(const QString &id, const QString &title, const QString &bo
 
 void Notifier::withdraw(const QString &id)
 {
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
     if (!QDBusConnection::sessionBus().isConnected())
         return;
 
@@ -134,7 +134,7 @@ void Notifier::withdraw(const QString &id)
 void Notifier::viaPortal(const QString &id, const QString &title, const QString &body,
                          Priority priority)
 {
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
     QVariantMap notification;
     notification.insert(QStringLiteral("title"), title);
     notification.insert(QStringLiteral("body"), body);
@@ -169,12 +169,12 @@ void Notifier::viaPortal(const QString &id, const QString &title, const QString 
 void Notifier::viaService(const QString &id, const QString &title, const QString &body,
                           Priority priority)
 {
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
     QVariantMap hints;
     hints.insert(QStringLiteral("urgency"), QVariant::fromValue(serviceUrgency(priority)));
     // The desktop file, so a shell that groups notifications by application
-    // files this under Clima and draws its icon.
-    hints.insert(QStringLiteral("desktop-entry"), QStringLiteral(CLIMA_APP_ID));
+    // files this under Climat and draws its icon.
+    hints.insert(QStringLiteral("desktop-entry"), QStringLiteral(CLIMAT_APP_ID));
 
     // Replacing rather than stacking: an update to a hazard this object has
     // already announced replaces the earlier notification, which is what the
@@ -184,9 +184,9 @@ void Notifier::viaService(const QString &id, const QString &title, const QString
     QDBusMessage call = QDBusMessage::createMethodCall(
         QLatin1String(serviceName), QLatin1String(servicePath), QLatin1String(serviceInterface),
         QStringLiteral("Notify"));
-    call << QStringLiteral("Clima")               // app_name
+    call << QStringLiteral("Climat")               // app_name
          << replaces                              // replaces_id
-         << QStringLiteral(CLIMA_APP_ID)          // app_icon — the icon theme name
+         << QStringLiteral(CLIMAT_APP_ID)          // app_icon — the icon theme name
          << title                                 // summary
          << body                                  // body
          << QStringList()                         // actions

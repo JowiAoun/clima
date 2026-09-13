@@ -1,9 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Clima contributors
+# SPDX-FileCopyrightText: 2026 Climat contributors
 # SPDX-License-Identifier: CC-BY-SA-4.0
 blank_issues_enabled: true
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/JowiAoun/clima/security/advisories/new
+    url: https://github.com/JowiAoun/climat/security/advisories/new
     about: Report privately. Please do not open a public issue for this.
   - name: Wrong forecast, or a missing weather alert
     url: https://open-meteo.com/

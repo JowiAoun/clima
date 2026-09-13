@@ -104,7 +104,7 @@ bool ScreenshotController::offer(QQuickItem *item, const char *property, const Q
 
 void ScreenshotController::start()
 {
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
     // Order matters here in exactly one way and it is worth naming: the state
     // flags go on before the capture timers start, so a --grab of a --metric is
     // a grab of the metric and not of the moment before it.
@@ -173,7 +173,7 @@ void ScreenshotController::grabTo(const QString &file, bool quitWhenSaved)
                 else if (quitWhenSaved)
                     qInfo("grab: wrote %s", qPrintable(file));
 
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
                 if (!quitWhenSaved) {
                     // Filming: the run ends when the last frame is on disk, not
                     // when the last shutter fires. Saves are asynchronous and
@@ -193,7 +193,7 @@ void ScreenshotController::onGrab()
     grabTo(m_grab, true);
 }
 
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
 
 void ScreenshotController::applyOpeningState()
 {
@@ -236,7 +236,7 @@ void ScreenshotController::applyPokes()
         const bool on         = value == QLatin1String("true") || value == QLatin1String("1");
 
         // Every target below except `remount` lives on the shell, and in
-        // clima-gallery there is no shell. Warning beats throwing: a poke that
+        // climat-gallery there is no shell. Warning beats throwing: a poke that
         // cannot land should say so, not abort the rest of the list.
         if (target != QLatin1String("remount") && target != QLatin1String("hits")
             && m_shell == nullptr) {
@@ -342,4 +342,4 @@ void ScreenshotController::onFilmTick()
     grabTo(name, false);
 }
 
-#endif // CLIMA_DEV_TOOLS
+#endif // CLIMAT_DEV_TOOLS

@@ -10,14 +10,14 @@
 //   * a glyph name QML does not switch on, which renders as an empty item
 //   * a code Open-Meteo emits that nothing here has heard of
 
-#include "libclima/domain/weathercode.h"
+#include "libclimat/domain/weathercode.h"
 
-#include "libclima/providers/metno/symbolcode.h"
+#include "libclimat/providers/metno/symbolcode.h"
 
 #include <QSet>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -100,7 +100,7 @@ void TestWeatherCode::typeAndGlyphAgreeAboutWhetherItIsRaining()
 
 void TestWeatherCode::theSixTypesAreSpelledThePrecipJsWay()
 {
-    // These strings are a contract with app/qml/Clima/precip.js's TYPES array
+    // These strings are a contract with app/qml/Climat/precip.js's TYPES array
     // and its STYLE table. A typo here does not fail: `STYLE[c.type]` misses,
     // `_styleOf` falls back to rain, and a snowstorm draws as rain.
     QCOMPARE(precipitationTypeName(PrecipitationType::Drizzle), QStringLiteral("drizzle"));

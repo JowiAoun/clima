@@ -3,9 +3,9 @@
 //
 // What the host was asked to put on the desktop.
 //
-//     clima-widget --widget current-conditions --widget uv-dial
-//     clima-widget --list
-//     clima-widget --snapshot tests/fixtures/wire/toronto.json --grab tiles.png
+//     climat-widget --widget current-conditions --widget uv-dial
+//     climat-widget --list
+//     climat-widget --snapshot tests/fixtures/wire/toronto.json --grab tiles.png
 //
 // The same shape as app/appoptions.h and for the same reason: the command line
 // is parsed once, in C++, into a singleton QML binds to — rather than scraped
@@ -98,7 +98,7 @@ public:
     // not every X11 and GNOME start of a flag nobody passed.
     [[nodiscard]] bool pinWasRequested() const { return m_pinRequested; }
 
-    [[nodiscard]] clima::widgets::layershell::Placement placement() const
+    [[nodiscard]] climat::widgets::layershell::Placement placement() const
     {
         return m_placement;
     }
@@ -126,5 +126,5 @@ private:
 
     Pin                                  m_pin          = Pin::Auto;
     bool                                 m_pinRequested = false;
-    clima::widgets::layershell::Placement m_placement;
+    climat::widgets::layershell::Placement m_placement;
 };

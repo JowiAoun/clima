@@ -43,7 +43,7 @@ const QList<int> sampleSizes = { 11, 12, 13, 15, 17, 22, 44, 72 };
 
 QString fingerprintPath()
 {
-    return QStringLiteral(CLIMA_SOURCE_DIR "/tests/golden/environment.json");
+    return QStringLiteral(CLIMAT_SOURCE_DIR "/tests/golden/environment.json");
 }
 
 } // namespace
@@ -112,22 +112,22 @@ void TestEnvironment::theMetricsAreWhatTheGoldensWereTakenAt()
     const QJsonObject actual = measure();
 
     // The bootstrap path, and the only way this file is ever written. Running
-    // the test with CLIMA_WRITE_FINGERPRINT=1 records the current machine as
+    // the test with CLIMAT_WRITE_FINGERPRINT=1 records the current machine as
     // the reference — which is a thing to do deliberately, inside the pinned
     // container, at the same time as re-recording the images, and never as a
     // way of making a red test go green.
-    if (!qEnvironmentVariableIsEmpty("CLIMA_WRITE_FINGERPRINT")) {
+    if (!qEnvironmentVariableIsEmpty("CLIMAT_WRITE_FINGERPRINT")) {
         QFile file(fingerprintPath());
         QVERIFY2(file.open(QIODevice::WriteOnly | QIODevice::Text),
                  qPrintable(fingerprintPath()));
         file.write(QJsonDocument(actual).toJson(QJsonDocument::Indented));
-        QSKIP("wrote tests/golden/environment.json; re-run without CLIMA_WRITE_FINGERPRINT");
+        QSKIP("wrote tests/golden/environment.json; re-run without CLIMAT_WRITE_FINGERPRINT");
     }
 
     QFile file(fingerprintPath());
     QVERIFY2(file.open(QIODevice::ReadOnly),
              qPrintable(QStringLiteral("cannot read %1 — run once with "
-                                       "CLIMA_WRITE_FINGERPRINT=1 to record it")
+                                       "CLIMAT_WRITE_FINGERPRINT=1 to record it")
                             .arg(fingerprintPath())));
 
     const QJsonObject expected = QJsonDocument::fromJson(file.readAll()).object();

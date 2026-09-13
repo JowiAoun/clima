@@ -58,15 +58,15 @@ namespace {
 //
 // ---- the paths --------------------------------------------------------------
 //
-// `:/qt/qml/Clima/fonts/…`, which is where qt_add_qml_module's RESOURCES put a
+// `:/qt/qml/Climat/fonts/…`, which is where qt_add_qml_module's RESOURCES put a
 // file listed as `fonts/Inter-Regular.ttf`: the module's own resource prefix,
 // then the path relative to app/CMakeLists.txt. Not aliased flat the way the
 // .qml and .js files are — those are flattened so that the module directory
 // matches its URI, and a font is not a QML type, so a subdirectory is just a
 // subdirectory.
 constexpr auto kFontResources = std::array{
-    ":/qt/qml/Clima/fonts/Inter-Regular.ttf",
-    ":/qt/qml/Clima/fonts/Inter-Bold.ttf",
+    ":/qt/qml/Climat/fonts/Inter-Regular.ttf",
+    ":/qt/qml/Climat/fonts/Inter-Bold.ttf",
 };
 
 } // namespace
@@ -84,7 +84,7 @@ QString AppFont::install()
     for (const auto *path : kFontResources) {
         const int id = QFontDatabase::addApplicationFont(QString::fromLatin1(path));
         if (id < 0) {
-            qWarning("clima: could not register %s; text will render in the host's font.", path);
+            qWarning("climat: could not register %s; text will render in the host's font.", path);
             continue;
         }
         for (const QString &family : QFontDatabase::applicationFontFamilies(id)) {
@@ -94,12 +94,12 @@ QString AppFont::install()
     }
 
     if (families.isEmpty()) {
-        qWarning("clima: no bundled font could be registered; text will render in the host's font.");
+        qWarning("climat: no bundled font could be registered; text will render in the host's font.");
         return {};
     }
 
     if (families.size() > 1) {
-        qWarning("clima: the bundled faces declare %lld families (%s); using the first. "
+        qWarning("climat: the bundled faces declare %lld families (%s); using the first. "
                  "They are meant to be one family in two weights.",
                  static_cast<long long>(families.size()), qPrintable(families.join(u", ")));
     }

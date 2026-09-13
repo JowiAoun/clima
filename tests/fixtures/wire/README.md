@@ -1,13 +1,13 @@
 <!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
-# Recorded snapshots, as `clima-daemon` sends them
+# Recorded snapshots, as `climat-daemon` sends them
 
 Four complete snapshots off the wire — the exact bytes `SnapshotChanged` carries — captured by
 running the daemon against `tests/fixtures/openmeteo/` and friends at their frozen clocks.
 `record.sh` is the command that captured them.
 
-They are what `clima-widget --snapshot <file>` reads, which is how a tile is developed, reviewed
+They are what `climat-widget --snapshot <file>` reads, which is how a tile is developed, reviewed
 and photographed without a session bus, a daemon or a network.
 
 ## Why these are recorded rather than hand-written

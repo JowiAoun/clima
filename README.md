@@ -1,13 +1,13 @@
-<!-- SPDX-FileCopyrightText: 2026 Clima contributors -->
+<!-- SPDX-FileCopyrightText: 2026 Climat contributors -->
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
-# Clima
+# Climat
 
 > A native, ad-free, open-source weather app for Linux and Windows. Two weeks of
 > forecast as charts you can read, and official severe-weather warnings on every
 > screen where they matter.
 
-![Clima on a phone, a tablet and a desktop](docs/images/hero.png)
+![Climat on a phone, a tablet and a desktop](docs/images/hero.png)
 
 **Status: early. Version 0.1.0, and the version number is honest** — this
 installs, runs and shows you real weather, and several things the plan calls for
@@ -26,7 +26,7 @@ what the app actually draws.
 - **Severe weather warnings**, live, from Environment and Climate Change Canada
   and the United States National Weather Service. No API key, no account, no
   server of ours in the middle. Off by default, they can also **interrupt you**:
-  a desktop notification when a warning arrives and Clima is not on screen,
+  a desktop notification when a warning arrives and Climat is not on screen,
   through the XDG portal where there is one and the notification service where
   there is not.
 - **Detail cards** for sunrise and sunset, the moon phase, and each measurement
@@ -47,8 +47,8 @@ what the app actually draws.
   asking for it directly. One process fetches; every tile and the top-bar
   indicator read from it over the session bus, so a desktop full of widgets is
   one client of the forecast service and not eight.
-- **`clima-cli`** — the forecast for a status bar, a script or a terminal.
-  `clima-cli now`, `hourly`, `daily`, `places`; `--json` and `--csv` for a
+- **`climat-cli`** — the forecast for a status bar, a script or a terminal.
+  `climat-cli now`, `hourly`, `daily`, `places`; `--json` and `--csv` for a
   script, in canonical units so a preference nobody opened cannot move a number
   something parses. It reads the same cache the app fills, so a status bar
   polling every minute is not a second client of the forecast service.
@@ -97,14 +97,14 @@ distribution — including Ubuntu 24.04, which ships Qt 6.4 and cannot run the
 `.deb`.
 
 ```sh
-flatpak install --user ./clima-0.1.0-x86_64.flatpak
-flatpak run io.github.JowiAoun.Clima
+flatpak install --user ./climat-0.1.0-x86_64.flatpak
+flatpak run io.github.JowiAoun.Climat
 ```
 
 **Debian 13 / Ubuntu 26.04 or newer**, using the distribution's own Qt:
 
 ```sh
-sudo apt install ./clima_0.1.0_amd64.deb
+sudo apt install ./climat_0.1.0_amd64.deb
 ```
 
 It declares `libqt6core6t64 (>= 6.8.2)` and apt will refuse to install it on
@@ -123,7 +123,7 @@ attempted; in the meantime every release carries `SHA256SUMS` and GitHub build
 provenance:
 
 ```sh
-gh attestation verify clima-0.1.0-windows-x64.msi --repo JowiAoun/clima
+gh attestation verify climat-0.1.0-windows-x64.msi --repo JowiAoun/climat
 ```
 
 That proves the file came out of this repository's release workflow at a named
@@ -138,7 +138,7 @@ and stronger in another, since it names the source revision.
 | **Tablet** — two content columns, bottom bar <br> ![](docs/images/tablet.png) | **Tablet, turned** — the nav becomes a left rail <br> ![](docs/images/tablet-landscape.png) |
 
 **Desktop widgets** — six of the ten. On GNOME a shell extension launches
-Clima's own Qt process and pins its window below everything else; it draws none
+Climat's own Qt process and pins its window below everything else; it draws none
 of this itself, because GNOME Shell cannot host a QML surface. On KDE and every
 wlroots compositor the same binary asks for a desktop-layer surface and there is
 no extension at all. [`docs/widgets.md`](docs/widgets.md) has both mechanisms
@@ -164,7 +164,7 @@ scripts/dev-run.sh                             # builds if needed, finds Qt itse
 ```
 
 `scripts/dev-run.sh` is the one entry point that works from a plain shell.
-Running `build/dev/app/clima` directly outside `nix develop` exits silently,
+Running `build/dev/app/climat` directly outside `nix develop` exits silently,
 because Qt is only in the Nix store and the binary cannot find its QML imports.
 
 Try the layouts and the themes:
@@ -177,12 +177,12 @@ scripts/dev-run.sh --fixture seattle           # four NWS alerts, offline
 ```
 
 The desktop tiles are a second binary reading from a third — a weather service
-the session bus starts on demand once Clima is installed. Nothing is installed
+the session bus starts on demand once Climat is installed. Nothing is installed
 in a build tree, so this starts one beside them:
 
 ```sh
 scripts/widgets-run.sh                         # the tiles, with a daemon to read
-CLIMA_FIXTURE=toronto scripts/widgets-run.sh   # …from recorded data
+CLIMAT_FIXTURE=toronto scripts/widgets-run.sh   # …from recorded data
 ```
 
 Without a Nix devshell, any Qt 6.8 or newer works —
@@ -200,7 +200,7 @@ The component gallery is a second binary and the fastest way to look at
 anything in isolation:
 
 ```sh
-CLIMA_BINARY=build/dev/gallery/clima-gallery scripts/dev-run.sh
+CLIMAT_BINARY=build/dev/gallery/climat-gallery scripts/dev-run.sh
 ```
 
 It has a touch-target overlay that draws every tap area a layout leaves under
@@ -209,7 +209,7 @@ disclosure chevron on every phone screen.
 
 ## Stack
 
-C++20 engine (`libclima`, GUI-free and enforced by a CMake assertion) under a
+C++20 engine (`libclimat`, GUI-free and enforced by a CMake assertion) under a
 **Qt 6.8+ / QML** interface, with a hand-written scene-graph chart kit.
 Open-Meteo is the primary forecast provider with MET Norway as a fallback;
 alerts are region-routed to ECCC and the NWS. Reverse geocoding is offline, from
@@ -234,7 +234,7 @@ from the provider registry rather than maintained by hand. The full record is in
 
 ## Licence
 
-- `libclima` — **MPL-2.0**, so the engine stays reusable outside a GPL program
+- `libclimat` — **MPL-2.0**, so the engine stays reusable outside a GPL program
 - the application — **GPL-3.0-or-later**
 - authored assets and documentation — **CC-BY-SA-4.0**
 - bundled Inter — **OFL-1.1**; bundled GeoNames data — **CC-BY 4.0**

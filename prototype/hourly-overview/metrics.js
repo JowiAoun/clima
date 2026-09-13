@@ -3,7 +3,7 @@
 // Metric registry: the tab bar and the chart are both driven from this list.
 //
 // Adding a metric is a data change, not a code change — which is the point. In
-// libclima this becomes a C++ registry populated from provider capabilities, so a
+// libclimat this becomes a C++ registry populated from provider capabilities, so a
 // tab only appears when the active provider actually has that variable for that
 // location (Open-Meteo has no 15-minute data outside Central Europe and North
 // America, for instance).

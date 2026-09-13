@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Turns GeoNames' cities15000 dump into the index Clima reverse-geocodes
-// against offline, and writes it where CMake will compile it into libclima.
+// Turns GeoNames' cities15000 dump into the index Climat reverse-geocodes
+// against offline, and writes it where CMake will compile it into libclimat.
 //
 //   nix develop -c node tools/geonames/pack.mjs \
 //       --cities  work/cities15000.zip \
 //       --admin1  work/admin1CodesASCII.txt \
-//       --out     libclima/providers/geocoding/data/cities15000.cgx
+//       --out     libclimat/providers/geocoding/data/cities15000.cgx
 //
 // ---- why this tool exists at all, and why its output is committed -----------
 //
@@ -52,7 +52,7 @@
 // ---- the file format --------------------------------------------------------
 //
 // Little-endian throughout, one uncompressed header followed by one zlib
-// stream. libclima/providers/geocoding/geonamesindex.h documents the layout
+// stream. libclimat/providers/geocoding/geonamesindex.h documents the layout
 // from the reading end and the two must be read side by side; what follows is
 // only the encoder's half.
 //
@@ -73,9 +73,9 @@ import { deflateSync, inflateRawSync } from "node:zlib";
 //
 // COORDINATE_SCALE is 10 000 — four decimal places — and it is not a guess
 // about how much precision a city centre deserves. It is
-// `clima::Coordinate::keyDecimals`, the precision every outbound request in
+// `climat::Coordinate::keyDecimals`, the precision every outbound request in
 // this codebase is quantised to before it is hashed or sent
-// (libclima/domain/coordinate.h explains why four). Storing five decimals here
+// (libclimat/domain/coordinate.h explains why four). Storing five decimals here
 // would mean storing a digit that no request, no cache key and no comparison
 // in the engine can ever see. The reader rounds the same way `Coordinate` does
 // — half away from zero — so a reverse-geocoded place and a searched one round
@@ -126,7 +126,7 @@ const DROPPED_FEATURE_CODES = new Set(["PPLX", "PPLH", "PPLQ", "PPLW"]);
 // Being generous costs nothing, because the *ranking* is what is used and
 // every candidate is inflated by the same rule.
 //
-// libclima/providers/geocoding/geonamesindex.cpp does the ranking. This file
+// libclimat/providers/geocoding/geonamesindex.cpp does the ranking. This file
 // only decides the radius.
 const URBAN_DENSITY_PER_KM2 = 2000;
 
@@ -143,7 +143,7 @@ function reachMetres(population) {
 
 // ---- the encoders -----------------------------------------------------------
 
-// Half away from zero, matching `roundTo` in libclima/domain/coordinate.cpp.
+// Half away from zero, matching `roundTo` in libclimat/domain/coordinate.cpp.
 // JavaScript's Math.round is half *up*, which disagrees on exactly the
 // negative halves — Math.round(-0.5) is -0, std::round(-0.5) is -1 — and a
 // coordinate in the southern or western hemisphere is where that would show
@@ -198,7 +198,7 @@ function plainVarints(values) {
 // The cities file is accepted as either the .zip upstream publishes or the
 // .txt inside it. Unzipping it here rather than asking for `unzip` keeps the
 // tool runnable inside `nix develop`, whose package list is deliberately about
-// building Clima and does not carry an archiver.
+// building Climat and does not carry an archiver.
 //
 // This reads exactly one entry, and it reads it through the CENTRAL DIRECTORY
 // rather than through the local file header at the front of the archive.
@@ -464,7 +464,7 @@ function sha256(path) {
 
 const citiesPath = option("cities");
 const admin1Path = option("admin1");
-const outPath = option("out", "libclima/providers/geocoding/data/cities15000.cgx");
+const outPath = option("out", "libclimat/providers/geocoding/data/cities15000.cgx");
 
 const parsed = parseCities(readCities(citiesPath));
 const rows = sortForPacking(parsed.rows);

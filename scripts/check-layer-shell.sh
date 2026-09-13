@@ -2,9 +2,9 @@
 # SPDX-FileCopyrightText: 2026 Jowi Aoun
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Proves that clima-widget pins itself to the desktop, against a real compositor.
+# Proves that climat-widget pins itself to the desktop, against a real compositor.
 #
-#   scripts/check-layer-shell.sh [path-to-clima-widget]
+#   scripts/check-layer-shell.sh [path-to-climat-widget]
 #
 # ============================================================================
 # WHY THIS SCRIPT EXISTS AT ALL
@@ -58,13 +58,13 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(cd "$here/.." && pwd)"
 
-widget="${1:-$repo/build/dev/widgets/clima-widget}"
+widget="${1:-$repo/build/dev/widgets/climat-widget}"
 fixture="$repo/tests/fixtures/wire/seattle.json"
 
 fail() { printf 'check-layer-shell: %s\n' "$1" >&2; exit 1; }
 skip() { printf 'check-layer-shell: %s SKIPPED.\n' "$1" >&2; exit 0; }
 
-[ -x "$widget" ] || fail "no clima-widget at $widget — build it first, or pass a path"
+[ -x "$widget" ] || fail "no climat-widget at $widget — build it first, or pass a path"
 [ -r "$fixture" ] || fail "no fixture at $fixture"
 
 command -v sway >/dev/null || skip "no sway, so there is no compositor to test against —"
@@ -78,7 +78,7 @@ command -v ffmpeg >/dev/null || skip "no ffmpeg, so the photograph cannot be mea
 # socket is a AF_UNIX path and `sun_path` is 108 bytes; a session directory a
 # few levels deep overruns it and sway fails with "Unable to open wayland
 # socket", which reads like a permissions problem and is a length problem.
-run="${CLIMA_LAYER_SHELL_RUNTIME_DIR:-/tmp/clima-ls-$$}"
+run="${CLIMAT_LAYER_SHELL_RUNTIME_DIR:-/tmp/climat-ls-$$}"
 rm -rf "$run"
 mkdir -p "$run"
 chmod 700 "$run"
@@ -138,7 +138,7 @@ run_sway() {
 #!/bin/sh
 tries=0
 while [ \$tries -lt 160 ]; do
-    grep -q 'namespace clima-widgets' "$run/$name.log" && break
+    grep -q 'namespace climat-widgets' "$run/$name.log" && break
     swaymsg -t get_tree | grep -q '"app_id": *"[^"]' && break
     tries=\$((tries + 1))
     sleep 0.25
@@ -171,7 +171,7 @@ TEARDOWN
 # Asked separately, and before anything is asserted, because the two answers are
 # different kinds of thing. A machine with no way to stand up wlroots — no
 # renderer it can use, no seat, a $XDG_RUNTIME_DIR it cannot bind in — has told
-# us nothing about clima-widget, and reporting that as a failure would put a red
+# us nothing about climat-widget, and reporting that as a failure would put a red
 # cross on a change that is fine. Every failure after this line is about the
 # code.
 {
@@ -220,7 +220,7 @@ surface="$(grep -o 'new layer surface: namespace [^ ]* layer [0-9]*' "$run/pinne
 [ -n "$surface" ] || fail "no layer surface was created — sway logged none"
 echo "$surface"
 
-grep -q 'namespace clima-widgets' <<<"$surface" \
+grep -q 'namespace climat-widgets' <<<"$surface" \
     || fail "the layer surface is not ours: $surface"
 # 0 background, 1 bottom, 2 top, 3 overlay. Bottom is what a desktop widget is:
 # above the wallpaper, below every window.
@@ -284,7 +284,7 @@ cat > "$run/hotplug.trigger.sh" <<TRIGGER
 #!/bin/sh
 tries=0
 while [ \$tries -lt 160 ]; do
-    grep -q 'namespace clima-widgets' "$run/hotplug.log" && break
+    grep -q 'namespace climat-widgets' "$run/hotplug.log" && break
     tries=\$((tries + 1))
     sleep 0.25
 done
@@ -304,7 +304,7 @@ run_sway hotplug 4 \
 grep -q 'never appeared' "$run/hotplug.trigger.log" \
     && fail "the tiles never reached the first output, so nothing was unplugged from under them"
 
-surfaces="$(grep -c 'namespace clima-widgets' "$run/hotplug.log" || true)"
+surfaces="$(grep -c 'namespace climat-widgets' "$run/hotplug.log" || true)"
 echo "layer surfaces created across the unplug: $surfaces"
 [ "$surfaces" -ge 2 ] \
     || fail "the tiles did not come back after their output went away"

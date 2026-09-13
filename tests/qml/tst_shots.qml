@@ -20,14 +20,14 @@
 // renders as a correctly sized window full of sky.
 import QtQuick
 import QtTest
-import Clima
-import Clima.Gallery
-import Clima.Test
+import Climat
+import Climat.Gallery
+import Climat.Test
 
 // The same route tst_specimen takes to gallery.js. A module's JS lives in the
 // resource tree at the URI's path, and a test outside the module cannot reach
 // it any other way.
-import "qrc:/qt/qml/Clima/Gallery/shots.js" as Shots
+import "qrc:/qt/qml/Climat/Gallery/shots.js" as Shots
 
 TestCase {
     id: testCase

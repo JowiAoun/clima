@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Every clock reading Clima prints, in one file, spelled one way.
+// Every clock reading Climat prints, in one file, spelled one way.
 //
 // ============================================================================
 // WHY THIS EXISTS AT ALL

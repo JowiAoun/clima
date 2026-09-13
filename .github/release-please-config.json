@@ -19,7 +19,7 @@
   ],
   "packages": {
     ".": {
-      "package-name": "clima",
+      "package-name": "climat",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         "CMakeLists.txt"

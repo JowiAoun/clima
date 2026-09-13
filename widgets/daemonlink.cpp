@@ -26,7 +26,7 @@ namespace {
 
 // The schema *this build* knows how to read.
 //
-// Deliberately a separate number from clima::wire::kSchemaVersion rather than
+// Deliberately a separate number from climat::wire::kSchemaVersion rather than
 // an include of it, and that is the point rather than an oversight. The widget
 // host and the daemon ship from different places on different clocks — the
 // GNOME extension from extensions.gnome.org, the app and its daemon from
@@ -48,7 +48,7 @@ constexpr auto kSignature = "ss";
 // Cut every array under `branch` down to `count` entries.
 //
 // Only the file source needs this. A subscription over the bus is answered by
-// libclima/wire/snapshot.cpp, which slices to the horizon the feed asked for;
+// libclimat/wire/snapshot.cpp, which slices to the horizon the feed asked for;
 // a recorded file is one full snapshot served to every tile, so without this a
 // six-hour rain tile would sum three hundred and sixty-nine hours and a
 // twenty-four-hour sparkline would draw a fortnight as a sawtooth.
@@ -97,12 +97,12 @@ void trimSeries(QJsonObject &root, const QString &branch, int count)
 // tr() here is the same choice DaemonLink::incompatibility already made.
 QString notRunningText()
 {
-    return DaemonLink::tr("The Clima weather service is not running.");
+    return DaemonLink::tr("The Climat weather service is not running.");
 }
 
 QString notAnsweringText()
 {
-    return DaemonLink::tr("The Clima weather service is not answering.");
+    return DaemonLink::tr("The Climat weather service is not answering.");
 }
 
 QVariantList catalogueFrom(const QByteArray &json, QString *error)
@@ -119,7 +119,7 @@ QVariantList catalogueFrom(const QByteArray &json, QString *error)
 
 } // namespace
 
-Q_LOGGING_CATEGORY(lcWidgets, "clima.widgets")
+Q_LOGGING_CATEGORY(lcWidgets, "climat.widgets")
 
 // ---- the singleton ----------------------------------------------------------
 
@@ -232,9 +232,9 @@ void DaemonLink::connectToBus()
     m_usingBus = true;
 
     // WatchForOwnerChange rather than ForRegistration alone, so that
-    // `clima-daemon --replace` — one daemon handing the name to another — is a
+    // `climat-daemon --replace` — one daemon handing the name to another — is a
     // re-subscribe rather than a permanent disconnection.
-    m_watcher = new QDBusServiceWatcher(QStringLiteral(CLIMA_DAEMON_SERVICE), bus,
+    m_watcher = new QDBusServiceWatcher(QStringLiteral(CLIMAT_DAEMON_SERVICE), bus,
                                         QDBusServiceWatcher::WatchForOwnerChange, this);
     connect(m_watcher, &QDBusServiceWatcher::serviceRegistered, this,
             &DaemonLink::onServiceRegistered);
@@ -252,11 +252,11 @@ void DaemonLink::connectToBus()
     // Subscribe, said so on the tile, and had nothing left that would ever make
     // it ask again — no timer, no retry, and the daemon has no way to push to a
     // subscription that was never created. This is that missing edge.
-    bus.connect(QStringLiteral(CLIMA_DAEMON_SERVICE), QStringLiteral(CLIMA_DAEMON_PATH),
-                QStringLiteral(CLIMA_DAEMON_INTERFACE), QStringLiteral("PlacesChanged"), this,
+    bus.connect(QStringLiteral(CLIMAT_DAEMON_SERVICE), QStringLiteral(CLIMAT_DAEMON_PATH),
+                QStringLiteral(CLIMAT_DAEMON_INTERFACE), QStringLiteral("PlacesChanged"), this,
                 SLOT(onPlacesChanged()));
 
-    if (bus.interface()->isServiceRegistered(QStringLiteral(CLIMA_DAEMON_SERVICE))) {
+    if (bus.interface()->isServiceRegistered(QStringLiteral(CLIMAT_DAEMON_SERVICE))) {
         handshake();
         return;
     }
@@ -266,7 +266,7 @@ void DaemonLink::connectToBus()
 
 // ---- asking the bus to start one --------------------------------------------
 //
-// packaging/linux/clima-daemon.service.in makes the daemon activatable; this is
+// packaging/linux/climat-daemon.service.in makes the daemon activatable; this is
 // the request that uses it. Without both halves a desktop that is not GNOME has
 // nothing that starts the service between one login and the next — the
 // extension is the only thing that ever did, and `--pin` put tiles on four other
@@ -292,7 +292,7 @@ void DaemonLink::startDaemon()
 
     auto *watcher = new QDBusPendingCallWatcher(
         bus->asyncCall(QStringLiteral("StartServiceByName"),
-                       QString::fromLatin1(CLIMA_DAEMON_SERVICE), quint32(0)),
+                       QString::fromLatin1(CLIMAT_DAEMON_SERVICE), quint32(0)),
         this);
 
     connect(watcher, &QDBusPendingCallWatcher::finished, this,
@@ -310,9 +310,9 @@ void DaemonLink::startDaemon()
                 // whoever is reading — there is no weather service and nothing
                 // is going to produce one.
                 qCWarning(lcWidgets,
-                          "no clima-daemon on the session bus, and the bus could not start one: "
+                          "no climat-daemon on the session bus, and the bus could not start one: "
                           "%s. The tiles will say so rather than sit on a skeleton. Start one "
-                          "with `clima-daemon`, or `clima-daemon --fixture toronto` for recorded "
+                          "with `climat-daemon`, or `climat-daemon --fixture toronto` for recorded "
                           "data.",
                           qPrintable(reply.error().message()));
 
@@ -352,8 +352,8 @@ void DaemonLink::onServiceUnregistered(const QString &)
 
 void DaemonLink::handshake()
 {
-    QDBusInterface daemon(QStringLiteral(CLIMA_DAEMON_SERVICE), QStringLiteral(CLIMA_DAEMON_PATH),
-                          QStringLiteral(CLIMA_DAEMON_INTERFACE), QDBusConnection::sessionBus());
+    QDBusInterface daemon(QStringLiteral(CLIMAT_DAEMON_SERVICE), QStringLiteral(CLIMAT_DAEMON_PATH),
+                          QStringLiteral(CLIMAT_DAEMON_INTERFACE), QDBusConnection::sessionBus());
     daemon.setTimeout(kCallTimeoutMs);
 
     const QDBusReply<int> version = daemon.call(QStringLiteral("SchemaVersion"));
@@ -373,13 +373,13 @@ void DaemonLink::handshake()
     m_available     = true;
 
     // Both directions are a refusal, and that is the honest reading of the rule
-    // in libclima/wire/snapshot.h: the number is bumped exactly when a reader
+    // in libclimat/wire/snapshot.h: the number is bumped exactly when a reader
     // that understood the old shape would *misread* the new one. An older
     // widget against a newer daemon misreads; a newer widget against an older
     // daemon is reading a shape that was replaced for a reason. Drawing
     // something plausible from either is worse than saying so.
     if (m_schemaVersion != kUnderstoodSchema) {
-        m_incompatibility = tr("The Clima daemon speaks schema %1; this build reads %2. "
+        m_incompatibility = tr("The Climat daemon speaks schema %1; this build reads %2. "
                                "Update both to the same release.")
                                 .arg(m_schemaVersion)
                                 .arg(kUnderstoodSchema);
@@ -403,8 +403,8 @@ void DaemonLink::handshake()
 
 void DaemonLink::loadCatalogue()
 {
-    QDBusInterface daemon(QStringLiteral(CLIMA_DAEMON_SERVICE), QStringLiteral(CLIMA_DAEMON_PATH),
-                          QStringLiteral(CLIMA_DAEMON_INTERFACE), QDBusConnection::sessionBus());
+    QDBusInterface daemon(QStringLiteral(CLIMAT_DAEMON_SERVICE), QStringLiteral(CLIMAT_DAEMON_PATH),
+                          QStringLiteral(CLIMAT_DAEMON_INTERFACE), QDBusConnection::sessionBus());
     daemon.setTimeout(kCallTimeoutMs);
 
     const QDBusReply<QString> reply = daemon.call(QStringLiteral("ListWidgets"));
@@ -436,7 +436,7 @@ void DaemonLink::loadEmbeddedCatalogue()
     // that will have been upgraded alongside the data; this is what makes
     // `--list`, `--snapshot` and a first paint before the handshake possible at
     // all.
-    QFile file(QStringLiteral(":/clima/catalogue.json"));
+    QFile file(QStringLiteral(":/climat/catalogue.json"));
     if (!file.open(QIODevice::ReadOnly)) {
         qCWarning(lcWidgets, "the built-in widget catalogue is missing from this binary.");
         return;
@@ -487,8 +487,8 @@ void DaemonLink::resubscribe(WidgetFeed *feed)
     dropSubscription(feed);
 
     QDBusConnection bus = QDBusConnection::sessionBus();
-    QDBusInterface  daemon(QStringLiteral(CLIMA_DAEMON_SERVICE), QStringLiteral(CLIMA_DAEMON_PATH),
-                          QStringLiteral(CLIMA_DAEMON_INTERFACE), bus);
+    QDBusInterface  daemon(QStringLiteral(CLIMAT_DAEMON_SERVICE), QStringLiteral(CLIMAT_DAEMON_PATH),
+                          QStringLiteral(CLIMAT_DAEMON_INTERFACE), bus);
     daemon.setTimeout(kCallTimeoutMs);
 
     const QDBusReply<QString> reply =
@@ -508,7 +508,7 @@ void DaemonLink::resubscribe(WidgetFeed *feed)
     // has no place by that id (daemon/snapshotservice.cpp, canonical()). Which
     // is a first run, and a common one — a package installs the widgets and the
     // autostart entry together, so the tiles can reach a working daemon on a
-    // desktop where nobody has opened Clima yet and chosen anywhere.
+    // desktop where nobody has opened Climat yet and chosen anywhere.
     //
     // That used to render as a skeleton, which is the least informative
     // possible answer to a question the reader can settle in ten seconds.
@@ -517,8 +517,8 @@ void DaemonLink::resubscribe(WidgetFeed *feed)
                   qPrintable(feed->place()));
 
         const bool home = feed->place().isEmpty() || feed->place() == QLatin1String("home");
-        feed->setWaitingReason(home ? tr("No place yet. Open Clima and choose one.")
-                                    : tr("That place is not in Clima any more."));
+        feed->setWaitingReason(home ? tr("No place yet. Open Climat and choose one.")
+                                    : tr("That place is not in Climat any more."));
         return;
     }
 
@@ -529,9 +529,9 @@ void DaemonLink::resubscribe(WidgetFeed *feed)
     // receive every subscriber's snapshot and throw away all but its own,
     // which on a desktop with eight tiles is 8x the wakeups and 8x the parsing
     // for the same pixels. See the header.
-    const bool matched = bus.connect(QStringLiteral(CLIMA_DAEMON_SERVICE),
-                                     QStringLiteral(CLIMA_DAEMON_PATH),
-                                     QStringLiteral(CLIMA_DAEMON_INTERFACE),
+    const bool matched = bus.connect(QStringLiteral(CLIMAT_DAEMON_SERVICE),
+                                     QStringLiteral(CLIMAT_DAEMON_PATH),
+                                     QStringLiteral(CLIMAT_DAEMON_INTERFACE),
                                      QStringLiteral("SnapshotChanged"), QStringList{ token },
                                      QString::fromLatin1(kSignature), this,
                                      SLOT(onSnapshotChanged(QString, QString)));
@@ -581,16 +581,16 @@ void DaemonLink::dropSubscription(WidgetFeed *feed)
         return;
 
     QDBusConnection bus = QDBusConnection::sessionBus();
-    bus.disconnect(QStringLiteral(CLIMA_DAEMON_SERVICE), QStringLiteral(CLIMA_DAEMON_PATH),
-                   QStringLiteral(CLIMA_DAEMON_INTERFACE), QStringLiteral("SnapshotChanged"),
+    bus.disconnect(QStringLiteral(CLIMAT_DAEMON_SERVICE), QStringLiteral(CLIMAT_DAEMON_PATH),
+                   QStringLiteral(CLIMAT_DAEMON_INTERFACE), QStringLiteral("SnapshotChanged"),
                    QStringList{ token }, QString::fromLatin1(kSignature), this,
                    SLOT(onSnapshotChanged(QString, QString)));
 
     // Best effort, and deliberately not checked: if the daemon has gone away
     // there is nobody to tell, and if it has not it drops the subscription on
     // the next publish anyway.
-    QDBusInterface daemon(QStringLiteral(CLIMA_DAEMON_SERVICE), QStringLiteral(CLIMA_DAEMON_PATH),
-                          QStringLiteral(CLIMA_DAEMON_INTERFACE), bus);
+    QDBusInterface daemon(QStringLiteral(CLIMAT_DAEMON_SERVICE), QStringLiteral(CLIMAT_DAEMON_PATH),
+                          QStringLiteral(CLIMAT_DAEMON_INTERFACE), bus);
     daemon.setTimeout(kCallTimeoutMs);
     daemon.asyncCall(QStringLiteral("Unsubscribe"), token);
 }
@@ -661,8 +661,8 @@ void DaemonLink::requestRefresh(const QString &placeId)
     if (!m_usingBus || !m_available)
         return;
 
-    QDBusInterface daemon(QStringLiteral(CLIMA_DAEMON_SERVICE), QStringLiteral(CLIMA_DAEMON_PATH),
-                          QStringLiteral(CLIMA_DAEMON_INTERFACE), QDBusConnection::sessionBus());
+    QDBusInterface daemon(QStringLiteral(CLIMAT_DAEMON_SERVICE), QStringLiteral(CLIMAT_DAEMON_PATH),
+                          QStringLiteral(CLIMAT_DAEMON_INTERFACE), QDBusConnection::sessionBus());
     daemon.setTimeout(kCallTimeoutMs);
     daemon.asyncCall(QStringLiteral("RequestRefresh"), placeId);
 }

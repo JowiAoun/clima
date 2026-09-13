@@ -16,8 +16,8 @@
 import QtQuick
 import QtQuick.Window
 import QtTest
-import Clima
-import Clima.Test
+import Climat
+import Climat.Test
 
 TestCase {
     id: testCase

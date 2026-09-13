@@ -5,13 +5,13 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 # tools/geonames
 
-The packer that turns GeoNames' `cities15000` dump into the index Clima reverse-geocodes
+The packer that turns GeoNames' `cities15000` dump into the index Climat reverse-geocodes
 against **offline**, and a harness for looking at what geocoding actually returns.
 
 ```
-libclima/providers/geocoding/data/cities15000.cgx   the output, committed
+libclimat/providers/geocoding/data/cities15000.cgx   the output, committed
 tools/geonames/pack.mjs                             the packer
-tools/geonames/main.cpp                             clima-geocode, the harness
+tools/geonames/main.cpp                             climat-geocode, the harness
 ```
 
 ## Why the lookup is offline
@@ -54,11 +54,11 @@ curl -o /tmp/geonames/admin1CodesASCII.txt https://download.geonames.org/export/
 nix develop -c node tools/geonames/pack.mjs \
     --cities /tmp/geonames/cities15000.zip \
     --admin1 /tmp/geonames/admin1CodesASCII.txt \
-    --out    libclima/providers/geocoding/data/cities15000.cgx
+    --out    libclimat/providers/geocoding/data/cities15000.cgx
 ```
 
 The zip is unpacked by the tool itself, so `unzip` is not needed — the devshell's package
-list is about building Clima and does not carry an archiver.
+list is about building Climat and does not carry an archiver.
 
 Then commit the result together with the provenance block the tool prints, and update the
 numbers below. `tests/tst_reversegeocode.cpp` asserts the row count and bounds the file
@@ -97,7 +97,7 @@ destroyed places, which are not somewhere you can be standing.
 
 Coordinates are stored to **four** decimals, not five, because `Coordinate::keyDecimals` is
 4 — every outbound request in the engine is quantised to four decimals before it is hashed
-or sent ([`libclima/domain/coordinate.h`](../../libclima/domain/coordinate.h) explains why,
+or sent ([`libclimat/domain/coordinate.h`](../../libclimat/domain/coordinate.h) explains why,
 and MET Norway's terms ask for it by name). A fifth decimal would be a digit no cache key,
 no URL and no comparison in the product could ever see. The packer rounds half away from
 zero, exactly as `Coordinate::rounded` does, so a place found by reverse geocoding and the
@@ -133,7 +133,7 @@ the coordinate. Point Nemo — 48.8767 S, 123.3933 W, the oceanic pole of inacce
 ## The file format
 
 Little-endian, one uncompressed 100-byte header and one zlib stream in `qCompress`'s wire
-format. [`libclima/providers/geocoding/geonamesindex.h`](../../libclima/providers/geocoding/geonamesindex.h)
+format. [`libclimat/providers/geocoding/geonamesindex.h`](../../libclimat/providers/geocoding/geonamesindex.h)
 documents it from the reading end and `pack.mjs` from the writing end; the two must be read
 side by side.
 
@@ -172,16 +172,16 @@ Geocoding by Open-Meteo.com (https://open-meteo.com), CC BY 4.0 (https://creativ
 Place names from GeoNames (https://www.geonames.org), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 ```
 
-## clima-geocode
+## climat-geocode
 
 ```sh
 nix develop -c cmake --build --preset dev
-nix develop -c ./build/dev/tools/geonames/clima-geocode Kigali
-nix develop -c ./build/dev/tools/geonames/clima-geocode 43.65,-79.38
-nix develop -c ./build/dev/tools/geonames/clima-geocode --id 6167865
+nix develop -c ./build/dev/tools/geonames/climat-geocode Kigali
+nix develop -c ./build/dev/tools/geonames/climat-geocode 43.65,-79.38
+nix develop -c ./build/dev/tools/geonames/climat-geocode --id 6167865
 ```
 
 An argument that parses as `lat,lon` is a reverse lookup and anything else is a search. The
 reverse path sends nothing; the search path is the one thing in this repository besides
-`clima-openmeteo-probe` that talks to a real service on purpose, which is why it is a
-`CLIMA_DEV_TOOLS` executable and not a test.
+`climat-openmeteo-probe` that talks to a real service on purpose, which is why it is a
+`CLIMAT_DEV_TOOLS` executable and not a test.

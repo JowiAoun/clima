@@ -4,7 +4,7 @@
 # 02 — Data Sources, Licensing and Attribution
 
 This is the most important research document in the repo. Data availability — not Qt,
-not C++ — is what will decide whether Clima reaches MSN parity.
+not C++ — is what will decide whether Climat reaches MSN parity.
 
 Headline conclusions:
 
@@ -39,7 +39,7 @@ regional enrichment. Never require an API key to use the app.
 
 ## 2.2 Open-Meteo product matrix — what we consume and where
 
-| Endpoint | What it gives us | Which Clima screen |
+| Endpoint | What it gives us | Which Climat screen |
 |---|---|---|
 | `/v1/forecast` | Current + hourly + daily, up to **16 days**, 50+ variables | Home, Hourly, 10-Day |
 | `minutely_15` params | 15-minute resolution — **Central Europe + North America only**, elsewhere interpolated hourly; lightning potential in HRRR regions | Next-hour precipitation ribbon |
@@ -75,7 +75,7 @@ coordinates; WMO weather codes 0–99.
 | **UKMO** | Met Office | Global / UK | 10 / 2 km | — | |
 | GEM, JMA, KMA, BOM, CMA | national | regional/global | varies | varies | Round out the ensemble |
 
-This table *is* the feature. MSN gives you one number; Clima can show you that ICON-D2
+This table *is* the feature. MSN gives you one number; Climat can show you that ICON-D2
 says 4 mm and AIFS says 0.2 mm, and that is information the user genuinely wants.
 
 ## 2.4 Radar sources — the hard problem
@@ -89,7 +89,7 @@ says 4 mm and AIFS says 0.2 mm, and that is information the user genuinely wants
 | **DWD Open Data** | Germany (RADOLAN/RADVOR) | GeoNutzV, attribution | Binary grids / GeoTIFF | ✅ Germany (needs decoding work) |
 | **EUMETNET OPERA** | Pan-European composite | Via LibreWXR / national portals | — | ✅ Europe (indirect) |
 | **NOAA MRMS** | CONUS, 2-min, quantitative | US public domain | GRIB2 | ⭕ heavy; server-side only |
-| Self-hosted Clima relay | Wherever we ingest | Ours | XYZ tiles | ⭕ Escape hatch (see §2.8) |
+| Self-hosted Climat relay | Wherever we ingest | Ours | XYZ tiles | ⭕ Escape hatch (see §2.8) |
 
 **Design consequence:** radar must be an *abstracted, region-routed, replaceable*
 provider from day one — `IRadarProvider` with a source registry keyed by bounding box.
@@ -144,7 +144,7 @@ limit is per-user and generous (our worst case is ~150 calls/day/user). The app 
 ships with **no mandatory server**, which is a privacy and trust feature we should
 advertise loudly.
 
-An optional `clima-relay` becomes worthwhile only for: radar tile normalisation,
+An optional `climat-relay` becomes worthwhile only for: radar tile normalisation,
 CAP alert aggregation, and rate-limit shielding if we ever go commercial. Self-hosting
 Open-Meteo is documented and realistic:
 
@@ -160,7 +160,7 @@ Open-Meteo is documented and realistic:
 | Provider | Required credit |
 |---|---|
 | Open-Meteo (forecast, AQI, archive, geocoding, elevation) | "Weather data by Open-Meteo.com" + link to CC-BY 4.0; underlying model owners (ECMWF, NOAA, DWD, Météo-France, …) named |
-| MET Norway | CC-BY 4.0 credit + **identifying User-Agent** `Clima/<version> (+https://…; contact@…)` — generic UA gets 403/blocked |
+| MET Norway | CC-BY 4.0 credit + **identifying User-Agent** `Climat/<version> (+https://…; contact@…)` — generic UA gets 403/blocked |
 | NWS / NOAA | Public domain; UA with contact still expected |
 | ECCC | "Contains information licensed under the Open Government Licence – Canada" |
 | DWD | GeoNutzV attribution |

@@ -3,7 +3,7 @@
 //
 // Somebody else's tables, checked against the authority that published them.
 //
-// libclima/domain/scales.h is a transcription: the WHO's UV bands, the European
+// libclimat/domain/scales.h is a transcription: the WHO's UV bands, the European
 // AQI's own bands, the Beaufort scale, the sixteen-point compass. Nothing in it
 // is a judgement of ours, which is exactly why it needs a test — a transcription
 // error is invisible. Every function returns a plausible word for every input,
@@ -33,8 +33,8 @@
 // UV index nobody measured is the null-drawn-as-zero mistake with a word on it."
 // Every string function here is asked that question.
 
-#include "libclima/domain/airquality.h"
-#include "libclima/domain/scales.h"
+#include "libclimat/domain/airquality.h"
+#include "libclimat/domain/scales.h"
 
 #include <QSet>
 #include <QTest>
@@ -42,8 +42,8 @@
 #include <cmath>
 #include <limits>
 
-using namespace clima;
-using namespace clima::scales;
+using namespace climat;
+using namespace climat::scales;
 
 namespace {
 
@@ -250,7 +250,7 @@ void TestScales::theAqiBoundaryBelongsToTheLowerBand()
 // boundary belongs to the band above it.
 //
 // The units are the hazard. Open-Meteo serves `visibility` in METRES —
-// libclima/providers/openmeteo/openmeteovariables.cpp says so on the line that
+// libclimat/providers/openmeteo/openmeteovariables.cpp says so on the line that
 // asks for it — and nothing in this function can tell 10 km from 10 m. The
 // conversion is the adapter's job and tst_openmeteoadapter.cpp is where it is
 // checked; all this file can do is pin the scale these numbers are on.
@@ -525,7 +525,7 @@ void TestScales::aBearingOutsideZeroToThreeSixtyStillNamesAPoint()
 // Pollutants — the closure test, and the reason this file exists at all.
 //
 // pollutantLabel() takes "a pollutant's machine id" and its header names
-// clima::pollutantId() as where those come from. Those are two tables in two
+// climat::pollutantId() as where those come from. Those are two tables in two
 // files with no compiler between them, and the app calls one on the output of
 // the other: app/viewmodels/conditionsdata.cpp does
 // `scales::pollutantLabel(pollutantId(*worst))` and widgets/wx.cpp does the
@@ -581,7 +581,7 @@ void TestScales::theSubscriptsAreRealCharactersAndNotMarkup()
 
     // The formula spellings are accepted too. The wire sends whatever
     // pollutantId() produced, but a widget reading a snapshot written by an
-    // older or newer Clima should still get a chemist's name rather than a
+    // older or newer Climat should still get a chemist's name rather than a
     // shout, and both spellings costing one row each is cheaper than a
     // migration.
     QCOMPARE(pollutantLabel(QStringLiteral("o3")), QStringLiteral("O\u2083"));

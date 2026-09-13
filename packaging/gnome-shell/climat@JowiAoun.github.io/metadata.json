@@ -1,0 +1,10 @@
+{
+    "uuid": "climat@JowiAoun.github.io",
+    "name": "Climat weather widgets",
+    "description": "Puts Climat's weather tiles on your desktop, and the current temperature in the top bar. Needs the Climat app installed; does nothing at all without it.\n\nThe extension draws no weather itself — GNOME Shell cannot host a Qt surface. It launches Climat's own widget process and pins its window to the desktop.",
+    "shell-version": ["45", "46", "47", "48"],
+    "url": "https://github.com/JowiAoun/climat",
+    "gettext-domain": "climat",
+    "settings-schema": "org.gnome.shell.extensions.climat",
+    "session-modes": ["user"]
+}

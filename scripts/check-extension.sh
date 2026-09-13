@@ -16,7 +16,7 @@
 #      able to establish, because those resources only exist inside gnome-shell.
 #
 #   2. The D-Bus introspection XML the extension carries is VALID and describes
-#      the same methods clima-daemon exports. This is a hand-maintained copy of
+#      the same methods climat-daemon exports. This is a hand-maintained copy of
 #      daemon/daemonadaptor.h — it has to be, since the extension ships from
 #      extensions.gnome.org and the daemon from Flathub — so the one thing that
 #      can be checked here is that it parses and that its names match.
@@ -37,7 +37,7 @@ set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(cd "$here/.." && pwd)"
-ext="$repo/packaging/gnome-shell/clima@JowiAoun.github.io"
+ext="$repo/packaging/gnome-shell/climat@JowiAoun.github.io"
 
 fail() { printf 'check-extension: %s\n' "$1" >&2; exit 1; }
 

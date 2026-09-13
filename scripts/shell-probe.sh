@@ -6,14 +6,14 @@
 # can be adopted, re-typed as a dock and hidden from the window list.
 #
 #   scripts/shell-probe.sh flatpak     the Flatpak-installed app
-#   scripts/shell-probe.sh host        build/dev/app/clima from this tree
+#   scripts/shell-probe.sh host        build/dev/app/climat from this tree
 #   scripts/shell-probe.sh -- CMD...   anything else
 #
 # This is the gate for the whole Ubuntu widget story. GNOME Shell cannot draw a
-# QML surface, so a Clima widget is our own Qt process whose window the
+# QML surface, so a Climat widget is our own Qt process whose window the
 # extension adopts — and every part of that rests on Meta.WaylandClient, whose
 # notion of "our window" comes from a socket fd inherited at spawn time. See
-# tests/shell/clima-window-probe@clima.invalid/extension.js for the mechanism
+# tests/shell/climat-window-probe@climat.invalid/extension.js for the mechanism
 # and docs/widgets.md for what it measured.
 #
 # ---- why this is not in CI --------------------------------------------------
@@ -37,9 +37,9 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "$here/.." && pwd)"
 
-app_id="io.github.JowiAoun.Clima"
-uuid="clima-window-probe@clima.invalid"
-mode="${CLIMA_PROBE_MODE:-dock}"
+app_id="io.github.JowiAoun.Climat"
+uuid="climat-window-probe@climat.invalid"
+mode="${CLIMAT_PROBE_MODE:-dock}"
 
 target="${1:-flatpak}"
 shift || true
@@ -50,10 +50,10 @@ case "$target" in
       echo "shell-probe: $app_id is not installed. Run scripts/flatpak.sh build" >&2
       exit 1
     fi
-    argv=(flatpak run --command=clima "$app_id")
+    argv=(flatpak run --command=climat "$app_id")
     ;;
   host)
-    binary="$root/build/dev/app/clima"
+    binary="$root/build/dev/app/climat"
     if [ ! -x "$binary" ]; then
       echo "shell-probe: $binary does not exist. Build the dev preset first." >&2
       exit 1
@@ -79,7 +79,7 @@ for tool in gnome-shell gjs /usr/bin/dbus-run-session; do
   }
 done
 
-state="$(mktemp -d "${TMPDIR:-/tmp}/clima-shell-probe.XXXXXX")"
+state="$(mktemp -d "${TMPDIR:-/tmp}/climat-shell-probe.XXXXXX")"
 trap 'rm -rf "$state"' EXIT
 
 # The nested shell gets its own everything. XDG_DATA_HOME is what makes it load
@@ -104,11 +104,11 @@ export PATH="/usr/bin:/bin:$PATH"
 
 report="$state/report.txt"
 : > "$report"
-export CLIMA_PROBE_REPORT="$report"
-export CLIMA_PROBE_MODE="$mode"
+export CLIMAT_PROBE_REPORT="$report"
+export CLIMAT_PROBE_MODE="$mode"
 
 joined="$(printf '%s\x1f' "${argv[@]}")"
-export CLIMA_PROBE_ARGV="${joined%$'\x1f'}"
+export CLIMAT_PROBE_ARGV="${joined%$'\x1f'}"
 
 echo "shell-probe: target  ${argv[*]}"
 echo "shell-probe: mode    $mode"

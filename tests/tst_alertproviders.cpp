@@ -21,12 +21,12 @@
 // registry test: it is a fact about the service, and it is only true because
 // somebody asked.
 
-#include "libclima/core/clock.h"
-#include "libclima/domain/alert.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/providers/eccc/ecccalertprovider.h"
-#include "libclima/providers/nws/nwsalertprovider.h"
-#include "libclima/providers/registry.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/domain/alert.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/providers/eccc/ecccalertprovider.h"
+#include "libclimat/providers/nws/nwsalertprovider.h"
+#include "libclimat/providers/registry.h"
 #include "support/httpstub.h"
 #include "support/networkguard.h"
 
@@ -34,13 +34,13 @@
 #include <QTest>
 #include <QUrl>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
 QByteArray fixture(const QString &relative)
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR) + QStringLiteral("/tests/fixtures/alerts/")
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR) + QStringLiteral("/tests/fixtures/alerts/")
                + relative);
     if (!file.open(QIODevice::ReadOnly))
         return {};
@@ -57,7 +57,7 @@ const Coordinate kSeattle{ 47.6062, -122.3321 };
 const Coordinate kToronto{ 43.6532, -79.3832 };
 
 // The instant everything here is judged against: 2026-08-05T21:30Z, which is
-// the same instant libclima/providers/fixture/data/seattle/fixture.json freezes
+// the same instant libclimat/providers/fixture/data/seattle/fixture.json freezes
 // its clock to, so a test and a screenshot agree about which alerts are live.
 const QDateTime kNow{ QDate(2026, 8, 5), QTime(21, 30), QTimeZone::UTC };
 

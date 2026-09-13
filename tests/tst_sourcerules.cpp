@@ -6,7 +6,7 @@
 // Both are rules that a comment in a header states and that nothing else would
 // notice being broken. A comment is a request; a failing test is a rule.
 //
-//   1. NOTHING READS THE WALL CLOCK except libclima/core/clock.cpp.
+//   1. NOTHING READS THE WALL CLOCK except libclimat/core/clock.cpp.
 //      The whole determinism story rests on this — fixture mode, golden
 //      images, every TTL test in tst_cachestore.cpp — and the way it breaks is
 //      not a bad commit but an ordinary one: somebody needs "now", writes
@@ -147,13 +147,13 @@ void TestSourceRules::nothingReadsTheWallClock()
     };
 
     const QStringList files =
-        sourceFiles(QStringLiteral(CLIMA_SOURCE_DIR), { QStringLiteral("libclima"),
+        sourceFiles(QStringLiteral(CLIMAT_SOURCE_DIR), { QStringLiteral("libclimat"),
                                                         QStringLiteral("app"),
                                                         QStringLiteral("gallery") },
                     { QStringLiteral("*.cpp"), QStringLiteral("*.h"), QStringLiteral("*.qml"),
                       QStringLiteral("*.js") });
 
-    QVERIFY2(files.size() > 50, "the source scan found almost nothing — CLIMA_SOURCE_DIR is wrong");
+    QVERIFY2(files.size() > 50, "the source scan found almost nothing — CLIMAT_SOURCE_DIR is wrong");
 
     // clock.cpp is the mechanism. It is the one file allowed to ask the
     // operating system what time it is, and everything else asks it.
@@ -162,7 +162,7 @@ void TestSourceRules::nothingReadsTheWallClock()
     QVERIFY2(violations.isEmpty(),
              qPrintable(QStringLiteral(
                             "something reads the wall clock directly.%1\n\n"
-                            "  Inject a clima::Clock and call now() instead. libclima/core/clock.h "
+                            "  Inject a climat::Clock and call now() instead. libclimat/core/clock.h "
                             "explains why:\n"
                             "  fixture mode, golden images and every TTL test depend on time being "
                             "asked for\n"
@@ -180,7 +180,7 @@ void TestSourceRules::noTestNamesAnExternalHost()
         QRegularExpression(QStringLiteral(R"(https?://(?!127\.0\.0\.1|localhost|\[::1\])[\w.-]+)")),
     };
 
-    const QStringList files = sourceFiles(QStringLiteral(CLIMA_SOURCE_DIR),
+    const QStringList files = sourceFiles(QStringLiteral(CLIMAT_SOURCE_DIR),
                                           { QStringLiteral("tests") },
                                           { QStringLiteral("*.cpp"), QStringLiteral("*.h") });
 
@@ -203,13 +203,13 @@ void TestSourceRules::theScannerActuallyFindsThings()
     // A scan that matches nothing passes both tests above whether or not the
     // tree is clean. This is the control: the same machinery, pointed at a
     // pattern that is definitely present, has to come back non-empty.
-    const QStringList files = sourceFiles(QStringLiteral(CLIMA_SOURCE_DIR),
-                                          { QStringLiteral("libclima") },
+    const QStringList files = sourceFiles(QStringLiteral(CLIMAT_SOURCE_DIR),
+                                          { QStringLiteral("libclimat") },
                                           { QStringLiteral("*.cpp") });
     QVERIFY(!files.isEmpty());
 
     const QList<Violation> found =
-        scan(files, { QRegularExpression(QStringLiteral(R"(namespace clima)")) }, {});
+        scan(files, { QRegularExpression(QStringLiteral(R"(namespace climat)")) }, {});
     QVERIFY2(!found.isEmpty(), "the source scanner matched nothing at all — it is broken");
 
     // And comment stripping works, which is what keeps the two rules above from

@@ -4,19 +4,19 @@
 #
 # The translatable strings, and the catalogues made from them.
 #
-#   scripts/i18n.sh update    regenerate app/translations/clima.ts from the source
+#   scripts/i18n.sh update    regenerate app/translations/climat.ts from the source
 #   scripts/i18n.sh check     fail if it is out of date (CI runs this)
 #
 # ---- what the template is, and what it is not -------------------------------
 #
-# `app/translations/clima.ts` is the SOURCE catalogue: every string the app and
+# `app/translations/climat.ts` is the SOURCE catalogue: every string the app and
 # the CLI mark for translation, with no translations in it. It is what a
 # translation platform imports, and it is committed so that a pull request
 # adding a user-facing sentence shows that sentence in its diff. Nothing loads
 # it at run time.
 #
-# A LANGUAGE catalogue is `clima_<locale>.ts` beside it — `clima_fr.ts`,
-# `clima_pt_BR.ts` — and there are none yet, which is stated in
+# A LANGUAGE catalogue is `climat_<locale>.ts` beside it — `climat_fr.ts`,
+# `climat_pt_BR.ts` — and there are none yet, which is stated in
 # docs/known-gaps.md rather than papered over with a machine translation.
 # Adding one is a file and a line in app/CMakeLists.txt; nothing else changes,
 # because app/apptranslator.cpp already looks for whatever was compiled in.
@@ -42,7 +42,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-template="$root/app/translations/clima.ts"
+template="$root/app/translations/climat.ts"
 
 mode="${1:-update}"
 
@@ -72,13 +72,13 @@ case "$mode" in
 
   check)
     if [ ! -r "$template" ]; then
-      echo "i18n: no template at app/translations/clima.ts — run scripts/i18n.sh update" >&2
+      echo "i18n: no template at app/translations/climat.ts — run scripts/i18n.sh update" >&2
       exit 1
     fi
 
     scratch="$(mktemp -d)"
     trap 'rm -rf "$scratch"' EXIT
-    fresh="$scratch/clima.ts"
+    fresh="$scratch/climat.ts"
 
     # lupdate merges into an existing file, so it has to start from the
     # committed one: generating into an empty file would mark every entry as
@@ -91,7 +91,7 @@ case "$mode" in
       exit 0
     fi
 
-    echo "i18n: app/translations/clima.ts is out of date. Run scripts/i18n.sh update." >&2
+    echo "i18n: app/translations/climat.ts is out of date. Run scripts/i18n.sh update." >&2
     echo >&2
     # Only the string lines, because the full diff is mostly XML scaffolding
     # and the question a reader has is "which sentence moved".

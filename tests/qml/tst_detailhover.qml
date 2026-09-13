@@ -27,9 +27,9 @@
 // DetailCard.qml, and this is where ignoring it fails with a name attached.
 import QtQuick
 import QtTest
-import Clima
+import Climat
 
-import "qrc:/qt/qml/Clima/chartmath.js" as ChartMath
+import "qrc:/qt/qml/Climat/chartmath.js" as ChartMath
 
 TestCase {
     id: testCase
@@ -100,7 +100,7 @@ TestCase {
     }
 
     function build(typeName) {
-        var component = Qt.createComponent("Clima", typeName)
+        var component = Qt.createComponent("Climat", typeName)
         verify(component !== null && component.status !== Component.Error,
                typeName + " does not build: "
                + (component === null ? "no such type" : component.errorString()))
@@ -431,7 +431,7 @@ TestCase {
     // straight onto the stage, and a Loader that swallowed hover would leave all
     // of it passing and the feature dead on the page.
     function test_aCardInsideTheRealGridTakesAHover() {
-        var component = Qt.createComponent("Clima", "WeatherDetails")
+        var component = Qt.createComponent("Climat", "WeatherDetails")
         verify(component !== null && component.status !== Component.Error,
                "WeatherDetails does not build: "
                + (component === null ? "no such type" : component.errorString()))

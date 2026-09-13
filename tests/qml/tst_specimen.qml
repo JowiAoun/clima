@@ -29,14 +29,14 @@
 // honest about what a green run proves.
 import QtQuick
 import QtTest
-import Clima
-import Clima.Gallery
+import Climat
+import Climat.Gallery
 // QmlWarnings, which is the whole reason this test can see the defects it is
 // written for. Its own module, built in tests/, so that a type that exists to
 // let a test assert about stderr is not importable from the app.
-import Clima.Test
+import Climat.Test
 
-import "qrc:/qt/qml/Clima/Gallery/gallery.js" as Catalogue
+import "qrc:/qt/qml/Climat/Gallery/gallery.js" as Catalogue
 
 TestCase {
     name: "Specimen"
@@ -91,9 +91,9 @@ TestCase {
         QmlWarnings.clear()
 
         var typeName = data.file.replace(/\.qml$/, "")
-        var component = Qt.createComponent("Clima", typeName)
+        var component = Qt.createComponent("Climat", typeName)
 
-        verify(component !== null, "Clima." + typeName + " is not a component name")
+        verify(component !== null, "Climat." + typeName + " is not a component name")
         verify(component.status !== Component.Error,
                data.file + " does not compile:\n" + component.errorString())
 
@@ -131,7 +131,7 @@ TestCase {
         var all = specimens()
         for (var i = 0; i < all.length; ++i) {
             var typeName = all[i].file.replace(/\.qml$/, "")
-            var component = Qt.createComponent("Clima", typeName)
+            var component = Qt.createComponent("Climat", typeName)
             if (component === null || component.status === Component.Error)
                 missing.push(all[i].file)
         }

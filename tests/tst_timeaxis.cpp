@@ -8,11 +8,11 @@
 // pass if two errors cancelled. These are the properties stated on their own,
 // with the inputs written out.
 
-#include "libclima/domain/timeaxis.h"
+#include "libclimat/domain/timeaxis.h"
 
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 

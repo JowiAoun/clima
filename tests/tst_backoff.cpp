@@ -5,12 +5,12 @@
 // here sleeps: a backoff test that waits for its own delays is a test that
 // takes thirty minutes to prove the cap.
 
-#include "libclima/net/backoff.h"
+#include "libclimat/net/backoff.h"
 
 #include <QSet>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 using namespace std::chrono_literals;
 
 class TestBackoff : public QObject

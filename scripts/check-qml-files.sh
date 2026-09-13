@@ -34,15 +34,15 @@ repo="$(cd "$here/.." && pwd)"
 # approves of.
 #
 # widgets/ is checked for the files it OWNS. Its CMakeLists.txt also lists a
-# handful of app/qml/Clima/ files by absolute path — the presentation components
+# handful of app/qml/Climat/ files by absolute path — the presentation components
 # a tile shares with the app — and those are deliberately outside this check:
 # they are already covered by the app's own entry, and a second claim on them
 # here would report every one of them as "on disk but not listed" the moment the
 # widget host stopped using one.
 modules=(
-    "app:qml/Clima"
-    "gallery:qml/Clima/Gallery"
-    "widgets:qml/Clima/Widgets"
+    "app:qml/Climat"
+    "gallery:qml/Climat/Gallery"
+    "widgets:qml/Climat/Widgets"
 )
 
 # Reported indented, because a bare column of filenames under an error line
@@ -101,8 +101,8 @@ for entry in "${modules[@]}"; do
     # list being reordered, renamed or split into more variables, which a block
     # parser would not.
     #
-    # The absent `/` in the character class is what keeps `qml/Clima` from
-    # claiming `qml/Clima/Gallery`'s files — one is a path prefix of the other,
+    # The absent `/` in the character class is what keeps `qml/Climat` from
+    # claiming `qml/Climat/Gallery`'s files — one is a path prefix of the other,
     # and a name that may not contain a slash is the whole of the distinction.
     LC_ALL=C sed 's/#.*$//' "$cmake_file" \
         | LC_ALL=C grep -oE "$prefix/[A-Za-z0-9_.-]+\.(qml|js)" \

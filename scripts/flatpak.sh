@@ -27,8 +27,8 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "$here/.." && pwd)"
 
-manifest="$root/packaging/flatpak/io.github.JowiAoun.Clima.yml"
-app_id="io.github.JowiAoun.Clima"
+manifest="$root/packaging/flatpak/io.github.JowiAoun.Climat.yml"
+app_id="io.github.JowiAoun.Climat"
 state_dir="$root/build/flatpak"
 
 # Read the runtime version out of the manifest rather than repeating it, so
@@ -87,7 +87,7 @@ case "$command" in
 
   bundle)
     # A single-file .flatpak, which is what a GitHub release can attach and
-    # what somebody installs with `flatpak install ./clima.flatpak` on a
+    # what somebody installs with `flatpak install ./climat.flatpak` on a
     # machine that has never heard of us. Distinct from `build`, which installs
     # into the user's flatpak and produces no file.
     #
@@ -100,7 +100,7 @@ case "$command" in
       "$state_dir/build" "$manifest"
 
     version="$(sed -n 's/^ *VERSION \([0-9][0-9.]*\).*/\1/p' "$root/CMakeLists.txt" | head -1)"
-    out="${1:-$root/build/clima-$version-x86_64.flatpak}"
+    out="${1:-$root/build/climat-$version-x86_64.flatpak}"
 
     flatpak build-bundle "$state_dir/repo" "$out" "$app_id"
     echo "flatpak: $out ($(wc -c < "$out") bytes)"

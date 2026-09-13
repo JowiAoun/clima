@@ -127,5 +127,5 @@ Pinning location is also how you reach states you cannot see from your desk —
 This captures third-party UI for study. Layout, proportion, interaction and
 information architecture are fair to learn from and reimplement. Icons,
 illustrations, fonts and markup are not ours to ship — asset URLs are recorded
-but never downloaded, `reference/` stays out of git, and Clima's own icons come
+but never downloaded, `reference/` stays out of git, and Climat's own icons come
 from Meteocons (MIT). Nothing here belongs in a release artifact.

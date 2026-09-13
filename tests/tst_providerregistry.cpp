@@ -16,10 +16,10 @@
 // About screen is generated from this registry, so "not registered" is the only
 // enforcement that reaches every screen at once.
 
-#include "libclima/core/clock.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/providers/metno/metnoforecastprovider.h"
-#include "libclima/providers/registry.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/providers/metno/metnoforecastprovider.h"
+#include "libclimat/providers/registry.h"
 #include "support/httpstub.h"
 #include "support/networkguard.h"
 
@@ -28,7 +28,7 @@
 #include <QSignalSpy>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -40,7 +40,7 @@ const QDateTime kRecordedAt{ QDate(2026, 7, 31), QTime(9, 13, 51), QTimeZone::UT
 
 QByteArray metNoFixture()
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR)
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR)
                + QStringLiteral("/tests/fixtures/metno/toronto.json"));
     if (!file.open(QIODevice::ReadOnly))
         return {};

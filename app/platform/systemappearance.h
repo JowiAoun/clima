@@ -46,7 +46,7 @@
 #include <QQmlEngine>
 #include <QString>
 
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
 // The whole header, not a forward declaration. QDBusVariant appears in a slot
 // signature below, and moc emits a metatype for every parameter of a slot — so
 // an incomplete type here fails the build inside qmetatype.h with "Meta Types
@@ -85,7 +85,7 @@ Q_SIGNALS:
     void reduceMotionChanged();
     void availableChanged();
 
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
     // A real slot, declared to moc, and it has to be. QDBusConnection::connect
     // takes a signature through the old SLOT() macro and resolves it at run
     // time against the meta-object — so an ordinary private method compiles,

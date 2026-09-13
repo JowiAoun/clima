@@ -3,7 +3,7 @@
 //
 // The QML test runner.
 //
-// Everything under tests/ before this file tested libclima — a network client,
+// Everything under tests/ before this file tested libclimat — a network client,
 // a cache, an adapter — and one view model. That is about 3,500 lines of C++.
 // The other 13,400 lines of this application are QML, and none of it had a test
 // of any kind: the acceptance check for the whole port was that `--grab`
@@ -25,12 +25,12 @@
 
 #include "appengine.h"
 #include "appfont.h"
-#include "libclima/providers/fixture/fixtureprovider.h"
+#include "libclimat/providers/fixture/fixtureprovider.h"
 #include "support/networkguard.h"
 #include "qmlwarnings.h"
 #include "settings.h"
 
-// Both modules, and the second one is not a convenience. `Clima.Gallery` holds
+// Both modules, and the second one is not a convenience. `Climat.Gallery` holds
 // gallery.js — the catalogue of every component in the tree, which is what
 // tst_specimen walks — and contrast.js, the WCAG arithmetic the palette page
 // audits with. Testing against the same catalogue the gallery browses is the
@@ -83,7 +83,7 @@ public Q_SLOTS:
         // the whole of CI already run on. Components get real values to bind
         // to rather than empty models, so a good deal more of each one is
         // actually exercised by being built.
-        AppEngine::instance()->configure(clima::fixtures::defaultName());
+        AppEngine::instance()->configure(climat::fixtures::defaultName());
 
         // Installed after QGuiApplication exists but before any test file is
         // loaded, so a warning raised while a .qml is being parsed is caught
@@ -93,6 +93,6 @@ public Q_SLOTS:
     }
 };
 
-QUICK_TEST_MAIN_WITH_SETUP(clima_qml, Setup)
+QUICK_TEST_MAIN_WITH_SETUP(climat_qml, Setup)
 
 #include "main.moc"

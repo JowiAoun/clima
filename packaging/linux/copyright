@@ -1,10 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: Clima
-Upstream-Contact: https://github.com/JowiAoun/clima/issues
-Source: https://github.com/JowiAoun/clima
+Upstream-Name: Climat
+Upstream-Contact: https://github.com/JowiAoun/climat/issues
+Source: https://github.com/JowiAoun/climat
 Comment:
- Installed as /usr/share/doc/clima/copyright, and it is not a formality: the
- clima binary is statically linked and carries a typeface, a place-name
+ Installed as /usr/share/doc/climat/copyright, and it is not a formality: the
+ climat binary is statically linked and carries a typeface, a place-name
  database and several recorded weather-service payloads inside it. Every one of
  those arrives under somebody else's licence, and a copyright file that named
  only the GPL would be describing a package that is not this one.
@@ -19,7 +19,7 @@ Files: *
 Copyright: 2026 Jowi Aoun
 License: GPL-3.0-or-later
 
-Files: libclima/*
+Files: libclimat/*
 Copyright: 2026 Jowi Aoun
 License: MPL-2.0
 Comment:
@@ -45,7 +45,7 @@ Comment:
  how OFL section 2 asks a binary redistribution to carry the notice; we do not
  strip them.
 
-Files: libclima/providers/geocoding/data/cities15000.cgx
+Files: libclimat/providers/geocoding/data/cities15000.cgx
 Copyright: GeoNames (https://www.geonames.org)
 License: CC-BY-4.0
 Comment:
@@ -54,15 +54,15 @@ Comment:
  columns and changing the container does not make it ours. The credit CC-BY
  requires is shown at run time under About, Data sources.
 
-Files: libclima/providers/fixture/data/*/forecast.json
- libclima/providers/fixture/data/*/airquality.json
+Files: libclimat/providers/fixture/data/*/forecast.json
+ libclimat/providers/fixture/data/*/airquality.json
 Copyright: Open-Meteo (https://open-meteo.com)
 License: CC-BY-4.0
 Comment:
  Recorded API responses, compiled into the binary so that --fixture renders
  without a network. Credited at run time under About, Data sources.
 
-Files: libclima/providers/fixture/data/toronto/alerts.json
+Files: libclimat/providers/fixture/data/toronto/alerts.json
 Copyright: Environment and Climate Change Canada
 License: LicenseRef-OGL-Canada-2.0
 Comment:
@@ -70,7 +70,7 @@ Comment:
  2.0. The attribution that licence requires is returned verbatim by
  EcccAlertProvider::attribution().
 
-Files: libclima/providers/fixture/data/seattle/alerts.json
+Files: libclimat/providers/fixture/data/seattle/alerts.json
 Copyright: NOAA National Weather Service
 License: LicenseRef-US-Public-Domain
 Comment:

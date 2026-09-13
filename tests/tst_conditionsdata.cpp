@@ -42,27 +42,27 @@
 // ============================================================================
 // AND WHY THIS IS THE ONE TEST THAT LINKS THE APP
 //
-// tests/CMakeLists.txt says the tests link libclima and Qt Test and that is the
+// tests/CMakeLists.txt says the tests link libclimat and Qt Test and that is the
 // whole list, because `engine_has_no_gui` reads a test binary's DT_NEEDED
 // entries to prove the engine drags in no windowing toolkit. That guarantee is
 // asked of tst_httpclient specifically and it is unaffected by this file: what
 // is under test here is a VIEW MODEL, which lives in app/, is GPL-3.0-or-later
 // rather than MPL-2.0, and is allowed a QML dependency because being read by
 // QML is its entire job. It is registered by hand below the loop for that
-// reason, without clima_forbid_gui.
+// reason, without climat_forbid_gui.
 
 #include "conditionsdata.h"
 
-#include "libclima/domain/hourconvention.h"
-#include "libclima/domain/weathercode.h"
-#include "libclima/providers/fixture/fixtureprovider.h"
+#include "libclimat/domain/hourconvention.h"
+#include "libclimat/domain/weathercode.h"
+#include "libclimat/providers/fixture/fixtureprovider.h"
 
 #include <QSet>
 #include <QStandardPaths>
 #include <QStringList>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 class TestConditionsData : public QObject
 {

@@ -30,7 +30,7 @@ void WidgetFeed::componentComplete()
     // Attach here and not in the constructor. QML assigns properties between
     // the two, so subscribing earlier would ask the daemon for the default
     // place with an empty field mask — which the wire format reads as "send
-    // everything" (libclima/wire/snapshot.h), so the mistake would be a working
+    // everything" (libclimat/wire/snapshot.h), so the mistake would be a working
     // widget receiving eight times the payload it needs. Silent, and the sort
     // of thing that is only ever found by looking at bus traffic.
     m_complete = true;
@@ -120,7 +120,7 @@ int WidgetFeed::ageMinutes() const
     // Floored rather than rounded, so a reading taken 119 seconds ago is "1
     // minute" and never "2". A widget's age is a claim about the past and it
     // must not overstate it.
-    const qint64 seconds = m_fetchedAt.secsTo(clima::widgets::now());
+    const qint64 seconds = m_fetchedAt.secsTo(climat::widgets::now());
     return seconds < 0 ? 0 : int(seconds / 60);
 }
 

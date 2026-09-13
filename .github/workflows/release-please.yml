@@ -13,8 +13,8 @@
 #
 # It will come up RED, once, on the version bump.
 #
-# release-please rewrites `project(clima VERSION …)` and nothing else. The
-# AppStream <releases> block in packaging/linux/clima.metainfo.xml.in is a
+# release-please rewrites `project(climat VERSION …)` and nothing else. The
+# AppStream <releases> block in packaging/linux/climat.metainfo.xml.in is a
 # changelog for a software centre — curated prose, not a generated list — so it
 # is written by a person, and packaging/CMakeLists.txt fails the configure step
 # when the newest entry there does not match the project version.

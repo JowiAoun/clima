@@ -1,7 +1,7 @@
-<!-- SPDX-FileCopyrightText: 2026 Clima contributors -->
+<!-- SPDX-FileCopyrightText: 2026 Climat contributors -->
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
-# Contributing to Clima
+# Contributing to Climat
 
 Thank you for looking. This file is longer than most because several of the
 rules here are unusual, and a rule you find out about in review is a rule that
@@ -62,7 +62,7 @@ for nothing. Everything else is `docs`, `style`, `refactor`, `perf`, `test`,
 `build`, `ci`, `chore` or `revert`.
 
 Scopes in use, so you can pick an existing one rather than inventing a
-neighbour: `app`, `libclima`, `gallery`, `packaging`, `net`, `alerts`,
+neighbour: `app`, `libclimat`, `gallery`, `packaging`, `net`, `alerts`,
 `golden`, `android`, `design`, `build`, `licensing`.
 
 Write a body whenever the *why* is not obvious from the diff. Explain the
@@ -83,19 +83,19 @@ New code is reviewed for style by a person. Match the file you are editing.
 
 ### 2. The engine may not touch the GUI
 
-`libclima/` is MPL-2.0 and links no Qt GUI module. This is not a preference:
-`cmake/ClimaEngineGuard.cmake` asserts it, and a test inspects the built binary
+`libclimat/` is MPL-2.0 and links no Qt GUI module. This is not a preference:
+`cmake/ClimatEngineGuard.cmake` asserts it, and a test inspects the built binary
 for QtGui symbols. It keeps the engine reusable outside a GPL program, which is
 decision D6 in [`docs/03-tech-stack.md`](docs/03-tech-stack.md).
 
-If your change wants a `QColor` in `libclima`, it belongs in `app/` instead.
+If your change wants a `QColor` in `libclimat`, it belongs in `app/` instead.
 
 ### 3. Every file carries an SPDX header
 
 `reuse lint` gates every commit. A new file needs two comment lines: an
 `SPDX-FileCopyrightText` naming you and the year, and an
 `SPDX-License-Identifier`. The identifier is `GPL-3.0-or-later` for most of the
-tree, `MPL-2.0` under `libclima/`, and `CC-BY-SA-4.0` for documentation and
+tree, `MPL-2.0` under `libclimat/`, and `CC-BY-SA-4.0` for documentation and
 artwork.
 
 The reliable way to get it right is to copy the header off the file next door,
@@ -143,7 +143,7 @@ nix develop --command reuse lint
 nix develop --command shellcheck --external-sources scripts/*.sh
 nix develop --command actionlint
 nix develop --command bash scripts/check-qml-files.sh
-CLIMA_BUILD_DIR=build/lint nix develop --command bash scripts/check-qmllint.sh
+CLIMAT_BUILD_DIR=build/lint nix develop --command bash scripts/check-qmllint.sh
 ```
 
 `check-qml-files.sh` is the one people trip over: the QML module lists every
@@ -173,7 +173,7 @@ already ship.
 Use the issue template, and attach a screenshot taken by the app itself:
 
 ```sh
-clima --grab bug.png
+climat --grab bug.png
 ```
 
 That captures exactly what the app rendered, at the size it rendered it, with no

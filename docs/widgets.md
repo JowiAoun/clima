@@ -5,7 +5,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 # Desktop widgets
 
-How a Clima widget reaches a desktop, and what had to be measured before any of
+How a Climat widget reaches a desktop, and what had to be measured before any of
 it could be designed.
 
 Nothing in this document is a plan for a feature that might work. The
@@ -22,7 +22,7 @@ gnome-shell's own process; extensions.gnome.org forbids shipping binaries; and
 mutter still does not implement `wlr-layer-shell`, so there is no protocol by
 which an outside process can ask to be a desktop layer.
 
-So a Clima widget is **not drawn by the extension**. It is our own Qt process,
+So a Climat widget is **not drawn by the extension**. It is our own Qt process,
 whose window the extension adopts and pins. That is the DING pattern — the same
 one Ubuntu's own desktop-icons extension uses, which is running on the machine
 these measurements were taken on.
@@ -35,7 +35,7 @@ components with the app instead of being a second implementation.
 
 ## One process fetches; the rest draw
 
-`clima-daemon` owns the network, the cache and the clock. Everything else —
+`climat-daemon` owns the network, the cache and the clock. Everything else —
 widgets, the tray, eventually the app — reads from it over the session bus.
 
 Three reasons, in the order they bite. **SQLite has one writer**, and a desktop
@@ -49,8 +49,8 @@ tombstone state machines that can disagree about whether a warning was
 cancelled.
 
 ```
-io.github.JowiAoun.Clima.Daemon   /io/github/JowiAoun/Clima/Daemon
-io.github.JowiAoun.Clima.Daemon1
+io.github.JowiAoun.Climat.Daemon   /io/github/JowiAoun/Climat/Daemon
+io.github.JowiAoun.Climat.Daemon1
 ```
 
 | Call | Does |
@@ -75,13 +75,13 @@ of tiles.
 The payload is JSON rather than a typed D-Bus signature, for the version-skew
 reason in the section below: the two ends ship from different places on
 different clocks, and an unknown key has to be ignorable rather than an
-unmarshalling error. `libclima/wire/snapshot.h` argues it at length.
+unmarshalling error. `libclimat/wire/snapshot.h` argues it at length.
 
 The field mask is what makes that affordable. A wind rose asks for three
 current readings; it is not sent 408 hourly points.
 
 There are two readers today and they exercise the interface differently, which
-is worth more than one of them exercising it twice. `clima-widget` holds one
+is worth more than one of them exercising it twice. `climat-widget` holds one
 subscription per tile and adds an **arg0 match rule** for each token, so the bus
 filters before delivery and one tile's refresh does not wake the other seven.
 The GNOME extension's panel indicator holds a single subscription and filters in
@@ -89,9 +89,9 @@ its callback, because GJS's proxy wrapper exposes no argument matching — which
 costs one wakeup per other subscriber and, for one indicator, is nothing.
 
 ```sh
-clima-daemon --print-address
-clima-daemon --fixture toronto           # recorded data at a frozen clock
-clima-daemon --fixture toronto --dump-snapshot   # one snapshot, no bus at all
+climat-daemon --print-address
+climat-daemon --fixture toronto           # recorded data at a frozen clock
+climat-daemon --fixture toronto --dump-snapshot   # one snapshot, no bus at all
 ```
 
 ### What starts it
@@ -100,9 +100,9 @@ Three things, and the order is how little each asks of the user.
 
 | | |
 |---|---|
-| **The bus** | `packaging/linux/clima-daemon.service.in` makes it activatable, so the first widget host or extension that looks for the name gets one started for it. Works from a Flatpak, on any desktop, without a login. |
+| **The bus** | `packaging/linux/climat-daemon.service.in` makes it activatable, so the first widget host or extension that looks for the name gets one started for it. Works from a Flatpak, on any desktop, without a login. |
 | **An autostart entry** | `/etc/xdg/autostart`, where a package can write one. Login-time, which is what a pinned tile wants: a reading that is already current when the desktop appears. |
-| **By hand** | `clima-daemon`. |
+| **By hand** | `climat-daemon`. |
 
 All three are idempotent — whichever loses the race finds the name owned and
 exits 5 — and none of them is a fallback for the others.
@@ -129,7 +129,7 @@ recording worth having.
 | mutter typelib | `Meta-14` |
 | gjs | 1.80.2 |
 | Session | Ubuntu, Wayland |
-| Harness | `scripts/shell-probe.sh` + `tests/shell/clima-window-probe@clima.invalid/` |
+| Harness | `scripts/shell-probe.sh` + `tests/shell/climat-window-probe@climat.invalid/` |
 
 The probe spawns a target through `Meta.WaylandClient`, waits for a window, and
 reports whether it can be adopted. It runs a **nested** shell — an ordinary
@@ -205,8 +205,8 @@ hide_from_window_list  make_desktop  make_dock  owns_window  show_in_window_list
 ```
 
 `make_dock()` gets `on_all_workspaces` and exclusion from the overview by
-construction, which is most of what the title flags were emulating. Clima's
-extension uses it — `packaging/gnome-shell/clima@JowiAoun.github.io/extension.js`
+construction, which is most of what the title flags were emulating. Climat's
+extension uses it — `packaging/gnome-shell/climat@JowiAoun.github.io/extension.js`
 — and nothing we send a widget travels through a window title.
 
 ### 4. `get_sandboxed_app_id()` returns null here, so it cannot identify us
@@ -245,7 +245,7 @@ annoyances:
 
 ```sh
 scripts/shell-probe.sh flatpak      # the Flatpak-installed app
-scripts/shell-probe.sh host         # build/dev/app/clima from this tree
+scripts/shell-probe.sh host         # build/dev/app/climat from this tree
 scripts/shell-probe.sh -- CMD...    # anything else
 ```
 
@@ -351,13 +351,13 @@ sentence that names what is wrong, because "not running", "not answering" and
 | What the tile shows | What is actually true |
 |---|---|
 | a skeleton | subscribed, or an activation request is in flight |
-| The Clima weather service is not running. | nothing owns the name and the bus could not start one |
-| The Clima weather service is not answering. | something owns the name and did not reply |
-| No place yet. Open Clima and choose one. | a working daemon with an empty place database — a first run |
+| The Climat weather service is not running. | nothing owns the name and the bus could not start one |
+| The Climat weather service is not answering. | something owns the name and did not reply |
+| No place yet. Open Climat and choose one. | a working daemon with an empty place database — a first run |
 
 The third one is the interesting one, and it was a second silent failure hiding
 behind the first: a package installs the widgets and the daemon together, so the
-tiles can reach a healthy daemon on a machine where nobody has opened Clima and
+tiles can reach a healthy daemon on a machine where nobody has opened Climat and
 chosen anywhere. `Subscribe` answers with an empty token, which is the daemon
 saying *I have no place by that id* — and that answer had been on the wire,
 unread, since the day the interface was written.
@@ -368,15 +368,15 @@ Once the tiles could say what was wrong, they said it: **no such place** — on 
 machine with seven saved cities and Toronto as home.
 
 `QStandardPaths::AppDataLocation` is `<organizationName>/<applicationName>`, and
-`libclima/cache/cachestore.cpp` puts `cache.sqlite` under it. The three
+`libclimat/cache/cachestore.cpp` puts `cache.sqlite` under it. The three
 processes set those two names in three separate `main()` functions, and one of
 them disagreed:
 
 | | organization | application | opens |
 |---|---|---|---|
-| `clima` | `Clima` | `clima` | `~/.local/share/Clima/clima` |
-| `clima-widget` | `Clima` | `clima` | the same |
-| `clima-daemon` | `clima` | **`clima-daemon`** | `~/.local/share/clima/clima-daemon` |
+| `climat` | `Climat` | `climat` | `~/.local/share/Climat/climat` |
+| `climat-widget` | `Climat` | `climat` | the same |
+| `climat-daemon` | `climat` | **`climat-daemon`** | `~/.local/share/climat/climat-daemon` |
 
 So the daemon had its own database, empty of places, and had never once served
 the weather for a city anybody chose. Both processes were working perfectly.
@@ -420,7 +420,7 @@ writes to that database itself on every fetch):
   subscription to re-resolve — which is every widget on a desktop where the
   tiles went up before anybody chose a place.
 
-Measured on a copy of a real profile: a running `clima-widget`, untouched,
+Measured on a copy of a real profile: a running `climat-widget`, untouched,
 followed a home change from Toronto to Vancouver and back within one frame of
 the settle interval — including the hourly axis moving to the new city's own
 zone.
@@ -435,19 +435,19 @@ zone.
 |---|---|
 | The adoption mechanism | Measured on GNOME Shell 46, Wayland — the verdict above |
 | The wire format and its field mask | `tst_wiresnapshot`, 17 assertions, three encoder rules |
-| `clima-daemon` | Exercised end to end on a private session bus: introspection, a masked `GetSnapshot`, `Subscribe` delivering its own token, `Unsubscribe`. Serving a **real** places table — as against a fixture — was measured against a copy of a live profile, which is how finding 9 was found |
-| `clima-widget` and the ten tiles | Rendered against four recorded snapshots in both schemes; `tst_widgets` asserts the catalogue, the dispatch and the module list agree, plus every `Wx` boundary |
-| Starting the daemon | D-Bus activation, run against a private bus with its own service directory: no daemon, no autostart, and `clima-widget` alone brought one up and filled its tiles. The three states a tile can be empty in were each photographed. |
+| `climat-daemon` | Exercised end to end on a private session bus: introspection, a masked `GetSnapshot`, `Subscribe` delivering its own token, `Unsubscribe`. Serving a **real** places table — as against a fixture — was measured against a copy of a live profile, which is how finding 9 was found |
+| `climat-widget` and the ten tiles | Rendered against four recorded snapshots in both schemes; `tst_widgets` asserts the catalogue, the dispatch and the module list agree, plus every `Wx` boundary |
+| Starting the daemon | D-Bus activation, run against a private bus with its own service directory: no daemon, no autostart, and `climat-widget` alone brought one up and filled its tiles. The three states a tile can be empty in were each photographed. |
 | The link-line guard | `widget_has_no_engine`, verified by injecting the defect |
 | The GNOME extension | `scripts/check-extension.sh`: both modules parse, the introspection XML matches what it calls, and every `Meta.WaylandClient` method it calls exists on this machine's mutter. Verified by injecting both defects. |
 | Pinning on KDE and wlroots | `scripts/check-layer-shell.sh`, in CI: a real headless wlroots compositor, six assertions, one of which is the same binary with `--pin off` failing them |
 | The reader's units and clock | `app/settings.cpp`, `app/viewmodels/units.cpp` and `app/viewmodels/timeformat.cpp` are compiled into the widget host, so a tile prints °F and a 24-hour clock because the app's own preference says so — one mapping, two processes |
 
 ```sh
-clima-widget --list
-clima-widget --snapshot tests/fixtures/wire/seattle.json --columns 2 \
+climat-widget --list
+climat-widget --snapshot tests/fixtures/wire/seattle.json --columns 2 \
              --widget current-conditions --widget alerts --grab tiles.png
-clima-widget --pin on --anchor bottom-right --margin 16
+climat-widget --pin on --anchor bottom-right --margin 16
 ```
 
 In a build tree there is nothing installed for the bus to activate, so the tiles
@@ -456,11 +456,11 @@ beside them. `scripts/widgets-run.sh` is that:
 
 ```sh
 scripts/widgets-run.sh                          # live
-CLIMA_FIXTURE=toronto scripts/widgets-run.sh    # recorded, frozen clock
+CLIMAT_FIXTURE=toronto scripts/widgets-run.sh    # recorded, frozen clock
 scripts/widgets-run.sh --columns 2 --widget uv-dial --widget wind-rose
 ```
 
-It starts a daemon, hands everything else to `clima-widget`, and stops the one
+It starts a daemon, hands everything else to `climat-widget`, and stops the one
 it started — never one that was already there. `--snapshot` is the other way,
 and the one CI uses: it reads a recorded file and never touches the bus at all,
 so the script stays out of the way when it sees that flag.

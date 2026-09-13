@@ -6,7 +6,7 @@
 // ============================================================================
 // THERE ARE NO TRANSLATIONS YET, AND THIS IS STILL WORTH HAVING
 //
-// `app/translations/clima.ts` is the source catalogue — 271 strings, kept
+// `app/translations/climat.ts` is the source catalogue — 271 strings, kept
 // current by scripts/i18n.sh and gated in CI — and there is not one language
 // catalogue beside it. docs/known-gaps.md says so rather than shipping a
 // machine translation, which is the one thing worse than shipping none: a
@@ -14,7 +14,7 @@
 // about everything else too.
 //
 // What this class is, then, is the half that turns a translation into a
-// running program. Drop `clima_fr.ts` into app/translations, add its line to
+// running program. Drop `climat_fr.ts` into app/translations, add its line to
 // app/CMakeLists.txt, and French appears — no code changes, because the lookup
 // below is by locale and not by a list of languages somebody has to remember
 // to extend.
@@ -50,7 +50,7 @@
 
 class QCoreApplication;
 
-namespace clima {
+namespace climat {
 
 class AppTranslator
 {
@@ -64,4 +64,4 @@ public:
     static void install(QCoreApplication *app);
 };
 
-} // namespace clima
+} // namespace climat

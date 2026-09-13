@@ -5,7 +5,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 # Releasing
 
-How a version of Clima gets from `main` to a download. Most of it is automatic;
+How a version of Climat gets from `main` to a download. Most of it is automatic;
 the parts that are not are the parts that should not be.
 
 ## The short version
@@ -25,19 +25,19 @@ has gone wrong and tagging by hand will hide it.
 
 `release-please` rewrites exactly one thing: the version on the line in
 `CMakeLists.txt` marked `# x-release-please-version`. Everything downstream —
-`CLIMA_VERSION`, the `.deb` version, the MSI `ProductVersion`, the MET Norway
+`CLIMAT_VERSION`, the `.deb` version, the MSI `ProductVersion`, the MET Norway
 User-Agent — reads from there, so one edit moves all of them.
 
 It does **not** write the AppStream release note, and `packaging/CMakeLists.txt`
 fails the configure step until somebody does:
 
 ```
-clima: version disagreement. project() says 0.2.0, the newest <release> in
-packaging/linux/clima.metainfo.xml.in says 0.1.0.
+climat: version disagreement. project() says 0.2.0, the newest <release> in
+packaging/linux/climat.metainfo.xml.in says 0.1.0.
 ```
 
 So the review of a release PR is: read the generated changelog, then write the
-human version of it into `packaging/linux/clima.metainfo.xml.in` as a new
+human version of it into `packaging/linux/climat.metainfo.xml.in` as a new
 `<release>` block at the top of `<releases>`.
 
 That is deliberate. The `<releases>` block is what GNOME Software and KDE
@@ -51,13 +51,13 @@ the worst moment to notice it.
 
 | Artefact | Built by | State |
 |---|---|---|
-| `clima_X.Y.Z_amd64.deb` | `debian:trixie` container | verified |
-| `clima-X.Y.Z-x86_64.flatpak` | `flatpak-builder` | verified |
-| `clima-X.Y.Z-windows-x64.msi` | WiX v5 on `windows-latest` | **never run** |
-| `clima-X.Y.Z-windows-x64.zip` | `Compress-Archive` on the staged install | **never run** |
-| `clima-X.Y.Z-x86_64.AppImage` | `linuxdeploy` on `ubuntu-22.04` | **never run**, `continue-on-error` |
+| `climat_X.Y.Z_amd64.deb` | `debian:trixie` container | verified |
+| `climat-X.Y.Z-x86_64.flatpak` | `flatpak-builder` | verified |
+| `climat-X.Y.Z-windows-x64.msi` | WiX v5 on `windows-latest` | **never run** |
+| `climat-X.Y.Z-windows-x64.zip` | `Compress-Archive` on the staged install | **never run** |
+| `climat-X.Y.Z-x86_64.AppImage` | `linuxdeploy` on `ubuntu-22.04` | **never run**, `continue-on-error` |
 | `SHA256SUMS` | `sha256sum` | |
-| `clima.spdx` | `reuse spdx` | SBOM, from the SPDX headers CI already gates |
+| `climat.spdx` | `reuse spdx` | SBOM, from the SPDX headers CI already gates |
 | `THIRD-PARTY-LICENCES.txt` | `scripts/licence-bundle.sh` | |
 | `QT-SOURCE-OFFER.txt` | committed, copied | LGPLv3 obligation |
 | build provenance | `actions/attest-build-provenance` | `gh attestation verify` |
@@ -70,7 +70,7 @@ promised look identical on a release page otherwise.
 
 Two of the attachments are not optional and both are easy to drop by accident.
 
-**`THIRD-PARTY-LICENCES.txt`.** `clima` is statically linked and carries Inter,
+**`THIRD-PARTY-LICENCES.txt`.** `climat` is statically linked and carries Inter,
 the GeoNames place index and recorded ECCC, NWS and Open-Meteo payloads inside
 the executable. Five licences that are not ours, in a program that otherwise
 appears to be GPL and nothing else. Generated from `packaging/linux/copyright`
@@ -83,7 +83,7 @@ GPLv3 §6 permits pointing at a third party's server only when the recipient got
 the object code from that same server. The offer is valid three years and the
 `.deb` and Flatpak are explicitly outside it, because they convey no Qt.
 
-This is also why `cmake/ClimaCPack.cmake` defines no Windows generator. A
+This is also why `cmake/ClimatCPack.cmake` defines no Windows generator. A
 `cpack -G ZIP` would produce a Qt-bundling archive carrying neither file, from
 one command, on anybody's machine.
 
@@ -105,7 +105,7 @@ a release name, so dispatch it from a tag ref if you want it to go all the way.
 
 The manifest in `packaging/flatpak/` builds a `dir` source — this working tree
 — which is what makes `scripts/flatpak.sh build` useful on a branch. A Flathub
-submission is a **separate repository**, `flathub/io.github.JowiAoun.Clima`,
+submission is a **separate repository**, `flathub/io.github.JowiAoun.Climat`,
 whose manifest is the same file with a `git` source pinned to a tag and a
 commit. A published build has to be reproducible from something immutable.
 

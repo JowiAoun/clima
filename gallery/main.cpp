@@ -8,7 +8,7 @@
 // the weather app remembers its window size and its units. This calls it too,
 // and the rule it used to state — a developer tool has no business writing to
 // the config directory the product reads — is kept by the FILE rather than by
-// the directory: `clima-gallery.ini` sits beside `clima.ini` and nothing in
+// the directory: `climat-gallery.ini` sits beside `climat.ini` and nothing in
 // this process can reach the second one. Open the gallery at 1500x950 and the
 // app still opens where the reader left it.
 //
@@ -32,7 +32,7 @@
 #include "galleryoptions.h"
 #include "settings.h"
 
-#include "climaconfig.h"
+#include "climatconfig.h"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -42,18 +42,18 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     // The app's organisation and a name of its own, which together are what
-    // QSettings keys a file off: `<config>/Clima/clima-gallery.ini`. Sharing
+    // QSettings keys a file off: `<config>/Climat/climat-gallery.ini`. Sharing
     // the organisation is what puts it in the directory a capture redirects and
     // pins; not sharing the name is what keeps it out of the app's own file.
-    QGuiApplication::setOrganizationName(QStringLiteral("Clima"));
+    QGuiApplication::setOrganizationName(QStringLiteral("Climat"));
     QGuiApplication::setOrganizationDomain(QStringLiteral("github.io"));
-    QGuiApplication::setApplicationName(QStringLiteral("clima-gallery"));
-    QGuiApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
+    QGuiApplication::setApplicationName(QStringLiteral("climat-gallery"));
+    QGuiApplication::setApplicationVersion(QStringLiteral(CLIMAT_VERSION));
 
     // INI on every platform, before anything constructs a QSettings — the same
     // first line app/main.cpp runs, and for the same reason its header gives.
     // Without it this process would read `.conf` through NativeFormat while
-    // every other Clima binary reads `.ini`, which is a preference that appears
+    // every other Climat binary reads `.ini`, which is a preference that appears
     // to be ignored.
     Settings::prepareStorage();
 
@@ -79,9 +79,9 @@ int main(int argc, char *argv[])
     //
     // So there is no live mode here and no flag for one: the recorded Toronto
     // afternoon at its frozen clock, always, which is the same data
-    // `clima --fixture toronto` shows — so a card that looks right on the stage
+    // `climat --fixture toronto` shows — so a card that looks right on the stage
     // looks the same in the product.
-    AppEngine::instance()->configure(clima::fixtures::defaultName());
+    AppEngine::instance()->configure(climat::fixtures::defaultName());
 
     QQmlApplicationEngine engine;
 
@@ -94,9 +94,9 @@ int main(int argc, char *argv[])
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
-    // By URI. `Clima.Gallery` is this executable's own module; the components it
-    // stages come from `Clima`, which it links and which Main.qml imports.
-    engine.loadFromModule("Clima.Gallery", "Main");
+    // By URI. `Climat.Gallery` is this executable's own module; the components it
+    // stages come from `Climat`, which it links and which Main.qml imports.
+    engine.loadFromModule("Climat.Gallery", "Main");
 
     return app.exec();
 }

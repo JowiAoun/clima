@@ -21,7 +21,7 @@
             "name": "golden",
             "inherits": "dev",
             "displayName": "golden — dev, optimised, for reproducible captures",
-            "description": "What scripts/grab.sh captures from under CLIMA_PRESET=golden. Inherits dev, which keeps CLIMA_DEV_TOOLS on: the scenes worth a golden image are set up with --poke, --scroll, --sky and --metric, and none of those exist in a packaged build. RelWithDebInfo rather than Debug so the images come off the optimisation level that ships — floating-point codegen differs between the two, and a difference of one level on an antialiased edge is a failed comparison that has nothing to say about the app.",
+            "description": "What scripts/grab.sh captures from under CLIMAT_PRESET=golden. Inherits dev, which keeps CLIMAT_DEV_TOOLS on: the scenes worth a golden image are set up with --poke, --scroll, --sky and --metric, and none of those exist in a packaged build. RelWithDebInfo rather than Debug so the images come off the optimisation level that ships — floating-point codegen differs between the two, and a difference of one level on an antialiased edge is a failed comparison that has nothing to say about the app.",
             "binaryDir": "${sourceDir}/build/golden",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo"

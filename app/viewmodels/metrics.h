@@ -4,11 +4,11 @@
 // The metric registry: the tab bar and the chart are both driven from this
 // list.
 //
-// This is app/qml/Clima/metrics.js, promoted. Its header said what it would
+// This is app/qml/Climat/metrics.js, promoted. Its header said what it would
 // become:
 //
 //     "Adding a metric is a data change, not a code change — which is the
-//      point. In libclima this becomes a C++ registry populated from provider
+//      point. In libclimat this becomes a C++ registry populated from provider
 //      capabilities, so a tab only appears when the active provider actually
 //      has that variable for that location."
 //

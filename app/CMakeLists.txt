@@ -9,7 +9,7 @@
 # screenshots, and a directory split in the same breath would mean two failure
 # modes sharing one bisect.
 
-configure_file(climaconfig.h.in climaconfig.h @ONLY)
+configure_file(climatconfig.h.in climatconfig.h @ONLY)
 
 # ---- the module's files -----------------------------------------------------
 #
@@ -25,86 +25,86 @@ configure_file(climaconfig.h.in climaconfig.h @ONLY)
 #
 # scripts/check-qml-files.sh diffs this block against what is on disk, so the
 # list going stale is caught by a script rather than by an afternoon.
-set(clima_qml_files
-    qml/Clima/AlertBanner.qml
-    qml/Clima/AlertRow.qml
-    qml/Clima/AlertSheet.qml
-    qml/Clima/ChevronGlyph.qml
-    qml/Clima/Clock.qml
-    qml/Clima/CurrentConditions.qml
-    qml/Clima/DayIconBadge.qml
-    qml/Clima/DayStrip.qml
-    qml/Clima/DetailAirQualityCard.qml
-    qml/Clima/DetailCard.qml
-    qml/Clima/DetailCloudCoverCard.qml
-    qml/Clima/DetailFeelsLikeCard.qml
-    qml/Clima/DetailHumidityCard.qml
-    qml/Clima/DetailMoonCard.qml
-    qml/Clima/DetailMoonPhaseCard.qml
-    qml/Clima/DetailPrecipitationCard.qml
-    qml/Clima/DetailPressureCard.qml
-    qml/Clima/DetailSunCard.qml
-    qml/Clima/DetailTemperatureCard.qml
-    qml/Clima/DetailUvCard.qml
-    qml/Clima/DetailVisibilityCard.qml
-    qml/Clima/DetailWindCard.qml
-    qml/Clima/DropletGlyph.qml
-    qml/Clima/FeelsLikeToggle.qml
-    qml/Clima/GearGlyph.qml
-    qml/Clima/HatchPattern.qml
-    qml/Clima/HourlyList.qml
-    qml/Clima/HourlyOverview.qml
-    qml/Clima/LocationBar.qml
-    qml/Clima/Main.qml
-    qml/Clima/MapPlaceholder.qml
-    qml/Clima/MetricTabBar.qml
-    qml/Clima/MobileActivitiesCard.qml
-    qml/Clima/MobileCalendar.qml
-    qml/Clima/MobileCard.qml
-    qml/Clima/MobileCurrentWeather.qml
-    qml/Clima/MobileDailyStrip.qml
-    qml/Clima/MobileHourStrip.qml
-    qml/Clima/MobileHourlyPage.qml
-    qml/Clima/MobileMapsPage.qml
-    qml/Clima/MobileMePage.qml
-    qml/Clima/MobileMetricPicker.qml
-    qml/Clima/MobileMonthlyPage.qml
-    qml/Clima/MobilePage.qml
-    qml/Clima/MobilePollenCard.qml
-    qml/Clima/MobileShell.qml
-    qml/Clima/MobileSunMoonCard.qml
-    qml/Clima/MobileTodayPage.qml
-    qml/Clima/MobileWeekStrip.qml
-    qml/Clima/MoonGlyph.qml
-    qml/Clima/NavGlyph.qml
-    qml/Clima/PageBackdrop.qml
-    qml/Clima/PagerButton.qml
-    qml/Clima/PlacePicker.qml
-    qml/Clima/PrecipBands.qml
-    qml/Clima/PrecipField.qml
-    qml/Clima/PrecipitationStrip.qml
-    qml/Clima/PrefGeneral.qml
-    qml/Clima/PrefGroup.qml
-    qml/Clima/PrefRow.qml
-    qml/Clima/PrefSegment.qml
-    qml/Clima/PrefSwitch.qml
-    qml/Clima/PrefUnits.qml
-    qml/Clima/PreferencesSheet.qml
-    qml/Clima/SectionHeader.qml
-    qml/Clima/SeriesArea.qml
-    qml/Clima/SeverityGlyph.qml
-    qml/Clima/SeriesBars.qml
-    qml/Clima/ShellNav.qml
-    qml/Clima/SkyArc.qml
-    qml/Clima/SunEventGlyph.qml
-    qml/Clima/TabFillet.qml
-    qml/Clima/TouchTarget.qml
-    qml/Clima/Theme.qml
-    qml/Clima/TrendBadge.qml
-    qml/Clima/Viewports.qml
-    qml/Clima/WeatherDetails.qml
-    qml/Clima/WeatherGlyph.qml
-    qml/Clima/WeatherPage.qml
+set(climat_qml_files
+    qml/Climat/AlertBanner.qml
+    qml/Climat/AlertRow.qml
+    qml/Climat/AlertSheet.qml
+    qml/Climat/ChevronGlyph.qml
+    qml/Climat/Clock.qml
+    qml/Climat/CurrentConditions.qml
+    qml/Climat/DayIconBadge.qml
+    qml/Climat/DayStrip.qml
+    qml/Climat/DetailAirQualityCard.qml
+    qml/Climat/DetailCard.qml
+    qml/Climat/DetailCloudCoverCard.qml
+    qml/Climat/DetailFeelsLikeCard.qml
+    qml/Climat/DetailHumidityCard.qml
+    qml/Climat/DetailMoonCard.qml
+    qml/Climat/DetailMoonPhaseCard.qml
+    qml/Climat/DetailPrecipitationCard.qml
+    qml/Climat/DetailPressureCard.qml
+    qml/Climat/DetailSunCard.qml
+    qml/Climat/DetailTemperatureCard.qml
+    qml/Climat/DetailUvCard.qml
+    qml/Climat/DetailVisibilityCard.qml
+    qml/Climat/DetailWindCard.qml
+    qml/Climat/DropletGlyph.qml
+    qml/Climat/FeelsLikeToggle.qml
+    qml/Climat/GearGlyph.qml
+    qml/Climat/HatchPattern.qml
+    qml/Climat/HourlyList.qml
+    qml/Climat/HourlyOverview.qml
+    qml/Climat/LocationBar.qml
+    qml/Climat/Main.qml
+    qml/Climat/MapPlaceholder.qml
+    qml/Climat/MetricTabBar.qml
+    qml/Climat/MobileActivitiesCard.qml
+    qml/Climat/MobileCalendar.qml
+    qml/Climat/MobileCard.qml
+    qml/Climat/MobileCurrentWeather.qml
+    qml/Climat/MobileDailyStrip.qml
+    qml/Climat/MobileHourStrip.qml
+    qml/Climat/MobileHourlyPage.qml
+    qml/Climat/MobileMapsPage.qml
+    qml/Climat/MobileMePage.qml
+    qml/Climat/MobileMetricPicker.qml
+    qml/Climat/MobileMonthlyPage.qml
+    qml/Climat/MobilePage.qml
+    qml/Climat/MobilePollenCard.qml
+    qml/Climat/MobileShell.qml
+    qml/Climat/MobileSunMoonCard.qml
+    qml/Climat/MobileTodayPage.qml
+    qml/Climat/MobileWeekStrip.qml
+    qml/Climat/MoonGlyph.qml
+    qml/Climat/NavGlyph.qml
+    qml/Climat/PageBackdrop.qml
+    qml/Climat/PagerButton.qml
+    qml/Climat/PlacePicker.qml
+    qml/Climat/PrecipBands.qml
+    qml/Climat/PrecipField.qml
+    qml/Climat/PrecipitationStrip.qml
+    qml/Climat/PrefGeneral.qml
+    qml/Climat/PrefGroup.qml
+    qml/Climat/PrefRow.qml
+    qml/Climat/PrefSegment.qml
+    qml/Climat/PrefSwitch.qml
+    qml/Climat/PrefUnits.qml
+    qml/Climat/PreferencesSheet.qml
+    qml/Climat/SectionHeader.qml
+    qml/Climat/SeriesArea.qml
+    qml/Climat/SeverityGlyph.qml
+    qml/Climat/SeriesBars.qml
+    qml/Climat/ShellNav.qml
+    qml/Climat/SkyArc.qml
+    qml/Climat/SunEventGlyph.qml
+    qml/Climat/TabFillet.qml
+    qml/Climat/TouchTarget.qml
+    qml/Climat/Theme.qml
+    qml/Climat/TrendBadge.qml
+    qml/Climat/Viewports.qml
+    qml/Climat/WeatherDetails.qml
+    qml/Climat/WeatherGlyph.qml
+    qml/Climat/WeatherPage.qml
 )
 
 # The .js files are part of the module too, not incidental data beside it.
@@ -118,13 +118,13 @@ set(clima_qml_files
 # of which quotes the header of the file it replaced. What is left in JavaScript
 # is the four libraries that compute rather than describe: chart geometry, the
 # precipitation model, the sky phase table and the colour ramps.
-set(clima_js_files
-    qml/Clima/chartmath.js
-    qml/Clima/mobiletabs.js
-    qml/Clima/precip.js
-    qml/Clima/sky.js
-    qml/Clima/theme.js
-    qml/Clima/themelight.js
+set(climat_js_files
+    qml/Climat/chartmath.js
+    qml/Climat/mobiletabs.js
+    qml/Climat/precip.js
+    qml/Climat/sky.js
+    qml/Climat/theme.js
+    qml/Climat/themelight.js
 )
 
 # ---- singletons -------------------------------------------------------------
@@ -137,36 +137,36 @@ set(clima_js_files
 # is no build-time complaint of any kind.
 #
 # So: a file with `pragma Singleton` at the top belongs here as well as in
-# clima_qml_files. Check `build/dev/qml/Clima/qmldir` if a singleton comes back
+# climat_qml_files. Check `build/dev/qml/Climat/qmldir` if a singleton comes back
 # undefined; the word `singleton` is either on its line or it is not.
 set_source_files_properties(
-    qml/Clima/Clock.qml
-    qml/Clima/Theme.qml
-    qml/Clima/Viewports.qml
+    qml/Climat/Clock.qml
+    qml/Climat/Theme.qml
+    qml/Climat/Viewports.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 
 # ---- flattening the resource path -------------------------------------------
 #
 # qt_add_qml_module aliases each file by its path relative to *this*
-# CMakeLists.txt, so `qml/Clima/Main.qml` would land at
-# `qrc:/qt/qml/Clima/qml/Clima/Main.qml` — the directory name repeated, once
+# CMakeLists.txt, so `qml/Climat/Main.qml` would land at
+# `qrc:/qt/qml/Climat/qml/Climat/Main.qml` — the directory name repeated, once
 # from the URI and once from the source layout.
 #
 # It works, and it is wrong in two ways worth a loop to avoid. Every error
 # message and every `component.url` in a log carries the doubled path, and
 # QT_QML_OUTPUT_DIRECTORY reproduces the nesting on disk, so the module
-# directory that qmllint and qmlls are pointed at has a `qml/Clima/` inside it
-# and its qmldir entries all read `qml/Clima/Foo.qml`.
+# directory that qmllint and qmlls are pointed at has a `qml/Climat/` inside it
+# and its qmldir entries all read `qml/Climat/Foo.qml`.
 #
 # Aliasing each file to its bare name puts the module where its URI says it is.
 # gallery/CMakeLists.txt does the same thing for the same reason, and the two
 # together are what make `../theme.js` mean what it says from inside
-# Clima.Gallery.
-foreach(clima_file IN LISTS clima_qml_files clima_js_files)
-    get_filename_component(clima_file_name "${clima_file}" NAME)
-    set_source_files_properties("${clima_file}"
-        PROPERTIES QT_RESOURCE_ALIAS "${clima_file_name}")
+# Climat.Gallery.
+foreach(climat_file IN LISTS climat_qml_files climat_js_files)
+    get_filename_component(climat_file_name "${climat_file}" NAME)
+    set_source_files_properties("${climat_file}"
+        PROPERTIES QT_RESOURCE_ALIAS "${climat_file_name}")
 endforeach()
 
 # ---- the module is a library ------------------------------------------------
@@ -174,14 +174,14 @@ endforeach()
 # Not a module baked straight into the executable, which is what this was until
 # the gallery moved out. The reason is one directory over: `gallery/` builds a
 # second executable whose entire job is to instantiate the types below, and a
-# QML module that lives inside `clima` is a module only `clima` can import.
+# QML module that lives inside `climat` is a module only `climat` can import.
 #
 # STATIC rather than SHARED. There is one repository, one release, and two
 # consumers that are always built together; a .so would buy nothing here but an
 # RPATH to get wrong and a second file for a packager to place. Note that this
 # is about *our* code — Qt itself is still linked dynamically, which is not a
 # preference but LGPLv3 (risk R3, docs/08-risks.md).
-qt_add_library(climaqml STATIC)
+qt_add_library(climatqml STATIC)
 
 # ---- the C++ that QML can see -----------------------------------------------
 #
@@ -192,10 +192,10 @@ qt_add_library(climaqml STATIC)
 # names the QML file that used it.
 #
 # screenshotcontroller is here unconditionally even though most of what it does
-# is CLIMA_DEV_TOOLS-only. `--grab` ships — the issue template says "attach
-# `clima --grab bug.png`" — so the file that implements it has to ship too, and
+# is CLIMAT_DEV_TOOLS-only. `--grab` ships — the issue template says "attach
+# `climat --grab bug.png`" — so the file that implements it has to ship too, and
 # the rest of it is compiled out from the inside. See its header.
-set(clima_cpp_sources
+set(climat_cpp_sources
     appfont.h
     appfont.cpp
     apptranslator.h
@@ -210,7 +210,7 @@ set(clima_cpp_sources
     # ---- the view models ----------------------------------------------------
     #
     # docs/04-architecture.md §4.2's middle layer, arrived. `Engine` owns
-    # libclima and the offline-first loop; `Data` and `Detail` are the two
+    # libclimat and the offline-first loop; `Data` and `Detail` are the two
     # shapes the QML already reads, which is why almost no QML file changed
     # when live data landed; `Units` is the one place a conversion factor is
     # written down and `Metrics` is the registry that used to be metrics.js.
@@ -266,42 +266,42 @@ set(clima_cpp_sources
 # RESOURCES rather than QML_FILES. QML_FILES runs its arguments through
 # qmlcachegen, which has opinions about what a .qml or .js file contains and
 # none about a TTF; RESOURCES embeds bytes. They land at
-# `:/qt/qml/Clima/fonts/…` — the module prefix plus the path relative to this
+# `:/qt/qml/Climat/fonts/…` — the module prefix plus the path relative to this
 # file — and app/appfont.cpp opens them there. Not flattened by the loop above,
 # because that loop exists to make the module directory match its URI for
 # qmllint's benefit, and a font is not a QML type.
 #
-# On climaqml, not on `clima`, so that the gallery gets the same bytes from the
+# On climatqml, not on `climat`, so that the gallery gets the same bytes from the
 # same place. Reviewing a component in a typeface the app does not use is
 # reviewing something else.
-set(clima_font_files
+set(climat_font_files
     fonts/Inter-Regular.ttf
     fonts/Inter-Bold.ttf
 )
 
-qt_add_qml_module(climaqml
-    URI Clima
+qt_add_qml_module(climatqml
+    URI Climat
     VERSION 1.0
     QML_FILES
-        ${clima_qml_files}
-        ${clima_js_files}
+        ${climat_qml_files}
+        ${climat_js_files}
     RESOURCES
-        ${clima_font_files}
+        ${climat_font_files}
     SOURCES
-        ${clima_cpp_sources}
+        ${climat_cpp_sources}
 )
 
 # PUBLIC, all three, and each for its own reason.
 #
-# The binary dir is where configure_file put climaconfig.h, and both executables
+# The binary dir is where configure_file put climatconfig.h, and both executables
 # print the version it carries. The source dir is what lets the gallery reuse
 # AppOptions' viewport and sky vocabularies rather than keeping a second copy of
 # two lists that must not disagree. The devtools dir is for a file nobody
-# writes: qmltyperegistrar generates clima_qmltyperegistrations.cpp with an
+# writes: qmltyperegistrar generates climat_qmltyperegistrations.cpp with an
 # `#include <screenshotcontroller.h>` — basename only, no directory — so every
 # directory holding a QML_ELEMENT header has to be reachable that way or the
 # generated file names a type that "was not declared in this scope".
-target_include_directories(climaqml PUBLIC
+target_include_directories(climatqml PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/devtools
@@ -317,15 +317,15 @@ target_include_directories(climaqml PUBLIC
 # PUBLIC because it changes the shape of ScreenshotController — a member the
 # library was compiled with and a consumer was not is an ODR violation that
 # links cleanly and corrupts memory at runtime.
-if(CLIMA_DEV_TOOLS)
-    target_compile_definitions(climaqml PUBLIC CLIMA_DEV_TOOLS)
+if(CLIMAT_DEV_TOOLS)
+    target_compile_definitions(climatqml PUBLIC CLIMAT_DEV_TOOLS)
 endif()
 
 # Qt6::Quick and nothing else, because QtQuick and QtQuick.Shapes are the only
 # two modules the QML imports (QtQuick.Window ships inside Quick) and both come
 # from this one target. Adding a component "in case" is how a banned module
-# arrives — see cmake/ClimaLicenceGuard.cmake.
-target_link_libraries(climaqml PUBLIC Qt6::Quick)
+# arrives — see cmake/ClimatLicenceGuard.cmake.
+target_link_libraries(climatqml PUBLIC Qt6::Quick)
 
 # The portal, when there is one to talk to. PRIVATE and guarded by a compile
 # definition rather than by a stub file: SystemAppearance is one class whose
@@ -334,8 +334,8 @@ target_link_libraries(climaqml PUBLIC Qt6::Quick)
 # them. Without this the class still exists, still answers, and still floors at
 # dark — it just stops hearing about changes.
 if(TARGET Qt6::DBus)
-    target_link_libraries(climaqml PRIVATE Qt6::DBus)
-    target_compile_definitions(climaqml PRIVATE CLIMA_HAVE_DBUS)
+    target_link_libraries(climatqml PRIVATE Qt6::DBus)
+    target_compile_definitions(climatqml PRIVATE CLIMAT_HAVE_DBUS)
 endif()
 
 # The engine. Nothing in app/ calls into it yet — the view models that will are
@@ -343,38 +343,38 @@ endif()
 # link line rather than about the code.
 #
 # The first is that the direction of the dependency is the architecture. app/
-# may include libclima's headers; libclima may not include app's, and the CMake
+# may include libclimat's headers; libclimat may not include app's, and the CMake
 # graph is where that is stated. Declaring it on the day the library appears
 # means the first view model is a `#include` rather than a build-system change
 # reviewed at the same time as a feature.
 #
 # The second is that it costs nothing to be wrong about. A static archive
-# contributes only the objects something references, so an unused libclima adds
-# no bytes to `clima`; measured before and after this line, the stripped binary
+# contributes only the objects something references, so an unused libclimat adds
+# no bytes to `climat`; measured before and after this line, the stripped binary
 # moved by 0 bytes against the <15 MB budget in docs/03-tech-stack.md §3.4. What
 # it does add is libQt6Sql.so.6 to the app's DT_NEEDED list — Qt6::Network was
 # already there, arriving through QtQml — which is a runtime dependency a
 # packager has to satisfy, and which the app genuinely will need.
 #
 # PUBLIC so that both the QML module's C++ and main.cpp can reach it. It is not
-# a QML-visible dependency: libclima declares no QML types and never will, which
-# is the same GUI-free promise cmake/ClimaEngineGuard.cmake enforces.
-target_link_libraries(climaqml PUBLIC libclima)
+# a QML-visible dependency: libclimat declares no QML types and never will, which
+# is the same GUI-free promise cmake/ClimatEngineGuard.cmake enforces.
+target_link_libraries(climatqml PUBLIC libclimat)
 
-clima_guard_target(climaqml)
+climat_guard_target(climatqml)
 
 # ---- the executable ---------------------------------------------------------
 #
 # Both targets, and neither is redundant. qt_add_qml_module generates
-# `climaqmlplugin` beside the backing library, and the plugin is what registers
-# the module with the engine — link only `climaqml` and the app builds, links,
-# and comes up against an engine that has never heard of `Clima`. But the plugin
+# `climatqmlplugin` beside the backing library, and the plugin is what registers
+# the module with the engine — link only `climatqml` and the app builds, links,
+# and comes up against an engine that has never heard of `Climat`. But the plugin
 # links its backing library privately, so its usage requirements — Qt6::Quick,
 # and the three include directories below — stop there. Link only the plugin and
 # main.cpp cannot find <QQmlEngine>.
 # ---- translations -----------------------------------------------------------
 #
-# `app/translations/clima.ts` is the SOURCE catalogue — every translatable
+# `app/translations/climat.ts` is the SOURCE catalogue — every translatable
 # string, no translations — kept current by scripts/i18n.sh and gated in CI. It
 # is deliberately NOT in the list below: compiling it would embed a catalogue
 # that translates English into English.
@@ -388,28 +388,28 @@ clima_guard_target(climaqml)
 # Listed one by one rather than globbed, for the reason the QML list above
 # gives at length: a glob goes stale silently, and here it would go stale in the
 # direction of shipping a half-finished catalogue somebody left in the tree.
-set(clima_translations
-    # app/translations/clima_fr.ts
+set(climat_translations
+    # app/translations/climat_fr.ts
 )
 
 # LinguistTools is optional in the same way Qt Positioning and Qt D-Bus are: a
 # packager building from a distribution's Qt may not have `lrelease`, and a
 # missing translation is a build that speaks English rather than a build that
 # fails. It is QUIET for that reason, and the message says what was lost.
-if(clima_translations)
+if(climat_translations)
     find_package(Qt6 6.8 QUIET COMPONENTS LinguistTools)
 
     if(TARGET Qt6::lrelease)
         # RESOURCE_PREFIX is where apptranslator.cpp looks. Stated rather than
         # left to the default, because the two have to agree and only one of
         # them is in this file.
-        qt_add_translations(climaqml
-            TS_FILES ${clima_translations}
+        qt_add_translations(climatqml
+            TS_FILES ${climat_translations}
             RESOURCE_PREFIX "/i18n"
         )
     else()
         message(STATUS
-            "clima: Qt LinguistTools was not found, so the translations are not compiled "
+            "climat: Qt LinguistTools was not found, so the translations are not compiled "
             "in and the app speaks its source language. Everything else works.")
     endif()
 endif()
@@ -418,40 +418,40 @@ endif()
 #
 # Compiled into the executable, so it has to be decided before the target is
 # declared rather than added to it afterwards. It carries the icon and the
-# version block — see packaging/windows/clima.rc.in for why an executable needs
+# version block — see packaging/windows/climat.rc.in for why an executable needs
 # its own icon even after an installer has made a shortcut with one.
 #
 # VERSIONINFO's FILEVERSION field is four comma-separated numbers and nothing
 # else; a dotted string there is a syntax error in rc.exe. The fourth is the
 # build number, which we do not have and which is conventionally 0.
 if(WIN32)
-    string(REPLACE "." "," CLIMA_VERSION_RC "${PROJECT_VERSION}")
-    set(CLIMA_VERSION_RC "${CLIMA_VERSION_RC},0")
+    string(REPLACE "." "," CLIMAT_VERSION_RC "${PROJECT_VERSION}")
+    set(CLIMAT_VERSION_RC "${CLIMAT_VERSION_RC},0")
 
     # An absolute path with forward slashes. rc.exe treats a backslash inside a
     # quoted string as an escape, so a Windows-style path here fails to find a
     # file whose name it has just mangled.
-    set(CLIMA_ICON_FILE "${CMAKE_SOURCE_DIR}/packaging/icons/clima.ico")
+    set(CLIMAT_ICON_FILE "${CMAKE_SOURCE_DIR}/packaging/icons/climat.ico")
 
     configure_file(
-        ${CMAKE_SOURCE_DIR}/packaging/windows/clima.rc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/clima.rc
+        ${CMAKE_SOURCE_DIR}/packaging/windows/climat.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/climat.rc
         @ONLY
     )
 
-    set(clima_windows_resources ${CMAKE_CURRENT_BINARY_DIR}/clima.rc)
+    set(climat_windows_resources ${CMAKE_CURRENT_BINARY_DIR}/climat.rc)
 endif()
 
-qt_add_executable(clima
+qt_add_executable(climat
     main.cpp
-    ${clima_windows_resources}
+    ${climat_windows_resources}
 )
 
-target_link_libraries(clima PRIVATE climaqml climaqmlplugin)
+target_link_libraries(climat PRIVATE climatqml climatqmlplugin)
 
-clima_guard_target(clima)
+climat_guard_target(climat)
 
-set_target_properties(clima PROPERTIES
+set_target_properties(climat PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
@@ -460,7 +460,7 @@ set_target_properties(clima PROPERTIES
 #
 # One executable, and that really is the whole payload. Every QML file, every JS
 # file and both Inter faces are compiled into it — qt_add_qml_module builds
-# `climaqml` as a static library carrying its QML in a resource — so there is no
+# `climatqml` as a static library carrying its QML in a resource — so there is no
 # module directory to install, no qmldir to ship and no QML_IMPORT_PATH to set
 # at run time. The data files that do get installed are the desktop entry, the
 # AppStream component and the icons, and those are packaging/'s business.
@@ -472,7 +472,7 @@ set_target_properties(clima PROPERTIES
 # to take, and windeployqt handles it — see packaging/windows/.
 include(GNUInstallDirs)
 
-install(TARGETS clima
+install(TARGETS climat
     BUNDLE  DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
@@ -490,11 +490,11 @@ install(TARGETS clima
 # as a launch item.
 if(WIN32)
     qt_generate_deploy_qml_app_script(
-        TARGET clima
-        OUTPUT_SCRIPT clima_deploy_script
+        TARGET climat
+        OUTPUT_SCRIPT climat_deploy_script
         NO_TRANSLATIONS
     )
-    install(SCRIPT ${clima_deploy_script})
+    install(SCRIPT ${climat_deploy_script})
 endif()
 
 # ---- Android ----------------------------------------------------------------
@@ -513,14 +513,14 @@ endif()
 # names; treat the first `qt-cmake` run against it as the test it has not had.
 # See docs/known-gaps.md.
 if(ANDROID)
-    set_target_properties(clima PROPERTIES
-        # `io.github.JowiAoun.Clima`, which is a legal Java package name — the
+    set_target_properties(climat PROPERTIES
+        # `io.github.JowiAoun.Climat`, which is a legal Java package name — the
         # segments start with a letter and contain only letters and digits —
         # even though the capitals are unconventional. One id, everywhere: the
         # same string names the .desktop file, the AppStream component, the
         # D-Bus name and the QSettings organisation.
-        QT_ANDROID_PACKAGE_NAME "${CLIMA_APP_ID}"
-        QT_ANDROID_APP_NAME "Clima"
+        QT_ANDROID_PACKAGE_NAME "${CLIMAT_APP_ID}"
+        QT_ANDROID_APP_NAME "Climat"
 
         # 28 is Android 9, which is where `QSettings` at AppDataLocation, TLS
         # 1.3 and the scoped-storage rules the cache relies on all settle. 35 is
@@ -536,6 +536,6 @@ if(ANDROID)
     # street — asking for a precision the product has no use for is how a
     # no-account, no-telemetry weather app ends up looking like every other
     # weather app.
-    qt_add_android_permission(clima NAME android.permission.INTERNET)
-    qt_add_android_permission(clima NAME android.permission.ACCESS_COARSE_LOCATION)
+    qt_add_android_permission(climat NAME android.permission.INTERNET)
+    qt_add_android_permission(climat NAME android.permission.ACCESS_COARSE_LOCATION)
 endif()

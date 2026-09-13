@@ -24,10 +24,10 @@
 //   * `applySystem` must refuse a name it does not know. Five preferences
 //     written from a typo is a reader reset to Celsius with nothing to undo it.
 //
-// ---- why it links climaqml ---------------------------------------------------
+// ---- why it links climatqml ---------------------------------------------------
 //
-// Same reason tst_conditionsdata does: its subject is app/, not libclima.
-// `clima_forbid_gui()` is deliberately not applied, which the function in
+// Same reason tst_conditionsdata does: its subject is app/, not libclimat.
+// `climat_forbid_gui()` is deliberately not applied, which the function in
 // tests/CMakeLists.txt cannot express — so this is registered by hand there.
 #include "settings.h"
 #include "units.h"

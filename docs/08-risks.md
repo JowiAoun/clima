@@ -13,7 +13,7 @@ Severity = impact × likelihood if unmitigated.
 | R2 | **Accidental GPLv3 lock-in** — a casual `find_package(Qt6 Charts)` or Qt Lottie import silently forces the whole app to GPLv3 and permanently kills the iOS path | 🔴 High | D3/D10 forbid those modules; add a CI check that fails the build if any GPL-only Qt module appears in the link line |
 | R3 | **LGPLv3 non-compliance** — no Qt corresponding-source offer, no relink info, static linking | 🔴 High | Dynamic linking enforced; release job generates the licence bundle and source offer; `reuse lint` in CI from M0 |
 | R4 | **Scope explosion** — 38 weeks of plan, one developer, and radar/alerts/models each look like a whole product | 🔴 High | Every milestone ships a usable artefact; the parity matrix (§5) is the contract for what is *out* of scope; differentiators deferred to M5, not chased early |
-| R5 | **Open-Meteo non-commercial terms** — if Clima ever takes donations-with-perks, sponsorship, or a paid tier, the free API licence no longer applies | 🟠 Med | Keep the app strictly free and ad-free; if that changes, either buy the commercial API tier or self-host (§2.8, ~50 GB selective / 500 GB+ global) |
+| R5 | **Open-Meteo non-commercial terms** — if Climat ever takes donations-with-perks, sponsorship, or a paid tier, the free API licence no longer applies | 🟠 Med | Keep the app strictly free and ad-free; if that changes, either buy the commercial API tier or self-host (§2.8, ~50 GB selective / 500 GB+ global) |
 | R6 | **Alerts coverage is thin outside US/EU/CA** — MeteoAlarm's REST portal appears aimed at member services, and other countries need per-issuer CAP endpoints | 🟠 Med | Verify MeteoAlarm third-party terms before M4; use the WMO SWIC source list to expand; be honest in-app about coverage rather than silently showing nothing |
 | R7 | **MapLibre Native Qt integration friction** — GL/RHI interop, Wayland, fractional scaling, no distro packaging | 🟠 Med | Vendor it via FetchContent; Supercell Wx is the working precedent to study; spike this in M0 for one day before committing to the M3 estimate |
 | R8 | **Qt version fragmentation** — floor at 6.8 costs us animated SVG (6.10) and the 6.11 GPU 2D work | 🟡 Low | Feature-guard newer APIs; Flatpak is primary so most users get modern Qt anyway |
@@ -28,20 +28,20 @@ These four are cheap to answer now and expensive to change later. M0 is blocked 
 Q3.
 
 ### Q1 — Licence split
-Recommendation (D6): **`libclima` MPL-2.0 + `clima` app GPL-3.0-or-later**, DCO sign-off, no
+Recommendation (D6): **`libclimat` MPL-2.0 + `climat` app GPL-3.0-or-later**, DCO sign-off, no
 CLA. This mirrors Vremenar and keeps a future iOS/App Store build legally possible.
 The alternatives are all-GPL-3.0-or-later (simpler, closes App Store forever) or
 all-Apache-2.0 (maximally permissive, allows proprietary forks).
 
 ### Q2 — Project identity
-"Clima" is the repo name; is it the product name? It is a common word, which makes search
+"Climat" is the repo name; is it the product name? It is a common word, which makes search
 discovery and a trademark position weak, and there are existing projects using it.
 Worth deciding before the AppStream ID and domain are minted.
 
 ### Q3 — App ID and domain
 The AppStream/Flatpak/D-Bus ID must be a namespace you control, and it is baked into the
-settings path — changing it later loses users' saved locations. Options: `app.clima.Clima`
-(needs the domain), or `io.github.<your-user>.Clima` (works immediately, harder to rebrand).
+settings path — changing it later loses users' saved locations. Options: `app.climat.Climat`
+(needs the domain), or `io.github.<your-user>.Climat` (works immediately, harder to rebrand).
 
 ### Q4 — macOS signing budget
 A notarised DMG needs an Apple Developer ID at $99/year. Without it, macOS users get a
@@ -63,5 +63,5 @@ Flagged so nobody quotes them as fact:
 | Supercell Wx licence = MIT | Believed; confirm from the repo's LICENSE |
 | MeteoAlarm's terms for third-party (non-member) API/feed consumers | **Unresolved — blocks M4 planning confidence** |
 | Whether Open-Meteo's free-tier limits are per-IP (assumed) rather than per-app | Assumed; matters for §2.8's "no backend needed" conclusion |
-| Reverse geocoding strategy (Nominatim policy vs. bundled offline data) | **Resolved — offline.** Nominatim answered HTTP 403 to the first request from a properly identified client, tested 2026-07-31. Clima bundles a packed GeoNames `cities15000` index instead (`tools/geonames/`, 412 KiB) |
+| Reverse geocoding strategy (Nominatim policy vs. bundled offline data) | **Resolved — offline.** Nominatim answered HTTP 403 to the first request from a properly identified client, tested 2026-07-31. Climat bundles a packed GeoNames `cities15000` index instead (`tools/geonames/`, 412 KiB) |
 | Exact Flathub `org.kde.Platform` Qt version at our M7 date | Moves; recheck before freezing the Qt floor |

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Design tokens for the hourly overview prototype.
-// These become the real Clima design system later; keep them in one place so the
+// These become the real Climat design system later; keep them in one place so the
 // whole chart can be re-skinned without touching layout code.
 .pragma library
 

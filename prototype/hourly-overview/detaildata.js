@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Current-conditions data for the weather-detail cards.
 //
-// Stand-in for the provider, shaped the way `libclima` will return it: plain
+// Stand-in for the provider, shaped the way `libclimat` will return it: plain
 // values plus the short series a card needs to draw a trend. No formatting
 // decisions — units, rounding and wording belong to the card.
 //

@@ -10,7 +10,7 @@
 // nobody drags to on purpose.
 import QtQuick
 import QtTest
-import Clima
+import Climat
 
 TestCase {
     name: "Viewports"

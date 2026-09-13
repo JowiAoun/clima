@@ -6,7 +6,7 @@
 #include "app/platform/notifier.h"
 #include "app/settings.h"
 #include "app/viewmodels/timeformat.h"
-#include "libclima/core/clock.h"
+#include "libclimat/core/clock.h"
 
 #include <QLocale>
 #include <QSet>
@@ -15,10 +15,10 @@
 
 #if __has_include(<QNetworkInformation>)
 #    include <QNetworkInformation>
-#    define CLIMA_HAVE_NETWORK_INFORMATION 1
+#    define CLIMAT_HAVE_NETWORK_INFORMATION 1
 #endif
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -79,7 +79,7 @@ QString stamp(const QDateTime &instant, const QDateTime &now, const QLocale &loc
 
 bool metered()
 {
-#ifdef CLIMA_HAVE_NETWORK_INFORMATION
+#ifdef CLIMAT_HAVE_NETWORK_INFORMATION
     // Best effort, and never loaded on our behalf. QNetworkInformation has no
     // backend on some platforms and none at all in a headless run, and the
     // honest answer there is "assume not metered": being wrong costs one extra
@@ -174,7 +174,7 @@ QDateTime AlertsData::now() const
     // clockless model shows nothing at all — which is wrong in the direction
     // that is visible, and says so on stderr.
     if (m_clock == nullptr) {
-        qWarning("clima: the alert model has no clock; no alert can be displayed");
+        qWarning("climat: the alert model has no clock; no alert can be displayed");
         return {};
     }
     return m_clock->now();

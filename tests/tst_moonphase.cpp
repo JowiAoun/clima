@@ -22,7 +22,7 @@
 // negative, and a bracket test written on the difference reads that gap as
 // containing 0.5. It does not — the moon is dark in the middle of it.
 
-#include "libclima/domain/forecast.h"
+#include "libclimat/domain/forecast.h"
 
 #include <QDate>
 #include <QTest>
@@ -30,7 +30,7 @@
 #include <cmath>
 #include <utility>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 

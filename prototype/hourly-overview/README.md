@@ -202,7 +202,7 @@ nobody ever sees them.
 store, and wires up the environment those builds need. Overrides:
 
 ```sh
-CLIMA_QML=/path/to/qml ./run.sh     # a specific Qt
+CLIMAT_QML=/path/to/qml ./run.sh     # a specific Qt
 QT_QPA_PLATFORM=xcb ./run.sh        # force X11 if Wayland misbehaves
 ```
 
@@ -400,7 +400,7 @@ first — and the four extras — live in the gallery, under *Precipitation wash
 ## Data
 
 `mockdata.js` stands in for the Open-Meteo provider, and its shape mirrors what
-`libclima`'s forecast provider will return: parallel per-hour arrays plus derived
+`libclimat`'s forecast provider will return: parallel per-hour arrays plus derived
 helpers, with no formatting decisions baked in.
 
 Temperature is hand-tuned so the labelled hours match the MSN reference exactly

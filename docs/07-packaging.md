@@ -14,7 +14,7 @@ corresponding Qt source or a written offer from infrastructure we control**.
 |---|---|---|---|---|
 | **Linux** | **Flathub** | **P0** | `org.kde.Platform` runtime, branch **6.11** | Primary channel. We control the Qt version, so users get modern Qt regardless of distro. `org.kde.Sdk` to build. **There is no 6.8 branch** — see §7.6. |
 | Linux | AppImage | P1 | Bundled, dynamic, with relink info | For distros/users that avoid Flatpak; must bundle Qt + relink instructions. **Never built** — `docs/known-gaps.md`. |
-| Linux | AUR (`clima`, `clima-git`) | P1 | System Qt | Arch users are early adopters and vocal |
+| Linux | AUR (`climat`, `climat-git`) | P1 | System Qt | Arch users are early adopters and vocal |
 | Linux | Fedora COPR → Fedora | P2 | System Qt | Needs a `.spec`; system-library build (D8) makes this feasible |
 | Linux | Debian/Ubuntu PPA → Debian | P2 | System Qt | Debian 13 ships Qt 6.8, which is why 6.8 is our floor |
 | Linux | openSUSE OBS, nixpkgs | P3 | System Qt | Community-driven |
@@ -52,7 +52,7 @@ corresponding Qt source or a written offer from infrastructure we control**.
   already permits `org.freedesktop.portal.*`, so declaring it states a permission that was
   granted anyway — verified by `SystemAppearance` reading the colour scheme over the
   portal inside the sandbox today with nothing declared. `packaging/flatpak/` carries no
-  `--talk-name` at all. **Done:** `libclima/places/portallocator.h` is a second locator
+  `--talk-name` at all. **Done:** `libclimat/places/portallocator.h` is a second locator
   behind the same interface, speaking `org.freedesktop.portal.Location`, and
   `DeviceLocator::create()` picks it first inside a sandbox — the reader gets their own
   desktop's dialog, once, and the app gets a fix. Nothing else needs location: *reverse*

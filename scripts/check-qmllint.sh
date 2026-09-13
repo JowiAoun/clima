@@ -7,7 +7,7 @@
 #   scripts/check-qmllint.sh            fail if any category got worse
 #   scripts/check-qmllint.sh --accept   record the current counts
 #
-# CLIMA_BUILD_DIR selects the build; it defaults to build/dev.
+# CLIMAT_BUILD_DIR selects the build; it defaults to build/dev.
 #
 # ---- why a ratchet ----------------------------------------------------------
 #
@@ -42,7 +42,7 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "$here/.." && pwd)"
 
-build_dir="${CLIMA_BUILD_DIR:-$root/build/dev}"
+build_dir="${CLIMAT_BUILD_DIR:-$root/build/dev}"
 baseline="$root/tests/qmllint-baseline"
 accept=0
 
@@ -54,7 +54,7 @@ elif [[ $# -gt 0 ]]; then
 fi
 
 if [[ ! -d "$build_dir" ]]; then
-    echo "check-qmllint: $build_dir is not there. Configure first, or set CLIMA_BUILD_DIR." >&2
+    echo "check-qmllint: $build_dir is not there. Configure first, or set CLIMAT_BUILD_DIR." >&2
     exit 2
 fi
 

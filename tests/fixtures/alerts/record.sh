@@ -28,8 +28,8 @@ out="${1:-$(dirname "$0")}"
 mkdir -p "$out/eccc" "$out/nws"
 
 # The same shape HttpClient sends. api.weather.gov answers 403 to an empty
-# User-Agent — see libclima/net/httpclient.h — so this is not decoration.
-ua='Clima/0.1.0 (+https://github.com/JowiAoun/clima; recording test fixtures)'
+# User-Agent — see libclimat/net/httpclient.h — so this is not decoration.
+ua='Climat/0.1.0 (+https://github.com/JowiAoun/climat; recording test fixtures)'
 
 eccc='https://api.weather.gc.ca/collections/weather-alerts/items'
 nws='https://api.weather.gov/alerts/active'

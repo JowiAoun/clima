@@ -13,7 +13,7 @@ taste — one of them gets rejected by Flathub's linter, and another one fails C
 |---|---|---|---|
 | **golden** | `scripts/golden.sh` | raw, exact, 50 scenes | byte for byte, every commit |
 | **showcase** | `scripts/shots.sh` | device bezels, composed | byte for byte, every commit |
-| **store** | `clima --grab` | raw, un-bezelled, whole window | not compared |
+| **store** | `climat --grab` | raw, un-bezelled, whole window | not compared |
 
 ## golden — the regression detector
 
@@ -51,7 +51,7 @@ inside `DeviceFrame` bezels, on the app's own page gradient — so a README imag
 cannot show a layout the app does not produce. Change a breakpoint and the
 images move; CI notices.
 
-The catalogue is `gallery/qml/Clima/Gallery/shots.js`, and it carries no pixel
+The catalogue is `gallery/qml/Climat/Gallery/shots.js`, and it carries no pixel
 dimensions. A sheet says which devices it shows and how far they are zoomed; the
 size comes from `Viewports` at build time. A `.pragma library` cannot reach a
 QML singleton, which is a limitation worth keeping — it is what stops the
@@ -67,9 +67,9 @@ and then `scripts/shots.sh` picks it up automatically.
 Raw grabs from the app itself, with no frame around them:
 
 ```sh
-clima --viewport desktop --scheme dark  --grab desktop-dark.png
-clima --viewport desktop --scheme light --grab desktop-light.png
-clima --viewport mobile  --tab monthly  --grab mobile-daily.png
+climat --viewport desktop --scheme dark  --grab desktop-dark.png
+climat --viewport desktop --scheme light --grab desktop-light.png
+climat --viewport mobile  --tab monthly  --grab mobile-daily.png
 ```
 
 **Do not use the showcase images here.** Flathub's linter reads a marketing
@@ -80,7 +80,7 @@ else.
 They are published to `gh-pages` by the release workflow rather than committed,
 because AppStream wants stable absolute URLs and a `raw.githubusercontent` link
 moves with the branch. The URLs are declared in
-`packaging/linux/clima.metainfo.xml.in`.
+`packaging/linux/climat.metainfo.xml.in`.
 
 ## Determinism, for all three
 

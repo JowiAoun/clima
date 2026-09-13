@@ -3,7 +3,7 @@
 
 #include "units.h"
 
-#include "libclima/domain/units.h"
+#include "libclimat/domain/units.h"
 
 #include "settings.h"
 
@@ -17,24 +17,24 @@ QVariantMap choice(const QString &id, const QString &label)
     return QVariantMap{ { QStringLiteral("id"), id }, { QStringLiteral("label"), label } };
 }
 
-// The arithmetic lives in libclima/domain/units.h now — the factors, the
-// symbols, the decimals and the two presets — because clima-cli prints a
+// The arithmetic lives in libclimat/domain/units.h now — the factors, the
+// symbols, the decimals and the two presets — because climat-cli prints a
 // temperature and links no QML engine. This class is what is left: the
 // reader's CHOICE, read from Settings and pushed into those functions, and
 // the QML-facing shape of the result.
-clima::units::Quantity bridged(Units::Quantity quantity)
+climat::units::Quantity bridged(Units::Quantity quantity)
 {
     switch (quantity) {
-    case Units::Quantity::Temperature:   return clima::units::Quantity::Temperature;
-    case Units::Quantity::Wind:          return clima::units::Quantity::Wind;
-    case Units::Quantity::Pressure:      return clima::units::Quantity::Pressure;
-    case Units::Quantity::Visibility:    return clima::units::Quantity::Visibility;
-    case Units::Quantity::Precipitation: return clima::units::Quantity::Precipitation;
-    case Units::Quantity::Percentage:    return clima::units::Quantity::Percentage;
-    case Units::Quantity::Direction:     return clima::units::Quantity::Direction;
+    case Units::Quantity::Temperature:   return climat::units::Quantity::Temperature;
+    case Units::Quantity::Wind:          return climat::units::Quantity::Wind;
+    case Units::Quantity::Pressure:      return climat::units::Quantity::Pressure;
+    case Units::Quantity::Visibility:    return climat::units::Quantity::Visibility;
+    case Units::Quantity::Precipitation: return climat::units::Quantity::Precipitation;
+    case Units::Quantity::Percentage:    return climat::units::Quantity::Percentage;
+    case Units::Quantity::Direction:     return climat::units::Quantity::Direction;
     case Units::Quantity::None:          break;
     }
-    return clima::units::Quantity::None;
+    return climat::units::Quantity::None;
 }
 
 } // namespace
@@ -70,7 +70,7 @@ Settings *Units::settings() const
 }
 
 // Which unit the reader chose for a quantity — the one thing this class knows
-// that libclima/domain/units.h does not.
+// that libclimat/domain/units.h does not.
 QString Units::unitFor(Quantity quantity) const
 {
     switch (quantity) {
@@ -101,19 +101,19 @@ QString Units::precipitationUnit() const { return settings()->precipitationUnit(
 
 double Units::convert(Quantity quantity, double canonical) const
 {
-    return clima::units::convert(bridged(quantity), unitFor(quantity), canonical);
+    return climat::units::convert(bridged(quantity), unitFor(quantity), canonical);
 }
 
 double Units::toCanonical(Quantity quantity, double display) const
 {
-    return clima::units::toCanonical(bridged(quantity), unitFor(quantity), display);
+    return climat::units::toCanonical(bridged(quantity), unitFor(quantity), display);
 }
 
 // ---- what it is called ----------------------------------------------------------
 
 QString Units::bareSymbol(Quantity quantity) const
 {
-    return clima::units::symbol(bridged(quantity), unitFor(quantity));
+    return climat::units::symbol(bridged(quantity), unitFor(quantity));
 }
 
 QString Units::symbol(Quantity quantity) const
@@ -136,7 +136,7 @@ QString Units::symbol(Quantity quantity) const
 
 int Units::decimals(Quantity quantity) const
 {
-    return clima::units::decimals(bridged(quantity), unitFor(quantity));
+    return climat::units::decimals(bridged(quantity), unitFor(quantity));
 }
 
 QString Units::format(Quantity quantity, double canonical) const
@@ -233,15 +233,15 @@ QVariantList Units::choicesFor(Quantity quantity) const
 
 QString Units::system() const
 {
-    return clima::units::presetFor(temperatureUnit(), windUnit(), pressureUnit(),
+    return climat::units::presetFor(temperatureUnit(), windUnit(), pressureUnit(),
                                    visibilityUnit(), precipitationUnit());
 }
 
 void Units::applySystem(const QString &system)
 {
-    const clima::units::Preset *preset =
-        system == QLatin1String("metric")     ? &clima::units::metric()
-        : system == QLatin1String("imperial") ? &clima::units::imperial()
+    const climat::units::Preset *preset =
+        system == QLatin1String("metric")     ? &climat::units::metric()
+        : system == QLatin1String("imperial") ? &climat::units::imperial()
                                               : nullptr;
     if (preset == nullptr) {
         qWarning("units: %s is not a unit system", qPrintable(system));

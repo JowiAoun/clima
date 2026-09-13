@@ -10,7 +10,7 @@
 // Three reasons, in the order they bite:
 //
 //   1. **SQLite has one writer.** Six widgets, a tray and the app is eight
-//      processes opening the same database. libclima's cache would survive it
+//      processes opening the same database. libclimat's cache would survive it
 //      — it is WAL and the writes are small — but "survive" is the wrong bar
 //      for something a user leaves running for a month.
 //
@@ -49,12 +49,12 @@
 
 #pragma once
 
-#include "libclima/domain/airquality.h"
-#include "libclima/domain/alert.h"
-#include "libclima/domain/forecast.h"
-#include "libclima/domain/place.h"
-#include "libclima/providers/fixture/fixtureprovider.h"
-#include "libclima/wire/snapshot.h"
+#include "libclimat/domain/airquality.h"
+#include "libclimat/domain/alert.h"
+#include "libclimat/domain/forecast.h"
+#include "libclimat/domain/place.h"
+#include "libclimat/providers/fixture/fixtureprovider.h"
+#include "libclimat/wire/snapshot.h"
 
 #include <QByteArray>
 #include <QHash>
@@ -64,7 +64,7 @@
 
 #include <memory>
 
-namespace clima {
+namespace climat {
 class CacheStore;
 class Clock;
 class HttpClient;
@@ -78,7 +78,7 @@ class NwsAlertProvider;
 class FixtureForecastProvider;
 class FixtureAirQualityProvider;
 class FixtureAlertProvider;
-} // namespace clima
+} // namespace climat
 
 class QFileSystemWatcher;
 class QTimer;
@@ -142,10 +142,10 @@ private:
     // starting up asks ten times in a second and the cache is not the thing
     // that should absorb that.
     struct Watched {
-        clima::Place      place;
-        clima::Forecast   forecast;
-        clima::AirQuality air;
-        clima::AlertSet   alerts;
+        climat::Place      place;
+        climat::Forecast   forecast;
+        climat::AirQuality air;
+        climat::AlertSet   alerts;
         QString           servedBy;
         bool              fromCache = true;
         bool              inFlight  = false;
@@ -164,7 +164,7 @@ private:
         // serving a subscription nobody would have made on purpose.
         QString              placeId;
         QString              requested;
-        clima::wire::FieldMask mask;
+        climat::wire::FieldMask mask;
         int                  hours = 0;
         int                  days  = 0;
     };
@@ -173,7 +173,7 @@ private:
     void buildFixtureProviders();
     void registerProviders();
 
-    [[nodiscard]] clima::Place resolve(const QString &placeId) const;
+    [[nodiscard]] climat::Place resolve(const QString &placeId) const;
     [[nodiscard]] QString      canonical(const QString &placeId) const;
 
     Watched &ensureWatched(const QString &placeId);
@@ -216,23 +216,23 @@ private:
     [[nodiscard]] QString placesFingerprint() const;
 
     QString                                m_fixtureName;
-    clima::Fixture                         m_fixture;
-    std::unique_ptr<clima::Clock>          m_clock;
-    std::unique_ptr<clima::CacheStore>     m_cache;
-    std::unique_ptr<clima::HttpClient>     m_http;
-    std::unique_ptr<clima::ProviderRegistry> m_registry;
+    climat::Fixture                         m_fixture;
+    std::unique_ptr<climat::Clock>          m_clock;
+    std::unique_ptr<climat::CacheStore>     m_cache;
+    std::unique_ptr<climat::HttpClient>     m_http;
+    std::unique_ptr<climat::ProviderRegistry> m_registry;
 
-    clima::LocationController *m_places = nullptr;
+    climat::LocationController *m_places = nullptr;
 
-    clima::OpenMeteoForecastProvider   *m_openMeteo   = nullptr;
-    clima::MetNoForecastProvider       *m_metNo       = nullptr;
-    clima::OpenMeteoAirQualityProvider *m_openMeteoAq = nullptr;
-    clima::EcccAlertProvider           *m_eccc        = nullptr;
-    clima::NwsAlertProvider            *m_nws         = nullptr;
+    climat::OpenMeteoForecastProvider   *m_openMeteo   = nullptr;
+    climat::MetNoForecastProvider       *m_metNo       = nullptr;
+    climat::OpenMeteoAirQualityProvider *m_openMeteoAq = nullptr;
+    climat::EcccAlertProvider           *m_eccc        = nullptr;
+    climat::NwsAlertProvider            *m_nws         = nullptr;
 
-    clima::FixtureForecastProvider   *m_fixtureForecast = nullptr;
-    clima::FixtureAirQualityProvider *m_fixtureAir      = nullptr;
-    clima::FixtureAlertProvider      *m_fixtureAlerts   = nullptr;
+    climat::FixtureForecastProvider   *m_fixtureForecast = nullptr;
+    climat::FixtureAirQualityProvider *m_fixtureAir      = nullptr;
+    climat::FixtureAlertProvider      *m_fixtureAlerts   = nullptr;
 
     QHash<QString, Watched>      m_watched;
     QHash<QString, Subscription> m_subscriptions;

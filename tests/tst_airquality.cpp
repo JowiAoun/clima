@@ -20,10 +20,10 @@
 // out-of-season zeroes prove it is testing the right thing: a gate written as
 // "any value above zero" passes the first two and fails here.
 
-#include "libclima/core/clock.h"
-#include "libclima/domain/airquality.h"
-#include "libclima/net/httpclient.h"
-#include "libclima/providers/airquality/openmeteoairqualityprovider.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/domain/airquality.h"
+#include "libclimat/net/httpclient.h"
+#include "libclimat/providers/airquality/openmeteoairqualityprovider.h"
 #include "support/httpstub.h"
 #include "support/networkguard.h"
 
@@ -31,13 +31,13 @@
 #include <QTest>
 #include <QUrl>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
 QByteArray fixture(const QString &name)
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR) + QStringLiteral("/tests/fixtures/airquality/")
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR) + QStringLiteral("/tests/fixtures/airquality/")
                + name);
     if (!file.open(QIODevice::ReadOnly))
         return {};
@@ -296,7 +296,7 @@ void TestAirQuality::theDominantPollutantIsTheArgmaxOfThoseSubIndices()
 
 void TestAirQuality::theLocalComputationAgreesOnGasesAndNotOnParticulates()
 {
-    // The measurement that decided the design. libclima/domain/airquality.h
+    // The measurement that decided the design. libclimat/domain/airquality.h
     // asserts it in prose; here it is as a number, so that anybody tempted to
     // delete the request for the published sub-indices and compute them locally
     // finds out what it would cost before shipping it.

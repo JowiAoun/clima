@@ -6,7 +6,7 @@
 //     Text { text: Wx.uvBand(feed.snapshot.current.uvIndex) }
 //     WeatherGlyph { kind: Wx.glyphKind(code, isDay) }
 //
-// Every function here forwards to libclima — the WMO code tables in
+// Every function here forwards to libclimat — the WMO code tables in
 // domain/weathercode.h and the published bands in domain/scales.h — and adds
 // exactly one thing of its own: it takes a QVariant rather than a double, so
 // that a null on the wire stays a null instead of becoming a plausible zero.
@@ -19,7 +19,7 @@
 // network or cache code — widgets/CMakeLists.txt makes that a check on the
 // built binary rather than a rule in a document — so the tile side gets its
 // own thin object over the same domain functions. The tables themselves are
-// not copied, and that is the whole reason libclima/domain/scales.h exists.
+// not copied, and that is the whole reason libclimat/domain/scales.h exists.
 //
 // ============================================================================
 // NULL, AND WHY EVERY ARGUMENT IS A QVariant
@@ -75,7 +75,7 @@ public:
     // ---- instants ----------------------------------------------------------
     //
     // Every timestamp on the wire is ISO 8601 *already moved into the place's
-    // own zone*, offset and all (libclima/wire/snapshot.cpp). So these read the
+    // own zone*, offset and all (libclimat/wire/snapshot.cpp). So these read the
     // wall clock out of the string rather than converting anything: a tile
     // showing Toronto shows Toronto's afternoon whatever zone the desktop is
     // in, and there is no second conversion here to get backwards.

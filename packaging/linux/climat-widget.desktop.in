@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# A launcher entry for the widget host, so that the tiles can be opened on a
+# desktop whose shell has no way to pin them.
+#
+# ---- who this is for --------------------------------------------------------
+#
+# On GNOME the tiles are launched and pinned by the shell extension, and this
+# entry is not how anybody gets them. It is for everywhere else: KDE, Sway,
+# Hyprland, XFCE.
+#
+# `Exec` carries no flags because it does not need any. `--pin` defaults to
+# `auto`, so on a compositor that implements zwlr_layer_shell_v1 — KWin and
+# every wlroots compositor — starting this from the application menu produces
+# tiles pinned to the desktop, top-right, under every window. Where the
+# protocol is absent it produces an ordinary window instead, which is what an
+# X11 desktop gets and what a GNOME user gets if they start this by hand rather
+# than enabling the extension. See packaging/plasma/README.md.
+#
+# There is deliberately no autostart entry beside this one. The daemon
+# autostarts because it is a service; whether weather tiles appear on somebody's
+# desktop at every login is their decision, and it is a copy of this file into
+# ~/.config/autostart/.
+#
+# ---- the filename -----------------------------------------------------------
+#
+# @CLIMAT_APP_ID@.Widget.desktop, matching the desktop file name the host sets in
+# QGuiApplication::setDesktopFileName() (widgets/main.cpp). A surface whose
+# app_id has no matching entry gets a generic icon and "Unknown application"
+# under Wayland; one that claimed the app's own id would put a second Climat in
+# the dock.
+
+[Desktop Entry]
+Type=Application
+Version=1.5
+
+Name=Climat widgets
+GenericName=Weather widgets
+Comment=Weather tiles for the desktop
+
+Exec=climat-widget
+Icon=@CLIMAT_APP_ID@
+Terminal=false
+
+Categories=Utility;
+Keywords=Weather;Widget;Desktop;Forecast;
+
+# False, and that is about what a pinned tile is. Startup notification ends when
+# the launched program takes the activation token, which a desktop-layer surface
+# never does — widgets/layershell.cpp sets activateOnShow(false), because a tile
+# that grabbed focus on appearing would eat the first keystroke after login. So
+# `true` here buys a launcher spinner that runs until it times out, on the
+# desktops where this now works best.
+StartupNotify=false
+
+# Still correct, and only for the case where there is a window to match: an X11
+# desktop, or a Wayland one with no layer-shell. A pinned surface has no
+# toplevel and nothing to match against.
+StartupWMClass=climat-widget
+
+# No OnlyShowIn, for the reason climat-daemon.desktop.in sets out at length: the
+# install rule already restricts this to Linux, and an enumerated list of
+# desktop names excluded Sway, Hyprland, Wayfire, river, labwc, niri and COSMIC
+# — which is to say, most of the compositors where `--pin` works.

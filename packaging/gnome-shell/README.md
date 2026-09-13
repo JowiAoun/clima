@@ -3,14 +3,14 @@
 
 # The GNOME Shell extension
 
-`clima@JowiAoun.github.io` puts Clima's tiles on the desktop and the current temperature in the
+`climat@JowiAoun.github.io` puts Climat's tiles on the desktop and the current temperature in the
 top bar. It is about 500 lines of GJS and **it draws no weather**.
 
 ## What it actually does
 
 GNOME Shell cannot host a Qt Quick surface — an extension is GJS running inside gnome-shell's own
 process, extensions.gnome.org forbids shipping binaries, and mutter does not implement
-`wlr-layer-shell`. So the extension launches `clima-widget`, which is our own Qt process, adopts
+`wlr-layer-shell`. So the extension launches `climat-widget`, which is our own Qt process, adopts
 the window that appears, types it as a dock and pins it below everything else.
 
 That is the DING pattern. It was measured on GNOME Shell 46 before any of this was written, and
@@ -18,7 +18,7 @@ That is the DING pattern. It was measured on GNOME Shell 46 before any of this w
 measurement corrected.
 
 ```
-extension  ──spawn──▶  clima-widget  ──D-Bus──▶  clima-daemon  ──HTTPS──▶  Open-Meteo
+extension  ──spawn──▶  climat-widget  ──D-Bus──▶  climat-daemon  ──HTTPS──▶  Open-Meteo
    (GJS)                  (Qt/QML)                (one fetch)
 ```
 
@@ -39,12 +39,12 @@ list, and it updates on a different clock from the app. Two consequences:
 
 ## The top bar will never look like the app
 
-The indicator and its menu are drawn in St with the shell's own theme. They cannot use Clima's
+The indicator and its menu are drawn in St with the shell's own theme. They cannot use Climat's
 typeface, its colour tokens or its charts, because none of that exists inside gnome-shell.
 
 This is written down in three places — here, in `extension.js`, and in the preferences window —
 because it is the first thing that looks like a bug and is not one. Making a St popup look like
-Clima would mean reimplementing the design system in CSS and maintaining two of them.
+Climat would mean reimplementing the design system in CSS and maintaining two of them.
 
 ## Wayland only
 
@@ -60,22 +60,22 @@ journal and stops. GNOME has defaulted to Wayland since 3.34 and Ubuntu since 21
 ## Installing it from this repository
 
 ```sh
-ln -s "$PWD/packaging/gnome-shell/clima@JowiAoun.github.io" \
+ln -s "$PWD/packaging/gnome-shell/climat@JowiAoun.github.io" \
       ~/.local/share/gnome-shell/extensions/
 
-glib-compile-schemas ~/.local/share/gnome-shell/extensions/clima@JowiAoun.github.io/schemas/
+glib-compile-schemas ~/.local/share/gnome-shell/extensions/climat@JowiAoun.github.io/schemas/
 
 # Wayland cannot restart the shell in place, so: log out, log back in.
-gnome-extensions enable clima@JowiAoun.github.io
+gnome-extensions enable climat@JowiAoun.github.io
 ```
 
 For development against a build tree rather than an installed app:
 
 ```sh
-CLIMA_WIDGET=$PWD/build/dev/widgets/clima-widget gnome-extensions enable clima@JowiAoun.github.io
+CLIMAT_WIDGET=$PWD/build/dev/widgets/climat-widget gnome-extensions enable climat@JowiAoun.github.io
 ```
 
-`CLIMA_WIDGET` has to be in gnome-shell's own environment, not in your terminal's — the extension
+`CLIMAT_WIDGET` has to be in gnome-shell's own environment, not in your terminal's — the extension
 runs inside the shell. `systemctl --user set-environment` before logging in, or use the nested
 shell that `scripts/shell-probe.sh` stands up.
 

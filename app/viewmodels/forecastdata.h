@@ -6,16 +6,16 @@
 // ============================================================================
 // THIS FILE IS mockdata.js, WITH A PROVIDER BEHIND IT
 //
-// app/qml/Clima/mockdata.js said so in its own header, before any of this
+// app/qml/Climat/mockdata.js said so in its own header, before any of this
 // existed:
 //
-//     "Shape of the API deliberately mirrors what libclima's ForecastProvider
+//     "Shape of the API deliberately mirrors what libclimat's ForecastProvider
 //      will return: parallel per-hour arrays plus derived helpers, no
 //      formatting decisions baked in."
 //
 // So this class keeps that shape exactly — the same property names, the same
 // array layout, the same helper functions — and the QML that reads it did not
-// have to change. `Data` is still `Data`; it is a C++ singleton in the Clima
+// have to change. `Data` is still `Data`; it is a C++ singleton in the Climat
 // module rather than a JavaScript library, which is why the thirteen files that
 // used to say `import "mockdata.js" as Data` now say nothing at all: a
 // singleton in the same module is in scope without an import, the way `Theme`
@@ -80,9 +80,9 @@
 
 #pragma once
 
-#include "libclima/domain/airquality.h"
-#include "libclima/domain/forecast.h"
-#include "libclima/domain/place.h"
+#include "libclimat/domain/airquality.h"
+#include "libclimat/domain/forecast.h"
+#include "libclimat/domain/place.h"
 
 #include <QDateTime>
 #include <QObject>
@@ -222,7 +222,7 @@ public:
 
     static ForecastData *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 
-    // The traditional name for a phase, localised. libclima returns an
+    // The traditional name for a phase, localised. libclimat returns an
     // identifier — "waning-gibbous" — precisely so that the wording is the
     // app's; public and static here so that the Sun & Moon card and the chart
     // legend cannot end up with two spellings of the same moon.
@@ -232,8 +232,8 @@ public:
     // wall clock's, which is what makes the "Now" column, the past veil and the
     // sky phase land on the same hour in a fixture run as they did on the
     // afternoon it was recorded.
-    void setSnapshot(const clima::Forecast &forecast, const clima::AirQuality &airQuality,
-                     const QDateTime &now, const clima::Place &place);
+    void setSnapshot(const climat::Forecast &forecast, const climat::AirQuality &airQuality,
+                     const QDateTime &now, const climat::Place &place);
 
     [[nodiscard]] int count() const { return m_count; }
     [[nodiscard]] int nowIndex() const { return m_nowIndex; }
@@ -322,7 +322,7 @@ public:
     // thunderstorm and every hour beside it said rain.
     //
     // So a labelled column answers for the whole span it stands for, under
-    // libclima/domain/weathercode.h's `codeForLabelledSpan` — its own hour's
+    // libclimat/domain/weathercode.h's `codeForLabelledSpan` — its own hour's
     // sky, and anything that is happening anywhere in the span. The day/night
     // form comes from the hour that won, not from the column's first hour: a
     // 7 p.m. storm in July is a day glyph.
@@ -374,17 +374,17 @@ private:
     // The local time of the hour at `index`, or an invalid QDateTime.
     [[nodiscard]] QDateTime localTimeAt(int index) const;
 
-    clima::Forecast   m_forecast;
-    clima::AirQuality m_air;
-    clima::Place      m_place;
+    climat::Forecast   m_forecast;
+    climat::AirQuality m_air;
+    climat::Place      m_place;
     QTimeZone         m_zone = QTimeZone::UTC;
     QDateTime         m_now;
 
-    // The hourly series after libclima/domain/hourconvention.h's shift, so
+    // The hourly series after libclimat/domain/hourconvention.h's shift, so
     // that every accumulated quantity in it describes the hour STARTING at its
     // timestamp — the convention precip.js draws on, and the one place in the
     // whole app where that shift happens.
-    QList<clima::HourlyPoint> m_hours;
+    QList<climat::HourlyPoint> m_hours;
 
     // The calendar day the window is of. Not derivable from `m_selectedDay`:
     // a card the hourly series cannot reach clamps onto the last day there is

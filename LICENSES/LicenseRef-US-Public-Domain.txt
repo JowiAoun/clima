@@ -38,7 +38,7 @@ jurisdictions do not recognise a government-work exception, and NOAA's own
 disclaimer notes that material on its sites may occasionally include work owned
 by third parties, which this exception does not reach.
 
-Neither limit affects Clima's use: the recordings are unmodified responses used
+Neither limit affects Climat's use: the recordings are unmodified responses used
 to test a parser, and the National Weather Service is credited in the
 application through NwsAlertProvider::attribution() whether or not any licence
 compels it.

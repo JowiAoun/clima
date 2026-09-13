@@ -17,7 +17,7 @@ namespace {
 
 // ---- FLAG DISPOSITION -------------------------------------------------------
 //
-// Nothing here ships, because this binary does not ship. The CLIMA_DEV_TOOLS
+// Nothing here ships, because this binary does not ship. The CLIMAT_DEV_TOOLS
 // split is honoured anyway, and for one reason worth stating: a gallery built
 // with the dev tools compiled out must fail the same way the app does rather
 // than a new way. `--walk` and `--poke` reach into ScreenshotController's
@@ -26,7 +26,7 @@ namespace {
 //
 // So: --grab, --size, --viewport, --sky, --card, --details and the component
 // name are always available; --film, --frames, --every, --poke and --walk go
-// with CLIMA_DEV_TOOLS.
+// with CLIMAT_DEV_TOOLS.
 
 [[noreturn]] void fail(const QString &message)
 {
@@ -38,9 +38,9 @@ namespace {
 
 // Guarded for the same reason appoptions.cpp guards its twin: --frames, --every
 // and --walk are the only flags here that take a number and all three are
-// dev-tools flags, so without this a CLIMA_DEV_TOOLS=OFF build carries an
+// dev-tools flags, so without this a CLIMAT_DEV_TOOLS=OFF build carries an
 // unused-function warning.
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
 int requireInt(const QCommandLineParser &parser, const QCommandLineOption &option,
                int minimum, const char *what)
 {
@@ -52,7 +52,7 @@ int requireInt(const QCommandLineParser &parser, const QCommandLineOption &optio
                  .arg(option.names().constFirst(), QString::fromUtf8(what), raw));
     return value;
 }
-#endif // CLIMA_DEV_TOOLS
+#endif // CLIMAT_DEV_TOOLS
 
 GalleryOptions *g_instance = nullptr;
 
@@ -91,7 +91,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
-        QStringLiteral("Clima's component gallery — every component in the app, on one\n"
+        QStringLiteral("Climat's component gallery — every component in the app, on one\n"
                        "screen, on the gradient it is actually composited over.\n"
                        "\n"
                        "It exists because almost every defect found in this design so far was\n"
@@ -131,7 +131,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("phase"));
     parser.addOption(skyOption);
 
-    // Mirrors clima's own --scheme, and for the same reason: the gallery is
+    // Mirrors climat's own --scheme, and for the same reason: the gallery is
     // where a palette is reviewed, and a palette cannot be reviewed in whichever
     // theme the machine happens to be in.
     const QCommandLineOption schemeOption(
@@ -161,7 +161,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("id"));
     parser.addOption(shotOption);
 
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
     const QCommandLineOption filmOption(
         QStringLiteral("film"),
         QStringLiteral("Write <prefix>-00.png, <prefix>-01.png … and exit. A still frame "
@@ -194,13 +194,13 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
                        "navigation and not only first paint."),
         QStringLiteral("n"));
     parser.addOption(walkOption);
-#endif // CLIMA_DEV_TOOLS
+#endif // CLIMAT_DEV_TOOLS
 
     parser.addPositionalArgument(
         QStringLiteral("component"),
         QStringLiteral("Which component to open on, matched as a substring against the "
                        "catalogue's names and file names. Every word up to the next flag, so "
-                       "`clima-gallery weather glyph` works without quotes."),
+                       "`climat-gallery weather glyph` works without quotes."),
         QStringLiteral("[component…]"));
 
     parser.process(app);
@@ -273,7 +273,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
         fail(QStringLiteral("--card and --details each render one thing on its own; "
                             "pick one"));
 
-#ifdef CLIMA_DEV_TOOLS
+#ifdef CLIMAT_DEV_TOOLS
     if (parser.isSet(framesOption))
         self->m_frames = requireInt(parser, framesOption, 1, "a count > 0");
     if (parser.isSet(everyOption))
@@ -291,7 +291,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
             fail(QStringLiteral("--poke: expected target=value, got \"%1\"").arg(poke));
         self->m_pokes.append(poke);
     }
-#endif // CLIMA_DEV_TOOLS
+#endif // CLIMAT_DEV_TOOLS
 
     // Joined with spaces rather than taken as the first word, so an unquoted
     // `weather glyph` is one query and not a query plus a stray argument. The

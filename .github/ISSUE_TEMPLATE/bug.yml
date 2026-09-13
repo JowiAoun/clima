@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Clima contributors
+# SPDX-FileCopyrightText: 2026 Climat contributors
 # SPDX-License-Identifier: CC-BY-SA-4.0
 name: Bug report
 description: Something the app does that contradicts what it claims
@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing: **[`docs/known-gaps.md`](https://github.com/JowiAoun/clima/blob/main/docs/known-gaps.md)**
+        Before filing: **[`docs/known-gaps.md`](https://github.com/JowiAoun/climat/blob/main/docs/known-gaps.md)**
         lists what the app deliberately does not do yet — no radar, no macOS build,
         an unsigned Windows build, no Android alert delivery. Those are gaps, not bugs.
 
@@ -33,7 +33,7 @@ body:
     attributes:
       label: A screenshot from the app itself
       description: |
-        Run `clima --grab bug.png` and drag the file in. That captures exactly what the
+        Run `climat --grab bug.png` and drag the file in. That captures exactly what the
         app rendered, at the size it rendered it, with no window manager in the way —
         which answers most of the questions this form would otherwise generate.
 
@@ -59,7 +59,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: From `clima --version`, or the release you downloaded.
+      description: From `climat --version`, or the release you downloaded.
     validations:
       required: true
 

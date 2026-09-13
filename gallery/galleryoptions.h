@@ -67,7 +67,7 @@ class GalleryOptions : public QObject
 
     // ---- and the way of looking at the whole product -----------------------
     // A composed device sheet for the README, rather than a component. See
-    // gallery/qml/Clima/Gallery/ShotSheet.qml.
+    // gallery/qml/Climat/Gallery/ShotSheet.qml.
     Q_PROPERTY(QString shot READ shot CONSTANT)
 
     // Exposed to QML for one reader only: tests/qml/tst_shots.qml, which
@@ -91,7 +91,7 @@ public:
     static GalleryOptions *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 
     // The shot ids --shot accepts. This is a second copy of the list in
-    // gallery/qml/Clima/Gallery/shots.js, and it exists for the same reason
+    // gallery/qml/Climat/Gallery/shots.js, and it exists for the same reason
     // AppOptions::viewportIds() is a second copy of the Viewports presets: a
     // command line has to reject a bad value before any QML has loaded, and
     // C++ cannot read a `.pragma library`.

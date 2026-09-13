@@ -3,13 +3,13 @@
 
 # KDE, wlroots, and why there is no applet in this directory
 
-There is no plasmoid here and there is not going to be one. `clima-widget` pins itself to the
+There is no plasmoid here and there is not going to be one. `climat-widget` pins itself to the
 desktop on Plasma 6 without an applet, without a plugin, and without a single file installed into
 `~/.local/share/plasma/`. The same binary GNOME's shell extension spawns asks KWin for a
 desktop-layer surface and gets one.
 
 ```sh
-clima-widget --widget current-conditions --widget hourly-strip --pin on
+climat-widget --widget current-conditions --widget hourly-strip --pin on
 ```
 
 `scripts/check-layer-shell.sh` is the proof, and it runs in CI.
@@ -35,10 +35,10 @@ The tiles are not pure QML. Every one of them reads:
 | `Units` | the reader's unit preference, out of the app's own INI | `app/viewmodels/units.h` |
 
 Those are C++. A plasmoid cannot import a C++ type that is not installed as a QML plugin on the
-system import path, and none of ours is: `Clima.Widgets` is a **static** module compiled into
-`clima-widget`, exactly like `Clima` is compiled into `clima`. So a plasmoid would need either a
+system import path, and none of ours is: `Climat.Widgets` is a **static** module compiled into
+`climat-widget`, exactly like `Climat` is compiled into `climat`. So a plasmoid would need either a
 second implementation of the data path in pure QML — and Plasma 6 ships no generic D-Bus binding
-for QML, so that path does not exist either — or `Clima.Widgets` has to become a shared, installed
+for QML, so that path does not exist either — or `Climat.Widgets` has to become a shared, installed
 QML plugin, which costs a shared library, an RPATH and three packaging formats that have to place
 two more files correctly.
 
@@ -88,7 +88,7 @@ and asserts six things:
 
 | | |
 |---|---|
-| **pinned** | sway logs a layer surface with namespace `clima-widgets` on layer 1 |
+| **pinned** | sway logs a layer surface with namespace `climat-widgets` on layer 1 |
 | **placed** | the tiles are in the anchored corner and the opposite corner is empty — measured off a `grim` photograph, because the anchor and margins are sent *after* the surface exists and appear in no log line |
 | **not a window** | `swaymsg -t get_tree` does not know about it: no alt-tab, no tiling, nothing reflows when it appears |
 | **falsifiable** | the same binary with `--pin off` **is** in that tree and logs no layer surface |
@@ -109,10 +109,10 @@ tiles nobody can see. It has to be `destroy()` and then `show()`.
 **None of this has run on KWin.** It has run on wlroots, which is the reference implementation of
 the protocol and is what KWin was written against, and the surface this creates uses nothing
 outside `zwlr_layer_shell_v1` version 1. That is a strong argument and it is not a measurement, and
-the difference is the point of this section. What would close it: `clima-widget --pin on` on a
+the difference is the point of this section. What would close it: `climat-widget --pin on` on a
 Plasma 6 session, and a line here saying so.
 
-**There is no autostart entry that pins.** `packaging/linux/clima-widget.desktop.in` is a launcher:
+**There is no autostart entry that pins.** `packaging/linux/climat-widget.desktop.in` is a launcher:
 it appears in the application menu and starting it from there gets pinned tiles, because `--pin
 auto` is the default. Making the tiles appear at every login is a decision for the person whose
 desktop it is, so it is a copy into `~/.config/autostart/` and not something a package does on

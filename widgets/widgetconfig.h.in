@@ -7,15 +7,15 @@
  * The widget host's own identity, as distinct from the app's. It shares the
  * app's QSettings organisation — it has to, or a tile would show °C to somebody
  * who chose °F — and it does not share its desktop file name, because a surface
- * that claims to be the weather app puts a second Clima in the dock.
+ * that claims to be the weather app puts a second Climat in the dock.
  */
 
-#ifndef CLIMA_WIDGETCONFIG_H
-#define CLIMA_WIDGETCONFIG_H
+#ifndef CLIMAT_WIDGETCONFIG_H
+#define CLIMAT_WIDGETCONFIG_H
 
-#define CLIMA_APP_ID             "@CLIMA_APP_ID@"
-#define CLIMA_WIDGET_DESKTOP_ID  "@CLIMA_APP_ID@.Widget"
-#define CLIMA_APP_NAME           "@PROJECT_NAME@"
-#define CLIMA_VERSION            "@PROJECT_VERSION@"
+#define CLIMAT_APP_ID             "@CLIMAT_APP_ID@"
+#define CLIMAT_WIDGET_DESKTOP_ID  "@CLIMAT_APP_ID@.Widget"
+#define CLIMAT_APP_NAME           "@PROJECT_NAME@"
+#define CLIMAT_VERSION            "@PROJECT_VERSION@"
 
-#endif /* CLIMA_WIDGETCONFIG_H */
+#endif /* CLIMAT_WIDGETCONFIG_H */

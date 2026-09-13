@@ -3,8 +3,8 @@
 //
 // What the adapters make of a recorded payload, printed.
 //
-//     nix develop --command cmake --build --preset dev --target clima-provider-probe
-//     ./build/dev/tools/provider-probe/clima-provider-probe
+//     nix develop --command cmake --build --preset dev --target climat-provider-probe
+//     ./build/dev/tools/provider-probe/climat-provider-probe
 //
 // A test asserts. This prints, which is a different job: the assertions in
 // tests/tst_airquality.cpp say the pollen gate is closed in Toronto and open in
@@ -16,17 +16,17 @@
 //
 // No network, ever. It reads the same fixtures the tests read, through the same
 // static parse() functions, so what it prints is what the app would hold.
-// CLIMA_SOURCE_DIR is baked in at configure time for the same reason the tests
+// CLIMAT_SOURCE_DIR is baked in at configure time for the same reason the tests
 // take it: a path computed from the binary's own location breaks the day the
 // build directory moves.
 //
-// It is a dev tool. CLIMA_DEV_TOOLS=OFF and this directory is never entered.
+// It is a dev tool. CLIMAT_DEV_TOOLS=OFF and this directory is never entered.
 
-#include "libclima/domain/airquality.h"
-#include "libclima/domain/forecast.h"
-#include "libclima/providers/airquality/openmeteoairqualityprovider.h"
-#include "libclima/providers/metno/metnoforecastprovider.h"
-#include "libclima/providers/metno/symbolcode.h"
+#include "libclimat/domain/airquality.h"
+#include "libclimat/domain/forecast.h"
+#include "libclimat/providers/airquality/openmeteoairqualityprovider.h"
+#include "libclimat/providers/metno/metnoforecastprovider.h"
+#include "libclimat/providers/metno/symbolcode.h"
 
 #include <QCoreApplication>
 #include <QDate>
@@ -35,7 +35,7 @@
 #include <QTextStream>
 #include <QTimeZone>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -47,7 +47,7 @@ QTextStream &out()
 
 QByteArray fixture(const QString &relative)
 {
-    QFile file(QStringLiteral(CLIMA_SOURCE_DIR) + QStringLiteral("/tests/fixtures/") + relative);
+    QFile file(QStringLiteral(CLIMAT_SOURCE_DIR) + QStringLiteral("/tests/fixtures/") + relative);
     if (!file.open(QIODevice::ReadOnly)) {
         out() << "cannot read " << file.fileName() << "\n";
         return {};
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
 
-    out() << "clima provider probe — recorded fixtures, no network\n";
+    out() << "climat provider probe — recorded fixtures, no network\n";
 
     rule(QStringLiteral("AIR QUALITY — the Europe pollen gate, seen rather than asserted"));
     probeAirQuality(QStringLiteral("Toronto — outside the CAMS European domain"),

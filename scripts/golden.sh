@@ -8,8 +8,8 @@
 #   scripts/golden.sh accept             re-record them, deliberately
 #   scripts/golden.sh capture <dir>      write them somewhere and stop
 #
-# CLIMA_BUILD_DIR selects the build to photograph; it defaults to build/dev.
-# CLIMA_GOLDEN_FILTER=<substring> narrows the run while working on one case.
+# CLIMAT_BUILD_DIR selects the build to photograph; it defaults to build/dev.
+# CLIMAT_GOLDEN_FILTER=<substring> narrows the run while working on one case.
 #
 # ---- do not `accept` under a filter -----------------------------------------
 #
@@ -58,8 +58,8 @@ root="$(cd "$here/.." && pwd)"
 
 cases_file="$root/tests/golden/cases"
 images_dir="$root/tests/golden/images"
-build_dir="${CLIMA_BUILD_DIR:-$root/build/dev}"
-filter="${CLIMA_GOLDEN_FILTER:-}"
+build_dir="${CLIMAT_BUILD_DIR:-$root/build/dev}"
+filter="${CLIMAT_GOLDEN_FILTER:-}"
 
 command="${1:-check}"
 shift || true
@@ -83,12 +83,12 @@ case "$command" in
         ;;
 esac
 
-app="$build_dir/app/clima"
-gallery="$build_dir/gallery/clima-gallery"
+app="$build_dir/app/climat"
+gallery="$build_dir/gallery/climat-gallery"
 
 for binary in "$app" "$gallery"; do
     if [[ ! -x "$binary" ]]; then
-        echo "golden: $binary is not there. Build first, or set CLIMA_BUILD_DIR." >&2
+        echo "golden: $binary is not there. Build first, or set CLIMAT_BUILD_DIR." >&2
         exit 2
     fi
 done
@@ -144,17 +144,17 @@ export XDG_CACHE_HOME="$scratch/cache"
 # same rule the colour scheme follows in Main.qml, one preference over: a
 # capture pins what it photographs.
 # Both binaries, because both are photographed and they keep separate
-# preference files: `clima` and `clima-gallery` share an organisation and not an
+# preference files: `climat` and `climat-gallery` share an organisation and not an
 # application name, so a pin written for one leaves the other reading its
 # default. That is exactly how this was found — the seven gallery cards
 # carrying a time moved while every app image held still.
 #
-# clima-widget needs no line of its own: it deliberately answers to the app's
+# climat-widget needs no line of its own: it deliberately answers to the app's
 # application name so that a tile prints the units and the clock the reader
 # chose, which is the whole of docs/widgets.md's preferences section.
-mkdir -p "$XDG_CONFIG_HOME/Clima"
-for clima_binary in clima clima-gallery; do
-  printf '[time]\nformat=12h\n' > "$XDG_CONFIG_HOME/Clima/$clima_binary.ini"
+mkdir -p "$XDG_CONFIG_HOME/Climat"
+for climat_binary in climat climat-gallery; do
+  printf '[time]\nformat=12h\n' > "$XDG_CONFIG_HOME/Climat/$climat_binary.ini"
 done
 
 out="${target:-$scratch/images}"

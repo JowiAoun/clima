@@ -7,7 +7,7 @@
 #   scripts/deb.sh              build it into build/deb/
 #   scripts/deb.sh inspect      build it and print the control file and contents
 #
-# CLIMA_DEB_IMAGE overrides the container image; it defaults to debian:trixie,
+# CLIMAT_DEB_IMAGE overrides the container image; it defaults to debian:trixie,
 # which is what .github/workflows/ci.yml builds in.
 #
 # ---- why this is a container and not just `cpack` ---------------------------
@@ -28,7 +28,7 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "$here/.." && pwd)"
 
-image="${CLIMA_DEB_IMAGE:-debian:trixie}"
+image="${CLIMAT_DEB_IMAGE:-debian:trixie}"
 mode="${1:-build}"
 
 if ! command -v docker > /dev/null 2>&1; then
@@ -58,9 +58,9 @@ docker run --rm \
     # binary.
     cmake -S /src -B /src/build/deb -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
-      -DCLIMA_BUILD_TESTS=OFF \
-      -DCLIMA_BUILD_GALLERY=OFF \
-      -DCLIMA_DEV_TOOLS=OFF
+      -DCLIMAT_BUILD_TESTS=OFF \
+      -DCLIMAT_BUILD_GALLERY=OFF \
+      -DCLIMAT_DEV_TOOLS=OFF
 
     cmake --build /src/build/deb
     cd /src/build/deb && cpack -G DEB

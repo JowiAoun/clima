@@ -12,7 +12,7 @@
 #include "appfont.h"
 #include "apptranslator.h"
 #include "appoptions.h"
-#include "climaconfig.h"
+#include "climatconfig.h"
 #include "settings.h"
 
 #include <QGuiApplication>
@@ -32,11 +32,11 @@ int main(int argc, char *argv[])
     // window to that entry. Without it the window gets a generic icon and no
     // app-menu association, which is the sort of thing nobody notices until
     // packaging.
-    QGuiApplication::setOrganizationName(QStringLiteral("Clima"));
+    QGuiApplication::setOrganizationName(QStringLiteral("Climat"));
     QGuiApplication::setOrganizationDomain(QStringLiteral("github.io"));
-    QGuiApplication::setApplicationName(QStringLiteral(CLIMA_APP_NAME));
-    QGuiApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
-    QGuiApplication::setDesktopFileName(QStringLiteral(CLIMA_APP_ID));
+    QGuiApplication::setApplicationName(QStringLiteral(CLIMAT_APP_NAME));
+    QGuiApplication::setApplicationVersion(QStringLiteral(CLIMAT_VERSION));
+    QGuiApplication::setDesktopFileName(QStringLiteral(CLIMAT_APP_ID));
 
     // ---- 2. storage --------------------------------------------------------
     // Before anything constructs a QSettings, because the format is decided at
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     // Before the QML engine loads: a translator installed after a component is
     // built does not reach the strings already in it. No-op today — there are
     // no language catalogues yet, which app/apptranslator.h explains.
-    clima::AppTranslator::install(&app);
+    climat::AppTranslator::install(&app);
 
     // ---- 4. the command line -----------------------------------------------
     // Before the engine loads anything, because Main.qml reads AppOptions at
@@ -106,10 +106,10 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection);
 
     // By URI, not by file path or qrc URL. loadFromModule asks the engine's
-    // import machinery for `Clima.Main`, which means the same line works
+    // import machinery for `Climat.Main`, which means the same line works
     // whether the module is compiled into this binary (it is) or found on
     // QML_IMPORT_PATH (which is how qmllint and qmlls see it).
-    engine.loadFromModule("Clima", "Main");
+    engine.loadFromModule("Climat", "Main");
 
     return app.exec();
 }

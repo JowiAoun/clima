@@ -29,7 +29,7 @@
 //                              original defect, restated.
 import QtQuick
 import QtTest
-import Clima
+import Climat
 
 TestCase {
     id: testCase
@@ -46,9 +46,9 @@ TestCase {
     // which is why this is the first time it has mattered.
     visible: true
 
-    // Every kind `clima::ConditionKind` can produce. Kept in the enum's order
+    // Every kind `climat::ConditionKind` can produce. Kept in the enum's order
     // so a reader can diff the two lists by eye; `conditionKindName()` in
-    // libclima/domain/weathercode.cpp is the other end of this contract, and
+    // libclimat/domain/weathercode.cpp is the other end of this contract, and
     // tests/tst_weathercode.cpp asserts the same set from the C++ side.
     readonly property var kinds: [
         "clear-day", "clear-night", "partly-day", "partly-night", "cloudy",

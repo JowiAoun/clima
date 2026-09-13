@@ -10,22 +10,22 @@
 # against drift in them. This is where you look at the live answer and check it
 # by eye — see main.cpp.
 #
-# Guarded by CLIMA_DEV_TOOLS, whose help text already promises "gallery,
+# Guarded by CLIMAT_DEV_TOOLS, whose help text already promises "gallery,
 # harnesses". A packaging build asks for neither and never enters this
 # directory, so nothing that ships can accidentally depend on it.
 #
-# Qt6::Core only. It links libclima, which is Core, Network and Sql, and
-# clima_forbid_gui() below is what keeps that true through this target as well:
+# Qt6::Core only. It links libclimat, which is Core, Network and Sql, and
+# climat_forbid_gui() below is what keeps that true through this target as well:
 # a harness that pulled in QtGui would be a harness that could not be built on
 # the headless machine anybody would want to run it from.
 
-add_executable(clima-openmeteo-probe main.cpp)
+add_executable(climat-openmeteo-probe main.cpp)
 
-target_link_libraries(clima-openmeteo-probe PRIVATE libclima Qt6::Core)
-target_compile_features(clima-openmeteo-probe PRIVATE cxx_std_17)
+target_link_libraries(climat-openmeteo-probe PRIVATE libclimat Qt6::Core)
+target_compile_features(climat-openmeteo-probe PRIVATE cxx_std_17)
 
-target_compile_options(clima-openmeteo-probe PRIVATE
+target_compile_options(climat-openmeteo-probe PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall;-Wextra>
 )
 
-clima_forbid_gui(clima-openmeteo-probe)
+climat_forbid_gui(climat-openmeteo-probe)

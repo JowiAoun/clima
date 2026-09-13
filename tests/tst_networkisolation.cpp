@@ -20,15 +20,15 @@
 // initTestCase and asserts an empty attempt list in cleanup, so the rule is
 // enforced per test rather than once per binary.
 
-#include "libclima/core/clock.h"
-#include "libclima/net/httpclient.h"
+#include "libclimat/core/clock.h"
+#include "libclimat/net/httpclient.h"
 #include "support/httpstub.h"
 #include "support/networkguard.h"
 
 #include <QTcpSocket>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 
 class TestNetworkIsolation : public QObject
 {

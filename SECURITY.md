@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2026 Clima contributors -->
+<!-- SPDX-FileCopyrightText: 2026 Climat contributors -->
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
 # Security policy
@@ -6,7 +6,7 @@
 ## Reporting a vulnerability
 
 Use GitHub's private reporting: **Security → Report a vulnerability** on
-[the repository](https://github.com/JowiAoun/clima/security/advisories/new).
+[the repository](https://github.com/JowiAoun/climat/security/advisories/new).
 That opens a channel only the maintainers can read.
 
 Please do not open a public issue for a suspected vulnerability.
@@ -43,11 +43,11 @@ already on disk:
    Norway, GeoJSON from ECCC and the NWS. These are trusted sources over TLS,
    but a compromised or hostile response is the most plausible route to
    misbehaviour, and a malformed one must not crash the app. Parsing is in
-   `libclima/providers/`.
+   `libclimat/providers/`.
 2. **The SQLite cache** at `QStandardPaths::AppDataLocation`. It stores raw
    payloads, so anything that can write there can feed the parsers above.
 3. **The bundled GeoNames index**, a compressed binary blob decoded at startup
-   in `libclima/providers/geocoding/`.
+   in `libclimat/providers/geocoding/`.
 4. **The Qt attack surface** underneath all of it. Report Qt issues to the Qt
    Project; we will pick up the fix by moving the floor or the runtime version.
 

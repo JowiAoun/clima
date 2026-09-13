@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Every unit conversion in Clima, in one file, applied at one boundary.
+// Every unit conversion in Climat, in one file, applied at one boundary.
 //
 // ============================================================================
 // WHERE THE CONVERSION HAPPENS, AND WHY IT IS NOT WHERE YOU WOULD PUT IT
 //
-// libclima speaks one set of units and only one: °C, km/h, hPa, km, mm, and
-// libclima/domain/forecast.h says so on every field. That is not a metric
+// libclimat speaks one set of units and only one: °C, km/h, hPa, km, mm, and
+// libclimat/domain/forecast.h says so on every field. That is not a metric
 // preference — it is the property that lets a cached payload survive a change
 // of preference, and that keeps `precip.js`'s NWS intensity thresholds (2.5
 // mm/h moderate, 7.6 mm/h heavy) meaning what the NWS meant by them when the
 // reader has asked for inches.
 //
 // So the conversion is *late*: it happens in app/viewmodels/, on the way out,
-// and everything upstream of that line is canonical. app/qml/Clima/metrics.js
+// and everything upstream of that line is canonical. app/qml/Climat/metrics.js
 // wrote this rule down before there was anything to enforce it —
 //
 //     "Header/readout formatting. Kept here so the chart never decides units."
@@ -200,7 +200,7 @@ private:
     [[nodiscard]] Settings *settings() const;
 
     // Which unit the reader chose for a quantity. The one thing this class
-    // knows that libclima/domain/units.h does not — the arithmetic moved there
-    // when clima-cli needed it, and what stayed here is the preference.
+    // knows that libclimat/domain/units.h does not — the arithmetic moved there
+    // when climat-cli needed it, and what stayed here is the preference.
     [[nodiscard]] QString unitFor(Quantity quantity) const;
 };

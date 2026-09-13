@@ -16,9 +16,9 @@ Every milestone ends with a **shippable artefact**. There is no milestone whose 
 |---|---|---|---|---|
 | **M0** | Foundations | 2 w | 2026-08-13 | Repo that builds on 3 OSes in CI, empty window, licence hygiene green |
 | **M1** | Vertical slice | 4 w | 2026-09-10 | **Alpha 0.1** — real current conditions for a searched location, offline cache, attribution screen |
-| **M2** | Full forecast surface | 5 w | 2026-10-15 | **Alpha 0.2** — hourly/16-day/day-drill-down, ClimaCharts, units, a11y |
+| **M2** | Full forecast surface | 5 w | 2026-10-15 | **Alpha 0.2** — hourly/16-day/day-drill-down, ClimatCharts, units, a11y |
 | **M3** | Radar map | 5 w | 2026-11-19 | **Beta 0.3** — animated radar over a vector basemap, region-routed |
-| **M4** | Alerts · AQI · CLI | 5 w | 2026-12-24 | **Beta 0.4** — CAP alerts + notifications, air quality, `clima-cli` |
+| **M4** | Alerts · AQI · CLI | 5 w | 2026-12-24 | **Beta 0.4** — CAP alerts + notifications, air quality, `climat-cli` |
 | **M5** | Trust layer + history + map layers | 7 w | 2027-02-11 | **Beta 0.5** — model comparison, ensemble fans, 30-year history, overlay layers |
 | **M6** | Desktop citizenship | 5 w | 2027-03-18 | **RC 0.9** — Plasma applet, GNOME extension, tray, exports, life index |
 | **M7** | Hardening + launch | 5 w | 2027-04-22 | **1.0** on Flathub, winget, Homebrew, AppImage, AUR |
@@ -34,9 +34,9 @@ Total to 1.0: **≈38 weeks / 9 months**.
 right before there is any code to migrate.
 
 Deliverables
-- CMake ≥ 3.21 skeleton: `libclima`, `app`, `cli`, `tests`. Qt 6.8 minimum.
+- CMake ≥ 3.21 skeleton: `libclimat`, `app`, `cli`, `tests`. Qt 6.8 minimum.
 - CI matrix green: Ubuntu 24.04 (system Qt + aqtinstall), Windows (MSVC), macOS (arm64).
-- `libclima` shell with the five provider interfaces and the registry, no implementations.
+- `libclimat` shell with the five provider interfaces and the registry, no implementations.
 - `HttpClient` with User-Agent policy, backoff+jitter, request coalescing — plus tests.
 - SQLite `CacheStore` with schema v1 and a migration harness.
 - **REUSE/SPDX compliance from commit one**: `LICENSES/`, per-file SPDX headers,
@@ -79,7 +79,7 @@ Exit criteria
 
 Deliverables
 - Hourly view, 16-day view, day drill-down; `minutely_15` nowcast ribbon where available.
-- **ClimaCharts v1**: `TemperatureBand`, `PrecipBars`, `NowcastRibbon`, `SunArc`,
+- **ClimatCharts v1**: `TemperatureBand`, `PrecipBars`, `NowcastRibbon`, `SunArc`,
   `WindRose`, shared `AxisModel` + synchronised `Crosshair`.
 - Full variable set: pressure + trend, dew point, visibility, cloud layers, gusts, UV.
 - Moon phase and twilight, computed locally.
@@ -118,13 +118,13 @@ Exit criteria
 ## 6.6 M4 — Alerts, air quality, CLI (5 weeks → 2026-12-24) · **Beta 0.4**
 
 Deliverables
-- **CAP 1.2 parser** in `libclima` (Qt XML, no new dependency) with a conformance suite.
+- **CAP 1.2 parser** in `libclimat` (Qt XML, no new dependency) with a conformance suite.
 - `IAlertProvider`: NWS (US), MeteoAlarm (EU/UK/IL), ECCC (Canada), MET Alerts (Norway).
 - Alert UI: severity-ranked banner, detail sheet, polygons on the map, expiry handling.
 - Desktop notifications via XDG portal / Windows toast / macOS Notification Center, with
   per-severity opt-in and a background-run permission flow.
 - Air Quality view: dual AQI gauges, pollutant breakdown, forecast, **Europe-gated pollen**.
-- `clima-cli`: `clima-cli now|hourly|daily [--json|--csv|--format …]` for status bars.
+- `climat-cli`: `climat-cli now|hourly|daily [--json|--csv|--format …]` for status bars.
 
 Exit criteria
 - A live US and a live European alert render correctly, including polygon geometry.
@@ -137,7 +137,7 @@ Exit criteria
   > Advisory carried `expires` 2026-08-06T05:00-07:00 and `ends` 2026-08-06T23:00-07:00 —
   > eighteen hours apart — and 19 of the 25 alerts in force in California that afternoon had
   > the same shape. An app hiding at `expires` takes the advisory down at five in the morning
-  > on the day of the heat. See `libclima/domain/alert.h`; the fixture is
+  > on the day of the heat. See `libclimat/domain/alert.h`; the fixture is
   > `tests/fixtures/alerts/nws/siskiyou-heat-advisory.json`.
   >
   > `expires` still matters, for confidence rather than for visibility: past it, if the last
@@ -147,7 +147,7 @@ Exit criteria
 
 ## 6.7 M5 — Trust layer, history, map overlays (7 weeks → 2027-02-11) · **Beta 0.5**
 
-**Goal:** the differentiators. This is where Clima stops being "a good weather app" and
+**Goal:** the differentiators. This is where Climat stops being "a good weather app" and
 becomes the one people recommend.
 
 Deliverables
@@ -170,7 +170,7 @@ Exit criteria
 ## 6.8 M6 — Desktop citizenship (5 weeks → 2027-03-18) · **RC 0.9**
 
 Deliverables
-- **Plasma 6 applet** and **GNOME Shell extension**, both consuming `libclima` (this is what
+- **Plasma 6 applet** and **GNOME Shell extension**, both consuming `libclimat` (this is what
   the MPL-2.0 engine split was for).
 - Tray / menu-bar item with live temperature.
 - KRunner plugin + GNOME search provider ("weather in Lisbon").
@@ -200,7 +200,7 @@ Exit criteria
 
 ### Correction, 2026-09-05: three of M4's deliverables landed early
 
-`clima-cli`, the desktop notifications and the background-run permission flow
+`climat-cli`, the desktop notifications and the background-run permission flow
 are listed above under **M4**, and all three exist. They arrived out of order
 for the reason W8 came before W7: each one was blocked on something that had
 already been built for another reason, and doing them when the blocker cleared
@@ -208,7 +208,7 @@ was cheaper than scheduling them.
 
 | Deliverable | What it turned out to be |
 |---|---|
-| `clima-cli … [--json\|--csv]` | `cli/`, one file over `libclima`. The conversion factors moved to `libclima/domain/units.h` so that a status-bar tool does not link a QML engine to print a temperature — the app's `Units` singleton is now the reader's *choice* and nothing else. |
+| `climat-cli … [--json\|--csv]` | `cli/`, one file over `libclimat`. The conversion factors moved to `libclimat/domain/units.h` so that a status-bar tool does not link a QML engine to print a temperature — the app's `Units` singleton is now the reader's *choice* and nothing else. |
 | Notifications with per-severity opt-in | `app/platform/notifier.h`, portal first and `org.freedesktop.Notifications` second. Opt-in rather than per-severity: the preference is one switch, and what is worth interrupting somebody for is `AlertsData`'s decision — a hazard they have not been told about, while the window is hidden. |
 | A background-run permission flow | **Not built, and not needed for this.** §4.5's own exception — a hidden window keeps polling, every fifteen minutes, when notifications are on — is enough while the app is running, and it needs no portal permission. Being notified when the app is *closed* is the daemon's job and is not scheduled. |
 
@@ -222,7 +222,7 @@ clients — is still unverified.
 Satellite imagery (needs an open ingest story) · marine forecasts · flood/GloFAS ·
 CMIP6 climate projections · iOS (note the GPLv3/App Store constraint in D6) ·
 lightning · webcams · personal weather station ingest (WeeWX, Ecowitt) ·
-`clima-relay` self-hostable proxy · Home Assistant integration.
+`climat-relay` self-hostable proxy · Home Assistant integration.
 
 ### Correction: Android moved forward, and one part of it did not
 

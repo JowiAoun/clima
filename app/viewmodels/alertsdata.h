@@ -97,7 +97,7 @@
 
 #pragma once
 
-#include "libclima/domain/alert.h"
+#include "libclimat/domain/alert.h"
 
 #include <QDateTime>
 #include <QHash>
@@ -110,7 +110,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 
-namespace clima {
+namespace climat {
 class Clock;
 }
 
@@ -171,11 +171,11 @@ public:
     // `clock` is the app's, so a fixture run judges alerts against the instant
     // the fixture was recorded. Without it a recorded banner would empty itself
     // the day the recording aged out, and every golden image of it with it.
-    void setClock(clima::Clock *clock);
+    void setClock(climat::Clock *clock);
     void setSettings(Settings *settings);
 
     // A new set from the engine. `complete` and `confirmedAt` travel inside it.
-    void apply(const clima::AlertSet &set);
+    void apply(const climat::AlertSet &set);
 
     // Whether the most recent refresh attempt failed. Pushed in rather than
     // inferred: a provider serving a stale set on a failed refresh parses the
@@ -250,7 +250,7 @@ private:
     // Posts for what is newly worth posting for, withdraws what has ended.
     // Called from rebuild(), which is the one place that knows what is
     // displayable at this minute.
-    void announce(const QList<clima::Alert> &shown);
+    void announce(const QList<climat::Alert> &shown);
 
     // Takes one down, or all of them. Both emit `withdrawn`, so the half of
     // the policy that removes a notification is as observable as the half that
@@ -258,26 +258,26 @@ private:
     void withdraw(const QString &key);
     void takeDownEverythingPosted();
 
-    [[nodiscard]] QVariantMap toVariant(const clima::Alert &alert) const;
+    [[nodiscard]] QVariantMap toVariant(const climat::Alert &alert) const;
     [[nodiscard]] QDateTime   now() const;
 
     // ---- the acknowledgement store -----------------------------------------
 
     struct Acknowledgement {
         QString              key;
-        clima::AlertSeverity severity = clima::AlertSeverity::Unknown;
+        climat::AlertSeverity severity = climat::AlertSeverity::Unknown;
         QDateTime            until;
     };
 
     void loadAcknowledgements();
     void saveAcknowledgements();
 
-    [[nodiscard]] bool isAcknowledged(const clima::Alert &alert) const;
+    [[nodiscard]] bool isAcknowledged(const climat::Alert &alert) const;
 
-    clima::Clock *m_clock    = nullptr;
+    climat::Clock *m_clock    = nullptr;
     Settings     *m_settings = nullptr;
 
-    clima::AlertSet m_set;
+    climat::AlertSet m_set;
     QVariantList    m_list;
     bool            m_available     = false;
     bool            m_refreshFailed = false;
@@ -310,7 +310,7 @@ private:
         QString canonical;
 
         // And the grade they were told at, which only ever rises.
-        clima::AlertSeverity severity = clima::AlertSeverity::Unknown;
+        climat::AlertSeverity severity = climat::AlertSeverity::Unknown;
     };
 
     // Kept in memory only, because a notification that survived a restart

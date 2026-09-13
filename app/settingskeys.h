@@ -4,7 +4,7 @@
 // The INI keys, named once.
 //
 // app/settings.cpp reads and writes them through Settings, which QML binds to.
-// clima-cli reads them through a bare QSettings, because Settings is a QML
+// climat-cli reads them through a bare QSettings, because Settings is a QML
 // singleton and a command-line tool that linked a QML engine to learn whether
 // the reader prefers Fahrenheit would be paying for the whole of Qt Quick to
 // print one character. Two readers, one list — a key renamed here is renamed
@@ -20,7 +20,7 @@
 #include <QLocale>
 #include <QString>
 
-namespace clima::settingskeys {
+namespace climat::settingskeys {
 
 // "12h" | "24h"
 constexpr auto clockFormat = "time/format";
@@ -52,7 +52,7 @@ constexpr auto clockFormat = "time/format";
                                                                   : QStringLiteral("24h");
 }
 
-// The five unit preferences. Values are the spellings libclima/domain/units.h
+// The five unit preferences. Values are the spellings libclimat/domain/units.h
 // converts by: "celsius" | "fahrenheit", "kmh" | "mph" | "ms" | "kn" | "bft",
 // "hpa" | "mb" | "inhg" | "mmhg", "km" | "mi", "mm" | "in".
 constexpr auto temperatureUnit   = "units/temperature";
@@ -61,4 +61,4 @@ constexpr auto pressureUnit      = "units/pressure";
 constexpr auto visibilityUnit    = "units/visibility";
 constexpr auto precipitationUnit = "units/precipitation";
 
-} // namespace clima::settingskeys
+} // namespace climat::settingskeys

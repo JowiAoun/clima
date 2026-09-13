@@ -7,14 +7,14 @@
 #include "timeformat.h"
 #include "units.h"
 
-#include "libclima/domain/hourconvention.h"
-#include "libclima/domain/weathercode.h"
+#include "libclimat/domain/hourconvention.h"
+#include "libclimat/domain/weathercode.h"
 
 #include <QHash>
 #include <QLocale>
 #include <QQmlEngine>
 
-using namespace clima;
+using namespace climat;
 
 namespace {
 
@@ -41,7 +41,7 @@ constexpr double kTrace = 0.1;
 
 // An absent Reading becomes NaN rather than 0. Zero is a temperature, a wind
 // speed and a rainfall; NaN is not, and every formatter in this app already
-// draws it as an em dash. libclima/domain/reading.h makes the same argument at
+// draws it as an em dash. libclimat/domain/reading.h makes the same argument at
 // greater length.
 double value(const Reading &reading)
 {
@@ -151,7 +151,7 @@ ForecastData *ForecastData::create(QQmlEngine *, QJSEngine *)
     return data;
 }
 
-// The traditional phase name, translated. libclima returns an identifier for
+// The traditional phase name, translated. libclimat returns an identifier for
 // exactly this reason — the table is data, and the CLI and the applet in D6
 // need the same sentence in the same language as the app.
 QString ForecastData::moonPhaseLabel(const QString &identifier)
@@ -247,7 +247,7 @@ void ForecastData::setSnapshot(const Forecast &forecast, const AirQuality &airQu
     }
 
     // THE SHIFT. Once, here, at the boundary where domain data becomes chart
-    // data — libclima/domain/hourconvention.h says to call it exactly once and
+    // data — libclimat/domain/hourconvention.h says to call it exactly once and
     // explains what calling it twice does. Everything below indexes `m_hours`,
     // in which an accumulated quantity describes the hour STARTING at its
     // timestamp.
@@ -548,9 +548,9 @@ void ForecastData::buildDays(const QDateTime &now)
         // DayStrip has drawn since the prototype.
         const int code = day.weatherCode ? *day.weatherCode : -1;
         entry[QStringLiteral("icon")] =
-            code < 0 ? QString() : conditionKindName(clima::conditionFor(code, true));
+            code < 0 ? QString() : conditionKindName(climat::conditionFor(code, true));
         entry[QStringLiteral("nightIcon")] =
-            code < 0 ? QString() : conditionKindName(clima::conditionFor(code, false));
+            code < 0 ? QString() : conditionKindName(climat::conditionFor(code, false));
 
         if (day.date == today)
             todayRow = int(all.size());
@@ -694,7 +694,7 @@ void ForecastData::buildSunEvents()
     // under the plot — so a legend naming today's phase over Friday's hours
     // would be the chart contradicting itself. The phase is a position in the
     // cycle and the illumination is the lit fraction, which is not linear in
-    // it: libclima computes the second from the first so that a waxing crescent
+    // it: libclimat computes the second from the first so that a waxing crescent
     // is not reported as a quarter lit.
     const QDate today  = m_now.toTimeZone(m_zone).date();
     const QDate wanted = m_windowDate.isValid() ? m_windowDate : today;
@@ -705,7 +705,7 @@ void ForecastData::buildSunEvents()
         m_moonPhase[QStringLiteral("name")]        = moonPhaseLabel(moonPhaseName(day.moonPhase));
         m_moonPhase[QStringLiteral("illuminated")] = lit.has_value() ? *lit : 0.0;
         // Which limb is lit. The fraction alone cannot say — see
-        // libclima/domain/forecast.h — and the legend's disc is small enough
+        // libclimat/domain/forecast.h — and the legend's disc is small enough
         // that drawing it mirrored looks like nothing at all until you compare
         // it with the card that has it right.
         m_moonPhase[QStringLiteral("waxing")]      = isWaxing(day.moonPhase);
@@ -779,7 +779,7 @@ QString ForecastData::conditionFor(int index) const
     if (!code)
         return {};
 
-    return conditionKindName(clima::conditionFor(*code, !isNight(index)));
+    return conditionKindName(climat::conditionFor(*code, !isNight(index)));
 }
 
 QString ForecastData::conditionForLabel(int index) const
@@ -829,7 +829,7 @@ QString ForecastData::conditionForLabel(int index) const
         }
     }
 
-    return conditionKindName(clima::conditionFor(*worst, !isNight(at)));
+    return conditionKindName(climat::conditionFor(*worst, !isNight(at)));
 }
 
 QString ForecastData::conditionText(int index) const
@@ -842,7 +842,7 @@ QString ForecastData::conditionText(int index) const
     if (!code)
         return QStringLiteral("—");
 
-    const QString text = clima::conditionText(*code, !isNight(index));
+    const QString text = climat::conditionText(*code, !isNight(index));
     return text.isEmpty() ? QStringLiteral("—") : text;
 }
 
@@ -875,7 +875,7 @@ QVariantMap ForecastData::ahead(int offset) const
     out[QStringLiteral("night")]      = night;
     out[QStringLiteral("condition")] =
         hour.weatherCode
-            ? conditionKindName(clima::conditionFor(*hour.weatherCode, !night))
+            ? conditionKindName(climat::conditionFor(*hour.weatherCode, !night))
             : QString();
     out[QStringLiteral("label")] =
         offset == 0 ? tr("Now") : hourOf(hour.time.toTimeZone(m_zone));

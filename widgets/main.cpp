@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// clima-widget: the process that draws the tiles on the desktop.
+// climat-widget: the process that draws the tiles on the desktop.
 //
 // ============================================================================
 // WHY THIS IS A SEPARATE EXECUTABLE FROM THE APP
@@ -12,7 +12,7 @@
 // and only then can it own, re-type and pin the window that appears. That was
 // measured before any of this was written; see docs/widgets.md.
 //
-// `clima --widgets` could not be spawned that way without the shell also
+// `climat --widgets` could not be spawned that way without the shell also
 // starting a full weather app, and a desktop with six tiles on it would be six
 // weather apps.
 //
@@ -29,9 +29,9 @@
 // WHAT THIS PROCESS MAY NOT DO
 //
 // Fetch. Open a socket. Write the cache. Every number on screen came from
-// clima-daemon over the session bus, and widgets/CMakeLists.txt turns that
+// climat-daemon over the session bus, and widgets/CMakeLists.txt turns that
 // into a check on the built binary rather than a promise in a comment — the
-// symbol table is inspected for HttpClient and the providers, because libclima
+// symbol table is inspected for HttpClient and the providers, because libclimat
 // is a static archive and `ldd` would prove nothing.
 //
 // When the daemon is not there, the tiles draw their last snapshot and say how
@@ -59,16 +59,16 @@ int main(int argc, char *argv[])
     // The same organisation and application names the app uses, because they
     // are what QSettings and QStandardPaths key on: the host has to read the
     // INI the app wrote or a widget shows °C to somebody who chose °F.
-    QGuiApplication::setOrganizationName(QStringLiteral("Clima"));
+    QGuiApplication::setOrganizationName(QStringLiteral("Climat"));
     QGuiApplication::setOrganizationDomain(QStringLiteral("github.io"));
-    QGuiApplication::setApplicationName(QStringLiteral(CLIMA_APP_NAME));
-    QGuiApplication::setApplicationVersion(QStringLiteral(CLIMA_VERSION));
+    QGuiApplication::setApplicationName(QStringLiteral(CLIMAT_APP_NAME));
+    QGuiApplication::setApplicationVersion(QStringLiteral(CLIMAT_VERSION));
 
     // A distinct desktop file name, and it matters more here than it does for
     // the app. Wayland reads it to decide what this surface is called and what
     // icon it carries, and a widget host claiming to be the weather app puts a
-    // second Clima in the dock the moment anything shows it in a window list.
-    QGuiApplication::setDesktopFileName(QStringLiteral(CLIMA_WIDGET_DESKTOP_ID));
+    // second Climat in the dock the moment anything shows it in a window list.
+    QGuiApplication::setDesktopFileName(QStringLiteral(CLIMAT_WIDGET_DESKTOP_ID));
 
     Settings::prepareStorage();
     AppFont::install();
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
-    engine.loadFromModule("Clima.Widgets", "WidgetWindow");
+    engine.loadFromModule("Climat.Widgets", "WidgetWindow");
 
     // ---- shown from here, not from QML -------------------------------------
     //
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     QWindow               *window =
         roots.isEmpty() ? nullptr : qobject_cast<QWindow *>(roots.constFirst());
     if (window == nullptr) {
-        std::fprintf(stderr, "clima-widget: the QML root is not a window.\n");
+        std::fprintf(stderr, "climat-widget: the QML root is not a window.\n");
         return 1;
     }
 
@@ -124,9 +124,9 @@ int main(int argc, char *argv[])
         // Asked, rather than assumed, so that the failure is reported once with
         // a reason rather than left to be inferred from where the tiles ended
         // up. pin() answers the same question again and it is cached.
-        QString unavailable = clima::widgets::layershell::unavailableReason();
+        QString unavailable = climat::widgets::layershell::unavailableReason();
 
-        if (unavailable.isEmpty() && !clima::widgets::layershell::pin(window, options->placement()))
+        if (unavailable.isEmpty() && !climat::widgets::layershell::pin(window, options->placement()))
             unavailable = QStringLiteral("the compositor accepted the protocol and refused the "
                                          "surface");
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
             // there is nobody at the keyboard to notice that the tiles came up
             // floating in the middle of the screen.
             if (required) {
-                std::fprintf(stderr, "clima-widget: --pin on, but %s.\n",
+                std::fprintf(stderr, "climat-widget: --pin on, but %s.\n",
                              qUtf8Printable(unavailable));
                 return 3;
             }
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
             // GNOME start explaining a flag nobody passed is noise.
             if (options->pinWasRequested()) {
                 std::fprintf(stderr,
-                             "clima-widget: not pinning, because %s. The tiles are an ordinary "
+                             "climat-widget: not pinning, because %s. The tiles are an ordinary "
                              "window.\n",
                              qUtf8Printable(unavailable));
             }

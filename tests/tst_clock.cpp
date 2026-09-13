@@ -5,11 +5,11 @@
 // the test suite is built on. If FrozenClock is wrong, every TTL test below is
 // testing the wrong instant and passing.
 
-#include "libclima/core/clock.h"
+#include "libclimat/core/clock.h"
 
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 using namespace std::chrono_literals;
 
 class TestClock : public QObject
@@ -75,7 +75,7 @@ void TestClock::systemClockIsUtcAndMonotonic()
 {
     SystemClock clock;
 
-    // UTC, whatever the machine's zone. Every timestamp libclima stores is a
+    // UTC, whatever the machine's zone. Every timestamp libclimat stores is a
     // UTC instant and a clock that answered in local time would put a cache
     // entry's expiry an hour out for half of Europe.
     QCOMPARE(clock.now().timeSpec(), Qt::UTC);

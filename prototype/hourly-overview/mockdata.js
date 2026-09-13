@@ -5,7 +5,7 @@
 // 48 hourly samples starting at 21:00. The values at the labelled indices are
 // hand-tuned to match the MSN screenshot this prototype is modelled on, so the
 // two can be compared side by side. Shape of the API deliberately mirrors what
-// libclima's ForecastProvider will return: parallel per-hour arrays plus derived
+// libclimat's ForecastProvider will return: parallel per-hour arrays plus derived
 // helpers, no formatting decisions baked in.
 .pragma library
 

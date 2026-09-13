@@ -20,7 +20,7 @@ Window {
     minimumWidth: 360
     minimumHeight: 480
     color: Theme.color.pageBg
-    title: qsTr("Clima (prototype)")
+    title: qsTr("Climat (prototype)")
 
     // ---- which shell -------------------------------------------------------
     // The window's width decides, and viewports.js owns the thresholds so the

@@ -58,9 +58,9 @@ jobs:
         run: |
           nix develop --command cmake -S . -B build/ci -G Ninja \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCLIMA_BUILD_TESTS=ON \
-            -DCLIMA_BUILD_GALLERY=ON \
-            -DCLIMA_DEV_TOOLS=ON
+            -DCLIMAT_BUILD_TESTS=ON \
+            -DCLIMAT_BUILD_GALLERY=ON \
+            -DCLIMAT_DEV_TOOLS=ON
 
       - name: Build
         run: nix develop --command cmake --build build/ci
@@ -84,8 +84,8 @@ jobs:
 
       # The two licence questions only a linked binary can answer: is a
       # GPLv3-only Qt module in the DT_NEEDED list, and is Qt linked
-      # dynamically. All FOUR shipped binaries — clima-cli is installed by the
-      # .deb and the MSI like the rest. cmake/ClimaLicenceGuard.cmake catches the way that mistake
+      # dynamically. All FOUR shipped binaries — climat-cli is installed by the
+      # .deb and the MSI like the rest. cmake/ClimatLicenceGuard.cmake catches the way that mistake
       # is normally made — a banned name in a find_package or a link line — and
       # cannot see a module that arrives through a QML import or another
       # module's dependency graph. This is risk R2 and R3 in
@@ -94,13 +94,13 @@ jobs:
       #
       # The script existed and nothing called it, which for a compliance check
       # is the same as it not existing. All FOUR shipped binaries, because
-      # clima-cli, clima-widget and clima-daemon are as much a release artefact
+      # climat-cli, climat-widget and climat-daemon are as much a release artefact
       # as the app.
       - name: Licence-compatible linking
         run: |
           nix develop --command bash scripts/check-licences.sh \
-            build/ci/app/clima build/ci/cli/clima-cli \
-            build/ci/daemon/clima-daemon build/ci/widgets/clima-widget
+            build/ci/app/climat build/ci/cli/climat-cli \
+            build/ci/daemon/climat-daemon build/ci/widgets/climat-widget
 
       # The desktop entry, the AppStream component and the icons, checked from
       # a staged install rather than from the templates — so this covers the
@@ -111,7 +111,7 @@ jobs:
       # it was told to install. The devshell carries appstreamcli,
       # desktop-file-validate and librsvg for exactly this step.
       - name: Packaging metadata
-        run: CLIMA_BUILD_DIR=build/ci nix develop --command bash scripts/check-packaging.sh
+        run: CLIMAT_BUILD_DIR=build/ci nix develop --command bash scripts/check-packaging.sh
 
       # The README's device images, re-rendered and diffed against what is
       # committed. They are composed out of the real shells at real breakpoints,
@@ -119,7 +119,7 @@ jobs:
       # layout the app stopped producing — the failure mode a screenshot pasted
       # into a README has always had and never reported.
       - name: README device images
-        run: CLIMA_BUILD_DIR=build/ci nix develop --command bash scripts/shots.sh check
+        run: CLIMAT_BUILD_DIR=build/ci nix develop --command bash scripts/shots.sh check
 
       # The desktop widgets, against a real compositor. `WLR_BACKENDS=headless
       # sway` needs no GPU, no seat and no display, and wlroots is the reference
@@ -127,12 +127,12 @@ jobs:
       # Sway story actually being exercised rather than compiled.
       #
       # It runs here rather than in `lint` for the reason the packaging step
-      # does: it needs a built clima-widget. The script skips, loudly, if sway
+      # does: it needs a built climat-widget. The script skips, loudly, if sway
       # cannot start on the runner at all — a machine that cannot host a
       # compositor has said nothing about this code — and fails for every other
       # reason.
       - name: Desktop widgets pin themselves
-        run: nix develop --command bash scripts/check-layer-shell.sh build/ci/widgets/clima-widget
+        run: nix develop --command bash scripts/check-layer-shell.sh build/ci/widgets/climat-widget
 
   # ---- a packager's build --------------------------------------------------
   #
@@ -166,9 +166,9 @@ jobs:
         run: |
           cmake -S . -B build/deb -G Ninja \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCLIMA_BUILD_TESTS=ON \
-            -DCLIMA_BUILD_GALLERY=ON \
-            -DCLIMA_DEV_TOOLS=ON
+            -DCLIMAT_BUILD_TESTS=ON \
+            -DCLIMAT_BUILD_GALLERY=ON \
+            -DCLIMAT_DEV_TOOLS=ON
 
       - name: Build
         run: cmake --build build/deb
@@ -216,9 +216,9 @@ jobs:
         run: >
           cmake -S . -B build/win -G Ninja
           -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          -DCLIMA_BUILD_TESTS=ON
-          -DCLIMA_BUILD_GALLERY=ON
-          -DCLIMA_DEV_TOOLS=ON
+          -DCLIMAT_BUILD_TESTS=ON
+          -DCLIMAT_BUILD_GALLERY=ON
+          -DCLIMAT_DEV_TOOLS=ON
 
       - name: Build
         run: cmake --build build/win
@@ -262,9 +262,9 @@ jobs:
         run: >
           cmake -S . -B build/mac -G Ninja
           -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          -DCLIMA_BUILD_TESTS=ON
-          -DCLIMA_BUILD_GALLERY=ON
-          -DCLIMA_DEV_TOOLS=ON
+          -DCLIMAT_BUILD_TESTS=ON
+          -DCLIMAT_BUILD_GALLERY=ON
+          -DCLIMAT_DEV_TOOLS=ON
 
       - name: Build
         run: cmake --build build/mac
@@ -366,10 +366,10 @@ jobs:
       - name: Configure, for qmllint
         run: |
           nix develop --command cmake -S . -B build/lint -G Ninja \
-            -DCLIMA_BUILD_TESTS=OFF -DCLIMA_BUILD_GALLERY=ON
+            -DCLIMAT_BUILD_TESTS=OFF -DCLIMAT_BUILD_GALLERY=ON
 
       - name: qmllint, as a ratchet
-        run: CLIMA_BUILD_DIR=build/lint nix develop --command bash scripts/check-qmllint.sh
+        run: CLIMAT_BUILD_DIR=build/lint nix develop --command bash scripts/check-qmllint.sh
 
   # ---- Android ---------------------------------------------------------------
   #
@@ -417,9 +417,9 @@ jobs:
         run: |
           "$QT_ROOT_DIR/bin/qt-cmake" -S . -B build/android -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCLIMA_BUILD_TESTS=OFF \
-            -DCLIMA_BUILD_GALLERY=OFF \
-            -DCLIMA_DEV_TOOLS=OFF \
+            -DCLIMAT_BUILD_TESTS=OFF \
+            -DCLIMAT_BUILD_GALLERY=OFF \
+            -DCLIMAT_DEV_TOOLS=OFF \
             -DQT_ANDROID_ABIS=arm64-v8a
 
       - name: Build the APK
@@ -427,6 +427,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: clima-apk
+          name: climat-apk
           path: build/android/app/android-build/build/outputs/apk/**/*.apk
           if-no-files-found: error

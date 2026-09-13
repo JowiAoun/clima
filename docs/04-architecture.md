@@ -9,7 +9,7 @@
    must never show an empty screen because an API is down — the documented failure mode of
    the current best Linux weather app.
 2. **Providers are pluggable and region-routed.** No provider name appears in UI code.
-3. **The engine has no GUI dependency.** `libclima` links Qt Core/Network only, so it can be
+3. **The engine has no GUI dependency.** `libclimat` links Qt Core/Network only, so it can be
    reused by a CLI, a Plasma applet, a GNOME extension, or a widget.
 4. **Uncertainty is a first-class data type.** Every forecast value can carry an ensemble
    spread and a per-model set. The UI is designed around that from the start rather than
@@ -22,10 +22,10 @@
 
 ```mermaid
 flowchart TB
-    subgraph UI["clima — QML UI (GPL-3.0-or-later)"]
+    subgraph UI["climat — QML UI (GPL-3.0-or-later)"]
         Shell["App shell · navigation · window chrome"]
         Views["Views: Home · Hourly · 10-Day · Map · AirQuality · History · Models"]
-        Charts["ClimaCharts — QQuickItem + QSGGeometryNode"]
+        Charts["ClimatCharts — QQuickItem + QSGGeometryNode"]
         MapView["MapView — MapLibre Native Qt"]
         Design["Design system: tokens, theming, motion, a11y"]
     end
@@ -38,7 +38,7 @@ flowchart TB
         SettingsVM["Settings"]
     end
 
-    subgraph Core["libclima — engine (MPL-2.0, no GUI)"]
+    subgraph Core["libclimat — engine (MPL-2.0, no GUI)"]
         Domain["Domain model: Observation · HourlyPoint · DailyPoint · Ensemble · Alert · Place"]
         Providers["Provider interfaces + registry (region routing, fallback chain)"]
         Cache["CacheStore — SQLite + tile cache, TTL + ETag"]
@@ -67,11 +67,11 @@ flowchart TB
 ## 4.3 Repository layout
 
 ```
-clima/
+climat/
 ├── CMakeLists.txt
 ├── LICENSES/                     # SPDX licence texts (REUSE-compliant)
 ├── docs/                         # this plan
-├── libclima/                     # MPL-2.0 engine, no Qt GUI
+├── libclimat/                     # MPL-2.0 engine, no Qt GUI
 │   ├── domain/                   # value types, units, WMO codes
 │   ├── providers/
 │   │   ├── iforecastprovider.h   # + iairquality, ialert, iradar, igeocode
@@ -86,13 +86,13 @@ clima/
 ├── app/                          # GPL-3.0-or-later
 │   ├── main.cpp
 │   ├── viewmodels/
-│   ├── charts/                   # ClimaCharts scene-graph items
+│   ├── charts/                   # ClimatCharts scene-graph items
 │   ├── qml/
 │   │   ├── views/  components/  theme/
 │   ├── fonts/                    # Inter, OFL-1.1 — the UI face, bundled
 │   └── assets/                   # Meteocons → generated QML
-├── gallery/                      # `clima-gallery` — every component on one screen, ships nowhere
-├── cli/                          # `clima-cli` — scriptable forecast output (built)
+├── gallery/                      # `climat-gallery` — every component on one screen, ships nowhere
+├── cli/                          # `climat-cli` — scriptable forecast output (built)
 ├── platform/
 │   ├── linux/                    # desktop file, appstream, portals, tray, Plasma applet
 │   ├── windows/                  # manifest, MSIX, jump list
@@ -103,7 +103,7 @@ clima/
 
 ## 4.4 Provider interfaces (sketch)
 
-<!-- The sketch below is libclima source, not documentation prose, so it carries -->
+<!-- The sketch below is libclimat source, not documentation prose, so it carries -->
 <!-- the engine's licence rather than this document's. REUSE snippet tags scope   -->
 <!-- that to the fence: the file stays CC-BY-SA-4.0, the code inside is MPL-2.0.  -->
 <!-- SPDX-SnippetBegin -->
@@ -111,8 +111,8 @@ clima/
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 
 ```cpp
-// libclima/providers/iforecastprovider.h
-namespace clima {
+// libclimat/providers/iforecastprovider.h
+namespace climat {
 
 struct ForecastRequest {
     Coordinate  coord;
@@ -136,7 +136,7 @@ public:
     virtual QFuture<Result<Forecast>> fetch(const ForecastRequest&) = 0;
 };
 
-} // namespace clima
+} // namespace climat
 ```
 
 <!-- SPDX-SnippetEnd -->
@@ -186,7 +186,7 @@ The line that brings that down is "stopped when hidden", which is why it is in t
 rather than in a comment. `app/viewmodels/alertsdata.h` owns the schedule; the measurements
 are in `tests/fixtures/alerts/README.md`.
 
-## 4.6 ClimaCharts — the chart kit
+## 4.6 ClimatCharts — the chart kit
 
 Each chart is a `QQuickItem` subclass implementing `updatePaintNode()`, building
 `QSGGeometryNode`s with the geometry held as a member of the node subclass (no
@@ -242,13 +242,13 @@ snapshots cross threads without locking.
 | Notifications | XDG Desktop Portal / `org.freedesktop.Notifications` | Toast + Action Center | Notification Center |
 | Autostart / background | `xdg-desktop-portal` Background + Autostart | Startup task | Login item |
 | Tray / status item | StatusNotifierItem (KDE/appindicator) | Tray icon with live temp | Menu-bar item with temp |
-| Widget / applet | **Plasma 6 applet** + **GNOME Shell extension** reusing `libclima` | Windows Widgets (post-1.0) | Today widget (post-1.0) |
+| Widget / applet | **Plasma 6 applet** + **GNOME Shell extension** reusing `libclimat` | Windows Widgets (post-1.0) | Today widget (post-1.0) |
 | Global shortcut | Portal GlobalShortcuts | — | — |
 | Search integration | KRunner plugin, GNOME Search Provider | — | Spotlight (post-1.0) |
 | Location | `Qt Positioning` → GeoClue2 | Windows Location | CoreLocation |
 | Theming | Follows Plasma/GNOME accent + dark mode, Wayland-native, CSD | System accent, Mica | Vibrancy, accent |
 
-The Plasma applet and GNOME extension are exactly why `libclima` is MPL-2.0 and GUI-free.
+The Plasma applet and GNOME extension are exactly why `libclimat` is MPL-2.0 and GUI-free.
 
 ## 4.10 Accessibility, i18n, units
 
@@ -264,7 +264,7 @@ The Plasma applet and GNOME extension are exactly why `libclima` is MPL-2.0 and 
 - Full keyboard navigation including chart scrubbing and radar timeline.
 - Respect `prefers-reduced-motion` equivalents; all animation is disable-able.
 - Qt Linguist `.ts` catalogues; translation via Weblate. WMO code → localised condition
-  strings live in `libclima` so the CLI and applets share them.
+  strings live in `libclimat` so the CLI and applets share them.
 - Units are per-quantity, not a global metric/imperial switch (people want °C with mph, or
   inHg with mm) — a lesson from every weather-app review comment section.
   - **Amended, and the rule is unchanged.** The preferences screen offers a °C and a °F

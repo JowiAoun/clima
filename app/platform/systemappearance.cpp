@@ -5,7 +5,7 @@
 #include <QGuiApplication>
 #include <QStyleHints>
 
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDBusVariant>
@@ -14,7 +14,7 @@
 
 namespace {
 
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
 constexpr auto portalService   = "org.freedesktop.portal.Desktop";
 constexpr auto portalPath      = "/org/freedesktop/portal/desktop";
 constexpr auto portalInterface = "org.freedesktop.portal.Settings";
@@ -74,7 +74,7 @@ QVariant readPortalSetting(const QString &nameSpace, const QString &key, bool *o
 
     return {};
 }
-#endif // CLIMA_HAVE_DBUS
+#endif // CLIMAT_HAVE_DBUS
 
 } // namespace
 
@@ -129,7 +129,7 @@ void SystemAppearance::readFromStyleHints()
 
 void SystemAppearance::connectToPortal()
 {
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
     if (!QDBusConnection::sessionBus().isConnected())
         return;
 
@@ -159,7 +159,7 @@ void SystemAppearance::connectToPortal()
 #endif
 }
 
-#ifdef CLIMA_HAVE_DBUS
+#ifdef CLIMAT_HAVE_DBUS
 void SystemAppearance::onSettingChanged(const QString &nameSpace, const QString &key,
                                         const QDBusVariant &value)
 {

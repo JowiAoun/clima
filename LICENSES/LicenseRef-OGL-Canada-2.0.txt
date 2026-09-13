@@ -7,7 +7,7 @@ Transcribed from https://open.canada.ca/en/open-government-licence-canada on
 a LicenseRef- entry.
 
 It applies to the Environment and Climate Change Canada weather-alert responses
-recorded in this repository — see REUSE.toml. The attribution statement Clima
+recorded in this repository — see REUSE.toml. The attribution statement Climat
 displays for them is returned by EcccAlertProvider::attribution() and rendered
 on the About screen.
 

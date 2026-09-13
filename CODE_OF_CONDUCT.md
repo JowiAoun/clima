@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: 2014 Coraline Ada Ehmke and Contributor Covenant contributors -->
-<!-- SPDX-FileCopyrightText: 2026 Clima contributors -->
+<!-- SPDX-FileCopyrightText: 2026 Climat contributors -->
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # Contributor Covenant Code of Conduct
@@ -64,7 +64,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement through
-[GitHub's private reporting](https://github.com/JowiAoun/clima/security/advisories/new)
+[GitHub's private reporting](https://github.com/JowiAoun/climat/security/advisories/new)
 or by opening a conversation with the repository owner.
 
 All complaints will be reviewed and investigated promptly and fairly. All

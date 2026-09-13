@@ -8,8 +8,8 @@
 // because nothing in it sleeps. That is the whole return on the injected clock:
 // "eleven minutes later" is a method call.
 
-#include "libclima/cache/cachestore.h"
-#include "libclima/core/clock.h"
+#include "libclimat/cache/cachestore.h"
+#include "libclimat/core/clock.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -17,7 +17,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 
-using namespace clima;
+using namespace climat;
 using namespace std::chrono_literals;
 
 class TestCacheStore : public QObject
@@ -415,7 +415,7 @@ void TestCacheStore::migrationToTheNextVersionKeepsTheData()
 
     // The next version the product does not have yet. Passing the migration
     // list in is what makes the *runner* testable without waiting for the
-    // schema to need another version — see libclima/cache/migrations.h. The
+    // schema to need another version — see libclimat/cache/migrations.h. The
     // number is one past whatever defaultMigrations() currently ends at, so
     // this test does not have to be edited every time the product migrates.
     const int current = highestVersion(defaultMigrations());
@@ -554,7 +554,7 @@ void TestCacheStore::aDatabaseFromTheFutureIsRefused()
         const Status status = store.open(path, defaultMigrations());
         QVERIFY(!status.hasValue());
         QCOMPARE(status.errorKind(), ErrorKind::Storage);
-        QVERIFY2(status.error().message().contains(QStringLiteral("newer Clima")),
+        QVERIFY2(status.error().message().contains(QStringLiteral("newer Climat")),
                  qPrintable(status.error().message()));
     }
 }

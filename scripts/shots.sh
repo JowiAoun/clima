@@ -7,7 +7,7 @@
 #   scripts/shots.sh              write docs/images/*.png
 #   scripts/shots.sh check        re-render to a temp dir and diff (CI gate)
 #
-# CLIMA_BUILD_DIR selects the build to photograph; it defaults to build/dev.
+# CLIMAT_BUILD_DIR selects the build to photograph; it defaults to build/dev.
 #
 # ---- the two capture profiles, and why they are different -------------------
 #
@@ -17,7 +17,7 @@
 # It is deliberately not the profile AppStream screenshots use. Flathub's
 # linter reads a marketing composite with a phone frame around it as excessive
 # whitespace and rejects it, so store screenshots are raw un-bezelled grabs
-# straight out of `clima --grab`. Two profiles, two purposes, and neither is a
+# straight out of `climat --grab`. Two profiles, two purposes, and neither is a
 # worse version of the other.
 #
 # ---- why these are still deterministic --------------------------------------
@@ -31,11 +31,11 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "$here/.." && pwd)"
 
-build_dir="${CLIMA_BUILD_DIR:-$root/build/dev}"
-binary="$build_dir/gallery/clima-gallery"
-widget_binary="$build_dir/widgets/clima-widget"
+build_dir="${CLIMAT_BUILD_DIR:-$root/build/dev}"
+binary="$build_dir/gallery/climat-gallery"
+widget_binary="$build_dir/widgets/climat-widget"
 images_dir="$root/docs/images"
-sheets_js="$root/gallery/qml/Clima/Gallery/shots.js"
+sheets_js="$root/gallery/qml/Climat/Gallery/shots.js"
 
 # The shot ids, read out of the catalogue rather than listed here. A third copy
 # of this list would be the one that goes stale — the C++ already keeps a second
@@ -91,17 +91,17 @@ export XDG_CACHE_HOME="$scratch/cache"
 # same rule the colour scheme follows in Main.qml, one preference over: a
 # capture pins what it photographs.
 # Both binaries, because both are photographed and they keep separate
-# preference files: `clima` and `clima-gallery` share an organisation and not an
+# preference files: `climat` and `climat-gallery` share an organisation and not an
 # application name, so a pin written for one leaves the other reading its
 # default. That is exactly how this was found — the seven gallery cards
 # carrying a time moved while every app image held still.
 #
-# clima-widget needs no line of its own: it deliberately answers to the app's
+# climat-widget needs no line of its own: it deliberately answers to the app's
 # application name so that a tile prints the units and the clock the reader
 # chose, which is the whole of docs/widgets.md's preferences section.
-mkdir -p "$XDG_CONFIG_HOME/Clima"
-for clima_binary in clima clima-gallery; do
-  printf '[time]\nformat=12h\n' > "$XDG_CONFIG_HOME/Clima/$clima_binary.ini"
+mkdir -p "$XDG_CONFIG_HOME/Climat"
+for climat_binary in climat climat-gallery; do
+  printf '[time]\nformat=12h\n' > "$XDG_CONFIG_HOME/Climat/$climat_binary.ini"
 done
 
 # ---- the desktop tiles ------------------------------------------------------

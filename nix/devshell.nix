@@ -32,7 +32,7 @@ let
     qt6.qttools
 
     # The Wayland platform plugin. Not needed to build anything and needed to
-    # run one thing: `clima-widget --pin`, which asks a compositor for a
+    # run one thing: `climat-widget --pin`, which asks a compositor for a
     # desktop-layer surface and can only do that over Wayland. Without this
     # module Qt has no `wayland` platform plugin at all and the layer-shell
     # path could be compiled here and never once executed — which is the exact
@@ -42,7 +42,7 @@ let
 in
 
 pkgs.mkShell {
-  name = "clima-dev";
+  name = "climat-dev";
 
   # Grouped by what they are for. An alphabetical list would sort nicely and
   # stop telling you why anything is in it, and this list only grows.
@@ -52,13 +52,13 @@ pkgs.mkShell {
     # calls it directly: qtdeclarative's own build needs it, and `qsb` is how
     # any ShaderEffect we write gets compiled ahead of time. qtpositioning is
     # "use my location" via GeoClue2 — optional at configure time, since
-    # libclima/CMakeLists.txt compiles the feature out when it is absent and a
+    # libclimat/CMakeLists.txt compiles the feature out when it is absent and a
     # packager is entitled to leave it out, but present here so the code path
     # is actually built somewhere. A feature nobody in CI compiles is a feature
     # that stops compiling.
 
     # Desktop widgets on KDE and on every wlroots compositor. This is the
-    # `zwlr_layer_shell_v1` client half: it turns clima-widget's window into a
+    # `zwlr_layer_shell_v1` client half: it turns climat-widget's window into a
     # surface the compositor pins to a layer of the desktop, which is what
     # GNOME needs a whole shell extension to do. Optional at configure time in
     # exactly the same way — widgets/CMakeLists.txt compiles --pin out when it
@@ -177,26 +177,26 @@ pkgs.mkShell {
     export QML2_IMPORT_PATH="$QML_IMPORT_PATH"
 
     # Everything else about this Qt — QML_IMPORT_PATH, QT_PLUGIN_PATH, and the
-    # CLIMA_QT_PREFIX that a CMake configure wants — comes from the same script
+    # CLIMAT_QT_PREFIX that a CMake configure wants — comes from the same script
     # the prototype's run.sh uses, so the shell and a bare terminal cannot
     # disagree about which Qt is in play or how it is set up. Both exports above
     # survive it: every assignment in there honours a value already set.
-    clima_root="$PWD"
+    climat_root="$PWD"
     if command -v git > /dev/null 2>&1; then
-      clima_root="$(git rev-parse --show-toplevel 2> /dev/null || printf '%s' "$PWD")"
+      climat_root="$(git rev-parse --show-toplevel 2> /dev/null || printf '%s' "$PWD")"
     fi
-    if [ -r "$clima_root/scripts/qt-env.sh" ]; then
+    if [ -r "$climat_root/scripts/qt-env.sh" ]; then
       # shellcheck source=/dev/null
-      . "$clima_root/scripts/qt-env.sh"
-      clima_qt_env || echo "clima: scripts/qt-env.sh found no qml — the shell is still usable" >&2
+      . "$climat_root/scripts/qt-env.sh"
+      climat_qt_env || echo "climat: scripts/qt-env.sh found no qml — the shell is still usable" >&2
     fi
-    unset clima_root
+    unset climat_root
 
     # Which Qt got picked matters only when something is wrong with the pick, so
-    # saying so is opt-in — the same bargain run.sh makes with CLIMA_VERBOSE.
-    if [ -n "''${CLIMA_VERBOSE:-}" ]; then
-      echo "clima-dev: qml $CLIMA_QML_BIN" >&2
-      echo "clima-dev: qt prefix $CLIMA_QT_PREFIX" >&2
+    # saying so is opt-in — the same bargain run.sh makes with CLIMAT_VERBOSE.
+    if [ -n "''${CLIMAT_VERBOSE:-}" ]; then
+      echo "climat-dev: qml $CLIMAT_QML_BIN" >&2
+      echo "climat-dev: qt prefix $CLIMAT_QT_PREFIX" >&2
     fi
   '';
 }

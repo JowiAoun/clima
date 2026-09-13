@@ -38,13 +38,13 @@
 //
 // ---- what this file is *not* any more ---------------------------------------
 // `--gallery`, `--card` and `--details` used to be here. They are the component
-// gallery's flags and the component gallery is `clima-gallery` now, so they
+// gallery's flags and the component gallery is `climat-gallery` now, so they
 // went with it: the weather app rejects all three, and rejects them by name
 // rather than ignoring them, which is what QCommandLineParser does with a flag
 // it was never told about.
 //
 // ---- every property is declared unconditionally ------------------------------
-// Half these flags are CLIMA_DEV_TOOLS-only (see the FLAG DISPOSITION comment
+// Half these flags are CLIMAT_DEV_TOOLS-only (see the FLAG DISPOSITION comment
 // in the .cpp). Only their *registration with the parser* is conditional: the
 // properties themselves always exist, so QML can read AppOptions.metric in
 // every build and get "" in the ones where the flag was never offered. The
@@ -134,7 +134,7 @@ public:
     // order between them is the interesting part:
     //
     //   1. --fixture <name>, or --fixture off, which always wins
-    //   2. CLIMA_FIXTURE in the environment, which is how CI says it once for
+    //   2. CLIMAT_FIXTURE in the environment, which is how CI says it once for
     //      a whole job rather than on every command
     //   3. a capture — --grab or --film — which defaults to the fixture,
     //      because a screenshot taken from the live network is a screenshot of
