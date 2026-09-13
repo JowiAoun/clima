@@ -144,16 +144,27 @@ void AlertsData::setSettings(Settings *settings)
     // and off is what stops it. Without this the change would take effect the
     // next time the window was shown and hidden, which is a preference that
     // appears not to work.
+    //
+    // Unique because this is a singleton whose setSettings() is called again
+    // on every test's init(), and a second connection would run the handler
+    // twice. Qt honours Qt::UniqueConnection only for a pointer to a member
+    // function: hand it a lambda and it does not dedupe, it asserts — so the
+    // handler below is a member, not the functor this began as.
     if (m_settings != nullptr) {
-        connect(m_settings, &Settings::alertNotificationsChanged, this, [this]() {
-            reschedule();
-            // And take down, or put up, what the switch has just changed the
-            // answer for. reschedule() alone left a notification on screen
-            // after the reader turned the preference off, until whatever
-            // happened next called rebuild().
-            rebuild();
-        }, Qt::UniqueConnection);
+        connect(m_settings, &Settings::alertNotificationsChanged,
+                this, &AlertsData::applyNotificationPreference,
+                Qt::UniqueConnection);
     }
+}
+
+void AlertsData::applyNotificationPreference()
+{
+    reschedule();
+    // And take down, or put up, what the switch has just changed the answer
+    // for. reschedule() alone left a notification on screen after the reader
+    // turned the preference off, until whatever happened next called
+    // rebuild().
+    rebuild();
 }
 
 QDateTime AlertsData::now() const

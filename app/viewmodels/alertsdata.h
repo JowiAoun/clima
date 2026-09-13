@@ -247,6 +247,13 @@ private:
 
     void reschedule();
 
+    // What `alertNotificationsChanged` runs. A named member rather than the
+    // lambda this used to be, because the connection is a Qt::UniqueConnection
+    // and Qt only honours that for a pointer to a member function — with a
+    // functor it asserts, which aborted every Debug build the moment
+    // setSettings() ran. See the connect in setSettings().
+    void applyNotificationPreference();
+
     // Posts for what is newly worth posting for, withdraws what has ended.
     // Called from rebuild(), which is the one place that knows what is
     // displayable at this minute.
