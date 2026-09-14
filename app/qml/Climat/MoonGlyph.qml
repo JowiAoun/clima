@@ -11,7 +11,7 @@ Item {
     property real glyphSize: 15
     property real illuminated: 0.74
 
-    // Which limb is lit — see chartmath.js. Waxing by default so a caller that
+    // Which limb is lit - see chartmath.js. Waxing by default so a caller that
     // has not got the answer draws what this glyph always drew.
     property bool waxing: true
 

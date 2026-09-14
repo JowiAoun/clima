@@ -6,7 +6,7 @@
 #
 #   scripts/dbus-test.sh build/dev/tests/tst_portallocator [args…]
 #
-# Two tests need this — tst_portallocator and tst_notifier — because both OWN
+# Two tests need this - tst_portallocator and tst_notifier - because both OWN
 # a well-known name that belongs to the desktop: org.freedesktop.portal.Desktop
 # and org.freedesktop.Notifications. A test that took either of those on the
 # developer's real bus would be taking it from the desktop, and a test that
@@ -19,7 +19,7 @@
 # `dbus-run-session` starts a private bus, but a private bus still reads
 # service files out of XDG_DATA_HOME and XDG_DATA_DIRS. On any desktop machine
 # that means /usr/share/dbus-1/services, which contains
-# org.freedesktop.portal.Desktop.service — so the moment the test asked for
+# org.freedesktop.portal.Desktop.service - so the moment the test asked for
 # that name, the bus activated the host's actual xdg-desktop-portal to provide
 # it, and the test found itself talking to the real portal on a bus it thought
 # was empty. Both variables are pointed at a scratch directory with nothing in
@@ -28,7 +28,7 @@
 # ---- 2. LD_LIBRARY_PATH must not shadow the tool's own libraries ------------
 #
 # `dbus-run-session` is linked against the libdbus that shipped with it, by
-# RUNPATH — and LD_LIBRARY_PATH beats RUNPATH. A desktop session that exports
+# RUNPATH - and LD_LIBRARY_PATH beats RUNPATH. A desktop session that exports
 # one (this developer's does, by way of an unrelated application) hands the
 # 1.16 tool a 1.14 library and it dies with `version LIBDBUS_PRIVATE_1.16.2
 # not found`. Nix binaries carry their dependencies in RUNPATH and need no
@@ -71,7 +71,7 @@ scratch="$(mktemp -d)"
 # cleanup is explicit and the exit status is carried by hand instead.
 cleanup() { rm -rf "$scratch"; }
 
-# Both: the trap covers this script being killed — a ctest timeout, a Ctrl-C —
+# Both: the trap covers this script being killed - a ctest timeout, a Ctrl-C -
 # and the explicit call at the end covers the ordinary path. `rm -rf` on a
 # directory already gone is silent, so running twice costs nothing.
 trap cleanup EXIT

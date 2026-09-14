@@ -19,12 +19,12 @@
 // Every other kind may be served past its TTL while a fresh copy is fetched,
 // because "the UI must never show an empty screen because an API is down" is
 // design principle 1. Alerts are the exception, and §4.5 marks that row with a
-// warning sign and the words "never show an expired alert" — showing a stale
+// warning sign and the words "never show an expired alert" - showing a stale
 // forecast reads as "updated 25 minutes ago", and showing a stale tornado
 // warning reads as a tornado warning.
 //
 // So it is asserted twice below: once as that row's value, and once as a
-// property of the whole table — Alerts is the ONLY kind with the flag off. The
+// property of the whole table - Alerts is the ONLY kind with the flag off. The
 // second form is the one that survives a well-meant "make the caching
 // consistent" pass, because it fails when a second row is turned off just as
 // loudly as when this one is turned on.
@@ -50,8 +50,8 @@ using namespace std::chrono_literals;
 namespace {
 
 // Every kind, as a list, so a loop cannot fall out of step with the enum. There
-// is no Count sentinel on DataKind — adding one now would be changing the
-// subject to suit the test — so this is written out and the totality check
+// is no Count sentinel on DataKind - adding one now would be changing the
+// subject to suit the test - so this is written out and the totality check
 // below is what catches a kind added without a row here.
 QList<DataKind> allKinds()
 {
@@ -103,7 +103,7 @@ private Q_SLOTS:
 };
 
 // ============================================================================
-// The table itself, transcribed a second time — deliberately, and from the
+// The table itself, transcribed a second time - deliberately, and from the
 // document rather than from the code. Two independent transcriptions of one
 // source disagree loudly; a test that read policyFor() to decide what
 // policyFor() should return would agree with anything.
@@ -188,7 +188,7 @@ void TestCachePolicy::alertsDeferToTheCapMessagesOwnLifetime()
 {
     // The three-minute TTL decides how often we ASK. What decides how long a
     // warning is valid is the CAP message's own <sent>/<expires>, and
-    // Revalidation::CapLifetime is how that is said in this table — anything
+    // Revalidation::CapLifetime is how that is said in this table - anything
     // else here would mean a computed expiry could outlive an issuer's.
     QCOMPARE(policyFor(DataKind::Alerts).revalidation, Revalidation::CapLifetime);
     QCOMPARE(policyFor(DataKind::Alerts).ttl, std::chrono::seconds(3min));
@@ -207,7 +207,7 @@ void TestCachePolicy::onlyTheEndpointsWithAValidatorAskForOne()
 {
     // A conditional request against an endpoint that sends no validator is a
     // full-price fetch with an extra header on it. §4.5 gives ETags to the two
-    // forecast rows and to nothing else — verified against the live services
+    // forecast rows and to nothing else - verified against the live services
     // and recorded in tests/fixtures/alerts/README.md, which notes that
     // api.weather.gc.ca sends no ETag, no Last-Modified and no Cache-Control.
     QSet<int> tagged;
@@ -266,7 +266,7 @@ void TestCachePolicy::anImmutableKindLeavesItsTtlAtZeroSoAReaderCannotBelieveIt(
 {
     // "`ttl` is meaningless when this is set and is left at zero so that a
     // caller who reads it anyway gets an obviously wrong answer rather than a
-    // plausible one" — cachepolicy.h. A caller that ignores `immutable` and
+    // plausible one" - cachepolicy.h. A caller that ignores `immutable` and
     // adds the TTL gets the fetch instant back, which is expired, which fails
     // in the direction of refetching rather than of caching forever by
     // accident.
@@ -347,7 +347,7 @@ void TestCachePolicy::aNameFromANewerClimatIsRejectedRatherThanGuessed()
     //
     // The value matters less than the flag, but both are asserted: a caller
     // that forgets to check `ok` gets a Forecast policy, which is a
-    // thirty-minute TTL with revalidation — the safe direction for an unknown
+    // thirty-minute TTL with revalidation - the safe direction for an unknown
     // payload, not a thirty-day one.
     for (const QString &name : { QStringLiteral("nowcast-v2"), QStringLiteral(""),
                                  QStringLiteral("Forecast"), QStringLiteral("ALERTS"),
@@ -422,7 +422,7 @@ void TestCachePolicy::anInvalidFetchTimeCannotProduceAValidExpiry()
 {
     // A row whose `fetched_at` column was NULL or unparseable. QDateTime::
     // addSecs on an invalid instant stays invalid, so such a row reads as
-    // "never expires" to a caller testing validity — which is why every read
+    // "never expires" to a caller testing validity - which is why every read
     // path checks the fetch instant too, and why this is asserted rather than
     // assumed: the failure is a cache entry that is never refreshed again.
     const QDateTime nothing;
@@ -435,7 +435,7 @@ void TestCachePolicy::expiryKeepsTheTimeZoneItWasGiven()
 {
     // addSecs preserves the time spec, and the cache compares expiry against
     // Clock::now(), which is UTC. A local-time expiry compared against a UTC
-    // now is wrong by the offset — five hours in Toronto, which is ten TTLs for
+    // now is wrong by the offset - five hours in Toronto, which is ten TTLs for
     // current conditions.
     const QDateTime local{ QDate(2026, 8, 5), QTime(14, 5), QTimeZone("America/Toronto") };
     const QDateTime expiry = expiryFor(DataKind::CurrentConditions, local);

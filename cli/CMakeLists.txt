@@ -6,8 +6,8 @@
 # docs/04-architecture.md §4.3 has had a `cli/` directory in its layout since
 # the plan was written and docs/05-feature-parity.md §5.6 lists the tool as a
 # differentiator the Linux audience will love; this is the first time either
-# has been true. One file, because everything it does is done by libclimat —
-# the providers, the cache, the places, the units — and what is left is
+# has been true. One file, because everything it does is done by libclimat -
+# the providers, the cache, the places, the units - and what is left is
 # parsing a command line and printing.
 #
 # ---- what this target may link ----------------------------------------------

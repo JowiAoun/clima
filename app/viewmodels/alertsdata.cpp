@@ -38,8 +38,8 @@ constexpr int kPollMeteredMs = 15 * 60 * 1000;
 constexpr int kPollHiddenNotifyingMs = 15 * 60 * 1000;
 
 // The separator inside one stored acknowledgement. A unit separator rather than
-// a comma or a pipe, because the key it has to survive is an NWS URN — colons,
-// dots and digits — and picking a printable delimiter is picking one that will
+// a comma or a pipe, because the key it has to survive is an NWS URN - colons,
+// dots and digits - and picking a printable delimiter is picking one that will
 // eventually appear in the data.
 const QChar kFieldSeparator = QChar(0x1f);
 
@@ -47,7 +47,7 @@ const QChar kFieldSeparator = QChar(0x1f);
 //
 // QLocale::ShortFormat on a whole QDateTime was the obvious thing and it is
 // wrong twice over. It prints the date every time, so a warning ending tonight
-// read "Until 05/08/2026 23:00" — six characters of information wrapped in
+// read "Until 05/08/2026 23:00" - six characters of information wrapped in
 // eleven of noise, on the one line of the banner that has to survive elision.
 // And under LC_ALL=C.UTF-8, which is what every capture and every CI run uses,
 // it renders as "7 08 2026 05:00": a date nobody can read at a glance and one
@@ -60,7 +60,7 @@ const QChar kFieldSeparator = QChar(0x1f);
 //
 // It used to be QLocale::ShortFormat on the QTime, which is the half of the
 // paragraph above that survived. That was the only clock in this application
-// that followed the locale — every other one hardcoded a 12-hour spelling — so
+// that followed the locale - every other one hardcoded a 12-hour spelling - so
 // under a C locale the chart said "3 PM" and the banner underneath it said
 // "23:00", in the same window, in the same second. Neither was a decision.
 //
@@ -148,7 +148,7 @@ void AlertsData::setSettings(Settings *settings)
     // Unique because this is a singleton whose setSettings() is called again
     // on every test's init(), and a second connection would run the handler
     // twice. Qt honours Qt::UniqueConnection only for a pointer to a member
-    // function: hand it a lambda and it does not dedupe, it asserts — so the
+    // function: hand it a lambda and it does not dedupe, it asserts - so the
     // handler below is a member, not the functor this began as.
     if (m_settings != nullptr) {
         connect(m_settings, &Settings::alertNotificationsChanged,
@@ -176,13 +176,13 @@ QDateTime AlertsData::now() const
     //
     // AND THERE IS NO FALLBACK, deliberately. The first version of this ended
     // `: QDateTime::currentDateTimeUtc()`, and tests/tst_sourcerules.cpp
-    // refused it — correctly. A fallback to the wall clock is not a safety net,
+    // refused it - correctly. A fallback to the wall clock is not a safety net,
     // it is the exact failure the rule exists to prevent: a run that forgot to
     // set the clock would keep working, look right, and quietly judge a
     // recorded alert against today.
     //
     // An invalid instant instead. Alert::phaseAt() answers Ended for it, so a
-    // clockless model shows nothing at all — which is wrong in the direction
+    // clockless model shows nothing at all - which is wrong in the direction
     // that is visible, and says so on stderr.
     if (m_clock == nullptr) {
         qWarning("climat: the alert model has no clock; no alert can be displayed");
@@ -222,7 +222,7 @@ void AlertsData::rebuild()
 
     // THE line. Everything the screen shows is filtered against the clock, so a
     // set that arrived from a cache written yesterday cannot put an ended
-    // warning on the screen today — see the header.
+    // warning on the screen today - see the header.
     const QList<Alert> shown = m_set.displayableAt(instant);
 
     QVariantList built;
@@ -244,8 +244,8 @@ void AlertsData::announce(const QList<Alert> &shown)
 {
     // The preference first, and it gates the bookkeeping as well as the
     // posting. rebuild() runs every minute whether or not anything was
-    // fetched — that is what makes an alert leave the screen when its hazard
-    // ends — so a hazard reaching its onset under a hidden window would
+    // fetched - that is what makes an alert leave the screen when its hazard
+    // ends - so a hazard reaching its onset under a hidden window would
     // otherwise announce itself with the switch turned off, having never been
     // polled for at all.
     //
@@ -267,14 +267,14 @@ void AlertsData::announce(const QList<Alert> &shown)
         // The hazard, not the message. NWS re-sends an alert in full under a
         // new id on every update and carries the id it replaces in
         // `references`, so nwsalertprovider builds identityKeys as [own id,
-        // referenced id] — a two-element chain, one hop long.
+        // referenced id] - a two-element chain, one hop long.
         //
         // Which means recognising an update takes two things, and the first
         // version of this did only one of them. Looking the incoming keys up
         // in what has been announced is necessary; RECORDING every one of them
         // is what makes the next hop match. Keyed on one, the chain
         // k1 → [k2,k1] → [k3,k2] recognised the second message and not the
-        // third, because k2 was never written down — so a long-running warning
+        // third, because k2 was never written down - so a long-running warning
         // re-interrupted the reader on every other update instead of every
         // update. acknowledge() below has always stored an entry per key; this
         // now does the same.
@@ -287,7 +287,7 @@ void AlertsData::announce(const QList<Alert> &shown)
         // What this hazard's announcement already knows, found through any of
         // the keys it answers to. The canonical key is CARRIED rather than
         // re-derived: picking "the first incoming key that is already known"
-        // walks down the chain — k1, then k1, then k2, then k3 — so the raise
+        // walks down the chain - k1, then k1, then k2, then k3 - so the raise
         // at the end of a long chain addressed a key the notification was
         // never posted under, and the desktop opened a second popup beside the
         // first instead of replacing it.
@@ -319,7 +319,7 @@ void AlertsData::announce(const QList<Alert> &shown)
 
         // The reader is looking at the banner, which says everything a
         // notification would and says it better. Recorded as told all the same
-        // — that is what stops a minimise from firing a notification for every
+        // - that is what stops a minimise from firing a notification for every
         // warning they were just reading.
         if (m_visible)
             continue;
@@ -331,7 +331,7 @@ void AlertsData::announce(const QList<Alert> &shown)
             continue;
 
         // The banner's own two lines: what it is, and until when. Not the
-        // description — a notification is a summons to look, and CAP
+        // description - a notification is a summons to look, and CAP
         // descriptions run to paragraphs.
         const QVariantMap shape = toVariant(alert);
         m_notifier->notify(canonical, alert.event,
@@ -351,8 +351,8 @@ void AlertsData::announce(const QList<Alert> &shown)
     // about weather that is over.
     //
     // Collected first and erased before anything is emitted: withdraw() emits
-    // a public signal, and a slot that reached back into this object — any
-    // path to rebuild(), apply(), clear() or acknowledge() — would invalidate
+    // a public signal, and a slot that reached back into this object - any
+    // path to rebuild(), apply(), clear() or acknowledge() - would invalidate
     // an iterator being held across it.
     // The CANONICAL keys of what has gone, deduplicated: one hazard holds an
     // entry per id it answers to, and only one of those was ever posted.
@@ -414,7 +414,7 @@ QVariantMap AlertsData::toVariant(const Alert &alert) const
     map[QStringLiteral("web")]         = alert.web.toString();
 
     // Both, always. `severityKey` indexes Theme.severity and `issuerLabel` is
-    // what the reader recognises — "yellow warning" is what weather.gc.ca
+    // what the reader recognises - "yellow warning" is what weather.gc.ca
     // showed them, and "Moderate" is a word they have never seen about weather.
     map[QStringLiteral("severityKey")]  = alertSeverityKey(alert.severity);
     map[QStringLiteral("severityName")] = alertSeverityName(alert.severity);
@@ -436,7 +436,7 @@ QVariantMap AlertsData::toVariant(const Alert &alert) const
     }
     map[QStringLiteral("when")] = when;
 
-    // Past the issuer's refresh deadline. Not a reason to hide anything — the
+    // Past the issuer's refresh deadline. Not a reason to hide anything - the
     // banner reads it together with `unconfirmed` below, which is the half that
     // knows whether the poll actually failed.
     map[QStringLiteral("pastDeadline")] = alert.isPastRefreshDeadline(instant);
@@ -457,7 +457,7 @@ bool AlertsData::isUnconfirmed() const
     //
     // Past `expires` alone is routine: the issuer is simply due to speak again,
     // and they usually have. It only becomes something to tell the user about
-    // when our last attempt to hear them FAILED — at which point we are holding
+    // when our last attempt to hear them FAILED - at which point we are holding
     // a message its author has already disowned, and saying nothing would be
     // silently keeping it.
     //
@@ -630,7 +630,7 @@ void AlertsData::setWindowState(bool visible, bool focused)
     reschedule();
 
     // Showing or hiding the window changes what is worth interrupting somebody
-    // for, so the announcement pass has to run again — opening the window is
+    // for, so the announcement pass has to run again - opening the window is
     // what takes a notification down, and nothing else would do it until the
     // next minute tick. Only on the visibility change: focus moves several
     // times a minute and does not affect it.
@@ -643,7 +643,7 @@ void AlertsData::setWindowState(bool visible, bool focused)
     // the set on screen is as old as the moment the window was hidden. A
     // warning issued while the app sat in the dock would then be absent from
     // the banner for a further three minutes after the reader brought it back
-    // — which is the one moment the banner exists for.
+    // - which is the one moment the banner exists for.
     //
     // The minute tick does not cover this and cannot: it re-filters what is
     // already held against the clock, so it retires a hazard that has ENDED and

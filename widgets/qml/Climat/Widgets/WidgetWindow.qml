@@ -9,7 +9,7 @@
 // Because a GNOME Shell extension adopts *a window*, and because six tiles in
 // one process is about 95 MB against six processes at about 280 MB. The
 // extension spawns this once, adopts what appears, types it as a dock and pins
-// it to the bottom of the stack — the DING pattern, measured on a real shell in
+// it to the bottom of the stack - the DING pattern, measured on a real shell in
 // docs/widgets.md.
 //
 // ============================================================================
@@ -40,7 +40,7 @@ Window {
     // `--pin` asks the compositor for a desktop-layer surface, and that request
     // has to be made before the window has a platform surface at all. A
     // `visible: true` here creates one during component completion, which is
-    // before main() gets the chance — and the failure is silent: the tiles
+    // before main() gets the chance - and the failure is silent: the tiles
     // appear as an ordinary window, in the middle of the screen, above
     // everything, and nothing says why. See widgets/layershell.h.
     visible: false
@@ -68,7 +68,7 @@ Window {
                                            : SystemAppearance.colorScheme
     }
 
-    // A tile draws no sky, so there is no star field to thin out — but the
+    // A tile draws no sky, so there is no star field to thin out - but the
     // token is read by the components this module shares with the app, and
     // leaving it at "full" would be a claim rather than a default.
     Binding {

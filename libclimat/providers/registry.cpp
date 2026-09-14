@@ -21,7 +21,7 @@ struct Box {
 };
 
 // Loose, and loose on purpose. These decide whether a national service is worth
-// *asking*, not whether it has data — the service answers that, with a 404, and
+// *asking*, not whether it has data - the service answers that, with a 404, and
 // a box tight enough to be a coastline would be a box that has to be maintained.
 //
 // The United States gets three: the contiguous states, Alaska, and a Pacific
@@ -53,7 +53,7 @@ const QList<Box> &boxesFor(Region region)
 }
 
 // The failure the whole chain reports, built from the walk. The first error is
-// the one that survives — see registry.h — and the rest are appended so the
+// the one that survives - see registry.h - and the rest are appended so the
 // message reads as a story rather than as one arbitrary sentence.
 Error chainError(const QList<ProviderFailure> &failures, const QString &product)
 {
@@ -72,14 +72,14 @@ Error chainError(const QList<ProviderFailure> &failures, const QString &product)
 
     QString message = primary.message();
     if (!tail.isEmpty()) {
-        message = QStringLiteral("%1 (fallbacks also failed — %2)")
+        message = QStringLiteral("%1 (fallbacks also failed - %2)")
                       .arg(message, tail.join(QStringLiteral("; ")));
     }
 
     // Rebuilt rather than copy-and-append, so that the kind, the provider id
     // and the HTTP status are carried over deliberately. An earlier version
     // copied the primary error, set its provider id, and then returned a *new*
-    // error built from the kind and the message — dropping the id it had just
+    // error built from the kind and the message - dropping the id it had just
     // set. The kind survived, so nothing branched wrongly and no test that was
     // not asking about the id noticed.
     Error error(primary.kind(), message);
@@ -368,7 +368,7 @@ QList<IAlertProvider *> ProviderRegistry::alertChain(Coordinate coord) const
 
 Capabilities ProviderRegistry::alertCapabilitiesAt(Coordinate coord) const
 {
-    // The union, which is right here and wrong for the other two — see the
+    // The union, which is right here and wrong for the other two - see the
     // header. Undetermined is unioned too and then cleared where it overlaps
     // available, which Capabilities' constructor does: one provider knowing it
     // has alerts here settles the question for the place, whatever a second
@@ -385,9 +385,9 @@ Capabilities ProviderRegistry::alertCapabilitiesAt(Coordinate coord) const
 
 QList<const IProvider *> ProviderRegistry::providers() const
 {
-    // Deduplicated by id, because one source can serve two products —
+    // Deduplicated by id, because one source can serve two products -
     // Open-Meteo is the forecast provider and the air-quality provider, on two
-    // hosts, under one id — and the About screen credits a source once.
+    // hosts, under one id - and the About screen credits a source once.
     QList<const IProvider *> all;
     QStringList              seen;
 
@@ -507,7 +507,7 @@ QFuture<Result<AlertAnswer>> ProviderRegistry::fetchAlerts(const AlertRequest &r
         const bool nobodyServed = state->servedBy.isEmpty();
 
         if (nobodyServed && state->failures.isEmpty()) {
-            // Everything that was asked declined. Not an error worth showing —
+            // Everything that was asked declined. Not an error worth showing -
             // the same answer as an empty chain.
             Error error(ErrorKind::Unsupported,
                         QStringLiteral("no alert provider covers %1")
@@ -540,7 +540,7 @@ QFuture<Result<AlertAnswer>> ProviderRegistry::fetchAlerts(const AlertRequest &r
         answer.failures = state->failures;
 
         // Deliberately left false. There is no fallback here to have taken
-        // over, and setting it would put "showing NWS — ECCC is unavailable" on
+        // over, and setting it would put "showing NWS - ECCC is unavailable" on
         // a screen where both were asked and one simply had nothing to say.
         answer.fromFallback = false;
 
@@ -558,7 +558,7 @@ QFuture<Result<AlertAnswer>> ProviderRegistry::fetchAlerts(const AlertRequest &r
 
                     for (const Alert &alert : part.alerts) {
                         // Keys are provider-prefixed, so a duplicate across two
-                        // services cannot happen — this is a guard against one
+                        // services cannot happen - this is a guard against one
                         // provider repeating itself, which a merge of two
                         // paginated answers could one day do.
                         const bool known =

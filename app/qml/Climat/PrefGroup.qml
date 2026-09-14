@@ -8,7 +8,7 @@
 //       PrefRow { … }
 //   }
 //
-// Children go straight in — the default property is the column's — and the group
+// Children go straight in - the default property is the column's - and the group
 // takes its height from them.
 //
 // ---- why this is not MobileCard ----------------------------------------------
@@ -21,7 +21,7 @@
 // nothing when pressed. Every platform's own settings list draws the row edge to
 // edge for that reason.
 //
-// So the padding moves from the card to the row — PrefRow owns `padH` — and this
+// So the padding moves from the card to the row - PrefRow owns `padH` - and this
 // is the shell that lets it. The two files are also not the same shape of thing:
 // MobileCard is a *mobile* card with a link-out affordance and a bleed mode,
 // and this one appears on the desktop too.
@@ -32,7 +32,7 @@
 // rule against the bottom edge of a card is a second card edge one pixel inside
 // the first, and the row that needs it switched off is the one most likely to be
 // added or moved. `Column.children` is the list, so the group can always answer
-// which one is last — which is exactly the kind of thing a caller should not
+// which one is last - which is exactly the kind of thing a caller should not
 // have to keep in step.
 import QtQuick
 
@@ -49,7 +49,7 @@ Item {
     height: implicitHeight
 
     // No border in dark, a hairline in light. `line.card` is the token that
-    // carries that difference — §10.1's exception, written down in themelight.js
+    // carries that difference - §10.1's exception, written down in themelight.js
     // rather than branched on here.
     Rectangle {
         anchors.fill: parent
@@ -59,8 +59,8 @@ Item {
         border.color: Theme.line.card
 
         // The rows run edge to edge, so the bottom one would square off the
-        // card's rounded corners if anything drew outside them. Nothing does —
-        // the last row has no wash of its own at rest — but a hover on it would,
+        // card's rounded corners if anything drew outside them. Nothing does -
+        // the last row has no wash of its own at rest - but a hover on it would,
         // so the corners are clipped.
         clip: true
     }
@@ -103,13 +103,13 @@ Item {
 
     // Assigns rather than binds, which is the one thing to know about it: a
     // caller that binds `ruled` on a row will have the binding destroyed here.
-    // Nothing does, and nothing should — which row is last is this group's
+    // Nothing does, and nothing should - which row is last is this group's
     // question, not the row's.
     //
     // "Last" is the last child that is a row, in declaration order, and
     // deliberately not the last VISIBLE one. Effective visibility is false for
     // every item in a window that has not been shown yet, and component
-    // completion runs before the show — so a visibility test here answers "none
+    // completion runs before the show - so a visibility test here answers "none
     // of them" at exactly the moment this is called, leaves `last` null, and
     // rules every row including the bottom one. It passed by accident in the app
     // and failed in the QML suite, which builds into a view it never shows.
@@ -117,7 +117,7 @@ Item {
         var last = null
         for (var i = 0; i < column.children.length; ++i)
             // `ruled !== undefined` is what excludes the non-rows. A Repeater is
-            // an Item and therefore a child of this Column — a group whose last
+            // an Item and therefore a child of this Column - a group whose last
             // declared child is a Repeater would otherwise hand the title to a
             // zero-height object and leave the bottom row ruled against the card
             // edge.

@@ -3,7 +3,7 @@
 //
 // The shot catalogue: the composed images the README and the docs are made of.
 //
-// Same shape as gallery.js and for the same reason — it is data, consumed by
+// Same shape as gallery.js and for the same reason - it is data, consumed by
 // three things (ShotSheet.qml builds it, GalleryOptions validates --shot
 // against it, scripts/shots.sh iterates it) with no second list anywhere.
 //
@@ -12,7 +12,7 @@
 // change to what "tablet" means moves these images and cannot leave them
 // describing a device the app no longer has. That is also why this file cannot
 // compute them itself: a `.pragma library` has no access to QML singletons,
-// which is a limitation worth keeping — it is what stops the numbers being
+// which is a limitation worth keeping - it is what stops the numbers being
 // copied here.
 .pragma library
 
@@ -21,7 +21,7 @@
 // layout rather than at the range.
 //
 // `zoom` on the hero is 0.5, and that is a deliberate trade. At half size the
-// labels inside the app are not readable, and they are not meant to be — the
+// labels inside the app are not readable, and they are not meant to be - the
 // hero is about the shape of the product across three form factors. The
 // per-device shots are 1.0, and those are the readable ones.
 var sheets = [

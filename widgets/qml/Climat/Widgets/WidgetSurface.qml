@@ -3,7 +3,7 @@
 //
 // The card every tile is drawn on, and the four states none of them may skip.
 //
-// A widget file declares what it draws and nothing else — no subscription, no
+// A widget file declares what it draws and nothing else - no subscription, no
 // staleness rule, no empty state:
 //
 //     WidgetSurface {
@@ -23,15 +23,15 @@
 //                     everything under it would be a guess about a shape.
 //
 //   2. WAITING        nothing has arrived yet. A quiet skeleton, no numbers.
-//                     Never a zero, never a dash where a reading will go —
+//                     Never a zero, never a dash where a reading will go -
 //                     docs/README.md ranks not fabricating above everything
 //                     else, and a brief lie is still the thing that rule is
 //                     about.
 //
 //                     The skeleton means "a snapshot is on its way" and it is
-//                     only ever shown when one is. When nothing is coming —
+//                     only ever shown when one is. When nothing is coming -
 //                     no daemon, no place, a daemon that has stopped answering
-//                     — the tile says which, in `feed.waitingReason`.
+//                     - the tile says which, in `feed.waitingReason`.
 //
 //                     That distinction is the whole of this state and it was
 //                     missing: four skeletons on a desktop, no message on
@@ -44,7 +44,7 @@
 //                     away, or it is serving from its cache. The tile draws
 //                     everything it has and says how old it is. This is the
 //                     state the whole design exists for and it must never
-//                     become state 2 — a tile that blanks when the daemon
+//                     become state 2 - a tile that blanks when the daemon
 //                     restarts is worse than one that is ten minutes behind.
 //
 //   4. LIVE           the footer says nothing at all. An "updated just now" on
@@ -116,7 +116,7 @@ Rectangle {
 
     // ---- a tile carries its own page ---------------------------------------
     //
-    // The app's card is `Theme.surface.base`, which is a 7 % white wash — it is
+    // The app's card is `Theme.surface.base`, which is a 7 % white wash - it is
     // a *lift* off the page behind it, not a colour. That works everywhere in
     // the app because there is always a page behind it. On a desktop there is
     // not: there is a wallpaper the user chose, and nothing this process gets
@@ -124,7 +124,7 @@ Rectangle {
     //
     // Rendered as-is, a dark-mode tile came out as 7 % white over a photograph
     // with white text on top. Legible over some wallpapers, invisible over the
-    // rest, and impossible to fix from the theme because the theme is right —
+    // rest, and impossible to fix from the theme because the theme is right -
     // the card token means what it says.
     //
     // So the tile paints the page itself. `Theme.page.bg` is the app's own
@@ -136,7 +136,7 @@ Rectangle {
 
     // The hairline is a light-mode exception in the app and is unconditional
     // here. docs/10-design-system.md §10.1 bans borders because contrast
-    // against the page defines a card — which is exactly the premise a
+    // against the page defines a card - which is exactly the premise a
     // wallpaper removes. A tile has to have an edge of its own or it has none.
     border.width: 1
     border.color: Theme.line.card
@@ -227,7 +227,7 @@ Rectangle {
     //
     // Three bars at the weights a reading, a caption and a series would have
     // had. Not a spinner, because a spinner is a claim about work in progress
-    // and this is a claim about a request in flight — which, now that `message`
+    // and this is a claim about a request in flight - which, now that `message`
     // covers the case where there is no request, is a claim that is true
     // whenever these bars are on screen.
 
@@ -267,7 +267,7 @@ Rectangle {
     // at the top of this file with the other state.
     //
     // Vertically centred rather than top-aligned. It is the tile's whole
-    // content, and the smallest one in the catalogue is 110 px tall — a line of
+    // content, and the smallest one in the catalogue is 110 px tall - a line of
     // text under the title with a drop of empty space beneath it reads as a
     // tile that failed to finish drawing, which is the impression this line
     // exists to correct.

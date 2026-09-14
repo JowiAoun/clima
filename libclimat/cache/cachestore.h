@@ -6,7 +6,7 @@
 // Design principle 1 in docs/04-architecture.md §4.1 is "offline-first: the UI
 // renders from cache, then reconciles with the network", and the second half of
 // that sentence explains why this class exists rather than a QNetworkDiskCache:
-// "The app must never show an empty screen because an API is down — the
+// "The app must never show an empty screen because an API is down - the
 // documented failure mode of the current best Linux weather app." An HTTP cache
 // answers "may I reuse this?". This answers "what is the best thing I can show
 // right now, and how old is it?", which is a different question and the one the
@@ -26,7 +26,7 @@
 //                  Show it, say how old it is, and fetch in the background.
 //   unusable       past its TTL and its kind forbids stale. Show nothing.
 //
-// The third state exists for exactly one row of §4.5's table — alerts — and
+// The third state exists for exactly one row of §4.5's table - alerts - and
 // that row is why the distinction is modelled at all. A stale forecast reads as
 // "updated 25 minutes ago". A stale severe-weather warning reads as a warning.
 // See libclimat/cache/cachepolicy.h.
@@ -36,7 +36,7 @@
 // The ETag lives next to the payload it validates, because that is the only
 // place the two cannot drift apart. HttpClient reaches it through the narrow
 // ValidatorStore interface rather than through this class, so the network layer
-// stays testable without a database — see libclimat/net/validatorstore.h.
+// stays testable without a database - see libclimat/net/validatorstore.h.
 //
 // ---- threading ---------------------------------------------------------------
 //
@@ -79,11 +79,11 @@ struct CacheEntry {
     QByteArray contentType;
 
     QDateTime  fetchedAt;
-    QDateTime  expiresAt;    // invalid means never — the immutable row of §4.5
+    QDateTime  expiresAt;    // invalid means never - the immutable row of §4.5
     Validators validators;
 };
 
-// A saved location. Declared in libclimat/domain/place.h — it moved out of this
+// A saved location. Declared in libclimat/domain/place.h - it moved out of this
 // header when the geocoder and the location model turned out to need it, and
 // including QSqlDatabase to name a place was the wrong trade.
 
@@ -107,7 +107,7 @@ public:
     // use.
     Status open(const QString &databasePath);
 
-    // The overload that takes a migration list. Present for tests — see
+    // The overload that takes a migration list. Present for tests - see
     // migrations.h for why the runner is testable against a schema that is not
     // the product's.
     Status open(const QString &databasePath, const QList<Migration> &migrations);
@@ -122,7 +122,7 @@ public:
 
     // Insert or replace. `expiresAt` is taken from the entry rather than
     // recomputed, because the network layer may have honoured a longer Expires
-    // than our table would have chosen — HttpClient does exactly that.
+    // than our table would have chosen - HttpClient does exactly that.
     Status put(const CacheEntry &entry);
 
     // The entry whatever its age. Freshness is the caller's decision and it

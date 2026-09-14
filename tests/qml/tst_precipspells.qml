@@ -4,15 +4,15 @@
 // One wet afternoon is one band.
 //
 // A precipitation run is drawn with an edge on each of its ends and captioned
-// once, so how the hours are grouped into runs is not an internal detail — it is
+// once, so how the hours are grouped into runs is not an internal detail - it is
 // what the chart claims happened. Split a spell in two and the chart draws two
 // edges where the weather did nothing, prints its name twice, and steps the
 // wash's alpha in the middle. Reported from a real screen as "rain over rain
 // twice on the same hour", which is exactly what it looks like.
 //
 // It happened because providers switch between drizzle and rain codes hour by
-// hour inside a single spell — 51, 51, 61, 51, 51 is an ordinary Open-Meteo day
-// — and the grouping was on the type. It is on the family now, and this file is
+// hour inside a single spell - 51, 51, 61, 51, 51 is an ordinary Open-Meteo day
+// - and the grouping was on the type. It is on the family now, and this file is
 // the difference: what still splits a run, and what no longer does.
 import QtQuick
 import QtTest
@@ -35,7 +35,7 @@ TestCase {
         return out
     }
 
-    // 51, 51, 61, 51, 51 — five hours of one spell, in the codes a provider
+    // 51, 51, 61, 51, 51 - five hours of one spell, in the codes a provider
     // actually sends. Three runs before, one now.
     function test_aRainHourInsideDrizzleDoesNotCutTheSpellInThree() {
         var s = Precip.spans(cells([null,
@@ -119,7 +119,7 @@ TestCase {
         compare(s[1].to, 2)
     }
 
-    // Runs never split on intensity — rain easing off is the same rain. This was
+    // Runs never split on intensity - rain easing off is the same rain. This was
     // true before the family change and is the property it had to preserve, so
     // it is asserted rather than assumed.
     function test_intensityStillDoesNotSplitARun() {
@@ -128,7 +128,7 @@ TestCase {
         compare(s[0].intensity, "heavy")
     }
 
-    // Bands never overlap — the other half of "two overlays on the same hour",
+    // Bands never overlap - the other half of "two overlays on the same hour",
     // and the half that measured clean when it was reported. Only overlap, not
     // "no gap": a gap between two bands is a dry hour, which is the one thing
     // the wash is required to leave alone.

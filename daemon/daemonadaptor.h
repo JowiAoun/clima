@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The daemon's session-bus face. Six methods and one signal, and nothing in
-// here does any work — it exists so that the D-Bus surface is one small file a
+// here does any work - it exists so that the D-Bus surface is one small file a
 // reader can hold in their head, separate from the fetching underneath it.
 //
 // ============================================================================
@@ -10,8 +10,8 @@
 //
 // A D-Bus signal is a broadcast: every subscriber on the connection is woken
 // for every emission. That is exactly wrong for a desktop with eight widgets
-// on it, because a wind rose does not want to be woken — or to parse a
-// snapshot — because a seven-day strip refreshed.
+// on it, because a wind rose does not want to be woken - or to parse a
+// snapshot - because a seven-day strip refreshed.
 //
 // So Subscribe() hands back a token and it is the *first argument* of
 // SnapshotChanged. A reader adds a match rule with arg0='<its token>' and the
@@ -77,7 +77,7 @@ public Q_SLOTS:
 
     // Ask now rather than at the next poll. Whether a socket is opened is
     // still the cache policy's decision, so this is not a way to hammer a
-    // provider — it is what a widget calls when a user clicks refresh.
+    // provider - it is what a widget calls when a user clicks refresh.
     void RequestRefresh(const QString &placeId);
 
     // widgets/catalogue.json, verbatim. Served from here so that the widget
@@ -93,14 +93,14 @@ Q_SIGNALS:
     void SnapshotChanged(const QString &token, const QString &json);
 
     // The saved places changed: one was added, removed, moved or made home.
-    // Carries nothing — a reader that cares calls Subscribe again, which is
+    // Carries nothing - a reader that cares calls Subscribe again, which is
     // the only thing it could do with any argument this might have had.
     //
     // Additive, so it does not move the trailing 1 on the interface name. An
     // older reader never asks for it and is unaffected; existing subscriptions
     // are re-pointed at the new place before this goes out, so ignoring it
     // costs nothing except in the one case where there was no subscription to
-    // re-point — a widget that came up before the user had chosen a place.
+    // re-point - a widget that came up before the user had chosen a place.
     void PlacesChanged();
 
 private:

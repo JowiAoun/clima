@@ -4,7 +4,7 @@
 //
 // A chart answers "what is the shape of the day"; a list answers "what exactly is
 // it at 3pm". Both are worth having, which is why the reference carries a switch
-// for it — and why leaving that switch inert was the wrong place to stop.
+// for it - and why leaving that switch inert was the wrong place to stop.
 //
 // The past is dimmed rather than hidden, and "now" is marked, so the same rule the
 // chart follows holds here: observed hours are real data, just not forecast.
@@ -18,7 +18,7 @@
 //     They pressed "List" to read 3 AM's numbers; making them watch 48 rows
 //     arrive is charging admission for data that was already on screen.
 //   * It would fire on scroll. ListView builds delegates as they come into
-//     view — `cacheBuffer: 0`, so exactly as they come into view — and §10.6
+//     view - `cacheBuffer: 0`, so exactly as they come into view - and §10.6
 //     forbids a reveal that re-triggers, "nothing fires on scrolling into
 //     view" in particular. A per-delegate animation is that bug by
 //     construction, not by accident.
@@ -140,8 +140,8 @@ Item {
         // Open on "now", explicitly.
         //
         // `currentIndex` alone does not decide where the view rests: nothing is
-        // bound to it — the now row draws off `index === Data.nowIndex`, not off
-        // being current — so all it does is make Qt track that delegate, and
+        // bound to it - the now row draws off `index === Data.nowIndex`, not off
+        // being current - so all it does is make Qt track that delegate, and
         // where tracking lands depends on the view's height when the delegate
         // happened to be created. That is why the same list opened on 9 PM
         // inside the page and on "now" in the gallery. Positioning explicitly
@@ -163,7 +163,7 @@ Item {
             // A reading aid, not an affordance. Seven columns spread over a
             // metre of screen and the eye loses the line somewhere around
             // Wind; the pointer's row lifting to the raised wash gives it a
-            // rail to run along. No `cursorShape` — nothing in this list is
+            // rail to run along. No `cursorShape` - nothing in this list is
             // clickable and a pointing hand would promise that it is.
             HoverHandler { id: rowHover }
 
@@ -176,7 +176,7 @@ Item {
                 // the stripe: two washes stack to a patch lighter than either
                 // (§10.1), and the seam is exactly what you would notice.
                 //
-                // The now row is exempt. Its fill *is* the mark — swapping the
+                // The now row is exempt. Its fill *is* the mark - swapping the
                 // yellow for a neutral wash would blank the one row the reader
                 // came to find, the moment they point at it.
                 color: hourRow.isNow ? Theme.color.nowRowBg

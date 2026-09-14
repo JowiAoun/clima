@@ -3,7 +3,7 @@
 #
 # The desktop entry, templated so that the app ID appears once in the build and
 # not once per format. packaging/CMakeLists.txt installs the result as
-# @CLIMAT_APP_ID@.desktop — the *filename* has to be the app ID exactly, or a
+# @CLIMAT_APP_ID@.desktop - the *filename* has to be the app ID exactly, or a
 # Wayland compositor cannot match our window to this file and the user gets a
 # generic icon and no application menu. That is one of the two silent failure
 # modes in this file; the other is Icon=, below.
@@ -24,7 +24,7 @@ Icon=@CLIMAT_APP_ID@
 Terminal=false
 
 # One main category on purpose. There is no Weather in the menu spec, and the
-# nearest fit — Science, carrying the registered Geoscience — files a
+# nearest fit - Science, carrying the registered Geoscience - files a
 # general-audience weather app next to the periodic table. Listing both is
 # worse than either: desktop-file-validate warns that two main categories make
 # the app appear twice in the menu, which it does.

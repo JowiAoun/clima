@@ -4,7 +4,7 @@
 //
 // Two things read this file and they must not disagree:
 //
-//   Main.qml    picks which shell the app runs — the desktop page, or the
+//   Main.qml    picks which shell the app runs - the desktop page, or the
 //               mobile shell with its bottom nav.
 //   Gallery.qml frames a specimen in a device-sized box, so a component can be
 //               reviewed at the width it will actually be given.
@@ -34,7 +34,7 @@ var presets = [
 // 600 is where a phone stops and a tablet starts by every convention worth
 // following, and it is also where this prototype's own content stops fitting a
 // single column comfortably. 1024 is where the desktop page's day strip and
-// twelve-card grid have room to be themselves — below it they are a worse
+// twelve-card grid have room to be themselves - below it they are a worse
 // version of the mobile layout rather than a better one.
 var minWidth = {
     mobile:  0,

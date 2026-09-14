@@ -9,7 +9,7 @@
 // Motion here is deliberately small. The pills are a tab strip driving the chart
 // below them, and the chart is the thing worth watching: a selection that threw
 // its own party would be competing with the answer it just asked for. So the
-// selected pill only changes colour — see §10.6, which measured the reference's
+// selected pill only changes colour - see §10.6, which measured the reference's
 // 0.2s linear fill and kept the idea while tightening the timing. The one thing
 // that *moves* is the view switch's indicator, because a switch with two lamps
 // has no position and a switch with one indicator does.
@@ -84,7 +84,7 @@ Item {
     }
 
     // The title is inline with the pills rather than on its own row, so this is
-    // not a SectionHeader — but it is the same *role*, and it takes the same
+    // not a SectionHeader - but it is the same *role*, and it takes the same
     // token. The two used to disagree by 3 px.
     Text {
         id: heading
@@ -99,7 +99,7 @@ Item {
     // ---- view switch (right-aligned, laid out first so pills can clip to it)
     //
     // The active half used to carry its own fill and the two of them crossfaded,
-    // which halfway through showed both sides half-lit and neither selected —
+    // which halfway through showed both sides half-lit and neither selected -
     // two lamps, not a switch. One indicator that travels says the control has a
     // *position*, which is the whole idea of a switch. It is also why the
     // indicator is now rounded on all four corners: the old half-pill was
@@ -115,7 +115,7 @@ Item {
         // The indicator's geometry comes from the segments, and a segment is
         // zero-wide until its label has been laid out. Without this gate the
         // Behaviors treat that first layout as a change and the indicator grows
-        // out of nothing on load — a mount animation for a control that has not
+        // out of nothing on load - a mount animation for a control that has not
         // been touched yet.
         property bool settled: false
         Component.onCompleted: Qt.callLater(function () { viewSwitch.settled = true })
@@ -202,7 +202,7 @@ Item {
                     // sideways on every tap: a whole row twitching to report a
                     // state change that the fill has already reported, and the
                     // only thing on this bar that moved without meaning to. The
-                    // reference measured the same — "unselected pill: no fill,
+                    // reference measured the same - "unselected pill: no fill,
                     // same box".
                     TextMetrics {
                         id: pillMetrics

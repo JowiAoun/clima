@@ -51,7 +51,7 @@ constexpr int kForecastDays = 11;
 // refusal through the real HttpClient, the real backoff and the real registry.
 //
 // A flag that made the registry *skip* a provider would test a different thing
-// — it would prove the chain can be reordered, not that it survives an outage —
+// - it would prove the chain can be reordered, not that it survives an outage -
 // and the difference is exactly the one docs/06-roadmap.md is worried about
 // when it argues for building the fallback early: "a path nobody can see is a
 // path nobody tests".
@@ -115,7 +115,7 @@ AppEngine::AppEngine()
     // Three things on screen go out of date on their own, with no new data
     // involved: the clock at the place, "Updated 4 minutes ago", and whether the
     // forecast has aged past its TTL. Nothing was telling them, so the first sat
-    // stopped and the second said "just now" an hour later — a line whose whole
+    // stopped and the second said "just now" an hour later - a line whose whole
     // job is to tell you how much to trust what is above it, quietly lying.
     m_minute.setSingleShot(true);
     m_minute.setTimerType(Qt::CoarseTimer);
@@ -152,7 +152,7 @@ AppEngine *AppEngine::instance()
     // ---- why the teardown is not simply ~AppEngine -------------------------
     //
     // `engine` is a function-local static, so its destructor runs during
-    // static destruction — after main() has returned and therefore after the
+    // static destruction - after main() has returned and therefore after the
     // QGuiApplication that lived on main()'s stack is already gone. Everything
     // Qt-owned that AppEngine holds is then released into an application that
     // no longer exists, and QSqlDatabase says so out loud on every single run:
@@ -162,7 +162,7 @@ AppEngine *AppEngine::instance()
     // Today that is one line of noise on exit. It is also the shape of a real
     // fault: removeDatabase() on a torn-down driver registry is not a
     // guaranteed no-op, and the moment the cache does anything on close that
-    // needs an event loop — a WAL checkpoint, a pending write — this becomes a
+    // needs an event loop - a WAL checkpoint, a pending write - this becomes a
     // corrupt cache rather than a warning.
     //
     // qAddPostRoutine runs the callback from ~QCoreApplication, which is early
@@ -243,7 +243,7 @@ void AppEngine::configure(const QString &fixtureName)
     m_alerts->setSettings(Settings::instance());
 
     // The one notifier in the process. Built here rather than by AlertsData so
-    // that the view model can be tested without a session bus — it takes one
+    // that the view model can be tested without a session bus - it takes one
     // or it takes none, and with none it still emits `announced`.
     if (Notifier::available()) {
         if (m_notifier == nullptr)
@@ -269,7 +269,7 @@ void AppEngine::configure(const QString &fixtureName)
     m_geocoder = new OpenMeteoGeocoder(m_http.get(), m_cache.get(), m_clock.get(), this);
     // Not parented and not loaded here. Decoding the bundled index is about a
     // megabyte of allocation, and the cold-start budget is 400 ms for a screen
-    // that comes out of SQLite — so the index is read the first time somebody
+    // that comes out of SQLite - so the index is read the first time somebody
     // presses "use my location" and never on a start that does not.
     m_reverse  = new OfflineReverseGeocoder();
     m_places   = new LocationController(m_cache.get(), this);
@@ -310,7 +310,7 @@ void AppEngine::configure(const QString &fixtureName)
     //
     // A fixture always opens on its own recorded place, whatever is saved,
     // because the whole promise of `--fixture toronto` is that it produces the
-    // same screen on every machine — and "whatever this developer last looked
+    // same screen on every machine - and "whatever this developer last looked
     // at" is the one input that would break it.
     if (isFixtureMode()) {
         const int row = m_places->addPlace(m_fixture.place, /*makeCurrent=*/true);
@@ -370,7 +370,7 @@ void AppEngine::buildFixtureProviders()
 
 void AppEngine::registerProviders()
 {
-    // 100 for the global primary, 200 for the global fallback — the convention
+    // 100 for the global primary, 200 for the global fallback - the convention
     // ProviderRegistry::addForecastProvider documents, leaving 0 for a national
     // service when the alert providers land.
     const auto complain = [](const Status &status, const char *what) {
@@ -424,8 +424,8 @@ void AppEngine::load()
     if (!hasPlace())
         return;
 
-    // Step 1, then step 2. The first is synchronous in practice — a cache hit
-    // resolves its future inside fetch() — so the window's first frame already
+    // Step 1, then step 2. The first is synchronous in practice - a cache hit
+    // resolves its future inside fetch() - so the window's first frame already
     // has data in it whenever there is any to have.
     fetch(/*cachedOnly=*/true);
     fetch(/*cachedOnly=*/false);
@@ -448,7 +448,7 @@ void AppEngine::fetch(bool cachedOnly)
     request.cachedOnly = cachedOnly;
 
     // The zone is the *place's*, not the machine's. A saved location in Tokyo
-    // renders its own evening while the app runs in Toronto — which is what
+    // renders its own evening while the app runs in Toronto - which is what
     // makes DailyPoint::date mean anything, and is why Place carries an IANA id
     // rather than an offset.
     if (!current.timezone.isEmpty())
@@ -462,8 +462,8 @@ void AppEngine::fetch(bool cachedOnly)
     // ---- why an already-finished future still has to be pumped -------------
     //
     // A QFutureWatcher does not call you back from setFuture(). It POSTS its
-    // call-outs to itself — QFutureWatcherBase::postCallOutEvent is a
-    // QCoreApplication::postEvent — and it does that even when the future it is
+    // call-outs to itself - QFutureWatcherBase::postCallOutEvent is a
+    // QCoreApplication::postEvent - and it does that even when the future it is
     // handed has already finished. The `finished` signal is then delivered on
     // the next pass of the event loop, which before exec() means "not yet, and
     // not for a while".
@@ -471,18 +471,18 @@ void AppEngine::fetch(bool cachedOnly)
     // That is the whole of the ordering bug this function used to have, and it
     // contradicted two comments written a metre apart. main.cpp's step 5 puts
     // configure() ahead of the QML engine precisely so the first frame has data
-    // in it, and load() below says step 1 "is synchronous in practice — a cache
+    // in it, and load() below says step 1 "is synchronous in practice - a cache
     // hit resolves its future inside fetch()". The future did resolve inside
     // fetch(). The ANSWER did not: it sat in the event queue while
     // loadFromModule() built and evaluated the entire scene, so every binding in
     // twelve detail cards was evaluated against the empty snapshot, and a
-    // fixture run — where both futures are finished before setFuture() returns —
+    // fixture run - where both futures are finished before setFuture() returns -
     // printed 469 lines of `undefined` before settling on the right numbers.
     //
     // sendPostedEvents() delivers what is already queued for this one watcher,
     // now, on this stack. Nothing else is touched: a future that has not
     // finished has posted nothing, so the live network path is exactly as it
-    // was, and the deleteLater() the handler issues is not honoured here —
+    // was, and the deleteLater() the handler issues is not honoured here -
     // deferred deletes posted outside an event loop are held until one starts,
     // which is what makes calling this from inside the handler's own call chain
     // safe.
@@ -500,7 +500,7 @@ void AppEngine::fetch(bool cachedOnly)
                     setInFlight(-1);
 
                 // An answer about a place the user has left. Dropped rather
-                // than applied — the same rule PlaceSearchModel uses on
+                // than applied - the same rule PlaceSearchModel uses on
                 // out-of-order geocoder replies.
                 if (generation != m_generation)
                     return;
@@ -542,7 +542,7 @@ void AppEngine::fetch(bool cachedOnly)
                 if (!result) {
                     // Air quality failing is not the forecast failing. It gets
                     // no `problem` line of its own: the card simply does not
-                    // draw, which is R9 — hide, never fabricate.
+                    // draw, which is R9 - hide, never fabricate.
                     return;
                 }
                 applyAirQuality(result.value().value);
@@ -555,7 +555,7 @@ void AppEngine::fetch(bool cachedOnly)
     //
     // A request of its own rather than a field of the forecast one: an alert
     // provider needs a point and a language and nothing else, and threading a
-    // day count and a model list through it would be four ignored fields — see
+    // day count and a model list through it would be four ignored fields - see
     // libclimat/providers/ialertprovider.h.
     //
     // Not counted in `loading`. A spinner over the whole window because a
@@ -576,7 +576,7 @@ void AppEngine::fetch(bool cachedOnly)
                 const Result<AlertAnswer> result = alertWatcher->result();
 
                 if (!result) {
-                    // Unsupported means nobody covers this place — most of the
+                    // Unsupported means nobody covers this place - most of the
                     // world. The feature is hidden, which §4.4 asks for, and it
                     // is not a failure to report.
                     if (result.errorKind() == ErrorKind::Unsupported) {
@@ -587,7 +587,7 @@ void AppEngine::fetch(bool cachedOnly)
                     // Everything else: the place HAS alert coverage and we could
                     // not reach it. Whatever is on screen stays, and the banner
                     // gains a "last confirmed" line if the top alert is past its
-                    // refresh deadline. Never blanked — an empty banner and "we
+                    // refresh deadline. Never blanked - an empty banner and "we
                     // could not check" are different claims.
                     if (!cachedOnly)
                         m_alerts->setRefreshFailed(true);
@@ -621,7 +621,7 @@ void AppEngine::applyForecast(const Forecast &forecast, const QString &servedBy,
     m_problem.clear();
 
     // The provider's display name, looked up rather than switched on. §4.1
-    // principle 2 — "no provider name appears in UI code" — is a rule about
+    // principle 2 - "no provider name appears in UI code" - is a rule about
     // *branching*, and this is a lookup: the string is shown, never tested.
     m_sourceName = servedBy;
     for (const IProvider *provider : m_registry->providers()) {
@@ -681,9 +681,9 @@ Place AppEngine::place() const
 bool AppEngine::hasPlace() const
 {
     // The name as well as the coordinate, and the name is the load-bearing
-    // half. A default-constructed Place has coordinate 0,0 — which
+    // half. A default-constructed Place has coordinate 0,0 - which
     // Coordinate::isValid() accepts, correctly, because null island is a
-    // latitude and a longitude — so a start with nothing saved fetched the
+    // latitude and a longitude - so a start with nothing saved fetched the
     // forecast for a point in the Gulf of Guinea and cached it. Found in the
     // cache table, not on screen: the request succeeded and the answer was
     // never drawn.
@@ -713,8 +713,8 @@ void AppEngine::chooseSearchResult(int row)
     if (found.name.isEmpty())
         return;
 
-    // addPlace() returns the existing row when the place is already saved —
-    // Place::isSameEntity decides — so searching for somewhere you already have
+    // addPlace() returns the existing row when the place is already saved -
+    // Place::isSameEntity decides - so searching for somewhere you already have
     // selects it rather than duplicating it.
     m_places->addPlace(found, /*makeCurrent=*/true);
     m_search->clear();
@@ -802,7 +802,7 @@ void AppEngine::armMinuteTimer()
     const int   msecs = 60000 - (now.second() * 1000 + now.msec());
 
     // Floored at a second. Armed at :59.94 the remainder is 60 ms, and a timer
-    // that short re-arms itself on the same minute it just announced — this
+    // that short re-arms itself on the same minute it just announced - this
     // lands early into the next minute instead, which is the minute meant.
     m_minute.start(qMax(1000, msecs));
 }
@@ -814,7 +814,7 @@ QString AppEngine::localTime() const
     if (m_clock == nullptr)
         return {};
 
-    // The forecast's zone first and the place's second — the same order
+    // The forecast's zone first and the place's second - the same order
     // ConditionsData resolves it in, so the two never disagree about which
     // evening this is. Unlike that one there is no fall back to UTC: a clock
     // reading is only worth showing when it is the right city's.
@@ -843,8 +843,8 @@ QString AppEngine::updatedLabel() const
     // exact hour stops being one.
     // Written out rather than run through tr()'s %n plural machinery, and that
     // is a deliberate downgrade. %n resolves its plural form from the
-    // *translation*, so with no catalogue loaded — which is every English build
-    // — the source string is returned verbatim and the line reads "Updated 3
+    // *translation*, so with no catalogue loaded - which is every English build
+    // - the source string is returned verbatim and the line reads "Updated 3
     // hour(s) ago". Seen on screen, in the offline capture this affordance was
     // built for. Two strings per unit is the price of English being a language
     // rather than a fallback.
@@ -872,7 +872,7 @@ bool AppEngine::isStale() const
         return false;
 
     // The same TTL the cache uses, asked of the same table. A second number
-    // here — "call it stale after an hour" — would be a second opinion about
+    // here - "call it stale after an hour" - would be a second opinion about
     // freshness, and the two would disagree the day §4.5 is edited.
     const QDateTime expires = expiryFor(DataKind::Forecast, m_forecast.fetchedAt);
     return expires.isValid() && m_clock->now() > expires;
@@ -887,8 +887,8 @@ QVariantList AppEngine::sources() const
     for (const Attribution &credit : m_registry->attributions())
         out.append(attributionMap(credit));
 
-    // The place index is not a provider — it answers no forecast and is in no
-    // chain — and it is bundled data under CC BY 4.0 all the same, so its
+    // The place index is not a provider - it answers no forecast and is in no
+    // chain - and it is bundled data under CC BY 4.0 all the same, so its
     // credit is as much of an obligation as Open-Meteo's. Appended here rather
     // than made into an IProvider, because inventing a provider interface for
     // something that provides no product would be the wrong shape for the sake

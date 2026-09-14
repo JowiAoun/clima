@@ -11,7 +11,7 @@
 # The plan for this guard was `ldd climat-widget | grep -qv libclimat_providers`,
 # and that check cannot work: libclimat is a STATIC archive. There is no
 # `libclimat_providers.so` to find, and DT_NEEDED says nothing about which of an
-# archive's members were pulled in — an unused provider adds no entry to it and
+# archive's members were pulled in - an unused provider adds no entry to it and
 # a used one adds no entry either.
 #
 # What a static link *does* leave is a symbol. `climat::HttpClient::get` either
@@ -22,7 +22,7 @@
 #
 # The fetching half of libclimat, by mangled-name substring: the HTTP client, the
 # cache, the provider registry and the provider classes themselves. Not the
-# domain types — `climat::Forecast` and the WMO tables are pure values, the
+# domain types - `climat::Forecast` and the WMO tables are pure values, the
 # widget host compiles two of those files on purpose, and banning them would be
 # banning the thing that keeps the tables single-sourced.
 #
@@ -96,7 +96,7 @@ set(forbidden
     #
     # This was found by injecting the defect rather than reasoned out: adding
     # libclimat to the link line and merely naming a type left no provider symbol
-    # at all — the compiler folded the reference away and the archive
+    # at all - the compiler folded the reference away and the archive
     # contributed nothing. Qt's resource initialisers are different. They are
     # force-linked whether or not anything reads them, so `libclimat` on a link
     # line always drags in the bundled GeoNames index and the recorded
@@ -131,7 +131,7 @@ if(offenders)
         "  The usual cause is a new target_link_libraries(climat-widget … libclimat)\n"
         "  line. If a tile needs something out of libclimat, compile that FILE into\n"
         "  the widget module the way widgets/CMakeLists.txt already does for\n"
-        "  domain/weathercode.cpp and domain/scales.cpp — and only if it is a pure\n"
+        "  domain/weathercode.cpp and domain/scales.cpp - and only if it is a pure\n"
         "  table with no I/O in it.\n")
 endif()
 

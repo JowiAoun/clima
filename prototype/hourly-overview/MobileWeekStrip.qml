@@ -4,7 +4,7 @@
 //
 // Seven days across a phone, so a column is about 48 px and everything in it
 // has to fit that: a one-letter weekday, the date, and a condition glyph. That
-// is the whole reason this is not DayStrip — that component's cards carry a
+// is the whole reason this is not DayStrip - that component's cards carry a
 // high, a low, a day and a night glyph and a tab that grows into the chart
 // below, and none of it survives being a seventh of 362 px.
 //
@@ -71,8 +71,8 @@ Item {
                     anchors.centerIn: parent
                     spacing: 3
 
-                    // One letter. Two days in seven share theirs — Saturday
-                    // and Sunday, Tuesday and Thursday — which is why the date
+                    // One letter. Two days in seven share theirs - Saturday
+                    // and Sunday, Tuesday and Thursday - which is why the date
                     // under it is not optional.
                     Text {
                         text: cell.modelData.weekday.charAt(0)

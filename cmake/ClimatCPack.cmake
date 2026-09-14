@@ -15,7 +15,7 @@
 # Ubuntu 24.04. That is not a limitation to be worked around: 24.04 ships
 # Qt 6.4.2, our floor is 6.8, and a package that installs and then fails to
 # start is worse than one that refuses. 24.04 users get the Flatpak, which
-# carries its own Qt — see packaging/flatpak/, and docs/known-gaps.md, which
+# carries its own Qt - see packaging/flatpak/, and docs/known-gaps.md, which
 # says so in the place a user will look.
 #
 # The dependency list is not written here. CPACK_DEBIAN_PACKAGE_SHLIBDEPS reads

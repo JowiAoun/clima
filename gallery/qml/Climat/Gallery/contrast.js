@@ -3,14 +3,14 @@
 // WCAG 2.1 contrast, for the palette page.
 //
 // This lives in the gallery rather than in Climat because the app never asks
-// what a contrast ratio is — it asks for a colour and paints with it. The
+// what a contrast ratio is - it asks for a colour and paints with it. The
 // measuring belongs to the instrument.
 //
 // Two things here are easy to get wrong and are the reason this is a file
 // rather than three lines inline:
 //
-// Compositing comes first. Most of this palette is translucent — `surface.base`
-// is 7% white, `line.card` is 8% black — and a ratio taken against the literal
+// Compositing comes first. Most of this palette is translucent - `surface.base`
+// is 7% white, `line.card` is 8% black - and a ratio taken against the literal
 // `#12ffffff` is a ratio against a colour nothing ever renders. Every value is
 // composited down onto an opaque background before it is measured, and the
 // background is itself composited the same way, because a card is translucent
@@ -19,7 +19,7 @@
 // And luminance is not lightness. WCAG's relative luminance linearises each
 // channel through the sRGB transfer function before weighting them 0.2126 /
 // 0.7152 / 0.0722, which is why a saturated yellow and a saturated blue of the
-// same HSL lightness are nowhere near the same ratio against white — the
+// same HSL lightness are nowhere near the same ratio against white - the
 // finding that `accent.fill` at `#e8a900` reaches only 1.62:1 on a light card
 // comes straight out of that weighting.
 .pragma library
@@ -93,7 +93,7 @@ function _at(table, path) {
 // measure the chevron against a colour that is 40% transparent, and the answer
 // would be wrong in the direction that hides a failure.
 //
-// `rule` is Theme.contrastRule. `seen` guards a cycle in the rule table — two
+// `rule` is Theme.contrastRule. `seen` guards a cycle in the rule table - two
 // tokens each declaring the other as ground would otherwise recurse until the
 // stack gave out, and a typo in a hand-maintained table should not take the
 // gallery down with it.
@@ -117,7 +117,7 @@ function groundOf(table, rule, path, seen) {
 // One row of the palette page.
 //
 // Returns the composited pair actually measured, the ratio between them, and a
-// verdict of "pass" | "fail" | "" — empty for an incidental token, which has no
+// verdict of "pass" | "fail" | "" - empty for an incidental token, which has no
 // minimum to meet and so must not be shown as having passed one.
 //
 // `floor` is Theme.contrastFloor. A paired token is scored on the better of the

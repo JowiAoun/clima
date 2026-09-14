@@ -14,15 +14,15 @@
 //
 // So the query is debounced: a keystroke restarts a 250 ms timer and only its
 // expiry sends anything. A quarter of a second is the number every search field
-// converges on — long enough that a fluent typist makes one request for a word,
-// short enough that a hunt-and-peck typist does not notice it — and it is
+// converges on - long enough that a fluent typist makes one request for a word,
+// short enough that a hunt-and-peck typist does not notice it - and it is
 // settable so that a test does not have to wait for it.
 //
 // The minimum length is the second half of the same restraint. Two characters
 // is what Open-Meteo supports for an exact match (docs/02-data-sources.md
 // §2.7); one character would match a large fraction of the planet and is a
 // request nobody wanted to make. Below the minimum, the model empties and
-// sends nothing — it does not error, because a person who has typed one letter
+// sends nothing - it does not error, because a person who has typed one letter
 // has not made a mistake.
 //
 // ---- why the debounce is here and not in the provider -----------------------
@@ -145,7 +145,7 @@ private:
 
     // Bumped by every dispatch. An answer that arrives carrying an older
     // number is an answer to a question the box no longer asks, and is
-    // dropped — see the header comment on out-of-order answers.
+    // dropped - see the header comment on out-of-order answers.
     quint64 m_generation = 0;
 
     QList<Place> m_results;

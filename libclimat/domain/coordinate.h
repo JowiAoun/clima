@@ -15,7 +15,7 @@
 //     4          ~11 m                  a building
 //     5          ~1.1 m                 a doorway
 //
-// Open-Meteo picks a *grid cell* from the coordinate — 1 to 11 km depending on
+// Open-Meteo picks a *grid cell* from the coordinate - 1 to 11 km depending on
 // the model, with 90 m DEM downscaling on top. MET Norway's terms ask outright
 // for coordinates to be truncated to four decimals before they are sent. Four
 // is therefore both the point where extra precision stops changing the answer
@@ -24,7 +24,7 @@
 // The consequence that matters is the map. Dragging a map emits a stream of
 // centre coordinates at full double precision, and every one of them is a
 // distinct cache key, a distinct in-flight request and a distinct row in
-// somebody's rate-limit ledger — for a forecast that is identical across all of
+// somebody's rate-limit ledger - for a forecast that is identical across all of
 // them. Rounding first collapses the whole drag into one request.
 //
 // So: HttpClient rounds before it hashes *and* before it builds the URL, in one
@@ -49,18 +49,18 @@ struct Coordinate {
     [[nodiscard]] bool isValid() const;
 
     // Half-away-from-zero at `decimals` places. Not std::round on a scaled
-    // double alone — that is what this does, but the scaling is written out so
+    // double alone - that is what this does, but the scaling is written out so
     // the rounding mode is visible: banker's rounding would send two adjacent
     // coordinates to different cells depending on parity, which is a cache
     // miss nobody could reproduce.
     [[nodiscard]] Coordinate rounded(int decimals = keyDecimals) const;
 
     // The canonical spelling used in cache keys and in query strings:
-    // "52.5200,13.4050" — fixed decimals, C locale, always a leading digit.
+    // "52.5200,13.4050" - fixed decimals, C locale, always a leading digit.
     //
     // C locale is load-bearing. QString::number honours QLocale in some
     // overloads and not others, and a comma decimal separator in a URL query
-    // is a different request on a French machine than on an English one — the
+    // is a different request on a French machine than on an English one - the
     // kind of bug that only ever reproduces on somebody else's laptop.
     [[nodiscard]] QString toKeyString(int decimals = keyDecimals) const;
 

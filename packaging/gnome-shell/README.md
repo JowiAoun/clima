@@ -8,7 +8,7 @@ top bar. It is about 500 lines of GJS and **it draws no weather**.
 
 ## What it actually does
 
-GNOME Shell cannot host a Qt Quick surface — an extension is GJS running inside gnome-shell's own
+GNOME Shell cannot host a Qt Quick surface - an extension is GJS running inside gnome-shell's own
 process, extensions.gnome.org forbids shipping binaries, and mutter does not implement
 `wlr-layer-shell`. So the extension launches `climat-widget`, which is our own Qt process, adopts
 the window that appears, types it as a dock and pins it below everything else.
@@ -25,7 +25,7 @@ extension  ──spawn──▶  climat-widget  ──D-Bus──▶  climat-dae
 ## It ships separately, and that is not an oversight
 
 gnome-shell will not load an extension from inside a Flatpak: extensions live in
-`~/.local/share/gnome-shell/extensions`, and the app has no `--filesystem=home` — deliberately.
+`~/.local/share/gnome-shell/extensions`, and the app has no `--filesystem=home` - deliberately.
 
 So this directory is published to extensions.gnome.org on its own, with its own `shell-version`
 list, and it updates on a different clock from the app. Two consequences:
@@ -42,7 +42,7 @@ list, and it updates on a different clock from the app. Two consequences:
 The indicator and its menu are drawn in St with the shell's own theme. They cannot use Climat's
 typeface, its colour tokens or its charts, because none of that exists inside gnome-shell.
 
-This is written down in three places — here, in `extension.js`, and in the preferences window —
+This is written down in three places - here, in `extension.js`, and in the preferences window -
 because it is the first thing that looks like a bug and is not one. Making a St popup look like
 Climat would mean reimplementing the design system in CSS and maintaining two of them.
 
@@ -50,7 +50,7 @@ Climat would mean reimplementing the design system in CSS and maintaining two of
 
 `Meta.WaylandClient` is what establishes that a window is ours: the shell makes a socketpair,
 keeps one end, and hands the child the other as `WAYLAND_SOCKET`. `owns_window()` is then a
-question about *that* `wl_client` — not about a title, and not about a sandbox id, which comes
+question about *that* `wl_client` - not about a title, and not about a sandbox id, which comes
 back null for a client that connected on an inherited fd.
 
 On X11 there is no such object. A window could be lowered but not verifiably adopted, and one the
@@ -75,7 +75,7 @@ For development against a build tree rather than an installed app:
 CLIMAT_WIDGET=$PWD/build/dev/widgets/climat-widget gnome-extensions enable climat@JowiAoun.github.io
 ```
 
-`CLIMAT_WIDGET` has to be in gnome-shell's own environment, not in your terminal's — the extension
+`CLIMAT_WIDGET` has to be in gnome-shell's own environment, not in your terminal's - the extension
 runs inside the shell. `systemctl --user set-environment` before logging in, or use the nested
 shell that `scripts/shell-probe.sh` stands up.
 
@@ -83,7 +83,7 @@ shell that `scripts/shell-probe.sh` stands up.
 
 | | |
 |---|---|
-| The adoption mechanism | Measured on GNOME Shell 46, Ubuntu, Wayland — `docs/widgets.md` |
+| The adoption mechanism | Measured on GNOME Shell 46, Ubuntu, Wayland - `docs/widgets.md` |
 | A Flatpak-installed target surviving `bwrap` | Measured, both halves separately |
 | `make_dock`, `hide_from_window_list`, `lower` | Measured; window type 2, out of alt-tab, still composited |
 | This extension end to end | **Not measured on a live session.** It is the probe's mechanism with placement, respawn and an indicator around it. |

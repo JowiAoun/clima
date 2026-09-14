@@ -13,8 +13,8 @@
 //      will return: parallel per-hour arrays plus derived helpers, no
 //      formatting decisions baked in."
 //
-// So this class keeps that shape exactly — the same property names, the same
-// array layout, the same helper functions — and the QML that reads it did not
+// So this class keeps that shape exactly - the same property names, the same
+// array layout, the same helper functions - and the QML that reads it did not
 // have to change. `Data` is still `Data`; it is a C++ singleton in the Climat
 // module rather than a JavaScript library, which is why the thirteen files that
 // used to say `import "mockdata.js" as Data` now say nothing at all: a
@@ -29,7 +29,7 @@
 // THE WINDOW: ONE DAY, MIDNIGHT TO MIDNIGHT
 //
 // A provider hands over several hundred hours. The window is twenty-four of
-// them — the calendar day `selectedDay` names, in the place's own zone — and
+// them - the calendar day `selectedDay` names, in the place's own zone - and
 // the day strip above the chart is what moves it.
 //
 // It was not always. Today used to get a rolling forty-eight-hour window
@@ -40,7 +40,7 @@
 //
 // What ended it is the pair of arrows either side of the chart. They step the
 // day now instead of scrolling the hours, so the chart shows a whole day at
-// once and nothing else — and a window that ran past midnight would put
+// once and nothing else - and a window that ran past midnight would put
 // Saturday morning on the end of a chart of Friday, where no arrow can reach it
 // without also meaning the part already on screen. One window per day is the
 // shape that makes "left is yesterday, right is tomorrow" true.
@@ -52,14 +52,14 @@
 // `nowIndex` is therefore an offset to the present rather than an index into
 // the window, and it MAY FALL OUTSIDE IT: negative when the whole window is
 // still ahead, `>= count` when it is all behind. That is not a degenerate case
-// to guard against, it is the answer — the chart's past veil runs from the
+// to guard against, it is the answer - the chart's past veil runs from the
 // plot's left edge to `nowIndex`, so a future day veils nothing and a past day
 // veils everything, with no branch anywhere. `nowInWindow` is for the two
 // things that cannot be expressed as a width: whether to draw the now line, and
 // whether any column is labelled "Now".
 //
-// What does NOT move with it: `days`, `todayIndex`, the calendar, the moon —
-// all of those are about dates rather than about the window — and `ahead()`,
+// What does NOT move with it: `days`, `todayIndex`, the calendar, the moon -
+// all of those are about dates rather than about the window - and `ahead()`,
 // which is below and exists precisely because two readouts mean "now" and have
 // to keep meaning it while the chart is showing Friday.
 //
@@ -67,13 +67,13 @@
 // UNITS: THE SERIES ARE CANONICAL EXCEPT WHERE THE READER SEES THEM
 //
 // Temperatures, wind speeds, pressures and visibilities are converted here, on
-// the way out, through app/viewmodels/units.h — because a QML file that writes
+// the way out, through app/viewmodels/units.h - because a QML file that writes
 // `Data.temperature[i] + "°"` is right in Celsius and in Fahrenheit, and one
 // that writes `+ " km/h"` is not, which is why HourlyList asks Units instead.
 //
 // `precipMm` is the exception and stays in millimetres. It has to: precip.js
-// classifies intensity against the NWS bands — 2.5 mm/h moderate, 7.6 mm/h
-// heavy — and those are statements about millimetres. Converted to inches they
+// classifies intensity against the NWS bands - 2.5 mm/h moderate, 7.6 mm/h
+// heavy - and those are statements about millimetres. Converted to inches they
 // would silently reclassify every rain band in the app to "light". The chart
 // converts it at the plotting boundary instead (app/viewmodels/metrics.h), and
 // this is the one series where those two are different places.
@@ -116,7 +116,7 @@ class ForecastData : public QObject
     // Hours counted forward from the present, into the whole series rather than
     // into the window. The Today screen's hourly strip and the Hourly screen's
     // reading both mean "right now", and before this they said `nowIndex` and
-    // meant it — which stopped being the same thing the moment the window
+    // meant it - which stopped being the same thing the moment the window
     // could be Friday's. `aheadCount` is how many exist; `ahead(0)` is now.
     Q_PROPERTY(int aheadCount READ aheadCount NOTIFY changed)
 
@@ -124,7 +124,7 @@ class ForecastData : public QObject
     //
     // Parallel arrays, `count` long, indexed by hour. Named exactly as
     // metrics.js's `series` field names them, because that registry looks them
-    // up by string — `Data[metric.series]` — and a rename here is a tab that
+    // up by string - `Data[metric.series]` - and a rename here is a tab that
     // silently draws nothing.
     Q_PROPERTY(QVariantList temperature READ temperature NOTIFY changed)
     Q_PROPERTY(QVariantList apparent READ apparent NOTIFY changed)
@@ -143,7 +143,7 @@ class ForecastData : public QObject
     // Whether `apparent` carries anything at all. MET Norway has no apparent
     // temperature and Open-Meteo does, so this is the difference between a
     // "Feels like" toggle that shows a second curve and one that redraws the
-    // first — see HourlyOverview, which hides the control rather than offering
+    // first - see HourlyOverview, which hides the control rather than offering
     // a switch whose only effect is to claim something untrue.
     Q_PROPERTY(bool hasApparent READ hasApparent NOTIFY changed)
 
@@ -158,7 +158,7 @@ class ForecastData : public QObject
     // because a changed model rebuilds the delegates and the calls happen
     // again. The window stopped being that. It is one calendar day now, so
     // `count` is 24 on Thursday and 24 on Friday and `labelIndices` is the same
-    // list on both — and Qt's item views return early from `setModel` when the
+    // list on both - and Qt's item views return early from `setModel` when the
     // new model equals the old one. Nothing was rebuilt, so nothing re-ran, and
     // the day strip moved Friday's temperatures under Thursday's weather glyph
     // and Thursday's hour labels. The chart's header band said "Now" over a day
@@ -173,7 +173,7 @@ class ForecastData : public QObject
     Q_PROPERTY(QVariantList conditionTexts READ conditionTexts NOTIFY changed)
 
     // The header band's glyph per LABELLED column, which is not the glyph for
-    // an hour — see `conditionForLabel` below for what it folds and why. Indexed
+    // an hour - see `conditionForLabel` below for what it folds and why. Indexed
     // by hour like the three above, and empty at every column that carries no
     // label.
     Q_PROPERTY(QVariantList labelConditions READ labelConditions NOTIFY changed)
@@ -202,7 +202,7 @@ class ForecastData : public QObject
     // These two were `labelIndices()` and `precipBuckets()` in mockdata.js. A
     // Repeater whose model is a function call never re-runs it, because a
     // binding subscribes to the properties it reads and a method call is not
-    // one — so a refresh would land in the arrays above and leave the header
+    // one - so a refresh would land in the arrays above and leave the header
     // band drawing the hours from before it. Properties, and the call sites
     // lost their parentheses.
     Q_PROPERTY(QVariantList labelIndices READ labelIndices NOTIFY changed)
@@ -215,7 +215,7 @@ public:
     // before it looks for a factory, so a QML_SINGLETON that can be
     // default-constructed is default-constructed and create() is never called.
     // app/appoptions.h has the same note and the same fix; the symptom here was
-    // perfect — the type registered, every binding evaluated, and QML read a
+    // perfect - the type registered, every binding evaluated, and QML read a
     // second, empty snapshot while C++ pushed into the one AppEngine owns.
     // Nothing warned. The screen came up with `undefined` in every card.
     explicit ForecastData(QObject *parent);
@@ -223,7 +223,7 @@ public:
     static ForecastData *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 
     // The traditional name for a phase, localised. libclimat returns an
-    // identifier — "waning-gibbous" — precisely so that the wording is the
+    // identifier - "waning-gibbous" - precisely so that the wording is the
     // app's; public and static here so that the Sun & Moon card and the chart
     // legend cannot end up with two spellings of the same moon.
     [[nodiscard]] static QString moonPhaseLabel(const QString &identifier);
@@ -259,7 +259,7 @@ public:
     // reader's units, the condition glyph's name, the axis label, and whether
     // it is dark. A map rather than five parallel accessors because every
     // caller wants all of it for one column, and an empty map for an hour past
-    // the end of the series — QML reads a missing key as `undefined`, which is
+    // the end of the series - QML reads a missing key as `undefined`, which is
     // what a column with nothing in it should be.
     [[nodiscard]] Q_INVOKABLE QVariantMap ahead(int offset) const;
 
@@ -301,7 +301,7 @@ public:
     // Still functions, because they take an index and there is no property
     // shape for that. They are safe as functions because every one of them is
     // called inside a Repeater delegate whose model is one of the properties
-    // above — so a refresh rebuilds the delegates and the calls happen again.
+    // above - so a refresh rebuilds the delegates and the calls happen again.
     [[nodiscard]] Q_INVOKABLE bool    isNight(int index) const;
     [[nodiscard]] Q_INVOKABLE QString conditionFor(int index) const;
 
@@ -309,7 +309,7 @@ public:
     // not the same thing as the glyph for an hour.
     //
     // The band cannot draw twenty-four 27 px icons across a plot, so it labels
-    // every second column — and for as long as it asked `conditionFor` for the
+    // every second column - and for as long as it asked `conditionFor` for the
     // single hour it happened to land on, the other twelve hours of the day had
     // no icon anywhere. Which twelve is arbitrary: a day window's labels start
     // at column 1 and a today window's phase comes from where the present fell,
@@ -318,11 +318,11 @@ public:
     //
     // Measured against Open-Meteo on 2026-08-22, 7 of 79 forecast days whose
     // daily code was a thunderstorm drew no thunderstorm glyph anywhere in this
-    // band — including Houston's Thursday, where the ten-day strip's card said
+    // band - including Houston's Thursday, where the ten-day strip's card said
     // thunderstorm and every hour beside it said rain.
     //
     // So a labelled column answers for the whole span it stands for, under
-    // libclimat/domain/weathercode.h's `codeForLabelledSpan` — its own hour's
+    // libclimat/domain/weathercode.h's `codeForLabelledSpan` - its own hour's
     // sky, and anything that is happening anywhere in the span. The day/night
     // form comes from the hour that won, not from the column's first hour: a
     // 7 p.m. storm in July is a day glyph.
@@ -352,7 +352,7 @@ private:
     void clear();
 
     // Everything downstream of which hours the window covers, rebuilt. Called
-    // for a new snapshot and again for every day change — the series, the sun
+    // for a new snapshot and again for every day change - the series, the sun
     // markers and the precipitation buckets are all slices of the window, and
     // `clearWindow()` exists because all three builders append.
     void clearWindow();
@@ -382,7 +382,7 @@ private:
 
     // The hourly series after libclimat/domain/hourconvention.h's shift, so
     // that every accumulated quantity in it describes the hour STARTING at its
-    // timestamp — the convention precip.js draws on, and the one place in the
+    // timestamp - the convention precip.js draws on, and the one place in the
     // whole app where that shift happens.
     QList<climat::HourlyPoint> m_hours;
 
@@ -394,7 +394,7 @@ private:
 
     int m_start           = 0;   // index into m_hours of column 0
     int m_count           = 0;
-    int m_nowIndex        = 0;   // may fall outside [0, count) — see the header
+    int m_nowIndex        = 0;   // may fall outside [0, count) - see the header
     int m_startHour       = 0;
     int m_firstLabelIndex = 2;
     int m_labelStep       = 2;

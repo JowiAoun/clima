@@ -5,7 +5,7 @@
 //
 // The European index everywhere, including in North America, because that is
 // what the app's card shows everywhere. Two scales for the same air would let
-// a tile and the card behind it disagree — 42 "moderate" on one and 78 "good"
+// a tile and the card behind it disagree - 42 "moderate" on one and 78 "good"
 // on the other, both correct, on the same desktop. libclimat/wire/snapshot.cpp
 // makes that choice once, on the wire.
 //
@@ -39,7 +39,7 @@ WidgetSurface {
         caption: Wx.aqiBand(root.index)
 
         // The dominant pollutant, when the provider names one. Blank rather
-        // than "—": an index with no dominant species is a normal reading, not
+        // than "-": an index with no dominant species is a normal reading, not
         // a missing one, and a dash there would read as a hole in the data.
         footnote: Wx.pollutant(root.air.dominant)
     }

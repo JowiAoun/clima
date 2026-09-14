@@ -7,14 +7,14 @@
 #   scripts/licence-bundle.sh [output]     defaults to THIRD-PARTY-LICENCES.txt
 #
 # Generated rather than written, and assembled from the two files that are
-# already authoritative — packaging/linux/copyright for what covers what, and
+# already authoritative - packaging/linux/copyright for what covers what, and
 # LICENSES/ for the texts themselves. A hand-maintained bundle is a third copy
 # of the licensing story, and a third copy is the one that goes stale: it stays
 # correct until somebody adds a dependency and updates the other two.
 #
 # `reuse lint` is what proves the inputs are complete. If a file in the tree
 # carried a licence that LICENSES/ had no text for, reuse would fail before
-# this script ever ran — which is why this does no checking of its own.
+# this script ever ran - which is why this does no checking of its own.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,7 +27,7 @@ rule() { printf '%.0s=' {1..78}; printf '\n'; }
 
 {
   rule
-  echo "  CLIMAT ${version} — THIRD-PARTY LICENCES"
+  echo "  CLIMAT ${version} - THIRD-PARTY LICENCES"
   rule
   echo
   cat <<'PREAMBLE'
@@ -41,20 +41,20 @@ QT-SOURCE-OFFER.txt.
 
 Part one below says what covers what. Part two is the full text of every
 licence named in part one. Both are generated from the repository's own SPDX
-metadata, which `reuse lint` gates on every commit — so this file cannot
+metadata, which `reuse lint` gates on every commit - so this file cannot
 describe a set of components that is not the set actually shipped.
 PREAMBLE
   echo
   echo
   rule
-  echo "  PART ONE — WHAT COVERS WHAT"
+  echo "  PART ONE - WHAT COVERS WHAT"
   rule
   echo
   cat "$root/packaging/linux/copyright"
   echo
   echo
   rule
-  echo "  PART TWO — THE LICENCE TEXTS"
+  echo "  PART TWO - THE LICENCE TEXTS"
   rule
 
   for licence in "$root"/LICENSES/*.txt; do

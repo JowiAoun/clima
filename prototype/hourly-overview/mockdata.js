@@ -17,7 +17,7 @@
 // page contradicts itself: for a while this said index 3, which is midnight,
 // and the hourly strip drew moon glyphs under a hero showing a sun and 27°.
 //
-// Index 15 is 12:00 — the hour that observation falls in — and it is the index
+// Index 15 is 12:00 - the hour that observation falls in - and it is the index
 // detaildata.js was already written against. Its twelve-hour context window is
 // `precipProb[9..20]` verbatim, and its own `nowIndex` of 6 lands exactly here.
 // So this is the marker being moved to where the rest of the data already
@@ -27,11 +27,11 @@
 // worth comparing to the reference: every value stays at the clock hour it was
 // authored for, and the labelled hours are still MSN's, column for column.
 // Fifteen observed hours is a lot of past to carry, and it is the honest
-// amount — the series starts at 21:00 the evening before.
+// amount - the series starts at 21:00 the evening before.
 var startHour       = 21;   // index 0 is 21:00 on day 0
 var nowIndex        = 15;   // 12:00, the hour detaildata.js observes
 var firstLabelIndex = 1;    // label every 2 h from 22:00, so the curve starts
-var labelStep       = 2;    // before the first label — as it does in MSN
+var labelStep       = 2;    // before the first label - as it does in MSN
 
 var temperature = [
     19.4, 19.0, 19.0, 19.0, 18.6, 18.3, 18.0, 18.0, 18.2, 18.0, 18.4, 19.0,
@@ -41,7 +41,7 @@ var temperature = [
 ];
 
 // Chance of precipitation. This was hand-tuned to the MSN screenshot like the
-// two series around it, and it no longer is at the wet hours — deliberately,
+// two series around it, and it no longer is at the wet hours - deliberately,
 // and the divergence is the point. The reference forecast is dry, so a mock
 // copied from it can only ever demonstrate a precipitation effect by not
 // having any. The wet hours below carry the probability their amounts imply;
@@ -67,7 +67,7 @@ var cloud = [
 
 var count = temperature.length;
 
-// Millimetres in the hour *starting* at each index — the convention every
+// Millimetres in the hour *starting* at each index - the convention every
 // provider uses, and the one the wash under the chart is drawn on.
 //
 // Four spells, chosen to be a day someone would actually plan around rather
@@ -86,17 +86,17 @@ function _buildPrecipMm() {
     for (var i = 0; i < count; ++i)
         out.push(0);
 
-    // 21:00 – 01:00, easing off. Entirely behind `nowIndex`, so the wash and
-    // the past veil are composited over each other on first paint — which is
+    // 21:00 - 01:00, easing off. Entirely behind `nowIndex`, so the wash and
+    // the past veil are composited over each other on first paint - which is
     // the one pair of layers here that can be got wrong and stay unnoticed,
     // since neither is ever seen over the other anywhere else.
     out[0]  = 0.35; out[1]  = 0.30; out[2]  = 0.22; out[3] = 0.15; out[4] = 0.11;
 
-    // 14:00 – 18:00, the event of the day.
+    // 14:00 - 18:00, the event of the day.
     out[17] = 0.6;  out[18] = 2.9;  out[19] = 8.6;  out[20] = 5.1; out[21] = 1.4;
     out[22] = 0.3;  out[23] = 0.15;
 
-    // 07:00 – 09:00 the next morning.
+    // 07:00 - 09:00 the next morning.
     out[34] = 0.6;  out[35] = 1.1;  out[36] = 0.7;
     return out;
 }
@@ -106,8 +106,8 @@ function _buildPrecipMm() {
 // truth and no hour can be drizzling in the chart and pouring in the strip.
 //
 // Type falls out of temperature here because the mock has no weather codes.
-// Open-Meteo sends a WMO code per hour and it is strictly better — it is the
-// only way to know thunder or hail is involved — so `Precip.cells` takes one
+// Open-Meteo sends a WMO code per hour and it is strictly better - it is the
+// only way to know thunder or hail is involved - so `Precip.cells` takes one
 // as its third argument, ready for the provider that has it.
 var precipCells = Precip.cells(precipMm, temperature);
 
@@ -132,7 +132,7 @@ function _buildApparent() {
 // Generated from temperature/cloud/hour rather than hand-typed, so they stay
 // internally coherent (humidity tracks temperature inversely, visibility drops in
 // rain, air quality peaks at rush hour and clears in wind). Deterministic on
-// purpose — no Math.random — so golden-image tests stay stable.
+// purpose - no Math.random - so golden-image tests stay stable.
 // ---------------------------------------------------------------------------
 
 function _clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
@@ -203,8 +203,8 @@ var airQuality = _build(function (i) {
 // mobile ten-day strip shows under each column.
 //
 // Ten days forward of today, plus yesterday. Ten because that is what the
-// screen it feeds is called, and the desktop strip — which only ever showed
-// what fitted and paged the rest — gets the extra columns for free.
+// screen it feeds is called, and the desktop strip - which only ever showed
+// what fitted and paged the rest - gets the extra columns for free.
 // `weekday` is carried rather than derived because `label` is not one: the
 // first two entries are "Yesterday" and "Today", and the mobile week strip
 // needs the actual day of the week under both of them.
@@ -228,7 +228,7 @@ var todayIndex = 1;
 // The month, for the calendar screen.
 // ---------------------------------------------------------------------------
 // July 2026: 31 days, the 1st a Wednesday, today the 30th. The weekday of the
-// 1st is the only calendar fact here — everything else follows from it, so
+// 1st is the only calendar fact here - everything else follows from it, so
 // moving the month is one number rather than thirty-one.
 //
 // Days that also appear in `days` take their values from there rather than
@@ -300,15 +300,15 @@ function _buildMonth() {
 
 // Fractional indices, so a marker can sit between two samples.
 //
-// The times are detaildata.js's — 6:04 and 8:43, its `sun.riseMin` and
-// `sun.setMin` to the minute — because the same sun cannot rise at two
+// The times are detaildata.js's - 6:04 and 8:43, its `sun.riseMin` and
+// `sun.setMin` to the minute - because the same sun cannot rise at two
 // different times on one page. These had been 5:44 and 8:33, which is some
 // other date's sun and put `isNight()` twenty minutes out from the arc on the
 // Sun card at one end and ten at the other. Tomorrow's pair moves the way a
 // real one does in late July: a minute later up, a minute earlier down.
 //
 // Index = the clock hour minus `startHour`, so 6:04 AM on day 1 is
-// 6 + 4/60 − 21 + 24 = 9.07.
+// 6 + 4/60 - 21 + 24 = 9.07.
 var sunEvents = [
     { index:  9.07, kind: "sunrise", text: "6:04 AM" },
     { index: 23.72, kind: "sunset",  text: "8:43 PM" },
@@ -345,7 +345,7 @@ function conditionText(i) {
     case "clear-day":    return "Sunny";
     case "clear-night":  return "Clear";
     }
-    return "—";
+    return "-";
 }
 
 function hourLabel(i) {

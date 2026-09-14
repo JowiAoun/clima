@@ -7,7 +7,7 @@
 #
 # flake.lock pins nixpkgs by revision, so `nix develop` gives the same Qt, the
 # same compiler, the same FreeType and the same fontconfig on a maintainer's
-# laptop and on a runner — down to the store hash. That is what makes the golden
+# laptop and on a runner - down to the store hash. That is what makes the golden
 # images comparable across machines at all, and it is a stronger guarantee than
 # the digest-pinned container docs/07 assumed, because it also covers the local
 # case: a developer who runs `nix develop -c ctest` is running what CI runs, not
@@ -84,9 +84,9 @@ jobs:
 
       # The two licence questions only a linked binary can answer: is a
       # GPLv3-only Qt module in the DT_NEEDED list, and is Qt linked
-      # dynamically. All FOUR shipped binaries — climat-cli is installed by the
+      # dynamically. All FOUR shipped binaries - climat-cli is installed by the
       # .deb and the MSI like the rest. cmake/ClimatLicenceGuard.cmake catches the way that mistake
-      # is normally made — a banned name in a find_package or a link line — and
+      # is normally made - a banned name in a find_package or a link line - and
       # cannot see a module that arrives through a QML import or another
       # module's dependency graph. This is risk R2 and R3 in
       # docs/08-risks.md, and static linking would silently relicense the
@@ -103,7 +103,7 @@ jobs:
             build/ci/daemon/climat-daemon build/ci/widgets/climat-widget
 
       # The desktop entry, the AppStream component and the icons, checked from
-      # a staged install rather than from the templates — so this covers the
+      # a staged install rather than from the templates - so this covers the
       # install rules too, which is where half of the silent failures live.
       #
       # It runs here, in the job that has a built tree, rather than in `lint`,
@@ -116,20 +116,20 @@ jobs:
       # The README's device images, re-rendered and diffed against what is
       # committed. They are composed out of the real shells at real breakpoints,
       # so this is the check that stops the front page of the project showing a
-      # layout the app stopped producing — the failure mode a screenshot pasted
+      # layout the app stopped producing - the failure mode a screenshot pasted
       # into a README has always had and never reported.
       - name: README device images
         run: CLIMAT_BUILD_DIR=build/ci nix develop --command bash scripts/shots.sh check
 
       # The desktop widgets, against a real compositor. `WLR_BACKENDS=headless
       # sway` needs no GPU, no seat and no display, and wlroots is the reference
-      # implementation of the protocol KWin also speaks — so this is the KDE and
+      # implementation of the protocol KWin also speaks - so this is the KDE and
       # Sway story actually being exercised rather than compiled.
       #
       # It runs here rather than in `lint` for the reason the packaging step
       # does: it needs a built climat-widget. The script skips, loudly, if sway
-      # cannot start on the runner at all — a machine that cannot host a
-      # compositor has said nothing about this code — and fails for every other
+      # cannot start on the runner at all - a machine that cannot host a
+      # compositor has said nothing about this code - and fails for every other
       # reason.
       - name: Desktop widgets pin themselves
         run: nix develop --command bash scripts/check-layer-shell.sh build/ci/widgets/climat-widget
@@ -190,7 +190,7 @@ jobs:
   # this distinction for screenshots: an honest Windows picture comes from a
   # real window, and it is documentation rather than a comparison.
   #
-  # This is the one job in the file that has never been run — everything else
+  # This is the one job in the file that has never been run - everything else
   # here was executed locally before being committed, the Debian build inside
   # the same container image it names. Treat its first run as the test of it.
   windows-msvc:
@@ -200,7 +200,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # The same modules the release job installs — release.yml adds
+      # The same modules the release job installs - release.yml adds
       # qtpositioning, and for a while this job did not, so the build CI
       # exercised was not the one the MSI ships: "use my location" was
       # compiled out here and in on the release runner. One list, both places.
@@ -232,8 +232,8 @@ jobs:
   # this file never had one, so "there is no macOS build" in docs/known-gaps.md
   # was true twice over: nothing shipped, and nothing was ever compiled. This
   # job makes the second half a measurement. It builds an unsigned .app and
-  # runs the suite without the golden images — CoreText is not FreeType, for
-  # the reason the Windows job gives — and it ships nothing, because shipping
+  # runs the suite without the golden images - CoreText is not FreeType, for
+  # the reason the Windows job gives - and it ships nothing, because shipping
   # needs the Developer ID the gap entry is about.
   #
   # Like the Windows job above, this has never been run. Treat its first run
@@ -315,7 +315,7 @@ jobs:
       # schema compiles --strict.
       #
       # gjs comes from apt rather than from the devshell, and the mutter typelib
-      # is absent on a runner — so the WaylandClient check SKIPS here and the
+      # is absent on a runner - so the WaylandClient check SKIPS here and the
       # script says so. That is the one assertion that needs a GNOME, and it is
       # exactly why scripts/shell-probe.sh is a manual acceptance test: standing
       # a shell up on a runner would test that stack rather than the one users
@@ -342,13 +342,13 @@ jobs:
       # reformat is the worse one. It would rewrite `git blame` for every line
       # of a codebase whose distinguishing feature is its comments, and
       # ReflowComments is exactly the setting that would tear up the aligned
-      # prose those comments are written in — the same reason docs/09 records
+      # prose those comments are written in - the same reason docs/09 records
       # that qmlformat must never be run over the QML.
       #
       # The gap this leaves is real and worth stating: new C++ is reviewed for
       # style by a person. If that stops working, the answer is to tune a
       # .clang-format down to zero replacements against the tree as it stands
-      # and adopt it in a commit that does nothing else — not to adopt a
+      # and adopt it in a commit that does nothing else - not to adopt a
       # standard style and reformat to meet it.
 
       # The translatable strings against the source they came from. A string
@@ -361,7 +361,7 @@ jobs:
         run: nix develop --command bash scripts/i18n.sh check
 
       # Needs a configured build for the all_qmllint target, but not a compiled
-      # one — qmllint reads sources and the module metadata that configuring
+      # one - qmllint reads sources and the module metadata that configuring
       # writes.
       - name: Configure, for qmllint
         run: |
@@ -376,18 +376,18 @@ jobs:
   # NOT part of the default run, and the `if` below is the honest reason: this
   # job has never executed. It was written against Qt's documented Android
   # deployment properties in an environment with no NDK, no SDK and no Qt for
-  # Android in it — a Nix devshell with desktop Qt — so it is a first draft of a
+  # Android in it - a Nix devshell with desktop Qt - so it is a first draft of a
   # build, not a check that passed.
   #
   # A job in that state does not belong on every pull request. Landing it as
   # `workflow_dispatch` only means the first person with the toolchain can run
   # it, fix whatever it says, and move it into the matrix in the commit that
-  # makes it green — rather than merging a red X that everyone learns to skip.
+  # makes it green - rather than merging a red X that everyone learns to skip.
   #
   # What it does NOT establish, whatever it reports: that the app works on a
   # phone. An APK that builds is an APK that builds. The gate this track is
   # actually waiting on is background alert delivery, which is not a build
-  # problem at all — see docs/known-gaps.md.
+  # problem at all - see docs/known-gaps.md.
   android:
     name: build (android, arm64-v8a)
     if: github.event_name == 'workflow_dispatch'

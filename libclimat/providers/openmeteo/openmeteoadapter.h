@@ -6,7 +6,7 @@
 // A free function over a QByteArray and nothing else: no clock, no network, no
 // member state. That is what lets tests/tst_openmeteoadapter.cpp run the whole
 // mapping against eight recorded responses without an event loop, and it is
-// what lets docs/04-architecture.md §4.8 put this on the parse pool — a pure
+// what lets docs/04-architecture.md §4.8 put this on the parse pool - a pure
 // function has nothing to synchronise.
 //
 // ============================================================================
@@ -19,7 +19,7 @@
 //
 // `visibility` arrives in METRES and the domain stores kilometres. Unconverted,
 // a clear day reads 24 100 against an axis whose maximum is 25, so the
-// Visibility tab is a flat line pinned to the top of the chart — which looks
+// Visibility tab is a flat line pinned to the top of the chart - which looks
 // like a working chart of a variable that never changes.
 //
 // `snowfall` arrives in CENTIMETRES while `precipitation`, `rain` and `showers`
@@ -31,7 +31,7 @@
 //
 // Everything else is already canonical: °C, km/h, hPa, mm, %, degrees from
 // north, seconds. Deliberately NOT requested in other units even though
-// Open-Meteo offers `temperature_unit` and `wind_speed_unit` — they are not
+// Open-Meteo offers `temperature_unit` and `wind_speed_unit` - they are not
 // per-quantity, there is no pressure parameter at all, and a unit-tagged
 // response makes the cache unit-keyed, so a user toggling °C to °F would
 // refetch every forecast they have ever looked at. Conversion happens once,
@@ -40,7 +40,7 @@
 // ---- 2. TIME IS NOT WHAT THE TIMESTAMPS SAY ----------------------------------
 //
 // `timezone=auto` returns naive local strings built by adding ONE fixed
-// `utc_offset_seconds` to a UTC series — there is no second offset and no
+// `utc_offset_seconds` to a UTC series - there is no second offset and no
 // transition, so Open-Meteo's local day is always 24 rows and its sunrise is an
 // hour wrong for half the year. libclimat/domain/timeaxis.h has the measurement
 // and the reasoning; this file simply never trusts a label and always
@@ -50,7 +50,7 @@
 //
 // Open-Meteo's accumulations are the PRECEDING hour. So is
 // libclimat/domain/forecast.h's convention, which means this adapter does *not*
-// shift — the shift belongs at the boundary where domain data becomes chart
+// shift - the shift belongs at the boundary where domain data becomes chart
 // data, because MET Norway's adapter shifts the other way into the same
 // convention and doing it twice here would undo that.
 //
@@ -77,7 +77,7 @@
 // hour in the middle of its series and a null tail on the sixteenth day;
 // `toronto-ecmwf-gaps.json` has `uv_index` and `visibility` null for all 72
 // hours because ECMWF IFS does not carry them, which is the difference between
-// "no value this hour" and "no such variable here" — and the second is what
+// "no value this hour" and "no such variable here" - and the second is what
 // decides whether a metric tab is drawn at all.
 //
 // A variable missing from the response *entirely* is the same thing said more
@@ -113,7 +113,7 @@ Result<Forecast> adaptForecast(const QByteArray &body, const QString &providerId
 // failure.
 Attribution attribution();
 
-// What a parsed payload turns out to carry — read off the columns rather than
+// What a parsed payload turns out to carry - read off the columns rather than
 // declared, because "which tabs exist here" is a question only the response can
 // answer. tests/fixtures/openmeteo/toronto-ecmwf-gaps.json is 72 hours of null
 // UV and null visibility beside a complete temperature series, which is "no

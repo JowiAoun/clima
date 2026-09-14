@@ -39,7 +39,7 @@ Item {
 
             // The knob travels, so it takes `move`; everything else here is a
             // recolour and takes `tint`. The knob landing a beat after the
-            // track has finished changing colour is the point — it is the one
+            // track has finished changing colour is the point - it is the one
             // part of the control that actually goes somewhere.
             Behavior on x {
                 NumberAnimation { duration: Theme.motion.move; easing.type: Easing.OutCubic }

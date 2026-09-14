@@ -11,8 +11,8 @@
 # Hyprland, XFCE.
 #
 # `Exec` carries no flags because it does not need any. `--pin` defaults to
-# `auto`, so on a compositor that implements zwlr_layer_shell_v1 — KWin and
-# every wlroots compositor — starting this from the application menu produces
+# `auto`, so on a compositor that implements zwlr_layer_shell_v1 - KWin and
+# every wlroots compositor - starting this from the application menu produces
 # tiles pinned to the desktop, top-right, under every window. Where the
 # protocol is absent it produces an ordinary window instead, which is what an
 # X11 desktop gets and what a GNOME user gets if they start this by hand rather
@@ -48,7 +48,7 @@ Keywords=Weather;Widget;Desktop;Forecast;
 
 # False, and that is about what a pinned tile is. Startup notification ends when
 # the launched program takes the activation token, which a desktop-layer surface
-# never does — widgets/layershell.cpp sets activateOnShow(false), because a tile
+# never does - widgets/layershell.cpp sets activateOnShow(false), because a tile
 # that grabbed focus on appearing would eat the first keystroke after login. So
 # `true` here buys a launcher spinner that runs until it times out, on the
 # desktops where this now works best.
@@ -62,4 +62,4 @@ StartupWMClass=climat-widget
 # No OnlyShowIn, for the reason climat-daemon.desktop.in sets out at length: the
 # install rule already restricts this to Linux, and an enumerated list of
 # desktop names excluded Sway, Hyprland, Wayfire, river, labwc, niri and COSMIC
-# — which is to say, most of the compositors where `--pin` works.
+# - which is to say, most of the compositors where `--pin` works.

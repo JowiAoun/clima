@@ -11,7 +11,7 @@
 #
 # This is the gate for the whole Ubuntu widget story. GNOME Shell cannot draw a
 # QML surface, so a Climat widget is our own Qt process whose window the
-# extension adopts — and every part of that rests on Meta.WaylandClient, whose
+# extension adopts - and every part of that rests on Meta.WaylandClient, whose
 # notion of "our window" comes from a socket fd inherited at spawn time. See
 # tests/shell/climat-window-probe@climat.invalid/extension.js for the mechanism
 # and docs/widgets.md for what it measured.
@@ -59,8 +59,8 @@ case "$target" in
       exit 1
     fi
     # The host binary needs the Qt from the flake on its library path, which is
-    # what qt-env.sh works out. The Flatpak needs none of this — its Qt is the
-    # runtime's — which is the one interesting difference between the two runs.
+    # what qt-env.sh works out. The Flatpak needs none of this - its Qt is the
+    # runtime's - which is the one interesting difference between the two runs.
     argv=("$root/scripts/dev-run.sh")
     ;;
   --)
@@ -116,7 +116,7 @@ echo "shell-probe: mode    $mode"
 # A private session bus. A second gnome-shell on the real one would contend for
 # org.gnome.Shell and org.gnome.ScreenSaver with the shell the user is looking
 # at. The cost is that there are no portals behind it, so a sandboxed Qt app
-# spends ~25 s timing out on org.freedesktop.portal.Desktop before it paints —
+# spends ~25 s timing out on org.freedesktop.portal.Desktop before it paints -
 # which is why the probe's deadline is 90 s and not 10.
 timeout 180 /usr/bin/dbus-run-session -- bash -c '
     gsettings set org.gnome.shell enabled-extensions "[\"'"$uuid"'\"]"
@@ -165,5 +165,5 @@ for k, exp, got in bad:
     print(f"shell-probe: FAIL {k}: expected {exp!r}, got {got!r}", file=sys.stderr)
 if bad:
     sys.exit(1)
-print("shell-probe: ok — window adopted, re-typed, out of the window list, still composited")
+print("shell-probe: ok - window adopted, re-typed, out of the window list, still composited")
 PY

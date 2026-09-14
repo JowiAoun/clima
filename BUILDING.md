@@ -14,7 +14,7 @@ nix develop --command cmake --build build/dev
 nix develop --command ctest --test-dir build/dev --output-on-failure
 ```
 
-Or skip the ceremony — this builds if needed, finds Qt itself, and works from a
+Or skip the ceremony - this builds if needed, finds Qt itself, and works from a
 plain shell:
 
 ```sh
@@ -33,7 +33,7 @@ hash. That is why golden images reproduce here and not in a container tagged
 
 ## With your distribution's Qt
 
-The floor is **Qt 6.8**. No dependency is fetched at configure time — decision
+The floor is **Qt 6.8**. No dependency is fetched at configure time - decision
 D8 rules out Conan and vcpkg precisely so this path works.
 
 **Debian 13 / Ubuntu 26.04+**
@@ -66,7 +66,7 @@ sudo cmake --install build
 ```
 
 **Ubuntu 24.04 cannot build this.** It ships Qt 6.4.2. Use the Flatpak, which
-carries its own Qt — see [`docs/known-gaps.md`](docs/known-gaps.md).
+carries its own Qt - see [`docs/known-gaps.md`](docs/known-gaps.md).
 
 ## Options
 
@@ -76,9 +76,9 @@ carries its own Qt — see [`docs/known-gaps.md`](docs/known-gaps.md).
 | `CLIMAT_BUILD_GALLERY` | `ON` | The `climat-gallery` component browser, a second binary. |
 | `CLIMAT_DEV_TOOLS` | `ON` | `--grab`, `--film`, `--poke` and the probe harnesses. `OFF` in shipped builds. |
 | `CLIMAT_APP_ID` | `io.github.JowiAoun.Climat` | Reverse-DNS id: desktop file, AppStream, icon name, settings path. |
-| `CLIMAT_CONTACT` | the issue tracker | Goes in the outbound User-Agent. **Packagers should override this** — a rate-limit complaint about your rebuild should reach you. |
+| `CLIMAT_CONTACT` | the issue tracker | Goes in the outbound User-Agent. **Packagers should override this** - a rate-limit complaint about your rebuild should reach you. |
 | `CLIMAT_MAINTAINER` | a noreply address | The Debian `Maintainer` field. |
-| `CLIMAT_INSTALL_AUTOSTART` | `ON` | Installs the daemon's entry into `/etc/xdg/autostart` — an absolute path, because the XDG search path is a fixed list. `OFF` for a sandboxed or staged install that cannot write there; the Flatpak passes it. Switching it off does not leave the widgets without a service: the D-Bus activation file installs under the prefix regardless, and the bus starts one when a widget host asks. |
+| `CLIMAT_INSTALL_AUTOSTART` | `ON` | Installs the daemon's entry into `/etc/xdg/autostart` - an absolute path, because the XDG search path is a fixed list. `OFF` for a sandboxed or staged install that cannot write there; the Flatpak passes it. Switching it off does not leave the widgets without a service: the D-Bus activation file installs under the prefix regardless, and the bus starts one when a widget host asks. |
 
 Four optional dependencies are found if present and compiled out if not:
 
@@ -87,7 +87,7 @@ Four optional dependencies are found if present and compiled out if not:
 | **Qt Positioning** | "use my location" through GeoClue2 on a desktop | the portal below answers instead, and failing that the user searches by name |
 | **Qt D-Bus** | the desktop's colour scheme over the XDG portal; severe-weather notifications; "use my location" inside a Flatpak, where GeoClue2 is unreachable and the Location portal is the only route; and `climat-daemon`, which the desktop widgets read from | `QStyleHints` answers the colour question, the notifications preference is not shown at all rather than shown and inert, and there are no widgets |
 | **Qt LinguistTools** | compiles the language catalogues listed in `app/CMakeLists.txt` into the binary | the app speaks its source language. There are no catalogues yet, so this buys nothing today |
-| **layer-shell-qt** + `wayland-client` | `climat-widget --pin`: the tiles pin themselves under your windows on KDE Plasma, Sway, Hyprland and every other wlroots compositor | `--pin` says so and the tiles are an ordinary window. GNOME is unaffected — its shell extension does the pinning, and mutter implements no such protocol anyway. |
+| **layer-shell-qt** + `wayland-client` | `climat-widget --pin`: the tiles pin themselves under your windows on KDE Plasma, Sway, Hyprland and every other wlroots compositor | `--pin` says so and the tiles are an ordinary window. GNOME is unaffected - its shell extension does the pinning, and mutter implements no such protocol anyway. |
 
 ```sh
 sudo apt install liblayershellqt6-dev libwayland-dev     # Debian 13 / Ubuntu 26.04+
@@ -110,7 +110,7 @@ scripts/flatpak.sh run
 The `.deb` is built in a container on purpose. `dpkg-shlibdeps` derives the
 `Depends` field from the binary's `DT_NEEDED` entries, so building it against a
 Nix Qt produces a package that depends on nothing, installs on a machine with no
-Qt, and then does not start — a failure invisible on the machine that made it.
+Qt, and then does not start - a failure invisible on the machine that made it.
 
 `flatpak-builder` needs `appstreamcli compose`, which lives in a separate binary
 many distributions do not ship. Without installing anything:
@@ -133,4 +133,4 @@ as one sentence about the machine instead of forty picture diffs. Golden images
 are only meaningful under `nix develop`; `ctest -LE golden` skips them.
 
 **The app starts and shows nothing.** Check stderr. If it is empty, you are
-probably outside the devshell — see the note at the top.
+probably outside the devshell - see the note at the top.

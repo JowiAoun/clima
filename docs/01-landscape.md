@@ -1,15 +1,15 @@
 <!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
-# 01 — Competitive Landscape
+# 01 - Competitive Landscape
 
 **Question we set out to answer:** is it actually true that there is no truly good
 cross-platform weather app, especially on Linux?
 
 **Verdict: substantially true, but the popular phrasing is too strong.**
 
-There *are* good Linux weather apps. What does not exist is any single application —
-open source or proprietary — that combines all five of the following:
+There *are* good Linux weather apps. What does not exist is any single application -
+open source or proprietary - that combines all five of the following:
 
 1. Global coverage (not one or two countries)
 2. An interactive radar / map layer
@@ -32,7 +32,7 @@ and it is a narrower, more defensible claim than "Linux weather apps are bad".
 | **Vremenar** | Qt 6 / QML, C++ | Linux, Windows, macOS, iOS, Android | ARSO (SI) + DWD (DE) | ❌ **2 countries** | ✅ radar on map | Limited | Region-specific | ❌ | GPL-3.0 / MPL-2.0 | Active, small (~15★) |
 | **Supercell Wx** | Qt 6 / C++ + MapLibre GL Native | Linux, Windows, macOS | NEXRAD L2/L3, NWS CAP | ❌ US-centric | ✅ **excellent** | ❌ (radar-first) | ✅ NWS | ❌ | ❌ | MIT ⚠️ | Active |
 | **Meteo** | GTK3 / Vala | Linux only | OpenWeatherMap (key required) | ✅ | Basic OWM tiles | Basic | ❌ | ❌ | ❌ | GPL-3.0 | Aging |
-| **Cumulus** | Qt5 / GTK | Linux only | Yahoo Weather (API retired) | — | ❌ | ❌ | ❌ | ❌ | ❌ | GPL-3.0 | Stale / broken |
+| **Cumulus** | Qt5 / GTK | Linux only | Yahoo Weather (API retired) | - | ❌ | ❌ | ❌ | ❌ | ❌ | GPL-3.0 | Stale / broken |
 | **GTK Meteo** | GTK4 | Linux only | Open-Meteo | ✅ | ❌ | Minimal | ❌ | ❌ | ❌ | GPL-3.0 | Low activity |
 | **wttr.in** | Terminal / web | Everywhere | Multiple | ✅ | ASCII only | ASCII | ❌ | ❌ | ❌ | Apache-2.0 | Active |
 
@@ -52,7 +52,7 @@ and it is a narrower, more defensible claim than "Linux weather apps are bad".
 | Source | Lesson to steal | Mistake to avoid |
 |---|---|---|
 | MSN Weather | Bento-grid dashboard; "day drill-down"; 30-year history comparison; map layer switcher as a tab strip | News feed pollution; opaque single-model forecast with no confidence signal |
-| Mousam | Density done well — a lot of numbers that still scan; GNOME HIG discipline | Linux-only; hard dependency on one API with no fallback → app shows nothing when API is down |
+| Mousam | Density done well - a lot of numbers that still scan; GNOME HIG discipline | Linux-only; hard dependency on one API with no fallback → app shows nothing when API is down |
 | Supercell Wx | MapLibre GL Native + Qt is a proven, performant combination for a radar app on Linux | Expert-only UI; no forecast product at all |
 | Vremenar | Proof that Qt/QML ships to all five platforms from one codebase | Coverage tied to two national agencies, so it cannot grow globally |
 | GNOME Weather | Excellent restraint and OS integration | Too little data for a weather enthusiast |
@@ -62,9 +62,9 @@ and it is a narrower, more defensible claim than "Linux weather apps are bad".
 - Recurring complaint of a "dearth of useful desktop weather radar apps for Linux"; some
   long-time Linux users keep a Windows machine specifically for radar software.
 - Linux weather apps frequently only resolve major cities, making them useless for rural
-  users — a geocoding/quality problem, not a forecast problem.
+  users - a geocoding/quality problem, not a forecast problem.
 - Mousam reviewers note it fails to load *anything* when its single upstream API is
-  unreachable — i.e. no offline cache, no fallback provider.
+  unreachable - i.e. no offline cache, no fallback provider.
 - Requested-but-missing features across apps: moon phase, rain alerts, customisation.
 
 Those four map directly onto four of our design principles in
@@ -74,7 +74,7 @@ offline-first cache, multi-provider fallback.
 ## 1.5 Positioning statement
 
 > **Climat** is a native, ad-free, open-source weather app for Linux, Windows and macOS
-> that shows you not just a forecast but *how much to trust it* — by comparing the
+> that shows you not just a forecast but *how much to trust it* - by comparing the
 > world's major forecast models side by side, on top of a global radar map.
 
 The differentiator is deliberately aimed at MSN's one genuine weakness: MSN has a good
@@ -85,15 +85,15 @@ ensembles from a single API surface.
 
 ## Sources
 
-- [Best Weather Apps for Linux — LinuxHint](https://linuxhint.com/best_linux_weather_apps/)
-- [Mousam is the Ultimate Weather App for Linux Desktop — OMG! Ubuntu](https://www.omgubuntu.co.uk/2024/10/mousam-modern-weather-app-for-linux)
+- [Best Weather Apps for Linux - LinuxHint](https://linuxhint.com/best_linux_weather_apps/)
+- [Mousam is the Ultimate Weather App for Linux Desktop - OMG! Ubuntu](https://www.omgubuntu.co.uk/2024/10/mousam-modern-weather-app-for-linux)
 - [Mousam docs](https://amit9838.github.io/mousam-docs/)
-- [KWeather — KDE Applications](https://apps.kde.org/kweather/)
+- [KWeather - KDE Applications](https://apps.kde.org/kweather/)
 - [KDE/kweather on GitHub](https://github.com/KDE/kweather)
 - [Vremenar](https://vremenar.app/) · [ntadej/Vremenar](https://github.com/ntadej/Vremenar)
 - [Supercell Wx](https://supercellwx.net/) · [dpaulat/supercell-wx](https://github.com/dpaulat/supercell-wx)
-- [Welcome to MSN Weather — Microsoft Support](https://support.microsoft.com/en-us/msn/welcome-to-msn-weather)
+- [Welcome to MSN Weather - Microsoft Support](https://support.microsoft.com/en-us/msn/welcome-to-msn-weather)
 - [MSN Weather on Google Play](https://play.google.com/store/apps/details?id=com.microsoft.amp.apps.bingweather)
 - [libgweather NEWS (yr.no → met.no switch)](https://github.com/GNOME/libgweather/blob/main/NEWS)
-- [Real Weather Radar software for Linux — Kubuntu Forums](https://www.kubuntuforums.net/forum/general/community-cafe/30874-real-weather-radar-software-for-linux)
-- [12 Best Free and Open Source GUI Weather Tools — LinuxLinks](https://www.linuxlinks.com/excellent-free-weather-software/)
+- [Real Weather Radar software for Linux - Kubuntu Forums](https://www.kubuntuforums.net/forum/general/community-cafe/30874-real-weather-radar-software-for-linux)
+- [12 Best Free and Open Source GUI Weather Tools - LinuxLinks](https://www.linuxlinks.com/excellent-free-weather-software/)

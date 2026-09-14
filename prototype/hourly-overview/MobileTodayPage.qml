@@ -14,7 +14,7 @@
 //   pollen              a band and its three sources
 //   health & activities five verdicts
 //
-// Two of the cards link onward — the hourly strip to the Hourly tab, the
+// Two of the cards link onward - the hourly strip to the Hourly tab, the
 // ten-day strip to Monthly. They are the two sections that are genuinely a
 // preview of another screen, and the link says so rather than leaving the
 // reader to find the tab. The other three have nowhere deeper to go and so

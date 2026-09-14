@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The two alert providers, against nine recorded responses and a loopback
-// server. No network — tests/support/networkguard.h makes that a property of
+// server. No network - tests/support/networkguard.h makes that a property of
 // the process.
 //
 // Every literal in this file was read off a payload the live service sent on
@@ -10,7 +10,7 @@
 // them and tests/fixtures/alerts/README.md says what each one is for. The
 // fixtures matter more here than anywhere else in the suite, because an alert
 // parser written against hand-made JSON agrees with whatever the author
-// believed — and three of the beliefs a reasonable author would hold about
+// believed - and three of the beliefs a reasonable author would hold about
 // these two services are wrong:
 //
 //     that severity is always stated              6 of 9 say "Unknown"
@@ -47,7 +47,7 @@ QByteArray fixture(const QString &relative)
     return file.readAll();
 }
 
-// Annapolis County, Nova Scotia — inside the heat warning's polygon.
+// Annapolis County, Nova Scotia - inside the heat warning's polygon.
 const Coordinate kAnnapolis{ 44.6487, -65.2007 };
 
 // Seattle. Four NWS alerts at this point on the recorded afternoon.
@@ -125,7 +125,7 @@ void TestAlertProviders::ecccReadsTheHeatWarningItWasSent()
     QVERIFY(alert.description.contains(QStringLiteral("mainland Nova Scotia")));
 
     // ECCC publishes no headline and no separate instruction. Empty rather than
-    // manufactured — a view that finds an empty headline shows `event`.
+    // manufactured - a view that finds an empty headline shows `event`.
     QVERIFY(alert.headline.isEmpty());
     QVERIFY(alert.instruction.isEmpty());
 
@@ -153,7 +153,7 @@ void TestAlertProviders::ecccMapsTheRiskColourAndNotTheAlertType()
     QCOMPARE(yellow.value().alerts.constFirst().severity, AlertSeverity::Moderate);
     QCOMPARE(orange.value().alerts.constFirst().severity, AlertSeverity::Severe);
 
-    // Both are warnings, so urgency is the same on both — which is the evidence
+    // Both are warnings, so urgency is the same on both - which is the evidence
     // that the two axes are actually being read from two different fields.
     QCOMPARE(yellow.value().alerts.constFirst().urgency, AlertUrgency::Expected);
     QCOMPARE(orange.value().alerts.constFirst().urgency, AlertUrgency::Expected);
@@ -198,7 +198,7 @@ void TestAlertProviders::ecccExpiresBeforeItEndsToo()
 {
     // The expires-before-ends shape is not an American peculiarity. This
     // Canadian payload has expiration_datetime 2026-08-06T10:44:57Z and
-    // event_end_datetime 2026-08-08T22:00Z — the message goes stale two days
+    // event_end_datetime 2026-08-08T22:00Z - the message goes stale two days
     // before the heat does.
     const Result<AlertSet> parsed = EcccAlertProvider::parse(
         fixture(QStringLiteral("eccc/annapolis-heat.json")), kNow, QStringLiteral("en"));
@@ -239,7 +239,7 @@ void TestAlertProviders::ecccReadsFrenchFromTheSamePayload()
              QStringLiteral("Environnement et Changement climatique Canada"));
 
     // The grade is identical, because it is read from risk_colour_en whichever
-    // language was asked for — "jaune" is shown, never matched.
+    // language was asked for - "jaune" is shown, never matched.
     QCOMPARE(french.value().alerts.constFirst().severity,
              english.value().alerts.constFirst().severity);
     QVERIFY(french.value().alerts.constFirst().issuerLabel.contains(QStringLiteral("jaune")));
@@ -255,7 +255,7 @@ void TestAlertProviders::ecccAnEmptyCollectionIsASuccessAndNotAFailure()
 
     // 850 bytes of HTTP 200. Everything above this line in the stack has to keep
     // the difference between this and a failure, because a fall-through chain
-    // treats it as an answer — which is why alerts fan out instead.
+    // treats it as an answer - which is why alerts fan out instead.
 }
 
 void TestAlertProviders::ecccSendsADegenerateBoundingBoxAndNotACqlFilter()
@@ -280,7 +280,7 @@ void TestAlertProviders::ecccSendsADegenerateBoundingBoxAndNotACqlFilter()
     QCOMPARE(stub.requestCount(), 1);
     const QByteArray target = stub.requests().constFirst().target;
 
-    // Longitude first, the same point twice — and rounded to four decimals by
+    // Longitude first, the same point twice - and rounded to four decimals by
     // composeUrl(), which is the property that keeps a map drag from becoming a
     // hundred requests.
     QVERIFY2(target.contains("bbox=-65.2007,44.6487,-65.2007,44.6487"), target.constData());
@@ -324,7 +324,7 @@ void TestAlertProviders::nwsKeepsUnknownSeverityUnknown()
         if (alert.event == QStringLiteral("Air Quality Alert")) {
             ++unknown;
             // Not Minor. The issuer declined to grade, and inventing Minor is
-            // inventing a grade — see alert.h.
+            // inventing a grade - see alert.h.
             QCOMPARE(alert.severity, AlertSeverity::Unknown);
             QCOMPARE(alert.urgency, AlertUrgency::Unknown);
             QCOMPARE(alert.certainty, AlertCertainty::Unknown);
@@ -504,7 +504,7 @@ void TestAlertProviders::coverageFollowsTheRegionBoxes()
     QVERIFY(!nws.covers(Coordinate{}));
 
     // Toronto is inside BOTH boxes, because no rectangle follows the border.
-    // That is not a defect to fix — it is why alerts fan out.
+    // That is not a defect to fix - it is why alerts fan out.
     QVERIFY(eccc.covers(kToronto));
     QVERIFY(nws.covers(kToronto));
 
@@ -671,7 +671,7 @@ void TestAlertProviders::everyProviderDecliningIsUnsupported()
     QVERIFY(QTest::qWaitFor([&future] { return future.isFinished(); }, 5000));
 
     // Nobody had anything to say about this place. §4.4: the UI hides the
-    // feature rather than showing a broken one — and "no alerts here" is not
+    // feature rather than showing a broken one - and "no alerts here" is not
     // the same claim.
     QVERIFY(!future.result().hasValue());
     QCOMPARE(future.result().errorKind(), ErrorKind::Unsupported);

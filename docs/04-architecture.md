@@ -1,12 +1,12 @@
 <!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
-# 04 — Architecture
+# 04 - Architecture
 
 ## 4.1 Design principles
 
 1. **Offline-first.** The UI renders from cache, then reconciles with the network. The app
-   must never show an empty screen because an API is down — the documented failure mode of
+   must never show an empty screen because an API is down - the documented failure mode of
    the current best Linux weather app.
 2. **Providers are pluggable and region-routed.** No provider name appears in UI code.
 3. **The engine has no GUI dependency.** `libclimat` links Qt Core/Network only, so it can be
@@ -22,11 +22,11 @@
 
 ```mermaid
 flowchart TB
-    subgraph UI["climat — QML UI (GPL-3.0-or-later)"]
+    subgraph UI["climat - QML UI (GPL-3.0-or-later)"]
         Shell["App shell · navigation · window chrome"]
         Views["Views: Home · Hourly · 10-Day · Map · AirQuality · History · Models"]
-        Charts["ClimatCharts — QQuickItem + QSGGeometryNode"]
-        MapView["MapView — MapLibre Native Qt"]
+        Charts["ClimatCharts - QQuickItem + QSGGeometryNode"]
+        MapView["MapView - MapLibre Native Qt"]
         Design["Design system: tokens, theming, motion, a11y"]
     end
 
@@ -38,12 +38,12 @@ flowchart TB
         SettingsVM["Settings"]
     end
 
-    subgraph Core["libclimat — engine (MPL-2.0, no GUI)"]
+    subgraph Core["libclimat - engine (MPL-2.0, no GUI)"]
         Domain["Domain model: Observation · HourlyPoint · DailyPoint · Ensemble · Alert · Place"]
         Providers["Provider interfaces + registry (region routing, fallback chain)"]
-        Cache["CacheStore — SQLite + tile cache, TTL + ETag"]
+        Cache["CacheStore - SQLite + tile cache, TTL + ETag"]
         Units["Units · WMO code mapping · i18n of conditions"]
-        Net["HttpClient — QNetworkAccessManager, backoff, UA policy, coalescing"]
+        Net["HttpClient - QNetworkAccessManager, backoff, UA policy, coalescing"]
     end
 
     subgraph Ext["External"]
@@ -89,10 +89,10 @@ climat/
 │   ├── charts/                   # ClimatCharts scene-graph items
 │   ├── qml/
 │   │   ├── views/  components/  theme/
-│   ├── fonts/                    # Inter, OFL-1.1 — the UI face, bundled
+│   ├── fonts/                    # Inter, OFL-1.1 - the UI face, bundled
 │   └── assets/                   # Meteocons → generated QML
-├── gallery/                      # `climat-gallery` — every component on one screen, ships nowhere
-├── cli/                          # `climat-cli` — scriptable forecast output (built)
+├── gallery/                      # `climat-gallery` - every component on one screen, ships nowhere
+├── cli/                          # `climat-cli` - scriptable forecast output (built)
 ├── platform/
 │   ├── linux/                    # desktop file, appstream, portals, tray, Plasma applet
 │   ├── windows/                  # manifest, MSIX, jump list
@@ -158,16 +158,16 @@ A provider that returns `∅` must make the UI *hide* the feature, not show a br
 |---|---|---|---|
 | Current conditions | 10 min | ETag / `If-Modified-Since` | ✅ show stale with a subtle "updated 25 min ago" |
 | Hourly / daily forecast | 30 min | ETag | ✅ |
-| 15-minute nowcast | 5 min | — | ✅ |
-| Ensemble / model comparison | 60 min | — | ✅ |
-| Air quality | 60 min (CAMS updates 12-hourly) | — | ✅ |
+| 15-minute nowcast | 5 min | - | ✅ |
+| Ensemble / model comparison | 60 min | - | ✅ |
+| Air quality | 60 min (CAMS updates 12-hourly) | - | ✅ |
 | Alerts | 3 min foreground, 10 idle, **stopped when hidden**, 15 metered | CAP `sent`/`expires` | ⚠️ never show an **ended** alert |
 | Radar frames | Frame lifetime (5 min) | Timeline manifest | ✅ |
-| Basemap tiles | 30 days | — | ✅ |
-| Historical archive / ERA5 | Immutable, cache forever | — | n/a |
-| Geocoding results | 7 days, keyed by query+lang | — | ✅ |
+| Basemap tiles | 30 days | - | ✅ |
+| Historical archive / ERA5 | Immutable, cache forever | - | n/a |
+| Geocoding results | 7 days, keyed by query+lang | - | ✅ |
 
-Rules: never more than one in-flight request per (provider, endpoint, location) — coalesce
+Rules: never more than one in-flight request per (provider, endpoint, location) - coalesce
 duplicates; exponential backoff with jitter on 5xx/429; **hard stop** on 403 from MET
 Norway (that means our User-Agent policy is broken, and retrying makes it worse); no
 background polling while the window is hidden unless the user enabled alert notifications.
@@ -178,7 +178,7 @@ forward-only migrations. Tiles in a separate size-capped LRU directory (default 
 **What alert polling actually costs.** The estimate this table was written against assumed
 both services revalidate. Measured on 2026-08-05, only one does: `api.weather.gov` sends an
 `ETag` and most of its polls come back 304, while `api.weather.gc.ca` sends **no validator at
-all** — no `ETag`, no `Last-Modified`, no `Cache-Control`, only `Vary: Accept-Encoding` — so
+all** - no `ETag`, no `Last-Modified`, no `Cache-Control`, only `Vary: Accept-Encoding` - so
 every Canadian poll is a full transfer of about 10 kB. A day of uninterrupted foreground
 polling in Canada is therefore nearer 5 MB than the 264 kB originally budgeted.
 
@@ -186,7 +186,7 @@ The line that brings that down is "stopped when hidden", which is why it is in t
 rather than in a comment. `app/viewmodels/alertsdata.h` owns the schedule; the measurements
 are in `tests/fixtures/alerts/README.md`.
 
-## 4.6 ClimatCharts — the chart kit
+## 4.6 ClimatCharts - the chart kit
 
 Each chart is a `QQuickItem` subclass implementing `updatePaintNode()`, building
 `QSGGeometryNode`s with the geometry held as a member of the node subclass (no
@@ -209,7 +209,7 @@ under `updatePolish()`.
 
 Shared infrastructure: `AxisModel` (time and value scales, tick generation, DST-aware),
 `ChartTheme` (tokens from the design system), `Crosshair` (synchronised scrubbing across
-stacked charts — MSN does this and it feels great), and a `ChartAccessibility` layer that
+stacked charts - MSN does this and it feels great), and a `ChartAccessibility` layer that
 exposes each series as a screen-reader table.
 
 ## 4.7 Map architecture
@@ -243,8 +243,8 @@ snapshots cross threads without locking.
 | Autostart / background | `xdg-desktop-portal` Background + Autostart | Startup task | Login item |
 | Tray / status item | StatusNotifierItem (KDE/appindicator) | Tray icon with live temp | Menu-bar item with temp |
 | Widget / applet | **Plasma 6 applet** + **GNOME Shell extension** reusing `libclimat` | Windows Widgets (post-1.0) | Today widget (post-1.0) |
-| Global shortcut | Portal GlobalShortcuts | — | — |
-| Search integration | KRunner plugin, GNOME Search Provider | — | Spotlight (post-1.0) |
+| Global shortcut | Portal GlobalShortcuts | - | - |
+| Search integration | KRunner plugin, GNOME Search Provider | - | Spotlight (post-1.0) |
 | Location | `Qt Positioning` → GeoClue2 | Windows Location | CoreLocation |
 | Theming | Follows Plasma/GNOME accent + dark mode, Wayland-native, CSD | System accent, Mica | Vibrancy, accent |
 
@@ -257,7 +257,7 @@ The Plasma applet and GNOME extension are exactly why `libclimat` is MPL-2.0 and
 - **No target smaller than `Theme.metric.hitMin` (44 px) in either direction.** It is a
   floor on the target, not on the mark: `TouchTarget.qml` grows an invisible area around a
   control that should stay small, and a control whose size *is* its affordance grows
-  instead. Two audits enforce it — `tests/qml/tst_hittargets.qml` walks every screen the
+  instead. Two audits enforce it - `tests/qml/tst_hittargets.qml` walks every screen the
   mobile shell reaches and fails on anything under the floor, and the gallery's **Touch
   targets** overlay draws them for review. Neither replaces the other: the test says a
   screen passes, the picture says what passing looks like.
@@ -266,15 +266,15 @@ The Plasma applet and GNOME extension are exactly why `libclimat` is MPL-2.0 and
 - Qt Linguist `.ts` catalogues; translation via Weblate. WMO code → localised condition
   strings live in `libclimat` so the CLI and applets share them.
 - Units are per-quantity, not a global metric/imperial switch (people want °C with mph, or
-  inHg with mm) — a lesson from every weather-app review comment section.
+  inHg with mm) - a lesson from every weather-app review comment section.
   - **Amended, and the rule is unchanged.** The preferences screen offers a °C and a °F
     preset above the five per-quantity rows. They are a *shortcut that writes the five*,
     not a sixth preference: `Units::system()` is a reading of what the five currently
     say and answers `custom` for any mixture, which the screen draws by filling neither
     radio. Change one row after choosing a preset and the other four stay where they
-    were — which is precisely what a real switch could not do, and why °C-with-mph is
+    were - which is precisely what a real switch could not do, and why °C-with-mph is
     still one tap. `Settings` has no unit-system key and will not grow one.
-- The clock format IS global — `Settings.clockFormat`, 12h or 24h — and that is not a
+- The clock format IS global - `Settings.clockFormat`, 12h or 24h - and that is not a
   contradiction of the line above. A unit is a property of a quantity and there are five
   of them; a clock is a property of the reader. `app/viewmodels/timeformat.h` is the one
   place that reads the key, and it reaches the app and the widget host both, because
@@ -285,8 +285,8 @@ The Plasma applet and GNOME extension are exactly why `libclimat` is MPL-2.0 and
 
 | Layer | Approach |
 |---|---|
-| Domain / units / WMO mapping | Plain unit tests, exhaustive on the 0–99 code table |
-| Provider parsing | **Golden-file tests** against recorded API responses committed to `tests/fixtures/` — no network in CI |
+| Domain / units / WMO mapping | Plain unit tests, exhaustive on the 0-99 code table |
+| Provider parsing | **Golden-file tests** against recorded API responses committed to `tests/fixtures/` - no network in CI |
 | Provider contract | A shared conformance suite every `IForecastProvider` must pass |
 | Registry / fallback | Fault injection: provider down, 429, 403, malformed JSON, partial data |
 | Cache | Migration tests, TTL/expiry, stale-while-revalidate behaviour |

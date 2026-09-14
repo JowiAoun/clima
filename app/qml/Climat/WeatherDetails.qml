@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The weather-detail grid: twelve cards, one per measurable.
 //
-// The cards are deliberately uniform — same box, same anatomy, same rhythm —
+// The cards are deliberately uniform - same box, same anatomy, same rhythm -
 // so the eye can sweep the grid and land only where a value is unusual. Twelve
 // differently-shaped cards would each demand to be read.
 //
@@ -11,7 +11,7 @@
 // the moment it became one section of a scrolling page: a scroll area inside a
 // scroll area gives the reader two things to drag and no way to tell which one
 // they got. The page owns the scrolling, and with it the layer that keeps these
-// cards' Shapes inside the viewport — see docs/10-design-system.md §10.8.
+// cards' Shapes inside the viewport - see docs/10-design-system.md §10.8.
 import QtQuick
 
 Item {
@@ -67,7 +67,7 @@ Item {
                 // A card that fails to load leaves a hole rather than
                 // collapsing the grid, so the gap names the culprit.
                 onStatusChanged: if (status === Loader.Error)
-                    console.warn("details: card failed to load —", source)
+                    console.warn("details: card failed to load -", source)
 
                 Rectangle {
                     anchors.fill: parent

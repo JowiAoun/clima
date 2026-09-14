@@ -26,7 +26,7 @@ namespace {
 
 // Parses an HTTP-date. Three formats are legal in RFC 7231 and servers in the
 // wild use all three, so all three are tried rather than assuming the modern
-// one — an Expires we fail to parse is a request we make again for nothing,
+// one - an Expires we fail to parse is a request we make again for nothing,
 // which is precisely the waste this class exists to avoid.
 QDateTime parseHttpDate(const QByteArray &raw)
 {
@@ -64,7 +64,7 @@ QDateTime parseHttpDate(const QByteArray &raw)
 // Nothing in Climat has a login, and §4.1's "zero telemetry, zero accounts" is a
 // claim we make on the download page. A Set-Cookie we accept is a stable
 // identifier we then carry across every subsequent request to that host without
-// meaning to — which is precisely the cross-request correlation the claim says
+// meaning to - which is precisely the cross-request correlation the claim says
 // we do not do.
 //
 // A subclass rather than QNetworkAccessManager::setCookieJar(nullptr), because
@@ -82,7 +82,7 @@ public:
 
 // Retry-After is either delta-seconds or an HTTP-date. Returns a negative
 // duration when there was no usable header, so that "absent" and "zero
-// seconds" stay distinguishable — a server saying "retry immediately" is a
+// seconds" stay distinguishable - a server saying "retry immediately" is a
 // different instruction from a server saying nothing.
 std::chrono::milliseconds parseRetryAfter(const QByteArray &raw, const QDateTime &now)
 {
@@ -128,7 +128,7 @@ HttpClient::HttpClient(Clock *clock, QObject *parent)
     , m_network(new QNetworkAccessManager(this))
     // Seeded once from the system generator. Jitter is the one place in this
     // codebase where a nondeterministic source is the point rather than a bug
-    // — see backoff.h — and seeding once rather than per-draw keeps the whole
+    // - see backoff.h - and seeding once rather than per-draw keeps the whole
     // process's schedule reproducible from a single value a test can set.
     , m_backoff(BackoffPolicy{}, QRandomGenerator::global()->generate())
 {
@@ -278,7 +278,7 @@ void HttpClient::dispatch(const std::shared_ptr<InFlight> &flight)
     // ---- the User-Agent -----------------------------------------------------
     //
     // Set here and only here. HttpRequest::headers is applied *after* this and
-    // is filtered so that it cannot overwrite it — see below. This is the
+    // is filtered so that it cannot overwrite it - see below. This is the
     // header a 403 hangs off, and the whole class is built around it being
     // exactly one string.
     request.setRawHeader(QByteArrayLiteral("User-Agent"), userAgent());
@@ -286,7 +286,7 @@ void HttpClient::dispatch(const std::shared_ptr<InFlight> &flight)
     for (auto it = flight->request.headers.cbegin(); it != flight->request.headers.cend(); ++it) {
         // A provider that tries to set its own User-Agent is refused rather
         // than obeyed. Silently, because there is nothing a caller could do
-        // about it and a warning per request would be noise — but the filter
+        // about it and a warning per request would be noise - but the filter
         // is here so that the compliance string cannot be routed around by
         // adding a map entry.
         if (it.key().compare(QByteArrayLiteral("User-Agent"), Qt::CaseInsensitive) == 0)
@@ -308,7 +308,7 @@ void HttpClient::dispatch(const std::shared_ptr<InFlight> &flight)
 
     request.setTransferTimeout(m_transferTimeout);
 
-    // Qt's own HTTP cache is off — there isn't one attached — but saying so
+    // Qt's own HTTP cache is off - there isn't one attached - but saying so
     // makes the intent unambiguous: the cache in this app is CacheStore, and
     // two caching layers with two TTL tables is a bug waiting for a support
     // thread nobody can reproduce.
@@ -346,7 +346,7 @@ void HttpClient::onReplyFinished(const std::shared_ptr<InFlight> &flight, QNetwo
     // 403 is the specific mistake that turns "refused" into "banned".
     if (status == 403) {
         const QString reason =
-            QStringLiteral("403 from %1 — the server refused our User-Agent (%2). "
+            QStringLiteral("403 from %1 - the server refused our User-Agent (%2). "
                            "This is a policy refusal, not an outage: the provider is now "
                            "disabled for the life of this process and will not be retried.")
                 .arg(reply->url().host(), QString::fromLatin1(userAgent()));
@@ -463,7 +463,7 @@ void HttpClient::onReplyFinished(const std::shared_ptr<InFlight> &flight, QNetwo
             QString detail = QString::fromUtf8(body.left(limit));
             if (body.size() > limit)
                 detail += QStringLiteral("…");
-            message += QStringLiteral(" — ") + detail.simplified();
+            message += QStringLiteral(" - ") + detail.simplified();
         }
 
         finish(flight, Result<HttpResponse>(fail(kind, message)));
@@ -533,8 +533,8 @@ void HttpClient::finish(const std::shared_ptr<InFlight> &flight, Result<HttpResp
     flight->finished = true;
 
     // Out of the map before the promise is fulfilled. A continuation attached
-    // to the future can call send() again for the same key — a fallback chain
-    // retrying against a second provider is exactly that shape — and it must
+    // to the future can call send() again for the same key - a fallback chain
+    // retrying against a second provider is exactly that shape - and it must
     // see an empty slot rather than coalesce onto a request that has already
     // answered.
     m_inFlight.remove(flight->key);

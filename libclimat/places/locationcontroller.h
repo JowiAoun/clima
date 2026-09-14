@@ -6,7 +6,7 @@
 // ---- the cold start is the whole design constraint --------------------------
 //
 // The app must come up on the home place before any network call completes.
-// Not "quickly" — *before*, because the first frame is drawn from the cached
+// Not "quickly" - *before*, because the first frame is drawn from the cached
 // forecast and a frame drawn before the place name is known has a hole in it
 // where the location bar goes. So `load()` is synchronous: one SELECT over a
 // table with a handful of rows, sub-millisecond against a cold page cache,
@@ -28,7 +28,7 @@
 //
 //   places.current   the place last looked at. Restored on start.
 //   the is_home flag on the row itself, which the places table enforces to at
-//   most one with a partial unique index — see migration 2.
+//   most one with a partial unique index - see migration 2.
 //
 // A start with no remembered current falls back to home, and a start with
 // neither falls back to the first row. A start with no rows at all leaves
@@ -94,13 +94,13 @@ public:
         LatitudeRole,
         LongitudeRole,
         IsHomeRole,
-        LabelRole,     // "Toronto, Ontario" — what the location bar shows
-        RegionRole,    // "Ontario, Canada" — the second line in a picker
+        LabelRole,     // "Toronto, Ontario" - what the location bar shows
+        RegionRole,    // "Ontario, Canada" - the second line in a picker
     };
     Q_ENUM(Role)
 
     // Reads every saved place and restores the current selection. Synchronous,
-    // on purpose — see the header comment. Safe to call again; it re-reads.
+    // on purpose - see the header comment. Safe to call again; it re-reads.
     Status load();
 
     [[nodiscard]] int      rowCount(const QModelIndex &parent = {}) const override;
@@ -131,7 +131,7 @@ public:
     // no the day upstream changed a spelling.
     [[nodiscard]] Q_INVOKABLE int indexOfGeonamesId(qint64 geonamesId) const;
 
-    // Adds, or returns the existing row when the place is already saved —
+    // Adds, or returns the existing row when the place is already saved -
     // `Place::isSameEntity` decides, so a place found by searching and the
     // same place found by standing in it do not become two rows. Returns the
     // row, or -1 if the write failed.

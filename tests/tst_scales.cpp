@@ -5,7 +5,7 @@
 //
 // libclimat/domain/scales.h is a transcription: the WHO's UV bands, the European
 // AQI's own bands, the Beaufort scale, the sixteen-point compass. Nothing in it
-// is a judgement of ours, which is exactly why it needs a test — a transcription
+// is a judgement of ours, which is exactly why it needs a test - a transcription
 // error is invisible. Every function returns a plausible word for every input,
 // so a band boundary off by one grades a UV index of 6 as "Moderate" for the
 // rest of the app's life and no screenshot shows it.
@@ -18,7 +18,7 @@
 //   the edges        the value ON the boundary and the value one step below it.
 //                    This is where a `<` written as a `<=` lives, and the three
 //                    string tables in this file deliberately do not agree about
-//                    which comparison they use — uvBand is `<`, aqiBand is `<=`,
+//                    which comparison they use - uvBand is `<`, aqiBand is `<=`,
 //                    visibilityBand is `>=`. A tidy-up that unified them would
 //                    silently move two of the three.
 //
@@ -60,7 +60,7 @@ constexpr double kEpsilon = 0.001;
 // pollutant to the enum without adding it here fails this file, which is the
 // only moment anybody is going to remember that the label table needs a row too.
 //
-// Not derived from pollutantLabel() — that is the thing under test, and a table
+// Not derived from pollutantLabel() - that is the thing under test, and a table
 // checked against itself checks nothing.
 QString expectedLabel(Pollutant pollutant)
 {
@@ -124,8 +124,8 @@ private Q_SLOTS:
 };
 
 // ============================================================================
-// UV — the WHO's five bands. scales.h states the table outright: "low 0–2,
-// moderate 3–5, high 6–7, very high 8–10, extreme 11+", so that is what is
+// UV - the WHO's five bands. scales.h states the table outright: "low 0-2,
+// moderate 3-5, high 6-7, very high 8-10, extreme 11+", so that is what is
 // asserted, integer by integer, rather than a handful of values chosen to pass.
 // ============================================================================
 
@@ -191,7 +191,7 @@ void TestScales::uvBandsBreakAtTheBoundaryAndNotBeforeIt()
 }
 
 // ============================================================================
-// AQI — the European index, and the one table in this file whose comparison is
+// AQI - the European index, and the one table in this file whose comparison is
 // `<=`. 20 is Good and 20.001 is Fair, which is the opposite convention to the
 // UV table three functions away.
 // ============================================================================
@@ -227,7 +227,7 @@ void TestScales::theAqiBoundaryBelongsToTheLowerBand()
 {
     // The whole point of this test is the contrast with uvBand above: there the
     // boundary opens the higher band, here it closes the lower one. Both are
-    // right — they are two authorities' tables — and a refactor that made them
+    // right - they are two authorities' tables - and a refactor that made them
     // agree would be wrong twice.
     QCOMPARE(aqiBand(20.0), QStringLiteral("Good"));
     QCOMPARE(aqiBand(20.0 + kEpsilon), QStringLiteral("Fair"));
@@ -246,12 +246,12 @@ void TestScales::theAqiBoundaryBelongsToTheLowerBand()
 }
 
 // ============================================================================
-// Visibility — kilometres, and the only table here that descends. `>=`, so a
+// Visibility - kilometres, and the only table here that descends. `>=`, so a
 // boundary belongs to the band above it.
 //
-// The units are the hazard. Open-Meteo serves `visibility` in METRES —
+// The units are the hazard. Open-Meteo serves `visibility` in METRES -
 // libclimat/providers/openmeteo/openmeteovariables.cpp says so on the line that
-// asks for it — and nothing in this function can tell 10 km from 10 m. The
+// asks for it - and nothing in this function can tell 10 km from 10 m. The
 // conversion is the adapter's job and tst_openmeteoadapter.cpp is where it is
 // checked; all this file can do is pin the scale these numbers are on.
 // ============================================================================
@@ -294,7 +294,7 @@ void TestScales::theVisibilityBoundaryBelongsToTheHigherBand()
 // ============================================================================
 // Beaufort. scales.h says it inverts v = 0.836·B^1.5, and the interesting
 // question is whether that inversion reproduces the km/h table the WMO
-// publishes — because the app shows the WORD, and the word is what a reader
+// publishes - because the app shows the WORD, and the word is what a reader
 // checks against a forecast on television.
 // ============================================================================
 
@@ -305,7 +305,7 @@ void TestScales::everyPublishedBeaufortBandInvertsBackToItsForce_data()
     QTest::addColumn<int>("force");
 
     // The WMO's own km/h ranges, both edges of each. Force 1 starts at 2 rather
-    // than at the published 1 — see the test below it, which is about that one
+    // than at the published 1 - see the test below it, which is about that one
     // kilometre and nothing else.
     const struct { int lower; int upper; int force; } bands[] = {
         {   0,   0,  0 },
@@ -346,7 +346,7 @@ void TestScales::everyPublishedBeaufortBandInvertsBackToItsForce()
 
 void TestScales::theOneKilometreDisagreementIsTheFormulaAndNotABug()
 {
-    // The WMO prints "1–5 km/h" for Force 1. The formula puts the 0/1 crossover
+    // The WMO prints "1-5 km/h" for Force 1. The formula puts the 0/1 crossover
     // at 0.836·0.5^1.5 m/s = 1.064 km/h, so 1 km/h is Force 0 and 1.1 is
     // Force 1.
     //
@@ -355,7 +355,7 @@ void TestScales::theOneKilometreDisagreementIsTheFormulaAndNotABug()
     // at 0.296 m/s. Rounded to whole km/h there is nowhere for that to go.
     //
     // Recorded here so that the next person to compare this code with a
-    // published table finds the answer instead of "fixing" it — a special case
+    // published table finds the answer instead of "fixing" it - a special case
     // for 1 km/h would put a discontinuity in a continuous function to make one
     // integer match a lossy printing of it.
     QCOMPARE(beaufortForce(1.0), 0);
@@ -368,7 +368,7 @@ void TestScales::theOneKilometreDisagreementIsTheFormulaAndNotABug()
 void TestScales::beaufortIsBoundedAtBothEndsOfTheScale()
 {
     // "The scale has no 13, and extrapolating one would be inventing a
-    // category" — scales.h. A category-5 hurricane is around 280 km/h and the
+    // category" - scales.h. A category-5 hurricane is around 280 km/h and the
     // strongest surface wind ever recorded is 408; all of it is Force 12.
     QCOMPARE(beaufortForce(280.0), 12);
     QCOMPARE(beaufortForce(408.0), 12);
@@ -387,12 +387,12 @@ void TestScales::aWindSpeedThatIsNotAFiniteNumberIsNotAHurricane()
     // function in scales.h answers an empty STRING for NaN; this one returns an
     // int and has nowhere to put the same answer, which is why
     // ConditionsData::buildWind has to test the reading itself before it prints
-    // a name — see tst_conditionsdata.cpp.
+    // a name - see tst_conditionsdata.cpp.
     QCOMPARE(beaufortForce(kNaN), 0);
 
     // Infinity is the one that used to be wrong, and wrong in the worse
     // direction. `int(std::pow(inf, 2.0/3.0) + 0.5)` is undefined behaviour;
-    // on x86-64 it produces INT_MIN, which qBound clamps to 0 — so an infinite
+    // on x86-64 it produces INT_MIN, which qBound clamps to 0 - so an infinite
     // wind speed reported "Calm". A guard on finiteness saturates it at the top
     // of the scale instead, which is the only end of the scale an unbounded
     // number can honestly be at.
@@ -505,8 +505,8 @@ void TestScales::aBearingOutsideZeroToThreeSixtyStillNamesAPoint()
         QStringLiteral("W"),   QStringLiteral("WNW"), QStringLiteral("NW"),  QStringLiteral("NNW"),
     };
 
-    // A negative bearing is not something a forecast produces — every provider
-    // sends 0–360 — but `& 15` on a negative index is the kind of arithmetic
+    // A negative bearing is not something a forecast produces - every provider
+    // sends 0-360 - but `& 15` on a negative index is the kind of arithmetic
     // that either works everywhere or reads one before the start of an array,
     // and "works everywhere" should be asserted rather than assumed.
     //
@@ -522,7 +522,7 @@ void TestScales::aBearingOutsideZeroToThreeSixtyStillNamesAPoint()
 }
 
 // ============================================================================
-// Pollutants — the closure test, and the reason this file exists at all.
+// Pollutants - the closure test, and the reason this file exists at all.
 //
 // pollutantLabel() takes "a pollutant's machine id" and its header names
 // climat::pollutantId() as where those come from. Those are two tables in two
@@ -532,7 +532,7 @@ void TestScales::aBearingOutsideZeroToThreeSixtyStillNamesAPoint()
 // same to the id that arrives over the wire.
 //
 // So every id the enum can produce has to be a key the table knows. Nothing
-// fails when it is not — the table's fallback uppercases the id — which is how
+// fails when it is not - the table's fallback uppercases the id - which is how
 // four of the six pollutants came to print OZONE, NITROGEN_DIOXIDE,
 // SULPHUR_DIOXIDE and CARBON_MONOXIDE on a card whose whole reason for existing
 // was that the fifth was printing PM2_5.
@@ -548,7 +548,7 @@ void TestScales::everyPollutantIdTheEngineEmitsHasAChemicalName()
 
         // The closure. `pollutantLabel` has a fallback that uppercases anything
         // it does not recognise, so a missing row produces a plausible string
-        // rather than an empty one — which is why this compares against a name
+        // rather than an empty one - which is why this compares against a name
         // written down independently instead of merely checking for non-empty.
         QVERIFY2(pollutantLabel(id) == expectedLabel(pollutant),
                  qPrintable(QStringLiteral("pollutantLabel(\"%1\") is \"%2\", expected \"%3\"")
@@ -565,7 +565,7 @@ void TestScales::everyPollutantIdTheEngineEmitsHasAChemicalName()
 void TestScales::theSubscriptsAreRealCharactersAndNotMarkup()
 {
     // "Subscripts as real characters rather than as rich text, because these go
-    // into a QML Text with no styled-text parsing" — scales.h. A `<sub>` here
+    // into a QML Text with no styled-text parsing" - scales.h. A `<sub>` here
     // renders literally.
     for (int i = 0; i < int(Pollutant::Count); ++i) {
         const QString label = pollutantLabel(pollutantId(static_cast<Pollutant>(i)));
@@ -593,7 +593,7 @@ void TestScales::theSubscriptsAreRealCharactersAndNotMarkup()
 void TestScales::anUnknownPollutantIsUppercasedRatherThanDropped()
 {
     // "Unknown ids come back uppercased, which is the old behaviour and the
-    // only honest answer for a species we have no name for" — scales.h. A
+    // only honest answer for a species we have no name for" - scales.h. A
     // species this build has never heard of still has to appear on the card;
     // an empty label would read as "no dominant pollutant", which is a
     // different and untrue statement.
@@ -606,7 +606,7 @@ void TestScales::anUnknownPollutantIsUppercasedRatherThanDropped()
     QCOMPARE(pollutantLabel(QStringLiteral("Ozone")), QStringLiteral("O\u2083"));
 
     // Empty in, empty out. `QString().toUpper()` is empty, so this falls out of
-    // the fallback rather than being handled — asserted so it stays that way,
+    // the fallback rather than being handled - asserted so it stays that way,
     // because the caller uses an empty label to mean "no breakdown here".
     QCOMPARE(pollutantLabel(QString()), QString());
 }
@@ -619,7 +619,7 @@ void TestScales::noBandNamesAReadingThatDoesNotExist()
 {
     // scales.h's opening paragraph, asserted. Every one of these is reachable:
     // `value(reading)` hands NaN straight through for an absent Reading, and
-    // ECMWF genuinely omits variables at some coordinates — see
+    // ECMWF genuinely omits variables at some coordinates - see
     // tests/fixtures/openmeteo/toronto-ecmwf-gaps.json.
     QVERIFY(uvBand(kNaN).isEmpty());
     QVERIFY(aqiBand(kNaN).isEmpty());

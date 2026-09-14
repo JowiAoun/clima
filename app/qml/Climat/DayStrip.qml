@@ -7,8 +7,8 @@
 // seam. That merge is what says "the chart underneath is showing this day".
 //
 // It is done by overhang rather than by drawing a join. The selected card extends
-// `mergeDepth` past the bottom of the strip, and the chart card — declared after
-// this in Main.qml, so painted over it — covers that overhang, taking the card's
+// `mergeDepth` past the bottom of the strip, and the chart card - declared after
+// this in Main.qml, so painted over it - covers that overhang, taking the card's
 // bottom border with it. Nothing has to line up to the pixel, and it stays correct
 // at any card position or window size.
 //
@@ -17,7 +17,7 @@
 // the card reads as pasted on top of the panel rather than growing out of it.
 //
 // Motion. Selecting a card is the one event here and it changes six things at
-// once — fill, outline, width, height, the bottom corners and the fillets — so
+// once - fill, outline, width, height, the bottom corners and the fillets - so
 // they are choreographed from this file rather than from the components.
 // TabFillet and DayIconBadge stay dumb; a fillet that animated itself would
 // animate in the gallery too, where nothing is selecting anything.
@@ -25,8 +25,8 @@
 // The geometry of the merge runs off ONE animated number, `merge`, split into
 // two beats that cannot overlap: the card travels down to the panel, and then
 // the corner it has made fillets outward. Reversed, the join comes apart before
-// the card lifts. Everything else here — fill, outline, the day/night crossfade
-// — is content rather than junction and keeps its own `tint` beat.
+// the card lifts. Everything else here - fill, outline, the day/night crossfade
+// - is content rather than junction and keeps its own `tint` beat.
 //
 // It is worth saying why, because the obvious spelling is a Behavior per
 // property and that is what this was. Three clocks on three properties drift:
@@ -39,8 +39,8 @@
 // The pragma is qmllint's ask and this file is the one place it costs nothing:
 // a Repeater delegate cannot see an outer id without it, so every `root.` in
 // the card below is an unqualified access and a binding qmlcachegen declines to
-// compile ahead of time. The requirement it brings — that a delegate declare
-// what it takes from the model with `required` — this delegate already met.
+// compile ahead of time. The requirement it brings - that a delegate declare
+// what it takes from the model with `required` - this delegate already met.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -51,7 +51,7 @@ Item {
     // The selection is the model's, not the strip's, and it travels both ways.
     //
     // It has to be the model's because it is what the chart below is a chart
-    // *of* — the strip is the control and `Data` is what it controls, and a
+    // *of* - the strip is the control and `Data` is what it controls, and a
     // number kept here with a copy pushed into the model is two numbers that
     // can disagree. It has to travel both ways because the model clamps: ask
     // for a row that a shorter forecast no longer has and the answer comes back
@@ -60,7 +60,7 @@ Item {
     //
     // The Binding element rather than a plain binding on `currentIndex`,
     // because a tap writes to it and a written property has no binding left.
-    // RestoreNone: there is nothing to restore to — the value this replaces is
+    // RestoreNone: there is nothing to restore to - the value this replaces is
     // the one it just sent.
     property int currentIndex: Data.selectedDay
     onCurrentIndexChanged: {
@@ -78,8 +78,8 @@ Item {
     readonly property real selectedExtra: 72     // room for the second badge
     readonly property real spacing: 14
     readonly property real badgeSize: 50
-    // The selected card used to overhang into the chart card, so the chart —
-    // painted after it — would cover the card's bottom border. There is no
+    // The selected card used to overhang into the chart card, so the chart -
+    // painted after it - would cover the card's bottom border. There is no
     // border to cover any more, and now that both surfaces are translucent an
     // overhang is actively wrong: the overlap would take the wash twice and
     // show as a lighter band across the junction. They abut instead.
@@ -93,11 +93,11 @@ Item {
     // and not enough to say there was another day past it: scrolled to the last
     // card that fits, the strip came to rest with 14 px of background beside it
     // and read as the end of the forecast. A slice of the next card is the
-    // thing that says "keep going" — the same reason any horizontally
+    // thing that says "keep going" - the same reason any horizontally
     // scrolling row leaves a partial item at its edge rather than a clean one.
     //
     // Eighty rather than the forty it started at, because the slice is not only
-    // a hint that the strip continues — it is the target you press to get
+    // a hint that the strip continues - it is the target you press to get
     // there. Forty put the neighbour's edge on screen and left the arrow as the
     // only thing big enough to aim at; eighty is half a card, which is a card
     // you can hit.
@@ -123,7 +123,7 @@ Item {
     //
     // A corner with a tab on it is not a corner. The card's bottom edge is
     // straight and the panel's is curving away from it, so the two meet across a
-    // 14 px notch of page background — the same seam the fillets exist to close,
+    // 14 px notch of page background - the same seam the fillets exist to close,
     // at the one place a fillet cannot go, because outside the panel there is no
     // panel to fillet into.
     //
@@ -136,7 +136,7 @@ Item {
 
     // Recomputed rather than bound, and this is the one place in this file that
     // is. The inputs are every delegate's x, width and landed plus the
-    // flickable's contentX and width — a binding cannot subscribe to a
+    // flickable's contentX and width - a binding cannot subscribe to a
     // Repeater's children, and the answer is a maximum over them, which is not
     // a binding at all.
     //
@@ -167,16 +167,16 @@ Item {
 
     // Bring the selected card into the strip, at the size it is about to be.
     //
-    // The obvious case is a selection this strip did not make — `--day 10`, or
+    // The obvious case is a selection this strip did not make - `--day 10`, or
     // a place change putting the selection back on today while the strip is
-    // scrolled into next week — where the chart below draws a day whose card is
+    // scrolled into next week - where the chart below draws a day whose card is
     // nowhere on screen. MetricTabBar has carried the same rule for its pills
     // since it was written, for the same reason: a control that cannot show its
     // own state is a control lying about it.
     //
     // The case that is easier to miss is a card the reader clicks themselves.
     // Selecting widens it by `selectedExtra`, so the rightmost card you can see
-    // is one you can select and then not see — it grows out of the strip under
+    // is one you can select and then not see - it grows out of the strip under
     // your own cursor.
     //
     // Hence the *final* extent rather than the live one. Every card except the
@@ -187,8 +187,8 @@ Item {
     // rather than dropped.
     //
     // Both of the ways a day is chosen without a click land in
-    // `Component.onCompleted` — `--day 9` from ScreenshotController, and the
-    // model's own selection when the window is rebuilt — and at that point the
+    // `Component.onCompleted` - `--day 9` from ScreenshotController, and the
+    // model's own selection when the window is rebuilt - and at that point the
     // Flickable is 0 px wide and this function can compute nothing. It used to
     // return, and nothing ever asked again: `--day 9` set the selection, the
     // strip stayed on the first page, and the card the whole flag is about was
@@ -215,7 +215,7 @@ Item {
         var from = index * (root.cardWidth + root.spacing)
         var to   = from + root.cardWidth + root.selectedExtra
 
-        // A slice of the neighbour beside it rather than a gap of air — see
+        // A slice of the neighbour beside it rather than a gap of air - see
         // `peek`, which is where the argument for the number is.
         var wanted = flick.contentX
         if (to + root.peek > wanted + flick.width)
@@ -282,7 +282,7 @@ Item {
 
         // `view` rather than `move`: a pager press swings the strip on by 70 % of
         // its width, so it replaces most of what you were looking at instead of
-        // nudging it — one view becoming another.
+        // nudging it - one view becoming another.
         function scrollBy(dx) {
             scrollTo(contentX + dx, Theme.motion.view)
         }
@@ -322,7 +322,7 @@ Item {
                     // Beat one: the card reaches down to the panel, its bottom
                     // corners flattening as they arrive. Beat two: the corner it has
                     // just made fillets outward. They cannot overlap, and that is the
-                    // whole of the fix — `joined` is above zero only where `landed`
+                    // whole of the fix - `joined` is above zero only where `landed`
                     // is exactly 1, so a fillet is never drawn beside a card that has
                     // not touched down, and never beside a corner that is still
                     // round. Those were the two ways the old spelling produced a
@@ -332,8 +332,8 @@ Item {
                     // gets the order right in both directions without asking which
                     // direction it is: run the same expressions backwards and the
                     // join comes apart before the card lifts, which is the only
-                    // order it can come apart in. The old spelling did ask —
-                    // `duration: selected ? move : 0` — and a Behavior can fire
+                    // order it can come apart in. The old spelling did ask -
+                    // `duration: selected ? move : 0` - and a Behavior can fire
                     // before the binding feeding its duration has been re-evaluated,
                     // so "leaving goes in one frame" held on some runs and not on
                     // others. It did not hold in the screenshot that started this.
@@ -355,7 +355,7 @@ Item {
                         color: card.selected ? Theme.surface.base : Theme.surface.recede
                         // No outline on the raised card: it is one surface with the
                         // panel below, and an outline would draw a line across that.
-                        // It is faded out rather than switched off — the width stays
+                        // It is faded out rather than switched off - the width stays
                         // 1 and the colour lands on the fill colour, so the ring
                         // disappears *into* the card over the same beat as the fill.
                         // Qt draws the border band in place of the fill rather than
@@ -387,7 +387,7 @@ Item {
                     //
                     // Both are pinned to the card's *live* bottom edge and take the
                     // card's *live* fill. Pinned to the strip's bottom and painted a
-                    // flat cardBg — which is what they were — they spent the whole
+                    // flat cardBg - which is what they were - they spent the whole
                     // 190 ms as a brighter shape floating below the card they belong
                     // to, and only met it in the last frame.
                     TabFillet {
@@ -479,12 +479,12 @@ Item {
                         // The night condition is the one thing selection *adds*, and
                         // `selectedExtra` is the room the card widens to fit it. It
                         // used to arrive at full strength on frame one, at the card's
-                        // *old* width — hard up against the high/low, which it had not
+                        // *old* width - hard up against the high/low, which it had not
                         // been given room beside yet.
                         //
                         // So it is read off the same merge the width is, one quarter
                         // in: it cannot be visible before a quarter of its room
-                        // exists, and backwards that is the same sentence — it is
+                        // exists, and backwards that is the same sentence - it is
                         // gone before the room closes. That was a `stagger` pause
                         // with `duration: selected ? 45 : 0` before, which is the
                         // same direction-branched Behavior as the fillet's and had

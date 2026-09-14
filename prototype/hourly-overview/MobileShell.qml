@@ -3,7 +3,7 @@
 // The phone and tablet shell: five destinations under a bottom nav.
 //
 // The desktop answer to "what is the weather doing" is one tall scrolling page
-// — WeatherPage — because a 1340 px window can afford to put the hero, the
+// - WeatherPage - because a 1340 px window can afford to put the hero, the
 // hourly chart and twelve detail cards in the same column and let the reader
 // scroll. A phone cannot: the same page at 390 px is roughly eight screens
 // deep, and the fourth of them is unreachable in any sense that matters.
@@ -21,7 +21,7 @@
 // the component at rest position zero, and the whole content area of a phone
 // is the worst possible place to break it: a reader who tapped "Hourly" is
 // waiting on the one thing they asked for. The pill is what has to move,
-// because the pill is what changed — it is the same object in a new place, and
+// because the pill is what changed - it is the same object in a new place, and
 // watching it travel is what tells you the bar has five positions and you are
 // now at the second. The page underneath is not a transition, it is a
 // destination.
@@ -47,7 +47,7 @@ Item {
     // Ambient motion, forwarded the same way. The precipitation field behind
     // the hourly chart is the only thing under this shell that moves when
     // nothing has changed, and `--grab` clears this so a headless frame is the
-    // same frame every run — frozen it still draws rain, because precip.js
+    // same frame every run - frozen it still draws rain, because precip.js
     // seeds every drop from its hour.
     //
     // It travels with the four above rather than being reached for directly
@@ -93,7 +93,7 @@ Item {
 
     // ---- shell state, page state -------------------------------------------
     // Values are *pushed* down and requests come back up as signals. The
-    // obvious alternative — Qt.binding() from the shell into the page — was
+    // obvious alternative - Qt.binding() from the shell into the page - was
     // written first and is quietly broken: the moment the reader touches the
     // control the page assigns its own property, which destroys the binding,
     // and every later push from the shell silently stops arriving. A poke that

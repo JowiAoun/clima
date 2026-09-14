@@ -186,7 +186,7 @@ void Notifier::viaService(const QString &id, const QString &title, const QString
         QStringLiteral("Notify"));
     call << QStringLiteral("Climat")               // app_name
          << replaces                              // replaces_id
-         << QStringLiteral(CLIMAT_APP_ID)          // app_icon — the icon theme name
+         << QStringLiteral(CLIMAT_APP_ID)          // app_icon - the icon theme name
          << title                                 // summary
          << body                                  // body
          << QStringList()                         // actions

@@ -21,7 +21,7 @@ integrations**, on the grounds that "a Plasma applet *is* QML and the widget fil
 `contents/ui/` nearly verbatim". That is wrong, and the reason is not visible until you try it.
 
 A plasmoid is a package of loose `.qml` files that plasmashell loads from disk. Files in
-`contents/ui/` resolve each other as types, and a `qmldir` there can even declare a singleton — so
+`contents/ui/` resolve each other as types, and a `qmldir` there can even declare a singleton - so
 `Theme.qml`, `theme.js`, `chartmath.js`, `WeatherGlyph.qml` and every other **pure-QML** file this
 project has really could be copied in and would really work.
 
@@ -29,7 +29,7 @@ The tiles are not pure QML. Every one of them reads:
 
 | Type | What it is | Where it comes from |
 |---|---|---|
-| `WidgetFeed` | the subscription — place, field mask, snapshot, staleness | `widgets/widgetfeed.h` |
+| `WidgetFeed` | the subscription - place, field mask, snapshot, staleness | `widgets/widgetfeed.h` |
 | `DaemonLink` | the session-bus connection, one per process | `widgets/daemonlink.h` |
 | `Wx` | the WMO tables and the published bands, null-safe | `widgets/wx.h` |
 | `Units` | the reader's unit preference, out of the app's own INI | `app/viewmodels/units.h` |
@@ -37,14 +37,14 @@ The tiles are not pure QML. Every one of them reads:
 Those are C++. A plasmoid cannot import a C++ type that is not installed as a QML plugin on the
 system import path, and none of ours is: `Climat.Widgets` is a **static** module compiled into
 `climat-widget`, exactly like `Climat` is compiled into `climat`. So a plasmoid would need either a
-second implementation of the data path in pure QML — and Plasma 6 ships no generic D-Bus binding
-for QML, so that path does not exist either — or `Climat.Widgets` has to become a shared, installed
+second implementation of the data path in pure QML - and Plasma 6 ships no generic D-Bus binding
+for QML, so that path does not exist either - or `Climat.Widgets` has to become a shared, installed
 QML plugin, which costs a shared library, an RPATH and three packaging formats that have to place
 two more files correctly.
 
 `zwlr_layer_shell_v1` costs none of that. It is a Wayland protocol for exactly this: a client says
 "put my surface on the desktop layer, anchored top-right, 24 px in, and give it no keyboard focus"
-and the compositor does it. KWin implements it. So does every wlroots compositor — Sway, Hyprland,
+and the compositor does it. KWin implements it. So does every wlroots compositor - Sway, Hyprland,
 Wayfire, river, labwc. One protocol, one binary, one implementation of every tile.
 
 ## What that looks like
@@ -70,7 +70,7 @@ screen is the failure this project keeps refusing to ship, so that spelling exit
 says which of the four reasons applied.
 
 On GNOME, `--pin auto` finds no `zwlr_layer_shell_v1`, says so, and the tiles come up as an
-ordinary window — the shell extension in `packaging/gnome-shell/` is what pins them there, and it
+ordinary window - the shell extension in `packaging/gnome-shell/` is what pins them there, and it
 has to be, because mutter implements no such protocol and extensions.gnome.org forbids shipping
 binaries. Two mechanisms, one set of tiles.
 
@@ -89,7 +89,7 @@ and asserts six things:
 | | |
 |---|---|
 | **pinned** | sway logs a layer surface with namespace `climat-widgets` on layer 1 |
-| **placed** | the tiles are in the anchored corner and the opposite corner is empty — measured off a `grim` photograph, because the anchor and margins are sent *after* the surface exists and appear in no log line |
+| **placed** | the tiles are in the anchored corner and the opposite corner is empty - measured off a `grim` photograph, because the anchor and margins are sent *after* the surface exists and appear in no log line |
 | **not a window** | `swaymsg -t get_tree` does not know about it: no alt-tab, no tiling, nothing reflows when it appears |
 | **falsifiable** | the same binary with `--pin off` **is** in that tree and logs no layer surface |
 | **refuses** | `--pin on` where a layer surface is impossible exits 3 and says why |
@@ -98,7 +98,7 @@ and asserts six things:
 The last one is the reason `widgets/layershell.cpp` has a `Remap` in it, and it is the one that
 only a runtime could have found. A layer surface belongs to an output; destroy that output and the
 compositor dismisses the surface and layer-shell-qt closes the window, which for a host whose only
-window that is means the process exits — a two-screen desktop would lose its tiles the first time
+window that is means the process exits - a two-screen desktop would lose its tiles the first time
 somebody undocked a laptop. What makes the recovery subtle is that the obvious fix does not work:
 `QWindow::close()` hides the window without necessarily destroying the platform window underneath,
 so `show()` maps nothing, reports success, and produces a process that believes it is displaying

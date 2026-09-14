@@ -12,7 +12,7 @@
 // question from the one people ask a rain widget, which is "do I need a coat".
 //
 // So the bar height is millimetres and the number under it is the chance. They
-// are visibly different encodings on purpose — docs/04 §4.10 forbids colour as
+// are visibly different encodings on purpose - docs/04 §4.10 forbids colour as
 // the only carrier of meaning, and this is the same argument about height.
 //
 // ============================================================================
@@ -44,7 +44,7 @@ WidgetSurface {
 
     // The sum, which is the one number somebody actually repeats out loud.
     // Absent hours are skipped rather than counted as zero, and the total is a
-    // dash when every hour is absent — "0 mm expected" is a forecast and we do
+    // dash when every hour is absent - "0 mm expected" is a forecast and we do
     // not have one.
     readonly property real total: {
         var sum = NaN
@@ -61,7 +61,7 @@ WidgetSurface {
         id: headline
         anchors.left: parent.left
         anchors.top: parent.top
-        // "– expected" is a sentence with a hole in it. When there is no figure
+        // "- expected" is a sentence with a hole in it. When there is no figure
         // at all the tile says so in words instead.
         text: isNaN(root.total)
               ? qsTr("No rain figure")

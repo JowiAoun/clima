@@ -4,7 +4,7 @@
 // The gallery's command line, parsed once, offered to QML as a singleton.
 //
 // The weather app's AppOptions and this are deliberately two classes rather
-// than one with a mode flag. They overlap — both take --grab, --size, --film —
+// than one with a mode flag. They overlap - both take --grab, --size, --film -
 // but they disagree about more than they share: `--viewport mobile` resizes the
 // app's window and does *not* resize this one, `--tab hourly` is meaningless
 // here, and `--card Uv` is meaningless there. A single parser covering both
@@ -21,7 +21,7 @@
 // paints which gradient, or what components exist. Viewports.qml, Theme.qml and
 // gallery.js own those, and a component name is passed through unexamined so
 // that `--gallery weather glyph` can be a substring match against the catalogue
-// at the moment the catalogue is loaded — which is the only moment anything
+// at the moment the catalogue is loaded - which is the only moment anything
 // knows what is in it.
 #pragma once
 

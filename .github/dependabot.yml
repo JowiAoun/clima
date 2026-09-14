@@ -6,7 +6,7 @@
 # There is nothing else here for Dependabot to watch. Decision D8 in
 # docs/03-tech-stack.md rules out Conan and vcpkg so that a distribution
 # packager can build this from what they already ship, so there is no manifest
-# of C++ dependencies — Qt comes from the platform, and everything else is in
+# of C++ dependencies - Qt comes from the platform, and everything else is in
 # this repository. nixpkgs is pinned in flake.lock and moving it re-records
 # every golden image, which is a deliberate act rather than a bot's.
 #

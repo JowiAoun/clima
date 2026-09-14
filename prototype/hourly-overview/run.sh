@@ -22,7 +22,7 @@
 #   CLIMAT_QML=/path/to/qml ./run.sh   use a specific Qt
 #   QT_QPA_PLATFORM=xcb ./run.sh      force X11 if Wayland misbehaves
 #
-# Which shell runs is a function of the window width alone — see viewports.js.
+# Which shell runs is a function of the window width alone - see viewports.js.
 # --viewport pins it and resizes to match; --size on its own works too, so
 # `--size 400x800` gets you the phone layout.
 
@@ -32,8 +32,8 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(cd "$here/../.." && pwd)"
 
 # Finding Qt is no longer this script's business. The CMake build has to reach
-# the same conclusion about which Qt this machine is using, so the discovery —
-# and the Nix-store environment it has to reconstruct by hand — lives in one
+# the same conclusion about which Qt this machine is using, so the discovery -
+# and the Nix-store environment it has to reconstruct by hand - lives in one
 # sourceable place. Read scripts/qt-env.sh for what it sets and why.
 # shellcheck source-path=SCRIPTDIR source=../../scripts/qt-env.sh
 source "$repo/scripts/qt-env.sh"
@@ -45,7 +45,7 @@ fi
 qml_bin="$CLIMAT_QML_BIN"
 
 # Any headless capture wants the offscreen platform, and --grab is not always
-# the first argument — scan for either.
+# the first argument - scan for either.
 for _a in "$@"; do
     if [[ "$_a" == "--grab" || "$_a" == "--film" ]]; then
         export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"

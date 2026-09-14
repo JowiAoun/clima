@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// refcap capture — one named component, optionally in an interaction state.
+// refcap capture - one named component, optionally in an interaction state.
 //
 // `crawl.mjs` captures a whole page at rest and needs no selectors. This mode
-// exists for what a crawl cannot reach: a component after a click or a hover —
+// exists for what a crawl cannot reach: a component after a click or a hover -
 // another metric tab selected, a chart scrubbed to show its readout. Those are
 // declared per target in targets.json.
 //
@@ -52,7 +52,7 @@ function parseArgs(argv) {
     return out;
 }
 
-// Pad may be a single number or per-side — per-side is how you show a seam
+// Pad may be a single number or per-side - per-side is how you show a seam
 // between two components without capturing both in full.
 function padOf(target) {
     const p = target.pad ?? 0;
@@ -65,7 +65,7 @@ function padOf(target) {
  * state, and tag the target element.
  *
  * Both passes go through here on purpose. When this was two copy-pasted
- * blocks, the measuring pass and the rendering pass could drift apart — and a
+ * blocks, the measuring pass and the rendering pass could drift apart - and a
  * difference between them is invisible in the output but corrupts it, because
  * the screenshot and the JSON would then describe different renders.
  *
@@ -85,7 +85,7 @@ async function openAt(browser, { dpr, url, city, args, target }) {
     if (args.state) {
         const step = target.states?.[args.state];
         if (!step) throw new Error(
-            `target has no state "${args.state}" — have: ${Object.keys(target.states ?? {}).join(', ') || '(none)'}`);
+            `target has no state "${args.state}" - have: ${Object.keys(target.states ?? {}).join(', ') || '(none)'}`);
         if (step.click) await page.locator(step.click).first().click({ timeout: 15000 });
         if (step.hover) await page.locator(step.hover).first().hover({ timeout: 15000 });
         await page.waitForTimeout(step.settleMs ?? 1500);
@@ -94,7 +94,7 @@ async function openAt(browser, { dpr, url, city, args, target }) {
     // Tag the element in the page, and take every later measurement from that
     // tag. Using a Playwright locator for the screenshot and a separate
     // querySelector for the dump can resolve to *different* nodes when a
-    // selector matches more than once — the image and the JSON would then
+    // selector matches more than once - the image and the JSON would then
     // disagree with no sign that anything is wrong.
     const box = await page.evaluate((selector) => {
         // Parts of the page are web components; a flat querySelector walks
@@ -153,10 +153,10 @@ async function main() {
 
     const name = args._[0];
     const target = targets[name];
-    if (!target) throw new Error(`unknown target "${name}" — run --list`);
+    if (!target) throw new Error(`unknown target "${name}" - run --list`);
 
     const city = CITIES[args.city];
-    if (!city) throw new Error(`unknown city "${args.city}" — have: ${Object.keys(CITIES).join(', ')}`);
+    if (!city) throw new Error(`unknown city "${args.city}" - have: ${Object.keys(CITIES).join(', ')}`);
     const url = target.url
         .replace('{loc}', encodeURIComponent(locParam(args.city, args.market)))
         .replace('{units}', args.units);

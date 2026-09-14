@@ -79,7 +79,7 @@ Result<QList<Place>> parseGeocodingSearch(const QByteArray &json)
     const QJsonValue results = document.value().object().value(QStringLiteral("results"));
 
     // No `results` key is what a search with no matches actually returns. It
-    // is a successful empty answer and not a parse failure — see the header.
+    // is a successful empty answer and not a parse failure - see the header.
     if (results.isUndefined() || results.isNull())
         return QList<Place>{};
 
@@ -94,8 +94,8 @@ Result<QList<Place>> parseGeocodingSearch(const QByteArray &json)
             continue;
         // One unusable row does not fail the search. A popover with nine of
         // the ten places the user could have meant is better than an error,
-        // and the alternative — refusing the whole response because Open-Meteo
-        // added a row shaped differently — is a client that breaks on a
+        // and the alternative - refusing the whole response because Open-Meteo
+        // added a row shaped differently - is a client that breaks on a
         // provider's ordinary change.
         if (const std::optional<Place> place = placeFromObject(value.toObject()))
             places.append(*place);

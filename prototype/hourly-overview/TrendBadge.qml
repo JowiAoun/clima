@@ -16,8 +16,8 @@
 //     separate specimens with four fixed props, not one badge cycling. A
 //     remount destroys and rebuilds them; it does not change anyone's mind.
 //
-// So a direction transition — the arrow swinging, the disc cross-fading between
-// trendUp and trendDown — would be motion built for a state that does not
+// So a direction transition - the arrow swinging, the disc cross-fading between
+// trendUp and trendDown - would be motion built for a state that does not
 // exist, tested only by the developer who wrote it.
 //
 // Nor does it animate on arrival. The badge is punctuation on the status line,

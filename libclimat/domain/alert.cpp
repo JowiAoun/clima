@@ -93,7 +93,7 @@ AlertPhase Alert::phaseAt(const QDateTime &now) const
         return AlertPhase::Ended;
 
     // Effective, not over, and the weather has not started. The banner says
-    // "begins 12:00 PM" rather than pretending it is happening — and rather than
+    // "begins 12:00 PM" rather than pretending it is happening - and rather than
     // hiding it, which is what an app that keys visibility off `onset` alone
     // would do to every advisory issued in advance.
     if (onset.isValid() && now < onset)
@@ -136,7 +136,7 @@ bool Alert::outranks(const Alert &other) const
         return certainty > other.certainty;
 
     // Same grade on all three axes: the one that starts sooner is the one to
-    // show. An invalid onset sorts last rather than first — a missing timestamp
+    // show. An invalid onset sorts last rather than first - a missing timestamp
     // is not evidence of imminence.
     const bool mine  = onset.isValid();
     const bool yours = other.onset.isValid();

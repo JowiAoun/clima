@@ -4,14 +4,14 @@
 //
 // A chart answers "what is the shape of the day"; a list answers "what exactly is
 // it at 3pm". Both are worth having, which is why the reference carries a switch
-// for it — and why leaving that switch inert was the wrong place to stop.
+// for it - and why leaving that switch inert was the wrong place to stop.
 //
 // ---- why it runs across and not down ----------------------------------------
 //
 // It was a table: one row per hour, seven columns, scrolling down. That reads
 // perfectly and sits wrongly, because of what is directly above it. The day
 // strip runs left to right and the chart under it runs left to right, both on
-// the same axis — time — and the list is a third view of that same axis. Turning
+// the same axis - time - and the list is a third view of that same axis. Turning
 // it through ninety degrees made the reader turn with it, and cost the one thing
 // the day strip is for: you could no longer see the hours and the day they
 // belong to as one line.
@@ -27,13 +27,13 @@
 //
 // Left and right walk the hours, and walking off the end of a day arrives at the
 // next one. That is the whole navigation model of this card in one sentence, and
-// it is the same sentence the chart's arrows obey — the chart just has no hours
+// it is the same sentence the chart's arrows obey - the chart just has no hours
 // left to walk first, because it draws the day whole.
 //
 // A day reached by paging opens at the edge you came through: forward into
 // midnight, back into the last hour. Reading a run of hours across a day
 // boundary is the thing this makes continuous, and opening the next day on
-// "now" — which is what a tap on the day strip should do, and does — would put
+// "now" - which is what a tap on the day strip should do, and does - would put
 // a gap in the middle of it.
 //
 // ---- motion -----------------------------------------------------------------
@@ -46,7 +46,7 @@
 //     They pressed "List" to read 3 AM's numbers; making them watch the day
 //     arrive is charging admission for data that was already on screen.
 //   * It would fire on scroll. ListView builds delegates as they come into
-//     view — `cacheBuffer: 0`, so exactly as they come into view — and §10.6
+//     view - `cacheBuffer: 0`, so exactly as they come into view - and §10.6
 //     forbids a reveal that re-triggers, "nothing fires on scrolling into
 //     view" in particular. A per-delegate animation is that bug by
 //     construction, not by accident.
@@ -65,8 +65,8 @@
 // The pragma is qmllint's ask, and the same one DayStrip makes at greater
 // length: a delegate cannot see an outer id without it, so every `root.` and
 // `view.` in the card below is an unqualified access and a binding qmlcachegen
-// declines to compile ahead of time. The requirement it brings — that a
-// delegate declare what it takes from the model with `required` — this delegate
+// declines to compile ahead of time. The requirement it brings - that a
+// delegate declare what it takes from the model with `required` - this delegate
 // already met.
 pragma ComponentBehavior: Bound
 
@@ -82,8 +82,8 @@ Item {
 
     // The card is as tall as what is in it, not as tall as the panel.
     //
-    // The panel's height is the chart's — the two share a body so that flipping
-    // the switch does not resize the page under the reader — and the chart
+    // The panel's height is the chart's - the two share a body so that flipping
+    // the switch does not resize the page under the reader - and the chart
     // needs a plot, a header band and a precipitation strip where this needs
     // eight lines of text. Stretched to fill, a 124 px card came out 370 tall
     // with a hand's width of nothing across its middle. So the cards keep their
@@ -113,7 +113,7 @@ Item {
 
         // The value keeps its width and the label gives way. "Humidity" is 44 px
         // in English and 85 in German, and the one of the two that must stay
-        // whole is the number — a row reading "Luftfeuchtig… 52%" still answers
+        // whole is the number - a row reading "Luftfeuchtig… 52%" still answers
         // the question, and one reading "Luftfeuchtigkeit 5…" does not.
         Text {
             id: valueText
@@ -151,8 +151,8 @@ Item {
         model: Data.count
         boundsBehavior: Flickable.StopAtBounds
 
-        // No `currentIndex` binding. Nothing here draws off being current — the
-        // now card draws off `index === Data.nowIndex` — and binding it costs
+        // No `currentIndex` binding. Nothing here draws off being current - the
+        // now card draws off `index === Data.nowIndex` - and binding it costs
         // something real: a view tracks its current item, and tracking IS a
         // scroll. `nowIndex` changes on every refresh and on every day change,
         // so the list would yank itself back under a reader who had paged
@@ -161,15 +161,15 @@ Item {
         // ---- where a day opens ------------------------------------------
         //
         // `currentIndex` alone does not decide where the view rests: nothing is
-        // bound to it — the now card draws off `index === Data.nowIndex`, not
-        // off being current — so all it does is make Qt track that delegate,
+        // bound to it - the now card draws off `index === Data.nowIndex`, not
+        // off being current - so all it does is make Qt track that delegate,
         // and where tracking lands depends on the view's width when the
         // delegate happened to be created. Positioning explicitly makes it the
         // same list in the page and in the gallery.
         //
         // "Now" is the answer for a day arrived at directly: the past is dimmed
         // context you can scroll back to, not the thing you came for. Clamped,
-        // because the day strip moves the window — `Data.nowIndex` is an offset
+        // because the day strip moves the window - `Data.nowIndex` is an offset
         // to the present, so on any day but today it points outside the list,
         // where positionViewAtIndex does nothing at all and the list would be
         // left wherever the previous day had scrolled it. Clamping opens a
@@ -195,7 +195,7 @@ Item {
         // Deferred, and it has to be. `setSelectedDay` emits
         // `selectedDayChanged` and only then `changed`, so at the instant this
         // is called the ListView is still holding the previous day's model and
-        // therefore the previous day's `contentWidth` — and arriving "at the
+        // therefore the previous day's `contentWidth` - and arriving "at the
         // end" would land on the end of the day being left. Qt.callLater runs
         // it once, after the bindings have settled.
         //
@@ -217,7 +217,7 @@ Item {
 
         // A Loader sizes its item AFTER the incubator reports Ready, so at
         // Component.onCompleted this view is 28 px narrower than nothing and
-        // every position clamps to zero — the list opened on midnight however
+        // every position clamps to zero - the list opened on midnight however
         // late in the day it was. The chart's Flickable carries the same pair
         // of hooks and a long note about the tablet grid that found it there.
         Component.onCompleted: openOnNow()
@@ -297,7 +297,7 @@ Item {
 
                 // A reading aid, not an affordance. On the card rather than on
                 // the full-height column it is centred in, so the tint follows
-                // what the pointer is actually over. No `cursorShape` — nothing
+                // what the pointer is actually over. No `cursorShape` - nothing
                 // in this list is clickable and a pointing hand would promise
                 // that it is.
                 HoverHandler { id: cardHover }
@@ -311,7 +311,7 @@ Item {
                     // either (§10.1), and the seam is exactly what you would
                     // notice.
                     //
-                    // The now card is exempt. Its fill *is* the mark — swapping
+                    // The now card is exempt. Its fill *is* the mark - swapping
                     // the yellow for a neutral wash would blank the one card
                     // the reader came to find, the moment they point at it.
                     color: hourCard.isNow ? Theme.surface.rowNow
@@ -354,7 +354,7 @@ Item {
                     Text {
                         // The arrays, not the functions of the same name. A
                         // binding subscribes to the properties it reads and a
-                        // method call is not one — and this view's model is
+                        // method call is not one - and this view's model is
                         // `Data.count`, which is 24 on Thursday and 24 on
                         // Friday, so Qt rebuilds no delegate and nothing
                         // re-runs. See forecastdata.h.
@@ -418,7 +418,7 @@ Item {
                     // Percentages through Units too, rather than `+ "%"`.
                     // Precipitation probability is Open-Meteo's alone and
                     // humidity is absent from two of the four providers, and an
-                    // absent reading is NaN — which concatenates to "NaN%" and
+                    // absent reading is NaN - which concatenates to "NaN%" and
                     // formats to an em dash.
                     Reading {
                         label: qsTr("Precip")
@@ -428,7 +428,7 @@ Item {
                     }
                     // formatDisplay, not format: `Data.windSpeed` is already in
                     // the reader's unit (forecastdata.h converts on the way
-                    // out), and `format` converts what it is given — so this
+                    // out), and `format` converts what it is given - so this
                     // printed a 20 km/h wind as 8 mph, correct-looking and
                     // wrong, for anyone who had changed the setting.
                     Reading {
@@ -448,7 +448,7 @@ Item {
 
     // ---- pagers --------------------------------------------------------------
     //
-    // Hours first, then days — see the header. Declared after the ListView so
+    // Hours first, then days - see the header. Declared after the ListView so
     // they take the presses over it.
     PagerButton {
         pointsLeft: true

@@ -41,7 +41,7 @@ QList<QLatin1String> hourlyVariables()
         QLatin1String("wind_gusts_10m"),             // its overlay
         QLatin1String("wind_direction_10m"),
         QLatin1String("uv_index"),                   // UV tab
-        QLatin1String("visibility"),                 // Visibility tab — METRES, see the adapter
+        QLatin1String("visibility"),                 // Visibility tab - METRES, see the adapter
         QLatin1String("is_day"),                     // day/night glyphs and the past veil
     };
 }
@@ -68,7 +68,7 @@ QList<QLatin1String> dailyVariables()
 
         // The three that delete a planned task. DetailMoonCard needs a phase,
         // a rise and a set, and the alternative to these was a local ephemeris
-        // — Meeus' lunar terms, a few hundred lines of astronomy nobody here
+        // - Meeus' lunar terms, a few hundred lines of astronomy nobody here
         // would be qualified to review. Open-Meteo serves all three, verified
         // against the live endpoint, so the astronomy stays upstream.
         QLatin1String("moon_phase"),

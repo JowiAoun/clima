@@ -23,7 +23,7 @@ const char kProviderId[] = "eccc";
 
 // "2026-08-05T18:44:57.573Z". Qt::ISODate accepts the fractional seconds and the
 // Z, and produces a QDateTime in UTC. An unparseable or absent value comes back
-// invalid, which every consumer in libclimat/domain/alert.h already handles —
+// invalid, which every consumer in libclimat/domain/alert.h already handles -
 // there is no timestamp here whose absence is a parse failure.
 QDateTime instant(const QJsonValue &value)
 {
@@ -45,7 +45,7 @@ QString text(const QJsonObject &object, const QString &stem, const QString &lang
     return object.value(stem + QStringLiteral("_en")).toString();
 }
 
-// THE severity mapping. From the risk colour, never from alert_type — the
+// THE severity mapping. From the risk colour, never from alert_type - the
 // header argues why at length.
 //
 // Matched on the English colour whatever language was asked for: `risk_colour_fr`
@@ -66,7 +66,7 @@ AlertSeverity severityFromColour(const QString &colourEnglish)
         return AlertSeverity::Minor;
 
     // A colour nobody here has seen. Unknown rather than a guess: it still
-    // displays, it just does not claim a grade — see alert.h on why Unknown
+    // displays, it just does not claim a grade - see alert.h on why Unknown
     // sorts below Minor and is not the same as "probably fine".
     return AlertSeverity::Unknown;
 }
@@ -151,14 +151,14 @@ Attribution EcccAlertProvider::attribution() const
 {
     // docs/02-data-sources.md §2.9 records ECCC's requirement as one exact
     // sentence, which is why Attribution has a `creditLine` field separate from
-    // `name` — see iforecastprovider.h. It is transcribed, not paraphrased.
+    // `name` - see iforecastprovider.h. It is transcribed, not paraphrased.
     Attribution credit;
     credit.name       = QStringLiteral("Environment and Climate Change Canada");
     credit.creditLine = QStringLiteral(
         "Data provided by Environment and Climate Change Canada. "
-        "Contains information licensed under the Open Government Licence – Canada.");
+        "Contains information licensed under the Open Government Licence - Canada.");
     credit.homepage    = QUrl(QStringLiteral("https://weather.gc.ca/"));
-    credit.licenceName = QStringLiteral("Open Government Licence – Canada 2.0");
+    credit.licenceName = QStringLiteral("Open Government Licence - Canada 2.0");
     credit.licenceUrl =
         QUrl(QStringLiteral("https://open.canada.ca/en/open-government-licence-canada"));
     credit.note = QStringLiteral(
@@ -182,7 +182,7 @@ Capabilities EcccAlertProvider::capabilitiesAt(Coordinate coord) const
         return {};
 
     // Never undetermined. Whether Canada issues alerts here is not a fact that
-    // has to be learned from a payload the way pollen coverage is — the service
+    // has to be learned from a payload the way pollen coverage is - the service
     // covers its own territory, and an empty answer means no alerts rather than
     // no product.
     return Capabilities(Capability::Alerts);
@@ -206,8 +206,8 @@ QFuture<Result<AlertSet>> EcccAlertProvider::fetchAlerts(const AlertRequest &req
 
     http.parameters = { { QStringLiteral("f"), QStringLiteral("json") } };
 
-    // The language is NOT in the request. One payload carries both languages —
-    // `alert_text_en` beside `alert_text_fr` — so the bytes are the same
+    // The language is NOT in the request. One payload carries both languages -
+    // `alert_text_en` beside `alert_text_fr` - so the bytes are the same
     // whichever was asked for, and keeping the language out of the key means
     // switching it costs nothing and shares a cache entry. It is applied at
     // parse time instead.
@@ -257,7 +257,7 @@ QFuture<Result<AlertSet>> EcccAlertProvider::fetchAlerts(const AlertRequest &req
                              -> Result<AlertSet> {
         if (!result.hasValue()) {
             // The refresh failed and we have something. Serve it, stamped with
-            // when it was last CONFIRMED rather than with now — that stamp is
+            // when it was last CONFIRMED rather than with now - that stamp is
             // what the banner's "last confirmed 14:05" reads, and it is the
             // difference between silently keeping an alert and saying so.
             if (cached.present) {
@@ -337,7 +337,7 @@ Result<AlertSet> EcccAlertProvider::parse(const QByteArray &body, const QDateTim
     // back as.
     if (root.contains(QStringLiteral("code")) && !root.contains(QStringLiteral("features"))) {
         return Error(ErrorKind::Parse,
-                     QStringLiteral("GeoMet refused the query: %1 — %2")
+                     QStringLiteral("GeoMet refused the query: %1 - %2")
                          .arg(root.value(QStringLiteral("code")).toString(),
                               root.value(QStringLiteral("description")).toString()));
     }
@@ -348,7 +348,7 @@ Result<AlertSet> EcccAlertProvider::parse(const QByteArray &body, const QDateTim
                      QStringLiteral("alert payload carries no feature collection"));
     }
 
-    // A short language code — "fr" from "fr-CA" — because the field suffixes are
+    // A short language code - "fr" from "fr-CA" - because the field suffixes are
     // two letters.
     const QString suffix = language.left(2).toLower();
 
@@ -379,7 +379,7 @@ Result<AlertSet> EcccAlertProvider::parse(const QByteArray &body, const QDateTim
         alert.description     = text(properties, QStringLiteral("alert_text"), suffix);
         alert.areaDescription = text(properties, QStringLiteral("feature_name"), suffix);
 
-        // ECCC publishes no headline and no separate instruction paragraph —
+        // ECCC publishes no headline and no separate instruction paragraph -
         // the remarks are inside alert_text. Left empty rather than manufactured
         // from the other fields; alert.h says an empty headline means the view
         // shows `event`, which is the right thing to show.
@@ -408,7 +408,7 @@ Result<AlertSet> EcccAlertProvider::parse(const QByteArray &body, const QDateTim
         alert.effective = instant(properties.value(QStringLiteral("validity_datetime")));
 
         // No onset. ECCC states when the message takes effect and when the event
-        // ends, and does not state when the weather starts — so `onset` stays
+        // ends, and does not state when the weather starts - so `onset` stays
         // invalid rather than being aliased to `effective`, which would make
         // every Canadian alert permanently "Active" by definition and hide the
         // Pending phase behind an assumption.
@@ -416,8 +416,8 @@ Result<AlertSet> EcccAlertProvider::parse(const QByteArray &body, const QDateTim
         alert.ends    = instant(properties.value(QStringLiteral("event_end_datetime")));
 
         // `web` is deliberately empty. The payload carries no per-alert URL, and
-        // the two obvious provincial pages to construct one from —
-        // weather.gc.ca/warnings/index_e.html?prov=ns and its /en/ variant —
+        // the two obvious provincial pages to construct one from -
+        // weather.gc.ca/warnings/index_e.html?prov=ns and its /en/ variant -
         // both answer 404, verified. A dead link is worse than no link.
 
         // Identity: (code, feature), not the message id, which embeds an issue

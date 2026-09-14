@@ -35,7 +35,7 @@ Item {
     // The six the desktop shows, without the disclosure chevrons the
     // reference puts on each. A chevron is a promise that tapping the slug
     // opens the measurable, and this prototype has no per-measurable screen on
-    // the phone to open — LocationBar's own note about the non-rotating
+    // the phone to open - LocationBar's own note about the non-rotating
     // chevron is the same rule: do not draw an affordance the app cannot keep.
     readonly property var slugs: [
         { label: qsTr("Air quality"), value: Detail.airQuality.reading,
@@ -72,7 +72,7 @@ Item {
     //
     // docs/04-architecture.md §4.5 asks for "a subtle 'updated 25 min ago'" on
     // every row it ticks stale-while-revalidate for, and this is it. Three
-    // facts share one line because they answer one question — how much should I
+    // facts share one line because they answer one question - how much should I
     // trust this:
     //
     //   the time where the weather is   12:28 PM

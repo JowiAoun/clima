@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Jowi Aoun
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Validates the Linux packaging metadata — against a real staged install, not
+# Validates the Linux packaging metadata - against a real staged install, not
 # against the templates.
 #
 #   scripts/check-packaging.sh          exit 1 on anything a store would reject
@@ -17,8 +17,8 @@
 # files. The desktop entry can be perfect and land in the wrong directory; the
 # icons can render and be installed under the source basename instead of the
 # app ID; the metainfo can validate and never be installed at all. Every one of
-# those produces exactly the same symptom — a working app with a generic icon
-# that no software centre lists — and none of them is visible in a template.
+# those produces exactly the same symptom - a working app with a generic icon
+# that no software centre lists - and none of them is visible in a template.
 #
 # So: install to a temporary prefix, then check what actually arrived, at the
 # paths a packager will actually ship. That is also the shape of the thing
@@ -33,13 +33,13 @@ app_id="io.github.JowiAoun.Climat"
 
 for tool in desktop-file-validate appstreamcli; do
   if ! command -v "$tool" > /dev/null 2>&1; then
-    echo "packaging: $tool not found — run this inside \`nix develop\`" >&2
+    echo "packaging: $tool not found - run this inside \`nix develop\`" >&2
     exit 1
   fi
 done
 
 if [ ! -f "$build_dir/CMakeCache.txt" ]; then
-  echo "packaging: no build at $build_dir — configure and build it first" >&2
+  echo "packaging: no build at $build_dir - configure and build it first" >&2
   exit 1
 fi
 
@@ -57,7 +57,7 @@ echo "packaging: staging an install of $app_id"
 # absolute destination and has to: the daemon's XDG autostart entry goes to
 # /etc/xdg/autostart, since the autostart search path is a fixed list and
 # nothing reads /usr/local/etc/xdg/autostart. `--prefix` does not redirect an
-# absolute DESTINATION — it is not for staging — so this script tried to write
+# absolute DESTINATION - it is not for staging - so this script tried to write
 # into the real /etc and stopped with "Permission denied", which is a check
 # that fails on the machine rather than on the tree.
 #
@@ -77,7 +77,7 @@ note() {
 #
 # Outside $stage on purpose: it is the one thing here that does not live under
 # the prefix. Checked only when the daemon was built, which is the same gate
-# packaging/CMakeLists.txt puts on installing it — a build without Qt D-Bus has
+# packaging/CMakeLists.txt puts on installing it - a build without Qt D-Bus has
 # no daemon and correctly installs no entry for one.
 if [ -x "$build_dir/daemon/climat-daemon" ]; then
   autostart="$root/etc/xdg/autostart/$app_id.Daemon.desktop"
@@ -87,7 +87,7 @@ if [ -x "$build_dir/daemon/climat-daemon" ]; then
     echo "packaging: no desktop-file-validate; the autostart entry is not validated." >&2
   elif ! desktop-file-validate "$autostart"; then
     # `if !`, not `cmd && echo`. This script runs under `set -e`, where a bare
-    # `cmd && echo ok` aborts on failure instead of reaching note() — so the one
+    # `cmd && echo ok` aborts on failure instead of reaching note() - so the one
     # thing it would have to say is the one thing it would not print.
     note "the daemon's autostart entry is not a valid desktop file"
   else
@@ -104,7 +104,7 @@ if [ -x "$build_dir/daemon/climat-daemon" ]; then
   #   * the FILE NAME is the bus name. The bus matches a request against it, and
   #     flatpak refuses to export a service file named anything else.
   #   * the Name= key agrees with it, and with the name the daemon actually
-  #     registers — which is read out of the binary rather than assumed, so a
+  #     registers - which is read out of the binary rather than assumed, so a
   #     rename that reaches one and not the other fails here.
   #   * Exec= is absolute. The bus does not search PATH, and a relative Exec is
   #     an activation that fails at the moment somebody needs it.
@@ -148,7 +148,7 @@ metainfo="$stage/share/metainfo/$app_id.metainfo.xml"
 if [ ! -f "$metainfo" ]; then
   note "no AppStream component at share/metainfo/$app_id.metainfo.xml"
 else
-  # --no-net because CI has no network by policy — see the `test` job in
+  # --no-net because CI has no network by policy - see the `test` job in
   # .github/workflows/ci.yml, which asserts that nothing opens a socket. The
   # cost is that a broken screenshot URL is not caught here; the release
   # workflow publishes those and is where reaching them is checked.

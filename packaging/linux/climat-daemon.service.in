@@ -17,7 +17,7 @@
 #
 #   * A DESKTOP THAT IS NOT GNOME. The GNOME extension starts the daemon when
 #     nothing else has. There is no extension on KDE, Sway, Hyprland, Wayfire or
-#     river — `climat-widget --pin` puts the tiles there on its own — so on every
+#     river - `climat-widget --pin` puts the tiles there on its own - so on every
 #     one of those the daemon had nobody to start it between one login and the
 #     next.
 #
@@ -41,7 +41,7 @@
 # ---- lifetime ---------------------------------------------------------------
 #
 # Activation starts one and the daemon then stays, because it has no idle
-# timeout by design — a service that quit after five idle minutes would take the
+# timeout by design - a service that quit after five idle minutes would take the
 # tiles stale with it. So this costs at most one process, started only on a
 # desktop where something actually asked for the weather, which is a smaller
 # claim on a machine than the autostart entry makes.
@@ -51,7 +51,7 @@
 [D-BUS Service]
 Name=@CLIMAT_APP_ID@.Daemon
 
-# Absolute, as the bus requires — it does not search PATH. Flatpak rewrites this
+# Absolute, as the bus requires - it does not search PATH. Flatpak rewrites this
 # line when it exports the file, to `flatpak run --command=climat-daemon`, so the
 # activated daemon gets its own sandbox instance rather than living inside
 # whichever one happened to ask for it first.

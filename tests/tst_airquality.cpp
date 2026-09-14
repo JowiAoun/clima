@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // The air-quality provider, against two recorded responses and a loopback
-// server. No network — tests/support/networkguard.h makes that a property of
+// server. No network - tests/support/networkguard.h makes that a property of
 // the process.
 //
 // The fixtures are the whole point of this file. They were recorded from the
@@ -12,7 +12,7 @@
 //     tests/fixtures/airquality/toronto.json    72 hours. Six pollen series and
 //                                               ammonia are null 72/72.
 //     tests/fixtures/airquality/berlin.json     72 hours. The same seven series
-//                                               are null 0/72 — and four of the
+//                                               are null 0/72 - and four of the
 //                                               six pollens are 0.0 throughout,
 //                                               because it is July.
 //
@@ -144,7 +144,7 @@ void TestAirQuality::torontoHasNoPollenAndBerlinDoes()
     QVERIFY(berlin.value().hasPollen);
 
     // And the consequence: no hour of the Toronto series carries a pollen map
-    // at all. Not an empty map — no map. A card driven by this cannot draw.
+    // at all. Not an empty map - no map. A card driven by this cannot draw.
     for (const AirQualityPoint &point : toronto.value().hourly)
         QVERIFY(!point.pollen.has_value());
 
@@ -158,7 +158,7 @@ void TestAirQuality::zeroIsAMeasurementAndNullIsNot()
 {
     // The test that keeps the gate from being rewritten as "any value above
     // zero". In a July fixture, Berlin's alder, birch, olive and ragweed are
-    // 0.0 for every hour — out of season, measured, real — and a gate that read
+    // 0.0 for every hour - out of season, measured, real - and a gate that read
     // zero as absence would hide a working card for two thirds of the year.
     const Result<AirQuality> berlin =
         OpenMeteoAirQualityProvider::parse(fixture(QStringLiteral("berlin.json")), kRecordedAt);
@@ -331,7 +331,7 @@ void TestAirQuality::theLocalComputationAgreesOnGasesAndNotOnParticulates()
 
     // The particulates: not close, and not close by enough to change a band.
     QVERIFY2(worstParticate > 5.0,
-             qPrintable(QStringLiteral("particulate error %1 — if this has become small, the "
+             qPrintable(QStringLiteral("particulate error %1 - if this has become small, the "
                                        "published sub-indices may no longer be needed")
                             .arg(worstParticate)));
 }
@@ -341,7 +341,7 @@ void TestAirQuality::carbonMonoxideCanNeverBeDominant()
     // CO is reported in the hundreds of µg/m³ while SO2 is reported in ones, so
     // the largest concentration is CO in every hour of both fixtures. It is
     // never the dominant pollutant, because the EAQI does not define a CO
-    // sub-index — which is the difference between comparing sub-indices and
+    // sub-index - which is the difference between comparing sub-indices and
     // comparing concentrations, made visible.
     for (const QString &name : { QStringLiteral("toronto.json"), QStringLiteral("berlin.json") }) {
         const Result<AirQuality> parsed =
@@ -432,7 +432,7 @@ void TestAirQuality::theVerdictIsRememberedPerCamsCell()
     QCOMPARE(provider.rememberedVerdictCount(), 1);
     QCOMPARE(m_stub.requestCount(), 1);
 
-    // A point 300 metres away is the same CAMS cell — the verdict is keyed at
+    // A point 300 metres away is the same CAMS cell - the verdict is keyed at
     // one decimal, ~11 km, which is the grid CAMS Europe is published on. The
     // answer is decided without a second request, which is the whole reason
     // the verdict is remembered at a coarser resolution than the request is
@@ -488,7 +488,7 @@ void TestAirQuality::theRequestAsksForEverythingThisFileParses()
     QVERIFY2(target.contains(QLatin1String("european_aqi_ozone")), qPrintable(target));
 
     // Every pollutant and every pollen species, generated from the enums rather
-    // than typed — so this assertion is really about the generator.
+    // than typed - so this assertion is really about the generator.
     for (int i = 0; i < int(Pollutant::Count); ++i) {
         QVERIFY2(target.contains(pollutantId(static_cast<Pollutant>(i))),
                  qPrintable(pollutantId(static_cast<Pollutant>(i))));
@@ -511,7 +511,7 @@ void TestAirQuality::theRequestAsksForEverythingThisFileParses()
 void TestAirQuality::aTruncatedPayloadIsATypedParseError()
 {
     // §4.4: never a partial success. Half a payload is an Error(Parse), not an
-    // AirQuality with three hours in it — the registry's chain branches on the
+    // AirQuality with three hours in it - the registry's chain branches on the
     // kind, and it cannot branch on a success that is secretly a failure.
     const QByteArray whole = fixture(QStringLiteral("berlin.json"));
     const Result<AirQuality> truncated =

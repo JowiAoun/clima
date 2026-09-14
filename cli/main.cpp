@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// climat-cli — the forecast for a status bar, a script or a terminal.
+// climat-cli - the forecast for a status bar, a script or a terminal.
 //
 //   climat-cli now                  the current conditions, and any warning
 //   climat-cli hourly [N]           the next N hours (12)
@@ -17,8 +17,8 @@
 // ============================================================================
 // TWO OUTPUTS, TWO RULES
 //
-// Text honours the reader's preferences — the units and the clock format the
-// app's Preferences screen wrote to the INI — because a status bar that said
+// Text honours the reader's preferences - the units and the clock format the
+// app's Preferences screen wrote to the INI - because a status bar that said
 // 72° while the app said 22° would be the app arguing with itself. The keys
 // are app/settingskeys.h, read here through a bare QSettings; there is no QML
 // engine in this process and no reason to pay for one.
@@ -178,11 +178,11 @@ QString unitFor(const Preferences &prefs, units::Quantity quantity)
     }
 }
 
-// "23°C", "12 km/h", "–" for a reading that is not there.
+// "23°C", "12 km/h", "-" for a reading that is not there.
 QString shown(const Preferences &prefs, units::Quantity quantity, const Reading &reading)
 {
     if (!reading.has_value())
-        return QStringLiteral("–");
+        return QStringLiteral("-");
     const QString unit    = unitFor(prefs, quantity);
     const double  display = units::convert(quantity, unit, *reading);
     const QString number  = QString::number(display, 'f', units::decimals(quantity, unit));
@@ -195,7 +195,7 @@ QString shown(const Preferences &prefs, units::Quantity quantity, const Reading 
 
 QString percent(const Reading &reading)
 {
-    return reading.has_value() ? QStringLiteral("%1%").arg(qRound(*reading)) : QStringLiteral("–");
+    return reading.has_value() ? QStringLiteral("%1%").arg(qRound(*reading)) : QStringLiteral("-");
 }
 
 // The sixteen points, from the direction the wind blows FROM.
@@ -212,7 +212,7 @@ QString compass(const Reading &degrees)
 QString clock(const Preferences &prefs, const QDateTime &instant, const QTimeZone &zone)
 {
     if (!instant.isValid())
-        return QStringLiteral("–");
+        return QStringLiteral("-");
     const QDateTime local = instant.toTimeZone(zone);
     return prefs.twentyFourHour ? local.toString(QStringLiteral("HH:mm"))
                                 : local.toString(QStringLiteral("h:mm AP"));
@@ -354,7 +354,7 @@ QJsonObject alertJson(const Alert &a, const QTimeZone &zone)
 // ---- CSV -------------------------------------------------------------------------
 //
 // One row per point, canonical units, a header naming every column. A cell
-// with no reading is empty rather than "null" — that is what a spreadsheet
+// with no reading is empty rather than "null" - that is what a spreadsheet
 // reads as missing.
 
 QString cell(const Reading &reading)
@@ -365,8 +365,8 @@ QString cell(const Reading &reading)
 // A text cell, quoted the way RFC 4180 says when it has to be.
 //
 // The numeric and ISO columns can never need this; the text ones can and do.
-// A place name out of GeoNames is whatever the dataset holds — "Washington,
-// D.C." is a real row — and joined with a bare comma it shifts every later
+// A place name out of GeoNames is whatever the dataset holds - "Washington,
+// D.C." is a real row - and joined with a bare comma it shifts every later
 // column by one, so `places --csv` grew a tenth field and a parser read the
 // home flag as the timezone. Condition text and issuer names are the same
 // hazard from a different source.
@@ -463,7 +463,7 @@ std::unique_ptr<Engine> buildEngine(const QString &fixtureName)
 
 // `--place` empty: the app's current place, then its home. A number: a saved
 // place by its id. Anything else: a search, whose first answer is used and
-// NOT saved — the app's list is the app's.
+// NOT saved - the app's list is the app's.
 Result<Place> resolvePlace(Engine &engine, const QString &asked, int timeoutMs)
 {
     if (engine.fixtureMode)
@@ -490,7 +490,7 @@ Result<Place> resolvePlace(Engine &engine, const QString &asked, int timeoutMs)
                 return place;
         }
         return Error(ErrorKind::NotFound,
-                     QStringLiteral("no saved place has id %1 — `climat-cli places` lists them")
+                     QStringLiteral("no saved place has id %1 - `climat-cli places` lists them")
                          .arg(id));
     }
 
@@ -567,8 +567,8 @@ int printPlaces(Engine &engine, const Run &run, QTextStream &out)
 //
 // The same rule app/viewmodels/conditionsdata.cpp follows, and for the same
 // reason it was written there. Open-Meteo's `current` block is stamped to the
-// quarter hour and is the better answer for an INSTANT — the temperature at
-// 4:47 rather than at four — but only while it is actually current. A cached
+// quarter hour and is the better answer for an INSTANT - the temperature at
+// 4:47 rather than at four - but only while it is actually current. A cached
 // response is served for as long as its freshness window allows, so the block
 // inside it can be hours old, and the CLI was printing that as the conditions
 // and labelling it "just now" off the fetch time.
@@ -585,7 +585,7 @@ CurrentConditions observationAt(const Forecast &forecast, const QDateTime &now)
     const CurrentConditions &block = forecast.current;
     const QList<HourlyPoint>  hours = asHourStarting(forecast.hourly);
 
-    // The hour the reader is standing in, whether or not the block is usable —
+    // The hour the reader is standing in, whether or not the block is usable -
     // because it is needed in both branches.
     const HourlyPoint *standing = nullptr;
     for (int i = hours.size() - 1; i >= 0; --i) {
@@ -605,7 +605,7 @@ CurrentConditions observationAt(const Forecast &forecast, const QDateTime &now)
         // series shifts it, and the block's `precipitation` is the PRECEDING
         // hour where the series is the hour starting. Two conventions in one
         // process is how "Mainly sunny" came to sit above a Now column drawing
-        // heavy rain — measured on five of twelve cities in one afternoon.
+        // heavy rain - measured on five of twelve cities in one afternoon.
         //
         // So the block is trusted for the instants it is genuinely better at
         // and the interval fields come from the interval.
@@ -618,7 +618,7 @@ CurrentConditions observationAt(const Forecast &forecast, const QDateTime &now)
 
     // Not current. Rebuilt from the hour, exactly as the app does.
     if (standing == nullptr) {
-        // No hour covers `now` either — a forecast with no usable series at
+        // No hour covers `now` either - a forecast with no usable series at
         // all. Empty, rather than the stale block this function exists to
         // suppress; the app leaves the observation empty here too.
         return {};
@@ -712,7 +712,7 @@ int printNow(const Forecast &forecast, const QString &servedBy, const QList<Aler
     // `current` block being called "just now". That was the wrong half of the
     // fix: observationAt() above now makes the reading current by
     // construction, so its stamp is under an hour old whenever any row covers
-    // the moment — and a line derived from it could never say a cached
+    // the moment - and a line derived from it could never say a cached
     // response was stale, which is the one thing this line is for.
     out << "Updated " << ago(forecast.fetchedAt, now) << " · " << servedBy << '\n';
     return 0;
@@ -728,7 +728,7 @@ int printHourly(const Forecast &forecast, const Preferences &prefs, const Run &r
     // on the row stamped `t` describe the hour ENDING at `t`; every screen in
     // the app reads asHourStarting(), where they describe the hour beginning
     // there. Windowed without converting, this printed the right times against
-    // the wrong rainfall — kampala's 0.4 mm of drizzle sat in the CLI's 10:00
+    // the wrong rainfall - kampala's 0.4 mm of drizzle sat in the CLI's 10:00
     // row and the app's 09:00 row, from one file.
     const QList<HourlyPoint> hours = asHourStarting(forecast.hourly);
 
@@ -1015,7 +1015,7 @@ int main(int argc, char *argv[])
         return printDaily(forecast->value().value, prefs, run, now, out);
 
     // `now` also asks for the warnings, which fan out rather than fall back and
-    // may be absent where nobody covers the place — in which case there is
+    // may be absent where nobody covers the place - in which case there is
     // nothing to print and nothing to apologise for.
     AlertRequest alertRequest;
     alertRequest.coord = place.value().coordinate;
@@ -1031,7 +1031,7 @@ int main(int argc, char *argv[])
     } else if (*alerts) {
         inForce = alerts->value().value.displayableAt(now);
     } else if (alerts->errorKind() != ErrorKind::Unsupported) {
-        // Unsupported is the ordinary case — most of the world has no covering
+        // Unsupported is the ordinary case - most of the world has no covering
         // provider and the app hides the feature. Anything else is a service
         // we should have been able to reach and could not.
         std::fprintf(stderr, "climat-cli: the warnings could not be checked: %s\n",

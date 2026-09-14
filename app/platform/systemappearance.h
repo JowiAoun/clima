@@ -5,7 +5,7 @@
 //
 // Two questions, asked of the session rather than of the user: is this a dark
 // desktop or a light one, and has the person asked for less movement. Neither
-// is a setting this app owns — they are the desktop's, and an app that ignores
+// is a setting this app owns - they are the desktop's, and an app that ignores
 // them is the one window on the screen that did not get the message when
 // somebody turned the lights off.
 //
@@ -23,7 +23,7 @@
 //      covers Windows, and Linux sessions with no portal running. It answers
 //      the colour question only; Qt has no reduced-motion hint on any platform.
 //
-//   3. Dark. Not "no preference" — dark. It is where this design system
+//   3. Dark. Not "no preference" - dark. It is where this design system
 //      started, it is what every committed screenshot shows, and a fallback
 //      that means "I could not tell" still has to paint something.
 //
@@ -35,8 +35,8 @@
 // ---- what this deliberately does not read -----------------------------------
 //
 // `accent-color`, which the same portal namespace offers. Accent in this
-// palette is structure — the selected pill, the nav pill, the wash behind the
-// now row — and `accent.ink` is tuned against it to a measured contrast ratio.
+// palette is structure - the selected pill, the nav pill, the wash behind the
+// now row - and `accent.ink` is tuned against it to a measured contrast ratio.
 // Adopting a system accent would break that pair on whichever desktop chose an
 // unlucky hue, and the light theme has already shown that the fill and the ink
 // on it cannot be chosen independently. See the note in themelight.js.
@@ -48,7 +48,7 @@
 
 #ifdef CLIMAT_HAVE_DBUS
 // The whole header, not a forward declaration. QDBusVariant appears in a slot
-// signature below, and moc emits a metatype for every parameter of a slot — so
+// signature below, and moc emits a metatype for every parameter of a slot - so
 // an incomplete type here fails the build inside qmetatype.h with "Meta Types
 // must be fully defined", a long way from the line that caused it.
 #include <QDBusVariant>
@@ -88,7 +88,7 @@ Q_SIGNALS:
 #ifdef CLIMAT_HAVE_DBUS
     // A real slot, declared to moc, and it has to be. QDBusConnection::connect
     // takes a signature through the old SLOT() macro and resolves it at run
-    // time against the meta-object — so an ordinary private method compiles,
+    // time against the meta-object - so an ordinary private method compiles,
     // links, and then fails at startup with
     //
     //   qt.dbus.integration: Could not connect "org.freedesktop.portal.Settings"

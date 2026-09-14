@@ -6,7 +6,7 @@
 // the whole difference between the two files and it is the reason there are two:
 // the chart's toggle is a control *with a label*, laid out as one object,
 // because the word "Feels like" is what the switch means. A preferences row has
-// already said what the switch means, in a title and a subtitle, on the left —
+// already said what the switch means, in a title and a subtitle, on the left -
 // so a second caption here would be the third time the same sentence is on the
 // row.
 //
@@ -26,7 +26,7 @@
 //     }
 //
 // A control that flipped `checked` itself would destroy that binding on the
-// first tap — assigning to a bound property is what breaks the binding — and
+// first tap - assigning to a bound property is what breaks the binding - and
 // from then on the switch would show its own state rather than the setting's.
 // The failure is invisible until something else writes the preference, which for
 // the unit switches is the metric/imperial preset one group above.
@@ -74,7 +74,7 @@ Item {
     }
 
     // 22 px tall in a 44 px row, so the target grows into padding that is
-    // already there. The row is a target too — see PrefRow — and this one sits
+    // already there. The row is a target too - see PrefRow - and this one sits
     // on top of it, which is what makes a tap on the switch and a tap on the row
     // do the same thing rather than two things.
     TouchTarget {

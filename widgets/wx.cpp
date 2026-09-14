@@ -136,7 +136,7 @@ QString Wx::pollutant(const QVariant &id) const
 // Which is the same arrangement `Units` already has here: the tiles are a second
 // process, and they read the reader's preferences out of the same INI the app
 // writes. A second implementation of "what time is it" in a second binary is a
-// second place for a 24-hour clock to be half-applied — and the failure mode is
+// second place for a 24-hour clock to be half-applied - and the failure mode is
 // a desktop showing "15:00" in the app and "3 PM" on the tile beside it.
 //
 // The preference is read at start, not followed live. Nothing pushes a settings
@@ -245,7 +245,7 @@ QString Wx::ago(int minutes) const
         return tr("yesterday");
 
     // Past a couple of days the number stops being useful and starts being
-    // alarming in the wrong way — the reading is not "a bit old", it is not
+    // alarming in the wrong way - the reading is not "a bit old", it is not
     // being refreshed at all, and that is what the tile should say.
     return tr("%n days ago", nullptr, days);
 }

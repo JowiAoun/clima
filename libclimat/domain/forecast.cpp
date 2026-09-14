@@ -28,7 +28,7 @@ const HourlyPoint *Forecast::hourAt(const QDateTime &at) const
     if (!at.isValid())
         return nullptr;
 
-    // The hour ENDING at `time` — see the convention section in the header —
+    // The hour ENDING at `time` - see the convention section in the header -
     // so the point at 15:00 covers [14:00, 15:00) and 15:00 itself belongs to
     // the next one. Half-open, so that no instant belongs to two points and
     // none belongs to none.
@@ -47,8 +47,8 @@ Reading moonIllumination(Reading moonPhase)
     if (!moonPhase)
         return std::nullopt;
 
-    // Half the cosine swing, offset to [0, 1]. Exact at the four quarters —
-    // 0 at new, 0.5 at both quarters, 1 at full — which is the property that
+    // Half the cosine swing, offset to [0, 1]. Exact at the four quarters -
+    // 0 at new, 0.5 at both quarters, 1 at full - which is the property that
     // makes it worth writing rather than approximating with a triangle wave.
     return (1.0 - std::cos(2.0 * M_PI * *moonPhase)) / 2.0;
 }
@@ -65,7 +65,7 @@ QString moonPhaseName(Reading moonPhase)
     if (phase < 0.0)
         phase += 1.0;
 
-    // The four exact phases get a window of ±0.02 of the cycle — about
+    // The four exact phases get a window of ±0.02 of the cycle - about
     // fourteen hours either side, so one calendar day is called "full" and
     // occasionally two. The naive alternative gives each of the eight names an
     // eighth of the month, which calls the moon full for three and a half days
@@ -150,7 +150,7 @@ std::optional<QDate> nextFullMoon(const QList<DailyPoint> &days, const QDate &fr
     }
 
     // Past the horizon. How far round the cycle the first reading still has to
-    // go, on the mean month — zero when it is already full, a whole month when
+    // go, on the mean month - zero when it is already full, a whole month when
     // it has just been.
     const auto &[date, phase] = readings.constFirst();
     const double toFull = std::fmod(0.5 - phase + 1.0, 1.0) * kSynodicMonth;

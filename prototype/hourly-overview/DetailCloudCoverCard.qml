@@ -3,7 +3,7 @@
 // Cloud-cover detail card.
 //
 // A dial filled for exactly as much of its circumference as the sky is
-// covered: 8% cover is 8% of the ring — a stub just past 12 o'clock — and an
+// covered: 8% cover is 8% of the ring - a stub just past 12 o'clock - and an
 // overcast sky would close the ring. The ring is the reading, so the number
 // belongs to it and the word belongs to the status line. "Sunny" is said once,
 // down there, and is not repeated inside the dial.
@@ -46,7 +46,7 @@ DetailCard {
         readonly property real reading: ChartMath.clamp(root.d.value / 100, 0, 1)
 
         // The head of the paint, running 0 → `reading` once on mount off the
-        // shell's `reveal` hook, over `Theme.motion.reveal` — the same two
+        // shell's `reveal` hook, over `Theme.motion.reveal` - the same two
         // lines as the UV and air-quality dials, which is the point: three
         // rings with one geometry that arrived three different ways would read
         // as three authors. The long version of why is in DetailUvCard.qml.
@@ -89,7 +89,7 @@ DetailCard {
             anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
 
-            // The unfilled remainder — the sky that is still clear. A gauge
+            // The unfilled remainder - the sky that is still clear. A gauge
             // only means something as a fraction of something, and this is the
             // something.
             ShapePath {
@@ -133,7 +133,7 @@ DetailCard {
             y: viz.dialY(viz.markAngle, viz.radius) - height / 2
         }
 
-        // In the middle of the dial — see the note in the air-quality card.
+        // In the middle of the dial - see the note in the air-quality card.
         Text {
             text: root.d.value + root.d.unit
             color: Theme.color.textPrimary

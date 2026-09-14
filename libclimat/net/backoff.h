@@ -11,7 +11,7 @@
 // the same instant, which is how a recovering server gets knocked over by the
 // clients that were waiting for it to recover.
 //
-// The fix is jitter, and the variant here is *full* jitter — a uniform draw
+// The fix is jitter, and the variant here is *full* jitter - a uniform draw
 // from [0, ceiling] rather than ceiling ± a few percent. It spreads a fleet
 // across the whole window instead of around a spike, and it is the variant
 // AWS's architecture blog measured as strictly better than "equal jitter" on

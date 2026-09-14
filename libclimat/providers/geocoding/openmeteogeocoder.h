@@ -16,8 +16,8 @@
 // would be a small matter to search it by name. It would also be a much worse
 // search. Open-Meteo's copy holds every GeoNames entry rather than the 31 673
 // with a population over fifteen thousand, indexes the *alternate names*
-// column — a hundred spellings of Toronto in forty scripts, which is two
-// thirds of the upstream file and the first thing the packer throws away — and
+// column - a hundred spellings of Toronto in forty scripts, which is two
+// thirds of the upstream file and the first thing the packer throws away - and
 // resolves postcodes. Typing "Кигали" or "M5V" and getting the right answer is
 // the feature; a substring match over 31 673 ASCII names is not.
 //
@@ -33,20 +33,20 @@
 // (libclimat/net/httpclient.h, promise 2), and the unit it disables is the
 // provider id. Sharing an id with the forecast provider would mean a refusal
 // from geocoding-api.open-meteo.com taking down forecasts from
-// api.open-meteo.com — a different host, with its own policy, answering a
+// api.open-meteo.com - a different host, with its own policy, answering a
 // different question. A user who cannot search for a city should still get the
 // weather for the city they already saved.
 //
 // ---- caching: seven days, and stale beats nothing ---------------------------
 //
 // §4.5's row for geocoding is "7 days, keyed by query+lang", and the key is
-// built by RequestKey from the provider, the endpoint and the parameters —
+// built by RequestKey from the provider, the endpoint and the parameters -
 // which include the query and the language, so the keying is structural rather
 // than remembered.
 //
 // A fresh hit is answered without a request. A *stale* hit is held in reserve:
 // if the network then fails, the stale answer is returned rather than the
-// error. That is design principle 1 (§4.1) applied to a search box — a user on
+// error. That is design principle 1 (§4.1) applied to a search box - a user on
 // a train who searched "Toronto" last week should get Toronto, not a spinner
 // that ends in a network message.
 //
@@ -54,7 +54,7 @@
 //
 // It does not debounce. Search-as-you-type sends a request per keystroke and
 // the fix for that is a timer, but a timer belongs to the thing that knows
-// when the user stopped typing — libclimat/places/placesearchmodel.h, which
+// when the user stopped typing - libclimat/places/placesearchmodel.h, which
 // holds the 250 ms one. A debounce inside the provider would also debounce the
 // programmatic callers, who are not typing.
 
@@ -100,7 +100,7 @@ public:
     QFuture<Result<Place>>        resolve(qint64 geonamesId) override;
 
     // Points the provider at a different origin. For the loopback stub in
-    // tests — there is no production reason to change it, and a setter is
+    // tests - there is no production reason to change it, and a setter is
     // cheaper than threading a URL through three constructors.
     void                setBaseUrl(const QUrl &url);
     [[nodiscard]] QUrl  baseUrl() const { return m_baseUrl; }

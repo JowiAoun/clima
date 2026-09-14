@@ -14,19 +14,19 @@
 //
 // The previous version drew one flat arc for the whole ring and left the entire
 // reading to a dot sliding along it: change the value and nothing moved but a
-// 16px disc. That is a drawn scale with the reading left out — the thing
+// 16px disc. That is a drawn scale with the reading left out - the thing
 // docs/10-design-system.md §10.7 calls decoration rather than visualisation.
 //
 // Two smaller corrections that came with it. The unfilled remainder is
 // `trackLine`, not `gridLine`: at 0.11 alpha the track was too faint to read as
 // a scale, and a filled fraction needs to be a fraction *of* something visible.
-// And the "PM2.5 4.4 µg/m³" caption is gone — the body sentence already names
+// And the "PM2.5 4.4 µg/m³" caption is gone - the body sentence already names
 // PM2.5 as the primary pollutant, and printing the same fact twice on one card
 // is what the caption was doing. The card's own number is the index; the
 // pollutant is context, and context is the body's job.
 // A card is a `DetailCard { content: Item { id: viz } }`, so everything drawn
-// here lives inside a Component and reaches the two ids around it — `root` for
-// the card and `viz` for the visualisation — across that boundary. Without this
+// here lives inside a Component and reaches the two ids around it - `root` for
+// the card and `viz` for the visualisation - across that boundary. Without this
 // pragma neither is resolvable at compile time: qmllint reports every one of
 // them as an unqualified access, and qmlcachegen, which is the half that costs
 // something, cannot ahead-of-time compile the binding and leaves it to be
@@ -36,7 +36,7 @@
 //
 // Bound makes the enclosing scope's ids lexical, which is what they already
 // read as. It is safe here because every delegate in this file declares its
-// `required property` — that is the one thing Bound takes away, and none of
+// `required property` - that is the one thing Bound takes away, and none of
 // these were relying on it.
 pragma ComponentBehavior: Bound
 
@@ -57,7 +57,7 @@ DetailCard {
     content: Item {
         id: viz
 
-        // Angles run clockwise from 3 o'clock, y down, as in SVG — the same
+        // Angles run clockwise from 3 o'clock, y down, as in SVG - the same
         // convention and the same 310° dial with a 50° mouth at the bottom that
         // the UV card uses. Matching numbers rather than merely similar ones is
         // what makes the two rings the same size on screen.
@@ -67,7 +67,7 @@ DetailCard {
         // Segments per full ring, so a painted stretch is smooth at any length.
         readonly property int segments: 44
 
-        // The marker is the widest thing on the dial, so it — not the stroke —
+        // The marker is the widest thing on the dial, so it - not the stroke -
         // decides how much room the ring must leave around itself.
         readonly property real markSize: 14
         readonly property real rim: markSize / 2 + 1
@@ -111,7 +111,7 @@ DetailCard {
 
         // A ShapePath can gradient-*fill* but not gradient-*stroke*, so the
         // painted stretch is a run of short arcs, each sampling the AQI bands at
-        // its own midpoint — the trick SeriesBars uses per bar. The run is cut to
+        // its own midpoint - the trick SeriesBars uses per bar. The run is cut to
         // end exactly under the marker rather than at the nearest segment
         // boundary, so the dot sits on the end of the paint and not a few pixels
         // past it.
@@ -161,7 +161,7 @@ DetailCard {
                 required property var modelData
 
                 // Clipped to the head of the sweep, and clamped at its own
-                // start: an arc asked to end before it begins is not empty —
+                // start: an arc asked to end before it begins is not empty -
                 // SVG goes the long way round and paints most of the ring.
                 readonly property real segTo: Math.max(modelData.from,
                                                        Math.min(modelData.to, viz.t))

@@ -4,7 +4,7 @@
 // The UV index now, against today's maximum.
 //
 // The arc runs 0 to 11, because that is where the WHO's scale stops naming
-// bands — 11 and over is "extreme" and there is nothing above it to scale
+// bands - 11 and over is "extreme" and there is nothing above it to scale
 // against. A reading past 11 fills the arc and the word says the rest.
 //
 // Today's maximum is a footnote rather than a second arc. It is the number that
@@ -16,7 +16,7 @@
 //
 // `Theme.ramp.uv.fill` runs purple at p = 0 to green at p = 1, because
 // chartmath.js's sampleRamp() takes a *normalised axis position* and 0 is the
-// top of a chart — where the biggest number is. A dial's fraction runs the
+// top of a chart - where the biggest number is. A dial's fraction runs the
 // other way, so it is inverted here.
 //
 // This is the sort of thing that produces a perfectly pretty widget colouring

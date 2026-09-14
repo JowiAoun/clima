@@ -9,5 +9,5 @@ contact_links:
     url: https://open-meteo.com/
     about: >-
       The numbers come from national weather services through Open-Meteo, and alerts
-      come from ECCC and the NWS unaltered. If the data is wrong, it is wrong upstream —
+      come from ECCC and the NWS unaltered. If the data is wrong, it is wrong upstream -
       but do file an issue if we are DISPLAYING it wrongly.

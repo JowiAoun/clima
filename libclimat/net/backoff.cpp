@@ -20,7 +20,7 @@ std::chrono::milliseconds Backoff::ceilingForRetry(int retry) const
         retry = 0;
 
     // In double, then clamped, rather than shifting an integer. `base << retry`
-    // is the tidier spelling and it overflows at retry 54 on a 64-bit count —
+    // is the tidier spelling and it overflows at retry 54 on a 64-bit count -
     // which is unreachable today because maxRetries is 5, and which would be a
     // silently negative delay the day somebody raises it. std::pow saturates to
     // infinity instead, and the min() below turns infinity into the cap.

@@ -7,7 +7,7 @@
 
 namespace {
 
-// The 12-hour hour. Midnight and noon are 12, not 0 — which is the whole of the
+// The 12-hour hour. Midnight and noon are 12, not 0 - which is the whole of the
 // arithmetic, and the whole of why this is written out rather than handed to
 // QLocale.
 //
@@ -59,7 +59,7 @@ QString TimeFormat::hour(QTime time) const
     // "3 PM" still reads as a time without them. "15" does not: on an axis under
     // a temperature series it is a bare number beside other bare numbers, and
     // every 24-hour weather service prints the colon for that reason.
-    // Padded — "00:00" and "04:00", not "0:00" and "4:00". A 24-hour clock pads
+    // Padded - "00:00" and "04:00", not "0:00" and "4:00". A 24-hour clock pads
     // and a 12-hour one does not, which is not a style choice: "0:00" is the one
     // spelling of midnight nobody writes, and an axis running 22:00, 0:00, 2:00
     // has a column that is two characters narrower than its neighbours.
@@ -89,7 +89,7 @@ QString TimeFormat::clockBare(QTime time) const
         return QStringLiteral("%1:%2").arg(time.hour(), 2, 10, QLatin1Char('0'))
                                       .arg(minutes(time));
 
-    // "8:42", not "08:42". A 12-hour clock does not pad — the reference does
+    // "8:42", not "08:42". A 12-hour clock does not pad - the reference does
     // not, and neither does any platform's own clock.
     return QStringLiteral("%1:%2").arg(twelve(time)).arg(minutes(time));
 }

@@ -3,7 +3,7 @@
 // Cloud-cover detail card.
 //
 // A dial filled for exactly as much of its circumference as the sky is
-// covered: 8% cover is 8% of the ring — a stub just past 12 o'clock — and an
+// covered: 8% cover is 8% of the ring - a stub just past 12 o'clock - and an
 // overcast sky would close the ring. The ring is the reading, so the number
 // belongs to it and the word belongs to the status line. "Sunny" is said once,
 // down there, and is not repeated inside the dial.
@@ -13,8 +13,8 @@
 // stacked wash (design system §10.1); the dial reads perfectly well drawn
 // straight on to the card, and the review that found it was right.
 // A card is a `DetailCard { content: Item { id: viz } }`, so everything drawn
-// here lives inside a Component and reaches the two ids around it — `root` for
-// the card and `viz` for the visualisation — across that boundary. Without this
+// here lives inside a Component and reaches the two ids around it - `root` for
+// the card and `viz` for the visualisation - across that boundary. Without this
 // pragma neither is resolvable at compile time: qmllint reports every one of
 // them as an unqualified access, and qmlcachegen, which is the half that costs
 // something, cannot ahead-of-time compile the binding and leaves it to be
@@ -24,7 +24,7 @@
 //
 // Bound makes the enclosing scope's ids lexical, which is what they already
 // read as. It is safe here because every delegate in this file declares its
-// `required property` — that is the one thing Bound takes away, and none of
+// `required property` - that is the one thing Bound takes away, and none of
 // these were relying on it.
 pragma ComponentBehavior: Bound
 
@@ -60,7 +60,7 @@ DetailCard {
         readonly property real reading: ChartMath.clamp(root.d.value / 100, 0, 1)
 
         // The head of the paint, running 0 → `reading` once on mount off the
-        // shell's `reveal` hook, over `Theme.motion.reveal` — the same two
+        // shell's `reveal` hook, over `Theme.motion.reveal` - the same two
         // lines as the UV and air-quality dials, which is the point: three
         // rings with one geometry that arrived three different ways would read
         // as three authors. The long version of why is in DetailUvCard.qml.
@@ -103,7 +103,7 @@ DetailCard {
             anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
 
-            // The unfilled remainder — the sky that is still clear. A gauge
+            // The unfilled remainder - the sky that is still clear. A gauge
             // only means something as a fraction of something, and this is the
             // something.
             ShapePath {
@@ -147,7 +147,7 @@ DetailCard {
             y: viz.dialY(viz.markAngle, viz.radius) - height / 2
         }
 
-        // In the middle of the dial — see the note in the air-quality card.
+        // In the middle of the dial - see the note in the air-quality card.
         Text {
             text: root.d.reading
             color: Theme.ink.primary

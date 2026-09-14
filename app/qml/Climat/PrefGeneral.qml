@@ -4,7 +4,7 @@
 //
 // One definition, two places. The desktop opens it in PreferencesSheet and the
 // phone shows it on the Me tab, and they are the same object rather than two
-// screens kept in step — which is the failure this group exists to prevent. The
+// screens kept in step - which is the failure this group exists to prevent. The
 // units below it are PrefUnits, split out for the same reason MobileMePage's
 // cards are separate: on a tablet they are two half-width cards side by side,
 // and one file could only ever be one card.
@@ -13,8 +13,8 @@
 //
 // `checked: Settings.x`, `onToggled: Settings.x = !Settings.x`. The control
 // never holds the value. That is what makes the metric/imperial preset in
-// PrefUnits work — it writes five preferences, and every row bound to one of
-// them redraws — and it is why PrefSwitch does not toggle itself. See its header.
+// PrefUnits work - it writes five preferences, and every row bound to one of
+// them redraws - and it is why PrefSwitch does not toggle itself. See its header.
 import QtQuick
 
 PrefGroup {
@@ -34,7 +34,7 @@ PrefGroup {
     // limitation along with the layout.
     PrefRow {
         title: qsTr("Dynamic background")
-        subtitle: qsTr("The page follows the sky over the place on screen — "
+        subtitle: qsTr("The page follows the sky over the place on screen - "
                      + "night, dawn, day and dusk. Off holds it at one palette.")
         control: PrefSwitch {
             checked: Settings.dynamicBackground
@@ -51,7 +51,7 @@ PrefGroup {
     // reachable only by deleting a line from an INI file.
     //
     // The subtitle says what "system" resolved to, and says so only when it is
-    // selected — on Light or Dark the resolved scheme and the choice are the
+    // selected - on Light or Dark the resolved scheme and the choice are the
     // same fact, and printing it twice is noise. When nothing answered, it says
     // that instead of reporting a preference it never received.
     PrefRow {
@@ -84,8 +84,8 @@ PrefGroup {
 
     // ---- the interruption ---------------------------------------------------
     //
-    // Hidden entirely where there is nothing to post to — a build with no Qt
-    // D-Bus, or a session with no bus — because a switch that cannot do
+    // Hidden entirely where there is nothing to post to - a build with no Qt
+    // D-Bus, or a session with no bus - because a switch that cannot do
     // anything is worse than an absent one: it teaches the reader that the
     // preferences lie. `Engine.notificationsAvailable` is the same question
     // Notifier::available() answers.
@@ -111,7 +111,7 @@ PrefGroup {
     // The ids are Settings' own spellings, so nothing here translates between a
     // label and a stored value. app/viewmodels/timeformat.h is the only thing
     // that reads the key, and it reaches every clock in the app and in the
-    // widgets — the hour axis, the hourly list, the observation stamp, both sun
+    // widgets - the hour axis, the hourly list, the observation stamp, both sun
     // and moon readings, the nine body sentences and the alert banner.
     PrefRow {
         title: qsTr("Time format")

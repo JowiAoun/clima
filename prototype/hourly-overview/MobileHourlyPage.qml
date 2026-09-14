@@ -8,9 +8,9 @@
 //   daily summary  the same day in a sentence
 //
 // The chart is the desktop's card, not a phone-sized rewrite of it. Everything
-// that made it worth building — the metric-driven axis, the gradient keyed to
+// that made it worth building - the metric-driven axis, the gradient keyed to
 // the value, the past veiled and hatched rather than hidden, the feels-like
-// morph — is width-independent, and the two things that are not are the column
+// morph - is width-independent, and the two things that are not are the column
 // width and the plot height, which is why both are now properties on it.
 //
 // What the phone changes is the *control*: ten pills become one button and a
@@ -18,7 +18,7 @@
 //
 // ---- what this does not do ---------------------------------------------------
 // Selecting a different day moves the strip and leaves the chart alone. That
-// is the same gap the desktop has and it is honest here for the same reason —
+// is the same gap the desktop has and it is honest here for the same reason -
 // there is one day of hourly data behind it. The strip is wired, the data is
 // not; when a provider arrives, this is one binding.
 import QtQuick

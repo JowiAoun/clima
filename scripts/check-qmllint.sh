@@ -27,7 +27,7 @@
 #
 # A single total is a ratchet with a hole in it. Fixing one unqualified access
 # while introducing one `missing-property` leaves the total unchanged, and those
-# two are not the same kind of thing at all — an unqualified access costs
+# two are not the same kind of thing at all - an unqualified access costs
 # `qmlcachegen` an AOT compilation, which is a first-paint cost, while a missing
 # property is a binding that will resolve to `undefined` and paint nothing.
 #
@@ -86,7 +86,7 @@ if [[ $accept -eq 1 ]]; then
 fi
 
 if [[ ! -f "$baseline" ]]; then
-    echo "check-qmllint: no baseline at $baseline — run with --accept once to record one." >&2
+    echo "check-qmllint: no baseline at $baseline - run with --accept once to record one." >&2
     exit 2
 fi
 
@@ -128,5 +128,5 @@ fi
 if [[ $improved -eq 1 ]]; then
     echo "check-qmllint: run scripts/check-qmllint.sh --accept to lower the baseline."
 else
-    echo "check-qmllint: ok — no category got worse"
+    echo "check-qmllint: ok - no category got worse"
 fi

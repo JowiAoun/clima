@@ -20,14 +20,14 @@
 // Keyed on 6167865 it does not, and `GET /v1/get?id=6167865` re-reads the
 // current description whenever it is worth refreshing.
 //
-// A place with `geonamesId == 0` is one the user pinned by coordinate — a
+// A place with `geonamesId == 0` is one the user pinned by coordinate - a
 // dropped map pin, a manually typed latitude. It is legal and it simply has no
 // upstream identity to reconcile against.
 //
 // ---- why this is in domain/ and not next to the database --------------------
 //
 // It was in libclimat/cache/cachestore.h, which meant that anything wanting to
-// name a place — the geocoder, the reverse index, the location model — had to
+// name a place - the geocoder, the reverse index, the location model - had to
 // include a header that drags in QSqlDatabase. A value type is not owned by
 // whichever layer happened to persist it first; it sits beside Coordinate,
 // which is the other thing everything needs and nothing owns.
@@ -52,7 +52,7 @@ struct Place {
     qint64 geonamesId = 0;
 
     QString name;          // "Toronto"
-    QString admin1;        // "Ontario" — state, province, région, prefecture
+    QString admin1;        // "Ontario" - state, province, région, prefecture
     QString country;       // "Canada"
     QString countryCode;   // "CA", ISO 3166-1 alpha-2, and what routes alerts
     QString timezone;      // "America/Toronto", IANA
@@ -76,12 +76,12 @@ struct Place {
     // division, and empty where there is neither.
     [[nodiscard]] QString region() const;
 
-    // "Toronto, Ontario" — the string the location bar shows. Falls back to
+    // "Toronto, Ontario" - the string the location bar shows. Falls back to
     // the bare name rather than leaving a trailing comma.
     [[nodiscard]] QString label() const;
 
     // Whether two Places are the same place upstream. Compares geonamesId when
-    // both have one, and the rounded coordinate otherwise — rounded, because
+    // both have one, and the rounded coordinate otherwise - rounded, because
     // two pins a metre apart are the same pin as far as every request this
     // engine makes is concerned.
     [[nodiscard]] bool isSameEntity(const Place &other) const;

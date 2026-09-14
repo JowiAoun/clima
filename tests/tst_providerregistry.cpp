@@ -4,7 +4,7 @@
 // Routing, attribution, and the fallback path actually being walked.
 //
 // docs/06-roadmap.md's argument for building the fallback in the same commit as
-// the interface is that an untested fallback is not a fallback — the competing
+// the interface is that an untested fallback is not a fallback - the competing
 // app's documented bug is that its second provider ran for the first time in
 // production. So the central test here is not "does the chain sort correctly";
 // it is `aFailedPrimaryFallsThroughToTheRealMetNorwayProvider`, which forces a
@@ -59,8 +59,8 @@ Attribution completeAttribution(const QString &name)
 }
 
 // A provider that answers with whatever it was told to answer with, without
-// touching a socket. It is not a mock of MET Norway — the real MET Norway
-// provider is used for that below — it is a way to put a *specific typed
+// touching a socket. It is not a mock of MET Norway - the real MET Norway
+// provider is used for that below - it is a way to put a *specific typed
 // failure* at the head of a chain, which is the input the fallback loop is
 // defined in terms of and which a real provider cannot be asked for on demand.
 class ScriptedForecastProvider : public IForecastProvider
@@ -199,7 +199,7 @@ void TestProviderRegistry::aProviderWithoutItsCreditIsRefused()
 
     const Status added = registry.addForecastProvider(&provider, 100);
 
-    QVERIFY2(!added, "a provider with an empty Attribution was accepted — R12 is unenforced");
+    QVERIFY2(!added, "a provider with an empty Attribution was accepted - R12 is unenforced");
     QCOMPARE(added.errorKind(), ErrorKind::Unsupported);
 }
 
@@ -333,7 +333,7 @@ void TestProviderRegistry::aProviderThatDoesNotCoverThePlaceIsNotInItsChain()
 
     QVERIFY(registry.addForecastProvider(&american, 0));
 
-    // Not tried and failed — absent. §4.4's ∅ case, which the UI must render as
+    // Not tried and failed - absent. §4.4's ∅ case, which the UI must render as
     // a hidden feature rather than a broken one.
     QVERIFY(registry.forecastChain(kBerlin).isEmpty());
     QCOMPARE(registry.forecastChain(kDenver).size(), 1);
@@ -410,7 +410,7 @@ void TestProviderRegistry::aFailedPrimaryFallsThroughToTheRealMetNorwayProvider(
 {
     // THE test this whole file exists for. The primary returns a typed
     // ServerError; the real MET Norway adapter, pointed at a loopback server
-    // serving the real recorded payload, has to produce the forecast — parsed,
+    // serving the real recorded payload, has to produce the forecast - parsed,
     // adapted, and labelled as having come from the fallback.
     m_stub.enqueue(StubResponse::ok(metNoFixture()));
 
@@ -440,7 +440,7 @@ void TestProviderRegistry::aFailedPrimaryFallsThroughToTheRealMetNorwayProvider(
 
     const ForecastAnswer &answer = result.value();
 
-    // Served by the fallback, and it says so — which is what the UI's "showing
+    // Served by the fallback, and it says so - which is what the UI's "showing
     // MET Norway" line reads, and the reason the flag exists at all.
     QCOMPARE(answer.servedBy, QStringLiteral("met-no"));
     QVERIFY(answer.fromFallback);
@@ -453,7 +453,7 @@ void TestProviderRegistry::aFailedPrimaryFallsThroughToTheRealMetNorwayProvider(
     QCOMPARE(answer.failures.constFirst().providerId, QStringLiteral("primary"));
     QCOMPARE(answer.failures.constFirst().error.kind(), ErrorKind::ServerError);
 
-    // And the data is real, adapted, and complete — not a placeholder that
+    // And the data is real, adapted, and complete - not a placeholder that
     // happens to have the right provider id on it.
     QCOMPARE(answer.value.hourly.size(), 90);
     QVERIFY(answer.value.hourly.constFirst().temperature.has_value());
@@ -470,7 +470,7 @@ void TestProviderRegistry::aDisabledPrimaryFallsThroughWithoutTouchingTheNetwork
 {
     // A 403 disables a provider for the process. HttpClient answers its later
     // requests with an already-finished ProviderDisabled, so the chain moves on
-    // at the speed of a function call rather than a round trip — which is why
+    // at the speed of a function call rather than a round trip - which is why
     // the hard stop and this loop are one design and not two.
     m_stub.enqueue(StubResponse::ok(metNoFixture()));
 
@@ -527,8 +527,8 @@ void TestProviderRegistry::aHealthyPrimaryIsTheOnlyOneAsked()
 void TestProviderRegistry::whenEveryProviderFailsThePrimarysErrorSurvives()
 {
     // The primary's failure is the news; the fallback failing too is
-    // corroboration. It also means a UserAgentRejected — which error.h says
-    // must reach a human because it means our code is wrong — cannot be buried
+    // corroboration. It also means a UserAgentRejected - which error.h says
+    // must reach a human because it means our code is wrong - cannot be buried
     // under somebody else's timeout.
     ProviderRegistry registry;
 
@@ -566,7 +566,7 @@ void TestProviderRegistry::whenEveryProviderFailsThePrimarysErrorSurvives()
 void TestProviderRegistry::aCancelledRequestIsNotHandedToTheNextProvider()
 {
     // Cancellation is the caller changing its mind. Asking somebody else on
-    // their behalf would be answering a question that was withdrawn — and it
+    // their behalf would be answering a question that was withdrawn - and it
     // would make a cancelled location switch fetch from every provider in the
     // chain before giving up.
     ProviderRegistry registry;
@@ -596,7 +596,7 @@ void TestProviderRegistry::aCancelledRequestIsNotHandedToTheNextProvider()
 void TestProviderRegistry::capabilitiesFollowTheServingProviderAndNotTheUnion()
 {
     // A union would promise a UV tab while the primary is healthy and empty it
-    // the moment the fallback took over — a tab that breaks exactly when
+    // the moment the fallback took over - a tab that breaks exactly when
     // everything else is already going wrong.
     ProviderRegistry registry;
 

@@ -3,12 +3,12 @@
 // The wash that says *when* it precipitates: one tinted band per contiguous
 // spell, edge to edge of the hours it covers.
 //
-// Drawn under the series, never over it — which is why this is a component of
+// Drawn under the series, never over it - which is why this is a component of
 // its own rather than half of `PrecipField`. Every fill on this chart uses
 // colour to encode its own value, and on the banded metrics (UV, AQI) those
 // colours are a published scale, so a blue wash laid over one would be stating
 // a different number (§10.5). Underneath it still reads clearly, because every
-// fill here is translucent — which is the same property the reference relies
+// fill here is translucent - which is the same property the reference relies
 // on, and measurably so: its rainy stretch shifts the area fill by about a
 // third of what it shifts the empty plot above it.
 import QtQuick
@@ -50,7 +50,7 @@ Item {
                                Theme.precip.washAlpha[band.modelData.intensity])
             }
 
-            // Both edges, always — including where two spells abut. A wash that
+            // Both edges, always - including where two spells abut. A wash that
             // changes from snow to rain in one step is two events, and the seam
             // between them is the only thing on the chart that says so.
             Rectangle {

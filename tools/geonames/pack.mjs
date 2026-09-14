@@ -11,8 +11,8 @@
 //
 // ---- why this tool exists at all, and why its output is committed -----------
 //
-// Reverse geocoding — turning the coordinate GeoClue2 hands us into the words
-// "Toronto, Ontario" — has one obvious implementation, which is to ask
+// Reverse geocoding - turning the coordinate GeoClue2 hands us into the words
+// "Toronto, Ontario" - has one obvious implementation, which is to ask
 // Nominatim. That implementation does not work. Asked once, today, from this
 // machine, with a properly identifying User-Agent naming the project and a
 // contact address, Nominatim answered HTTP 403 "Access denied" to the *first*
@@ -21,8 +21,8 @@
 // that is broken for every user at once the day the policy tightens further.
 //
 // So the lookup is offline, and this is the tool that makes it possible. The
-// packed output is COMMITTED to the repository — 3.3 MB of upstream zip
-// reduced to a few hundred kilobytes — for the same reason tests/fixtures/ is
+// packed output is COMMITTED to the repository - 3.3 MB of upstream zip
+// reduced to a few hundred kilobytes - for the same reason tests/fixtures/ is
 // committed: a build must not need a network. A packaging build on a Debian
 // buildd, a Flathub builder and a CI runner all have the same amount of
 // internet, which is none.
@@ -36,14 +36,14 @@
 // Upstream has nineteen tab-separated columns. Seven survive: geonameid,
 // latitude, longitude, name, country code, admin1 code and timezone. The
 // alternate-names column alone is two thirds of the file and it is what the
-// *forward* geocoder is for — that runs against Open-Meteo's hosted copy of
+// *forward* geocoder is for - that runs against Open-Meteo's hosted copy of
 // the same dataset, which can afford to index a hundred spellings of Toronto.
 //
 // Population is not stored, but it is not discarded either: it is folded into
 // one byte per row, the settlement's modelled radius. See `reachMetres`.
 //
 // Rows whose feature code is PPLX, PPLH, PPLQ or PPLW are dropped. PPLX is a
-// *section* of a populated place — "Moss Park", "Bay Street Corridor" — and
+// *section* of a populated place - "Moss Park", "Bay Street Corridor" - and
 // the nearest row to downtown Toronto is a PPLX, so keeping them would answer
 // "where am I" with the name of a neighbourhood nobody outside the city has
 // heard of. The other three are historical, abandoned and destroyed places:
@@ -56,8 +56,8 @@
 // from the reading end and the two must be read side by side; what follows is
 // only the encoder's half.
 //
-// The payload is COLUMNAR — every latitude, then every longitude, then every
-// id — rather than row-major, and the difference is a third of the file. A
+// The payload is COLUMNAR - every latitude, then every longitude, then every
+// id - rather than row-major, and the difference is a third of the file. A
 // row-major layout interleaves four unrelated kinds of number, so deflate sees
 // a repeating 25-byte pattern with no runs in it; a columnar one gives it a
 // long stretch of values that differ from their neighbour in the low bits
@@ -71,14 +71,14 @@ import { deflateSync, inflateRawSync } from "node:zlib";
 
 // ---- the packing constants, which the reader also has to know ---------------
 //
-// COORDINATE_SCALE is 10 000 — four decimal places — and it is not a guess
+// COORDINATE_SCALE is 10 000 - four decimal places - and it is not a guess
 // about how much precision a city centre deserves. It is
 // `climat::Coordinate::keyDecimals`, the precision every outbound request in
 // this codebase is quantised to before it is hashed or sent
 // (libclimat/domain/coordinate.h explains why four). Storing five decimals here
 // would mean storing a digit that no request, no cache key and no comparison
 // in the engine can ever see. The reader rounds the same way `Coordinate` does
-// — half away from zero — so a reverse-geocoded place and a searched one round
+// - half away from zero - so a reverse-geocoded place and a searched one round
 // to bit-identical doubles.
 const COORDINATE_SCALE = 10000;
 
@@ -92,7 +92,7 @@ const LAT_CELLS = 180 / CELL_DEGREES;
 const LON_CELLS = 360 / CELL_DEGREES;
 
 // One byte per row holds how far a settlement reaches, in 250 m steps, so the
-// largest representable reach is 63.75 km — comfortably past Tokyo's 39 km and
+// largest representable reach is 63.75 km - comfortably past Tokyo's 39 km and
 // short of nothing that matters. See `reachMetres` for the model.
 const REACH_STEP_METRES = 250;
 
@@ -104,8 +104,8 @@ const DROPPED_FEATURE_CODES = new Set(["PPLX", "PPLH", "PPLQ", "PPLW"]);
 // ---- how big is a city ------------------------------------------------------
 //
 // The whole difficulty of "which of these places am I in" is that nearest is
-// the wrong answer. Stand at 43.65 N, 79.38 W — the corner of Yonge and Queen,
-// downtown Toronto — and the nearest surviving row is Moss Park at 880 m, then
+// the wrong answer. Stand at 43.65 N, 79.38 W - the corner of Yonge and Queen,
+// downtown Toronto - and the nearest surviving row is Moss Park at 880 m, then
 // Etobicoke, then Thornhill. Toronto itself is 6.4 km away, because a city's
 // row sits at its centroid and a city is bigger than that. The same thing
 // happens in Singapore (Ang Mo Kio New Town wins), in Tokyo (Asagaya-minami
@@ -115,7 +115,7 @@ const DROPPED_FEATURE_CODES = new Set(["PPLX", "PPLH", "PPLQ", "PPLW"]);
 // So each row carries a radius, and the radius comes from population. If a
 // settlement of P people is a disc at some typical urban density rho, then
 // pi*r^2*rho = P and r = sqrt(P / (pi * rho)). At rho = 2 000 people per square
-// kilometre — the low end of urban, which is deliberate, see below — that puts
+// kilometre - the low end of urban, which is deliberate, see below - that puts
 // Toronto's reach at 21 km, Tokyo's at 39 km, Reykjavík's at 4.4 km and a
 // 16 000-person town's at 1.6 km. Those are the right order of magnitude for
 // "how far out do people say they live in X".
@@ -130,8 +130,8 @@ const DROPPED_FEATURE_CODES = new Set(["PPLX", "PPLH", "PPLQ", "PPLW"]);
 // only decides the radius.
 const URBAN_DENSITY_PER_KM2 = 2000;
 
-// A row with no population — a handful of administrative seats in the dump
-// have zero — would otherwise get a zero radius and lose every comparison.
+// A row with no population - a handful of administrative seats in the dump
+// have zero - would otherwise get a zero radius and lose every comparison.
 // A thousand people is 400 m of reach, which is about right for a hamlet and
 // is small enough that it never beats a real town.
 const MINIMUM_MODELLED_POPULATION = 1000;
@@ -145,7 +145,7 @@ function reachMetres(population) {
 
 // Half away from zero, matching `roundTo` in libclimat/domain/coordinate.cpp.
 // JavaScript's Math.round is half *up*, which disagrees on exactly the
-// negative halves — Math.round(-0.5) is -0, std::round(-0.5) is -1 — and a
+// negative halves - Math.round(-0.5) is -0, std::round(-0.5) is -1 - and a
 // coordinate in the southern or western hemisphere is where that would show
 // up. Quietly, on one row in ten thousand.
 function roundHalfAwayFromZero(value) {
@@ -157,8 +157,8 @@ function quantise(degrees) {
 }
 
 // LEB128, and zigzag first for anything that can go backwards. Deltas within a
-// column are mostly small and occasionally large — a delta crosses a grid cell
-// boundary a few thousand times — which is the distribution a varint is for.
+// column are mostly small and occasionally large - a delta crosses a grid cell
+// boundary a few thousand times - which is the distribution a varint is for.
 function zigzag(value) {
     return value < 0 ? -2 * value - 1 : 2 * value;
 }
@@ -204,7 +204,7 @@ function plainVarints(values) {
 // rather than through the local file header at the front of the archive.
 // That is not thoroughness, it is necessity: GeoNames' zips are written by a
 // streaming producer, so the local header declares both sizes as zero and puts
-// the real ones in a data descriptor *after* the compressed bytes — which
+// the real ones in a data descriptor *after* the compressed bytes - which
 // cannot be found without already knowing where the compressed bytes end. The
 // central directory at the tail has both numbers written down.
 //
@@ -258,8 +258,8 @@ function readCities(path) {
 }
 
 // admin1CodesASCII.txt: "<country>.<code>\t<name>\t<ascii name>\t<geonameid>".
-// Column 1 and not column 2, because column 2 is the ASCII fold — "Ile-de-
-// France" rather than "Île-de-France" — and the forward geocoder returns the
+// Column 1 and not column 2, because column 2 is the ASCII fold - "Ile-de-
+// France" rather than "Île-de-France" - and the forward geocoder returns the
 // real spelling. Two paths that disagree about an accent are two places as far
 // as a string comparison is concerned.
 function readAdmin1Names(path) {
@@ -318,7 +318,7 @@ function parseCities(text) {
 // The cell order is what the grid index needs. The order *within* a cell is
 // free, and sorting by id is worth 20 KB over sorting by latitude: exactly one
 // of the three delta-coded columns can be made cheap by the choice, and ids in
-// one cell are clustered — GeoNames allocates them by country — while
+// one cell are clustered - GeoNames allocates them by country - while
 // latitudes inside a five-degree box are not much more ordered than random.
 function sortForPacking(rows) {
     return rows.slice().sort((a, b) => {
@@ -331,7 +331,7 @@ function sortForPacking(rows) {
 function buildSections(rows, admin1Names) {
     const countries = new Map();
     // Index 0 is the empty admin1 name, so that a row in a country with no
-    // first-level divisions — Singapore, Monaco, the Vatican — indexes
+    // first-level divisions - Singapore, Monaco, the Vatican - indexes
     // something real rather than carrying a sentinel the reader has to know
     // about.
     const admin1 = new Map([["", 0]]);
@@ -376,7 +376,7 @@ function buildSections(rows, admin1Names) {
 
     // A newline-separated blob rather than an offset table. It costs one byte
     // a row and saves four, and a length column would have cost 18 KB
-    // compressed on its own — deflate is better at finding the separator than
+    // compressed on its own - deflate is better at finding the separator than
     // we are at encoding where it would have been. No GeoNames name contains a
     // newline; the assertion below is what keeps that a fact rather than an
     // assumption.

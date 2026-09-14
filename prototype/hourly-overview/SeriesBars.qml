@@ -3,7 +3,7 @@
 // Bar series for quantities that are sums or banded indices rather than
 // continuities: precipitation amount, UV index, air quality.
 //
-// Drawing rain as a smooth curve would be a lie — 0.4 mm in one hour and 0 mm in
+// Drawing rain as a smooth curve would be a lie - 0.4 mm in one hour and 0 mm in
 // the next is not a gradual transition, and published indices (WHO UV, European
 // AQI) are banded, so each bar takes the flat colour of its own band.
 import QtQuick
@@ -28,8 +28,8 @@ Item {
     //
     // Geometry only, deliberately: `norm`, and therefore the band colour, stays
     // keyed to the bar's own value the whole way up. Scaling the *value* instead
-    // would walk each bar down through the ramp as it grew — a UV 9 bar coming
-    // up through green — and the colour here is the reading, not decoration.
+    // would walk each bar down through the ramp as it grew - a UV 9 bar coming
+    // up through green - and the colour here is the reading, not decoration.
     property real growth: 1
 
     // Normalised axis position: 0 at the top of the axis, 1 at the bottom.

@@ -4,7 +4,7 @@
 //
 // It is a chart, not a row of icons. The band's top edge *is* the temperature,
 // so the shape of the next twelve hours is readable before any of the numbers
-// are — which is the whole reason the Today screen carries an hourly section
+// are - which is the whole reason the Today screen carries an hourly section
 // at all rather than sending you straight to the Hourly tab.
 //
 // The reference draws a flat band here and puts the temperatures above it. A
@@ -75,8 +75,8 @@ Item {
 
     // Padded so the warmest hour does not ride the top edge and the coolest
     // does not sit flat on the icons. Auto-scaled rather than fixed: over one
-    // day the whole spread is often six degrees, and on a 0–40 axis that is a
-    // flat line — the same argument precipitation's axis makes in metrics.js.
+    // day the whole spread is often six degrees, and on a 0-40 axis that is a
+    // flat line - the same argument precipitation's axis makes in metrics.js.
     readonly property real vMin: {
         var m = values.length ? values[0] : 0
         for (var i = 1; i < values.length; ++i)
@@ -123,7 +123,7 @@ Item {
         clip: true
 
         // Bounds the Shapes. Every glyph in here draws with one and Shapes
-        // ignore ancestor clipping outright — without this the condition icon
+        // ignore ancestor clipping outright - without this the condition icon
         // from the 11 PM column paints over the ten-day card below. §10.8.
         layer.enabled: true
 
@@ -150,8 +150,8 @@ Item {
 
                 // Keyed to the *absolute* temperature scale, not to the band.
                 //
-                // The geometry auto-scales — it has to, or a day that spans
-                // six degrees draws as a flat line — but colour must not.
+                // The geometry auto-scales - it has to, or a day that spans
+                // six degrees draws as a flat line - but colour must not.
                 // §10.5 and theme.js's ramp note are both explicit that colour
                 // encodes the value, which is what lets a 19° hour read the
                 // same green here as it does on the Hourly tab's chart. Key
@@ -182,7 +182,7 @@ Item {
                     height: scroll.height
 
                     // The reading, above the band and over the column it
-                    // belongs to rather than over the point on the curve —
+                    // belongs to rather than over the point on the curve -
                     // a label chasing a shallow curve wanders by a few pixels
                     // per column and reads as misalignment.
                     Text {
@@ -235,7 +235,7 @@ Item {
 
     // A rule under the band rather than a lighter strip behind the hours.
     // The reference tints that row, and a tint here would be a second wash
-    // inside the card's own — 0.07 over 0.07 is the stacked surface §10.1
+    // inside the card's own - 0.07 over 0.07 is the stacked surface §10.1
     // exists to prevent. A hairline separates the axis from the plot without
     // claiming to be a surface.
     Rectangle {

@@ -12,7 +12,7 @@
 //
 //     color: Theme.ink.primary
 //
-// used to be evaluated exactly once — when the binding was created — and never
+// used to be evaluated exactly once - when the binding was created - and never
 // again. Swapping the table at runtime repainted nothing, which is why
 // dark/light was not merely unbuilt but unbuildable, and why every component
 // written against the JS namespace in the meantime would have had to be
@@ -26,13 +26,13 @@
 // than flattened names (`inkPrimary`) for one reason beyond spelling: their
 // identity never changes. A theme switch will assign new values to the
 // properties *inside* these objects; it will never replace an object. Nothing
-// that holds `Theme.ink` — a binding, a cached reference in a Canvas paint
-// handler, a property alias — is ever left pointing at a corpse.
+// that holds `Theme.ink` - a binding, a cached reference in a Canvas paint
+// handler, a property alias - is ever left pointing at a corpse.
 //
 // Each group is an *inline component* instantiated once, rather than an
 // anonymous `QtObject { … }`, and that is a tooling decision with real teeth.
 // A property declared `QtObject` tells qmllint and qmlls that the thing on the
-// other side has QObject's members and nothing else — so every one of the six
+// other side has QObject's members and nothing else - so every one of the six
 // hundred token reads in the tree came back as `Member "primary" not found on
 // type "QObject"`. Six hundred warnings in the lint target and a squiggle under
 // every colour in the editor is not a cost worth paying for two fewer lines
@@ -49,8 +49,8 @@
 //   each is a property with its own notification.
 //
 //   A *table* is keyed by a data value: `sky` by a phase, `ramp` by a metric
-//   id, `precip.wash` by a precipitation type. The keys are not tokens — they
-//   are the domain — and the lookups in the tree are all dynamic
+//   id, `precip.wash` by a precipitation type. The keys are not tokens - they
+//   are the domain - and the lookups in the tree are all dynamic
 //   (`Theme.ramp[metric.ramp]`, `Theme.sky[phase]`). Declaring one property per
 //   weather type would buy nothing that `Tokens.precip.wash[type]` does not
 //   already give, so these stay whole objects behind a single `var`. They are
@@ -66,7 +66,7 @@
 // Absorbing this file would mean either editing the catalogue to route three
 // ramp lookups through QML, or keeping a second copy of a seventy-line colour
 // table in step with the first by hand. A binding per token is the cheaper of
-// the three, and it puts the values and the essays about them in one place —
+// the three, and it puts the values and the essays about them in one place -
 // which is where they were.
 //
 // ---- what this file does not decide ----------------------------------------
@@ -75,7 +75,7 @@
 // arguments made in theme.js, next to the values they are about. This file
 // republishes whatever is there. The one thing it adds is `motion.easing`,
 // which cannot live in a plain JS library because it is a QML enum, and the one
-// thing it *asks* rather than states is `type.family` — see below.
+// thing it *asks* rather than states is `type.family` - see below.
 pragma Singleton
 
 import QtQuick
@@ -92,8 +92,8 @@ QtObject {
     // is instantiated, and hands the chosen table down; nothing else in the
     // tree ever asks which theme is running.
     //
-    // The groups are QObjects whose identity never changes — only the `src`
-    // they read from does — so a switch re-evaluates the bindings inside them
+    // The groups are QObjects whose identity never changes - only the `src`
+    // they read from does - so a switch re-evaluates the bindings inside them
     // and destroys none of them. That is the property `.pragma library` could
     // not offer and the reason Theme became a singleton in the first place: a
     // JS library value produces no change notification, so
@@ -107,7 +107,7 @@ QtObject {
 
     // Startup shape check, because the failure it catches is silent. The light
     // table is a separate file carrying the same key set, so a key added to one
-    // and not the other is a binding that quietly resolves to undefined — which
+    // and not the other is a binding that quietly resolves to undefined - which
     // in QML is a transparent colour, not an error. One pass at construction
     // costs nothing and turns that into a line on stderr naming the key.
     Component.onCompleted: {
@@ -136,7 +136,7 @@ QtObject {
     // not something every caller should have to know, so it is filtered here
     // and only here.
     // `src` and `still` are the inputs a group is *constructed* from, not
-    // tokens in it — the table a theme-varying group reads, and the flag the
+    // tokens in it - the table a theme-varying group reads, and the flag the
     // motion group collapses on. They are properties like any other as far as
     // Object.keys is concerned, so without this line `Theme.names(Theme.page)`
     // answers `["bg", "src"]` and any page generated from it grows a column for
@@ -157,7 +157,7 @@ QtObject {
     // palette rather than about the tool that draws it. The palette page walks
     // it and then walks `names()` inside each role, so a *token* added to a role
     // still appears without anyone doing anything; only a whole new role costs a
-    // line. That trade is deliberate — a new role is a design decision worth
+    // line. That trade is deliberate - a new role is a design decision worth
     // one line of bookkeeping, and a new token is not.
     readonly property var colorRoles: [
         "page", "surface", "ink", "line", "accent",
@@ -172,27 +172,27 @@ QtObject {
     // be the place it is written down.
     //
     // One blanket threshold was tried first and it was worthless. Held to 3:1,
-    // the shipped dark palette came out almost entirely red — `line.grid` at
-    // 1.40:1, `overlay.hatch` at 1.19:1 — and every one of those is the design
+    // the shipped dark palette came out almost entirely red - `line.grid` at
+    // 1.40:1, `overlay.hatch` at 1.19:1 - and every one of those is the design
     // working as intended, because a chart gridline is *supposed* to be barely
     // there. An instrument that flags the correct answer is one nobody reads,
     // and a page of red rows hides the four that are real.
     //
     // So a token declares two things. `on` is the background it is actually
-    // composited over — a token measured against a ground it never touches is
+    // composited over - a token measured against a ground it never touches is
     // measuring nothing, which is what made `accent.ink` (the label *on* the
     // pill) look broken at 1.48:1 against a card it is never drawn on. And
     // `duty` is which of three jobs it does:
     //
     //   text        draws glyphs of text at body size                    4.5:1
     //   essential   you must see it to read the content or to work a     3.0:1
-    //               control — WCAG 1.4.11's "graphical objects required
+    //               control - WCAG 1.4.11's "graphical objects required
     //               to understand content" and "UI components"
     //   incidental  scaffolding, washes, decoration. No minimum. The
     //               ratio is still computed and still shown, because a
     //               number you can see is how you notice it drifting.
     //
-    // `pair` names the other stop of a two-stop gradient — a badge plate, a
+    // `pair` names the other stop of a two-stop gradient - a badge plate, a
     // cloud, the sun. The requirement belongs to the pair and not to either
     // stop: a plate is legible if *either* end of it separates from the card,
     // and which end does that flips between the schemes. `badge.nightBottom` is
@@ -226,7 +226,7 @@ QtObject {
 
         // Three of the eleven lines carry meaning. `now` says where the present
         // is, `forecast` says where the recording stops and the prediction
-        // starts, and `series` is the data itself — you cannot read the chart
+        // starts, and `series` is the data itself - you cannot read the chart
         // without them. The other eight are ruling.
         "line.now":        { duty: "essential" },
         "line.forecast":   { duty: "essential" },
@@ -241,7 +241,7 @@ QtObject {
         "accent.ink":      { duty: "text", on: "accent.fill" },
 
         // A switch is found by its knob, not by the boundary of its track, so
-        // the track is not what has to reach 3:1 — the knob against the track
+        // the track is not what has to reach 3:1 - the knob against the track
         // is. Same for the pager: the scrim behind the chevron is decoration
         // and the chevron is the control.
         "control.toggleTrack":    { duty: "incidental" },
@@ -270,7 +270,7 @@ QtObject {
         "glyph.boltOnLight":        { on: "badge.dayTop" },
 
         // And the same six for the other plate, which had nothing measuring it
-        // at all until this table gained these lines — the entry in
+        // at all until this table gained these lines - the entry in
         // docs/known-gaps.md that said so is closed by them.
         //
         // Against `badge.nightTop` and not `nightBottom`, and that is the
@@ -289,7 +289,7 @@ QtObject {
         "glyph.moonShade":          { on: "glyph.moon" },
 
         // The four badge stops are the plate a weather glyph is drawn on, and
-        // the plate is not what has to be seen — the glyph is. That requirement
+        // the plate is not what has to be seen - the glyph is. That requirement
         // is already carried, one role up, by glyph.cloud*OnLight measured
         // against badge.dayTop.
         //
@@ -299,8 +299,8 @@ QtObject {
         // the separation is hue and a WCAG ratio is luminance only. Two
         // honest readings of that: the plate is decoration and the number does
         // not apply, or the plate leans on a channel the number cannot see and
-        // should not be trusted alone. Both land here — no floor, ratio still
-        // printed — rather than on a threshold that would have been satisfied
+        // should not be trusted alone. Both land here - no floor, ratio still
+        // printed - rather than on a threshold that would have been satisfied
         // by turning a sunny day's badge into a bronze one.
         "badge.dayTop":      { duty: "incidental" },
         "badge.dayBottom":   { duty: "incidental" },
@@ -342,8 +342,8 @@ QtObject {
     // ---- reading the palette from outside the running scheme ----------------
     //
     // Everything above hands components the table for whichever scheme is on.
-    // The gallery needs both at once — a light column beside a dark one is the
-    // whole point of a palette page — so these two hand back a raw table by
+    // The gallery needs both at once - a light column beside a dark one is the
+    // whole point of a palette page - so these two hand back a raw table by
     // name.
     //
     // Nothing in the app may call them. Reading a colour for a scheme you are
@@ -359,7 +359,7 @@ QtObject {
     }
 
     // The ramps whose hues are published authority bands rather than our
-    // choice — European AQI, WHO UV, and the precipitation scale — so light
+    // choice - European AQI, WHO UV, and the precipitation scale - so light
     // mode passes them through unchanged instead of inverting their lightness
     // like the six continuous ones. `tools/theme/ramp-light.mjs` holds the same
     // list, because it is a one-shot generator that reads theme.js as data and
@@ -369,8 +369,8 @@ QtObject {
 
     // ---- surfaces ----------------------------------------------------------
     // The alpha ladder, as the leading pair of an #AARRGGBB literal. Nothing
-    // reads these — the composed `surface.*` values below are what the tree
-    // uses — and they stay exported because they are the ladder the design
+    // reads these - the composed `surface.*` values below are what the tree
+    // uses - and they stay exported because they are the ladder the design
     // system quotes, not a leftover.
     component SurfaceAlphaTokens: QtObject {
         // The group's values for the active scheme, handed in rather than
@@ -388,7 +388,7 @@ QtObject {
     // Eleven roles. Every one of them is declared `string` rather than `color`,
     // which is not laziness. A `color` property round-trips through QColor, so
     // `"transparent"` reads back as `"#00000000"` and `"#ffffff"` as
-    // `"#ffffffff"` — and the gallery's palette page prints these values as text
+    // `"#ffffffff"` - and the gallery's palette page prints these values as text
     // beside each swatch. Assigning a string to a `color` property at the call
     // site is a conversion QML already does everywhere, so nothing downstream
     // can tell the difference; the palette page can.
@@ -462,13 +462,13 @@ QtObject {
     // This pair used to be `color.accent` and `color.onAccent` on one object,
     // and the second of those could not be written like its neighbours: any
     // binding whose name is `on` + a capital letter is parsed as a signal
-    // handler first, so `onAccent:` resolved against a member called `accent` —
-    // which existed — and the value went to the signal rather than to the
+    // handler first, so `onAccent:` resolved against a member called `accent` -
+    // which existed - and the value went to the signal rather than to the
     // property.
     //
     // How that failed is why it is worth recording. With a literal it is at
     // least an error: `Cannot assign a value to a signal`. With an *expression*
-    // — which every token here is, since they all read out of theme.js — a
+    // - which every token here is, since they all read out of theme.js - a
     // script assigned to a signal is perfectly legal QML, so it compiled clean,
     // ran clean, and left the token as the empty string. An empty string is a
     // valid colour to QML: it paints black. The whole symptom was a 9x9 patch of
@@ -625,7 +625,7 @@ QtObject {
     // Not in `colorRoles`, and therefore not on the gallery's contrast page,
     // which walks flat groups. It is audited instead by tests/qml/tst_theme.qml,
     // which knows the shape and checks all twenty values against the plate they
-    // are actually drawn on — see theme.js for the numbers and why the ground
+    // are actually drawn on - see theme.js for the numbers and why the ground
     // is the composited plate and not the page.
     readonly property var severity: theme.isLight ? LightTokens.severity : Tokens.severity
 
@@ -635,7 +635,7 @@ QtObject {
     readonly property var severityKeys: ["extreme", "severe", "moderate", "minor", "unknown"]
 
     // ---- the sky -----------------------------------------------------------
-    // A table keyed by phase — `night`, `dawn`, `day`, `dusk` — because that is
+    // A table keyed by phase - `night`, `dawn`, `day`, `dusk` - because that is
     // how it is read: `Theme.sky[phase]`, with the phase computed from the
     // clock. Main.qml also leans on a miss returning `undefined`, which is how
     // `--sky nonsense` is rejected rather than obeyed.
@@ -694,8 +694,8 @@ QtObject {
     // ---- performance -------------------------------------------------------
     //
     // "full" or "reduced". Pushed in from Main, like `scheme` and `stillness`
-    // and for the same reason: the answer belongs to the running application —
-    // it is the platform on a handset and a flag under review — and Theme is
+    // and for the same reason: the answer belongs to the running application -
+    // it is the platform on a handset and a flag under review - and Theme is
     // where every component already looks.
     //
     // A tier and not a device check at each site. There is one consumer today
@@ -726,7 +726,7 @@ QtObject {
         // The face, and the second token in this file that does not come from
         // theme.js. `easing` is there because a QML enum cannot live in a plain
         // JS library; this one is there because the *right* answer is not a
-        // string at all — it is a question, asked of the running application.
+        // string at all - it is a question, asked of the running application.
         //
         // app/appfont.cpp registers the bundled Inter faces and makes the family
         // they declare the application font. That is what every one of the 158
@@ -741,7 +741,7 @@ QtObject {
         // inside the font file. The failure the duplicate would have caused is
         // quiet and slow: swap the bundled face, C++ picks up the new family
         // automatically, theme.js still says the old one, and every component
-        // that referenced the token falls back to the host's font — half the
+        // that referenced the token falls back to the host's font - half the
         // screen in the right face and half in the wrong one.
         //
         // Nothing in the tree needs to set `font.family` today; the application
@@ -756,8 +756,8 @@ QtObject {
         // call sites do not change when it is solved.
         //
         // The suppression is a gap in qmllint's type data rather than a gap in
-        // Qt: `Qt.application.font` is documented and works — the gallery's Type
-        // page prints "family · Inter" off this very property — but the QML type
+        // Qt: `Qt.application.font` is documented and works - the gallery's Type
+        // page prints "family · Inter" off this very property - but the QML type
         // description for QQmlApplication does not list `font`, so the linter
         // reports a member that is there. Scoped to the one line, because
         // `missing-property` is the category that catches real typos in a token
@@ -784,8 +784,8 @@ QtObject {
     // ---- motion ------------------------------------------------------------
     // `easing` is the one thing this file adds rather than republishes. theme.js
     // says outright that it cannot hold `Easing.OutCubic` because a QML enum
-    // cannot live in a plain JS library, so the house rule — **OutCubic unless
-    // there is a stated reason** — is written literally at some sixty call sites
+    // cannot live in a plain JS library, so the house rule - **OutCubic unless
+    // there is a stated reason** - is written literally at some sixty call sites
     // and enforced by nothing. A singleton can hold it.
     // ---- motion ------------------------------------------------------------
     //
@@ -793,8 +793,8 @@ QtObject {
     // switch serves two callers that turn out to want exactly the same thing.
     //
     // A READER who has asked their desktop for reduced motion. docs/04 requires
-    // honouring it, and §10.11's standing precipitation field — the only
-    // infinite animation in the product — is the first thing such a reader wants
+    // honouring it, and §10.11's standing precipitation field - the only
+    // infinite animation in the product - is the first thing such a reader wants
     // stopped.
     //
     // A CAPTURE. --grab waits a fixed interval and photographs whatever has
@@ -802,7 +802,7 @@ QtObject {
     // fades its opacity over `tint`; when the shutter and the fade land at the
     // same moment the chevron is caught mid-fade, and the result is a handful of
     // pixels a shade out. That surfaced as two alternating outputs for one
-    // command, 35 pixels apart on a 1340x900 frame — invisible to look at, and
+    // command, 35 pixels apart on a 1340x900 frame - invisible to look at, and
     // fatal to a golden image, which compares bytes.
     //
     // A longer settle would have made it rarer rather than impossible: it is a
@@ -837,7 +837,7 @@ QtObject {
     // A table keyed by ramp name, which is a metric's choice and not a token:
     // the chart reads `Theme.ramp[root.metric.ramp].fill` and the registry is
     // what decides the key. gallery.js reads this table too, and it reads it
-    // straight out of theme.js — a `.pragma library` cannot import a QML
+    // straight out of theme.js - a `.pragma library` cannot import a QML
     // singleton, which is the other half of why theme.js is still the file the
     // values live in.
     readonly property var ramp: theme.isLight ? LightTokens.ramp : Tokens.ramp

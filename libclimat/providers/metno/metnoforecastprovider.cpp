@@ -34,7 +34,7 @@ Reading number(const QJsonValue &value)
 
 // MET's timestamps are UTC with an explicit Z. Parsed as ISO and forced to UTC
 // anyway, because a payload that ever arrives without the suffix would
-// otherwise be reinterpreted in the machine's local zone — which is a fixture
+// otherwise be reinterpreted in the machine's local zone - which is a fixture
 // that parses differently in Oslo and in Toronto, and the determinism invariant
 // is not a thing to leave to a remote server's formatting.
 QDateTime instantAt(const QJsonValue &value)
@@ -51,8 +51,8 @@ QDateTime instantAt(const QJsonValue &value)
 //
 // `properties.meta.units` says what everything is measured in, and this reads
 // it. Not paranoia: the one conversion in this file is wind, m/s to km/h, and
-// the failure mode of assuming it is that a 20 m/s gale renders as 20 km/h — a
-// stiff breeze — with no error anywhere. A unit we do not recognise is a Parse
+// the failure mode of assuming it is that a 20 m/s gale renders as 20 km/h - a
+// stiff breeze - with no error anywhere. A unit we do not recognise is a Parse
 // error naming the unit, which is a bug report rather than a wrong number.
 struct Units {
     bool    ok = true;
@@ -73,7 +73,7 @@ struct Units {
         Units result;
         for (auto it = expected.cbegin(); it != expected.cend(); ++it) {
             const QJsonValue declared = units.value(it.key());
-            // Absent is fine — `compact` omits the units for variables it did
+            // Absent is fine - `compact` omits the units for variables it did
             // not send. Present and different is not.
             if (declared.isUndefined() || declared.isNull())
                 continue;
@@ -224,7 +224,7 @@ Capabilities MetNoForecastProvider::capabilitiesAt(Coordinate) const
     //
     // The absences are the point. Everything the `compact` product does not
     // carry is a flag that is NOT set, which makes the UI hide the row rather
-    // than draw it full of zeros — the list, and what each one would cost, is
+    // than draw it full of zeros - the list, and what each one would cost, is
     // in the header.
     const CapabilityFlags available = Capability::CurrentConditions | Capability::Hourly
         | Capability::Daily | Capability::Temperature | Capability::Humidity
@@ -253,7 +253,7 @@ QFuture<Result<Forecast>> MetNoForecastProvider::fetchForecast(const ForecastReq
     http.latitudeParameter  = QStringLiteral("lat");
     http.longitudeParameter = QStringLiteral("lon");
 
-    // conditional stays true. Their terms require it — see the header — and
+    // conditional stays true. Their terms require it - see the header - and
     // there is deliberately no way for a caller to turn it off here.
 
     const QString key = RequestKey::forRequest(http).toString();
@@ -393,7 +393,7 @@ Result<Forecast> MetNoForecastProvider::parse(const QByteArray &body, const QTim
     // ---- pass one: the instants -------------------------------------------
     //
     // One point per entry, carrying only what `instant` measured AT that time.
-    // The forward-looking blocks are applied in pass two, one point later —
+    // The forward-looking blocks are applied in pass two, one point later -
     // see the header for why they cannot be applied here.
     QHash<QDateTime, int> indexByTime;
     forecast.hourly.reserve(timeseries.size());
@@ -443,7 +443,7 @@ Result<Forecast> MetNoForecastProvider::parse(const QByteArray &body, const QTim
 
         const QJsonObject data = object.value(QStringLiteral("data")).toObject();
 
-        // The 1-hour block wins where both exist. Not a preference — using both
+        // The 1-hour block wins where both exist. Not a preference - using both
         // would count the transition hour twice, once in each regime.
         Period period = readPeriod(data, QStringLiteral("next_1_hours"), 1);
         if (!period.isValid())
@@ -469,8 +469,8 @@ Result<Forecast> MetNoForecastProvider::parse(const QByteArray &body, const QTim
     // ---- current ----------------------------------------------------------
     //
     // The first entry's instant. MET has no separate "observations now"
-    // product in Locationforecast — the first timestep IS now, rounded to the
-    // hour — so `current` is that entry rather than a second request.
+    // product in Locationforecast - the first timestep IS now, rounded to the
+    // hour - so `current` is that entry rather than a second request.
     const HourlyPoint &first = forecast.hourly.constFirst();
     forecast.current.time             = first.time;
     forecast.current.temperature      = first.temperature;
@@ -481,7 +481,7 @@ Result<Forecast> MetNoForecastProvider::parse(const QByteArray &body, const QTim
     forecast.current.windDirection    = first.windDirection;
 
     // The weather code for "now" comes from the first entry's own next_1_hours
-    // — the hour that is starting — rather than from the shifted value on the
+    // - the hour that is starting - rather than from the shifted value on the
     // first point, which is empty because it would describe the past.
     const QJsonObject firstData =
         timeseries.at(0).toObject().value(QStringLiteral("data")).toObject();
@@ -494,7 +494,7 @@ Result<Forecast> MetNoForecastProvider::parse(const QByteArray &body, const QTim
     // ---- daily -------------------------------------------------------------
     //
     // Derived, not fetched: MET has no daily product. Grouped by calendar date
-    // in `forecast.timeZone`, which is the caller's zone or UTC — the header
+    // in `forecast.timeZone`, which is the caller's zone or UTC - the header
     // explains why that is the honest arrangement and what the alternative
     // would be lying about.
     struct DayAccumulator {

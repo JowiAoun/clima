@@ -14,7 +14,7 @@
 let
   # The Qt derivations, named once. Nix splits Qt across one store path per
   # module, so "where are Qt's plugins" has as many answers as there are
-  # modules here — and the shell hook below turns this list into that answer
+  # modules here - and the shell hook below turns this list into that answer
   # rather than letting scripts/qt-env.sh guess it back out of `ldd`, which can
   # only ever find the two modules a binary happens to link.
   qtModules = with pkgs; [
@@ -35,7 +35,7 @@ let
     # run one thing: `climat-widget --pin`, which asks a compositor for a
     # desktop-layer surface and can only do that over Wayland. Without this
     # module Qt has no `wayland` platform plugin at all and the layer-shell
-    # path could be compiled here and never once executed — which is the exact
+    # path could be compiled here and never once executed - which is the exact
     # reason packaging/plasma/README.md gave for not building it.
     qt6.qtwayland
   ];
@@ -51,7 +51,7 @@ pkgs.mkShell {
     # build QT_PLUGIN_PATH. qtshadertools is not optional even though nothing
     # calls it directly: qtdeclarative's own build needs it, and `qsb` is how
     # any ShaderEffect we write gets compiled ahead of time. qtpositioning is
-    # "use my location" via GeoClue2 — optional at configure time, since
+    # "use my location" via GeoClue2 - optional at configure time, since
     # libclimat/CMakeLists.txt compiles the feature out when it is absent and a
     # packager is entitled to leave it out, but present here so the code path
     # is actually built somewhere. A feature nobody in CI compiles is a feature
@@ -61,8 +61,8 @@ pkgs.mkShell {
     # `zwlr_layer_shell_v1` client half: it turns climat-widget's window into a
     # surface the compositor pins to a layer of the desktop, which is what
     # GNOME needs a whole shell extension to do. Optional at configure time in
-    # exactly the same way — widgets/CMakeLists.txt compiles --pin out when it
-    # is missing — and, like qtpositioning, present here so that "optional"
+    # exactly the same way - widgets/CMakeLists.txt compiles --pin out when it
+    # is missing - and, like qtpositioning, present here so that "optional"
     # does not mean "never built".
     kdePackages.layer-shell-qt
 
@@ -71,8 +71,8 @@ pkgs.mkShell {
     # zwlr_layer_shell_v1 at all? See widgets/layershell.cpp.
     wayland
 
-    # dbus-run-session, for the tests that own a well-known name — the
-    # location portal's, in tst_portallocator — and must therefore not run on
+    # dbus-run-session, for the tests that own a well-known name - the
+    # location portal's, in tst_portallocator - and must therefore not run on
     # the developer's own bus. tests/CMakeLists.txt registers those tests only
     # where this is found.
     dbus
@@ -85,7 +85,7 @@ pkgs.mkShell {
     pkg-config
     gcc
 
-    # What CI gates on, so it has to be here too — a lint you cannot run before
+    # What CI gates on, so it has to be here too - a lint you cannot run before
     # pushing is a lint that fails after pushing. reuse over every file,
     # clang-format and clang-tidy over C++, shellcheck and shfmt over scripts.
     clang-tools
@@ -95,7 +95,7 @@ pkgs.mkShell {
 
     # The workflows, which are the one part of CI that CI cannot check before
     # it runs. actionlint parses them, verifies every `uses:` and `runs-on:`
-    # against the real schema, and pipes each `run:` block through shellcheck —
+    # against the real schema, and pipes each `run:` block through shellcheck -
     # so a typo in the release workflow is caught here rather than by tagging
     # a release and watching it fail.
     actionlint
@@ -106,13 +106,13 @@ pkgs.mkShell {
     # sway is here rather than KWin for one reason: it runs headless.
     # `WLR_BACKENDS=headless sway` stands up a wlroots compositor with a
     # virtual output, no GPU and no seat, and wlroots is the reference
-    # implementation of the protocol KWin also speaks — so a layer surface that
+    # implementation of the protocol KWin also speaks - so a layer surface that
     # sway accepts is one Plasma, Hyprland, Wayfire and river accept too.
     # scripts/check-layer-shell.sh drives it; `sway -d` logs each layer surface
     # with its namespace, layer, anchor and margins, which is the assertion.
     #
     # grim photographs the result and wayland-info lists what the compositor
-    # advertises — the two things that turn "it did not crash" into a check.
+    # advertises - the two things that turn "it did not crash" into a check.
     sway
     grim
     wayland-utils
@@ -125,12 +125,12 @@ pkgs.mkShell {
 
     # Packaging metadata gets validated rather than eyeballed: appstreamcli
     # validate on the metainfo, desktop-file-validate on the .desktop. Both are
-    # Flathub submission requirements — see docs/07-packaging.md.
+    # Flathub submission requirements - see docs/07-packaging.md.
     appstream
     desktop-file-utils
 
     # The icon rasteriser. The master is one SVG and the hicolor theme wants
-    # eight PNG sizes, so the sizes are generated rather than drawn — see
+    # eight PNG sizes, so the sizes are generated rather than drawn - see
     # scripts/icons.sh, which also re-renders and diffs them in CI so a hand-
     # edited PNG cannot survive. librsvg rather than ImageMagick because the
     # output has to be byte-reproducible: a flake-pinned librsvg renders the
@@ -152,13 +152,13 @@ pkgs.mkShell {
     export QT_QPA_PLATFORMTHEME=generic
 
     # Without this, Qt decides stderr has no console and silently swallows QML
-    # errors — the app comes up blank and says nothing about why.
+    # errors - the app comes up blank and says nothing about why.
     export QT_FORCE_STDERR_LOGGING=1
 
     # Where Qt's plugins and QML modules are, said by the thing that knows.
     #
     # scripts/qt-env.sh can work this out on its own and does, for a bare
-    # terminal — but only from `ldd qml`, which finds qtbase and qtdeclarative
+    # terminal - but only from `ldd qml`, which finds qtbase and qtdeclarative
     # because those are the two a `qml` binary links. Every other Nix Qt module
     # is a separate store path that nothing links, so nothing points at it:
     # qtsvg's image formats and qtwayland's *platform plugin* were both absent
@@ -176,8 +176,8 @@ pkgs.mkShell {
     }''${QML_IMPORT_PATH:+:$QML_IMPORT_PATH}"
     export QML2_IMPORT_PATH="$QML_IMPORT_PATH"
 
-    # Everything else about this Qt — QML_IMPORT_PATH, QT_PLUGIN_PATH, and the
-    # CLIMAT_QT_PREFIX that a CMake configure wants — comes from the same script
+    # Everything else about this Qt - QML_IMPORT_PATH, QT_PLUGIN_PATH, and the
+    # CLIMAT_QT_PREFIX that a CMake configure wants - comes from the same script
     # the prototype's run.sh uses, so the shell and a bare terminal cannot
     # disagree about which Qt is in play or how it is set up. Both exports above
     # survive it: every assignment in there honours a value already set.
@@ -188,12 +188,12 @@ pkgs.mkShell {
     if [ -r "$climat_root/scripts/qt-env.sh" ]; then
       # shellcheck source=/dev/null
       . "$climat_root/scripts/qt-env.sh"
-      climat_qt_env || echo "climat: scripts/qt-env.sh found no qml — the shell is still usable" >&2
+      climat_qt_env || echo "climat: scripts/qt-env.sh found no qml - the shell is still usable" >&2
     fi
     unset climat_root
 
     # Which Qt got picked matters only when something is wrong with the pick, so
-    # saying so is opt-in — the same bargain run.sh makes with CLIMAT_VERBOSE.
+    # saying so is opt-in - the same bargain run.sh makes with CLIMAT_VERBOSE.
     if [ -n "''${CLIMAT_VERBOSE:-}" ]; then
       echo "climat-dev: qml $CLIMAT_QML_BIN" >&2
       echo "climat-dev: qt prefix $CLIMAT_QT_PREFIX" >&2

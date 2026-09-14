@@ -152,7 +152,7 @@ void HttpStub::onConnection()
         for (auto it = response.headers.cbegin(); it != response.headers.cend(); ++it)
             out += it.key() + QByteArrayLiteral(": ") + it.value() + QByteArrayLiteral("\r\n");
 
-        // 304 must not carry a body — RFC 7232 — and Qt's HTTP stack is right
+        // 304 must not carry a body - RFC 7232 - and Qt's HTTP stack is right
         // to be confused by one. Content-Length is still sent, as zero, so the
         // client does not wait for bytes that are not coming.
         const bool bodyAllowed = response.status != 304 && response.status != 204;

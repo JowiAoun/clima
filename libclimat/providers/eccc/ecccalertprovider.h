@@ -10,7 +10,7 @@
 // colour on it.
 //
 // ============================================================================
-// IT IS A BOUNDING BOX, NOT THE CQL2 FILTER — AND THAT IS A CORRECTION
+// IT IS A BOUNDING BOX, NOT THE CQL2 FILTER - AND THAT IS A CORRECTION
 //
 // The plan this was built from recorded, from research:
 //
@@ -23,7 +23,7 @@
 //         {"code":"NoApplicableCode","description":"query error (check logs)"}
 //     filter=INTERSECTS(geometry,POINT(-65.3 44.7))              HTTP 200, 1 match
 //
-// The prefixed form — the one the plan called required — is the one that fails,
+// The prefixed form - the one the plan called required - is the one that fails,
 // and it fails with a 500 that says nothing. Whichever way round it is today,
 // the interesting fact is that the convention MOVED, silently, and that a
 // deployment which changes it again turns every Canadian alert off with an
@@ -33,7 +33,7 @@
 //
 //     ?f=json&bbox=lon,lat,lon,lat
 //
-// A zero-area bounding box, which is OGC API — Features **Part 1: Core**. CQL2
+// A zero-area bounding box, which is OGC API - Features **Part 1: Core**. CQL2
 // filtering is Part 3, an extension, and Part 3 is the part that just moved
 // underneath us. Verified equivalent: the same point, same single alert, 10,459
 // bytes against the filter's 10,546.
@@ -51,7 +51,7 @@
 // else is a no-op here, and every poll is a full transfer of about 10 kB.
 //
 // That is the real polling budget, and it is worth writing down because the
-// plan's estimate — "~264 KB/day" — assumed revalidation. At the three-minute
+// plan's estimate - "~264 KB/day" - assumed revalidation. At the three-minute
 // foreground interval in docs/04-architecture.md §4.5 a full day of foreground
 // polling would be nearer 5 MB. Nothing here is foreground for a day; the
 // interval backs off when the window is hidden and stops when it is closed,
@@ -76,8 +76,8 @@
 //     certainty  <- confidence_en     High Likely · Medium Possible · Low Unlikely
 //
 // `alert_type` deliberately does NOT touch severity. A watch is a statement
-// about confidence and time, not about magnitude — that is what CAP separates
-// urgency and certainty from severity for — and folding it into severity is how
+// about confidence and time, not about magnitude - that is what CAP separates
+// urgency and certainty from severity for - and folding it into severity is how
 // a tornado watch ends up ranked below a heat warning.
 //
 // The issuer's own words survive all of this: `issuerLabel` is built as
@@ -89,13 +89,13 @@
 //
 // ECCC has no CAP `references` chain. What it has is `alert_code` ("EHW") and
 // `feature_id` ("fea1-786", the county), and it issues one alert of a given
-// type per area — a second heat warning for Annapolis County is not a thing
+// type per area - a second heat warning for Annapolis County is not a thing
 // that exists, it is the same warning `status_en: continued`. So that pair is
 // the hazard's identity, and it is stable across re-issue by construction,
 // which the message id is not: the id embeds an issue timestamp.
 //
 // This differs from the NWS provider on purpose, and the difference is real
-// rather than stylistic — see libclimat/providers/nws/nwsalertprovider.h, where
+// rather than stylistic - see libclimat/providers/nws/nwsalertprovider.h, where
 // two Air Quality Alerts share every field this provider would key on.
 
 #pragma once
@@ -135,7 +135,7 @@ public:
 
     QFuture<Result<AlertSet>> fetchAlerts(const AlertRequest &request) override;
 
-    // Parsing, without a network, a client or an event loop — the shape every
+    // Parsing, without a network, a client or an event loop - the shape every
     // provider here exposes, and what tests/tst_ecccalerts.cpp actually tests.
     //
     // `language` picks between the `_en` and `_fr` field pairs. `fetchedAt` is

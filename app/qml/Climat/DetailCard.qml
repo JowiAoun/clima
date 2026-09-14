@@ -5,7 +5,7 @@
 // Twelve cards share one anatomy: a quiet title, a visualisation that carries
 // the reading, a bold status line, and a sentence of context. Only the
 // visualisation differs. Putting the other four in one place is what keeps
-// twelve independently-written cards looking like one set — the alternative is
+// twelve independently-written cards looking like one set - the alternative is
 // twelve slightly different paddings and four different title sizes.
 //
 // Fill the `content` slot with the visualisation and nothing else. It is given
@@ -36,8 +36,8 @@ Item {
     // These cards have no changing data: the provider values are fixed for the
     // life of the process, so nothing about a card ever transitions from one
     // state to another on its own. The piece of motion that is honest anyway is
-    // the *arrival* — a dial sweeping up to its reading, a bar growing off its
-    // baseline, a curve drawing itself in — which is worth having because it
+    // the *arrival* - a dial sweeping up to its reading, a bar growing off its
+    // baseline, a curve drawing itself in - which is worth having because it
     // shows the reader where the value sits on the scale rather than just
     // asserting it.
     //
@@ -96,15 +96,15 @@ Item {
     // correct and all three still, and the one thing it cannot say standing
     // still is the thing a weather vane says at a glance: the air is going
     // somewhere. So the wedge travels downwind. Everything else on this page is
-    // a level, a history or a fraction — quantities that do not *do* anything —
+    // a level, a history or a fraction - quantities that do not *do* anything -
     // and a level that jiggles under a pointer is decoration.
     //
     // Two rules, and like the reveal's they are not negotiable:
     //
     //   - Everything a card moves on hover is multiplied by `hoverPhase`, which
     //     is exactly 0 at rest. That is what keeps a resting card identical to
-    //     the card before any of this existed — which is what the golden images
-    //     assert — and it is what retires a gesture along the shortest path from
+    //     the card before any of this existed - which is what the golden images
+    //     assert - and it is what retires a gesture along the shortest path from
     //     wherever it had got to when the pointer left, so no gesture has to
     //     know how to finish itself.
     //   - `hoverPhase` is pinned to 0 under `Theme.stillness`, so a reader who
@@ -114,7 +114,7 @@ Item {
     //
     // Mouse and touchpad only. A touch screen delivers a synthetic hover that
     // arrives with the press and never leaves, so on a phone a card the reader
-    // had once touched would go on drifting — and the phone does not draw this
+    // had once touched would go on drifting - and the phone does not draw this
     // grid to be pointed at in the first place.
     HoverHandler {
         id: cardHover
@@ -142,7 +142,7 @@ Item {
     // In a grid of twelve that misalignment is the first thing the eye finds.
     // Measured rather than computed: line spacing is not `pixelSize * lineHeight`,
     // and an arithmetic guess that comes out a few pixels short makes every body
-    // in the grid elide to one line — which is exactly what it did.
+    // in the grid elide to one line - which is exactly what it did.
     readonly property real bodyReserve: bodyProbe.height
 
     Text {

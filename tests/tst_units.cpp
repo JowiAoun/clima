@@ -6,15 +6,15 @@
 // docs/04-architecture.md §4.10 and app/settings.h are emphatic that units in
 // this app are per quantity and that there is no metric/imperial switch: people
 // want °C with mph, or inHg with mm. The preferences screen offers a °C and a °F
-// preset anyway, because changing five rows to read Fahrenheit — and knowing
-// that inHg goes with miles — is not a settings screen anybody finishes.
+// preset anyway, because changing five rows to read Fahrenheit - and knowing
+// that inHg goes with miles - is not a settings screen anybody finishes.
 //
 // The preset is a shortcut that writes the five, not a sixth preference, and
 // this file is where that distinction is held to:
 //
 //   * `system()` must answer "custom" for a mixture. A screen that filled the
 //     metric radio for °C-with-mph would be telling the reader their units are
-//     something they are not — and the next thing they do is tap it, which
+//     something they are not - and the next thing they do is tap it, which
 //     silently rewrites the other four.
 //
 //   * the metric preset must be exactly what Settings falls back to with nothing
@@ -28,7 +28,7 @@
 //
 // Same reason tst_conditionsdata does: its subject is app/, not libclimat.
 // `climat_forbid_gui()` is deliberately not applied, which the function in
-// tests/CMakeLists.txt cannot express — so this is registered by hand there.
+// tests/CMakeLists.txt cannot express - so this is registered by hand there.
 #include "settings.h"
 #include "units.h"
 

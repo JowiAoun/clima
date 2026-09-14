@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Metric registry: the tab bar and the chart are both driven from this list.
 //
-// Adding a metric is a data change, not a code change — which is the point. In
+// Adding a metric is a data change, not a code change - which is the point. In
 // libclimat this becomes a C++ registry populated from provider capabilities, so a
 // tab only appears when the active provider actually has that variable for that
 // location (Open-Meteo has no 15-minute data outside Central Europe and North
@@ -15,7 +15,7 @@ var list = [
     { id: "overview",      label: "Overview",      kind: "area", series: "temperature", unit: "°",
       min: 0,   max: 40,   step: 10, ramp: "temp",       decimals: 0, legend: "Temperature" },
 
-    // autoScale: a fixed 0–4 mm axis renders a drizzle as a flat line, which reads
+    // autoScale: a fixed 0-4 mm axis renders a drizzle as a flat line, which reads
     // as "no data" rather than "a little rain". Rain is the one variable whose
     // range genuinely spans orders of magnitude, so its axis follows the data.
     { id: "precipitation", label: "Precipitation", kind: "bars", series: "precipMm",    unit: " mm",
@@ -99,6 +99,6 @@ function axisTicks(metric, values) {
 // Header/readout formatting. Kept here so the chart never decides units.
 function format(metric, value) {
     if (value === undefined || value === null || isNaN(value))
-        return "–";
+        return "-";
     return value.toFixed(metric.decimals) + metric.unit;
 }

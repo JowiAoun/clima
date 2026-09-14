@@ -6,7 +6,7 @@
 // The arc is the app's own SkyArc, unchanged. That component already knows
 // that a body which sets before it rises is normal, that the mark rides a
 // slot rather than a "sun or moon" enum, and how to place a label under each
-// end — none of which is worth writing twice.
+// end - none of which is worth writing twice.
 //
 // ============================================================================
 // THE MARK MOVES WHEN THE DATA DOES NOT
@@ -14,7 +14,7 @@
 // `nowMin` comes from the reader's own clock moved into the place's offset, not
 // from the snapshot's `generatedAt`. A sun that stepped forward once every five
 // minutes and then froze the moment the daemon stopped would be the one thing
-// on the tile that looked broken while everything around it was correct — and
+// on the tile that looked broken while everything around it was correct - and
 // sunrise and sunset do not change between publishes, so there is nothing to
 // wait for. Wx::nowMinutesInZoneOf has the caveat.
 //

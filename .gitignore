@@ -16,7 +16,7 @@ compile_commands.json
 
 # Reference captures of third-party UIs (tools/refcap).
 # Someone else's pixels and markup: fine to study locally, not ours to
-# redistribute. What belongs in git is the distilled measurements —
+# redistribute. What belongs in git is the distilled measurements -
 # see docs/09-reference-capture.md.
 /reference/
 /tools/refcap/node_modules
@@ -31,9 +31,9 @@ tests/golden/images/*.actual.png
 .DS_Store
 Thumbs.db
 
-# Mission Control Recall (project memory) — private, do not commit
+# Mission Control Recall (project memory) - private, do not commit
 CLAUDE.local.md
 
-# Mission Control — files it installs per session; managed by the app, do not commit
+# Mission Control - files it installs per session; managed by the app, do not commit
 .claude/skills/diagram/
 .claude/skills/git-workflow/

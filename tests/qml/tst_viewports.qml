@@ -40,7 +40,7 @@ TestCase {
     }
 
     // The tablet runs the phone's shell. This is the assertion that stops
-    // somebody "fixing" the tablet by giving it the desktop page — which is a
+    // somebody "fixing" the tablet by giving it the desktop page - which is a
     // reasonable-sounding change that would drop the bottom nav on an 834 px
     // screen and leave no way to reach four of the five sections.
     function test_tabletRunsTheMobileShell() {
@@ -63,7 +63,7 @@ TestCase {
     // `pinned` is the exception, and it is the whole reason the class is a
     // field rather than the id: a tablet in landscape is 1112 px wide, which
     // classifies as desktop, and that is not a bug in either the preset or the
-    // breakpoints — width genuinely cannot tell that window from a desktop one.
+    // breakpoints - width genuinely cannot tell that window from a desktop one.
     // It is asked for by name instead. This test's job is to make sure the
     // exception stays the single documented one.
     function test_presetsAgreeWithTheirOwnWidths() {
@@ -80,7 +80,7 @@ TestCase {
                 ++pinned
                 verify(Viewports.classOf(preset.w) !== preset.cls,
                        preset.id + " is marked pinned but its width already "
-                       + "classifies as " + preset.cls + " — drop the flag")
+                       + "classifies as " + preset.cls + " - drop the flag")
                 continue
             }
             compare(Viewports.classOf(preset.w), preset.cls,
@@ -149,7 +149,7 @@ TestCase {
 
     // Narrow to wide. `classOf` returns the widest match, so a presets array
     // that fell out of order would still classify correctly and would put the
-    // gallery's rail in a nonsensical sequence — the kind of defect that is
+    // gallery's rail in a nonsensical sequence - the kind of defect that is
     // obvious in a picture and invisible in a unit test unless it is stated.
     function test_presetsAreOrderedNarrowToWide() {
         var ids = Viewports.ids()

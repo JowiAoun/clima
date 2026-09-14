@@ -6,7 +6,7 @@
 // docs/04-architecture.md §4.5: "schema-versioned with forward-only
 // migrations". Forward-only is the important half. There is no `down()`, there
 // is no rollback to a previous version, and a database written by a newer Climat
-// than the one opening it is *refused* rather than opened optimistically —
+// than the one opening it is *refused* rather than opened optimistically -
 // because the alternative is a v3 binary reading a v4 file, finding a column
 // missing, and either crashing or silently writing rows the v4 binary will
 // misread. Refusing is recoverable; a corrupted cache written by two versions
@@ -38,7 +38,7 @@
 // ---- how to add one ---------------------------------------------------------
 //
 // Append to defaultMigrations() with the next integer. Never edit an existing
-// migration — the databases that already ran it will not run it again, so an
+// migration - the databases that already ran it will not run it again, so an
 // edit produces two different schemas both claiming the same version, and the
 // difference only shows up on machines that installed at the wrong moment.
 
@@ -78,7 +78,7 @@ int highestVersion(const QList<Migration> &migrations);
 // ascending order, each in its own transaction.
 //
 // `migrations` is a parameter rather than a call to defaultMigrations() so that
-// the runner can be tested against a schema that is not the product's — a test
+// the runner can be tested against a schema that is not the product's - a test
 // that wants to prove v1 → v2 works does not have to wait for the product to
 // need a v2, and a test that wants to prove a *failing* migration rolls back
 // cannot write one into the shipping list.

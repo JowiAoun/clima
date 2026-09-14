@@ -25,7 +25,7 @@ namespace {
 // Anchoring to two adjacent edges keeps the surface its own size and puts it
 // in that corner; anchoring to none lets the compositor centre it. Anchoring
 // to two *opposite* edges would stretch the surface across the screen, which
-// is what a panel wants and never what a tile wants — so no name here produces
+// is what a panel wants and never what a tile wants - so no name here produces
 // that combination.
 struct AnchorSpec
 {
@@ -51,8 +51,8 @@ constexpr AnchorSpec kAnchors[] = {
 //
 // `bottom` is the default and it is the one that means "desktop widget": above
 // the wallpaper, below every ordinary window. `background` is where the
-// wallpaper itself lives — a tile there is stacked against swaybg by creation
-// order, which is a race — and `top`/`overlay` sit above windows, which is a
+// wallpaper itself lives - a tile there is stacked against swaybg by creation
+// order, which is a race - and `top`/`overlay` sit above windows, which is a
 // panel or a notification, not a tile that is meant to be got out of the way
 // by opening anything.
 constexpr const char *kLayers[] = {"background", "bottom", "top", "overlay"};
@@ -91,7 +91,7 @@ void registryGlobalRemove(void *, wl_registry *, uint32_t)
 //
 // One registry roundtrip on a second connection, thrown away immediately. Qt
 // will not answer this: QtWaylandClient's globals are private API, and asking
-// layer-shell-qt costs a *window* — LayerShellQt::Window::get() only discovers
+// layer-shell-qt costs a *window* - LayerShellQt::Window::get() only discovers
 // the protocol is missing at the moment it tries to swap the shell
 // integration, by which point the window exists and the only report is a
 // warning on a logging category.
@@ -122,7 +122,7 @@ bool compositorHasLayerShell()
 // A layer surface belongs to an output. Unplug that monitor and the compositor
 // sends `zwlr_layer_surface_v1.closed`; layer-shell-qt turns that into
 // QWindow::close(), and since this is the host's only window the process would
-// then quit — a desktop with two screens would lose its tiles for good the
+// then quit - a desktop with two screens would lose its tiles for good the
 // first time somebody undocked a laptop.
 //
 // A dismissed surface cannot be reused, so the recovery is to close and open
@@ -141,7 +141,7 @@ public:
         , m_window(window)
     {
         // Otherwise the close that a dismissal produces takes the process down
-        // before the remap below can run — QGuiApplication quits on the last
+        // before the remap below can run - QGuiApplication quits on the last
         // window closing, and that quit is posted from inside the close. The
         // host now decides for itself when it is finished, which is when it has
         // given up, immediately below.
@@ -159,7 +159,7 @@ private:
 
         if (m_remapped && m_since.elapsed() < 2000) {
             qWarning("climat-widget: the compositor dismissed the tiles twice in "
-                     "two seconds — giving up rather than spinning");
+                     "two seconds - giving up rather than spinning");
             m_stopping = true;
             QCoreApplication::quit();
             return;
@@ -200,12 +200,12 @@ private:
         // QWindow::close() hides the window; it does not necessarily take the
         // platform window down with it. Qt then still holds a QWaylandWindow
         // whose wl_surface the compositor destroyed when it dismissed us, and
-        // `show()` on that maps nothing — measured: visibleChanged went false
+        // `show()` on that maps nothing - measured: visibleChanged went false
         // and then true again, the window reported itself visible, and the
         // compositor logged no second layer surface at all. Nothing failed;
         // there were simply no tiles.
         //
-        // destroy() drops it, so show() has to build a new one — and building a
+        // destroy() drops it, so show() has to build a new one - and building a
         // new one is what fires the QPlatformSurfaceEvent that layer-shell-qt's
         // event filter is waiting for to swap the shell integration back in.
         m_window->destroy();
@@ -231,7 +231,7 @@ QString computeUnavailableReason()
     const QString platform = QGuiApplication::platformName();
     if (platform != QLatin1String("wayland")) {
         return QStringLiteral(
-                   "the Qt platform plugin is \"%1\", not \"wayland\" — "
+                   "the Qt platform plugin is \"%1\", not \"wayland\" - "
                    "zwlr_layer_shell_v1 is a Wayland protocol and has no X11 equivalent")
             .arg(platform);
     }
@@ -246,7 +246,7 @@ QString computeUnavailableReason()
     // (docs/widgets.md, finding 2).
     //
     // So probing here would consume the handshake, Qt would find no socket to
-    // connect to, and the tiles would never appear — a bug that reproduces only
+    // connect to, and the tiles would never appear - a bug that reproduces only
     // under the shell that spawns us, which is the hardest place to see it.
     //
     // It is also the right answer semantically. A shell that spawned us to
@@ -260,7 +260,7 @@ QString computeUnavailableReason()
 
     if (!compositorHasLayerShell()) {
         return QStringLiteral(
-            "this compositor does not implement zwlr_layer_shell_v1 — GNOME's "
+            "this compositor does not implement zwlr_layer_shell_v1 - GNOME's "
             "mutter is the one that does not, and there the GNOME Shell "
             "extension in packaging/gnome-shell/ is what pins the tiles");
     }

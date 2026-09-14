@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// refcap crawl — capture a whole page as a set of per-component references.
+// refcap crawl - capture a whole page as a set of per-component references.
 //
 // The single-target mode needs a hand-written selector per component, which
 // does not scale to a page with forty of them and goes stale every time the
@@ -21,7 +21,7 @@
 //   page/tokens.json        CSS custom properties (once, not per component)
 //   page/palette.json       every colour actually chosen, with usage counts
 //   page/typography.json    every distinct type style, with usage counts
-//   page/assets.json        image and icon URLs — recorded, never downloaded
+//   page/assets.json        image and icon URLs - recorded, never downloaded
 //   components/NN-name/     shot.png, meta.json, geometry.json, styles.json, svg-*.svg
 //
 // Usage:
@@ -69,7 +69,7 @@ function parseArgs(argv) {
     if (!['dark', 'light'].includes(out.theme)) throw new Error('--theme must be dark or light');
     out.units = String(out.units).toUpperCase();
     if (!['C', 'F'].includes(out.units)) throw new Error('--units must be C or F');
-    if (!CITIES[out.city]) throw new Error(`unknown city "${out.city}" — have: ${Object.keys(CITIES).join(', ')}`);
+    if (!CITIES[out.city]) throw new Error(`unknown city "${out.city}" - have: ${Object.keys(CITIES).join(', ')}`);
     return out;
 }
 
@@ -92,7 +92,7 @@ function discoverComponents({ minWidth, minHeight, maxHeight }) {
             const cls = String(e.getAttribute?.('class') ?? '');
             const m = /(?:^|\s)([A-Za-z_][\w]*)-DS-/.exec(cls);
             // Custom elements are components by definition even without a
-            // module class — MSN wraps a few modules in them.
+            // module class - MSN wraps a few modules in them.
             const isCustom = e.tagName.includes('-') && !e.tagName.startsWith('MSN-VERTICALS');
             if (!m && !isCustom) continue;
 
@@ -135,7 +135,7 @@ function discoverComponents({ minWidth, minHeight, maxHeight }) {
     }
     scan(document);
 
-    // Repeated instances — day cards, hourly rows — teach us nothing new after
+    // Repeated instances - day cards, hourly rows - teach us nothing new after
     // the first. Keep one exemplar and record how many there were.
     const byName = new Map();
     for (const c of found) {
@@ -259,7 +259,7 @@ function renderIndex(meta, comps) {
     L.push(`${comps.length} components over ${meta.pageHeight} px of page.`, '');
     L.push(`Page-wide inventories are in [\`page/\`](page/): design tokens, the full`
         + ` colour palette with usage counts, the type scale, and asset URLs.`
-        + ` The page itself is in [\`page/strips/\`](page/strips/), one screenful per file —`
+        + ` The page itself is in [\`page/strips/\`](page/strips/), one screenful per file -`
         + ` a single image of a ${meta.pageHeight} px page would have to be squeezed to`
         + ` ~340 px wide to fit, and would be legible nowhere.`, '');
     L.push('## Components', '');
@@ -285,12 +285,12 @@ function renderIndex(meta, comps) {
 
     L.push('', '## Re-capturing one component', '');
     L.push('Each component directory records the selector it was found by. To pull a',
-        'single component again — with a state applied, or a different city — add it',
+        'single component again - with a state applied, or a different city - add it',
         'to `targets.json` and use `capture.mjs`, which supports clicks and hovers.', '');
     L.push('## Provenance', '');
     L.push('Third-party reference material, captured for study. Layout, proportion and',
         'interaction are fair to learn from; icons, illustrations, fonts and markup are',
-        'not ours to ship. This tree is gitignored — distil measurements into',
+        'not ours to ship. This tree is gitignored - distil measurements into',
         '`docs/09-reference-capture.md` rather than committing captures.');
     return L.join('\n') + '\n';
 }
@@ -384,7 +384,7 @@ async function main() {
             // React re-renders lazy modules while the crawl is running, which
             // replaces the tagged node and loses the attribute. Re-establish
             // it from the component's own selector and recorded box before
-            // relying on it — otherwise the component is found and
+            // relying on it - otherwise the component is found and
             // screenshotted, then fails to dump, which reads like a bad
             // selector rather than a node swapped out underneath us.
             await page.evaluate(({ tag, selector, box, index }) => {

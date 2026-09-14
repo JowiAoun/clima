@@ -7,8 +7,8 @@
 // seam. That merge is what says "the chart underneath is showing this day".
 //
 // It is done by overhang rather than by drawing a join. The selected card extends
-// `mergeDepth` past the bottom of the strip, and the chart card — declared after
-// this in Main.qml, so painted over it — covers that overhang, taking the card's
+// `mergeDepth` past the bottom of the strip, and the chart card - declared after
+// this in Main.qml, so painted over it - covers that overhang, taking the card's
 // bottom border with it. Nothing has to line up to the pixel, and it stays correct
 // at any card position or window size.
 //
@@ -17,7 +17,7 @@
 // the card reads as pasted on top of the panel rather than growing out of it.
 //
 // Motion. Selecting a card is the one event here and it changes four things at
-// once — fill, outline, size and the second badge — so they are choreographed
+// once - fill, outline, size and the second badge - so they are choreographed
 // from this file rather than from the components. TabFillet and DayIconBadge
 // stay dumb; a fillet that animated itself would animate in the gallery too,
 // where nothing is selecting anything.
@@ -34,8 +34,8 @@ Item {
     readonly property real selectedExtra: 72     // room for the second badge
     readonly property real spacing: 14
     readonly property real badgeSize: 50
-    // The selected card used to overhang into the chart card, so the chart —
-    // painted after it — would cover the card's bottom border. There is no
+    // The selected card used to overhang into the chart card, so the chart -
+    // painted after it - would cover the card's bottom border. There is no
     // border to cover any more, and now that both surfaces are translucent an
     // overhang is actively wrong: the overlap would take the wash twice and
     // show as a lighter band across the junction. They abut instead.
@@ -66,7 +66,7 @@ Item {
 
         // `view` rather than `move`: a pager press swings the strip on by 70 % of
         // its width, so it replaces most of what you were looking at instead of
-        // nudging it — one view becoming another.
+        // nudging it - one view becoming another.
         NumberAnimation {
             id: scrollAnim
             target: flick
@@ -132,7 +132,7 @@ Item {
                         color: card.selected ? Theme.color.cardBg : Theme.color.dayCardBg
                         // No outline on the raised card: it is one surface with the
                         // panel below, and an outline would draw a line across that.
-                        // It is faded out rather than switched off — the width stays
+                        // It is faded out rather than switched off - the width stays
                         // 1 and the colour lands on the fill colour, so the ring
                         // disappears *into* the card over the same beat as the fill.
                         // Qt draws the border band in place of the fill rather than
@@ -158,7 +158,7 @@ Item {
                     //
                     // Both are pinned to the card's *live* bottom edge and take the
                     // card's *live* fill. Pinned to the strip's bottom and painted a
-                    // flat cardBg — which is what they were — they spent the whole
+                    // flat cardBg - which is what they were - they spent the whole
                     // 190 ms as a brighter shape floating below the card they belong
                     // to, and only met it in the last frame.
                     TabFillet {
@@ -250,7 +250,7 @@ Item {
                         // The night condition is the one thing selection *adds*, and
                         // `selectedExtra` is the room the card widens to fit it. It
                         // used to arrive at full strength on frame one, at the card's
-                        // *old* width — hard up against the high/low, which it had not
+                        // *old* width - hard up against the high/low, which it had not
                         // been given room beside yet. Now it waits a `stagger` and then
                         // fades over `tint`: 45 + 150 puts it fully there as the card
                         // stops widening. Leaving, it goes straight away, so it is gone

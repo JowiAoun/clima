@@ -9,7 +9,7 @@ namespace climat {
 
 // Out of line, and not `= default` in the header. A polymorphic class whose
 // virtual functions are all inline gets its vtable emitted in every translation
-// unit that includes it — the "weak vtable" warning — and the key-function rule
+// unit that includes it - the "weak vtable" warning - and the key-function rule
 // says the vtable is emitted once, here, if exactly one virtual function is
 // defined in exactly one place. The destructors are that place.
 IProvider::~IProvider() = default;
@@ -49,8 +49,8 @@ Capabilities::Capabilities(CapabilityFlags available, CapabilityFlags undetermin
     , m_undetermined(undetermined & ~available)
 {
     // The overlap is cleared rather than asserted on. A provider that says a
-    // capability is both known-good and unknown means the first — it learned
-    // the answer and forgot to take it out of the other set — and the cost of
+    // capability is both known-good and unknown means the first - it learned
+    // the answer and forgot to take it out of the other set - and the cost of
     // being wrong about that is a tab that appears, which is the same thing
     // `available` was already asking for. Crashing the app over a redundant
     // flag helps nobody.
@@ -102,7 +102,7 @@ QString Capabilities::toString() const
 QString capabilityName(Capability capability)
 {
     // Total over the enum. -Wswitch is on for this library, so a capability
-    // added without a name here stops the build — which matters more than it
+    // added without a name here stops the build - which matters more than it
     // looks, because the name is what the About screen and every test failure
     // print, and an unnamed flag would show up as a silent gap in both.
     switch (capability) {

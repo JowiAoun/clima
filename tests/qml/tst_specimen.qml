@@ -12,7 +12,7 @@
 //
 // What it catches that nothing else does:
 //
-//   * a QML file that does not compile — trivially, but nothing checked it, and
+//   * a QML file that does not compile - trivially, but nothing checked it, and
 //     a component nobody has opened since a refactor is exactly the one that
 //     stopped compiling
 //   * a binding referring to a token, function or property that no longer
@@ -43,7 +43,7 @@ TestCase {
 
     // Somewhere for the instances to live. A component created with no parent
     // is not in a window, so nothing lays it out and a good half of the
-    // bindings under test never evaluate — which would make this a compile
+    // bindings under test never evaluate - which would make this a compile
     // check wearing a smoke test's name.
     Item {
         id: stage
@@ -53,7 +53,7 @@ TestCase {
 
     // The catalogue, flattened to one row per (component, variant). A component
     // with no declared variants still gets one row, so both go down the same
-    // path — the same rule the gallery's own repeater follows.
+    // path - the same rule the gallery's own repeater follows.
     function specimens() {
         var out = []
         for (var g = 0; g < Catalogue.groups.length; ++g) {
@@ -78,7 +78,7 @@ TestCase {
 
     function test_catalogueIsNotEmpty() {
         var all = specimens()
-        verify(all.length > 20, "only " + all.length + " specimens — is the catalogue loading?")
+        verify(all.length > 20, "only " + all.length + " specimens - is the catalogue loading?")
     }
 
     function test_everySpecimenBuilds_data() {
@@ -101,8 +101,8 @@ TestCase {
         verify(instance !== null, "createObject returned null for " + data.file)
 
         // The catalogue's stage size stands in for a host that is not here.
-        // Applied the same way Specimen.qml applies it — only when the
-        // catalogue says the component has no size worth keeping — because a
+        // Applied the same way Specimen.qml applies it - only when the
+        // catalogue says the component has no size worth keeping - because a
         // width is what makes a layout actually run.
         if (data.stage) {
             if (data.stage.w > 0)
@@ -118,7 +118,7 @@ TestCase {
         wait(0)
 
         compare(QmlWarnings.count, 0,
-                data.file + " built with warnings — " + QmlWarnings.summary())
+                data.file + " built with warnings - " + QmlWarnings.summary())
 
         instance.destroy()
     }

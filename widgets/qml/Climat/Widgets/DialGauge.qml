@@ -11,13 +11,13 @@
 // exactly the way that is most visible: one arc a pixel thicker than the other,
 // one gap at the bottom a few degrees wider. The *scales* stay separate,
 // because those are two different authorities' tables and must never be
-// unified — see libclimat/domain/scales.h.
+// unified - see libclimat/domain/scales.h.
 //
 // ============================================================================
 // AN UNKNOWN READING DRAWS THE TRACK AND NOTHING ELSE
 //
 // `fraction` is NaN when there is no reading, and then the coloured arc is not
-// drawn at all — not drawn at zero. A UV dial pinned at the start of its arc
+// drawn at all - not drawn at zero. A UV dial pinned at the start of its arc
 // says "the sun is not out"; an empty track says "we have no UV product here",
 // which is the true statement for most of the world's air-quality coverage and
 // for every place before the first fetch lands.
@@ -34,7 +34,7 @@ Item {
     property color tint: Theme.accent.fill
 
     // The number, already formatted. A dash is a perfectly good value.
-    property string reading: "–"
+    property string reading: "-"
 
     // The band name, or whatever one line of context the tile wants.
     property string caption: ""

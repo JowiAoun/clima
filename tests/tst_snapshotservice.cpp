@@ -4,7 +4,7 @@
 // What a daemon that has never fetched says to the first widget that asks.
 //
 // The widget host subscribes and calls GetSnapshot in the same turn of the
-// event loop — see SnapshotService::subscribe for why it cannot be pushed —
+// event loop - see SnapshotService::subscribe for why it cannot be pushed -
 // and until warmFromCache() existed the answer in that turn was always empty.
 // Not because there was nothing: the cache on disk had yesterday's forecast in
 // it. Because fetch() reads the cache through the registry, and every future
@@ -19,8 +19,8 @@
 //
 // Fixture mode would prove nothing here. Its providers answer from memory and
 // answer synchronously, so a fixture daemon was never cold. What is exercised
-// below is the live construction — real providers, real cache, a real request
-// key — with the cache seeded the way a previous run would have left it and
+// below is the live construction - real providers, real cache, a real request
+// key - with the cache seeded the way a previous run would have left it and
 // the network unreachable, which is what a runner is and what NetworkGuard
 // guarantees.
 
@@ -72,7 +72,7 @@ Place toronto()
 
 // The request the daemon will make for this place, built the way the daemon
 // builds it. The cache key is derived from it, so any drift between this and
-// SnapshotService::fetch is a cache miss — which is exactly what the assertion
+// SnapshotService::fetch is a cache miss - which is exactly what the assertion
 // below would then report.
 ForecastRequest daemonRequest(const Place &place)
 {
@@ -159,7 +159,7 @@ void TestSnapshotService::aColdDaemonAnswersFromTheCacheBeforeItsFirstFetch()
     service.configure(QString());
 
     // Subscribe and GetSnapshot in one turn, which is what DaemonLink does and
-    // is the only order the bus allows — there is no event-loop spin between
+    // is the only order the bus allows - there is no event-loop spin between
     // these two lines, and that is the point of the test.
     const QString token = service.subscribe(QStringLiteral("home"), {}, -1, -1);
     QVERIFY(!token.isEmpty());
@@ -179,7 +179,7 @@ void TestSnapshotService::aColdDaemonAnswersFromTheCacheBeforeItsFirstFetch()
 
 void TestSnapshotService::aColdDaemonWithNothingCachedSaysSo()
 {
-    // The honest half. No previous run, so nothing to warm from — and the
+    // The honest half. No previous run, so nothing to warm from - and the
     // snapshot must say "unknown" rather than invent a reading or fail to
     // answer. The place has to exist for there to be a snapshot at all.
     {

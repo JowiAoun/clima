@@ -8,7 +8,7 @@
 //
 // The day strip was wired to nothing. Every card selected, the selected card
 // grew into the panel below it and merged with it, and the panel went on
-// drawing today — because `ForecastData` published one window, fixed around the
+// drawing today - because `ForecastData` published one window, fixed around the
 // present, and nothing could ask it for another. Picking Friday changed the
 // picture and not the data, which is the worst kind of broken control: it
 // answers.
@@ -19,7 +19,7 @@
 //
 //   * `nowIndex` may fall OUTSIDE [0, count). It is an offset to the present,
 //     not an index into the window, and that is what makes the chart's past
-//     veil correct on every day with no branch in it — `xForIndex(nowIndex)`
+//     veil correct on every day with no branch in it - `xForIndex(nowIndex)`
 //     wide, so a day still ahead veils nothing and a day gone veils everything.
 //
 //   * `ahead()` indexes the whole series from the present and is unaffected by
@@ -54,8 +54,8 @@ using namespace climat;
 namespace {
 
 // The six glyph names that are only a statement about how much sky is showing.
-// Everything else in `ConditionKind` is a thing happening — fog, something
-// falling, lightning — and the difference is the line
+// Everything else in `ConditionKind` is a thing happening - fog, something
+// falling, lightning - and the difference is the line
 // libclimat/domain/weathercode.h folds a labelled column across.
 bool isSky(const QString &kind)
 {
@@ -142,7 +142,7 @@ private Q_SLOTS:
 
 private:
     // One fixture, loaded once: Toronto is the one every capture uses and its
-    // recorded instant is midday, which is the only interesting case — a
+    // recorded instant is midday, which is the only interesting case - a
     // fixture recorded at 00:30 would make "today's window" and "today from
     // midnight" almost the same window and prove nothing.
     Fixture   m_fixture;
@@ -215,8 +215,8 @@ void TestForecastData::todaysWindowIsTodayFromMidnight()
     load(data);
 
     // Today is a day like any other, and that is the change. It used to be
-    // forty-eight hours with fifteen of them behind the present — a rolling
-    // window that ran past midnight into tomorrow — and the arrows either side
+    // forty-eight hours with fifteen of them behind the present - a rolling
+    // window that ran past midnight into tomorrow - and the arrows either side
     // of the chart are what ended it: they step the day, so a window that
     // spilled into the next one had hours no arrow could be about.
     //
@@ -261,7 +261,7 @@ void TestForecastData::theOutermostColumnsAreNeverLabelled()
 
 // …and the constraint that pulls the other way: "Now" has to be one of the
 // labels, or the word is never drawn. Midnight is the one hour it cannot be,
-// because column 0 is not available — and a now line with no label under it is
+// because column 0 is not available - and a now line with no label under it is
 // a smaller loss than a label sliced in half.
 void TestForecastData::nowIsALabelledColumnWhereverThereIsOne()
 {
@@ -277,7 +277,7 @@ void TestForecastData::nowIsALabelledColumnWhereverThereIsOne()
 }
 
 // The precipitation strip tiles the window in two-hour cells and the labels no
-// longer do — they skip the outermost columns. Buckets that followed the labels
+// longer do - they skip the outermost columns. Buckets that followed the labels
 // left the first hours of the day with no cell over them, which is a gap at the
 // left of the strip on every day of the forecast.
 void TestForecastData::theStripCoversEveryHourOfTheDay()
@@ -296,7 +296,7 @@ void TestForecastData::theStripCoversEveryHourOfTheDay()
         covered += bucket.value(QStringLiteral("span")).toInt();
     }
     // Exactly, not "at least". The plot maps hour i to i * columnWidth, so a
-    // window of N hours is N-1 intervals wide — and a cell that ran past that
+    // window of N hours is N-1 intervals wide - and a cell that ran past that
     // was clipped to half its width with its droplet spilling out of it.
     QCOMPARE(covered, data.count() - 1);
 }
@@ -342,7 +342,7 @@ void TestForecastData::anotherDayIsThatDayFromMidnight()
     QCOMPARE(data.startHour(), 0);
 
     // A day nobody is living through has no "Now" to anchor the label phase to,
-    // so it takes the even one — 2 AM, 4 AM, 6 AM — which is how a clock reads.
+    // so it takes the even one - 2 AM, 4 AM, 6 AM - which is how a clock reads.
     // Two rather than zero because column 0 is on the edge; see
     // theOutermostColumnsAreNeverLabelled.
     QCOMPARE(data.firstLabelIndex(), 2);
@@ -356,8 +356,8 @@ void TestForecastData::anotherDayIsThatDayFromMidnight()
     // `ahead()` indexes the whole series from the present and is unaffected by
     // which day is selected, so tomorrow's first column has to be the hour
     // `24 - now` hours from now, and every column after it the hour after that.
-    // If the day lookup were off by one — a UTC date compared against a local
-    // one is the obvious way — this is the assertion that says so.
+    // If the day lookup were off by one - a UTC date compared against a local
+    // one is the obvious way - this is the assertion that says so.
     const QDateTime nowLocal   = m_fixture.recordedAt.toTimeZone(zone());
     const int       toMidnight = 24 - nowLocal.time().hour();
 
@@ -379,7 +379,7 @@ void TestForecastData::everyDayInTheStripSelectsRealHours()
 
     // The strip draws a card per row of `days`, and every one of them is
     // tappable. A row whose date is past the hourly horizon has to fall back to
-    // something rather than to an empty chart — MET Norway's daily series
+    // something rather than to an empty chart - MET Norway's daily series
     // outruns its hourly one by days, and a blank panel under a card that
     // lights up is the same defect this whole change is about.
     const int rows = int(data.days().size());
@@ -492,7 +492,7 @@ void TestForecastData::aheadRunsOutRatherThanWrappingRound()
     QVERIFY(data.aheadCount() > 0);
     QVERIFY(!data.ahead(data.aheadCount() - 1).isEmpty());
 
-    // Past the end is an empty map, which QML reads as `undefined` per key —
+    // Past the end is an empty map, which QML reads as `undefined` per key -
     // a column with nothing in it, rather than the first hour of the series
     // wearing tomorrow's label.
     QVERIFY(data.ahead(data.aheadCount()).isEmpty());
@@ -526,7 +526,7 @@ void TestForecastData::reselectingTheSameDayRebuildsNothing()
     data.setSelectedDay(data.selectedDay());
     QCOMPARE(spy.count(), 0);
 
-    // And a rebuild really is a rebuild rather than an append — every builder
+    // And a rebuild really is a rebuild rather than an append - every builder
     // downstream of the window appends to a list, so selecting a day twice over
     // is where a missing clear shows up as a doubled series.
     const int day = data.todayIndex() + 1 < data.days().size() ? data.todayIndex() + 1 : 0;
@@ -549,7 +549,7 @@ void TestForecastData::reselectingTheSameDayRebuildsNothing()
 // The band draws one icon per *label*, and it labels every second column,
 // because two dozen 27 px glyphs will not fit across a plot. For as long as
 // each label asked `conditionFor` about the single hour it happened to land on,
-// half of every day had no icon anywhere — and which half was arbitrary, since
+// half of every day had no icon anywhere - and which half was arbitrary, since
 // a day window's labels start at column 1 while today's take their phase from
 // where the present fell. The visible result was a ten-day card that said
 // thunderstorm above an hourly row that said rain all evening.
@@ -575,8 +575,8 @@ void TestForecastData::everyLabelledColumnHasAGlyph()
 void TestForecastData::aColumnNeverDrawsPlainSkyOverAnHourWithWeatherInIt()
 {
     // The property behind the fix, stated as a property. A column may show a
-    // different glyph from one of its hours — two events in one span, and the
-    // louder wins — but it may never show *sky* over a span with weather in it,
+    // different glyph from one of its hours - two events in one span, and the
+    // louder wins - but it may never show *sky* over a span with weather in it,
     // because that is the case where a reader is told nothing is happening.
     ForecastData data(nullptr);
     load(data);
@@ -613,7 +613,7 @@ void TestForecastData::aThunderstormOnAColumnTheBandSkipsIsStillDrawn()
     //
     // One hour is what it takes. A day nobody is living through labels columns
     // 2, 4, 6 … so the odd columns are the ones nothing asks about, and column
-    // 13 is the hour starting at 1 p.m. — WMO 95 stamped 2 p.m. under
+    // 13 is the hour starting at 1 p.m. - WMO 95 stamped 2 p.m. under
     // Open-Meteo's convention. Before this fix that storm had no glyph anywhere
     // in its own day.
     const Forecast forecast = oneStormyHour(14);
@@ -630,7 +630,7 @@ void TestForecastData::aThunderstormOnAColumnTheBandSkipsIsStillDrawn()
     QCOMPARE(data.count(), 24);
 
     QVERIFY2(!data.labelIndices().contains(13),
-             "column 13 is labelled after all — this test no longer tests anything");
+             "column 13 is labelled after all - this test no longer tests anything");
     QCOMPARE(data.conditionFor(13), QStringLiteral("thunder"));
 
     bool drawn = false;
@@ -646,8 +646,8 @@ void TestForecastData::aThunderstormOnAColumnTheBandSkipsIsStillDrawn()
 //
 // The band labels every second column and skips the outermost one at each end,
 // so the day's first hours and its last are covered by a label's span or by
-// nothing. It was nothing at the start of the day, and then — once the first
-// label was made to reach back — still nothing at the end, on any day whose
+// nothing. It was nothing at the start of the day, and then - once the first
+// label was made to reach back - still nothing at the end, on any day whose
 // label phase is odd. Sweeping the storm across all twenty-four hours is what
 // makes "no hour is an hour no column answers for" a property rather than a
 // case somebody remembered.
@@ -681,8 +681,8 @@ void TestForecastData::noHourOfTheDayIsAnHourNoColumnAnswersFor()
 
 // The chart's legend names a moon, and it has to be the moon of the hours on
 // the plot. Those are the same day except where the strip carries a card the
-// hourly series cannot reach — MET Norway's daily horizon runs days past its
-// hourly one — and there the window clamps onto the last day it has hours for
+// hourly series cannot reach - MET Norway's daily horizon runs days past its
+// hourly one - and there the window clamps onto the last day it has hours for
 // while the card stays where it was put.
 void TestForecastData::theMoonFollowsTheHoursRatherThanTheCard()
 {

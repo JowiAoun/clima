@@ -8,14 +8,14 @@
 //
 // docs/04-architecture.md §4.1 principle 1: "the UI renders from cache, then
 // reconciles with the network. The app must never show an empty screen because
-// an API is down — the documented failure mode of the current best Linux
+// an API is down - the documented failure mode of the current best Linux
 // weather app."
 //
 // Three steps, in this order, every time a place is selected:
 //
 //   1. ask for a CACHED answer only. No socket is opened. If there is one, it
-//      is published immediately — inside the same call stack, before the first
-//      frame — carrying the timestamp it was originally fetched at, so the UI
+//      is published immediately - inside the same call stack, before the first
+//      frame - carrying the timestamp it was originally fetched at, so the UI
 //      says "updated 40 minutes ago" and means it.
 //
 //   2. ask again, normally. The provider revalidates, or serves from a fresh
@@ -24,12 +24,12 @@
 //   3. publish whatever came back. A failure at this step does NOT clear what
 //      step 1 published: the screen keeps the stale forecast and gains a line
 //      saying the refresh failed. That is the sentence in §4.1 made into
-//      control flow — there is no path here that replaces data with a spinner.
+//      control flow - there is no path here that replaces data with a spinner.
 //
 // Step 1 is why ForecastRequest has a `cachedOnly` flag. Without it the choice
 // is between a synchronous cache read the view model does not have access to,
 // and a second cache in app/ holding a second copy of the same forecast in some
-// other shape — and two caches is how the two disagree.
+// other shape - and two caches is how the two disagree.
 //
 // ============================================================================
 // WHAT MAKES A RUN DETERMINISTIC
@@ -42,7 +42,7 @@
 // Nothing downstream of that line branches on which one happened. The TTL
 // table, the backoff, the "now" marker, the past veil, the sky phase and the
 // "updated N minutes ago" line all read the clock they were handed and behave
-// identically — which is the argument libclimat/core/clock.h makes at length and
+// identically - which is the argument libclimat/core/clock.h makes at length and
 // this class is the place it pays off.
 //
 // Fixture is the DEFAULT under `--grab`, under `--film`, in climat-gallery and
@@ -58,7 +58,7 @@
 // component reading `Data.temperature[i]` and one reading
 // `Detail.temperature.value` are reading the same number through two shapes,
 // which is the property the prototype's mockdata.js and detaildata.js had to
-// maintain by hand — and got wrong twice, which is what the comments at the top
+// maintain by hand - and got wrong twice, which is what the comments at the top
 // of both files are about.
 
 #pragma once
@@ -121,7 +121,7 @@ class AppEngine : public QObject
 
     // ---- what time it is there ---------------------------------------------
     //
-    // "10:31 PM" — the wall clock at the *place*, not at this machine. MSN's
+    // "10:31 PM" - the wall clock at the *place*, not at this machine. MSN's
     // overview card carries exactly this and nothing else beside it; fetched
     // for Seattle and Toronto in the same second it reads 7:31 PM and 10:31 PM,
     // so it is the location's clock rather than the reader's.
@@ -129,7 +129,7 @@ class AppEngine : public QObject
     // It used to be `Detail.observedAt`, the observation's own timestamp, which
     // is a defensible thing to show and is not what anybody reads it as. A time
     // on a weather screen is taken for the time, and this one sat at whatever
-    // quarter-hour the provider last stamped and never moved again — a clock
+    // quarter-hour the provider last stamped and never moved again - a clock
     // that has stopped, which is worse than no clock at all.
     //
     // Empty until a place with a zone is known, and the line it belongs to drops
@@ -155,7 +155,7 @@ class AppEngine : public QObject
     // Whether a desktop notification can be posted at all: this build has Qt
     // D-Bus and there is a session bus. CONSTANT because neither answer
     // changes while the process runs. The preferences row is hidden when it is
-    // false — a switch that cannot do anything teaches the reader that the
+    // false - a switch that cannot do anything teaches the reader that the
     // preferences lie.
     Q_PROPERTY(bool notificationsAvailable READ notificationsAvailable CONSTANT)
 
@@ -184,7 +184,7 @@ public:
     static AppEngine *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 
     // Drops everything that needs a live QCoreApplication to be released
-    // cleanly — the cache's SQLite connection above all. Registered as a
+    // cleanly - the cache's SQLite connection above all. Registered as a
     // qAddPostRoutine from instance(), so it runs inside ~QCoreApplication
     // rather than during static destruction, which is far too late. Idempotent
     // and safe to call again from ~AppEngine.
@@ -203,8 +203,8 @@ public:
     // Resolves a query through the geocoder and selects the first result. For
     // `--place`, which exists so that a headless capture can be taken of
     // somewhere other than the saved place. Blocks the calling thread on the
-    // geocoder's future, which is acceptable in exactly one situation — before
-    // the window exists — and nowhere else.
+    // geocoder's future, which is acceptable in exactly one situation - before
+    // the window exists - and nowhere else.
     void selectByQuery(const QString &query, int timeoutMs = 15000);
 
     [[nodiscard]] QObject *placesModel() const;
@@ -241,7 +241,7 @@ public:
     Q_INVOKABLE void selectPlace(int row);
 
     // Row in the *search* model. Saves it if it is new, selects it either way,
-    // and clears the query — which is what "tapping a search result" means.
+    // and clears the query - which is what "tapping a search result" means.
     Q_INVOKABLE void chooseSearchResult(int row);
 
     Q_INVOKABLE void removePlace(int row);
@@ -276,7 +276,7 @@ Q_SIGNALS:
     //
     // A signal of its own because the alternative is re-emitting
     // forecastChanged() once a minute, and forecastChanged() means "there is new
-    // weather" — every view model rebuilds its whole snapshot on it. Wiring the
+    // weather" - every view model rebuilds its whole snapshot on it. Wiring the
     // minute timer to it would rebuild twelve detail cards to move one colon.
     void freshnessChanged();
 
@@ -314,7 +314,7 @@ private:
     // Which is also what keeps a capture still, though not directly: --grab and
     // --film default to a fixture, so the timer is not running in any capture
     // this repository takes. A capture that has explicitly asked for live data
-    // — --place, or --fixture off — does tick, and appoptions.cpp has already
+    // - --place, or --fixture off - does tick, and appoptions.cpp has already
     // said in so many words that such a capture is not reproducible.
     QTimer                              m_minute;
     std::unique_ptr<climat::CacheStore>  m_cache;
@@ -353,7 +353,7 @@ private:
     int     m_inFlight     = 0;
 
     // Bumped on every place change. An answer carrying an older number is an
-    // answer about somewhere the user has left, and is dropped — the same rule
+    // answer about somewhere the user has left, and is dropped - the same rule
     // PlaceSearchModel applies to out-of-order geocoder replies, for the same
     // reason.
     quint64 m_generation = 0;
@@ -362,7 +362,7 @@ private:
     ConditionsData *m_conditionsData = nullptr;
 
     // The fourth singleton QML sees. Not a formatter over the forecast the way
-    // the other two are — it is a view of a different product, on a different
+    // the other two are - it is a view of a different product, on a different
     // schedule, which is why it owns its own poll timer rather than riding this
     // class's refresh.
     AlertsData *m_alerts = nullptr;

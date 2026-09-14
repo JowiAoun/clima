@@ -17,8 +17,8 @@
 #
 # ---- this is NOT run under `nix develop` ------------------------------------
 #
-# flatpak-builder drives the host's flatpak installation — its repo, its
-# bubblewrap, its runtimes — so it has to be the host's flatpak-builder or one
+# flatpak-builder drives the host's flatpak installation - its repo, its
+# bubblewrap, its runtimes - so it has to be the host's flatpak-builder or one
 # that agrees with it. The Qt in the flake is irrelevant here; the build inside
 # the sandbox uses the SDK's Qt, which is the entire reason a Flatpak solves
 # Ubuntu 24.04. Run this from a normal shell.
@@ -81,7 +81,7 @@ case "$command" in
       "$state_dir/build" "$manifest"
 
     echo
-    echo "flatpak: installed $app_id — run it with"
+    echo "flatpak: installed $app_id - run it with"
     echo "  scripts/flatpak.sh run"
     ;;
 

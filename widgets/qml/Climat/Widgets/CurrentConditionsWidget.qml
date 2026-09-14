@@ -5,7 +5,7 @@
 //
 // The glyph is the app's own WeatherGlyph, not a second drawing of the same
 // weather. That is the point of the widget module compiling the app's
-// presentation files rather than copying them — a cloud that gains a highlight
+// presentation files rather than copying them - a cloud that gains a highlight
 // in the app gains it here on the same commit.
 
 import QtQuick

@@ -20,8 +20,8 @@ QtMessageHandler g_previous = nullptr;
 // interesting ones are `qml` (a binding failed) and `js` (something threw).
 //
 // Deliberately not filtered by severity beyond Warning. A QML `console.warn`
-// from our own code — Theme.qml's startup key check, PageBackdrop's phase
-// check, Specimen's error report — is exactly as much a failure as one the
+// from our own code - Theme.qml's startup key check, PageBackdrop's phase
+// check, Specimen's error report - is exactly as much a failure as one the
 // engine raises, and those are the ones written on purpose to be noticed.
 bool isInteresting(QtMsgType type)
 {
@@ -47,8 +47,8 @@ void handler(QtMsgType type, const QMessageLogContext &context, const QString &m
 } // namespace
 
 // Installing once in main() is not enough, and finding that out cost a test
-// that could not fail: QTestLib installs its own handler when the run starts —
-// it is how QTest::ignoreMessage works — which quietly replaced ours before a
+// that could not fail: QTestLib installs its own handler when the run starts -
+// it is how QTest::ignoreMessage works - which quietly replaced ours before a
 // single test function ran. The suite was green with `Theme.ink.typo` wired
 // into a live component, while the app printed four warnings a launch about
 // exactly that line.

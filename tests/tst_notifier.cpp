@@ -6,8 +6,8 @@
 // Same arrangement as tst_portallocator: this binary owns the well-known
 // names on a bus dbus-run-session started for it, and the class under test
 // talks to them over D-Bus exactly as it would to the desktop. What is
-// asserted is the ORDER — portal first, the service only when the portal is
-// not there — and that a portal which refuses is not gone around.
+// asserted is the ORDER - portal first, the service only when the portal is
+// not there - and that a portal which refuses is not gone around.
 
 #include "app/platform/notifier.h"
 
@@ -138,7 +138,7 @@ void TestNotifier::initTestCase()
 {
     NetworkGuard::install();
     QVERIFY2(QDBusConnection::sessionBus().isConnected(),
-             "no session bus — this test is meant to run under dbus-run-session");
+             "no session bus - this test is meant to run under dbus-run-session");
     QVERIFY(m_desktopBus.isConnected());
     QVERIFY(Notifier::available());
 }
@@ -281,7 +281,7 @@ void TestNotifier::withdrawingReachesWhicheverRouteCarriedIt()
 void TestNotifier::withdrawingClosesTheServiceNotificationItOpened()
 {
     // The half the case above cannot reach. With a portal up, the portal
-    // carries the notification and m_serviceIds is never populated — so its
+    // carries the notification and m_serviceIds is never populated - so its
     // `m_service->closed.isEmpty()` assertion passes whether or not withdraw()
     // has a service branch at all. Only the service, then, and the id it
     // handed back is the id that must come back.

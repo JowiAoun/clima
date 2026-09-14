@@ -4,8 +4,8 @@
 // Every warning QML emitted, as a thing a test can assert about.
 //
 // This exists because of a bug that had already shipped once. Launching the app
-// printed around 469 `TypeError` and `undefined` lines — bindings evaluating
-// before the first snapshot arrived — and every one of them was a card drawing
+// printed around 469 `TypeError` and `undefined` lines - bindings evaluating
+// before the first snapshot arrived - and every one of them was a card drawing
 // with a value it had not been given. The app *looked* right, all the tests
 // passed, and the only evidence was a wall of text on a stream nobody reads
 // during a build.

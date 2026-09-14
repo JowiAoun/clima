@@ -11,8 +11,8 @@
 // that rule is right everywhere the surface sits *in* the page. This one sits
 // *over* it: the page scrolls underneath, so at 0.07 the reader would watch a
 // temperature curve slide through the word "Hourly". The pager buttons already
-// established the exception — a thing that floats over moving content is
-// tinted and mostly opaque — and `navBg` is that token for this bar.
+// established the exception - a thing that floats over moving content is
+// tinted and mostly opaque - and `navBg` is that token for this bar.
 //
 // The hairline along the top is the second half of the same decision. §10.1
 // warns off borders because a border across a junction is the seam the
@@ -24,7 +24,7 @@
 // The pill slides between tabs rather than cutting, at `move`, because it is
 // the one element here that is genuinely the same object in a new place. The
 // glyphs and labels tint at `tint`. Nothing else moves, and nothing moves on a
-// timer — the bar is at rest until it is touched.
+// timer - the bar is at rest until it is touched.
 import QtQuick
 import "theme.js" as Theme
 import "mobiletabs.js" as Tabs
@@ -35,7 +35,7 @@ Item {
     property string currentId: Tabs.list[0].id
 
     // The bar's own height, without the strip below it. The shell needs both
-    // numbers — one to place the bar, one to pad the page — and they must come
+    // numbers - one to place the bar, one to pad the page - and they must come
     // from the same place or the last row of a page hides under the nav.
     readonly property real barHeight: Theme.metric.navHeight
     readonly property real safeArea: Theme.metric.navSafeArea

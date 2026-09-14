@@ -26,7 +26,7 @@ be one until the project is large enough for that to mean something.
 Worth stating plainly, because it is smaller than a weather app's usually is and
 that changes what is worth your time:
 
-- **There is no server.** Not "we do not talk about it" — there is no
+- **There is no server.** Not "we do not talk about it" - there is no
   infrastructure of ours anywhere. Every request goes from the user's machine
   directly to a public weather service.
 - **There is no account, no login and no credential of any kind.** No API key
@@ -60,7 +60,7 @@ already on disk:
 - **Alerts may be late or missing.** This app is not a life-safety system and
   says so. Severe weather warnings are shown as the issuing authority published
   them, but polling stops when the window is hidden, and there is no background
-  delivery on Android at all. Do not rely on it for a tornado warning — use the
+  delivery on Android at all. Do not rely on it for a tornado warning - use the
   authority's own channel.
 - **Coordinates are sent to weather services.** That is how a forecast is
   fetched. They are sent at four decimal places to the providers named under

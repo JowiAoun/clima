@@ -11,7 +11,7 @@
 //
 // Because the tests deliberately cannot answer the question this answers.
 // Nothing in tests/ may reach a network (docs/04-architecture.md §4.11), so the
-// suite proves the adapter is consistent with eight recorded responses — and
+// suite proves the adapter is consistent with eight recorded responses - and
 // would go on proving it after Open-Meteo renamed a field, changed a unit, or
 // started sending a WMO code nothing here has a phrase for. Recorded fixtures
 // are a guard against regression in *us*; they are not a guard against drift in
@@ -60,20 +60,20 @@ QTextStream &out()
 // like the column of dashes the UI would draw.
 QString show(Reading value, int decimals = 1)
 {
-    return value ? QString::number(*value, 'f', decimals) : QStringLiteral("—");
+    return value ? QString::number(*value, 'f', decimals) : QStringLiteral("-");
 }
 
 QString showCode(WeatherCode code)
 {
     if (!code)
-        return QStringLiteral("—");
+        return QStringLiteral("-");
     return QStringLiteral("%1 %2").arg(*code, 3).arg(conditionText(*code, true));
 }
 
 QString clock(int minutes)
 {
     if (!hasMinuteOfDay(minutes))
-        return QStringLiteral("—");
+        return QStringLiteral("-");
     // Not clamped: a moon that rose last night is genuinely negative and a
     // polar sunset is genuinely 1440. Printing the raw number is the point.
     const int hh = minutes / 60;
@@ -108,7 +108,7 @@ void printForecast(const Forecast &forecast, int hours)
     out() << "  visibility   " << show(now.visibility) << " km\n";
     out() << "  uv           " << show(now.uvIndex) << "\n";
     out() << "  condition    " << showCode(now.weatherCode) << "\n";
-    out() << "  daylight     " << (now.isDay ? (*now.isDay ? "day" : "night") : "—") << "\n";
+    out() << "  daylight     " << (now.isDay ? (*now.isDay ? "day" : "night") : "-") << "\n";
 
     // The hourly series as a chart sees it: accumulations moved onto the hour
     // they fall in. Printing the raw series instead would hide the one
@@ -164,7 +164,7 @@ void printForecast(const Forecast &forecast, int hours)
                                .arg(int(*day.daylightSeconds) / 3600)
                                .arg((int(*day.daylightSeconds) % 3600) / 60, 2, 10,
                                     QLatin1Char('0'))
-                         : QStringLiteral("—"),
+                         : QStringLiteral("-"),
                      10)
               << QStringLiteral("%1").arg(
                      clock(minutesFromLocalMidnight(day.moonrise, zone, day.date)), 10)
@@ -173,14 +173,14 @@ void printForecast(const Forecast &forecast, int hours)
               << QStringLiteral("%1").arg(show(day.moonPhase, 3), 7)
               << QStringLiteral("%1").arg(
                      illumination ? QStringLiteral("%1%").arg(int(*illumination * 100 + 0.5))
-                                  : QStringLiteral("—"),
+                                  : QStringLiteral("-"),
                      5)
               << QStringLiteral("  ") << moonPhaseName(day.moonPhase) << "\n";
     }
 
     // The local day lengths, which is where a DST window shows itself. Every
     // day is 24 hours except the two a year that are not, and Open-Meteo's own
-    // labels never say so — see libclimat/domain/timeaxis.h.
+    // labels never say so - see libclimat/domain/timeaxis.h.
     out() << "\n=== local day lengths (25 or 23 means a DST transition) =========\n  ";
     QList<QDateTime> instants;
     for (const HourlyPoint &point : forecast.hourly)

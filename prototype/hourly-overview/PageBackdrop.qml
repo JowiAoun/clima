@@ -9,7 +9,7 @@
 // Extracted from Main.qml when the gallery grew device frames. A specimen
 // framed at 390x844 inside a 950 px window was being drawn over whatever slice
 // of the *window's* gradient happened to be behind it, which is not the slice
-// it gets in the app — and the gallery's entire premise is that a component is
+// it gets in the app - and the gallery's entire premise is that a component is
 // reviewed on the background it is actually composited over.
 //
 // ---- the sky -----------------------------------------------------------------
@@ -19,7 +19,7 @@
 // one that cares: it follows the clock.
 //
 // `stars` adds the field and three constellations. On by default at night and
-// dusk only through `Theme.sky[phase].stars` — a starfield over a midday sky
+// dusk only through `Theme.sky[phase].stars` - a starfield over a midday sky
 // is not a stylistic choice, it is wrong.
 //
 // ---- why nothing here twinkles -----------------------------------------------
@@ -31,7 +31,7 @@
 // trying to read a number off a chart. It would also make every golden image
 // of every mobile screen a coin toss.
 //
-// The field is static and deterministic — see sky.js, which has no
+// The field is static and deterministic - see sky.js, which has no
 // Math.random in it for the same reason.
 //
 // The stars do not scroll with the page either. They are the sky, and the sky
@@ -50,7 +50,7 @@ Rectangle {
     property bool stars: false
 
     // `skyPalette` rather than the obvious `palette`: Item already declares
-    // that one, and shadowing it is not an error — it is a runtime warning and
+    // that one, and shadowing it is not an error - it is a runtime warning and
     // a property that quietly means two things. Same family of trap as the
     // FINAL `top` the README records.
     readonly property var skyPalette: Theme.sky[phase] !== undefined ? Theme.sky[phase]
@@ -78,7 +78,7 @@ Rectangle {
         opacity: root.starOpacity
 
         // ---- the field ------------------------------------------------------
-        // Plain Rectangles, not Shapes. At 0.55–2 px these are points, and a
+        // Plain Rectangles, not Shapes. At 0.55-2 px these are points, and a
         // radial gradient per point would be 120 offscreen passes to draw
         // something two pixels across.
         Repeater {
@@ -98,7 +98,7 @@ Rectangle {
         }
 
         // ---- the brighter few ----------------------------------------------
-        // A glow, not a disc — the distinction §10.1 draws, and the same one
+        // A glow, not a disc - the distinction §10.1 draws, and the same one
         // WeatherGlyph's sun halo had to learn: a flat circle has an edge you
         // can trace, and an edge makes it a stacked wash.
         Repeater {
@@ -109,8 +109,8 @@ Rectangle {
                 required property var modelData
 
                 // Every dimension below is `beacon.something`, never `parent`.
-                // Inside a RadialGradient, `parent` is the ShapePath — which
-                // has no width — so `parent.width / 2` is NaN and the gradient
+                // Inside a RadialGradient, `parent` is the ShapePath - which
+                // has no width - so `parent.width / 2` is NaN and the gradient
                 // renders as a flat white disc the size of the item. That is
                 // exactly what it did: nine hard white blobs sitting on top of
                 // the ten-day card, and the mistake is invisible in the code.

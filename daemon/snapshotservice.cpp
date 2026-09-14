@@ -61,7 +61,7 @@ void SnapshotService::configure(const QString &fixtureName)
 {
     m_fixtureName = fixtureName;
 
-    // The clock first, and everything else is handed it — the same single
+    // The clock first, and everything else is handed it - the same single
     // branch AppEngine::configure takes, for the same reason.
     if (isFixtureMode()) {
         m_fixture = fixtures::load(fixtureName);
@@ -203,9 +203,9 @@ void SnapshotService::watchPlaces()
         return;
 
     // Settled rather than immediate, and the interval is chosen for SQLite
-    // rather than for the user. One place added by the app is several writes —
+    // rather than for the user. One place added by the app is several writes -
     // the row, the home flag on the row that used to hold it, the WAL, a
-    // checkpoint — and re-reading the table between two of them would answer a
+    // checkpoint - and re-reading the table between two of them would answer a
     // question about a half-finished edit.
     m_placesSettle = new QTimer(this);
     m_placesSettle->setSingleShot(true);
@@ -337,8 +337,8 @@ SnapshotService::Watched &SnapshotService::ensureWatched(const QString &placeId)
     it          = m_watched.insert(placeId, fresh);
 
     // A place nobody has asked about before has nothing in memory. The cache
-    // first, synchronously, so that a GetSnapshot in this same turn — which is
-    // when a starting widget host makes it — gets a stale reading rather than
+    // first, synchronously, so that a GetSnapshot in this same turn - which is
+    // when a starting widget host makes it - gets a stale reading rather than
     // a gap; then a fetch, which brings the reading up to date. The same rule
     // the app's first frame follows, one process further out.
     warmFromCache(*it);
@@ -359,7 +359,7 @@ void SnapshotService::warmFromCache(Watched &watched)
 
     // Asked of the providers directly rather than through the registry's walk.
     // The walk chains its attempts through QFuture::then with a context
-    // object, and a continuation with a context runs on the event loop — even
+    // object, and a continuation with a context runs on the event loop - even
     // when the future it hangs off finished before it was attached. A cached
     // answer from a provider, on the other hand, is a promise finished before
     // fetchForecast() returns, and isFinished() is what tells the two apart. A
@@ -415,7 +415,7 @@ void SnapshotService::warmFromCache(Watched &watched)
         }
 
         // By value, and that is not a style choice. QFuture::result() returns a
-        // Result BY VALUE, and Result::value() hands back a reference into it —
+        // Result BY VALUE, and Result::value() hands back a reference into it -
         // so `const AlertSet &part = answer.result().value();` binds to a
         // temporary that is destroyed at the end of that statement, and every
         // read of it afterwards is a use-after-free. It survives only while the
@@ -510,7 +510,7 @@ QString SnapshotService::subscribe(const QString    &placeId,
     //
     // The subscriber is blocked in this method call. It cannot add its match
     // rule until the reply reaches it, and adding one is itself a round trip to
-    // the bus daemon — while singleShot(0) fires here as soon as the reply is
+    // the bus daemon - while singleShot(0) fires here as soon as the reply is
     // *written*. So the race is not close: the first snapshot is normally
     // emitted before anybody is listening for it, and a widget then shows its
     // waiting skeleton until the next poll five minutes later.
@@ -556,8 +556,8 @@ QByteArray SnapshotService::catalogue() const
 void SnapshotService::onPollTimeout()
 {
     // The guarantee behind the file watcher. If a notification was never
-    // delivered — a filesystem that does not report, a database on a network
-    // home, a container that isolates inotify — the list is still re-read here,
+    // delivered - a filesystem that does not report, a database on a network
+    // home, a container that isolates inotify - the list is still re-read here,
     // and the worst case becomes "the widgets follow within five minutes"
     // rather than "the widgets never follow".
     reloadPlaces();

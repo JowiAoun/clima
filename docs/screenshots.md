@@ -7,7 +7,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 There are **three** capture profiles in this repository and they are
 deliberately different from one another. Using the wrong one is not a matter of
-taste — one of them gets rejected by Flathub's linter, and another one fails CI.
+taste - one of them gets rejected by Flathub's linter, and another one fails CI.
 
 | Profile | Made by | Looks like | Compared how |
 |---|---|---|---|
@@ -15,7 +15,7 @@ taste — one of them gets rejected by Flathub's linter, and another one fails C
 | **showcase** | `scripts/shots.sh` | device bezels, composed | byte for byte, every commit |
 | **store** | `climat --grab` | raw, un-bezelled, whole window | not compared |
 
-## golden — the regression detector
+## golden - the regression detector
 
 50 scenes from the app and the gallery, in `tests/golden/images/`. Nobody looks
 at these; a machine does.
@@ -26,7 +26,7 @@ scripts/golden.sh accept     # re-record, deliberately
 ```
 
 They reproduce because `flake.lock` pins nixpkgs by revision, so Qt, FreeType
-and fontconfig are identical everywhere down to the store hash — a stronger
+and fontconfig are identical everywhere down to the store hash - a stronger
 guarantee than the digest-pinned container the plan originally assumed. On top
 of that, `tests/golden/fontconfig.conf` declares **no font directories at all**
 (the typeface is inside the binary), which is what stops a host font being
@@ -36,7 +36,7 @@ produced three different checksums.
 `tst_environment` runs first by way of its `DEPENDS`, so rasterisation drift
 arrives as one sentence about the machine rather than as forty picture diffs.
 
-## showcase — the images people look at
+## showcase - the images people look at
 
 Five composed sheets in `docs/images/`, used by the README.
 
@@ -47,14 +47,14 @@ scripts/shots.sh check       # CI gate
 
 These are not screenshots pasted into a README. `ShotSheet.qml` builds real
 `MobileShell` and `WeatherPage` instances at the widths `Viewports` declares,
-inside `DeviceFrame` bezels, on the app's own page gradient — so a README image
+inside `DeviceFrame` bezels, on the app's own page gradient - so a README image
 cannot show a layout the app does not produce. Change a breakpoint and the
 images move; CI notices.
 
 The catalogue is `gallery/qml/Climat/Gallery/shots.js`, and it carries no pixel
 dimensions. A sheet says which devices it shows and how far they are zoomed; the
 size comes from `Viewports` at build time. A `.pragma library` cannot reach a
-QML singleton, which is a limitation worth keeping — it is what stops the
+QML singleton, which is a limitation worth keeping - it is what stops the
 numbers being copied in.
 
 Adding a sheet means editing three places, and `tests/qml/tst_shots.qml` fails
@@ -62,7 +62,7 @@ until they agree: `shots.js`, `GalleryOptions::shotIds()` (a command line has to
 reject a bad id before any QML loads, and C++ cannot read a `.pragma library`),
 and then `scripts/shots.sh` picks it up automatically.
 
-## store — what Flathub and GNOME Software show
+## store - what Flathub and GNOME Software show
 
 Raw grabs from the app itself, with no frame around them:
 
@@ -85,12 +85,12 @@ moves with the branch. The URLs are declared in
 ## Determinism, for all three
 
 Every profile captures against a **fixture at a frozen clock**, never live data
-— `--grab` implies `--fixture toronto` unless told otherwise. A live capture is
+- `--grab` implies `--fixture toronto` unless told otherwise. A live capture is
 a picture of the weather that afternoon and cannot be compared to anything.
 
 ### What a fixture hides
 
-A fixture is published **before the QML engine loads** — `main.cpp` puts
+A fixture is published **before the QML engine loads** - `main.cpp` puts
 `AppEngine::configure()` ahead of it so the first frame has data in it, and a
 fixture's futures are finished inside that call. A live first fetch is not: the
 answer is delivered on the next pass of the event loop, which is after the whole
@@ -106,7 +106,7 @@ them are fixtures.
 
 The rule that follows: if a component computes something once, at construction,
 from data or from layout, that is a thing this suite cannot check. Assert the
-relationship in `tests/qml/` instead — `tst_hourlychart.qml` is that for this
+relationship in `tests/qml/` instead - `tst_hourlychart.qml` is that for this
 one, and it builds a card with no width and then gives it one.
 
 `Theme.stillness` collapses every animation duration to zero for a still
@@ -122,7 +122,7 @@ source change between them. Two separate failures, and they are not the same
 kind of thing.
 
 **A whole `Shape` missing.** One run in five came back with the preferences gear
-absent from `alert-desktop` and `alert-desktop-light` — 600 bytes smaller, and
+absent from `alert-desktop` and `alert-desktop-light` - 600 bytes smaller, and
 it reads exactly like a bug in the gear rather than a bug in the harness. Qt
 Quick's render loop is threaded by default and `grabToImage()` completes on the
 render thread, so the shutter races the scene. `QSG_RENDER_LOOP=basic` is now
@@ -131,7 +131,7 @@ added, and it has not recurred in fourteen runs. That is evidence, not proof,
 for something that appeared once in five.
 
 **Twenty-three pixels, off by one.** Still happening, in about two runs in five,
-and always identically: `desktop-preferences.png`, x 89–95, y 827–838 — the
+and always identically: `desktop-preferences.png`, x 89-95, y 827-838 - the
 chevron of the left pager in the hourly chart, under the sheet's scrim. The
 largest channel difference is **1**, which is a rasteriser rounding a blend two
 ways rather than anything in the scene. It survives `QSG_RENDER_LOOP=basic`
@@ -143,17 +143,17 @@ a *different* PagerButton race and is documented in `Theme.qml`. A shade caught
 mid-fade would be tens of levels, not one.
 
 **What it costs, and the two ways out.** A suite that fails two runs in five
-teaches people to re-run it, which is the same as not having it — so this needs
+teaches people to re-run it, which is the same as not having it - so this needs
 settling before it trains anybody. Either find the remaining rounding (the next
 suspect is scene-graph batching: the chevron is the one antialiased thing under
 a translucent full-page layer, and how it batches with that layer is not a
-stable property of the scene), or compare with a tolerance — no pixel off by
+stable property of the scene), or compare with a tolerance - no pixel off by
 more than one level, no more than N pixels, and report every tolerated pixel so
 nothing hides behind it. The second gives up the byte-equality claim that is
 this suite's whole argument, so it is a decision rather than a fix.
 
 Two things worth taking from it either way. An intermittent capture does not
-look intermittent — it looks like whatever it dropped, so the first suspect is
+look intermittent - it looks like whatever it dropped, so the first suspect is
 the newest thing on the page, which is how this cost an afternoon on a gear that
 was never broken. And a harness that pins twelve variables to make the pixels
 reproducible had pinned nothing about *which frame* they came from.
@@ -161,6 +161,6 @@ reproducible had pinned nothing about *which frame* they came from.
 ## When an image changes
 
 A pull request that re-records any compared image **has to say why the pixels
-moved**. That sentence is the entire value of both suites — see
+moved**. That sentence is the entire value of both suites - see
 [`CONTRIBUTING.md`](../CONTRIBUTING.md). Look at the `.actual.png` files a
 failing run leaves beside the originals before assuming the test is wrong.

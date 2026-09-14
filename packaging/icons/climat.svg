@@ -16,14 +16,14 @@
 
   Drawn at 512 and designed to survive 16. The rules that follow from that:
 
-    * Two shapes carry the icon — a warm disc and a pale cloud — because a third
+    * Two shapes carry the icon - a warm disc and a pale cloud - because a third
       is mud at 16 px. The stars are texture, not information: at 512 they are
       6 px and read, at 16 they are a fifth of a pixel and disappear, which is
       the correct way for a detail to degrade.
     * The sun sits up-left and the cloud crosses it low-right, so the two never
       resolve into one blob. Overlap is what makes it read as weather rather
       than as a yellow dot.
-    * The halo is a radial fading to zero alpha, never a flat disc — the same
+    * The halo is a radial fading to zero alpha, never a flat disc - the same
       correction WeatherGlyph.qml carries, and for the same reason: a flat
       circle has an edge you can trace at any size above a thumbnail.
 -->

@@ -5,13 +5,13 @@
 //
 // Every assertion here is exact. There is no network, no clock and no
 // randomness in the answer, which is the whole argument for the index being
-// bundled rather than fetched — a golden image with a place name in the corner
+// bundled rather than fetched - a golden image with a place name in the corner
 // is only golden if that name cannot change under it.
 //
 // ---- the four coordinates, and why each one is here -------------------------
 //
 //   Toronto      the case that plain nearest-neighbour gets wrong. The nearest
-//                row to Yonge and Queen is Moss Park, 880 m away — a
+//                row to Yonge and Queen is Moss Park, 880 m away - a
 //                neighbourhood. This asserts that the answer is Toronto.
 //
 //   Reykjavík    a small capital with a larger suburb next door and a
@@ -22,7 +22,7 @@
 //                with six-figure populations. Nearest gives Ang Mo Kio New
 //                Town; the footprint rule gives Singapore.
 //
-//   Point Nemo   48.8767 S, 123.3933 W — the oceanic pole of inaccessibility,
+//   Point Nemo   48.8767 S, 123.3933 W - the oceanic pole of inaccessibility,
 //                2 690 km from the nearest land. This is the "nowhere" case,
 //                and what it returns is a decision this file records:
 //                ErrorKind::Unsupported, not a city on another continent.
@@ -97,15 +97,15 @@ void TestReverseGeocode::theBundledIndexIsPresentAndSmall()
     // The size is asserted, not merely reported. The packed index is committed
     // to the repository and compiled into every binary we ship, so a change
     // that doubles it should fail a test rather than turn up in a download
-    // size six weeks later. The bound is deliberately loose — this is a
-    // regression guard, not a budget — and docs/03-tech-stack.md §3.4 gives the
+    // size six weeks later. The bound is deliberately loose - this is a
+    // regression guard, not a budget - and docs/03-tech-stack.md §3.4 gives the
     // whole binary 15 MB.
     QFile file(GeonamesIndex::bundledResourcePath());
     QVERIFY2(file.open(QIODevice::ReadOnly), "the packed index is not in the binary");
 
     const qint64 bytes = file.size();
     QVERIFY2(bytes > 300 * 1024,
-             qPrintable(QStringLiteral("the index is only %1 bytes — it is truncated").arg(bytes)));
+             qPrintable(QStringLiteral("the index is only %1 bytes - it is truncated").arg(bytes)));
     QVERIFY2(bytes < 512 * 1024,
              qPrintable(QStringLiteral("the index has grown to %1 bytes").arg(bytes)));
 
@@ -118,8 +118,8 @@ void TestReverseGeocode::theBundledIndexIsPresentAndSmall()
 void TestReverseGeocode::torontoBeatsTheNeighbourhoodNextDoor()
 {
     // Yonge and Queen. The nearest row in the dataset is Moss Park at 880 m,
-    // then Bay Street Corridor, then Church-Yonge Corridor — all of them
-    // dropped as PPLX — and after that Etobicoke at 15 km. Toronto's own row
+    // then Bay Street Corridor, then Church-Yonge Corridor - all of them
+    // dropped as PPLX - and after that Etobicoke at 15 km. Toronto's own row
     // is 6.4 km away at the city centroid, and it wins because the point is
     // deep inside its modelled footprint.
     const Result<ReverseMatch> found = m_geocoder.reverse(at(43.65, -79.38));
@@ -158,7 +158,7 @@ void TestReverseGeocode::reykjavikKeepsItsAccentAndBeatsItsSuburb()
     QCOMPARE(place.geonamesId, Q_INT64_C(3413829));
 
     // Kópavogur is 4.1 km away and Reykjavík is 2.6 km away, so nearest agrees
-    // here — but the ratio is what decides, and Kópavogur's is 1.6 against
+    // here - but the ratio is what decides, and Kópavogur's is 1.6 against
     // Reykjavík's 0.6. The two rules agreeing is worth asserting precisely
     // because in Toronto and Singapore they do not.
     QVERIFY(found.value().insideFootprint);
@@ -180,7 +180,7 @@ void TestReverseGeocode::singaporeBeatsItsNewTowns()
     QCOMPARE(place.geonamesId, Q_INT64_C(1880252));
 
     // A country with no first-level divisions. The label must not end up as
-    // "Singapore, " — Place::label() drops the comma, and the index stores the
+    // "Singapore, " - Place::label() drops the comma, and the index stores the
     // empty admin1 as a real table entry rather than as a sentinel.
     QVERIFY(place.admin1.isEmpty());
     QCOMPARE(place.label(), QStringLiteral("Singapore"));
@@ -220,7 +220,7 @@ void TestReverseGeocode::aPointInTheOceanIsUnsupported()
     // Unsupported for "the provider does not cover this coordinate", and the
     // difference matters: NotFound invites the caller to try another provider,
     // and there is no provider for which the middle of the Pacific is a town.
-    // The UI shows the coordinate instead — §4.4 again: a provider that
+    // The UI shows the coordinate instead - §4.4 again: a provider that
     // returns nothing must make the UI hide the feature, not show a broken one.
     QCOMPARE(found.errorKind(), ErrorKind::Unsupported);
     QVERIFY2(found.error().message().contains(QStringLiteral("250 km")),
@@ -253,8 +253,8 @@ void TestReverseGeocode::aDetectedPlaceAndASearchedPlaceAreTheSameEntity()
     // The payoff, and the fourth reason the reverse index is GeoNames rather
     // than Nominatim.
     //
-    // The fixture is a recorded response from Open-Meteo's geocoding API — a
-    // different service, a different host, a different code path — and the
+    // The fixture is a recorded response from Open-Meteo's geocoding API - a
+    // different service, a different host, a different code path - and the
     // Place it parses to has to be the same place as the one the bundled index
     // returns for a coordinate downtown. Nominatim would have answered with an
     // OSM relation id, which has no correspondence to a GeoNames id at all,
@@ -315,7 +315,7 @@ void TestReverseGeocode::truncatedBytesAreRejectedRatherThanRead()
     GeonamesIndex index;
 
     // Empty, short, and half a file. Each one has to come back as a Parse
-    // error rather than as a load that half-succeeds — the columns are
+    // error rather than as a load that half-succeeds - the columns are
     // length-prefixed varints, and a reader that trusted them would walk off
     // the end of the payload.
     QCOMPARE(index.load(QByteArray()).errorKind(), ErrorKind::Parse);

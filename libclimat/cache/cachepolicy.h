@@ -5,7 +5,7 @@
 //
 // The table in cachepolicy.cpp is a transcription of docs/04-architecture.md
 // §4.5 and nothing else. It is not tuned, it is not guessed, and a change to a
-// number here is a change to that document first — the numbers are downstream
+// number here is a change to that document first - the numbers are downstream
 // of what the providers actually publish (CAMS updates twelve-hourly, a radar
 // frame has a five-minute lifetime, ERA5 reanalysis never changes once it is
 // written) rather than of anybody's opinion about freshness.
@@ -18,7 +18,7 @@
 //   ttl                   when the entry stops being fresh.
 //
 //   revalidation          what we send to ask "is it still the same?".
-//     Cheap for us and cheaper for them — MET Norway's terms *require*
+//     Cheap for us and cheaper for them - MET Norway's terms *require*
 //     conditional requests, and a 304 costs a few hundred bytes against a
 //     hundred-kilobyte forecast. `None` means the endpoint offers no
 //     validator worth sending; `CapLifetime` means the payload carries its own
@@ -26,8 +26,8 @@
 //
 //   staleWhileRevalidate  whether an expired entry may still be shown while a
 //     fresh one is fetched.
-//     This is design principle 1 in §4.1 — "The UI must never show an empty
-//     screen because an API is down" — expressed as a per-kind flag. It is
+//     This is design principle 1 in §4.1 - "The UI must never show an empty
+//     screen because an API is down" - expressed as a per-kind flag. It is
 //     true for everything except alerts, and the exception is the reason the
 //     flag exists at all: showing a stale forecast reads as "updated 25
 //     minutes ago", and showing a stale tornado warning reads as a tornado
@@ -41,7 +41,7 @@
 // codebase does arithmetic on a number chosen to be too big to matter, and the
 // day one of them overflows or one of them is compared with `<` instead of
 // `<=` there is no test that notices. So it is a separate flag, and an
-// immutable entry gets an *invalid* expiry timestamp in the database — a value
+// immutable entry gets an *invalid* expiry timestamp in the database - a value
 // SQLite stores as NULL and QDateTime reports as invalid, which every read
 // path already has to handle.
 
@@ -86,7 +86,7 @@ struct CachePolicy {
     bool immutable = false;
 };
 
-// The table. Total over DataKind — adding a kind without adding its row is a
+// The table. Total over DataKind - adding a kind without adding its row is a
 // compile error under -Wswitch, which is on for this library.
 CachePolicy policyFor(DataKind kind);
 
@@ -99,7 +99,7 @@ QString  dataKindName(DataKind kind);
 DataKind dataKindFromName(const QString &name, bool *ok = nullptr);
 
 // When an entry fetched at `fetchedAt` stops being fresh. Returns an invalid
-// QDateTime for an immutable kind — see the header comment; invalid means
+// QDateTime for an immutable kind - see the header comment; invalid means
 // "never".
 QDateTime expiryFor(DataKind kind, const QDateTime &fetchedAt);
 

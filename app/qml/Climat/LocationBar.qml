@@ -15,9 +15,9 @@ Item {
     property string label: Detail.location.label
     property bool isHome: Detail.location.isHome
 
-    // Whether the picker this bar opens is currently up. Bound from outside —
+    // Whether the picker this bar opens is currently up. Bound from outside -
     // the picker is a sheet over the whole page and the bar is inside it, so
-    // the bar cannot own it — and read here for one thing only: which way the
+    // the bar cannot own it - and read here for one thing only: which way the
     // chevron points.
     property bool disclosed: false
 
@@ -31,19 +31,19 @@ Item {
     // that is already there and that nothing else is aiming at.
     //
     // The alternative was to make the bar 44 and it moved every page in the app
-    // down by 18 px — a whole-page diff on eleven golden images to make room for
+    // down by 18 px - a whole-page diff on eleven golden images to make room for
     // air around two marks that had not changed size. The rule this file ended
     // up on is the one TouchTarget states: the target grows, the layout does
     // not. Here it could not be TouchTarget itself, because the two marks are
-    // too close together for two 44 px areas — so the cells grew instead, and
+    // too close together for two 44 px areas - so the cells grew instead, and
     // only across.
     implicitHeight: 26
     height: implicitHeight
 
     // ---- spacing is the touch fix here ---------------------------------------
     //
-    // The chevron and the home marker are two different actions — open the
-    // place list, make this place home — and they used to sit 10 px apart, with
+    // The chevron and the home marker are two different actions - open the
+    // place list, make this place home - and they used to sit 10 px apart, with
     // a 14 px target and a 24 px one. Two 44 px targets need 88 px between their
     // outer edges and cannot be conjured out of 48; growing them in place would
     // have made each one steal half the other's taps, which is worse than
@@ -52,7 +52,7 @@ Item {
     // So the cells are the floor and the spacing goes to zero, which puts 15 px
     // of air between the name and the chevron where there were 10, and 25 px
     // between the chevron and the home ring where there were 10. That reads as
-    // a deliberate separation of two unlike controls rather than as a gap — and
+    // a deliberate separation of two unlike controls rather than as a gap - and
     // it is the only part of this bar that moved. See `implicitHeight`.
     Row {
         id: bar
@@ -77,8 +77,8 @@ Item {
         // over and reveals nothing is an animation making a promise the app
         // cannot keep.
         //
-        // The promise is kept. The signal opens PlacePicker — search, saved
-        // places, use my location — so the chevron is doing what a disclosure
+        // The promise is kept. The signal opens PlacePicker - search, saved
+        // places, use my location - so the chevron is doing what a disclosure
         // chevron means: pointing at the thing it opened, and pointing back
         // when it closes. `disclosed` is bound from whichever page owns the
         // sheet, so the arrow is a readout of the picker's state rather than a
@@ -141,8 +141,8 @@ Item {
                 Behavior on color {
                     ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                 }
-                // The marker is a toggle — `homeToggled()` is its whole reason
-                // for having a tap target — so the ring must not snap between
+                // The marker is a toggle - `homeToggled()` is its whole reason
+                // for having a tap target - so the ring must not snap between
                 // states while the wash behind it fades.
                 Behavior on border.color {
                     ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }

@@ -6,8 +6,8 @@
 //
 // app/main.cpp calls Settings::prepareStorage() before anything else, because
 // the weather app remembers its window size and its units. This calls it too,
-// and the rule it used to state — a developer tool has no business writing to
-// the config directory the product reads — is kept by the FILE rather than by
+// and the rule it used to state - a developer tool has no business writing to
+// the config directory the product reads - is kept by the FILE rather than by
 // the directory: `climat-gallery.ini` sits beside `climat.ini` and nothing in
 // this process can reach the second one. Open the gallery at 1500x950 and the
 // app still opens where the reader left it.
@@ -19,10 +19,10 @@
 // capture locale while every app image stayed 12-hour, so the component
 // browser was drawing something the product does not. A gallery that renders
 // the app's components in the app's typeface should read the app's
-// preferences too — and scripts/golden.sh pins them for a capture by writing
+// preferences too - and scripts/golden.sh pins them for a capture by writing
 // exactly this file.
 //
-// AppFont::install() is the opposite case — the one piece of app/main.cpp this
+// AppFont::install() is the opposite case - the one piece of app/main.cpp this
 // file must copy. The specimens on the stage are the app's own components out
 // of the app's own module, and a review of them in a different typeface is a
 // review of something the product does not ship.
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationName(QStringLiteral("climat-gallery"));
     QGuiApplication::setApplicationVersion(QStringLiteral(CLIMAT_VERSION));
 
-    // INI on every platform, before anything constructs a QSettings — the same
+    // INI on every platform, before anything constructs a QSettings - the same
     // first line app/main.cpp runs, and for the same reason its header gives.
     // Without it this process would read `.conf` through NativeFormat while
     // every other Climat binary reads `.ini`, which is a preference that appears
@@ -79,14 +79,14 @@ int main(int argc, char *argv[])
     //
     // So there is no live mode here and no flag for one: the recorded Toronto
     // afternoon at its frozen clock, always, which is the same data
-    // `climat --fixture toronto` shows — so a card that looks right on the stage
+    // `climat --fixture toronto` shows - so a card that looks right on the stage
     // looks the same in the product.
     AppEngine::instance()->configure(climat::fixtures::defaultName());
 
     QQmlApplicationEngine engine;
 
     // A QML file that fails to construct its root object leaves the engine
-    // holding nothing and the event loop with no window to show — the process
+    // holding nothing and the event loop with no window to show - the process
     // comes up invisible and has to be killed. Exit instead, non-zero, so a
     // headless capture in CI fails as a failure rather than as a timeout.
     QObject::connect(

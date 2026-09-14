@@ -11,7 +11,7 @@
 #
 # Note what this does *not* do: it does not fall back to <nixpkgs>. A channel
 # would make this file work on a machine with no network and no lock discipline
-# — and would hand that machine a different Qt from everyone else's, which is
+# - and would hand that machine a different Qt from everyone else's, which is
 # the exact failure the pin exists to prevent. If flake.lock cannot be honoured,
 # better to fail loudly here.
 
@@ -20,7 +20,7 @@ let
   node = lock.nodes.nixpkgs.locked;
 
   # narHash is the hash of the unpacked tree, which is precisely what
-  # fetchTarball checks — so the lockfile's own integrity field does the work
+  # fetchTarball checks - so the lockfile's own integrity field does the work
   # here with nothing restated.
   nixpkgs = builtins.fetchTarball {
     url = "https://github.com/${node.owner}/${node.repo}/archive/${node.rev}.tar.gz";

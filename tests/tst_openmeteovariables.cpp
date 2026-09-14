@@ -9,7 +9,7 @@
 //     "Every name below is asked for in a query string and read out of a JSON
 //      object by the same spelling. Split across two files they drift the moment
 //      somebody adds a variable to one of them, and the symptom is a column of
-//      absent Readings for a variable the response does not contain — which
+//      absent Readings for a variable the response does not contain - which
 //      looks exactly like a provider that does not have it at that location,
 //      which is a thing that genuinely happens."
 //
@@ -27,7 +27,7 @@
 // ---- and one rule that is not about spelling --------------------------------
 //
 // `current=` may not name a variable Open-Meteo does not serve as a current
-// value. That is not a missing field — it is a 400 for the entire request, so
+// value. That is not a missing field - it is a 400 for the entire request, so
 // one wrong name in that list takes the forecast, the chart, the ten-day strip
 // and every detail card down together. The subset check below is what stops a
 // variable being added to `current` because it looked useful in `hourly`.
@@ -64,7 +64,7 @@ QSet<QString> asSet(const QList<QLatin1String> &names)
 // Every fixture recorded from /v1/forecast, and only those.
 //
 // `toronto-dst-fall.json` and `toronto-dst-spring.json` are deliberately not
-// here. They come from archive-api.open-meteo.com — ERA5 reanalysis — because
+// here. They come from archive-api.open-meteo.com - ERA5 reanalysis - because
 // the forecast endpoint only reaches 92 days back and Toronto's DST
 // transitions are outside that window. The archive serves a different and
 // smaller set of variables: no `precipitation_probability`, no
@@ -80,8 +80,8 @@ QSet<QString> asSet(const QList<QLatin1String> &names)
 // The remaining six ARE witnesses: record.sh builds their query strings from
 // the same lists this file is testing, so each one is a recording of those
 // names being accepted and answered by the live service. The fixtures contain
-// MORE than we ask for — `snow_depth`, the three cloud-cover layers,
-// `surface_pressure` — which is deliberate and is why the closure only runs in
+// MORE than we ask for - `snow_depth`, the three cloud-cover layers,
+// `surface_pressure` - which is deliberate and is why the closure only runs in
 // one direction: everything asked for came back, not everything that came back
 // was asked for.
 QStringList forecastFixtures()
@@ -151,7 +151,7 @@ void TestOpenMeteoVariables::everyHourlyVariableComesBackInARecordedResponse()
 
     for (const QLatin1String &variable : hourlyVariables()) {
         QVERIFY2(hourly.contains(QString(variable)),
-                 qPrintable(QStringLiteral("%1: hourly has no \"%2\" — the request asks for a "
+                 qPrintable(QStringLiteral("%1: hourly has no \"%2\" - the request asks for a "
                                            "name the response does not use")
                                 .arg(name, QString(variable))));
     }
@@ -180,7 +180,7 @@ void TestOpenMeteoVariables::everyDailyVariableComesBackInARecordedResponse()
 void TestOpenMeteoVariables::everyCurrentVariableComesBackInARecordedResponse()
 {
     // Only the fixtures that recorded a `current` block. A payload without one
-    // is not a failure — the block is requested separately — but a payload WITH
+    // is not a failure - the block is requested separately - but a payload WITH
     // one has to answer every name in the list, because a `current=` naming a
     // variable Open-Meteo does not serve is a 400 for the whole request.
     int checked = 0;
@@ -207,7 +207,7 @@ void TestOpenMeteoVariables::everyCurrentVariableComesBackInARecordedResponse()
 
 void TestOpenMeteoVariables::currentIsASubsetOfHourly()
 {
-    // "A subset of the hourly one — Open-Meteo does not offer every variable as
+    // "A subset of the hourly one - Open-Meteo does not offer every variable as
     // a current value, and asking for one it does not have fails the whole
     // request rather than omitting that field."
     //
@@ -231,7 +231,7 @@ void TestOpenMeteoVariables::currentDoesNotAskForPrecipitationProbability()
     // Named specifically because it is the one Open-Meteo has no current value
     // for, it is obviously useful, and the comment in openmeteovariables.cpp is
     // the only thing standing between it and somebody adding it. The cost of
-    // being wrong is not a missing number — it is a 400 that empties every
+    // being wrong is not a missing number - it is a 400 that empties every
     // screen in the app.
     QVERIFY(!asSet(currentVariables()).contains(QStringLiteral("precipitation_probability")));
     QVERIFY(asSet(hourlyVariables()).contains(QStringLiteral("precipitation_probability")));
@@ -279,7 +279,7 @@ void TestOpenMeteoVariables::theSpellingsAreTheOnesOpenMeteoUses_data()
         "dew_point_2m",                // not "dewpoint"
         "apparent_temperature",        // not "feels_like"
         "precipitation_probability",   // not "precipitation_chance"
-        "weather_code",                // not "weathercode" — that is the v1 spelling
+        "weather_code",                // not "weathercode" - that is the v1 spelling
         "cloud_cover",                 // not "cloudcover"
         "wind_speed_10m",              // not "windspeed_10m"
         "wind_gusts_10m",              // not "wind_gust_10m"
@@ -328,7 +328,7 @@ void TestOpenMeteoVariables::theQueryParametersCarryNothingAUrlWouldHaveToEscape
 {
     // These go into a query string. A space or an ampersand in one would either
     // be percent-encoded into a name the service does not know, or split the
-    // parameter — and both produce the same "variable not in the response"
+    // parameter - and both produce the same "variable not in the response"
     // symptom the whole file is about.
     for (const QString &parameter : { hourlyParameter(), dailyParameter(), currentParameter() }) {
         for (const QChar c : parameter) {
@@ -356,7 +356,7 @@ void TestOpenMeteoVariables::theVariablesTheCardsDoNotReadAreStillAbsent()
     // and thrown away on every refresh, forever, against a free service's rate
     // limit."
     //
-    // The recorded fixtures DO contain them, deliberately — so the day a card
+    // The recorded fixtures DO contain them, deliberately - so the day a card
     // wants one, only this list has to change. Which is also why their absence
     // here cannot be inferred from the fixtures and has to be asserted.
     const QSet<QString> asked = asSet(hourlyVariables()) + asSet(currentVariables());
@@ -369,7 +369,7 @@ void TestOpenMeteoVariables::theVariablesTheCardsDoNotReadAreStillAbsent()
                  qPrintable(QStringLiteral("\"%1\" is fetched and never read").arg(unused)));
     }
 
-    // And `minutely_15` is not a forecast variable at all — it is a separate
+    // And `minutely_15` is not a forecast variable at all - it is a separate
     // request with its own cache row and its own region limits.
     for (const QLatin1String &name : hourlyVariables())
         QVERIFY(!QString(name).contains(QStringLiteral("minutely")));
@@ -378,7 +378,7 @@ void TestOpenMeteoVariables::theVariablesTheCardsDoNotReadAreStillAbsent()
 void TestOpenMeteoVariables::theMoonVariablesAreAskedForRatherThanComputed()
 {
     // "The three that delete a planned task. DetailMoonCard needs a phase, a
-    // rise and a set, and the alternative to these was a local ephemeris —
+    // rise and a set, and the alternative to these was a local ephemeris -
     // Meeus' lunar terms, a few hundred lines of astronomy nobody here would be
     // qualified to review."
     //

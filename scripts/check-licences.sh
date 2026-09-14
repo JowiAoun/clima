@@ -20,7 +20,7 @@
 # down. None of those appear in CMake as a banned name; all of them appear in
 # the linked binary as a DT_NEEDED entry.
 #
-# So this reads the artefact. The two are not redundant — one checks the recipe
+# So this reads the artefact. The two are not redundant - one checks the recipe
 # and one checks the cake, and R2 in docs/08-risks.md is a risk precisely
 # because the two can differ.
 #
@@ -28,7 +28,7 @@
 #
 # R2. No GPLv3-or-commercial Qt module. Qt Charts, Graphs, Lottie, Quick3D and
 #     VirtualKeyboard are licensed GPLv3-or-commercial rather than
-#     LGPLv3 — so linking one does not merely add a dependency, it relicenses
+#     LGPLv3 - so linking one does not merely add a dependency, it relicenses
 #     the result. The app is GPL-3.0-or-later and would survive that; libclimat
 #     is MPL-2.0 and would not, and neither would any downstream reuse of it,
 #     which is the entire point of the split in D6.
@@ -37,7 +37,7 @@
 #     licensed work link an LGPL library only if the user can relink against a
 #     modified version. Static linking removes that, and the obligation it
 #     replaces it with is to ship the object files. A statically linked Qt is
-#     therefore not a build-size decision — it is a licence change made by
+#     therefore not a build-size decision - it is a licence change made by
 #     accident, and it is invisible in the source.
 #
 # Both are checked with objdump because that is what a distribution's own
@@ -66,7 +66,7 @@ fi
 
 # The same five as cmake/ClimatLicenceGuard.cmake, spelled as the shared-object
 # names a linker actually records. Kept in step by hand, and the comment there
-# says so too — two spellings of one list is the price of asking the question in
+# says so too - two spellings of one list is the price of asking the question in
 # two places, and the list changes about once a Qt major.
 banned_libs=(
     libQt6Charts
@@ -88,7 +88,7 @@ for binary in "$@"; do
     # DT_NEEDED only. Not the full dynamic-section dump and not `ldd`: ldd
     # resolves the whole transitive closure through the loader, which would
     # report a library that Qt itself pulls in on this machine as though we had
-    # linked it, and — more to the point — ldd runs the binary's loader, which
+    # linked it, and - more to the point - ldd runs the binary's loader, which
     # is not a thing to do to an artefact you are auditing.
     needed="$($objdump -p "$binary" 2>/dev/null | awk '$1 == "NEEDED" { print $2 }')"
 
@@ -104,7 +104,7 @@ for binary in "$@"; do
             echo "check-licences: $binary links $lib" >&2
             echo "  That module is GPLv3-or-commercial, not LGPLv3. See R2 in" >&2
             echo "  docs/08-risks.md; draw the chart with QQuickItem and QSGNode" >&2
-            echo "  instead — that is what ClimatCharts is for." >&2
+            echo "  instead - that is what ClimatCharts is for." >&2
             status=1
         fi
     done
@@ -122,7 +122,7 @@ for binary in "$@"; do
 done
 
 if [[ $status -eq 0 ]]; then
-    echo "check-licences: ok — $# binary/binaries, no GPLv3-only Qt module, Qt linked dynamically"
+    echo "check-licences: ok - $# binary/binaries, no GPLv3-only Qt module, Qt linked dynamically"
 fi
 
 exit $status

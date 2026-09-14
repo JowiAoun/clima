@@ -16,7 +16,7 @@
 // THE ROUTING TABLE IS NOT A SWITCH STATEMENT
 //
 // Written literally, that sketch is a chain of `if` on region, per product,
-// naming providers — which puts every provider's name in one central file and
+// naming providers - which puts every provider's name in one central file and
 // makes adding a regional source an edit to shared code. §4.1's second design
 // principle is that providers are pluggable; a registry that has to be taught
 // about each one is not a plug.
@@ -27,7 +27,7 @@
 //     covers(coord)   NWS says false outside the United States, ECCC says false
 //                     outside Canada, Open-Meteo and MET Norway say true
 //                     everywhere. A provider that does not cover a place is not
-//                     in that place's chain — it is not tried and failed, it is
+//                     in that place's chain - it is not tried and failed, it is
 //                     absent.
 //
 //     priority        a number, given at registration. Lower goes first. A
@@ -36,9 +36,9 @@
 //                     without anybody writing "US" here.
 //
 // The `∅` case falls out too: a place where no provider covers the product has
-// an empty chain, capabilitiesAt() reports nothing, and §4.4's rule — "a
+// an empty chain, capabilitiesAt() reports nothing, and §4.4's rule - "a
 // provider that returns ∅ must make the UI *hide* the feature, not show a
-// broken one" — is the natural consequence rather than a thing to remember.
+// broken one" - is the natural consequence rather than a thing to remember.
 //
 // Region() below exists for the providers to use in their own covers(), and for
 // nothing else. It is a shared table of bounding boxes, not a router.
@@ -54,7 +54,7 @@
 // So add() returns a Status and REFUSES an incomplete Attribution, naming the
 // missing field. The provider is not registered; not registered means never in
 // a chain; never in a chain means its data cannot reach a screen. An
-// uncredited provider does not render uncredited — it does not render.
+// uncredited provider does not render uncredited - it does not render.
 //
 // That is a deliberately harsh failure and it is the right one. The alternative
 // failure is a licence breach that looks like a layout bug, discovered by the
@@ -70,13 +70,13 @@
 //
 // A disabled provider costs nothing to skip. HttpClient answers a request for a
 // provider it has disabled with an already-finished future carrying
-// ErrorKind::ProviderDisabled — no socket, no event loop turn — so a chain
+// ErrorKind::ProviderDisabled - no socket, no event loop turn - so a chain
 // whose primary has been 403'd falls through at roughly the speed of a function
 // call. That is why the hard stop in HttpClient and the chain here are the same
 // design and not two.
 //
-// When every provider fails, the error reported is the FIRST one — the
-// primary's — with the rest appended to its message. The primary's failure is
+// When every provider fails, the error reported is the FIRST one - the
+// primary's - with the rest appended to its message. The primary's failure is
 // the news; the fallback failing too is corroboration. It also means a
 // UserAgentRejected from the primary, which error.h says "should surface to a
 // human" because it means our code is wrong, cannot be buried under a network
@@ -92,7 +92,7 @@
 // ask the next. fetchAlerts() below does not do that. It asks every covering
 // provider at once and merges the answers, because an alert provider succeeds
 // by returning an empty collection, and a fall-through stops at the first
-// success — so in Detroit, which is inside the loose Canadian box because the
+// success - so in Detroit, which is inside the loose Canadian box because the
 // box has to hold the Great Lakes, ECCC's valid empty answer would end the walk
 // and the National Weather Service would never be asked.
 //
@@ -119,7 +119,7 @@ namespace climat {
 // national service plausibly have data here", and the authoritative answer to
 // that comes from the service, as a 404.
 //
-// Not used for pollen. That gate is derived from the payload — see
+// Not used for pollen. That gate is derived from the payload - see
 // libclimat/providers/airquality/openmeteoairqualityprovider.h, which argues at
 // length why a bounding box is the wrong instrument for a question the response
 // already answers exactly.
@@ -132,8 +132,8 @@ enum class Region {
 
 // ---- there is no regionFor(), and that is the interesting part --------------
 //
-// The obvious signature is `Region regionFor(Coordinate)` — one place, one
-// region — and it is wrong. Toronto is at 43.70 N, 79.42 W, which is inside the
+// The obvious signature is `Region regionFor(Coordinate)` - one place, one
+// region - and it is wrong. Toronto is at 43.70 N, 79.42 W, which is inside the
 // contiguous-United-States box AND inside the Canadian one, because the border
 // between them runs 8,891 km through two Great Lakes and a river and no
 // rectangle follows it. A single-winner function has to pick, and every rule it
@@ -144,7 +144,7 @@ enum class Region {
 //     centroid distance   makes Detroit and Windsor swap depending on rounding
 //
 // The question a provider actually needs answered is not "which country is
-// this" — a bounding box cannot answer that and should not pretend to. It is
+// this" - a bounding box cannot answer that and should not pretend to. It is
 // "could this national service plausibly have data here", which is a per-region
 // yes or no, and to which "both" is a legitimate answer. The service settles it
 // authoritatively, with a 404, and the registry orders the attempts by priority.
@@ -177,7 +177,7 @@ struct Answer {
     QString servedBy;
 
     // True when the provider that answered was not the first in the chain.
-    // This is the flag behind a "showing MET Norway — Open-Meteo is
+    // This is the flag behind a "showing MET Norway - Open-Meteo is
     // unavailable" line.
     bool fromFallback = false;
 
@@ -190,7 +190,7 @@ using ForecastAnswer   = Answer<Forecast>;
 using AirQualityAnswer = Answer<AirQuality>;
 
 // `fromFallback` is always false here and `servedBy` is a comma-joined list,
-// because alerts fan out rather than fall back — see the second block at the
+// because alerts fan out rather than fall back - see the second block at the
 // top of this file. `failures` still means what it says and is what a
 // diagnostics panel reads; the user-facing version of the same fact is
 // AlertSet::complete.
@@ -216,14 +216,14 @@ public:
     // national service, 100 for the global primary and 200 for a global
     // fallback, leaving room to slot one in without renumbering.
     //
-    // Returns an error when the Attribution is incomplete — see the header —
+    // Returns an error when the Attribution is incomplete - see the header -
     // and when a provider with the same id is already registered for the same
     // product, which is otherwise a silent double entry on the About screen.
     Status addForecastProvider(IForecastProvider *provider, int priority);
     Status addAirQualityProvider(IAirQualityProvider *provider, int priority);
 
-    // `priority` orders the merge for readability — the lowest-numbered
-    // provider's id comes first in AlertSet::providerId — and nothing else. It
+    // `priority` orders the merge for readability - the lowest-numbered
+    // provider's id comes first in AlertSet::providerId - and nothing else. It
     // cannot decide which provider answers, because they all do.
     Status addAlertProvider(IAlertProvider *provider, int priority);
 
@@ -232,14 +232,14 @@ public:
     [[nodiscard]] QList<IForecastProvider *>   forecastChain(Coordinate coord) const;
     [[nodiscard]] QList<IAirQualityProvider *> airQualityChain(Coordinate coord) const;
 
-    // Not a chain — every one of these is asked. Named the same way as the
+    // Not a chain - every one of these is asked. Named the same way as the
     // others so that a reader looking for "which providers apply here" finds it,
     // and documented here so a reader who assumes it behaves the same does not.
     [[nodiscard]] QList<IAlertProvider *> alertChain(Coordinate coord) const;
 
     // What the app can show here, for the tab bar.
     //
-    // The SERVING provider's capabilities — the first in the chain — and
+    // The SERVING provider's capabilities - the first in the chain - and
     // deliberately not the union across it. The union would be a promise the
     // app cannot keep: MET Norway has no UV index, so a UV tab built from a
     // union would be present while Open-Meteo is healthy and empty the moment
@@ -253,13 +253,13 @@ public:
 
     // The UNION across the alert providers, and the one place where a union is
     // the right answer rather than the wrong one. The argument against it for
-    // forecasts — that a tab built from a union empties the moment the fallback
-    // takes over — does not apply when every provider is queried on every poll,
+    // forecasts - that a tab built from a union empties the moment the fallback
+    // takes over - does not apply when every provider is queried on every poll,
     // because there is no "the fallback took over".
     [[nodiscard]] Capabilities alertCapabilitiesAt(Coordinate coord) const;
 
     // Every registered provider, deduplicated by id, in registration order.
-    // This is what the About → Data sources screen is generated from — one
+    // This is what the About → Data sources screen is generated from - one
     // provider, one credit, no list maintained anywhere else. R12.
     [[nodiscard]] QList<const IProvider *> providers() const;
     [[nodiscard]] QList<Attribution>       attributions() const;
@@ -274,8 +274,8 @@ public:
     // with AlertSet::complete false, because "we could not reach the service
     // that would know" must not render as "there are no warnings".
     //
-    // A provider answering ErrorKind::Unsupported — api.weather.gov's 400 for a
-    // coordinate outside the United States — is not a failure and does not make
+    // A provider answering ErrorKind::Unsupported - api.weather.gov's 400 for a
+    // coordinate outside the United States - is not a failure and does not make
     // the set incomplete. When every provider answers that way the result is
     // Unsupported, which §4.4 says must make the UI hide the feature.
     QFuture<Result<AlertAnswer>> fetchAlerts(const AlertRequest &request);

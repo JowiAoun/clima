@@ -23,12 +23,12 @@ DeviceLocator *DeviceLocator::create(QObject *parent)
 {
     // Three backends and one order, decided here and nowhere else:
     //
-    //   1. inside a sandbox, the portal — the only route that works there,
+    //   1. inside a sandbox, the portal - the only route that works there,
     //      and the better arrangement anyway (portallocator.h)
     //   2. Qt Positioning, where it found a source: GeoClue2 on a desktop,
     //      Windows Location, CoreLocation
-    //   3. the portal again, for a desktop where Qt found nothing — a packager
-    //      who left Qt Positioning out, or a Qt without its GeoClue2 plugin —
+    //   3. the portal again, for a desktop where Qt found nothing - a packager
+    //      who left Qt Positioning out, or a Qt without its GeoClue2 plugin -
     //      since any desktop with xdg-desktop-portal can still answer
     //
     // and the base class when none of those was compiled in.
@@ -50,7 +50,7 @@ DeviceLocator *DeviceLocator::create(QObject *parent)
     return new PortalLocator(parent);
 #else
     // The base class *is* the null implementation: isAvailable() is false and
-    // requestPosition() reports Unavailable. That is deliberate — a separate
+    // requestPosition() reports Unavailable. That is deliberate - a separate
     // NullDeviceLocator would be a class whose entire body is the base class's,
     // and the base class has to behave that way anyway for the case where Qt
     // Positioning is compiled in and finds no source at runtime.

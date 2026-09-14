@@ -71,8 +71,8 @@ void TestCli::initTestCase()
 Outcome TestCli::run(const QStringList &arguments, const QByteArray &ini)
 {
     // The INI where QSettings will look for it under XDG_CONFIG_HOME: the
-    // organisation's directory, the application's file. Written fresh — or
-    // removed — for every run so that a case cannot inherit another's.
+    // organisation's directory, the application's file. Written fresh - or
+    // removed - for every run so that a case cannot inherit another's.
     const QString directory = m_config.path() + QStringLiteral("/Climat");
     const QString file      = directory + QStringLiteral("/climat.ini");
     QDir().mkpath(directory);
@@ -231,7 +231,7 @@ void TestCli::theObservationIsNotAStaleCurrentBlock()
     // first version of this tool reintroduced: Open-Meteo's `current` block is
     // stamped to the quarter hour and a cached response can carry a very old
     // one. toronto's block says 06:30 against a recording at 12:28, so `now`
-    // printed 15 °C and "Sunny" while `hourly` led with 23 °C — one process,
+    // printed 15 °C and "Sunny" while `hourly` led with 23 °C - one process,
     // one file, one instant, eight degrees apart.
     const Outcome now = run({ QStringLiteral("--fixture"), QStringLiteral("toronto"),
                               QStringLiteral("now"), QStringLiteral("--json") });
@@ -248,8 +248,8 @@ void TestCli::theObservationIsNotAStaleCurrentBlock()
     const QJsonObject standing = QJsonDocument::fromJson(hourly.stdOut).object()
                                      .value(QStringLiteral("hourly")).toArray().at(0).toObject();
 
-    // The same instant described by the same process twice. Not identical —
-    // the block is a quarter-hour reading and the row is an hour — but they
+    // The same instant described by the same process twice. Not identical -
+    // the block is a quarter-hour reading and the row is an hour - but they
     // cannot be a different afternoon.
     const double a = current.value(QStringLiteral("temperature")).toDouble();
     const double b = standing.value(QStringLiteral("temperature")).toDouble();
@@ -263,7 +263,7 @@ void TestCli::theObservationIsNotAStaleCurrentBlock()
 
 void TestCli::theHourlySeriesIsReadTheWayTheAppReadsIt()
 {
-    // asHourStarting does NOT move a timestamp — it moves the accumulations and
+    // asHourStarting does NOT move a timestamp - it moves the accumulations and
     // the weather code onto the row before, and drops the last point. So a test
     // that compared stamps compared something the conversion never touches and
     // passed either way; this asserts the value that actually moves.
@@ -364,7 +364,7 @@ void TestCli::jsonAndCsvTogetherIsAUsageError()
     QCOMPARE(got.exitCode, 2);
 
     // The message too, not only the code: every other usage rejection returns
-    // the same 2, so a code on its own would pass for the wrong reason — a
+    // the same 2, so a code on its own would pass for the wrong reason - a
     // renamed fixture, a bad --units value, an unparsed count.
     QVERIFY2(got.stdErr.contains("pick one"), got.stdErr.constData());
 }

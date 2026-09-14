@@ -10,7 +10,7 @@
 // socket. "Does a 304 come back as a success" is a question about how Qt's HTTP
 // stack reports a status with no body. "Is exactly one request issued when
 // three callers ask" is a question about how many times a server was contacted
-// — which is a count only the server can take, and which a mock of our own
+// - which is a count only the server can take, and which a mock of our own
 // client would answer by construction rather than by observation.
 //
 // A QTcpServer bound to 127.0.0.1 on an ephemeral port answers all three

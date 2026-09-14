@@ -4,7 +4,7 @@
 // gradient it is actually composited over.
 //
 // It exists because almost every defect found in this design so far was
-// invisible in the code and obvious in a render — and because a component is
+// invisible in the code and obvious in a render - and because a component is
 // easiest to get wrong in the states no current screen happens to use. The
 // catalogue is gallery.js; this file is only the browser around it.
 //
@@ -35,7 +35,7 @@ Item {
     property string pick: ""
 
     // ---- device frames -------------------------------------------------------
-    // "" is free — the component at whatever size the catalogue gives it, which
+    // "" is free - the component at whatever size the catalogue gives it, which
     // is what the gallery did before any of this existed and is still the right
     // default for a glyph or a badge.
     //
@@ -47,13 +47,13 @@ Item {
     // choose rather than a thing you inherit from the window.
     //
     // The frame is not scaled to fit. A 1340x762 desktop frame inside a 1500 px
-    // window overflows the pane and the pane scrolls, which is honest — a
+    // window overflows the pane and the pane scrolls, which is honest - a
     // half-size preview of a 11 px axis label tells you nothing about whether it
     // is legible.
     property string viewport: ""
 
     // The sky a mobile or tablet frame is painted with. Desktop frames and
-    // free mode stay at `dusk` — the palette the desktop page runs on — for
+    // free mode stay at `dusk` - the palette the desktop page runs on - for
     // the same reason the app does.
     property string skyPhase: "dusk"
 
@@ -96,7 +96,7 @@ Item {
     // ---- the palette page's instrument ---------------------------------------
     //
     // Both raw palettes, side by side, which is the one thing Theme's grouped
-    // properties deliberately cannot give you — they answer for the scheme that
+    // properties deliberately cannot give you - they answer for the scheme that
     // is running, and a light column beside a dark one is the entire point of a
     // palette page.
     //
@@ -131,14 +131,14 @@ Item {
     // but a ratio you can see is how you notice one drifting.
     function ratioText(audit) {
         if (audit.on === null)
-            return "—"
+            return "-"
         return audit.ratio.toFixed(2) + ":1"
     }
 
     // Red is reserved for a token that misses the floor its duty sets. An
     // incidental token is drawn dim rather than green, because a page where
     // two thirds of the rows are a passing colour is a page where the four
-    // real failures do not stand out — which is the failure mode this column
+    // real failures do not stand out - which is the failure mode this column
     // exists to avoid.
     function ratioInk(audit) {
         if (audit.verdict === "fail")
@@ -159,18 +159,18 @@ Item {
     // A ramp, drawn.
     //
     // Sampled into cells rather than declared as a gradient because QML cannot
-    // build GradientStops from a Repeater — the same wall DetailSunCard and
+    // build GradientStops from a Repeater - the same wall DetailSunCard and
     // DetailMoonCard hit, where three colours are written twice over precisely
     // this. Sampling with the app's own ChartMath.sampleRamp() is the better
     // answer anyway: the bar is interpolated by the function the chart
     // interpolates with, so a ramp that reviews cleanly here is the ramp the
     // chart got, not a second reading of the same table.
     //
-    // The ground matters. Six of the nine ramps carry alpha in every stop —
-    // `temp.fill` opens at 80% and closes at 43% — so a bar painted on the pane
+    // The ground matters. Six of the nine ramps carry alpha in every stop -
+    // `temp.fill` opens at 80% and closes at 43% - so a bar painted on the pane
     // would be a bar reviewed at a contrast the chart never has.
     // Square corners, and no clip. A rounded bar would need one to keep the
-    // sample cells off its corners, and a bar is a bar — the eight px cells are
+    // sample cells off its corners, and a bar is a bar - the eight px cells are
     // the honest shape for something being read as a sequence of stops rather
     // than as a control.
     component RampBar: Rectangle {
@@ -258,7 +258,7 @@ Item {
     // Selection is keyed on the name, not on object identity. A Repeater over
     // a JS array hands its delegate a wrapper around the entry rather than the
     // entry itself, so `modelData === current` is false even for the row that
-    // is selected — which silently cost the rail both its highlight and its
+    // is selected - which silently cost the rail both its highlight and its
     // scroll-to-selection. Item names are unique across the catalogue.
     readonly property string currentName: current ? current.name : ""
 
@@ -323,13 +323,13 @@ Item {
     //
     //   fills      a screen or a shell: it takes the whole device.
     //   stage.w    it takes a width from its host, so in a frame that width is
-    //              the one the shell at this viewport would give it — not the
+    //              the one the shell at this viewport would give it - not the
     //              number in the catalogue, which was only ever a stand-in for
     //              a host that was not there.
     //   neither    a glyph, a badge, a toggle: natural size, whatever the frame.
     // Zero for anything the catalogue did not state, and `|| 0` rather than a
     // presence test on `stage` alone. Every entry written before the alert
-    // group spelled both dimensions — `stage: { w: 362, h: 0 }` — so an entry
+    // group spelled both dimensions - `stage: { w: 362, h: 0 }` - so an entry
     // that gave only a width read `undefined` here and QML said so nine times,
     // once per variant: "Unable to assign [undefined] to double".
     //
@@ -698,18 +698,18 @@ Item {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             clip: true
-            // Specimens draw with Shapes, which ignore ancestor clipping — see
+            // Specimens draw with Shapes, which ignore ancestor clipping - see
             // docs/10-design-system.md §10.8. Without the layer, a specimen
             // taller than the pane paints its chart over the heading.
             //
-            // A `kind` page draws no Shapes, and the layer is off for those —
+            // A `kind` page draws no Shapes, and the layer is off for those -
             // which is not a micro-optimisation but a bug this page found.
             //
             // Qt 6.11's software renderer is what a headless capture runs, the
             // offscreen platform plugin advertising no GL capability (the long
             // note in scripts/grab.sh). It classifies a square, fully opaque
             // Rectangle as an opaque node, and one such node anywhere inside a
-            // layer makes the *whole* layer composite as opaque black —
+            // layer makes the *whole* layer composite as opaque black -
             // measured: a 300x26 `color: "#36375b"` blacks out the entire
             // 1220x1035 pane, while the same rectangle given a `radius`, or
             // given alpha 254/255, does not. So this is a trap rather than a
@@ -720,7 +720,7 @@ Item {
             // Turning the layer off where nothing needs it removes the trap
             // from the three generated pages outright. It is still live for
             // specimens, which is worth knowing before adding an opaque square
-            // Rectangle to a component — `TabFillet.qml` already has the only
+            // Rectangle to a component - `TabFillet.qml` already has the only
             // opaque colour in the palette.
             layer.enabled: root.current !== null && root.current.kind === undefined
             contentWidth: Math.max(width, body.width)
@@ -773,7 +773,7 @@ Item {
                         // A card framed at 390x844 in a 950 px window would
                         // otherwise be composited over the slice of the
                         // window's gradient that happens to be behind it, which
-                        // is not the slice the app gives it — and being drawn on
+                        // is not the slice the app gives it - and being drawn on
                         // the right background is the whole premise here.
                         PageBackdrop {
                             visible: root.framed
@@ -816,7 +816,7 @@ Item {
                         // The device edge. A border is the one thing that can
                         // draw it: the frame's whole job is to show where the
                         // screen stops, and a component that runs to the edge
-                        // — which every screen here does — has nothing else to
+                        // - which every screen here does - has nothing else to
                         // separate it from the pane behind.
                         Rectangle {
                             visible: root.framed
@@ -922,7 +922,7 @@ Item {
 
                     // The role, named. Without it the page is 59 rows in one
                     // undifferentiated field, which is the flat list this whole
-                    // restructure existed to get rid of — and a palette that
+                    // restructure existed to get rid of - and a palette that
                     // does not show its groups cannot show that a token is in
                     // the wrong one.
                     Text {
@@ -951,7 +951,7 @@ Item {
                                 var rule = Theme.contrastRule(path)
                                 return {
                                     token: token,
-                                    on: rule.on === null ? "—" : rule.on,
+                                    on: rule.on === null ? "-" : rule.on,
                                     duty: rule.duty,
                                     darkValue:  String(tables.dark[role.modelData][token]),
                                     lightValue: String(tables.light[role.modelData][token]),
@@ -1126,8 +1126,8 @@ Item {
 
                     Repeater {
                         // fill and line are the two halves of every ramp and the
-                        // chart draws both — the area under the curve and the
-                        // curve itself — so a page showing only the fill would
+                        // chart draws both - the area under the curve and the
+                        // curve itself - so a page showing only the fill would
                         // be reviewing half of what ships.
                         model: [
                             { part: "fill",
@@ -1187,7 +1187,7 @@ Item {
 
             Repeater {
                 // Sizes only. `family` is a token in the same group and a string,
-                // and a string in `font.pixelSize` is a Text with no height —
+                // and a string in `font.pixelSize` is a Text with no height -
                 // which on this page reads as a row that silently went missing
                 // rather than as an error. Filtering on the type of the value
                 // keeps the page generated rather than transcribed: the next

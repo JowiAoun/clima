@@ -5,7 +5,7 @@
 // Twelve cards share one anatomy: a quiet title, a visualisation that carries
 // the reading, a bold status line, and a sentence of context. Only the
 // visualisation differs. Putting the other four in one place is what keeps
-// twelve independently-written cards looking like one set — the alternative is
+// twelve independently-written cards looking like one set - the alternative is
 // twelve slightly different paddings and four different title sizes.
 //
 // Fill the `content` slot with the visualisation and nothing else. It is given
@@ -37,8 +37,8 @@ Item {
     // These cards have no interaction and no changing data: the provider values
     // are fixed for the life of the process, so nothing about a card ever
     // transitions from one state to another. The one honest piece of motion
-    // available to them is the *arrival* — a dial sweeping up to its reading, a
-    // bar growing off its baseline, a curve drawing itself in — which is worth
+    // available to them is the *arrival* - a dial sweeping up to its reading, a
+    // bar growing off its baseline, a curve drawing itself in - which is worth
     // having because it shows the reader where the value sits on the scale
     // rather than just asserting it.
     //
@@ -88,7 +88,7 @@ Item {
     // In a grid of twelve that misalignment is the first thing the eye finds.
     // Measured rather than computed: line spacing is not `pixelSize * lineHeight`,
     // and an arithmetic guess that comes out a few pixels short makes every body
-    // in the grid elide to one line — which is exactly what it did.
+    // in the grid elide to one line - which is exactly what it did.
     readonly property real bodyReserve: bodyProbe.height
 
     Text {

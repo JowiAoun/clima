@@ -4,7 +4,7 @@
 //
 // It exists so the page's sections cannot disagree about what a heading is.
 // Before there was one, the hourly section set its title at 18 px and the
-// details grid set its at 15 — invisible while each was the only thing on
+// details grid set its at 15 - invisible while each was the only thing on
 // screen, and the first thing you see once they are stacked.
 //
 // The timestamp sits on the title's baseline rather than under it: it qualifies

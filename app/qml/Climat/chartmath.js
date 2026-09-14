@@ -155,13 +155,13 @@ function _parseHex(c) {
 }
 
 // Lit limb of the moon, centred on (cx, cy). `illum` is the illuminated
-// fraction — 0.5 half, above it gibbous, below it crescent — and `waxing` is
+// fraction - 0.5 half, above it gibbous, below it crescent - and `waxing` is
 // which side of the disc that fraction is on.
 // The drawn stretches of a broken compass ring, intersected with a span.
 //
 // A compass ring is four quadrant arcs with a gap at each cardinal for the
-// letter that sits in it. Anything painted *on* that ring — the wind card's
-// gust band — has to be broken in the same four places, so it is those same
+// letter that sits in it. Anything painted *on* that ring - the wind card's
+// gust band - has to be broken in the same four places, so it is those same
 // four arcs cut down to whatever span it covers. Asking one function for both
 // is what stops the two from ever disagreeing: `compassSpans(0, 360, gap)` is
 // the ring itself.
@@ -172,7 +172,7 @@ function _parseHex(c) {
 //
 // It replaces a version that took the span's two ends and pushed each one clear
 // of any gap it had landed in. That can only ever move an end, and a span whose
-// *centre* is in a gap has both ends outside it and nothing to push — so a wind
+// *centre* is in a gap has both ends outside it and nothing to push - so a wind
 // blowing from within `gapHalf` of a cardinal drew its band straight through the
 // letter. A quarter of the compass is inside a gap, so that was not a corner.
 function compassSpans(a0, a1, gapHalf) {
@@ -201,7 +201,7 @@ function moonPath(cx, cy, r, illum, waxing) {
     // weather app ships.
     //
     // For as long as the argument did not exist this function drew every moon
-    // lit on the LEFT — so the historical picture was the waning one, and the
+    // lit on the LEFT - so the historical picture was the waning one, and the
     // caller that still does not pass a flag (WeatherGlyph's decorative night
     // crescent, which is not claiming a phase at all) says so explicitly rather
     // than leaning on that.

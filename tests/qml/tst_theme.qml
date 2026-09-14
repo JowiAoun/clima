@@ -5,7 +5,7 @@
 //
 // Three kinds of defect live here and all three are silent. A token misspelled
 // at the point of use resolves to `undefined`, which QML turns into a
-// transparent colour — so the component renders invisibly and reports success.
+// transparent colour - so the component renders invisibly and reports success.
 // A token added to theme.js and forgotten in themelight.js is the same failure
 // wearing one theme. And a colour that is simply too close to what it is drawn
 // on cannot be caught by any amount of instantiation, because nothing about it
@@ -52,8 +52,8 @@ TestCase {
 
     // Key-for-key, in both directions. Theme.qml warns about the first
     // direction at startup, which is a line on stderr in a run nobody is
-    // watching; this is the same check as a failure. The second direction — a
-    // key in light that dark does not have — nothing checked at all, and it is
+    // watching; this is the same check as a failure. The second direction - a
+    // key in light that dark does not have - nothing checked at all, and it is
     // the more insidious one: the light value is simply never read, so the
     // theme silently falls back to a dark token and looks *almost* right.
     function test_lightMirrorsDarkKeyForKey() {
@@ -68,7 +68,7 @@ TestCase {
     // The grouped properties are what components actually read, and Theme.qml
     // lists every token by hand inside an inline component. A token added to
     // theme.js and not to that list exists in the table, appears on the palette
-    // page, and is invisible to `Theme.ink.whatever` — which is the one place
+    // page, and is invisible to `Theme.ink.whatever` - which is the one place
     // it needs to work.
     function test_groupedPropertiesExposeEveryToken() {
         for (var i = 0; i < Theme.colorRoles.length; ++i) {
@@ -154,7 +154,7 @@ TestCase {
     }
 
     // The assertion this whole apparatus exists for. Both schemes, every token,
-    // against the contract in Theme.qml — and the failure message names the
+    // against the contract in Theme.qml - and the failure message names the
     // tokens, so a red row is a line in the log rather than a picture somebody
     // has to go and look at.
     function test_noTokenMissesItsContrastFloor_data() {
@@ -183,13 +183,13 @@ TestCase {
 
     // ---- severity ----------------------------------------------------------
     //
-    // The alert palette is a table keyed by data — `Theme.severity[key]` — so
+    // The alert palette is a table keyed by data - `Theme.severity[key]` - so
     // it is not in `colorRoles` and the audit above walks straight past it. It
     // is also the group with the most at stake: a severity `ink` that fails its
     // floor is a tornado warning nobody can read.
     //
     // So it is checked here, by hand, with the same arithmetic. The ground is
-    // the COMPOSITED PLATE — the wash over the page — and not the page itself,
+    // the COMPOSITED PLATE - the wash over the page - and not the page itself,
     // because that is what the text is actually drawn on. Auditing the ink
     // against `page.bg` would score a colour against a background it never
     // touches, which is the mistake theme.js's contrast contract exists to
@@ -256,7 +256,7 @@ TestCase {
     // Extreme must be the most present thing on the screen. Checked on the
     // saturated tokens rather than on the wash: in dark, amber on navy is
     // simply brighter than red on navy, so moderate's PLATE sits a hair above
-    // extreme's and always will — theme.js records that measurement. The rail,
+    // extreme's and always will - theme.js records that measurement. The rail,
     // the glyph and the word are what carry the ordering, and they can.
     function test_severityIsDistinguishableGradeToGrade_data() {
         return [{ tag: "dark", scheme: "dark" }, { tag: "light", scheme: "light" }]
@@ -270,8 +270,8 @@ TestCase {
             var key = Theme.severityKeys[i]
             var edge = severity[key].edge.toLowerCase()
 
-            // Two grades sharing an edge colour would make the rail — the one
-            // part of the banner readable from across a room — say nothing.
+            // Two grades sharing an edge colour would make the rail - the one
+            // part of the banner readable from across a room - say nothing.
             verify(seen[edge] === undefined,
                    data.scheme + ": severity." + key + " and severity." + seen[edge]
                    + " share the edge colour " + edge)
@@ -299,7 +299,7 @@ TestCase {
 
     // Stops run 0 to 1, in order. `ChartMath.sampleRamp` walks the array
     // assuming that and returns the last stop when it falls off the end, so an
-    // out-of-order table does not throw — it draws a flat band.
+    // out-of-order table does not throw - it draws a flat band.
     function test_rampStopsAreOrderedAndSpanTheRange() {
         var schemes = ["dark", "light"]
         for (var s = 0; s < schemes.length; ++s) {
@@ -414,7 +414,7 @@ TestCase {
     // Two facts, and the second is the one the whole idea rests on: a reduced
     // sky must be a PREFIX of the full one. sky.js seeds every star from its own
     // index, so `field(70)` is the first seventy of the same hundred and thirty
-    // — which is what makes a reduced sky the same sky with fewer stars rather
+    // - which is what makes a reduced sky the same sky with fewer stars rather
     // than a different sky, and what lets a golden image exist per tier.
     function test_theReducedTierIsSmallerInEveryDimension() {
         var was = Theme.perfTier

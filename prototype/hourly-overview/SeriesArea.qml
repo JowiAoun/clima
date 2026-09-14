@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Filled series: gradient area plus a gradient "curve".
 //
-// Generalised from the temperature chart — the gradient runs down the *value*
+// Generalised from the temperature chart - the gradient runs down the *value*
 // axis and its stops are keyed by normalised position, so the same component
 // serves °C, %, km/h and hPa without knowing what it is drawing.
 import QtQuick
@@ -28,7 +28,7 @@ Item {
     // folds onto it, the axis becomes a different axis while nothing is drawn,
     // and the incoming series grows back off it. SeriesBars carries the same
     // property under the same name, which is what lets area → bars read as one
-    // gesture instead of a cut — the two have nothing else in common.
+    // gesture instead of a cut - the two have nothing else in common.
     //
     // Geometry only. The gradient stays keyed to the axis, not to the fold, so
     // the fill never claims a value the series is not at.

@@ -10,8 +10,8 @@
 // advisory at equal weight. So the banner shows the highest-ranked alert and
 // says "+3 more"; the sheet is where the rest live.
 //
-// Ranking is libclimat's — AlertSet::displayableAt() sorts by severity, then
-// urgency, then certainty, then onset — so this file makes no decision about
+// Ranking is libclimat's - AlertSet::displayableAt() sorts by severity, then
+// urgency, then certainty, then onset - so this file makes no decision about
 // which alert is the important one. It only draws the answer.
 //
 // ---- dismissal is acknowledgement -------------------------------------------
@@ -22,7 +22,7 @@
 // is an alert whose banner people learn to dismiss reflexively; a strip that
 // stays is a reminder that costs one line of the screen.
 //
-// An update that RAISES the severity un-acknowledges — see
+// An update that RAISES the severity un-acknowledges - see
 // app/viewmodels/alertsdata.h, which owns that rule and the storage behind it.
 //
 // ---- where this is not ------------------------------------------------------
@@ -32,7 +32,7 @@
 // inside it would scroll away from a warning the reader has not read yet. On
 // the phone MobileShell destroys and rebuilds its page on every tab change, so
 // a per-page banner would be constructed five times in a session and would
-// re-run its entrance each time — a tornado warning that re-animates when you
+// re-run its entrance each time - a tornado warning that re-animates when you
 // look at the map.
 //
 // ---- motion -----------------------------------------------------------------
@@ -56,7 +56,7 @@ Item {
     id: root
 
     // Everything comes from the model. Held as a property rather than read
-    // through the singleton at each site so the gallery can hand in a specimen —
+    // through the singleton at each site so the gallery can hand in a specimen -
     // Alerts is a singleton with a network behind it, and a component that can
     // only be seen by having weather is a component nobody reviews.
     property var alert: Alerts.top
@@ -74,14 +74,14 @@ Item {
     readonly property var tones: Theme.severity[severity] || Theme.severity.unknown
 
     // An empty map is what the model publishes when there is nothing in force,
-    // and it is the only visibility test. Not `Alerts.count > 0` — that would be
+    // and it is the only visibility test. Not `Alerts.count > 0` - that would be
     // a second source of truth for the same question.
     readonly property bool present: alert !== undefined && alert !== null
                                     && alert.event !== undefined && alert.event !== ""
 
     // The event name, or an empty string. A property rather than
-    // `alert.event` at each site, because `{}` — which is exactly what
-    // `Alerts.top` publishes when nothing is in force — is TRUTHY, so
+    // `alert.event` at each site, because `{}` - which is exactly what
+    // `Alerts.top` publishes when nothing is in force - is TRUTHY, so
     // `alert ? alert.event : ""` evaluates to `undefined` and QML says
     // "Unable to assign [undefined] to QString" twice on every launch of a
     // place with no weather warnings. `visible: present` hides the banner and
@@ -95,7 +95,7 @@ Item {
 
     visible: present
     // Column computes its own implicitHeight from its children, so the padding
-    // is added here rather than assigned there — `Column.implicitHeight` is
+    // is added here rather than assigned there - `Column.implicitHeight` is
     // read-only and assigning it is a load error, not a warning.
     implicitHeight: present ? (acknowledged ? strip.implicitHeight
                                             : full.implicitHeight + 26) : 0
@@ -115,7 +115,7 @@ Item {
         clip: true
 
         // The rail. §10.1 bans borders at a junction; this is not a junction and
-        // not a border — it is the one place the saturated severity colour is
+        // not a border - it is the one place the saturated severity colour is
         // allowed to be a solid, and it is what makes the banner scannable in a
         // column of cards without reading a word of it.
         Rectangle {
@@ -130,7 +130,7 @@ Item {
         // Declared HERE, before the content, and that ordering is the whole of
         // it: QML stacks later siblings above earlier ones, so this written last
         // would sit over the dismiss control and swallow every click on it. The
-        // close button would have looked present and done nothing — which is the
+        // close button would have looked present and done nothing - which is the
         // kind of defect that survives review, because the banner is obviously
         // fine and the one control on it is obviously there.
         MouseArea {
@@ -152,9 +152,9 @@ Item {
             opacity: root.acknowledged ? 1 : 0
             visible: opacity > 0
 
-            // The floor. The collapsed strip IS the target — the whole thing is
+            // The floor. The collapsed strip IS the target - the whole thing is
             // tappable and tapping it is how an acknowledged alert is read
-            // again — so here the control's size is the affordance and it grows
+            // again - so here the control's size is the affordance and it grows
             // rather than growing an invisible area around itself.
             implicitHeight: Theme.metric.hitMin
 
@@ -238,7 +238,7 @@ Item {
                 //
                 // Its own item in the head row rather than a clause on the
                 // sentence below, and that is not a layout preference. It was in
-                // the sentence first — and Seattle's area description is 180
+                // the sentence first - and Seattle's area description is 180
                 // characters of county names, so the line elided long before it
                 // and the banner told a reader about one of four alerts with no
                 // sign the other three existed. The one fact a banner cannot
@@ -273,7 +273,7 @@ Item {
                 //
                 // The target grows past the item on all four sides. It is 6 px
                 // clear of the plate's right edge and well inside its top, which
-                // matters because the plate clips — and clipping in Qt Quick
+                // matters because the plate clips - and clipping in Qt Quick
                 // takes input with it, so a target that overflowed a clipped
                 // edge would silently be smaller than it says.
                 Item {
@@ -319,7 +319,7 @@ Item {
 
             // ---- the sentence ----------------------------------------------
             //
-            // The issuer's own grading, then the window, then the area — and
+            // The issuer's own grading, then the window, then the area - and
             // that order is the whole of the design here, because this line
             // elides.
             //

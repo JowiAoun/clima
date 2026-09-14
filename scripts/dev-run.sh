@@ -26,7 +26,7 @@
 #
 #   CLIMAT_PRESET=golden     which CMake preset to build and run (default: dev)
 #   CLIMAT_NO_BUILD=1        skip the build; CI has already done it
-#   CLIMAT_BINARY=<path>     run a different executable out of the same build —
+#   CLIMAT_BINARY=<path>     run a different executable out of the same build -
 #                           the component gallery is its own binary, and this is
 #                           how it and anything after it get the same launcher
 #                           rather than a second copy of this file
@@ -50,8 +50,8 @@ binary="${CLIMAT_BINARY:-$build_dir/app/climat}"
 # ---- reaching the toolchain -------------------------------------------------
 #
 # cmake and ninja come from the Nix devshell and are on PATH only inside it. Two
-# ways to be inside it — `nix develop` then this script, or this script from a
-# bare terminal — and both have to work, because the first is what a developer
+# ways to be inside it - `nix develop` then this script, or this script from a
+# bare terminal - and both have to work, because the first is what a developer
 # does all afternoon and the second is what someone does on their first day.
 #
 # So: use the cmake we can see, and reach for `nix develop` only when we cannot.
@@ -78,7 +78,7 @@ EOF
 
 # `cmake --build --preset` reads CMakePresets.json from the working directory
 # and, unlike a configure, has no -S to point it somewhere else. So the build
-# runs from the repo root — in a subshell, because the app inherits our working
+# runs from the repo root - in a subshell, because the app inherits our working
 # directory and `--grab shot.png` has to mean the directory the user typed it
 # in, not this one.
 if [[ -z "${CLIMAT_NO_BUILD:-}" ]]; then
@@ -92,9 +92,9 @@ fi
 if [[ ! -x "$binary" ]]; then
     echo "error: no executable at $binary" >&2
     if [[ -n "${CLIMAT_BINARY:-}" ]]; then
-        echo "       CLIMAT_BINARY names it — check the path, or unset it for the app." >&2
+        echo "       CLIMAT_BINARY names it - check the path, or unset it for the app." >&2
     elif [[ -n "${CLIMAT_NO_BUILD:-}" ]]; then
-        echo "       CLIMAT_NO_BUILD is set — unset it, or build the '$preset' preset first." >&2
+        echo "       CLIMAT_NO_BUILD is set - unset it, or build the '$preset' preset first." >&2
     else
         echo "       the build reported success and produced nothing; check the preset name." >&2
     fi
@@ -103,7 +103,7 @@ fi
 
 # ---- the Qt this binary was linked against ----------------------------------
 #
-# Finding Qt is not this script's business either — scripts/qt-env.sh answers it
+# Finding Qt is not this script's business either - scripts/qt-env.sh answers it
 # once, for the prototype, the build and this. What matters here is that the
 # answer is not optional. A binary built against a Nix-store Qt is not
 # env-wrapped: without the QML_IMPORT_PATH and QT_PLUGIN_PATH that qt-env.sh
@@ -119,7 +119,7 @@ if ! climat_qt_env; then
 fi
 
 # Any headless capture wants the offscreen platform, and --grab is not always
-# the first argument — scan for either. Kept as a default rather than an
+# the first argument - scan for either. Kept as a default rather than an
 # assignment so that grab.sh, which has already pinned this and eleven other
 # variables, is not overruled by the script it called.
 for _a in "$@"; do

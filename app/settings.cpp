@@ -18,19 +18,19 @@ namespace {
 
 // Keys, in one place. A key spelled twice is a key that will eventually be
 // spelled two ways, and the failure mode of that is a preference that saves and
-// never loads — no error, no warning, just a setting that does not stick.
+// never loads - no error, no warning, just a setting that does not stick.
 namespace key {
 const auto appearance        = QStringLiteral("appearance");
 // A group of its own rather than `appearance/dynamic`. QSettings will happily
 // write a scalar `appearance` and a section `[appearance]` into the same INI,
-// and the file that comes out is one nobody can read at a glance — which is the
+// and the file that comes out is one nobody can read at a glance - which is the
 // whole reason this app forces INI in the first place.
 const auto dynamicBackground = QStringLiteral("background/dynamic");
 
 // The four below are the ones climat-cli also reads, and they come from
 // app/settingskeys.h rather than being spelled again here. That header claims
 // to be the one list; it was not, and a rename would have moved the CLI while
-// leaving the app writing the old key — the exact "a preference the app wrote
+// leaving the app writing the old key - the exact "a preference the app wrote
 // and the CLI silently ignored" failure it was added to prevent.
 const auto clockFormat        = QString::fromLatin1(climat::settingskeys::clockFormat);
 const auto alertNotifications = QStringLiteral("alerts/notify");
@@ -48,12 +48,12 @@ const auto acknowledgedAlerts = QStringLiteral("alerts/acknowledged");
 
 // How long a burst of notifications is allowed to go quiet before the file is
 // re-read. One preference change is one QSettings::sync, which is a temporary
-// file, a rename and a directory entry — three events for one edit — and the
+// file, a rename and a directory entry - three events for one edit - and the
 // app may write several keys in a row when a unit preset is applied.
 constexpr int kSettleMs = 250;
 
 // The file QSettings would use for a given identity. Constructing a QSettings
-// does not create anything on disk — it only computes a path — so this is safe
+// does not create anything on disk - it only computes a path - so this is safe
 // to call for an identity that has never existed.
 QString configFileFor(const SettingsIdentity &identity)
 {
@@ -79,7 +79,7 @@ QString configFileFor(const SettingsIdentity &identity)
 //     skips a rename that renamed the file out from under the reader
 //
 // Both were live: this function used to be the only one, and an application
-// rename — the likelier half of a rebrand, since the organisation is a domain —
+// rename - the likelier half of a rebrand, since the organisation is a domain -
 // silently reverted every preference to its default with the old file sitting
 // unread in the same directory.
 QString configDirectoryFor(const SettingsIdentity &identity)
@@ -145,7 +145,7 @@ void Settings::prepareStorage()
 {
     // Before any QSettings is constructed anywhere, this one included. A
     // QSettings built before this line has already chosen its format and will
-    // keep it — on Windows that is the registry, and the app then reads one
+    // keep it - on Windows that is the registry, and the app then reads one
     // store and writes another.
     QSettings::setDefaultFormat(QSettings::IniFormat);
 
@@ -156,8 +156,8 @@ QList<SettingsIdentity> Settings::supersededIdentities()
 {
     // Empty, and correct: Climat has written preferences under exactly one
     // organisation and application name, the one main() sets today. This is the
-    // list a rename appends to — `{ QStringLiteral("Climat"), QStringLiteral("climat") }`
-    // would be the entry if the identity moved tomorrow — and the reason the
+    // list a rename appends to - `{ QStringLiteral("Climat"), QStringLiteral("climat") }`
+    // would be the entry if the identity moved tomorrow - and the reason the
     // machinery below exists before there is anything for it to do is that a
     // migration written after the rename has already lost the data it was
     // supposed to carry.
@@ -180,7 +180,7 @@ bool Settings::migrateConfigDirectory(const QList<SettingsIdentity> &superseded)
     // on every single launch.
     //
     // The file and not the directory, because the directory is named after the
-    // organisation and is shared — see configDirectoryFor(). Asking about the
+    // organisation and is shared - see configDirectoryFor(). Asking about the
     // directory meant a rename within one organisation was refused as "already
     // migrated" on the strength of a file belonging to something else.
     if (QFile::exists(currentFile))
@@ -193,8 +193,8 @@ bool Settings::migrateConfigDirectory(const QList<SettingsIdentity> &superseded)
         if (legacyFile == currentFile || !QFile::exists(legacyFile))
             continue;
 
-        // Everything beside the settings file comes forward too — a per-widget
-        // layout, a cached place list — but only when it is somewhere else. An
+        // Everything beside the settings file comes forward too - a per-widget
+        // layout, a cached place list - but only when it is somewhere else. An
         // application rename leaves the directory where it was, and copying a
         // directory onto itself is not a thing to attempt.
         bool ok = true;
@@ -324,7 +324,7 @@ void Settings::reloadFromDisk()
     m_settings->sync();
 
     // Compared against what this object last announced, NOT against a read
-    // taken just before the sync. QSettings syncs on its own as well — it
+    // taken just before the sync. QSettings syncs on its own as well - it
     // posts itself an UpdateRequest after every setValue and flushes on the
     // next turn of the event loop, and that flush re-reads a changed file
     // exactly as ours does. A "before" taken here would then already carry
@@ -362,9 +362,9 @@ void Settings::rearmWatch()
     const QString directory = QFileInfo(file).absolutePath();
 
     // A fresh install where the app has never written a preference has no
-    // file and may have no directory. The directory is created — QSettings
+    // file and may have no directory. The directory is created - QSettings
     // would create it on the first write anyway, and an empty one is not a
-    // preference — so that there is something to watch for the file appearing
+    // preference - so that there is something to watch for the file appearing
     // in. The file itself is only added once it exists; QFileSystemWatcher
     // refuses a path that does not.
     QDir().mkpath(directory);
@@ -486,7 +486,7 @@ void Settings::saveWindowGeometry(int x, int y, int width, int height)
 
     // Explicitly, because this is usually the last thing that happens before
     // the process exits and QSettings' own flush is tied to its destructor
-    // running — which a crash, a SIGTERM or a compositor logout does not
+    // running - which a crash, a SIGTERM or a compositor logout does not
     // guarantee.
     if (changed) {
         m_settings->sync();
@@ -559,7 +559,7 @@ void Settings::setPrecipitationUnit(const QString &value)
 //
 // The one setting this class stores without understanding. Each entry is a
 // hazard key, the severity it was dismissed at and when it stops mattering,
-// packed by app/viewmodels/alertsdata.cpp — which owns the format, prunes the
+// packed by app/viewmodels/alertsdata.cpp - which owns the format, prunes the
 // expired entries and is the only thing that reads them back.
 //
 // Kept here anyway rather than in a file of its own, because the reason it

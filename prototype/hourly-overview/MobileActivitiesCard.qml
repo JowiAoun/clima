@@ -3,8 +3,8 @@
 // Health & activities: five verdicts, one per row.
 //
 // Nothing here is a measurement, so nothing here is a chart. Each row is a
-// question the reader already knows the units of — do I need a coat, do I need
-// an umbrella — answered in words, with a dot carrying the same answer for the
+// question the reader already knows the units of - do I need a coat, do I need
+// an umbrella - answered in words, with a dot carrying the same answer for the
 // eye that is scanning rather than reading.
 //
 // The dot is the last thing on the row, not the first. A column of coloured
@@ -72,7 +72,7 @@ Item {
                     }
                 }
 
-                // Between rows, not under the last one — a rule under the
+                // Between rows, not under the last one - a rule under the
                 // final row would be a line with nothing below it, which reads
                 // as a list that has been cut off.
                 Rectangle {

@@ -12,8 +12,8 @@
 # The promise is easy to make and easy to break, and breaking it produces no
 # error of any kind. Somebody wants a colour, writes QColor, adds Qt6::Gui to
 # the link line because the compiler asked for it, and the build succeeds. The
-# damage is not visible until months later, when the GNOME extension — which
-# runs inside gnome-shell and cannot link a windowing toolkit — turns out to be
+# damage is not visible until months later, when the GNOME extension - which
+# runs inside gnome-shell and cannot link a windowing toolkit - turns out to be
 # unbuildable against the engine it was supposed to reuse, and the fix is not a
 # link line but every type that leaked through the API in between.
 #
@@ -24,13 +24,13 @@
 # ---- what it actually checks -------------------------------------------------
 #
 # The *transitive* link closure, walked over real CMake targets. Qt6::Quick does
-# not name Qt6::Gui in a way a grep of one CMakeLists.txt would find — it
-# arrives through Qt6::Quick's own INTERFACE_LINK_LIBRARIES — so a one-level
+# not name Qt6::Gui in a way a grep of one CMakeLists.txt would find - it
+# arrives through Qt6::Quick's own INTERFACE_LINK_LIBRARIES - so a one-level
 # check would pass a target that links QtQuick. This one follows every edge.
 #
 # It cannot see a dependency that arrives outside CMake's target graph: a bare
 # `-lQt6Gui` on a flags variable, or a header included from a directory nobody
-# declared. That is what the binary-level test in tests/CMakeLists.txt is for —
+# declared. That is what the binary-level test in tests/CMakeLists.txt is for -
 # it reads the actual dynamic dependencies of a linked executable, which is the
 # honest check, and which needs something linked before it can run.
 
@@ -58,7 +58,7 @@ set(CLIMAT_GUI_QT_TARGETS
 # Resolves aliases and strips the generator expressions Qt puts in its interface
 # link lists. `$<LINK_ONLY:Qt6::Foo>` is a real edge and has to be followed;
 # anything else with a `$<` in it is a conditional this function does not try to
-# evaluate, and is skipped — which is a deliberate false-negative rather than a
+# evaluate, and is skipped - which is a deliberate false-negative rather than a
 # guess.
 function(_climat_normalise_link_entry entry out)
     set(value "${entry}")
@@ -84,7 +84,7 @@ endfunction()
 
 # Breadth-first over LINK_LIBRARIES and INTERFACE_LINK_LIBRARIES. Returns the
 # full closure including the starting target, and the path by which each banned
-# target was reached — the path is the whole value of the message: "libclimat →
+# target was reached - the path is the whole value of the message: "libclimat →
 # Qt6::Quick → Qt6::Gui" tells you which line to delete, and "Qt6::Gui is
 # linked" does not.
 function(_climat_walk_link_closure target out_visited out_offenders out_paths)
@@ -168,14 +168,14 @@ function(climat_forbid_gui target)
         "  libclimat is the GUI-free engine. docs/04-architecture.md §4.1 and §4.9:\n"
         "  a Plasma 6 applet, a GNOME Shell extension and climat-cli are all meant to\n"
         "  link it, and none of them can link a windowing toolkit. A GUI dependency\n"
-        "  here does not fail to build — it fails to be reusable, months later, in a\n"
+        "  here does not fail to build - it fails to be reusable, months later, in a\n"
         "  repository that is not this one.\n"
         "\n"
         "  If you needed a type from QtGui, you almost certainly wanted one of:\n"
-        "    * a colour        — the design tokens live in app/qml/Climat/Theme.qml;\n"
+        "    * a colour        - the design tokens live in app/qml/Climat/Theme.qml;\n"
         "                        the engine has no opinion about colour.\n"
-        "    * an image        — hand the caller the bytes and let it decode.\n"
-        "    * a QPointF       — use libclimat's own value types, or std::pair.\n"
+        "    * an image        - hand the caller the bytes and let it decode.\n"
+        "    * a QPointF       - use libclimat's own value types, or std::pair.\n"
         "\n"
         "  If the dependency is genuinely necessary, the piece that needs it belongs\n"
         "  in app/, not in the engine.\n")

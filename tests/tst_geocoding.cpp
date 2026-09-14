@@ -14,7 +14,7 @@
 //                           first-level divisions. This is the case that
 //                           makes admin1 load-bearing rather than decorative.
 //   search-no-results.json  what a search that matched nothing ACTUALLY
-//                           returns, which is not an empty array — it is an
+//                           returns, which is not an empty array - it is an
 //                           object with no `results` key at all. Recorded on
 //                           purpose, because a parser written against the
 //                           documentation would get this wrong and appear to
@@ -199,7 +199,7 @@ void TestGeocoding::twelveTorontosAreToldApartByAdmin1()
 
 void TestGeocoding::aSearchThatMatchedNothingIsAnEmptyListAndNotAnError()
 {
-    // The recorded bytes are `{"generationtime_ms":0.44560432}` — no `results`
+    // The recorded bytes are `{"generationtime_ms":0.44560432}` - no `results`
     // key of any kind. A person who typed three letters that match nothing has
     // not caused a failure, and a search box that showed them a network error
     // would be lying about what happened.
@@ -234,7 +234,7 @@ void TestGeocoding::aRowWithNoIdIsDroppedRatherThanStored()
 {
     // One unusable row must not fail the whole search: nine of the ten places
     // the user could have meant is better than an error. But it must not be
-    // *kept* either — a Place with identity zero is a place nothing can ever
+    // *kept* either - a Place with identity zero is a place nothing can ever
     // reconcile, and the places table's unique index has an opinion about it.
     const QByteArray mixed = QByteArrayLiteral(
         R"({"results":[{"name":"Nowhere","latitude":1,"longitude":2},)"
@@ -246,7 +246,7 @@ void TestGeocoding::aRowWithNoIdIsDroppedRatherThanStored()
     QCOMPARE(parsed.value().first().name, QStringLiteral("Toronto"));
 
     // No `country` in that row, so the parser fills it from the country code
-    // the way the offline reverse geocoder does — one mapping, so the two
+    // the way the offline reverse geocoder does - one mapping, so the two
     // paths cannot disagree about how a country is spelled.
     QVERIFY(parsed.value().first().country.isEmpty());
 }

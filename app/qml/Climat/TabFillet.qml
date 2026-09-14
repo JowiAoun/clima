@@ -4,7 +4,7 @@
 //
 // A tab joined to a panel makes a *reflex* corner: the fill wraps around the
 // outside of the angle. Rounding that corner is the opposite of rounding a normal
-// one — instead of cutting the corner off, you subtract a quarter-disc from the
+// one - instead of cutting the corner off, you subtract a quarter-disc from the
 // gap beside it, so the fill bulges outward and the tab's side edge flows into the
 // panel's top edge. Squaring it off instead is what makes a tab look pasted on.
 //
@@ -12,7 +12,7 @@
 // *beside* the tab, not inside it.
 //
 // It has no motion of its own. Its radius and colour are expected to be *driven*
-// — DayStrip grows the junction with the tab it belongs to — so the geometry has
+// - DayStrip grows the junction with the tab it belongs to - so the geometry has
 // to stay valid at every value on the way, including zero. A fillet that timed
 // its own arrival would also play in the gallery, where nothing is arriving.
 import QtQuick
@@ -26,7 +26,7 @@ Item {
     property bool mirrored: false     // false = left of the tab, true = right
     // No default worth having. A fillet is the tab's own fill continued around
     // the corner, so the only correct value is whatever the caller painted the
-    // tab with — and both callers pass it. The old default was an opaque navy,
+    // tab with - and both callers pass it. The old default was an opaque navy,
     // which in a system with no opaque cards (§10.1) would have been wrong
     // wherever it landed; it never landed anywhere, and transparent says that
     // out loud instead of hiding it behind a plausible colour.

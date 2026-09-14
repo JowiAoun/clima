@@ -21,7 +21,7 @@ QtPositioningLocator::QtPositioningLocator(QObject *parent)
 
     // errorOccurred rather than the deprecated `error` signal, and the handler
     // takes an int so that this header does not have to name
-    // QGeoPositionInfoSource::Error in a signature — the enum's spelling has
+    // QGeoPositionInfoSource::Error in a signature - the enum's spelling has
     // moved once already across Qt 6 minors.
     connect(m_source, &QGeoPositionInfoSource::errorOccurred, this,
             [this](QGeoPositionInfoSource::Error error) { onErrorOccurred(int(error)); });

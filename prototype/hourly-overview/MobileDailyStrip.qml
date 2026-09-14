@@ -4,7 +4,7 @@
 //
 // One column per day: what it is called, what it looks like, its high over its
 // low, and the chance of rain. The desktop's DayStrip is a different component
-// and deliberately so — that one is a *control*, with a selected card that
+// and deliberately so - that one is a *control*, with a selected card that
 // grows a tab into the chart below it. This is a readout. Nothing here is
 // selectable, because there is nothing on this screen for a selection to
 // change.
@@ -22,7 +22,7 @@ Item {
     readonly property real columnWidth: 72
 
     // Today and the nine days after it. `days` also carries yesterday, which
-    // belongs on the desktop strip — where the reader can page backwards — and
+    // belongs on the desktop strip - where the reader can page backwards - and
     // not on a card called "10 Day".
     readonly property var forecast: Data.days.slice(Data.todayIndex,
                                                     Data.todayIndex + 10)

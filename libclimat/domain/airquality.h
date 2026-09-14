@@ -10,7 +10,7 @@
 // Because they are not two spellings of the same number. The US AQI runs 0-500
 // over rolling averages and is dominated by PM2.5; the European AQI runs 0-100+
 // and is dominated, most days, by ozone. The same air is 29 on one scale and 14
-// on the other — those are the readings the Toronto fixture in
+// on the other - those are the readings the Toronto fixture in
 // tests/fixtures/airquality/ actually carries, at the same hour, for the same
 // air.
 //
@@ -25,7 +25,7 @@
 //
 // app/qml/Climat/detaildata.js wants a pollutant name, a concentration and a
 // unit: "Deteriorating, with PM2.5 the primary pollutant." Picking the largest
-// *concentration* would answer that with carbon monoxide every single time — CO
+// *concentration* would answer that with carbon monoxide every single time - CO
 // is measured in the hundreds of µg/m³ while SO2 is measured in ones, and
 // 204 µg/m³ of CO is clean air while 204 µg/m³ of NO2 is not. Concentrations of
 // different gases are not comparable numbers.
@@ -33,7 +33,7 @@
 // What is comparable is each pollutant's own sub-index: its concentration run
 // through its own breakpoint table onto the shared 0-100+ European scale. The
 // EAQI is *defined* as the maximum of those sub-indices, so the argmax is not
-// an approximation of the dominant pollutant — it is the pollutant the
+// an approximation of the dominant pollutant - it is the pollutant the
 // published index is currently reporting. Verified on the recorded fixtures:
 // over 144 hours across two continents, `european_aqi` equals the maximum of
 // the five published sub-indices exactly, every hour, with no rounding slack.
@@ -53,7 +53,7 @@
 //
 // The three gases agree because the EAQI defines their sub-indices on hourly
 // values, which is what a forecast response contains. The two particulates do
-// not, because the EAQI defines *theirs* on a 24-hour running mean — and the
+// not, because the EAQI defines *theirs* on a 24-hour running mean - and the
 // first hour of a forecast has no preceding twenty-four hours to average. A
 // 22-point error on PM2.5 is the difference between "good" and "moderate", and
 // on a rising evening it is exactly the error that hands the argmax to the
@@ -65,7 +65,7 @@
 // first, computed second, and never a mixture that would compare one of each.
 //
 // Carbon monoxide has no sub-index in either mode. The EAQI does not include
-// CO, so it cannot be dominant — which is correct rather than a limitation: an
+// CO, so it cannot be dominant - which is correct rather than a limitation: an
 // index cannot be dominated by a pollutant it does not measure. Its
 // concentration is still reported, because a detail card lists it.
 //
@@ -76,7 +76,7 @@
 // else; ammonia is the same. Open-Meteo answers a Toronto request for them with
 // a well-formed array of nulls rather than with an error, which is the trap: a
 // parser that reads null as 0.0 produces a pollen card saying "Grass: 0,
-// Birch: 0 — Low" for a city that has no pollen product at all, and it is
+// Birch: 0 - Low" for a city that has no pollen product at all, and it is
 // *plausible*, which is what makes it worse than a crash.
 //
 // So `pollen` is an optional whole. Absent means "this place has no pollen
@@ -128,7 +128,7 @@ enum class PollenSpecies {
     Count
 };
 
-// Stable machine names — "pm2_5", "grass_pollen" — for cache keys, log lines
+// Stable machine names - "pm2_5", "grass_pollen" - for cache keys, log lines
 // and the property names a QML model exposes. These are also the Open-Meteo
 // parameter names, deliberately: one string does for the outbound query, the
 // key and the property, and three spellings of "pm2_5" is three places for a
@@ -144,7 +144,7 @@ QString pollenSpeciesId(PollenSpecies species);
 // define, which is how the query builder knows not to ask for one.
 QString europeanSubIndexId(Pollutant pollutant);
 
-// µg/m³ for every pollutant Open-Meteo reports, including CO — it publishes CO
+// µg/m³ for every pollutant Open-Meteo reports, including CO - it publishes CO
 // in µg/m³ where the WHO guideline values are quoted in mg/m³, and a card that
 // printed the WHO's unit next to Open-Meteo's number would be wrong by a factor
 // of a thousand in the reassuring direction.
@@ -183,11 +183,11 @@ struct AirQualityPoint {
 
     Reading dust;                  // µg/m³, Saharan and other mineral dust
     Reading aerosolOpticalDepth;   // dimensionless, 550 nm
-    Reading ammonia;               // µg/m³ — Europe only, like pollen
+    Reading ammonia;               // µg/m³ - Europe only, like pollen
     Reading uvIndex;
 
     // Absent outside the CAMS Europe domain. Absent means no product, not zero
-    // pollen — see the header. A species inside a present map may still be
+    // pollen - see the header. A species inside a present map may still be
     // missing for an hour the model did not produce.
     std::optional<QMap<PollenSpecies, double>> pollen;
 
@@ -197,8 +197,8 @@ struct AirQualityPoint {
     [[nodiscard]] std::optional<double>    dominantSubIndex() const;
 
     // The dominant pollutant's own concentration, in pollutantUnit() of it.
-    // This is `airQuality.pollutantValue` in app/qml/Climat/detaildata.js — the
-    // number a user reads — as distinct from the sub-index, which is the number
+    // This is `airQuality.pollutantValue` in app/qml/Climat/detaildata.js - the
+    // number a user reads - as distinct from the sub-index, which is the number
     // that decided *which* pollutant to name.
     [[nodiscard]] std::optional<double> dominantConcentration() const;
 };
@@ -217,7 +217,7 @@ struct AirQuality {
 
     // True when at least one pollen sample in the whole response was non-null.
     // This is the Europe gate, computed from the payload rather than from a
-    // bounding box — see openmeteoairqualityprovider.h for why the payload is
+    // bounding box - see openmeteoairqualityprovider.h for why the payload is
     // the more trustworthy source, and what is remembered so that the tab bar
     // can be built before the payload arrives.
     bool hasPollen = false;

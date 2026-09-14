@@ -16,7 +16,7 @@ tools/geonames/main.cpp                             climat-geocode, the harness
 
 ## Why the lookup is offline
 
-Reverse geocoding — a coordinate in, "Toronto, Ontario" out — has one obvious implementation
+Reverse geocoding - a coordinate in, "Toronto, Ontario" out - has one obvious implementation
 and it does not work. Nominatim was tested from a developer machine on 2026-07-31 with a
 properly identifying `User-Agent` naming the project and a contact address. It answered
 **HTTP 403 "Access denied" to the first request**. Not the eleventh, not after a burst: the
@@ -43,7 +43,7 @@ kilobytes on its own:
 ## Running it
 
 The output is **committed**, so a normal build and CI need neither this tool nor a network.
-Re-run it when the upstream dump is worth refreshing — GeoNames rebuilds daily, and a yearly
+Re-run it when the upstream dump is worth refreshing - GeoNames rebuilds daily, and a yearly
 refresh is plenty for city names.
 
 ```sh
@@ -57,7 +57,7 @@ nix develop -c node tools/geonames/pack.mjs \
     --out    libclimat/providers/geocoding/data/cities15000.cgx
 ```
 
-The zip is unpacked by the tool itself, so `unzip` is not needed — the devshell's package
+The zip is unpacked by the tool itself, so `unzip` is not needed - the devshell's package
 list is about building Climat and does not carry an archiver.
 
 Then commit the result together with the provenance block the tool prints, and update the
@@ -83,20 +83,20 @@ output   cities15000.cgx  421933 bytes
 
 Upstream has nineteen tab-separated columns; seven survive: `geonameid`, `latitude`,
 `longitude`, `name`, `country code`, `admin1 code`, `timezone`. The alternate-names column
-alone is two thirds of the file, and it is what the *forward* geocoder is for — that runs
+alone is two thirds of the file, and it is what the *forward* geocoder is for - that runs
 against Open-Meteo's hosted copy, which can afford to index a hundred spellings of Toronto
 in forty scripts.
 
 Population is not stored but is not discarded either: it is folded into one byte per row,
 the settlement's modelled radius. See below.
 
-Rows whose feature code is `PPLX`, `PPLH`, `PPLQ` or `PPLW` are dropped — 2 393 of them.
+Rows whose feature code is `PPLX`, `PPLH`, `PPLQ` or `PPLW` are dropped - 2 393 of them.
 `PPLX` is a *section* of a populated place ("Moss Park", "Bay Street Corridor"), and the
 nearest row to downtown Toronto is a `PPLX`; the other three are historical, abandoned and
 destroyed places, which are not somewhere you can be standing.
 
 Coordinates are stored to **four** decimals, not five, because `Coordinate::keyDecimals` is
-4 — every outbound request in the engine is quantised to four decimals before it is hashed
+4 - every outbound request in the engine is quantised to four decimals before it is hashed
 or sent ([`libclimat/domain/coordinate.h`](../../libclimat/domain/coordinate.h) explains why,
 and MET Norway's terms ask for it by name). A fifth decimal would be a digit no cache key,
 no URL and no comparison in the product could ever see. The packer rounds half away from
@@ -113,21 +113,21 @@ Mo Kio New Town wins), Tokyo (Asagaya-minami) and Paris (Paris 04 Hôtel-de-Vill
 So each row carries a **reach**, derived from population by treating the settlement as a
 disc at a typical urban density: `r = sqrt(P / (π · ρ))` with ρ = 2 000 people/km². Toronto
 gets 21 km, Tokyo 39 km, Reykjavík 4.4 km, a 16 000-person town 1.6 km. The density is on
-the low side of real urban density on purpose — the model is not drawing city limits, it is
+the low side of real urban density on purpose - the model is not drawing city limits, it is
 covering the suburbs the dataset has no row for, and every candidate is inflated by the same
 rule so only the ranking matters.
 
 Ranking is then two steps:
 
-* Among candidates inside the cutoff, take the smallest `d / reach` — the settlement you are
+* Among candidates inside the cutoff, take the smallest `d / reach` - the settlement you are
   furthest *inside*. If that ratio is ≤ 1, that is the answer.
 * If every ratio exceeds 1 you are in open country, and the ranking falls back to plain
   distance. Without this, a point 30 km from a village and 60 km from a city would be
-  labelled with the city, because a big reach forgives a big distance — right when you are
+  labelled with the city, because a big reach forgives a big distance - right when you are
   inside the city, wrong when you are not.
 
 Beyond the cutoff (250 km by default) the answer is `ErrorKind::Unsupported` and the UI shows
-the coordinate. Point Nemo — 48.8767 S, 123.3933 W, the oceanic pole of inaccessibility — is
+the coordinate. Point Nemo - 48.8767 S, 123.3933 W, the oceanic pole of inaccessibility - is
 2 711 km from the nearest row, which is Adamstown, population 46.
 
 ## The file format
@@ -137,7 +137,7 @@ format. [`libclimat/providers/geocoding/geonamesindex.h`](../../libclimat/provid
 documents it from the reading end and `pack.mjs` from the writing end; the two must be read
 side by side.
 
-The payload is **columnar** — every latitude, then every longitude, then every id — with the
+The payload is **columnar** - every latitude, then every longitude, then every id - with the
 integer columns zigzag-varint delta-coded. That is worth a third of the file: a row-major
 layout interleaves four unrelated kinds of number and deflate finds no runs in it. Measured
 on this data, 664 KB row-major against 413 KB columnar.
@@ -162,8 +162,8 @@ on this data, 664 KB row-major against 413 KB columnar.
 GeoNames data is **CC BY 4.0**. The packed index is a transformation of a CC-BY work and is
 under the same licence; trimming columns and changing the container does not make it ours.
 
-`REUSE.toml` declares `cities15000.cgx` with **GeoNames** as the copyright holder — not
-"Jowi Aoun" — and `LICENSES/CC-BY-4.0.txt` carries the terms. The user-visible half of the
+`REUSE.toml` declares `cities15000.cgx` with **GeoNames** as the copyright holder - not
+"Jowi Aoun" - and `LICENSES/CC-BY-4.0.txt` carries the terms. The user-visible half of the
 obligation is discharged by `OfflineReverseGeocoder::attribution()` and
 `OpenMeteoGeocoder::attribution()`, whose lines belong on the About → Data sources screen:
 

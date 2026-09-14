@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Visibility detail card — how far you can see, drawn as the distance itself.
+// Visibility detail card - how far you can see, drawn as the distance itself.
 //
 // One continuous sight line, near end at the left where you are standing,
 // tapering away to the ceiling of the scale at the right. It is lit from the
@@ -12,7 +12,7 @@
 // only thing a new reading could change was which of five colours each bar took.
 // 16 km and 19 km drew exactly the same picture, and every value between 12 and
 // 16 drew the same picture as 16. Next to Temperature's twelve-point series that
-// is a coarse read of a quantity that is not stepped in the first place —
+// is a coarse read of a quantity that is not stepped in the first place -
 // visibility is a distance, continuous by nature, and the honest drawing of a
 // continuous quantity is a continuous one. The taper survives because it is what
 // makes the shape read as distance rather than as a bar; what has changed is
@@ -20,7 +20,7 @@
 // before the taper was fixed decoration and the reading was a colour lookup.
 //
 // Three other corrections. The reading was scaled against `d.max`, which no
-// longer exists and which was today's *peak* distance when it did — 16 km of
+// longer exists and which was today's *peak* distance when it did - 16 km of
 // "Excellent" lit two bars of five while the status line said Excellent. The
 // ceiling is `d.scaleMax`, which is data and means a ceiling: past 20 km a
 // public forecast stops distinguishing. The colour comes from
@@ -28,8 +28,8 @@
 // five-colour ramp invented here. And the reading is bottom-left, where every
 // card puts it except the three dials, which centre theirs inside the ring.
 // A card is a `DetailCard { content: Item { id: viz } }`, so everything drawn
-// here lives inside a Component and reaches the two ids around it — `root` for
-// the card and `viz` for the visualisation — across that boundary. Without this
+// here lives inside a Component and reaches the two ids around it - `root` for
+// the card and `viz` for the visualisation - across that boundary. Without this
 // pragma neither is resolvable at compile time: qmllint reports every one of
 // them as an unqualified access, and qmlcachegen, which is the half that costs
 // something, cannot ahead-of-time compile the binding and leaves it to be
@@ -39,7 +39,7 @@
 //
 // Bound makes the enclosing scope's ids lexical, which is what they already
 // read as. It is safe here because every delegate in this file declares its
-// `required property` — that is the one thing Bound takes away, and none of
+// `required property` - that is the one thing Bound takes away, and none of
 // these were relying on it.
 pragma ComponentBehavior: Bound
 
@@ -73,10 +73,10 @@ DetailCard {
         // ---- the arrival ---------------------------------------------------
         // The sight line extends from where you are standing out to the
         // reading. A distance is read along its length, so pushing it out
-        // lengthwise is the same movement the eye makes over it — where a bar
+        // lengthwise is the same movement the eye makes over it - where a bar
         // "growing" off a baseline would be the wrong axis entirely.
         //
-        // The taper behind it does not extend: it is the whole 0–20 km scale,
+        // The taper behind it does not extend: it is the whole 0-20 km scale,
         // the thing the lit stretch is a fraction of (§10.7), and revealing it
         // alongside the reading would leave the first frames with a lit length
         // and nothing to judge it against.
@@ -123,7 +123,7 @@ DetailCard {
         }
 
         // Where the lit stretch starts giving way. A fixed run, so the boundary
-        // stays findable at any value — but never more than half the stretch, or
+        // stays findable at any value - but never more than half the stretch, or
         // a short reading is nothing but fade and its length stops being legible.
         readonly property real litLength: Math.max(1, xVal - x0)
         readonly property real fadeRun: Math.min(26, litLength * 0.45)
@@ -142,7 +142,7 @@ DetailCard {
             }
 
             // As far as you can see, fading out at its own limit rather than
-            // stopping at an edge — which is what a visibility limit does. The
+            // stopping at an edge - which is what a visibility limit does. The
             // fade goes to zero alpha, so it is a dissolve and not a second
             // shape laid over the first.
             ShapePath {

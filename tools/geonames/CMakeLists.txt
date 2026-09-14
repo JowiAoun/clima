@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Jowi Aoun
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# `climat-geocode` — the manual harness for both halves of geocoding.
+# `climat-geocode` - the manual harness for both halves of geocoding.
 #
 # The suite proves the parser against four recorded responses and the reverse
 # index against four coordinates. Neither of those notices the day Open-Meteo

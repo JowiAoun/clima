@@ -13,13 +13,13 @@
 //
 // It is the reason this component exists rather than MobileMePage's one-line
 // settings row, which is a title on the left and a value on the right. That
-// shape is right for "Wind — km/h", where the title names a quantity everybody
+// shape is right for "Wind - km/h", where the title names a quantity everybody
 // already understands. It is wrong for every setting on this screen: "Dynamic
 // background" does not say what it does, and a switch with no sentence under it
 // is a switch you have to flip to find out.
 //
 // So the subtitle is a required part of the row and not an option on it. Rows
-// that genuinely have nothing to add — the five per-quantity unit rows — pass
+// that genuinely have nothing to add - the five per-quantity unit rows - pass
 // none and get the compact shape back, which is the one case where the title
 // really is self-describing.
 //
@@ -33,7 +33,7 @@
 //
 // A row with no `onActivated` handler is not tappable at all: no hover wash, no
 // pointing cursor, nothing to promise an interaction that does not happen. That
-// is what `interactive` reads — see below — rather than a flag the caller has to
+// is what `interactive` reads - see below - rather than a flag the caller has to
 // remember to set in step with the handler.
 import QtQuick
 
@@ -43,7 +43,7 @@ Item {
     property string title
     property string subtitle: ""
 
-    // The control at the trailing edge — a switch, a segment. Given as a
+    // The control at the trailing edge - a switch, a segment. Given as a
     // Component so the row owns its placement and the caller owns its bindings.
     property Component control
 
@@ -52,7 +52,7 @@ Item {
     // two sit on opposite sides of the text and a row could want both.
     property Component leading
 
-    // The hairline under the row. The group turns it off for the last one — a
+    // The hairline under the row. The group turns it off for the last one - a
     // rule against the bottom edge of a card is a second card edge 1 px inside
     // the first.
     property bool ruled: true
@@ -60,7 +60,7 @@ Item {
     signal activated()
 
     // Whether anything is listening. `activated` is a signal, and QML has no way
-    // to ask a signal how many connections it has — but an unconnected signal
+    // to ask a signal how many connections it has - but an unconnected signal
     // and a connected one differ in exactly one observable way, which is whether
     // the caller wrote the handler. So the caller states it, and the default is
     // "yes" because a row with a control is nearly always tappable.
@@ -73,7 +73,7 @@ Item {
     //
     // A three-position segment is 220 px and a two-position one is 162. On a
     // 390 px phone, where a row is 362 px wide, that leaves 98 px for a title
-    // and a sentence — and "Used everywhere a time appears, including the
+    // and a sentence - and "Used everywhere a time appears, including the
     // desktop widgets" comes out five ragged lines deep beside a control one
     // line tall. The row is legible and it looks like a mistake.
     //
@@ -84,7 +84,7 @@ Item {
     // ---- stated as a floor under the text, not a fraction of the row --------
     //
     // This was `controlWidth > width * 0.45` first, and the two numbers it had
-    // to separate were 220 px of segment against a 223 px threshold — three
+    // to separate were 220 px of segment against a 223 px threshold - three
     // pixels, which a translated label or a different face would have crossed
     // without anybody touching this file. The question is not what fraction the
     // control takes; it is whether a sentence still fits beside it. 200 px is
@@ -132,7 +132,7 @@ Item {
     height: implicitHeight
 
     // The hover wash. Edge to edge inside the group, because the row is the
-    // target — a wash inset from the card's sides would say the strip in the
+    // target - a wash inset from the card's sides would say the strip in the
     // margin is not part of what you are about to press.
     Rectangle {
         anchors.fill: parent
@@ -188,7 +188,7 @@ Item {
             root.padH + (root.leadingItem ? root.leadingItem.implicitWidth + 12 : 0)
         anchors.right: parent.right
         // 12 px of air between the last word and the control, and none when
-        // there is no control — an unloaded Loader is 0 wide, so the margin has
+        // there is no control - an unloaded Loader is 0 wide, so the margin has
         // to be conditional or every row without a control ends 12 px short of
         // the ones that have one. Stacked, the words get the whole width.
         anchors.rightMargin: root.padH
@@ -210,7 +210,7 @@ Item {
             color: Theme.ink.dim
             font.pixelSize: Theme.type.label
             // Wrapped, not elided. A subtitle is a sentence and half a sentence
-            // is worse than a taller row — the row grows, which is what
+            // is worse than a taller row - the row grows, which is what
             // `implicitHeight` is measured from.
             wrapMode: Text.WordWrap
         }

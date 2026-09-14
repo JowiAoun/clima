@@ -36,8 +36,8 @@
 //     THE HAZARD ENDS AT `ends`. WHERE THERE IS NO `ends`, AND ONLY THERE,
 //     `expires` STANDS IN FOR IT.
 //
-// `ends` really is absent sometimes — all three Air Quality Alerts in
-// tests/fixtures/alerts/nws/seattle-four.json have `ends: null` — which is why
+// `ends` really is absent sometimes - all three Air Quality Alerts in
+// tests/fixtures/alerts/nws/seattle-four.json have `ends: null` - which is why
 // the fallback exists at all and why it is not the primary rule.
 //
 // docs/06-roadmap.md §6.6 says "no *expired* alert is ever displayed". As
@@ -51,7 +51,7 @@
 // alert is current whatever `expires` says. If our last poll FAILED, we are
 // holding a message its author has already disowned, and the honest thing is to
 // keep showing it and say when we last confirmed it. Never silently keep it,
-// never silently drop it — AlertSet::confirmedAt is that sentence's data.
+// never silently drop it - AlertSet::confirmedAt is that sentence's data.
 //
 // ============================================================================
 // SEVERITY IS CAP'S, AND THE ISSUER'S OWN WORDS TRAVEL BESIDE IT
@@ -69,7 +69,7 @@
 //
 // ---- Unknown is a real value and it is not "probably fine" ------------------
 //
-// severity `Unknown` is what NWS sends for every Air Quality Alert — six of the
+// severity `Unknown` is what NWS sends for every Air Quality Alert - six of the
 // nine alerts recorded in tests/fixtures/alerts/nws/. It means the issuer did
 // not classify, not that the classification is low. It therefore sorts BELOW
 // Minor for ranking, because something graded Minor was graded, and it must
@@ -78,7 +78,7 @@
 // ============================================================================
 // IDENTITY: WHY THIS IS A LIST OF KEYS AND NOT A STRING
 //
-// Acknowledgement — see the banner — is remembered per hazard, not per message,
+// Acknowledgement - see the banner - is remembered per hazard, not per message,
 // so the app has to be able to say "this is the alert you already dismissed"
 // about a message it has never seen before. The two services make that a
 // different problem each:
@@ -87,8 +87,8 @@
 //   ids it supersedes in `references`. 24 of the 25 alerts in force in
 //   California were messageType Update. So identity has to follow the chain.
 //
-//   ECCC does not have references. It has `alert_code` and `feature_id` —
-//   "heat warning" and "Annapolis County" — and it issues one alert per type
+//   ECCC does not have references. It has `alert_code` and `feature_id` -
+//   "heat warning" and "Annapolis County" - and it issues one alert per type
 //   per area, so that pair IS the hazard.
 //
 // And the shape that rules out the obvious shared answer: Seattle had TWO Air
@@ -119,7 +119,7 @@ namespace climat {
 // ---- CAP 1.2 enumerations ------------------------------------------------------
 //
 // Ordered lowest to highest so that `<` means what it reads as. `Unknown` is
-// first for exactly that reason — see the header.
+// first for exactly that reason - see the header.
 
 enum class AlertSeverity {
     Unknown = 0,
@@ -145,9 +145,9 @@ enum class AlertCertainty {
     Observed,
 };
 
-// CAP's msgType. Carried rather than acted on by the primary providers — both
+// CAP's msgType. Carried rather than acted on by the primary providers - both
 // of them serve an *active* collection, so a cancelled alert is one that is no
-// longer in the answer — but the CAP feeds a fallback would read do send Cancel
+// longer in the answer - but the CAP feeds a fallback would read do send Cancel
 // explicitly, and a field that arrives with the parser is a field that does not
 // have to be retrofitted around one.
 enum class AlertMessageType {
@@ -164,7 +164,7 @@ QString alertCertaintyName(AlertCertainty certainty);
 
 // Lowercase, stable, and the string QML indexes a token group by:
 // "extreme", "severe", "moderate", "minor", "unknown". Separate from
-// alertSeverityName() — that one is for logs and may be capitalised or
+// alertSeverityName() - that one is for logs and may be capitalised or
 // translated; this one is a key and must not move.
 QString alertSeverityKey(AlertSeverity severity);
 
@@ -175,7 +175,7 @@ enum class AlertPhase {
     // yet. Not drawn.
     NotYet,
 
-    // Effective, but the hazard has not started. Drawn, with "begins 12:00 PM" —
+    // Effective, but the hazard has not started. Drawn, with "begins 12:00 PM" -
     // this is the Heat Advisory issued at breakfast for an afternoon that has
     // not arrived, and hiding it is the failure docs/06 §6.6 was corrected for.
     Pending,
@@ -193,7 +193,7 @@ QString alertPhaseName(AlertPhase phase);
 // ---- the alert -------------------------------------------------------------------
 
 struct Alert {
-    // Provider-scoped and unique per MESSAGE. Not the hazard's identity — see
+    // Provider-scoped and unique per MESSAGE. Not the hazard's identity - see
     // identityKeys(), and the header for why those are different things.
     QString id;
     QString providerId;
@@ -241,7 +241,7 @@ struct Alert {
     // Where the issuer's own page for this is, when they gave one.
     QUrl web;
 
-    // Every string this alert may be recognised by. Populated by the provider —
+    // Every string this alert may be recognised by. Populated by the provider -
     // see the header for what each one puts in it. Never empty: a provider with
     // nothing better contributes the message id, which at least makes the alert
     // identical to itself.
@@ -251,7 +251,7 @@ struct Alert {
 
     // `ends`, or `expires` where there is no `ends`. Invalid when there is
     // neither, which no observed payload has produced and which is treated as
-    // "no end stated" — such an alert stays visible until it leaves the feed.
+    // "no end stated" - such an alert stays visible until it leaves the feed.
     [[nodiscard]] QDateTime hazardEnd() const;
 
     [[nodiscard]] AlertPhase phaseAt(const QDateTime &now) const;
@@ -260,7 +260,7 @@ struct Alert {
     [[nodiscard]] bool isDisplayableAt(const QDateTime &now) const;
 
     // True once the issuer's own refresh deadline has passed. NOT a reason to
-    // hide anything — see the header — only a reason to say when we last
+    // hide anything - see the header - only a reason to say when we last
     // confirmed it, and only when the poll that would have confirmed it failed.
     [[nodiscard]] bool isPastRefreshDeadline(const QDateTime &now) const;
 
@@ -268,7 +268,7 @@ struct Alert {
     [[nodiscard]] bool isSameHazard(const Alert &other) const;
 
     // Higher ranks first in the banner. Severity, then urgency, then certainty,
-    // then the earlier onset — an Extreme that starts tomorrow still outranks a
+    // then the earlier onset - an Extreme that starts tomorrow still outranks a
     // Severe that started this morning, because the banner shows one alert and
     // the one it must not omit is the worst one.
     [[nodiscard]] bool outranks(const Alert &other) const;
@@ -296,7 +296,7 @@ struct AlertSet {
     QDateTime confirmedAt;
 
     // Comma-joined provider ids, in the order they answered. Plural because
-    // alerts fan out rather than fall back — see registry.h.
+    // alerts fan out rather than fall back - see registry.h.
     QString providerId;
 
     // False when at least one provider that covers this place did not answer.

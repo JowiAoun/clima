@@ -7,8 +7,8 @@
 // WHY THIS IS A SEPARATE EXECUTABLE FROM THE APP
 //
 // Because a GNOME Shell extension has to *spawn* it. Extension identity on
-// Wayland is established by an inherited socket fd — the shell makes a
-// socketpair, keeps one end and hands the child the other as WAYLAND_SOCKET —
+// Wayland is established by an inherited socket fd - the shell makes a
+// socketpair, keeps one end and hands the child the other as WAYLAND_SOCKET -
 // and only then can it own, re-type and pin the window that appears. That was
 // measured before any of this was written; see docs/widgets.md.
 //
@@ -30,7 +30,7 @@
 //
 // Fetch. Open a socket. Write the cache. Every number on screen came from
 // climat-daemon over the session bus, and widgets/CMakeLists.txt turns that
-// into a check on the built binary rather than a promise in a comment — the
+// into a check on the built binary rather than a promise in a comment - the
 // symbol table is inspected for HttpClient and the providers, because libclimat
 // is a static archive and `ldd` would prove nothing.
 //
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
     // The app writes the INI; this process only reads it, and until it
     // watched the file it read it once. A reader who switches to a 24-hour
-    // clock in the app should see the tiles follow, not restart the host —
+    // clock in the app should see the tiles follow, not restart the host -
     // `Units` and `TimeFormat` are already bound to Settings' signals, so the
     // reload is the whole of it.
     Settings::instance()->watchForExternalChanges();
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     // WidgetWindow.qml is `visible: false` and this is why. A window that shows
     // itself during component completion already has a platform surface by the
     // time this line runs, and a surface has already committed to being an
-    // ordinary xdg-shell window — `LayerShellQt::Window::get()` after that
+    // ordinary xdg-shell window - `LayerShellQt::Window::get()` after that
     // point warns onto a logging category nobody has enabled and changes
     // nothing. The tiles would appear, floating, and the only evidence that
     // `--pin` had failed would be that they were in the wrong place.
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
                 return 3;
             }
 
-            // `--pin auto` degrades, and says so once — but only to somebody who
+            // `--pin auto` degrades, and says so once - but only to somebody who
             // typed it. It is also the default, and a line on every X11 and
             // GNOME start explaining a flag nobody passed is noise.
             if (options->pinWasRequested()) {

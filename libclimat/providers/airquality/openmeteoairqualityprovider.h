@@ -9,14 +9,14 @@
 // A separate host from the forecast API and therefore, as far as HttpClient is
 // concerned, still the same provider id: `open-meteo`. That is deliberate. A
 // 403 is a statement about our User-Agent, not about a hostname, so a 403 from
-// either host should disable both — which is what sharing the id buys, for
+// either host should disable both - which is what sharing the id buys, for
 // free, in the one place it matters.
 //
 // ============================================================================
 // THE PROBLEM: A WELL-FORMED RESPONSE FULL OF NOTHING
 //
 // Ask for pollen in Toronto and the request succeeds. HTTP 200, valid JSON,
-// `hourly.grass_pollen` present, seventy-two entries long — and every one of
+// `hourly.grass_pollen` present, seventy-two entries long - and every one of
 // them `null`. Verified against the live service and recorded in
 // tests/fixtures/airquality/toronto.json: six pollen series and ammonia, 72
 // nulls out of 72 each. The same request against Berlin returns 0 nulls out of
@@ -28,7 +28,7 @@
 // design and a trap for a parser.
 //
 // The failure mode is not a crash. It is a pollen card in Toronto reading
-// "Grass 0 · Birch 0 · Alder 0 — Low", which is *plausible*, which is worse.
+// "Grass 0 · Birch 0 · Alder 0 - Low", which is *plausible*, which is worse.
 // docs/08-risks.md R9: region-gate honestly, never fabricate.
 //
 // ============================================================================
@@ -42,7 +42,7 @@
 //      that started working. Nothing fails; the app is just quietly worse than
 //      the data it is holding.
 //   2. A rectangle is wrong at the edges by construction. Iceland, Cyprus, the
-//      Azores, the eastern Turkish border — every one of them is a coin flip
+//      Azores, the eastern Turkish border - every one of them is a coin flip
 //      between an empty card and a hidden working one, and no test we can write
 //      knows which.
 //   3. The response already answers the question, exactly, for the point being
@@ -72,15 +72,15 @@
 // ============================================================================
 // WHAT IS REMEMBERED, AND AT WHAT RESOLUTION
 //
-// capabilitiesAt() must answer synchronously — it is called while building a
-// tab bar — but the verdict above comes out of a payload. Before the first
+// capabilitiesAt() must answer synchronously - it is called while building a
+// tab bar - but the verdict above comes out of a payload. Before the first
 // fetch for a place, the honest answer is Capabilities::isUndetermined(), and
 // after it the verdict is remembered so the answer is instant thereafter.
 //
 // The verdict is keyed by the coordinate rounded to ONE decimal place, which is
 // ~11 km, which is the resolution of the CAMS Europe grid itself
 // (docs/02-data-sources.md §2.6: "Europe 11 km"). One remembered verdict per
-// CAMS cell. Not four decimals — that is the *request* quantisation from
+// CAMS cell. Not four decimals - that is the *request* quantisation from
 // libclimat/domain/coordinate.h, and at four decimals a user who moved the map
 // eleven metres would re-learn a continental fact. Not whole degrees either:
 // a 111 km cell straddles the domain boundary, and this cache is allowed to be
@@ -120,7 +120,7 @@ class OpenMeteoAirQualityProvider : public QObject, public IAirQualityProvider
 
 public:
     // Neither is owned and both must outlive this. Same rule as everything else
-    // that takes a Clock — libclimat/core/clock.h — and the same reason: a
+    // that takes a Clock - libclimat/core/clock.h - and the same reason: a
     // provider that constructed its own network client would be a provider
     // outside the User-Agent, coalescing and 403 policy that client exists to
     // enforce.

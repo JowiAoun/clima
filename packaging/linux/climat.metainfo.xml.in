@@ -101,7 +101,7 @@
     raw.githubusercontent link moves with the branch. They are un-bezelled
     grabs on purpose: Flathub's linter reads a marketing composite with a
     phone frame around it as excessive whitespace and rejects it. The framed
-    versions are for the README, and they are a different capture profile —
+    versions are for the README, and they are a different capture profile -
     see docs/screenshots.md.
   -->
   <screenshots>
@@ -126,7 +126,7 @@
   <!--
     Our two palette anchors, so a software centre tints the page with the app's
     own colours rather than guessing from the icon. `sky.night.stops[1]` for
-    dark and `surface.base` for light — see app/qml/Climat/theme.js.
+    dark and `surface.base` for light - see app/qml/Climat/theme.js.
   -->
   <branding>
     <color type="primary" scheme_preference="dark">#141f4a</color>
@@ -134,7 +134,7 @@
   </branding>
 
   <!--
-    360 px is the narrowest layout that exists — the phone breakpoint in
+    360 px is the narrowest layout that exists - the phone breakpoint in
     app/qml/Climat/Viewports.qml. Below it the app does not degrade, it clips,
     so this is a requirement rather than a recommendation.
   -->

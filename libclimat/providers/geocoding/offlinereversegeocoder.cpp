@@ -74,7 +74,7 @@ Result<ReverseMatch> OfflineReverseGeocoder::reverse(const Coordinate &at) const
         // Unsupported and not NotFound. §4.4's word for "the provider does not
         // cover this coordinate" is Unsupported, and the difference matters to
         // the caller: NotFound invites a retry somewhere else, and there is
-        // nowhere else — every provider would say the same thing about the
+        // nowhere else - every provider would say the same thing about the
         // middle of the Pacific.
         return Error(ErrorKind::Unsupported,
                      QStringLiteral("no populated place within %1 km of %2")

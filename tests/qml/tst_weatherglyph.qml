@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// Thirteen conditions, thirteen different pictures — asserted on the pixels.
+// Thirteen conditions, thirteen different pictures - asserted on the pixels.
 //
 // This test exists because of a bug that was invisible in every screenshot the
 // project had ever taken. `WeatherGlyph.qml` knew seven of `ConditionKind`'s
@@ -9,7 +9,7 @@
 // folded the other six into those seven before QML saw them: fog and snow to
 // cloudy, drizzle, sleet, thunder and hail to rain. A thunderstorm therefore
 // rendered as an ordinary shower, and an ordinary shower is a *plausible*
-// picture of a thunderstorm — so the ten-day strip looked completely fine while
+// picture of a thunderstorm - so the ten-day strip looked completely fine while
 // telling you the wrong thing about Saturday.
 //
 // Nothing structural could have caught it. The kind was a valid string, the
@@ -39,7 +39,7 @@ TestCase {
     height: 240
 
     // A TestCase is invisible by default, and an invisible item's subtree is
-    // never rendered — a grab of one comes back the window's clear colour,
+    // never rendered - a grab of one comes back the window's clear colour,
     // every pixel of it. That reads as "the glyph paints nothing", which is the
     // exact failure this file exists to report, so it would have been a very
     // convincing false positive. Nothing else under tests/qml/ looks at pixels,
@@ -58,7 +58,7 @@ TestCase {
     // Two conditions that are *meant* to paint the same pixels, and the only
     // pair allowed to. The enum keeps rain and rain-night apart because the
     // plate behind the glyph is a day plate or a night plate and that is where
-    // the difference is carried — a moon behind a raining cloud is a sky nobody
+    // the difference is carried - a moon behind a raining cloud is a sky nobody
     // can see. If a night form of rain is ever drawn, delete this, do not widen
     // it.
     readonly property var identicalPairs: [["rain", "rain-night"]]
@@ -88,7 +88,7 @@ TestCase {
         glyph.kind = kind
         // No waitForRendering: under the offscreen platform it reports false
         // whether or not a frame arrived, and `grabImage` renders the subtree
-        // synchronously anyway. The writes above have already propagated — a
+        // synchronously anyway. The writes above have already propagated - a
         // QML property assignment is not deferred.
 
         var img = grabImage(stage)
@@ -109,14 +109,14 @@ TestCase {
     }
 
     // Is `target` painted anywhere, give or take the fraction of a channel that
-    // antialiasing moves an edge pixel by? Only ever asked about flat fills —
+    // antialiasing moves an edge pixel by? Only ever asked about flat fills -
     // a gradient stop is reached at exactly one row and is not a safe needle.
     function paints(kind, target, ground) {
         glyph.ground = ground === undefined ? "card" : ground
         glyph.kind = kind
         // No waitForRendering: under the offscreen platform it reports false
         // whether or not a frame arrived, and `grabImage` renders the subtree
-        // synchronously anyway. The writes above have already propagated — a
+        // synchronously anyway. The writes above have already propagated - a
         // QML property assignment is not deferred.
 
         var img = grabImage(stage)
@@ -146,7 +146,7 @@ TestCase {
     function test_everyKindPaintsSomething(data) {
         var got = maskOf(data.kind)
         verify(got.marks > 0,
-               "\"" + data.kind + "\" paints nothing — WeatherGlyph.qml has no picture for it, "
+               "\"" + data.kind + "\" paints nothing - WeatherGlyph.qml has no picture for it, "
                + "so it renders as an empty box and reads as missing data")
 
         // A floor as well as a non-zero, because a single stray antialiased
@@ -179,7 +179,7 @@ TestCase {
 
                 if (exempt[a + "/" + b]) {
                     verify(same, a + " and " + b + " are listed as a deliberate pair but no "
-                           + "longer paint the same pixels — the list is now the stale half "
+                           + "longer paint the same pixels - the list is now the stale half "
                            + "of the contract")
                     continue
                 }
@@ -194,7 +194,7 @@ TestCase {
     }
 
     // The six the engine used to fold away, named one at a time against what it
-    // used to fold them into. The test above already covers these — this is the
+    // used to fold them into. The test above already covers these - this is the
     // regression stated in the words of the bug, so a failure says which
     // downgrade came back rather than only that two masks matched.
     function test_theFoldedKindsAreNoLongerTheirFallback_data() {
@@ -222,7 +222,7 @@ TestCase {
         verify(paints("thunder", Theme.glyph.bolt, "card"),
                "the thunder glyph paints no Theme.glyph.bolt anywhere")
         verify(paints("hail", Theme.glyph.bolt, "card"),
-               "the hail glyph paints no bolt — WMO 96 and 99 are the only codes that reach it "
+               "the hail glyph paints no bolt - WMO 96 and 99 are the only codes that reach it "
                + "and both of them are thunderstorms")
         verify(!paints("rain", Theme.glyph.bolt, "card"),
                "the plain rain glyph has a bolt in it")
@@ -231,7 +231,7 @@ TestCase {
     // ---- the pale plate ----------------------------------------------------
 
     // DayIconBadge draws the glyph on a near-white disc, which is where a pale
-    // mark goes invisible — a `glyph.rain` drop measures 2.13:1 on dark's day
+    // mark goes invisible - a `glyph.rain` drop measures 2.13:1 on dark's day
     // plate, under the 3:1 an essential mark owes its ground. Every falling
     // mark therefore has a second token for that plate, and this catches the
     // half-migration where the token was added and the binding was not.
@@ -263,8 +263,8 @@ TestCase {
         // That was tried and it is not a real invariant: the mask is "differs
         // from the ground", the pale-plate inks are nearer this navy ground
         // than the card inks are, and so a handful of antialiased edge pixels
-        // legitimately drop below the threshold. Drizzle and snow — the two
-        // finest marks, with the most edge per unit of area — failed it while
+        // legitimately drop below the threshold. Drizzle and snow - the two
+        // finest marks, with the most edge per unit of area - failed it while
         // being pixel-perfect.
     }
 
@@ -273,7 +273,7 @@ TestCase {
     // The other half of the same story, and the one nothing measured at all
     // until `ground` had three values. DayIconBadge's NIGHT disc is neither a
     // card nor a pale plate: at its old mid-blue, `glyph.rain` measured 1.31:1
-    // on it — raindrops on the night half of a rainy day card that were
+    // on it - raindrops on the night half of a rainy day card that were
     // arithmetically not visible, and which the audit could not see either,
     // because a token is scored against one ground and this one had three.
     //

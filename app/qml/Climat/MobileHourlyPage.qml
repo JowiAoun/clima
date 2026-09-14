@@ -8,9 +8,9 @@
 //   daily summary  the same day in a sentence
 //
 // The chart is the desktop's card, not a phone-sized rewrite of it. Everything
-// that made it worth building — the metric-driven axis, the gradient keyed to
+// that made it worth building - the metric-driven axis, the gradient keyed to
 // the value, the past veiled and hatched rather than hidden, the feels-like
-// morph — is width-independent, and the two things that are not are the column
+// morph - is width-independent, and the two things that are not are the column
 // width and the plot height, which is why both are now properties on it.
 //
 // What the phone changes is the *control*: ten pills become one button and a
@@ -19,7 +19,7 @@
 // ---- the day the chart is of -------------------------------------------------
 // The week strip writes `Data.selectedDay` and the chart reads the window that
 // moves with it, so picking a day here redraws the chart under it. The reading
-// row above it does not move — it says what the weather is doing *now*, which
+// row above it does not move - it says what the weather is doing *now*, which
 // is a different question from what the chart is answering, and it asks
 // `Data.ahead(0)` rather than the window so that it keeps saying so.
 import QtQuick
@@ -39,13 +39,13 @@ MobilePage {
 
     // The shell owns it, so a metric picked here survives a trip to the map and
     // back. See MobileShell's note on why it travels as a request rather than as
-    // a binding — and on why the day does not travel at all: the strip below
+    // a binding - and on why the day does not travel at all: the strip below
     // reads and writes `Data.selectedDay`, which outlives this page by itself.
     signal metricRequested(string id)
 
     // The selected day, guarded. A live series is as long as the provider sent
     // and the selection outlives the page, so the index can outlive the row it
-    // pointed at — MET Norway serves nine and a half days where Open-Meteo
+    // pointed at - MET Norway serves nine and a half days where Open-Meteo
     // serves sixteen, and a fallback that shortened the strip under a selection
     // of 12 would take the page down with it.
     readonly property var day:
@@ -105,7 +105,7 @@ MobilePage {
 
     // Which day the chart is of. On the desktop the page said this before you
     // ever reached the chart; here the screen is arrived at from a tab bar, so
-    // it has to say so itself — and now that the strip above actually moves the
+    // it has to say so itself - and now that the strip above actually moves the
     // window, "which day" is a question with more than one answer.
     //
     // Today's window is the one around the present and the observation stamp is
@@ -141,7 +141,7 @@ MobilePage {
     MobileCard {
         // One column, not two. The body is a paragraph, and a paragraph
         // set across both columns of a landscape tablet is a 95-character
-        // measure — half again the widest line typography has ever called
+        // measure - half again the widest line typography has ever called
         // comfortable. It leaves the right column empty under the chart,
         // which is what a page with one card left in it looks like.
         width: root.spanWidth(1)
@@ -159,7 +159,7 @@ MobilePage {
 
             Text {
                 id: summaryHigh
-                text: root.day ? Units.formatDisplay(Units.Temperature, root.day.high) : "—"
+                text: root.day ? Units.formatDisplay(Units.Temperature, root.day.high) : "-"
                 color: Theme.ink.primary
                 font.pixelSize: Theme.type.readingPair
                 font.bold: true
@@ -179,7 +179,7 @@ MobilePage {
             }
 
             Text {
-                text: root.day ? Units.formatDisplay(Units.Temperature, root.day.low) : "—"
+                text: root.day ? Units.formatDisplay(Units.Temperature, root.day.low) : "-"
                 color: Theme.ink.muted
                 font.pixelSize: Theme.type.readingPair
                 anchors.left: divider.right
@@ -192,7 +192,7 @@ MobilePage {
             // The glyph and the pair above come from the selected day and
             // always did; this line comes from `Detail`, which is the twelve
             // detail cards' view model and is built entirely around the present
-            // — "Peaks at 4:00 p.m." is a claim about today. Under a high and
+            // - "Peaks at 4:00 p.m." is a claim about today. Under a high and
             // low read off Monday it is a claim about Monday, and a wrong one.
             //
             // Hidden rather than rewritten because there is nothing honest to

@@ -7,7 +7,7 @@
 // This is app/qml/Climat/metrics.js, promoted. Its header said what it would
 // become:
 //
-//     "Adding a metric is a data change, not a code change — which is the
+//     "Adding a metric is a data change, not a code change - which is the
 //      point. In libclimat this becomes a C++ registry populated from provider
 //      capabilities, so a tab only appears when the active provider actually
 //      has that variable for that location."
@@ -16,8 +16,8 @@
 // is still one entry in it; what moved is *why* it had to move, which is the
 // last two lines of its other comment: "Header/readout formatting. Kept here so
 // the chart never decides units." A `.pragma library` cannot see a QML
-// singleton — gallery/CMakeLists.txt already had to work around the same wall
-// for theme.js — so `format()` had no way of reaching a preference, and a
+// singleton - gallery/CMakeLists.txt already had to work around the same wall
+// for theme.js - so `format()` had no way of reaching a preference, and a
 // registry whose formatter cannot know whether the reader wants Fahrenheit is a
 // registry that has to hand the decision back to the chart.
 //
@@ -30,7 +30,7 @@
 //
 // `min`, `max`, `step`, the tick values, the formatted readout and the series
 // the chart plots. All of them, so that no consumer ever holds two numbers on
-// different scales at once — which is the failure this arrangement exists to
+// different scales at once - which is the failure this arrangement exists to
 // prevent, and it is a silent one: a Fahrenheit axis with a Celsius curve on it
 // draws perfectly and reads 27° as freezing.
 //
@@ -51,8 +51,8 @@ class Metrics : public QObject
     QML_SINGLETON
 
     // Every metric, in tab order. Each entry carries the same keys metrics.js
-    // used — id, label, kind, series, unit, min, max, step, ramp, decimals,
-    // legend, and optionally autoScale, overlay and overlayLegend — because
+    // used - id, label, kind, series, unit, min, max, step, ramp, decimals,
+    // legend, and optionally autoScale, overlay and overlayLegend - because
     // MetricTabBar and MobileMetricPicker read them by name.
     Q_PROPERTY(QVariantList list READ list NOTIFY changed)
 
@@ -72,8 +72,8 @@ public:
     [[nodiscard]] Q_INVOKABLE QVariantList displayAll(const QVariantMap &metric,
                                                       const QVariantList &canonical) const;
 
-    // The axis, honouring autoScale. `values` are DISPLAY values — the same
-    // ones the chart is about to plot — because a "nice maximum" chosen from
+    // The axis, honouring autoScale. `values` are DISPLAY values - the same
+    // ones the chart is about to plot - because a "nice maximum" chosen from
     // millimetres and then converted to inches is not a nice maximum.
     //
     // Pass everything that will be DRAWN, not just the series: the wind chart's
@@ -82,7 +82,7 @@ public:
     //
     // A fixed min/max in the registry is the axis a reader should normally see
     // and not a promise about the weather. Both ends give way when the data
-    // needs them to — see the comment on the definitions.
+    // needs them to - see the comment on the definitions.
     [[nodiscard]] Q_INVOKABLE double       axisMin(const QVariantMap &metric,
                                                    const QVariantList &values) const;
     [[nodiscard]] Q_INVOKABLE double       axisMax(const QVariantMap &metric,

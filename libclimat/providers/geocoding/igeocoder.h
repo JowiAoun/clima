@@ -5,7 +5,7 @@
 //
 // docs/04-architecture.md §4.3 lists `igeocode.h` beside `iforecastprovider.h`
 // as one more provider interface. It turned out to be two, and the split is not
-// tidiness — it is the shape of the problem:
+// tidiness - it is the shape of the problem:
 //
 //   FORWARD, a name in and places out, is a network provider. It is
 //   asynchronous, it can fail with every ErrorKind in the enum, it is cached
@@ -15,7 +15,7 @@
 //
 //   REVERSE, a coordinate in and one place out, is a lookup in a table. It is
 //   synchronous, it cannot time out, it cannot be rate-limited, and it needs no
-//   User-Agent — because it is a bundled dataset and not a request. See
+//   User-Agent - because it is a bundled dataset and not a request. See
 //   libclimat/providers/geocoding/geonamesindex.h for why it had to be, which
 //   begins with Nominatim answering 403 to the first request ever sent to it.
 //
@@ -30,7 +30,7 @@
 // geonameid 6167865; stand in Toronto and get geonameid 6167865. One entity,
 // one `Place::geonamesId`, one row in the places table. A reverse geocoder
 // built on Nominatim would have returned an OSM relation id, which has no
-// correspondence to a GeoNames id at all — so the app could never have known
+// correspondence to a GeoNames id at all - so the app could never have known
 // that the place the user searched for and the place they were standing in
 // were the same place.
 
@@ -47,7 +47,7 @@
 namespace climat {
 
 struct GeocodeQuery {
-    // What the user typed. Not trimmed or case-folded here — the provider
+    // What the user typed. Not trimmed or case-folded here - the provider
     // does that, because what counts as whitespace is a per-provider question
     // and the cache key has to be built from whatever it decided.
     QString name;
@@ -56,7 +56,7 @@ struct GeocodeQuery {
     // popover's worth and more than a person reads.
     int count = 10;
 
-    // The language the *names* come back in — "Berlin" against "Berlín" — as
+    // The language the *names* come back in - "Berlin" against "Berlín" - as
     // an ISO 639-1 code. Part of the cache key: §4.5 says geocoding results
     // are cached "keyed by query+lang", and two languages are two answers.
     QString language = QStringLiteral("en");
@@ -92,7 +92,7 @@ struct ReverseMatch {
     Place  place;
     double distanceKm = 0.0;
 
-    // True when the point is inside the settlement's modelled footprint —
+    // True when the point is inside the settlement's modelled footprint -
     // "you are in Toronto" rather than "the nearest town is Toronto". The UI
     // may want to phrase those differently; nothing in the engine does.
     bool insideFootprint = false;
@@ -109,7 +109,7 @@ public:
     [[nodiscard]] virtual QStringList  attribution() const = 0;
 
     // ErrorKind::Unsupported when there is no populated place within the
-    // cutoff — a point in the ocean, or deep in a desert. That is not a
+    // cutoff - a point in the ocean, or deep in a desert. That is not a
     // failure and the UI must not report it as one: §4.4 says a provider that
     // returns nothing makes the UI *hide* the feature rather than show a
     // broken one, and here that means showing the coordinate instead of

@@ -6,7 +6,7 @@
 //
 // ---- why this is an interface and not just CacheStore -----------------------
 //
-// HttpClient needs two strings per request — the ETag and the Last-Modified —
+// HttpClient needs two strings per request - the ETag and the Last-Modified -
 // and CacheStore happens to have them, because it wrote them down next to the
 // payload. Handing HttpClient a CacheStore* to get at them would make the
 // network layer depend on SQLite, on QStandardPaths, on a schema and on a
@@ -14,7 +14,7 @@
 // layer, and it is the one that has to be testable without a database on disk.
 //
 // So the dependency points the other way through a four-method interface.
-// CacheStore implements it — it is already writing the columns — and a test
+// CacheStore implements it - it is already writing the columns - and a test
 // implements it in twenty lines with a QHash. The layering matches
 // docs/04-architecture.md §4.2, where Net and Cache are siblings inside the
 // engine rather than one stacked on the other.
@@ -23,8 +23,8 @@
 //
 // MET Norway's terms of service require conditional requests: a client that
 // refetches an unchanged forecast is using their bandwidth for nothing, and
-// they say so. docs/02-data-sources.md §2.9 records it. The saving is real —
-// a 304 is a few hundred bytes against a hundred-kilobyte forecast — but the
+// they say so. docs/02-data-sources.md §2.9 records it. The saving is real -
+// a 304 is a few hundred bytes against a hundred-kilobyte forecast - but the
 // reason it is implemented on day one rather than as a later optimisation is
 // that it is part of the deal we made to use the service without a key.
 
@@ -48,7 +48,7 @@ struct Validators {
 
     // The server's own Expires, when it sent one and it parsed. Kept because
     // §4.5's TTLs are *our* policy and a provider is entitled to a longer
-    // opinion about its own data — see HttpClient, which takes the later of
+    // opinion about its own data - see HttpClient, which takes the later of
     // the two.
     QDateTime expires;
 

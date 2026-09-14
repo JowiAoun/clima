@@ -8,7 +8,7 @@ body:
     attributes:
       value: |
         Before filing: **[`docs/known-gaps.md`](https://github.com/JowiAoun/climat/blob/main/docs/known-gaps.md)**
-        lists what the app deliberately does not do yet — no radar, no macOS build,
+        lists what the app deliberately does not do yet - no radar, no macOS build,
         an unsigned Windows build, no Android alert delivery. Those are gaps, not bugs.
 
   - type: textarea
@@ -34,7 +34,7 @@ body:
       label: A screenshot from the app itself
       description: |
         Run `climat --grab bug.png` and drag the file in. That captures exactly what the
-        app rendered, at the size it rendered it, with no window manager in the way —
+        app rendered, at the size it rendered it, with no window manager in the way -
         which answers most of the questions this form would otherwise generate.
 
         If the app will not start, paste its stderr instead.

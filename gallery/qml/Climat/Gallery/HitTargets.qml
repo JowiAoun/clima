@@ -3,15 +3,15 @@
 // Every touch target in a specimen, drawn and measured.
 //
 // A layout defect you can see is a layout defect somebody fixes. A control that
-// is 32 px tall looks exactly like a control that is 44 px tall — the mark
-// inside it is the same size either way — so the only way to review touch is to
+// is 32 px tall looks exactly like a control that is 44 px tall - the mark
+// inside it is the same size either way - so the only way to review touch is to
 // make the *target* visible, which is what this does: a rectangle over every
 // tappable area, green at or above `Theme.metric.hitMin` in both directions and
 // red below it, with the measurement written on the ones that fail.
 //
 // ---- why the tree is walked rather than annotated -----------------------------
 //
-// The alternative is a marker property on each control — `hitTarget: true` —
+// The alternative is a marker property on each control - `hitTarget: true` -
 // and it is worse in the one way that matters: it reports what somebody
 // remembered to declare. A target added in a hurry is exactly the target that
 // is too small, and it is the one an annotation-based overlay would not draw.
@@ -32,14 +32,14 @@
 // and a width is a MouseArea and nothing else in this tree; `gesturePolicy` is
 // a TapHandler and not the HoverHandler beside it. tst_hittargets pins both by
 // asserting a known count on a known component, so a Qt release that renamed
-// either of those would fail a test rather than quietly find nothing — which is
+// either of those would fail a test rather than quietly find nothing - which is
 // exactly how the first version of this file failed, and it failed looking like
 // a screen with no controls on it.
 //
 // ---- used twice ---------------------------------------------------------------
 //
 // The gallery draws it. tests/qml/tst_hittargets.qml builds one invisibly and
-// asserts `failures()` is empty for every screen the phone has — which is the
+// asserts `failures()` is empty for every screen the phone has - which is the
 // half of this that keeps working when nobody is looking.
 import QtQuick
 import Climat
@@ -94,7 +94,7 @@ Item {
     // a HoverHandler reports it as undefined and a TapHandler as 0, so the
     // property's presence separates the two handlers this file cares about
     // telling apart. DragHandler and PinchHandler do not have it either, which
-    // is correct — neither is a tap target.
+    // is correct - neither is a tap target.
     function isTapHandler(o) {
         return o !== null && o !== undefined && o.gesturePolicy !== undefined
     }
@@ -104,7 +104,7 @@ Item {
     //
     // `parent` and not `parentItem`, which is what the C++ getter is called and
     // what a first attempt used: QQuickPointerHandler declares the Q_PROPERTY as
-    // `parent`, so `handler.parentItem` from QML is undefined — and undefined
+    // `parent`, so `handler.parentItem` from QML is undefined - and undefined
     // silently failed every guard, so the overlay drew nothing at all and looked
     // like a component that had no targets rather than a scan that found none.
     function targetOf(handler) {
@@ -115,7 +115,7 @@ Item {
     //
     // "MobileCard · TapHandler 62×17" is a defect somebody can go and fix;
     // "TapHandler 62×17" is a puzzle. QML gives JS no way to ask an object its
-    // type, but its JS wrapper stringifies as `MobileCard_QMLTYPE_87(0x…)` —
+    // type, but its JS wrapper stringifies as `MobileCard_QMLTYPE_87(0x…)` -
     // so the name is there, and walking up to the nearest ancestor that is not
     // a built-in QQuick* type lands on the .qml file that declared the control.
     //
@@ -159,7 +159,7 @@ Item {
     // Hidden means skipped, and `visible` is the only test.
     //
     // Worth knowing before reusing this: QQuickItem's `visible` is EFFECTIVE
-    // visibility — false if any ancestor is hidden — and a QtQuickTest lives in
+    // visibility - false if any ancestor is hidden - and a QtQuickTest lives in
     // a QQuickView that is never shown, so a screen built there reports false
     // for every item on it and this walk finds nothing at all. tst_hittargets
     // therefore builds a real Window rather than teaching this function about
@@ -204,7 +204,7 @@ Item {
 
         // Assigned only when it changed. A `var` property emits on every
         // assignment whether or not the value differs, and the Repeater below
-        // rebuilds every delegate when it does — which under the poll timer is
+        // rebuilds every delegate when it does - which under the poll timer is
         // a flicker four times a second.
         if (JSON.stringify(out) !== JSON.stringify(targets))
             targets = out
@@ -217,8 +217,8 @@ Item {
     Component.onCompleted: rescan()
 
     // Polled, and there is no better answer available. A specimen settles
-    // asynchronously — text metrics, an image, a Flickable clamping its content
-    // — and there is no one signal that means "this subtree has stopped
+    // asynchronously - text metrics, an image, a Flickable clamping its content
+    // - and there is no one signal that means "this subtree has stopped
     // moving". The poll costs a tree walk of a few hundred objects four times a
     // second while the overlay is up, and it stops the moment it is put away.
     //

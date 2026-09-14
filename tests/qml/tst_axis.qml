@@ -7,7 +7,7 @@
 // axis that means the same thing every time you look at it is what lets a
 // reader compare Tuesday with Friday, where an auto axis makes a flat day look
 // dramatic. What those numbers are not is a *clip*. Each was written down as
-// the range the weather usually sits in, and weather leaves it — and when it
+// the range the weather usually sits in, and weather leaves it - and when it
 // did, the curve was drawn past the last gridline and out of the card.
 //
 // That shipped. Toronto's visibility runs to 64 km against an axis that stopped
@@ -31,14 +31,14 @@ TestCase {
 
     function test_theRegistryIsLoaded() {
         verify(testCase.metrics.length >= 10,
-               "only " + testCase.metrics.length + " metrics — is Metrics reachable?")
+               "only " + testCase.metrics.length + " metrics - is Metrics reachable?")
     }
 
     // Values that leave the metric's declared range by a long way, which is what
     // a heatwave, a deep low or a very clear afternoon look like.
     //
     // Never below the floor for an auto-scaled metric. Precipitation is the only
-    // one, its floor is zero, and there is no such thing as negative rainfall —
+    // one, its floor is zero, and there is no such thing as negative rainfall -
     // so an axis that will not go under zero for it is right rather than
     // clipping, and asking it to would be testing a reading no provider can
     // send. Its ceiling is tested like every other.
@@ -86,7 +86,7 @@ TestCase {
         verify(hi >= maxOf(vals) - 1e-9,
                row.tag + ": the data reaches " + maxOf(vals).toFixed(1)
                + " and the axis ceiling is " + hi.toFixed(1)
-               + ". Everything above the ceiling is drawn over the plot box — "
+               + ". Everything above the ceiling is drawn over the plot box - "
                + "which is the visibility chart's 64 km against a 25 km axis, "
                + "the defect this file exists for.")
     }
@@ -110,8 +110,8 @@ TestCase {
                 row.tag + "'s ceiling moved for data that fits inside it")
     }
 
-    // An axis with no reading on it at all — every hour absent, which is what a
-    // provider gap looks like — must not collapse or run away.
+    // An axis with no reading on it at all - every hour absent, which is what a
+    // provider gap looks like - must not collapse or run away.
     function test_anEmptySeriesLeavesTheDeclaredAxis_data() { return rows() }
 
     function test_anEmptySeriesLeavesTheDeclaredAxis(row) {
@@ -144,14 +144,14 @@ TestCase {
         verify(ticks.length >= 2, row.tag + " drew " + ticks.length + " gridline(s)")
         compare(ticks[0], lo, row.tag + "'s first gridline is not the axis floor")
 
-        // The last tick sits at or below the ceiling — a range that is not a
+        // The last tick sits at or below the ceiling - a range that is not a
         // whole number of steps ends between two of them, which is correct and
         // is why this is not an equality.
         var last = ticks[ticks.length - 1]
         verify(last <= hi + 1e-9, row.tag + "'s last gridline is above the axis")
         verify(hi - last < (hi - lo) / 2,
                row.tag + " labels only up to " + last + " on an axis reaching "
-               + hi + " — the top half of the plot has no scale against it.")
+               + hi + " - the top half of the plot has no scale against it.")
 
         // Eleven gridlines on a 170 px plot is a hatch, not a scale.
         verify(ticks.length <= 10,
@@ -160,7 +160,7 @@ TestCase {
 
     // Evenly spaced, and on numbers a person would have chosen. A range that has
     // given way at both ends carries more labels than the gutter has room for,
-    // and the step is doubled to fit — doubling is what keeps 5 going to 10 and
+    // and the step is doubled to fit - doubling is what keeps 5 going to 10 and
     // 25 to 50 rather than to something nobody writes down.
     function test_gridlinesAreEvenlySpaced_data() { return rows() }
 
@@ -184,13 +184,13 @@ TestCase {
         verify(Math.abs(ratio - Math.round(ratio)) < 0.001
                && Math.round(ratio) === Math.pow(2, Math.round(Math.log(ratio) / Math.log(2))),
                row.tag + "'s gridline step is " + step + " against a declared "
-               + registry + " — a widened axis doubles its step and does nothing else.")
+               + registry + " - a widened axis doubles its step and does nothing else.")
     }
 
     // ---- the overlay -------------------------------------------------------
 
     // Three metrics draw a second line over the series. Whatever the axis is
-    // asked to hold has to include it, or the line goes off the box — which is
+    // asked to hold has to include it, or the line goes off the box - which is
     // the same defect as clipping, reached from the other side. The chart passes
     // both series in; this is the half of the contract the registry owns.
     function test_everyOverlayNamesASeriesTheChartCanPlot_data() { return rows() }
@@ -210,7 +210,7 @@ TestCase {
     // The temperature pair are one comparison told from both sides, so each has
     // to point at the other. A Feels like chart that does not say what it is
     // unlike is the missing comparison the toggle used to make by swapping the
-    // curve — showing one reading at a time and neither of them against
+    // curve - showing one reading at a time and neither of them against
     // anything.
     function test_theTemperaturePairPointAtEachOther() {
         var overview = Metrics.byId("overview")

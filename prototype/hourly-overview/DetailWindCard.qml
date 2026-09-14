@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Wind detail card — a compass rose on the left, the readings on the right.
+// Wind detail card - a compass rose on the left, the readings on the right.
 //
 // Wind is two facts that do not fit in one glyph: how hard it is blowing and
 // where it is coming from. The numbers carry the first, because a speed is a
@@ -21,7 +21,7 @@
 //
 // All three arrive rather than appear: the vane swings off north onto the
 // bearing, the wedge grows out to its reach, and the gust band opens to its
-// width — one gesture on the card's one-shot `reveal`. The two numbers do not
+// width - one gesture on the card's one-shot `reveal`. The two numbers do not
 // move. A speed is a reading and a reading is legible from the first frame.
 import QtQuick
 import QtQuick.Shapes
@@ -42,7 +42,7 @@ DetailCard {
         id: viz
 
         // Belongs to this visualisation and to nothing else, so it lives here
-        // rather than in theme.js — design system §10, the wind-rose exception.
+        // rather than in theme.js - design system §10, the wind-rose exception.
         readonly property color windAccent: "#55b17e"
 
         readonly property real dirDeg: root.d.directionDeg
@@ -53,7 +53,7 @@ DetailCard {
         // north is the reading's own zero and starting anywhere else would be
         // decoration dressed as data.
         //
-        // It takes the short way round — 66° anticlockwise for a WNW wind, not
+        // It takes the short way round - 66° anticlockwise for a WNW wind, not
         // 294° the other way. A vane settles onto the wind; a near-full
         // revolution in half a second reads as a spinner, which is the one thing
         // an arrival on this page must not look like. `dirDelta` is the signed
@@ -84,13 +84,13 @@ DetailCard {
             return (8 + 30 * Math.min(excess, 1)) * root.reveal
         }
 
-        // Wedge reach downwind, against the working ceiling in detaildata.js —
+        // Wedge reach downwind, against the working ceiling in detaildata.js -
         // a ceiling that decides what the reader sees is data, not styling. At
         // 30 km/h it puts 13 km/h a little past halfway out, and anything at or
         // above the ceiling stops just short of the ring.
         //
         // Only the speed's share of the reach is revealed. 0.46 is the scale's
-        // own zero — where a dead calm leaves the wedge — so the reach grows off
+        // own zero - where a dead calm leaves the wedge - so the reach grows off
         // that the way a bar grows off its baseline, rather than swelling out of
         // a point that means nothing.
         readonly property real wedgeApexR:
@@ -211,8 +211,8 @@ DetailCard {
         // The readings. Bearing first, because it is what the rose is showing;
         // then the mean, then the gust, each with its unit and its name.
         //
-        // Mean and gust are co-equal — neither is the number the card exists to
-        // show on its own — so both take the pair size rather than one of them
+        // Mean and gust are co-equal - neither is the number the card exists to
+        // show on its own - so both take the pair size rather than one of them
         // taking the reading size and the other a scaled-down guess.
         Column {
             id: readout

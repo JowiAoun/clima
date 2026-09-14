@@ -64,7 +64,7 @@ void TestTimeAxis::anUnknownZoneFallsBackToTheOffsetItWasGiven()
 {
     // An old tzdata, a musl build without one, a provider inventing a name.
     // The fallback is Open-Meteo's own behaviour, so it is no worse than not
-    // having tried — and it is a valid QTimeZone, so nothing downstream has to
+    // having tried - and it is a valid QTimeZone, so nothing downstream has to
     // test for it.
     for (const QString &name : { QStringLiteral("Mars/Olympus_Mons"), QString() }) {
         const QTimeZone zone = zoneFor(name, 19800);
@@ -110,8 +110,8 @@ void TestTimeAxis::nothingUnparseableBecomesAnInstant()
 
 void TestTimeAxis::aFallBackDayHasTwentyFiveHours()
 {
-    // A uniformly spaced UTC series — which is what Open-Meteo's is, whatever
-    // its labels claim — re-expressed in a zone that goes back an hour.
+    // A uniformly spaced UTC series - which is what Open-Meteo's is, whatever
+    // its labels claim - re-expressed in a zone that goes back an hour.
     QList<QDateTime> series;
     for (int hour = 0; hour < 72; ++hour)
         series.append(utc(2025, 11, 1, 4).addSecs(hour * 3600));

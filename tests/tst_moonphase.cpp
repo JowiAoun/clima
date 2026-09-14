@@ -6,8 +6,8 @@
 // `moonPhase` is one number and the moon phase card asks it two questions it
 // does not answer:
 //
-//   * WHICH LIMB IS LIT. The illuminated fraction is symmetric about full — a
-//     waxing and a waning gibbous are the same number and mirror images — so a
+//   * WHICH LIMB IS LIT. The illuminated fraction is symmetric about full - a
+//     waxing and a waning gibbous are the same number and mirror images - so a
 //     disc drawn from the fraction alone is backwards for half of every month.
 //     It reads as nothing at all until you put it beside a moon that is right.
 //
@@ -20,7 +20,7 @@
 // The interesting failure in `nextFullMoon` is not arithmetic, it is the pair
 // that straddles the NEW moon: phases run 0.97 then 0.02, the difference is
 // negative, and a bracket test written on the difference reads that gap as
-// containing 0.5. It does not — the moon is dark in the middle of it.
+// containing 0.5. It does not - the moon is dark in the middle of it.
 
 #include "libclimat/domain/forecast.h"
 
@@ -113,7 +113,7 @@ void TestMoonPhase::aFullMoonInsideTheHorizonComesFromTheSeries()
 void TestMoonPhase::theNightItIsFullIsTheNightNearestFull()
 {
     // The pair brackets 0.5 at 0.48 and 0.514. The first is 0.02 short and the
-    // second 0.014 past, so the second is the night the moon is full — and a
+    // second 0.014 past, so the second is the night the moon is full - and a
     // rule that simply took the earlier of the bracket would name the first.
     QList<DailyPoint> days;
     for (const auto &[date, phase] : QList<std::pair<QDate, double>>{
@@ -148,7 +148,7 @@ void TestMoonPhase::aFullMoonPastTheHorizonIsExtrapolated()
 void TestMoonPhase::theGapAroundTheNewMoonIsNotReadAsFull()
 {
     // The defect this guards. 0.97 → 0.01 is a negative difference across a
-    // gap that contains new, not full — and a bracket test written on the
+    // gap that contains new, not full - and a bracket test written on the
     // difference would return the day the moon is DARK.
     QList<DailyPoint> days;
     for (const auto &[date, phase] : QList<std::pair<QDate, double>>{

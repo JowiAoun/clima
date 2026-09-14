@@ -39,7 +39,7 @@ QStringList savedIds()
 {
     // Read straight from QSettings rather than through the Settings singleton,
     // because this runs before there is a QML engine and Settings publishes no
-    // widget list of its own — the layout belongs to the desktop shell, and the
+    // widget list of its own - the layout belongs to the desktop shell, and the
     // app has no opinion about it.
     QSettings store;
     const QString saved = store.value(QStringLiteral("widgets/enabled")).toString();
@@ -170,7 +170,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     parser.process(app);
 
     // Before anything else reads a clock. Two things on a tile move without new
-    // data — the sun mark and the age footer — and both are correct behaviour
+    // data - the sun mark and the age footer - and both are correct behaviour
     // that makes a screenshot different every time it is taken. See
     // widgets/widgetclock.h.
     const QString frozen = parser.value(nowOption);
@@ -283,7 +283,7 @@ void WidgetOptions::parseCommandLine(QCoreApplication &app)
     // A window somebody asked to be ordinary, or one that exists only to be
     // photographed, is not pinned to anything. Both already force --windowed
     // above; this says the same thing about the surface type, because the two
-    // are separate decisions on Wayland — a frameless window is still an
+    // are separate decisions on Wayland - a frameless window is still an
     // xdg-shell window.
     if (self->m_windowed)
         self->m_pin = Pin::Off;

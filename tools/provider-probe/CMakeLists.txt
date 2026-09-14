@@ -6,7 +6,7 @@
 # on, and it is not installed.
 #
 # It links libclimat and Qt Core and nothing else, so climat_forbid_gui() applies
-# to it exactly as it does to the tests — a harness that dragged in Qt Gui would
+# to it exactly as it does to the tests - a harness that dragged in Qt Gui would
 # be a second place the engine's strongest guarantee could be quietly lost.
 
 add_executable(climat-provider-probe main.cpp)

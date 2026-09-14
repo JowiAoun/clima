@@ -11,7 +11,7 @@
 // Search is first and not last because a picker is opened to go somewhere new;
 // the saved list is what you already have and is one glance away underneath.
 // "Use my location" is last because it is the one row that can fail for reasons
-// that are nothing to do with the weather — no service, no permission, no fix —
+// that are nothing to do with the weather - no service, no permission, no fix -
 // and a row that sometimes answers with an error belongs where an error can be
 // read rather than at the top where it displaces the list.
 //
@@ -92,7 +92,7 @@ Item {
         // surface is a wash over the page gradient. Every other surface in
         // Climat sits on the background; this one sits on top of the hero card
         // and the chart, and a 7% white wash over those reads as a smear rather
-        // than as a panel — the place names come out interleaved with the
+        // than as a panel - the place names come out interleaved with the
         // temperature behind them. A sheet is the one thing that has to hide
         // what it covers.
         color: Theme.page.bg
@@ -134,7 +134,7 @@ Item {
                     selectByMouse: true
                     clip: true
 
-                    // The debounce is PlaceSearchModel's, not this field's —
+                    // The debounce is PlaceSearchModel's, not this field's -
                     // 250 ms, and it belongs there because the model is what
                     // knows a request is about to be made. Assigning on every
                     // keystroke is correct: the model decides when to send.

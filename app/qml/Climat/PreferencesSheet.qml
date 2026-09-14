@@ -4,7 +4,7 @@
 //
 // A sheet over the page for the reason PlacePicker and AlertSheet are: changing
 // a setting is a detour, not a destination. You come back to the weather you
-// were looking at, and on the desktop there is nothing to push a screen onto —
+// were looking at, and on the desktop there is nothing to push a screen onto -
 // WeatherPage is one scrolling column and there is no navigation stack anywhere
 // in this shell.
 //
@@ -14,8 +14,8 @@
 // that already exists for settings. A sheet there would be a modal over a screen
 // whose entire content is the thing the modal contains.
 //
-// That asymmetry is the point rather than an inconsistency: the groups —
-// PrefGeneral and PrefUnits — are one definition used twice, and what differs is
+// That asymmetry is the point rather than an inconsistency: the groups -
+// PrefGeneral and PrefUnits - are one definition used twice, and what differs is
 // only how each shell presents them. The desktop had no settings surface at all
 // before this file; every preference in the app was reachable only by making the
 // window narrow enough to trigger the phone layout.
@@ -46,7 +46,7 @@ Item {
 
     // The sheet takes focus while it is up, so Escape reaches it rather than the
     // shell underneath. Handled on the press, which is the stage MobileShell's
-    // back handler also uses — one key must not close this on the way down and
+    // back handler also uses - one key must not close this on the way down and
     // change a tab on the way up.
     onOpenChanged: if (open) forceActiveFocus()
     Keys.onEscapePressed: function (event) {
@@ -111,7 +111,7 @@ Item {
                     }
 
                     // The word rather than a cross, which is what AlertSheet
-                    // does — one dismiss affordance spelled one way, and a
+                    // does - one dismiss affordance spelled one way, and a
                     // cross would be the only glyph in the app whose meaning is
                     // learned rather than read.
                     Text {
@@ -147,7 +147,7 @@ Item {
                 // Not under a capture, for two unrelated reasons that happen to
                 // want the same thing. It is an absolute path under the home
                 // directory, so it is the one string on this sheet that differs
-                // between two machines — a golden image of it could never be
+                // between two machines - a golden image of it could never be
                 // stable, because scripts/golden.sh redirects XDG_CONFIG_HOME
                 // into a fresh scratch directory on every run. And `--grab` is
                 // what the issue template asks a reporter to attach, which makes

@@ -13,12 +13,12 @@
 // ALERTS FAN OUT. THEY DO NOT FALL BACK.
 //
 // Everywhere else in this codebase a chain means "ask the first, and if it
-// fails ask the next" — libclimat/providers/registry.h. For alerts that is
+// fails ask the next" - libclimat/providers/registry.h. For alerts that is
 // wrong, and wrong in a way that hides warnings.
 //
 // The bug: a fallback chain stops at the first provider that SUCCEEDS. An alert
-// provider succeeds by answering `{"features": []}` — HTTP 200, a well-formed
-// empty collection — which is what ECCC returns for any coordinate south of the
+// provider succeeds by answering `{"features": []}` - HTTP 200, a well-formed
+// empty collection - which is what ECCC returns for any coordinate south of the
 // border, verified: tests/fixtures/alerts/eccc/toronto-clear.json is 850 bytes
 // of exactly that. Detroit is inside the Canadian bounding box, because the box
 // has to contain the Great Lakes. So a fallback chain in Detroit asks ECCC,
@@ -27,13 +27,13 @@
 //
 // The bounding boxes cannot be tightened out of this. registry.h already argues
 // at length that no rectangle follows an 8,891 km border and that the honest
-// answer for a border city is "both" — the forecast chain can live with that
+// answer for a border city is "both" - the forecast chain can live with that
 // because a forecast from either service is a forecast. An alert set from one
 // of two services is HALF THE WARNINGS.
 //
 // So ProviderRegistry::fetchAlerts() queries every covering provider
 // concurrently and merges. The merge is well defined because the sets are
-// disjoint by construction — ECCC and NWS issue about their own territory, and
+// disjoint by construction - ECCC and NWS issue about their own territory, and
 // Alert::identityKeys are provider-prefixed, so nothing can be double-counted
 // even if they were not.
 //
@@ -46,7 +46,7 @@
 // A REGIONAL SERVICE ASKED OUTSIDE ITS REGION RETURNS Unsupported
 //
 // Not NotFound, not HttpStatus. api.weather.gov answers a Canadian coordinate
-// with HTTP 400 and `"Parameter \"point\" is invalid: out of bounds"` — verified
+// with HTTP 400 and `"Parameter \"point\" is invalid: out of bounds"` - verified
 // live, recorded in tests/fixtures/alerts/nws/out-of-bounds.json. That is a
 // well-formed statement that the question was not for them, and it must not
 // reach the user as a failure or make AlertSet::complete false. covers() should
@@ -67,13 +67,13 @@ struct AlertRequest {
     Coordinate coord;
 
     // Answer from the cache or not at all. Same flag, same meaning and same
-    // reason as ForecastRequest::cachedOnly — docs/04-architecture.md §4.1's
+    // reason as ForecastRequest::cachedOnly - docs/04-architecture.md §4.1's
     // "render from cache, then reconcile", which for alerts is the difference
     // between a tornado warning on the first frame and one two seconds later.
     bool cachedOnly = false;
 
-    // An ISO 639-1 code. ECCC is bilingual by FIELD SELECTION — one feature
-    // carries `alert_text_en` and `alert_text_fr` together — rather than by
+    // An ISO 639-1 code. ECCC is bilingual by FIELD SELECTION - one feature
+    // carries `alert_text_en` and `alert_text_fr` together - rather than by
     // serving different documents, so this picks which field is read and does
     // not change the request. NWS is English only and ignores it.
     //
@@ -88,8 +88,8 @@ class IAlertProvider : public IProvider
 public:
     ~IAlertProvider() override;
 
-    // Either an AlertSet — possibly empty, which is the commonest answer and is
-    // a success — or a typed Error. An empty set and a failure are the two
+    // Either an AlertSet - possibly empty, which is the commonest answer and is
+    // a success - or a typed Error. An empty set and a failure are the two
     // things this interface exists to keep apart.
     virtual QFuture<Result<AlertSet>> fetchAlerts(const AlertRequest &request) = 0;
 };

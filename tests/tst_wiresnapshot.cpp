@@ -7,9 +7,9 @@
 // ============================================================================
 // WHY THE CATALOGUE IS TESTED HERE AND NOT BESIDE THE WIDGETS
 //
-// widgets/catalogue.json is consumed by five things — the widget host, the
+// widgets/catalogue.json is consumed by five things - the widget host, the
 // gallery group, the Plasma configuration page, the extension's menu and the
-// documentation — and the whole reason it is one file is that five copies
+// documentation - and the whole reason it is one file is that five copies
 // would disagree. The failure it is guarding against is not a crash: a widget
 // whose `fields` contains a typo gets a snapshot with an axis in it and
 // nothing else, renders an empty tile, and looks like a layout bug.

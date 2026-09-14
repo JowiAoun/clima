@@ -76,7 +76,7 @@ std::optional<bool> readFlag(const QJsonArray &column, int index)
     // Open-Meteo sends `is_day` as 1 and 0 rather than as true and false.
     //
     // Left absent when the provider did not say, rather than guessed from the
-    // sun's position — libclimat/domain/forecast.h asks for exactly that, and
+    // sun's position - libclimat/domain/forecast.h asks for exactly that, and
     // guessing is how a night hour at 78° north gets a sun over it on the one
     // day of the year the question is interesting.
     if (index < 0 || index >= column.size())
@@ -277,7 +277,7 @@ Result<Forecast> adaptForecast(const QByteArray &body, const QString &providerId
     const QString timezoneId    = root.value(QLatin1String("timezone")).toString();
 
     // The IANA zone, not the fixed offset. This single line is the whole of
-    // trap 3 — see libclimat/domain/timeaxis.h for the measurement showing that
+    // trap 3 - see libclimat/domain/timeaxis.h for the measurement showing that
     // `utc_offset_seconds` is a constant Open-Meteo applies to the entire
     // window regardless of what the zone does inside it.
     forecast.timeZone = zoneFor(timezoneId, offsetSeconds);
@@ -398,7 +398,7 @@ Result<Forecast> adaptForecast(const QByteArray &body, const QString &providerId
         for (int i = 0; i < dailyTime.size(); ++i) {
             DailyPoint day;
 
-            // A bare "2026-07-30", and it is already the local calendar date —
+            // A bare "2026-07-30", and it is already the local calendar date -
             // no offset arithmetic, because a date is not an instant. Running
             // it through utcFromNaiveLocal and taking .date() would be the
             // same answer by luck and a different one at any other offset.
@@ -428,7 +428,7 @@ Result<Forecast> adaptForecast(const QByteArray &body, const QString &providerId
 
             // Null on about one day a month, when the moon's rising drifts past
             // midnight and skips a calendar day. Not an error, not a gap to
-            // fill — the moon really did not rise.
+            // fill - the moon really did not rise.
             day.moonrise  = readInstant(moonrise, i, offsetSeconds);
             day.moonset   = readInstant(moonset, i, offsetSeconds);
             day.moonPhase = readNumber(moonPhase, i);

@@ -71,7 +71,7 @@ PrecipitationType precipitationTypeFor(int wmoCode)
     case 80: case 81: case 82:          // rain showers, slight → violent
         return PrecipitationType::Rain;
 
-    case 66: case 67:                   // freezing rain — ice, and it reads as sleet
+    case 66: case 67:                   // freezing rain - ice, and it reads as sleet
     case 68: case 69:                   // rain or drizzle and snow, mixed
     case 83: case 84:                   // showers of rain and snow, mixed
         return PrecipitationType::Sleet;
@@ -107,7 +107,7 @@ std::optional<int> codeForLabelledSpan(const QList<int> &codes)
     // Where the cloud-cover ramp ends and the events begin. 45 is fog, and fog
     // belongs on this side of the line: it is the one sky state a reader
     // changes plans over. Nothing between 4 and 44 is emitted by any provider
-    // Climat reads — see symbolcode.h for MET Norway's four extras, which are
+    // Climat reads - see symbolcode.h for MET Norway's four extras, which are
     // sleet codes and land above it.
     constexpr int kFirstEvent = 45;
 
@@ -181,7 +181,7 @@ QString conditionText(int wmoCode, bool isDay)
     case 1:  return isDay ? tr("Mainly sunny") : tr("Mainly clear");
 
     // "Partly sunny" by day and "Partly cloudy" by night is not a translation
-    // artefact — it is what the reference forecast says and what
+    // artefact - it is what the reference forecast says and what
     // app/qml/Climat/mockdata.js already writes. A clear night is not sunny.
     case 2:  return isDay ? tr("Partly sunny") : tr("Partly cloudy");
 
@@ -202,12 +202,12 @@ QString conditionText(int wmoCode, bool isDay)
     case 66: return tr("Light freezing rain");
     case 67: return tr("Freezing rain");
 
-    // Mixed rain and snow. Open-Meteo never emits these four — MET Norway does,
+    // Mixed rain and snow. Open-Meteo never emits these four - MET Norway does,
     // and libclimat/providers/metno/symbolcode.h maps its eight sleet symbols
     // onto them. They were missing here for as long as the tables were checked
     // against Open-Meteo's vocabulary alone, and the day MET Norway served
     // instead every sleet hour drew a plain overcast cloud with no wording and
-    // no wash — the fallback path failing quietly, which is the failure mode
+    // no wash - the fallback path failing quietly, which is the failure mode
     // the fallback exists to avoid.
     case 68: return tr("Light sleet");
     case 69: return tr("Sleet");

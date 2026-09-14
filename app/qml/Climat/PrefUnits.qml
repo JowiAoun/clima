@@ -13,7 +13,7 @@
 // inHg goes with miles.
 //
 // So both. The presets write the five at once and the five rows underneath are
-// still the truth — change one and the preset reads "custom", which is a state
+// still the truth - change one and the preset reads "custom", which is a state
 // the radio draws by filling neither dot. Nothing here can express a preference
 // the per-quantity model cannot hold, and nothing is unreachable.
 //
@@ -21,7 +21,7 @@
 // other direction: it offers °C or °F, and then a separate "precipitation in
 // inches" switch that overrides it. That switch is an admission that the bundle
 // is not enough, and it is the second row of this group for exactly that reason
-// — it is the override people actually reach for, promoted out of the five.
+// - it is the override people actually reach for, promoted out of the five.
 //
 // ---- the lists are Units', not this file's ------------------------------------
 //
@@ -31,7 +31,7 @@
 // downstream understands.
 //
 // `Bound` because the preset rows are a Repeater delegate whose radio dot reads
-// the delegate's own model role from inside a Component — a scope of its own,
+// the delegate's own model role from inside a Component - a scope of its own,
 // where an unqualified lookup is what stops qmlcachegen compiling the binding
 // ahead of time.
 pragma ComponentBehavior: Bound
@@ -56,7 +56,7 @@ PrefGroup {
     // A dot rather than a check: a radio in a group of two mutually exclusive
     // options, which is what this is, and a check mark would say the two could
     // both be on. Drawn with two Rectangles instead of a Shape because it is a
-    // circle inside a circle — a Shape here would be a scene-graph node and an
+    // circle inside a circle - a Shape here would be a scene-graph node and an
     // offscreen pass to draw eleven pixels.
     component RadioDot: Item {
         id: dot
@@ -64,7 +64,7 @@ PrefGroup {
         property bool selected: false
 
         // Implicit as well as actual, because PrefRow measures the slot's item
-        // by its implicit size — a Loader whose item states only `width` reports
+        // by its implicit size - a Loader whose item states only `width` reports
         // zero, and the title then starts underneath the dot.
         implicitWidth: 18
         implicitHeight: 18
@@ -138,7 +138,7 @@ PrefGroup {
     // on the row, so the cycle shows its result rather than hiding it.
     //
     // No subtitles. These are the rows where the title genuinely says everything
-    // — "Wind — km/h" needs no sentence — and PrefRow's compact shape is for
+    // - "Wind - km/h" needs no sentence - and PrefRow's compact shape is for
     // exactly this case.
     PrefRow {
         title: qsTr("Temperature")

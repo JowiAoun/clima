@@ -6,8 +6,8 @@
 // ============================================================================
 // THERE ARE NO TRANSLATIONS YET, AND THIS IS STILL WORTH HAVING
 //
-// `app/translations/climat.ts` is the source catalogue — 271 strings, kept
-// current by scripts/i18n.sh and gated in CI — and there is not one language
+// `app/translations/climat.ts` is the source catalogue - 271 strings, kept
+// current by scripts/i18n.sh and gated in CI - and there is not one language
 // catalogue beside it. docs/known-gaps.md says so rather than shipping a
 // machine translation, which is the one thing worse than shipping none: a
 // reader who sees their own language done badly concludes the app is careless
@@ -15,12 +15,12 @@
 //
 // What this class is, then, is the half that turns a translation into a
 // running program. Drop `climat_fr.ts` into app/translations, add its line to
-// app/CMakeLists.txt, and French appears — no code changes, because the lookup
+// app/CMakeLists.txt, and French appears - no code changes, because the lookup
 // below is by locale and not by a list of languages somebody has to remember
 // to extend.
 //
 // One thing that will need saying out loud on that day: the STRINGS of all
-// three binaries are collected — the app, the CLI and the desktop tiles — and
+// three binaries are collected - the app, the CLI and the desktop tiles - and
 // only the app installs a translator. The widget host is a second process with
 // a second QML module, so a compiled catalogue would have to be attached to
 // that module too and widgets/main.cpp would call this the way app/main.cpp
@@ -57,7 +57,7 @@ class AppTranslator
 public:
     // Installs a translator for the system locale when a catalogue for it was
     // compiled into this binary. Call once, from main(), before the QML engine
-    // loads — a translation installed after a component is built does not
+    // loads - a translation installed after a component is built does not
     // reach the strings already in it.
     //
     // `app` owns whatever is installed.

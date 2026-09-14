@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: MPL-2.0
 //
-// "My location" through the XDG desktop portal — the route that works from
+// "My location" through the XDG desktop portal - the route that works from
 // inside a Flatpak, and the only one that does.
 //
 // ============================================================================
@@ -48,7 +48,7 @@
 //
 // Nothing here blocks. Every call is a QDBusPendingCall and every answer
 // arrives by signal, which is DeviceLocator's first rule and the one a portal
-// makes hardest to keep — a permission dialog can sit open for a minute, and
+// makes hardest to keep - a permission dialog can sit open for a minute, and
 // a locator that waited for it would hold the UI thread for that minute.
 //
 // It asks for CITY accuracy. A forecast is answered on a grid a few kilometres
@@ -83,13 +83,13 @@ public:
     // The session bus.
     explicit PortalLocator(QObject *parent = nullptr);
 
-    // A bus of the caller's choosing — a private one, for a test that puts a
+    // A bus of the caller's choosing - a private one, for a test that puts a
     // portal of its own on it.
     PortalLocator(const QDBusConnection &bus, QObject *parent = nullptr);
     ~PortalLocator() override;
 
     // How long the reader is given to answer the portal's permission dialog,
-    // which is a different wait from `timeout()` — that one bounds the arrival
+    // which is a different wait from `timeout()` - that one bounds the arrival
     // of a POSITION, and until the dialog is answered there is no position to
     // wait for. Three minutes by default; a test sets it low to reach the
     // path, which is otherwise only reachable by leaving a real dialog open.
@@ -141,7 +141,7 @@ private:
 
     // Closes a session by path, whoever owns it. Used for the session this
     // request is finished with, and for one that arrived for a request that
-    // had already been cancelled — see onSessionCreated().
+    // had already been cancelled - see onSessionCreated().
     void closePath(const QString &sessionPath);
 
     // And for the case where we cannot know whether there is one: a CreateSession

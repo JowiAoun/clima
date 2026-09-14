@@ -37,7 +37,7 @@ namespace {
 //
 // The properties on AppOptions exist in every build regardless; see the header.
 
-// A parse failure that is ours rather than QCommandLineParser's — a value with
+// A parse failure that is ours rather than QCommandLineParser's - a value with
 // the wrong shape, as opposed to a flag that does not exist. Prints in the same
 // voice the parser uses for its own errors and exits with the same code, so a
 // script cannot tell the two apart and does not have to.
@@ -73,11 +73,11 @@ void note(const QString &message)
 // Every numeric flag in this parser wants the same three things: the value has
 // to be a whole number, it has to clear a floor, and a failure has to name the
 // flag rather than the number. Written once because it was written five times
-// in the QML and two of the five got the NaN check subtly wrong — parseInt()
+// in the QML and two of the five got the NaN check subtly wrong - parseInt()
 // coerces to 0 on the way into an int property, so a check made after the
 // assignment was testing the coercion rather than the input.
 //
-// Guarded, because every flag that takes a number — --frames, --every, --day —
+// Guarded, because every flag that takes a number - --frames, --every, --day -
 // is a dev-tools flag, so a packaged build compiles this to nothing and would
 // otherwise carry an unused-function warning for it.
 int requireInt(const QCommandLineParser &parser, const QCommandLineOption &option,
@@ -122,7 +122,7 @@ AppOptions *AppOptions::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 // The CLI's vocabulary, and only that. The pixel sizes behind these ids are in
 // Viewports.qml and the gradients behind those phases are in Theme.qml; neither
 // table is duplicated here, and neither is reachable from C++ before the engine
-// exists — which is precisely when the command line has to be parsed.
+// exists - which is precisely when the command line has to be parsed.
 QStringList AppOptions::viewportIds()
 {
     return { QStringLiteral("mobile"), QStringLiteral("tablet"),
@@ -151,7 +151,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
-        QStringLiteral("Climat — a native Qt 6 weather app.\n"
+        QStringLiteral("Climat - a native Qt 6 weather app.\n"
                        "\n"
                        "With no options it opens the forecast. The window's width chooses the\n"
                        "layout: a phone gets five tabs under a nav bar, a desktop gets one\n"
@@ -250,7 +250,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
         QStringLiteral("perf"),
         QStringLiteral("Force the drawing tier rather than deriving it from the platform: %1. "
                        "`reduced` halves the night sky's star count, which is what a handheld "
-                       "gets by default — this is how it is reviewed on a desktop.")
+                       "gets by default - this is how it is reviewed on a desktop.")
             .arg(perfTiers().join(QStringLiteral(", "))),
         QStringLiteral("tier"));
     parser.addOption(perfOption);
@@ -290,7 +290,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(fixtureOption)) {
         const QString name = parser.value(fixtureOption);
         if (name != QLatin1String("off") && !climat::fixtures::exists(name)) {
-            fail(QStringLiteral("unknown fixture \"%1\" — try one of: %2, or \"off\"")
+            fail(QStringLiteral("unknown fixture \"%1\" - try one of: %2, or \"off\"")
                      .arg(name, climat::fixtures::names().join(QStringLiteral(", "))));
         }
         self->m_fixture = name;
@@ -314,7 +314,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(viewportOption)) {
         const QString id = parser.value(viewportOption);
         if (!viewportIds().contains(id))
-            fail(QStringLiteral("--viewport: expected one of %1 — got \"%2\"")
+            fail(QStringLiteral("--viewport: expected one of %1 - got \"%2\"")
                      .arg(viewportIds().join(QStringLiteral(", ")), id));
         self->m_viewport = id;
     }
@@ -330,7 +330,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
 
     // Shape only. Whether `metric` is a target and whether `uv` is a metric are
     // questions for the moment the poke is applied, because that is the first
-    // moment anything knows which shell is running — and under --gallery there
+    // moment anything knows which shell is running - and under --gallery there
     // is no shell at all.
     for (const QString &poke : parser.values(pokeOption)) {
         if (!poke.contains(QLatin1Char('=')))
@@ -366,7 +366,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
                      .arg(self->m_place, self->m_fixture));
         }
 
-        // Implied rather than stated, so the place wins — but the capture that
+        // Implied rather than stated, so the place wins - but the capture that
         // results is a live one, which means it is a picture of this afternoon
         // and will not compare against another taken tomorrow. That is worth a
         // line, because reproducibility is the entire reason the default exists.
@@ -393,7 +393,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(skyOption)) {
         const QString phase = parser.value(skyOption);
         if (!skyPhases().contains(phase))
-            fail(QStringLiteral("--sky: expected one of %1 — got \"%2\"")
+            fail(QStringLiteral("--sky: expected one of %1 - got \"%2\"")
                      .arg(skyPhases().join(QStringLiteral(", ")), phase));
         self->m_sky = phase;
     }
@@ -401,7 +401,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(schemeOption)) {
         const QString name = parser.value(schemeOption);
         if (!schemes().contains(name))
-            fail(QStringLiteral("--scheme: expected one of %1 — got \"%2\"")
+            fail(QStringLiteral("--scheme: expected one of %1 - got \"%2\"")
                      .arg(schemes().join(QStringLiteral(", ")), name));
         self->m_scheme = name;
     }
@@ -409,7 +409,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(perfOption)) {
         const QString tier = parser.value(perfOption);
         if (!perfTiers().contains(tier))
-            fail(QStringLiteral("--perf: expected one of %1 — got \"%2\"")
+            fail(QStringLiteral("--perf: expected one of %1 - got \"%2\"")
                      .arg(perfTiers().join(QStringLiteral(", ")), tier));
         self->m_perf = tier;
     }
@@ -431,7 +431,7 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
 
 #endif // CLIMAT_DEV_TOOLS
 
-    // This program takes no positional arguments at all — it took one, and that
+    // This program takes no positional arguments at all - it took one, and that
     // one was the gallery's component name, which left with the gallery. A
     // stray word is therefore a typo, most likely a flag that lost its dashes,
     // and saying so beats opening the forecast and ignoring it.
@@ -441,15 +441,15 @@ void AppOptions::parseCommandLine(const QCoreApplication &app)
     // location either.
     const QStringList words = parser.positionalArguments();
     if (!words.isEmpty())
-        fail(QStringLiteral("unexpected argument \"%1\" — climat takes options, not arguments")
+        fail(QStringLiteral("unexpected argument \"%1\" - climat takes options, not arguments")
                  .arg(words.constFirst()));
 }
 
 // ---- which data this run uses ---------------------------------------------------
 //
 // The resolution order is in the header. It is three lines of code and the
-// reason it is not inlined at the call site is that there are two call sites —
-// app/main.cpp and gallery/main.cpp — and a gallery that resolved it differently
+// reason it is not inlined at the call site is that there are two call sites -
+// app/main.cpp and gallery/main.cpp - and a gallery that resolved it differently
 // would review components against data the app never shows.
 QString AppOptions::fixture() const
 {
@@ -461,7 +461,7 @@ QString AppOptions::fixture() const
         return m_fixture;
 
     // Rules 2 and 3 are both *implied* fixtures, and an implied fixture loses
-    // to a named place — see the header. The place is the more specific
+    // to a named place - see the header. The place is the more specific
     // instruction and the only one of the two that a recording cannot honour.
     const bool named = !m_place.isEmpty();
 

@@ -7,8 +7,8 @@
 // WHAT THIS IS FOR
 //
 // climat-daemon fetches the weather once and serves it to everything on the
-// desktop (daemon/snapshotservice.h). This is the reader: it finds the daemon —
-// asking the bus to start one if nothing else has — re-finds it when it
+// desktop (daemon/snapshotservice.h). This is the reader: it finds the daemon -
+// asking the bus to start one if nothing else has - re-finds it when it
 // restarts, keeps one subscription per tile, and hands each tile its own
 // snapshot. Nothing here draws and nothing here fetches.
 //
@@ -22,7 +22,7 @@
 //                              QStringList{token}, "ss", this, SLOT(...))
 //
 // so the bus daemon filters before delivery. A desktop with eight tiles on it
-// therefore wakes one tile when one tile's data changes, not eight — which is
+// therefore wakes one tile when one tile's data changes, not eight - which is
 // what keeps the ~0 % idle CPU line in docs/03-tech-stack.md §3.4 true once
 // somebody actually fills their desktop. Connecting without the match would
 // work, would look identical on a two-tile test, and would quietly cost 8× the
@@ -31,7 +31,7 @@
 // ============================================================================
 // A DEAD DAEMON IS NOT A BLANK TILE
 //
-// The daemon can go away — an upgrade, a crash, a user logging into a session
+// The daemon can go away - an upgrade, a crash, a user logging into a session
 // where it is not autostarted. When it does, every WidgetFeed keeps the last
 // snapshot it was given and `available` goes false; the tiles keep drawing and
 // start saying how old their reading is. This is non-negotiable 1 in
@@ -39,8 +39,8 @@
 // cannot source, and it never shows nothing where it has something.
 //
 // When the name comes back, every attached feed is re-subscribed from here.
-// Tokens are not stable across a daemon restart — the new daemon has never
-// heard of the old ones — so the match rules are torn down and rebuilt.
+// Tokens are not stable across a daemon restart - the new daemon has never
+// heard of the old ones - so the match rules are torn down and rebuilt.
 //
 // ============================================================================
 // AND A MISSING ONE IS NOT A LOADING TILE
@@ -51,8 +51,8 @@
 // snapshot was half a second away or was never coming at all.
 //
 // Those are not the same state and they had the same picture. Four grey tiles
-// on a desktop, no message on screen, and — because the only warning here was
-// for a session bus that could not be reached — nothing in the journal either.
+// on a desktop, no message on screen, and - because the only warning here was
+// for a session bus that could not be reached - nothing in the journal either.
 // The daemon simply was not running, which is the ordinary case on any desktop
 // that is not GNOME: the extension starts it, and nothing else did.
 //
@@ -93,7 +93,7 @@ class DaemonLink : public QObject
     QML_SINGLETON
 
     // Whether there is a daemon on the bus right now. False is not an error
-    // state — it is the state a tile has to keep drawing through.
+    // state - it is the state a tile has to keep drawing through.
     Q_PROPERTY(bool available READ isAvailable NOTIFY availableChanged)
 
     // "bus" | "file" | "none". A tile does not branch on this; the footer does,
@@ -189,7 +189,7 @@ private:
     // C++ goes on holding the one it made; nothing warns.
     //
     // What that looked like here: the command line parsed correctly, the
-    // snapshot loaded correctly, and the tiles came up empty — because QML's
+    // snapshot loaded correctly, and the tiles came up empty - because QML's
     // WidgetOptions had an empty widget list and QML's DaemonLink had never
     // been told about the recorded snapshot. Two hours, and the fix is one
     // access specifier.
@@ -211,7 +211,7 @@ private:
     void dropSubscription(WidgetFeed *feed);
     void deliver(WidgetFeed *feed, const QByteArray &json);
 
-    // The reason every feed is given while there is no subscription to be had —
+    // The reason every feed is given while there is no subscription to be had -
     // empty when a snapshot is on its way, which is what leaves the skeleton up.
     // Per-feed refinements (a place this daemon does not have) are set in
     // resubscribe(), after this one has been pushed to everybody.

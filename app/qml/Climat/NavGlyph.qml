@@ -4,13 +4,13 @@
 //
 // Same decision as WeatherGlyph and for the same reason: the prototype stays a
 // single `qml` invocation with no asset pipeline. Production swaps these for
-// the shipped icon set (decision D10) — these exist to get the shell's
+// the shipped icon set (decision D10) - these exist to get the shell's
 // proportions right, not to be the final art.
 //
 // They are outlines, not fills, and that is the one thing to preserve if they
 // are redrawn. A nav bar is five icons in a row at 22 px: at that size a solid
 // glyph reads as a blob and the only thing distinguishing the five is their
-// silhouette, so the interior detail — a clock's hands, a calendar's grid —
+// silhouette, so the interior detail - a clock's hands, a calendar's grid -
 // has to be drawn rather than implied.
 //
 // `today` and `monthly` are deliberately the same calendar body with different

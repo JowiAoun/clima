@@ -4,20 +4,20 @@
 //
 // The reading here is a *comparison*, not a number: 30° only means something
 // next to the 27° it is being compared with. So the visualisation draws both
-// twelve-hour curves and fills the gap between them — the shaded band is the
+// twelve-hour curves and fills the gap between them - the shaded band is the
 // part of the reading the thermometer does not show, and it is the only thing
 // on the card that would change shape if the two series converged.
 //
 // It is a sparkline card like Temperature and Pressure, and it uses their
 // marker: a 14 px disc with a 2.5 px ring, on the feels-like curve. It used to
 // carry a 12 px dot on a 2 px rule down to a 9 px tick on the measured line,
-// which composited into a map pin dangling below the curve — a third mark
+// which composited into a map pin dangling below the curve - a third mark
 // spec in a family of three cards, and the ribbon already draws that gap over
 // all twelve hours rather than only at this one.
 //
 // The line colour is the rosy red measured off the reference (#dc626d), close
-// enough to the Temperature card to read as "warmth" and far enough — with the
-// second curve, the band and the paired readings — never to be mistaken for it.
+// enough to the Temperature card to read as "warmth" and far enough - with the
+// second curve, the band and the paired readings - never to be mistaken for it.
 //
 // On arrival the chart draws itself in from the left, as Temperature and
 // Pressure do. Both curves and the band between them come in under one sweep,
@@ -36,7 +36,7 @@ DetailCard {
     // Local to this visualisation, so they stay out of theme.js.
     readonly property color feelsStroke:     "#dc626d"   // measured, reference
     readonly property color feelsStrokeDim:  "#59dc626d" // forecast: same line, less certainty
-    // The line's hue at label contrast — which on a light card means darker
+    // The line's hue at label contrast - which on a light card means darker
     // than the line rather than paler.
     readonly property color feelsInk:        Theme.isLight ? "#a83744" : "#eda2ab"
     // The temperature being compared against: deliberately quieter than the
@@ -59,7 +59,7 @@ DetailCard {
         readonly property int nowIndex: Detail.nowIndex
 
         // The comparison curve is the Temperature card's series. Both cover the
-        // same twelve hours today and the card goes on assuming they do — but a
+        // same twelve hours today and the card goes on assuming they do - but a
         // provider that returned a shorter one should cost the comparison, not
         // the card, so everything below is gated on this rather than indexing
         // off the end of the array and drawing NaN.
@@ -87,7 +87,7 @@ DetailCard {
             anchors.bottom: valueRow.top
             // The chart ends where the reading begins. It used to hang the
             // reading 6 px outside the content box to buy this room back; the
-            // box is the box, so the chart is shorter instead — and it is
+            // box is the box, so the chart is shorter instead - and it is
             // taller than it was anyway, because the row that used to sit here
             // is gone.
             anchors.bottomMargin: 10
@@ -136,14 +136,14 @@ DetailCard {
 
             // The sweep: a window over the chart whose right edge travels left
             // to right on `reveal`. One window over the whole Shape, so both
-            // curves and the band between them arrive together — the gap is the
+            // curves and the band between them arrive together - the gap is the
             // reading, and it has to be legible from the first hour drawn.
             //
             // A clip rather than a regenerated path: re-splining a growing
             // subset would shift the control points of the stretch already
             // drawn, and here that wriggle would land in the band, which is the
             // one thing on the card whose shape carries the value.
-            // `layer.enabled` is what makes the clip bite — Shapes escape
+            // `layer.enabled` is what makes the clip bite - Shapes escape
             // ancestor clipping (docs/10-design-system.md §10.8), and a child
             // outside the layer's texture is never drawn into it.
             Item {
@@ -226,7 +226,7 @@ DetailCard {
 
             // "Now", on the feels-like curve: the grid's one mark, ringed so it
             // stays visible wherever the curve puts it. The measured line gets
-            // none of its own — at this gap a second disc lands under this one.
+            // none of its own - at this gap a second disc lands under this one.
             //
             // Outside the sweep, and grown in when the drawing edge passes it: a
             // mark sitting there before the curve arrives is pointing at

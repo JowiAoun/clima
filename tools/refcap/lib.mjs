@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Shared machinery for refcap. Both the single-target capture and the
-// whole-page crawl go through the same browser setup and the same DOM dump —
+// whole-page crawl go through the same browser setup and the same DOM dump -
 // if they diverged, two captures of the same component would disagree with no
 // sign that anything was wrong.
 
@@ -35,7 +35,7 @@ export function bestScale(cssW, cssH) {
  *
  * The crawl renders the whole page once at a high DPR and clips components out
  * of it, so a large component can land over budget. Downscaling from that
- * render beats re-rendering at a lower DPR — it is supersampled, so edges and
+ * render beats re-rendering at a lower DPR - it is supersampled, so edges and
  * text come out cleaner than a native low-DPR pass would give.
  */
 export async function fitToBudget(file, w, h) {
@@ -54,7 +54,7 @@ export async function fitToBudget(file, w, h) {
 // Determinism
 //
 // A capture that changes with the machine's location, unit preference, clock
-// or ad auction is not a reference — two runs would disagree for reasons that
+// or ad auction is not a reference - two runs would disagree for reasons that
 // have nothing to do with the design. Pin every one of those.
 export const CITIES = {
     seattle: { l: 'Seattle', r: 'Washington', r2: 'King', c: 'United States', i: 'US', x: '-122.33207', y: '47.60621', tz: 'America/Los_Angeles' },
@@ -67,7 +67,7 @@ export const CITIES = {
 
 export function locParam(city, market = 'en-us') {
     const c = CITIES[city];
-    if (!c) throw new Error(`unknown city "${city}" — have: ${Object.keys(CITIES).join(', ')}`);
+    if (!c) throw new Error(`unknown city "${city}" - have: ${Object.keys(CITIES).join(', ')}`);
     const { tz, ...loc } = c;
     return Buffer.from(JSON.stringify({ ...loc, g: market })).toString('base64');
 }
@@ -166,7 +166,7 @@ export const SVG_ONLY = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', '
  * Dump one element's subtree: geometry, computed visual styles, and any SVG
  * verbatim with its styling inlined.
  *
- * Runs inside the page, so it must not close over anything — every constant
+ * Runs inside the page, so it must not close over anything - every constant
  * arrives as an argument. `rootSelector` is resolved fresh here rather than
  * passed in, because a handle and a selector can disagree.
  */
@@ -175,7 +175,7 @@ export function dumpSubtree({ rootSelector, props, noise, svgOnly, maxNodes, max
     const SVG_ONLY = new Set(svgOnly);
     // Must pierce shadow roots, because discovery does. A plain
     // document.querySelector silently loses every component that lives inside
-    // a web component — they are found, tagged, screenshotted, and then fail
+    // a web component - they are found, tagged, screenshotted, and then fail
     // to dump, which looks like a selector typo rather than a scoping bug.
     const root = (function deepQuery(sel, node) {
         const hit = node.querySelector(sel);
@@ -203,7 +203,7 @@ export function dumpSubtree({ rootSelector, props, noise, svgOnly, maxNodes, max
         if (depth > maxDepth) return;
         // A 24-row table with a detail grid per row runs to thousands of
         // near-identical nodes and a multi-megabyte dump, no more readable
-        // than the screenshot was. Cap it — but say so, because a silent cap
+        // than the screenshot was. Cap it - but say so, because a silent cap
         // reads as "captured everything".
         if (nodes.length >= maxNodes) { truncated = true; return; }
         const r = e.getBoundingClientRect();
@@ -250,7 +250,7 @@ export function dumpSubtree({ rootSelector, props, noise, svgOnly, maxNodes, max
         'stroke-linecap', 'stroke-opacity', 'fill-opacity', 'opacity',
         'font-family', 'font-size', 'font-weight'];
     // Only elements that actually paint. Inlining onto <stop>, <mask> and
-    // gradient defs is pure noise — it buries the stop list, which is the
+    // gradient defs is pure noise - it buries the stop list, which is the
     // single most valuable thing in a chart SVG.
     const PAINTS = new Set(['svg', 'g', 'path', 'rect', 'circle', 'ellipse',
         'line', 'polyline', 'polygon', 'text', 'tspan', 'use']);

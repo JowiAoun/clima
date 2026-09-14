@@ -10,8 +10,8 @@
 # separate mechanism from cmake/ClimatEngineGuard.cmake rather than a duplicate
 # of it. The configure-time guard walks CMake's target graph, which is a model
 # of the link; this reads DT_NEEDED, which is the link. A dependency that
-# arrived outside the target graph — a bare `-lQt6Gui` on a flags variable, a
-# transitively linked package that CMake never saw as a target — is invisible to
+# arrived outside the target graph - a bare `-lQt6Gui` on a flags variable, a
+# transitively linked package that CMake never saw as a target - is invisible to
 # the first check and unmissable to this one.
 #
 # It is pointed at a test executable rather than at libclimat itself, because a
@@ -29,7 +29,7 @@ if(NOT EXISTS "${CLIMAT_BINARY}")
 endif()
 
 if(NOT CLIMAT_OBJDUMP OR NOT EXISTS "${CLIMAT_OBJDUMP}")
-    # Reached only if objdump vanished between configure and test — the test is
+    # Reached only if objdump vanished between configure and test - the test is
     # not registered at all when it was missing at configure time, on the
     # grounds that a check which cannot run is not a check that passed and must
     # not be reported as one.
@@ -98,4 +98,4 @@ if(offenders)
         "  and none of them can link a windowing toolkit.\n")
 endif()
 
-message(STATUS "ClimatNoGuiBinaryCheck: ${CLIMAT_BINARY} needs ${needed} — no GUI library")
+message(STATUS "ClimatNoGuiBinaryCheck: ${CLIMAT_BINARY} needs ${needed} - no GUI library")

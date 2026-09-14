@@ -21,7 +21,7 @@
 //
 // domain/ rather than a new directory, because these are properties of the
 // quantity rather than of any provider or of any screen. No I/O, no Qt Gui,
-// nothing that needs a cache — a pure function from a double to a string, which
+// nothing that needs a cache - a pure function from a double to a string, which
 // is why the widget host can link this file alone and carry none of the
 // engine with it.
 //
@@ -29,7 +29,7 @@
 //
 // Every one of these takes a plain double rather than a Reading, and every one
 // answers an empty string for NaN rather than a band name. A caller that has
-// no reading has to say "—" itself; being handed "Low" for a UV index nobody
+// no reading has to say "-" itself; being handed "Low" for a UV index nobody
 // measured is the null-drawn-as-zero mistake with a word on it.
 
 #pragma once
@@ -38,12 +38,12 @@
 
 namespace climat::scales {
 
-// WHO, and this is the whole table: low 0–2, moderate 3–5, high 6–7,
-// very high 8–10, extreme 11+.
+// WHO, and this is the whole table: low 0-2, moderate 3-5, high 6-7,
+// very high 8-10, extreme 11+.
 [[nodiscard]] QString uvBand(double index);
 
-// The European AQI's own bands: 0–20 good, 20–40 fair, 40–60 moderate,
-// 60–80 poor, 80–100 very poor, 100+ extremely poor.
+// The European AQI's own bands: 0-20 good, 20-40 fair, 40-60 moderate,
+// 60-80 poor, 80-100 very poor, 100+ extremely poor.
 //
 // The *European* index specifically. libclimat/wire/snapshot.cpp sends this one
 // everywhere for the same reason app/viewmodels/conditionsdata.cpp shows it
@@ -55,7 +55,7 @@ namespace climat::scales {
 [[nodiscard]] QString visibilityBand(double km);
 
 // Beaufort force from km/h, inverting the standard v = 0.836·B^1.5 in m/s.
-// Bounded to 0–12: the scale has no 13, and extrapolating one would be
+// Bounded to 0-12: the scale has no 13, and extrapolating one would be
 // inventing a category.
 [[nodiscard]] int beaufortForce(double kmh);
 
@@ -65,7 +65,7 @@ namespace climat::scales {
 // average, and NNE-by-E is a precision it does not have.
 [[nodiscard]] QString compassPoint(double degrees);
 
-// A pollutant's machine id — `climat::pollutantId()`'s "pm2_5", "no2", "o3" —
+// A pollutant's machine id - `climat::pollutantId()`'s "pm2_5", "no2", "o3" -
 // as the name a chemist would write.
 //
 // airquality.h is explicit that its ids are not user-facing, and until there

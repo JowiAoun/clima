@@ -5,7 +5,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 The extension's own settings, which are about PLACEMENT and nothing else.
 
-Everything about how a tile looks — units, dark or light, which place is home —
+Everything about how a tile looks - units, dark or light, which place is home -
 belongs to the app and lives in its INI, because a widget that showed °C to
 somebody who chose °F would be the app disagreeing with itself. The extension
 owns where the tiles sit on the screen, which is a question the app has no

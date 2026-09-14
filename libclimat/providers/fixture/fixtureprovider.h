@@ -7,7 +7,7 @@
 // ============================================================================
 // WHY THIS IS A PROVIDER AND NOT A MODE
 //
-// The alternative — a `bool fixtureMode` threaded through the app — is the
+// The alternative - a `bool fixtureMode` threaded through the app - is the
 // design libclimat/core/clock.h already argues against at length, and every word
 // of that argument applies here. Five flags in, "fixture mode" is a
 // cross-cutting concern living in the cache, the network layer and the view
@@ -16,9 +16,9 @@
 // So there is no fixture mode. There is a provider that happens to read its
 // bytes from a resource instead of from a socket, registered into the same
 // ProviderRegistry as any other, and a FrozenClock set to the moment those
-// bytes were captured. Everything downstream — the TTL table, the backoff, the
+// bytes were captured. Everything downstream - the TTL table, the backoff, the
 // "now" marker on the hourly strip, the past veil, the sky phase, the "updated
-// N minutes ago" line — behaves exactly as it did on the afternoon of the
+// N minutes ago" line - behaves exactly as it did on the afternoon of the
 // recording, and not one of them knows why.
 //
 // That is also what makes a golden image worth comparing: two runs a week apart
@@ -28,7 +28,7 @@
 // ============================================================================
 // IT PARSES. IT DOES NOT SHORT-CIRCUIT.
 //
-// The recorded payload goes through `openmeteo::adaptForecast()` — the same
+// The recorded payload goes through `openmeteo::adaptForecast()` - the same
 // function the live provider calls on the same bytes. A fixture provider that
 // handed back a pre-built Forecast would be a fixture of the adapter's output
 // rather than of the service's, and the first thing it would stop testing is
@@ -42,7 +42,7 @@
 //
 // The bytes are Open-Meteo's, recorded under CC BY 4.0, so the credit line is
 // Open-Meteo's credit line. What is ours is the `note`, which says the data is
-// a recording and when it was taken — because a screenshot of this app taken in
+// a recording and when it was taken - because a screenshot of this app taken in
 // fixture mode is a screenshot of a July afternoon whatever the calendar says,
 // and a reader has a right to know that.
 //
@@ -68,7 +68,7 @@ namespace climat {
 //
 // One recorded place, its two payloads, and the instant the recording was made.
 // A payload may be empty, which means "this fixture does not carry that
-// product" rather than "the product failed" — kampala carries a forecast and no
+// product" rather than "the product failed" - kampala carries a forecast and no
 // air quality, because it exists to prove one thing about one hour of rain.
 struct Fixture {
     QString    name;
@@ -81,7 +81,7 @@ struct Fixture {
     //
     // The id is in the manifest rather than sniffed from the bytes, because the
     // two shapes are a GeoJSON FeatureCollection and a GeoJSON FeatureCollection
-    // — they differ only in their property names, and a sniffer would be a third
+    // - they differ only in their property names, and a sniffer would be a third
     // parser that has to be kept in step with the two real ones.
     //
     // Empty means the fixture does not carry alerts, which is not the same as
@@ -101,7 +101,7 @@ struct Fixture {
 //
 // Fixtures are compiled in, under `:/climat/fixtures/<name>/`. Compiled in and
 // not read from tests/, because `--fixture` has to work from an installed
-// binary on a machine that has no source tree — that is the difference between
+// binary on a machine that has no source tree - that is the difference between
 // a reviewer's tool and a developer's habit.
 namespace fixtures {
 
@@ -161,8 +161,8 @@ private:
 // docs/04-architecture.md §4.11 forbids a network in tests, and the golden
 // images add a second requirement the forecast fixture already meets and the
 // alert one has to as well: a banner photographed today has to be the banner
-// photographed next month. Alerts are the most volatile product in the app —
-// the whole point of them is that they appear and vanish — so a golden image of
+// photographed next month. Alerts are the most volatile product in the app -
+// the whole point of them is that they appear and vanish - so a golden image of
 // one taken from the live service would be a golden image with a shelf life of
 // hours.
 //

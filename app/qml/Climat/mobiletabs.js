@@ -4,7 +4,7 @@
 //
 // One list, read by two things that must not disagree: `ShellNav` draws it,
 // and `MobileShell` loads `page` for whichever id is current. Same argument as
-// the metric registry — adding a screen is a line of data, and a screen that exists in
+// the metric registry - adding a screen is a line of data, and a screen that exists in
 // the tree but not in this list shows up as a tab that is missing rather than
 // as a page nobody can reach.
 //
@@ -30,7 +30,7 @@ function byId(id) {
 
 // -1 for an id that is not a tab, so a caller can tell "not found" from "the
 // first one". Anything positioning something in the bar wants
-// Math.max(0, indexOf(id)) — a nav pill has to be somewhere.
+// Math.max(0, indexOf(id)) - a nav pill has to be somewhere.
 function indexOf(id) {
     for (var i = 0; i < list.length; ++i)
         if (list[i].id === id)

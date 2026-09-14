@@ -16,11 +16,11 @@
 // ---- why the target and not the mark ------------------------------------------
 //
 // The alternative is to make the control itself bigger, and for some controls
-// that is right — a settings row at 42 px should simply be 44, and a dropdown
+// that is right - a settings row at 42 px should simply be 44, and a dropdown
 // item at 38 should be 44, because those are surfaces a reader is aiming at and
 // their size IS the affordance. It is wrong for a mark. A 44 px dismiss cross
 // or a 44 px disclosure chevron is a shape shouting at the reader, and the
-// screens here are full of small marks sitting in generous padding — which is
+// screens here are full of small marks sitting in generous padding - which is
 // exactly the shape of layout where the target can grow into space that is
 // already empty.
 //
@@ -66,7 +66,7 @@ Item {
     // rather than a control, so the caller can turn it off.
     property int cursorShape: Qt.PointingHandCursor
 
-    // What to cover. The parent, which is the ordinary case, or any sibling —
+    // What to cover. The parent, which is the ordinary case, or any sibling -
     // see the note above about positioners.
     property Item area: parent
 

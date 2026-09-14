@@ -8,7 +8,7 @@
 # would go on proving that after Open-Meteo renamed a field or changed a unit,
 # because a recorded fixture is a guard against regression in us and not
 # against drift in them. This is where you look at the live answer and check it
-# by eye — see main.cpp.
+# by eye - see main.cpp.
 #
 # Guarded by CLIMAT_DEV_TOOLS, whose help text already promises "gallery,
 # harnesses". A packaging build asks for neither and never enters this

@@ -7,7 +7,7 @@
 // climat-cli reads them through a bare QSettings, because Settings is a QML
 // singleton and a command-line tool that linked a QML engine to learn whether
 // the reader prefers Fahrenheit would be paying for the whole of Qt Quick to
-// print one character. Two readers, one list — a key renamed here is renamed
+// print one character. Two readers, one list - a key renamed here is renamed
 // in both, and a key renamed in only one would be a preference the app wrote
 // and the CLI silently ignored.
 //
@@ -27,19 +27,19 @@ constexpr auto clockFormat = "time/format";
 
 // What a reader who has never touched the switch gets: their own locale's
 // answer. Both readers of the INI call this, which is the point of it being
-// here — the app through Settings, the CLI through its own QSettings, and a
+// here - the app through Settings, the CLI through its own QSettings, and a
 // default that differed between them would be the two of them disagreeing
 // about what time it is on the same machine.
 //
 // QLocale spells a 12-hour format with AP or ap and a 24-hour one with neither,
 // so the presence of that letter is the question. It is asked of the SHORT
-// format because that is the one this app prints — a long format carries a
+// format because that is the one this app prints - a long format carries a
 // timezone name nothing here shows.
 //
 // This used to be a flat "12h", and docs/known-gaps.md carried the entry
 // saying why that was wrong outside North America: a reader in Paris got
 // "3 PM" until they found the switch. What kept it flat was the capture path
-// rather than the clock — every golden image runs under LC_ALL=C.UTF-8, whose
+// rather than the clock - every golden image runs under LC_ALL=C.UTF-8, whose
 // short format is 24-hour, so a locale-derived default would have re-recorded
 // most of the reference images and made them a picture of the C locale rather
 // than of the product. scripts/golden.sh and scripts/shots.sh now write the

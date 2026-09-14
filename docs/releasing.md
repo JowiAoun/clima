@@ -24,9 +24,9 @@ has gone wrong and tagging by hand will hide it.
 ## The one manual step, and why it is not automated
 
 `release-please` rewrites exactly one thing: the version on the line in
-`CMakeLists.txt` marked `# x-release-please-version`. Everything downstream —
+`CMakeLists.txt` marked `# x-release-please-version`. Everything downstream -
 `CLIMAT_VERSION`, the `.deb` version, the MSI `ProductVersion`, the MET Norway
-User-Agent — reads from there, so one edit moves all of them.
+User-Agent - reads from there, so one edit moves all of them.
 
 It does **not** write the AppStream release note, and `packaging/CMakeLists.txt`
 fails the configure step until somebody does:
@@ -41,7 +41,7 @@ human version of it into `packaging/linux/climat.metainfo.xml.in` as a new
 `<release>` block at the top of `<releases>`.
 
 That is deliberate. The `<releases>` block is what GNOME Software and KDE
-Discover show a user deciding whether to update — curated prose, in the voice
+Discover show a user deciding whether to update - curated prose, in the voice
 of the product, not a list of commit subjects. Generating it would produce
 "fix(net): keep the reason a 4xx gave in the error message" on a store page.
 And a version bump with no note is invisible until it is published, which is
@@ -78,7 +78,7 @@ and `LICENSES/`, both of which `reuse lint` gates, so it cannot describe a set
 of components that is not the set shipped.
 
 **`QT-SOURCE-OFFER.txt`.** The Windows artefacts and the AppImage bundle Qt,
-which makes them LGPLv3 conveyances. A link to qt.io does not discharge that —
+which makes them LGPLv3 conveyances. A link to qt.io does not discharge that -
 GPLv3 §6 permits pointing at a third party's server only when the recipient got
 the object code from that same server. The offer is valid three years and the
 `.deb` and Flatpak are explicitly outside it, because they convey no Qt.
@@ -103,8 +103,8 @@ a release name, so dispatch it from a tag ref if you want it to go all the way.
 
 ## When Flathub happens
 
-The manifest in `packaging/flatpak/` builds a `dir` source — this working tree
-— which is what makes `scripts/flatpak.sh build` useful on a branch. A Flathub
+The manifest in `packaging/flatpak/` builds a `dir` source - this working tree
+- which is what makes `scripts/flatpak.sh build` useful on a branch. A Flathub
 submission is a **separate repository**, `flathub/io.github.JowiAoun.Climat`,
 whose manifest is the same file with a `git` source pinned to a tag and a
 commit. A published build has to be reproducible from something immutable.

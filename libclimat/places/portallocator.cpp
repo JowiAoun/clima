@@ -84,7 +84,7 @@ bool PortalLocator::isAvailable() const
     // The bus, not the portal. Asking the bus whether the portal's name is
     // activatable is a round trip, and this is called on the way to the first
     // frame to decide whether a button exists. A missing portal is reported at
-    // request time, once, as Unavailable — the same branch a refusal takes and
+    // request time, once, as Unavailable - the same branch a refusal takes and
     // the same sentence the UI already has for it.
     return m_bus.isConnected();
 }
@@ -117,7 +117,7 @@ void PortalLocator::requestPosition()
 {
     // The in-flight check comes FIRST, and the order is load-bearing. A second
     // press while the first request is outstanding is the user being impatient,
-    // not a second question — and here a second question would be a second
+    // not a second question - and here a second question would be a second
     // permission dialog. Asked the other way round, a bus that had gone away
     // between the two presses reported Unavailable for the second one, which
     // clears the in-flight flag without going through finish(): the first
@@ -143,7 +143,7 @@ void PortalLocator::requestPosition()
     m_sessionPath = sessionPathFor(m_token);
     m_requestPath = requestPathFor(m_token);
 
-    // Subscribed BEFORE anything is asked — see the header for the race this
+    // Subscribed BEFORE anything is asked - see the header for the race this
     // closes. Both signals, because Response and LocationUpdated can arrive in
     // the same burst as the reply to Start().
     subscribe();
@@ -163,7 +163,7 @@ void PortalLocator::requestPosition()
 
     // The DIALOG's clock, not the fix's. timeout() is how long to wait for a
     // position, and until the reader has answered the portal's permission
-    // prompt there is no position to wait for — a request timed out at fifteen
+    // prompt there is no position to wait for - a request timed out at fifteen
     // seconds while somebody was still reading the dialog, closed the session
     // out from under it, and reported "no position arrived" for a request they
     // were in the middle of granting. Restarted at timeout() the moment the
@@ -179,7 +179,7 @@ void PortalLocator::onSessionCreated(QDBusPendingCallWatcher *watcher)
 
     const QDBusPendingReply<QDBusObjectPath> reply = *watcher;
 
-    // A reply for a request that was cancelled or timed out in the meantime —
+    // A reply for a request that was cancelled or timed out in the meantime -
     // or, worse, for one that was, while a NEW request is now outstanding. The
     // serial tells those apart; the in-flight flag alone cannot, and adopting
     // a stale reply would point this locator at one session while leaving
@@ -216,7 +216,7 @@ void PortalLocator::onSessionCreated(QDBusPendingCallWatcher *watcher)
     }
 
     // The portal is entitled to hand back a different path from the one the
-    // token predicts — the spec says it may — and the one it hands back wins.
+    // token predicts - the spec says it may - and the one it hands back wins.
     const QString handed = reply.value().path();
     if (!handed.isEmpty())
         m_sessionPath = handed;
@@ -271,7 +271,7 @@ void PortalLocator::onResponse(uint response, const QVariantMap &results)
     case kResponseSuccess:
         // Granted, so the dialog is answered and the wait becomes a wait for a
         // POSITION. That is what timeout() bounds, and it starts here rather
-        // than when the request did — see requestPosition().
+        // than when the request did - see requestPosition().
         m_timer.disconnect(this);
         connect(&m_timer, &QTimer::timeout, this, &PortalLocator::onTimeout);
         m_timer.start(timeout());
@@ -279,7 +279,7 @@ void PortalLocator::onResponse(uint response, const QVariantMap &results)
 
     case kResponseCancelled:
         // The one that is not a malfunction. The user, through their own
-        // desktop's dialog, said no — and the right response is to stop asking
+        // desktop's dialog, said no - and the right response is to stop asking
         // and let them search for a place by name.
         finish();
         reportFailure(Failure::PermissionDenied,
@@ -362,7 +362,7 @@ void PortalLocator::subscribe()
 
     // Matched on the request PATH for Response, since every request has its
     // own object; and on the portal's own path for LocationUpdated, which is
-    // emitted there for every session — filtered by path in the slot.
+    // emitted there for every session - filtered by path in the slot.
     m_bus.connect(service(), m_requestPath, requestInterface(), QStringLiteral("Response"),
                   this, SLOT(onResponse(uint, QVariantMap)));
     m_bus.connect(service(), objectPath(), locationInterface(), QStringLiteral("LocationUpdated"),
@@ -397,8 +397,8 @@ void PortalLocator::closeAfterAnErrorThatMayHaveCreatedOne(const QDBusError &err
     // one that timed out or lost its connection may well have created a session
     // and been unable to tell us about it.
     //
-    // The path is guessable precisely because we chose the token — see
-    // sessionPathFor() — and the portal only picks its own path when it can
+    // The path is guessable precisely because we chose the token - see
+    // sessionPathFor() - and the portal only picks its own path when it can
     // answer. Closing a path that was never created is a no-op error reply
     // nobody reads, which is a good deal cheaper than a session that outlives
     // the reader's interest by hours.
@@ -428,8 +428,8 @@ void PortalLocator::closePath(const QString &sessionPath)
 }
 
 // Everything that ends a request, whichever way it ended. The in-flight flag
-// itself is cleared by reportFailure()/reportPosition() — or by cancel(),
-// which reports nothing — so that a slot arriving after this has a flag to
+// itself is cleared by reportFailure()/reportPosition() - or by cancel(),
+// which reports nothing - so that a slot arriving after this has a flag to
 // test.
 void PortalLocator::finish()
 {

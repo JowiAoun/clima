@@ -23,7 +23,7 @@ Item {
     property string metricId: "overview"
     property bool listView: false
 
-    // Ambient motion — currently the precipitation field, which is the only
+    // Ambient motion - currently the precipitation field, which is the only
     // thing here that moves when nothing has changed. Off under `--grab`, so a
     // headless frame is the same frame every time.
     property bool animated: true
@@ -44,7 +44,7 @@ Item {
     // ---- scales and metrics ---------------------------------------------
     // Settable, not readonly: the mobile shell runs this same card at 362 px,
     // where the token's 48 px column leaves room for six hours and a gutter.
-    // It is still the token by default — a caller overriding it is stating a
+    // It is still the token by default - a caller overriding it is stating a
     // width the token cannot know about, not disagreeing with it.
     property real hourWidth: Theme.metric.hourWidth
     readonly property real axisTopPad: Theme.metric.axisTopPad
@@ -69,7 +69,7 @@ Item {
 
     // The card takes whatever height it is given and hands the remainder to the
     // plot. That works when it fills a window and does nothing at all in a
-    // scrolling column, where an item has to say how tall it wants to be — so
+    // scrolling column, where an item has to say how tall it wants to be - so
     // this is the same relation solved the other way round: the height at which
     // the plot comes out at its preferred size.
     //
@@ -78,7 +78,7 @@ Item {
     //
     // Settable for the same reason `hourWidth` is. A 252 px plot plus its
     // header band and strip is 398 px of card, which on a 390x844 phone is
-    // half the screen for one of five things on it — and the plot is the part
+    // half the screen for one of five things on it - and the plot is the part
     // that can afford to give: the header band and the strip are fixed-height
     // rows that would become illegible rather than merely shorter.
     property real preferredPlotHeight: Theme.metric.plotHeight
@@ -95,8 +95,8 @@ Item {
     // This is a genuine tween and not a crossfade: the points themselves are
     // interpolated and the path is regenerated from them, so every intermediate
     // frame is a curve the renderer could have been given as data. `view`,
-    // because it is one view of today becoming another — the same hours, read a
-    // second way — and deliberately the same token as the metric handover's
+    // because it is one view of today becoming another - the same hours, read a
+    // second way - and deliberately the same token as the metric handover's
     // incoming half, which is the other thing on this card that replaces the
     // series without moving the frame around it. It was 430 ms, one of the eight
     // strays §10.6 was written to end.
@@ -116,13 +116,13 @@ Item {
     // different units. Morphing one curve into the other would claim they are
     // the same measurement changing; sliding the axis from 40 °C to 40 km/h
     // would put a tick label through numbers that mean nothing on either scale.
-    // And area → bars cannot be tweened at all — §10.7 makes bars and curves
+    // And area → bars cannot be tweened at all - §10.7 makes bars and curves
     // different *claims about the data*, so an in-between shape would be a
     // claim we do not have.
     //
     // What every metric on this card does share is the axis baseline. So the
     // outgoing series folds onto it, everything that names the metric changes
-    // at that instant — when the plot is empty and nothing can be misread — and
+    // at that instant - when the plot is empty and nothing can be misread - and
     // the incoming series grows back off it. That is §10.6's own description of
     // honest motion, "a bar growing off its baseline", applied to a switch
     // rather than to an arrival, and it is the one gesture that serves a curve
@@ -140,8 +140,8 @@ Item {
     // 1 = the series at full extent, 0 = flat on the baseline.
     property real seriesExtent: 1
 
-    // Set once the object is built, so properties handed in at construction —
-    // the gallery builds specimens with `metricId` already set — configure the
+    // Set once the object is built, so properties handed in at construction -
+    // the gallery builds specimens with `metricId` already set - configure the
     // chart instead of animating it.
     property bool ready: false
 
@@ -255,7 +255,7 @@ Item {
     //
     // Toggling `visible` on the chart panel corrupted clipping elsewhere in the
     // scene: the section heading in the tab bar stopped painting, and list rows
-    // escaped the ListView's clip. Both are the same underlying problem — the
+    // escaped the ListView's clip. Both are the same underlying problem - the
     // panel contains a clipped Flickable, and hiding that subtree leaves the clip
     // state wrong for other nodes. A Loader avoids it entirely, and not keeping an
     // invisible chart alive is the better shape anyway.
@@ -273,7 +273,7 @@ Item {
         // active: true, not `!root.listView`.
         //
         // Removing the chart subtree from the scene makes unrelated Text items
-        // elsewhere in the window stop painting — the section heading in the tab
+        // elsewhere in the window stop painting - the section heading in the tab
         // bar and the "Chart" switch label both vanish. Those items report as
         // perfectly healthy at runtime (right text, size, colour, visible, opacity
         // 1), so the scene is correct and only the render is wrong. Ruled out:
@@ -282,7 +282,7 @@ Item {
         // alive underneath is the one thing that reliably fixes it.
         //
         // Cost is a chart that stays built while the list is shown. Revisit when
-        // the C++ port lands (decision D3) — this smells like a Qt scene-graph bug
+        // the C++ port lands (decision D3) - this smells like a Qt scene-graph bug
         // that a QSGGeometryNode implementation may simply not trip.
         // …but staying loaded is not the same as staying *visible*, and that
         // distinction went missing. While every surface was an opaque navy fill
@@ -351,7 +351,7 @@ Item {
                 // `clip` bounds the rectangles and the text; it does not bound
                 // Qt Quick Shapes (docs/10-design-system.md §10.8), and the hour
                 // glyphs are Shapes. Off the right of a 1340-wide window the
-                // escapees land outside the window and are never seen — the
+                // escapees land outside the window and are never seen - the
                 // component gallery, which stages this panel at 1000, is where
                 // they showed up: cloud and sun glyphs floating in open page
                 // 300px past the panel edge.
@@ -365,7 +365,7 @@ Item {
                 // Open on now, not on the start of the series.
                 //
                 // The series begins at 21:00 the evening before, so at midday
-                // fifteen of its forty-eight hours have already happened —
+                // fifteen of its forty-eight hours have already happened -
                 // which is the shape a provider hands over, not an artefact of
                 // the mock. Opening at contentX 0 therefore opens the section
                 // called *Hourly* on last night. `HourlyList` has scrolled to
@@ -375,8 +375,8 @@ Item {
                 // while "now" was three columns in.
                 //
                 // Observed hours are kept on screen rather than none. The past
-                // treatment is a reading — those hours happened, and the veil
-                // and the hatch are what say so — and a chart that opens
+                // treatment is a reading - those hours happened, and the veil
+                // and the hatch are what say so - and a chart that opens
                 // exactly on the now line never shows it at all.
                 //
                 // How many is not a taste: it is one label interval, put one
@@ -384,8 +384,8 @@ Item {
                 // per labelled hour, so landing on a label rather than between
                 // two is the difference between opening with a legible column
                 // and opening with half a glyph and "AM" sliced off by the
-                // clip. `nowIndex` is itself a labelled index — it has to be,
-                // or "Now" would never be drawn — so stepping back by
+                // clip. `nowIndex` is itself a labelled index - it has to be,
+                // or "Now" would never be drawn - so stepping back by
                 // `labelStep` lands on the label before it.
                 //
                 // Assigned on completion rather than bound: this is where the
@@ -397,7 +397,7 @@ Item {
                         0, Math.max(0, contentWidth - width))
 
                 // A pager step is three quarters of the plot: one view of the day
-                // becoming another, hence `view`. A *drag* is not animated — the
+                // becoming another, hence `view`. A *drag* is not animated - the
                 // content tracks the finger, and interposing an easing between
                 // the two is what makes a scroll feel like it is on elastic.
                 NumberAnimation {
@@ -506,7 +506,7 @@ Item {
                         // Precipitation, under the series: the hours it falls
                         // in, washed. Under and not over, because the series'
                         // own colour is a value and a wash laid over it would
-                        // be stating a different one — see PrecipBands.qml.
+                        // be stating a different one - see PrecipBands.qml.
                         PrecipBands {
                             anchors.fill: parent
                             cells: Data.precipCells
@@ -770,7 +770,7 @@ Item {
                 visible: !root.listView
                 // The swatch is the metric's colour identity, and a fill is what
                 // `tint` is for. It carries the ramp across the handover so the
-                // legend does not blink to a new colour on its own — the stops
+                // legend does not blink to a new colour on its own - the stops
                 // are bound through animatable properties because a Behavior
                 // cannot be attached to a GradientStop.
                 Rectangle {

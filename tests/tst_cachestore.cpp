@@ -187,7 +187,7 @@ void TestCacheStore::ttlExpiryIsExactAgainstAFrozenClock()
     QVERIFY(store.isFresh(store.get(QStringLiteral("current")).value()));
 
     // The exact boundary. Fresh is `now < expiresAt`, so the instant the TTL
-    // names is already expired — no sleeping, no tolerance, no flake.
+    // names is already expired - no sleeping, no tolerance, no flake.
     clock.advance(1s);
     QVERIFY(!store.isFresh(store.get(QStringLiteral("current")).value()));
 }
@@ -381,7 +381,7 @@ void TestCacheStore::aValidatorOnlyRowIsNotACacheHit()
 {
     // HttpClient records an ETag the moment a 200 arrives, which is before the
     // caller has parsed the body and decided to keep it. That leaves a row with
-    // a NULL payload, and a row with no payload is not a cache entry — reading
+    // a NULL payload, and a row with no payload is not a cache entry - reading
     // it as one would hand a parser zero bytes.
     FrozenClock clock;
     CacheStore  store(&clock);
@@ -415,7 +415,7 @@ void TestCacheStore::migrationToTheNextVersionKeepsTheData()
 
     // The next version the product does not have yet. Passing the migration
     // list in is what makes the *runner* testable without waiting for the
-    // schema to need another version — see libclimat/cache/migrations.h. The
+    // schema to need another version - see libclimat/cache/migrations.h. The
     // number is one past whatever defaultMigrations() currently ends at, so
     // this test does not have to be edited every time the product migrates.
     const int current = highestVersion(defaultMigrations());
@@ -463,7 +463,7 @@ void TestCacheStore::migrationToTheNextVersionKeepsTheData()
                  QByteArrayLiteral(R"({"hourly":{"temperature_2m":[3.1,3.4]}})"));
     }
 
-    // Reopening again applies nothing and stays put — migrations run once, and
+    // Reopening again applies nothing and stays put - migrations run once, and
     // running them twice would fail on the duplicate column.
     {
         CacheStore store(&clock);
@@ -511,7 +511,7 @@ void TestCacheStore::aFailingMigrationRollsBackEntirely()
 
     // Still at the product's version, and still openable. A half-applied
     // migration would leave the file one version on with a column the code does
-    // not know about, or one version back with a column it does — both
+    // not know about, or one version back with a column it does - both
     // unrecoverable without deleting the cache.
     {
         CacheStore store(&clock);

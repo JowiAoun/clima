@@ -3,7 +3,7 @@
 //
 // "Where am I", answered from a table compiled into the binary.
 //
-// GeonamesIndex does the searching; this turns what it found into a Place —
+// GeonamesIndex does the searching; this turns what it found into a Place -
 // the same value type the forward geocoder produces, so that a place detected
 // and a place searched for are interchangeable everywhere downstream.
 //
@@ -20,7 +20,7 @@
 // with a place the user has never been.
 //
 // So there is a cutoff, 250 km by default. Inside it, a name. Outside it, an
-// absence the UI is expected to render as the coordinate itself —
+// absence the UI is expected to render as the coordinate itself -
 // docs/04-architecture.md §4.4: "A provider that returns nothing must make the
 // UI *hide* the feature, not show a broken one."
 //
@@ -35,7 +35,7 @@
 // The packed index carries the ISO 3166-1 alpha-2 code and not the country's
 // name, because QLocale already knows the mapping and a second copy of the
 // world's country names is 4 KB of data to keep in step with nothing. The names
-// Qt produces — "Canada", "Iceland", "Singapore", "Rwanda" — are the same
+// Qt produces - "Canada", "Iceland", "Singapore", "Rwanda" - are the same
 // strings Open-Meteo's geocoder returns, which is the property that matters:
 // the two paths have to produce the same Place.
 

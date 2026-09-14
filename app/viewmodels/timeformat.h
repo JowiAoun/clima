@@ -30,7 +30,7 @@
 // THE PREFERENCE, AND WHERE ITS DEFAULT COMES FROM
 //
 // `Settings::clockFormat` is "12h" or "24h", and a reader who has never
-// touched it gets their own locale's answer — `settingskeys::defaultClockFormat`
+// touched it gets their own locale's answer - `settingskeys::defaultClockFormat`
 // asks QLocale, so a French desktop opens on 15:30 and an American one on
 // 3 PM.
 //
@@ -38,9 +38,9 @@
 // the capture path rather than the clock: every picture this project takes of
 // itself runs under LC_ALL=C.UTF-8, whose short format is 24-hour, so a
 // locale-derived default would have made the reference images a picture of the
-// C locale. That is now pinned where it belongs — scripts/golden.sh and
+// C locale. That is now pinned where it belongs - scripts/golden.sh and
 // scripts/shots.sh write the preference into their own scratch config, the way
-// Main.qml pins the colour scheme under `--grab` — which leaves the default
+// Main.qml pins the colour scheme under `--grab` - which leaves the default
 // free to follow the reader and the pictures free to stay what they were.
 //
 // ============================================================================
@@ -48,7 +48,7 @@
 //
 // Deliberately, and it is the one thing to be careful about when calling it.
 // Which zone an instant should be read in is a question this class cannot
-// answer — conditionsdata has `m_zone`, the forecast's own zone, and reading a
+// answer - conditionsdata has `m_zone`, the forecast's own zone, and reading a
 // sunset in the machine's zone instead is a bug that looks like a rendering
 // problem. Every caller already knows its zone and has already converted; a
 // QDateTime overload here would be an invitation to stop.
@@ -75,7 +75,7 @@ public:
     [[nodiscard]] bool twentyFourHour() const;
 
     // "3 PM" / "15:00". An hourly axis column, where the minutes are always
-    // zero — see forecastdata.cpp, which argues ":00" out of the 12-hour
+    // zero - see forecastdata.cpp, which argues ":00" out of the 12-hour
     // spelling and back into the 24-hour one, because "15" alone beside a
     // temperature is a number with no unit.
     [[nodiscard]] QString hour(QTime time) const;
@@ -85,7 +85,7 @@ public:
 
     // The same reading with the suffix held back, and the suffix on its own.
     // Two fields rather than one because the sun and moon cards draw the suffix
-    // smaller and beside — see DetailSunCard.qml — and a caller that split
+    // smaller and beside - see DetailSunCard.qml - and a caller that split
     // `clock()` on a space would be parsing its own output.
     //
     // Under a 24-hour clock `meridiem()` is empty and `clockBare()` is the whole
@@ -95,7 +95,7 @@ public:
     [[nodiscard]] QString meridiem(QTime time) const;
 
     // "3:00 p.m." / "15:00". The reference's spelling inside a sentence, as
-    // distinct from the "3:00 PM" a label uses — detaildata.js used both, in the
+    // distinct from the "3:00 PM" a label uses - detaildata.js used both, in the
     // same two places, and the distinction survived the port.
     [[nodiscard]] QString sentence(QTime time) const;
 

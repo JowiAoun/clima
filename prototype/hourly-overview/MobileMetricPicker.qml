@@ -3,7 +3,7 @@
 // The metric chooser on the Hourly screen: a button that opens a list.
 //
 // The desktop puts ten metrics in a row of pills, which is the right control
-// when they all fit — every option is visible, switching is one tap, and the
+// when they all fit - every option is visible, switching is one tap, and the
 // selected one is legible in the reader's peripheral vision while they read
 // the chart. None of that survives 362 px. Ten pills there is a horizontally
 // scrolling row where the option you want is usually off-screen, and a
@@ -12,14 +12,14 @@
 //
 // So the phone trades visibility for reach: one button that says what is
 // selected, and a list that shows all ten when asked. It is the same registry
-// behind both — metrics.js — so a metric added there appears in both controls.
+// behind both - metrics.js - so a metric added there appears in both controls.
 //
 // ---- motion ------------------------------------------------------------------
 // The list fades at `tint`. §10.6's "text does not fade" is about a component
 // assembling its own resting content, where the reader is left waiting for
 // something they asked to read. This is a transient overlay: it is not there,
 // then it is, and the fade is what stops it appearing to have been there all
-// along. Nothing else moves — no slide, no scale, no stagger down the rows.
+// along. Nothing else moves - no slide, no scale, no stagger down the rows.
 import QtQuick
 import "theme.js" as Theme
 import "metrics.js" as Metrics
@@ -102,7 +102,7 @@ Item {
         opacity: root.open ? 1 : 0
         visible: opacity > 0
         // `enabled` follows, or an invisible menu keeps taking the taps meant
-        // for the chart underneath it — the same trap §10.8 records for the
+        // for the chart underneath it - the same trap §10.8 records for the
         // chart hidden behind the list view.
         enabled: root.open
 

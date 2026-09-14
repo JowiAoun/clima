@@ -8,7 +8,7 @@
 // scaffolding.
 //
 // Unmistakably is the whole specification. A tasteful empty state in the house
-// colours — a centred glyph, a grey sentence — is exactly what a *finished*
+// colours - a centred glyph, a grey sentence - is exactly what a *finished*
 // screen with no data looks like, and six weeks later somebody files a bug
 // about the map not loading. So this is deliberately off-palette and
 // deliberately ugly: hatched, dash-outlined, and labelled in words.
@@ -16,7 +16,7 @@
 // The hatch is the same one the chart uses for the past, and it means the same
 // thing in both places: there is no data here and that is on purpose.
 //
-// What replaces it is MapLibre Native over a vector basemap — see
+// What replaces it is MapLibre Native over a vector basemap - see
 // docs/03-tech-stack.md, decision D4. Its chrome (the layer legend, the
 // timeline scrubber, the locate button) is not drawn here either, on the
 // grounds that chrome around a placeholder is a mock of a mock.
@@ -78,7 +78,7 @@ Item {
                 anchors.centerIn: parent
             }
 
-            // Struck through — the glyph alone is a map icon, which is exactly
+            // Struck through - the glyph alone is a map icon, which is exactly
             // what a *working* map tab would put on its own button.
             //
             // The stroke overshoots the glyph's box by ten pixels at both ends
@@ -109,8 +109,8 @@ Item {
 
         Text {
             text: qsTr("Nothing on this screen is a map. The radar view is "
-                     + "MapLibre Native over a vector basemap — decision D4 in "
-                     + "docs/03-tech-stack.md — and this panel stands in for it "
+                     + "MapLibre Native over a vector basemap - decision D4 in "
+                     + "docs/03-tech-stack.md - and this panel stands in for it "
                      + "so the shell can be reviewed with all five tabs present.")
             color: Theme.ink.muted
             font.pixelSize: Theme.type.body

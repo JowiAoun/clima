@@ -7,8 +7,8 @@
 // notice being broken. A comment is a request; a failing test is a rule.
 //
 //   1. NOTHING READS THE WALL CLOCK except libclimat/core/clock.cpp.
-//      The whole determinism story rests on this — fixture mode, golden
-//      images, every TTL test in tst_cachestore.cpp — and the way it breaks is
+//      The whole determinism story rests on this - fixture mode, golden
+//      images, every TTL test in tst_cachestore.cpp - and the way it breaks is
 //      not a bad commit but an ordinary one: somebody needs "now", writes
 //      QDateTime::currentDateTime(), and it works. Nothing fails. The golden
 //      image that starts flaking is six weeks away and names a chart.
@@ -20,14 +20,14 @@
 // ---- how the scan handles comments ------------------------------------------
 //
 // Both rules are *about* strings that this codebase writes down in prose all
-// the time — clock.h's header lists every banned spelling, and
+// the time - clock.h's header lists every banned spelling, and
 // tst_networkisolation.cpp names two real weather APIs on purpose. So the
 // scanner strips comments before matching: a line whose first non-space
 // characters are `//`, `/*` or `*` is dropped, and anything from a `//` to the
 // end of a line is dropped.
 //
 // That is a line-based approximation rather than a parser, and its one blind
-// spot is a statement beginning with a dereference — `*out = ...`. It is
+// spot is a statement beginning with a dereference - `*out = ...`. It is
 // documented rather than fixed because the alternative is a C++ lexer in a
 // test, and because a real violation on such a line would still be caught by
 // review, which is more than the rule had before.
@@ -153,7 +153,7 @@ void TestSourceRules::nothingReadsTheWallClock()
                     { QStringLiteral("*.cpp"), QStringLiteral("*.h"), QStringLiteral("*.qml"),
                       QStringLiteral("*.js") });
 
-    QVERIFY2(files.size() > 50, "the source scan found almost nothing — CLIMAT_SOURCE_DIR is wrong");
+    QVERIFY2(files.size() > 50, "the source scan found almost nothing - CLIMAT_SOURCE_DIR is wrong");
 
     // clock.cpp is the mechanism. It is the one file allowed to ask the
     // operating system what time it is, and everything else asks it.
@@ -210,7 +210,7 @@ void TestSourceRules::theScannerActuallyFindsThings()
 
     const QList<Violation> found =
         scan(files, { QRegularExpression(QStringLiteral(R"(namespace climat)")) }, {});
-    QVERIFY2(!found.isEmpty(), "the source scanner matched nothing at all — it is broken");
+    QVERIFY2(!found.isEmpty(), "the source scanner matched nothing at all - it is broken");
 
     // And comment stripping works, which is what keeps the two rules above from
     // failing on the paragraphs that describe them.

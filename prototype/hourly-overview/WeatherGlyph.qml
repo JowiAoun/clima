@@ -4,7 +4,7 @@
 //
 // Deliberately drawn rather than shipped as assets: it keeps the prototype a
 // single `qml` invocation with no asset pipeline. Production swaps these for
-// Meteocons (MIT) converted to Qt Quick Shapes via svgtoqml — decision D10.
+// Meteocons (MIT) converted to Qt Quick Shapes via svgtoqml - decision D10.
 import QtQuick
 import QtQuick.Shapes
 import "theme.js" as Theme
@@ -41,7 +41,7 @@ Item {
         //
         // This was a flat circle of `sunGlyphWarm` at 16 %, 1.28x the sun's
         // diameter. A flat circle has an edge you can trace, which is §10.1's
-        // test for a stacked wash rather than a glow — and at the 26 px this
+        // test for a stacked wash rather than a glow - and at the 26 px this
         // glyph is normally drawn at, the edge is a couple of pixels and nobody
         // ever saw it. Staged at 72 px on the current-conditions card it is an
         // unmistakable hard-rimmed ring around the sun.

@@ -4,7 +4,7 @@
 # shellcheck shell=bash
 #
 # Finds a Qt 6 and describes it to whoever asked. Source this; do not run it.
-# There is no shebang and no execute bit on purpose — the whole point is to put
+# There is no shebang and no execute bit on purpose - the whole point is to put
 # variables into the caller's environment, which a subprocess cannot do.
 #
 #   source scripts/qt-env.sh
@@ -18,7 +18,7 @@
 # After a successful call:
 #
 #   CLIMAT_QML_BIN            the `qml` runtime, absolute
-#   CLIMAT_QT_PREFIX          qtbase's prefix — the first CMAKE_PREFIX_PATH entry
+#   CLIMAT_QT_PREFIX          qtbase's prefix - the first CMAKE_PREFIX_PATH entry
 #   CLIMAT_QT_QML_PREFIX      qtdeclarative's prefix, which on Nix is a different
 #                            store path and therefore a second prefix entry
 #   QML_IMPORT_PATH          \
@@ -36,7 +36,7 @@
 # two copies of "which Qt is this machine using" is one copy too many.
 
 # What to tell a user who has no Qt 6. The caller prints it, because only the
-# caller knows whether a missing Qt is fatal — inside `nix develop` it is a bug,
+# caller knows whether a missing Qt is fatal - inside `nix develop` it is a bug,
 # in a bare terminal it is a Tuesday.
 climat_qt_env_hint() {
     cat <<'EOF'
@@ -94,7 +94,7 @@ _climat_qt_prefix_from_qmake() {
     return 1
 }
 
-# No qmake6 — so work backwards from the answer. "The prefix" is not a property
+# No qmake6 - so work backwards from the answer. "The prefix" is not a property
 # of the filesystem layout, it is whatever directory CMake can find
 # Qt6Config.cmake beneath, so look for that file rather than guessing at how
 # many `lib/x86_64-linux-gnu` levels to strip off.
@@ -145,13 +145,13 @@ climat_qt_env() {
         # Scoped to Nix-store Qt deliberately: a distro or Flatpak Qt has a
         # consistent GTK stack, so it should keep gtk3 and the desktop
         # integration that comes with it. The real app gets font/dark-mode/dialog
-        # integration through portals instead — see docs/04-architecture.md §4.9.
+        # integration through portals instead - see docs/04-architecture.md §4.9.
         export QT_QPA_PLATFORMTHEME="${QT_QPA_PLATFORMTHEME:-generic}"
 
         # Nix splits Qt across one derivation per module, so there is no single
         # prefix with all of Qt6Config.cmake, Qt6QmlConfig.cmake and friends
         # under it. A CMake configure needs both of these on CMAKE_PREFIX_PATH.
-        # Empty when ldd told us nothing — an empty prefix is honest, a wrong one
+        # Empty when ldd told us nothing - an empty prefix is honest, a wrong one
         # sends CMake somewhere plausible and wrong.
         export CLIMAT_QT_PREFIX="${CLIMAT_QT_PREFIX:-$qtbase}"
         export CLIMAT_QT_QML_PREFIX="${CLIMAT_QT_QML_PREFIX:-$qtd}"
@@ -173,7 +173,7 @@ climat_qt_env() {
     fi
 
     # Without this, Qt decides stderr has no console and silently swallows QML
-    # errors — the app comes up blank and says nothing about why.
+    # errors - the app comes up blank and says nothing about why.
     export QT_FORCE_STDERR_LOGGING="${QT_FORCE_STDERR_LOGGING:-1}"
 
     return 0

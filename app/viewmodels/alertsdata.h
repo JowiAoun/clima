@@ -28,7 +28,7 @@
 // alert, it cannot remove it from the sheet, and it lapses the moment the
 // issuer says something worse.
 //
-//   the key      Alert::identityKeys — the hazard, not the message. NWS re-sends
+//   the key      Alert::identityKeys - the hazard, not the message. NWS re-sends
 //                an alert in full on every update under a new id, and 24 of the
 //                25 alerts in force in California on the recording afternoon
 //                were updates. Keyed by message id, a dismissal would come
@@ -54,7 +54,7 @@
 // WHAT IS WORTH INTERRUPTING SOMEBODY FOR
 //
 // A notification goes out for a hazard the reader has not been told about, and
-// only while the window is hidden — the banner is already on the screen
+// only while the window is hidden - the banner is already on the screen
 // otherwise, and a desktop notification for something two centimetres away is
 // noise. `announced` carries every one, so the policy is testable without a
 // desktop; app/platform/notifier.h carries it to one.
@@ -72,12 +72,12 @@
 //
 //     visible and focused      3 min
 //     visible, not focused    10 min
-//     hidden                  stopped — unless notifications are on
+//     hidden                  stopped - unless notifications are on
 //     hidden, notifying       15 min
 //     metered                 15 min
 //
-// The fourth line is §4.5's own exception — "no background polling while the
-// window is hidden *unless the user enabled alert notifications*" — and it is
+// The fourth line is §4.5's own exception - "no background polling while the
+// window is hidden *unless the user enabled alert notifications*" - and it is
 // what makes the notification worth having. A warning that only arrives while
 // the reader is already looking at the banner is not a warning, and stopping
 // the poll for a window somebody asked to be interrupted from would be
@@ -86,8 +86,8 @@
 //
 // The plan estimated ~264 KB/day. That assumed both services revalidate, and
 // only one does: api.weather.gov sends an ETag and most of its polls come back
-// 304, while api.weather.gc.ca sends no validator at all — no ETag, no
-// Last-Modified, no Cache-Control — so every Canadian poll is a full ~10 kB.
+// 304, while api.weather.gc.ca sends no validator at all - no ETag, no
+// Last-Modified, no Cache-Control - so every Canadian poll is a full ~10 kB.
 // Verified, and recorded in tests/fixtures/alerts/README.md.
 //
 // A day of uninterrupted foreground polling in Canada would therefore be nearer
@@ -129,7 +129,7 @@ class AlertsData : public QObject
     Q_PROPERTY(QVariantList list READ list NOTIFY changed)
     Q_PROPERTY(int count READ count NOTIFY changed)
 
-    // The one the banner shows. Empty when there is nothing to show — a banner
+    // The one the banner shows. Empty when there is nothing to show - a banner
     // binds `visible: Alerts.count > 0` rather than testing this.
     Q_PROPERTY(QVariantMap top READ top NOTIFY changed)
 
@@ -144,13 +144,13 @@ class AlertsData : public QObject
     Q_PROPERTY(bool complete READ isComplete NOTIFY changed)
 
     // Past the issuer's own refresh deadline AND the last poll failed. This is
-    // the "last confirmed 14:05" state — never silently keep an alert, never
+    // the "last confirmed 14:05" state - never silently keep an alert, never
     // silently drop it.
     Q_PROPERTY(bool unconfirmed READ isUnconfirmed NOTIFY changed)
     Q_PROPERTY(QString confirmedLabel READ confirmedLabel NOTIFY changed)
 
     // Whether this place has alert coverage at all. False hides the feature
-    // outright rather than showing an empty one — §4.4.
+    // outright rather than showing an empty one - §4.4.
     Q_PROPERTY(bool available READ isAvailable NOTIFY changed)
 
     // Comma-joined ids of the services that answered, for the sheet's footer.
@@ -226,7 +226,7 @@ Q_SIGNALS:
     void changed();
 
     // One per hazard actually announced, with the grade it was announced at.
-    // The policy above, made observable — tst_alertsdata asserts against this
+    // The policy above, made observable - tst_alertsdata asserts against this
     // and needs no session bus to do it.
     void announced(const QString &key, const QString &severityKey);
 
@@ -249,7 +249,7 @@ private:
 
     // What `alertNotificationsChanged` runs. A named member rather than the
     // lambda this used to be, because the connection is a Qt::UniqueConnection
-    // and Qt only honours that for a pointer to a member function — with a
+    // and Qt only honours that for a pointer to a member function - with a
     // functor it asserts, which aborted every Debug build the moment
     // setSettings() ran. See the connect in setSettings().
     void applyNotificationPreference();
@@ -261,7 +261,7 @@ private:
 
     // Takes one down, or all of them. Both emit `withdrawn`, so the half of
     // the policy that removes a notification is as observable as the half that
-    // posts one — without either of them needing a desktop.
+    // posts one - without either of them needing a desktop.
     void withdraw(const QString &key);
     void takeDownEverythingPosted();
 
@@ -293,7 +293,7 @@ private:
 
     // Every minute, whatever the poll interval is. This is the timer that makes
     // an alert leave the screen when its hazard ends rather than when the next
-    // payload happens to arrive — a Heat Advisory that ends at 23:00 must be
+    // payload happens to arrive - a Heat Advisory that ends at 23:00 must be
     // gone at 23:00, not at 23:09.
     QTimer m_tick;
 
@@ -305,7 +305,7 @@ private:
 
     // What one hazard's announcement remembers. Held against EVERY key the
     // hazard answers to, so an update that leads with a new message id still
-    // finds it — NWS re-sends under a new id and carries only the id it
+    // finds it - NWS re-sends under a new id and carries only the id it
     // replaces, so the keys form a chain one hop long and a record kept
     // against a single key goes stale after two.
     struct Announcement {
@@ -325,8 +325,8 @@ private:
     QHash<QString, Announcement> m_announced;
 
     // And which of those are on the screen right now, which is not the same
-    // list. Showing the window takes the notifications down — the banner is
-    // the better copy of the same news — but it must NOT forget that the
+    // list. Showing the window takes the notifications down - the banner is
+    // the better copy of the same news - but it must NOT forget that the
     // reader has been told, or hiding the window again would announce
     // everything a second time. m_announced is the memory; this is the state.
     QSet<QString> m_posted;

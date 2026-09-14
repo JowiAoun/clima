@@ -13,8 +13,8 @@
 # which is the one thing a Debian or Fedora build environment does not have.
 #
 # Qt Test arrives with the Qt that is already required, and it happens to be the
-# right shape anyway. Everything below is asynchronous — a network client, a
-# signal, a future — and QSignalSpy and QTest::qWaitFor are what those are
+# right shape anyway. Everything below is asynchronous - a network client, a
+# signal, a future - and QSignalSpy and QTest::qWaitFor are what those are
 # tested with.
 #
 # ---- the tests link libclimat and Qt Test, and that is the whole list --------
@@ -28,7 +28,7 @@
 # ---- shared test support ----------------------------------------------------
 #
 # A loopback HTTP server and the proxy factory that makes reaching anything else
-# impossible. Both are GPL-3.0-or-later like everything outside libclimat/ —
+# impossible. Both are GPL-3.0-or-later like everything outside libclimat/ -
 # tests are not part of the reusable engine.
 add_library(climat_testsupport STATIC
     support/httpstub.h
@@ -46,7 +46,7 @@ climat_forbid_gui(climat_testsupport)
 # ---- one function, because every test wants the same five lines --------------
 #
 # CLIMAT_SOURCE_DIR is the repository root, handed to the tests that read the
-# tree — tst_sourcerules.cpp scans for wall-clock reads and for hostnames. A
+# tree - tst_sourcerules.cpp scans for wall-clock reads and for hostnames. A
 # test that computed the path from its own binary location would be a test that
 # breaks the day the build directory moves.
 function(climat_add_test name)
@@ -101,8 +101,8 @@ climat_add_test(tst_wiresnapshot)
 # ---- the tiles ---------------------------------------------------------------
 #
 # Registered by hand rather than through climat_add_test(), for two reasons that
-# both come from the subject. It links `climatwidgetsqml` — the widget host's QML
-# module — rather than libclimat, because `Wx` is what every number a tile prints
+# both come from the subject. It links `climatwidgetsqml` - the widget host's QML
+# module - rather than libclimat, because `Wx` is what every number a tile prints
 # goes through. And climat_forbid_gui() is deliberately not applied: that guard
 # enforces libclimat's own promise, and this is a test of a thing that draws.
 #
@@ -119,7 +119,7 @@ if(TARGET climatwidgetsqml)
 
     # TZ=UTC is load-bearing here rather than hygienic. Half of what this file
     # asserts is that an instant is read in the zone its own offset names and
-    # NOT converted into the reader's — which is invisible on a machine whose
+    # NOT converted into the reader's - which is invisible on a machine whose
     # clock happens to agree with the fixture.
     set_tests_properties(tst_widgets PROPERTIES
         ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_FORCE_STDERR_LOGGING=1;LC_ALL=C.UTF-8;TZ=UTC"
@@ -158,7 +158,7 @@ set_tests_properties(tst_cli PROPERTIES
 # Needs a bus that is not the developer's, because the test OWNS the portal's
 # well-known name. dbus-run-session starts one that lives exactly as long as
 # the test. Where it is not installed the test is not registered, and the
-# configure says so — a test that cannot run has not passed, and a runner
+# configure says so - a test that cannot run has not passed, and a runner
 # without dbus-daemon has said nothing about this code.
 #
 # Linked against Qt D-Bus directly as well as through libclimat, because the
@@ -201,7 +201,7 @@ endif()
 # org.freedesktop.portal.Desktop and org.freedesktop.Notifications on a bus
 # dbus-run-session started for it. It links climatqml because Notifier is
 # compiled into the app's module, so climat_forbid_gui() is deliberately not
-# applied — the thing under test lives in a binary that draws.
+# applied - the thing under test lives in a binary that draws.
 if(TARGET Qt6::DBus AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_executable(tst_notifier tst_notifier.cpp)
 
@@ -259,7 +259,7 @@ endif()
 # test whose subject is a VIEW MODEL and not the engine. `Detail` is
 # app/viewmodels/conditionsdata.h: GPL-3.0-or-later, not MPL-2.0, read by QML and
 # therefore allowed to depend on it. climat_forbid_gui() is deliberately not
-# applied — it would refuse the link, and refusing it here would be enforcing
+# applied - it would refuse the link, and refusing it here would be enforcing
 # libclimat's promise against something that never made it.
 #
 # The promise itself is untouched. `engine_has_no_gui` below asks the question of
@@ -291,7 +291,7 @@ set_tests_properties(tst_conditionsdata PROPERTIES
 #
 # TZ is pinned for the same reason the golden run pins it. The window is
 # selected by comparing a local date against a local date, and the fixture's
-# zone is Toronto's — a runner in UTC and a runner in Tokyo disagreeing about
+# zone is Toronto's - a runner in UTC and a runner in Tokyo disagreeing about
 # which hours are "Friday" is exactly the failure this asserts is impossible.
 add_executable(tst_forecastdata tst_forecastdata.cpp)
 
@@ -310,7 +310,7 @@ set_tests_properties(tst_forecastdata PROPERTIES
 # ---- the other two that link app/ -------------------------------------------
 #
 # `TimeFormat`'s five spellings and `Units`' two presets. Here rather than
-# through climat_add_test() for tst_conditionsdata's reason — their subject is
+# through climat_add_test() for tst_conditionsdata's reason - their subject is
 # app/ and climat_forbid_gui() would refuse the link.
 #
 # LC_ALL matters more to the first of these than anywhere else in this file. Half
@@ -342,7 +342,7 @@ endforeach()
 #
 # TZ is load-bearing rather than hygienic, as it is for tst_widgets. Half of
 # what this file asserts is which words a banner puts under a headline, and one
-# of them is a weekday — "Until Fri 11:00 PM" for a hazard ending on a different
+# of them is a weekday - "Until Fri 11:00 PM" for a hazard ending on a different
 # day from the one the reader is in. Which day that is depends on the zone the
 # instant is read in, so a runner in Tokyo would disagree with a runner in
 # Toronto about a string neither of them chose.
@@ -363,7 +363,7 @@ set_tests_properties(tst_alertsdata PROPERTIES
 # ---- the golden images' canary ----------------------------------------------
 #
 # Links climatqml for AppFont and therefore links Qt6::Gui, which is why it is
-# registered here rather than through climat_add_test() — that function applies
+# registered here rather than through climat_add_test() - that function applies
 # climat_forbid_gui() and would refuse the link. Measuring text without a GUI is
 # not a thing that can be arranged.
 #
@@ -381,7 +381,7 @@ target_compile_definitions(tst_environment PRIVATE
 add_test(NAME tst_environment COMMAND tst_environment)
 
 # Labelled `golden`, so that `ctest -LE golden` drops the canary along with the
-# images it guards. That is not tidiness — it was a real failure. Built against
+# images it guards. That is not tidiness - it was a real failure. Built against
 # Debian 13's Qt 6.8.2 the suite is 21/22, and the one failure is this test
 # correctly reporting that FreeType there rounds line heights differently:
 #
@@ -389,7 +389,7 @@ add_test(NAME tst_environment COMMAND tst_environment)
 #
 # One sixty-fourth of a pixel, at five of the eight sizes, with every advance
 # identical. Every golden image would differ and not one of those differences
-# would be a defect — which is exactly what this test exists to say. But the
+# would be a defect - which is exactly what this test exists to say. But the
 # packager's build deliberately runs a *different* Qt, so asking it whether the
 # machine matches the one the images were recorded on is asking a question with
 # a known answer and calling it a failure.
@@ -405,8 +405,8 @@ set_tests_properties(tst_environment PROPERTIES
 # this repository has ever had of the part of it that users look at.
 #
 # It links both QML modules and both plugins. `Climat` for the components and the
-# Theme singleton; `Climat.Gallery` for gallery.js — the catalogue of everything
-# in the tree, which tst_specimen walks — and contrast.js, which is where WCAG's
+# Theme singleton; `Climat.Gallery` for gallery.js - the catalogue of everything
+# in the tree, which tst_specimen walks - and contrast.js, which is where WCAG's
 # arithmetic lives. Linking the gallery module is why gallery/ builds a static
 # library with a thin executable on top rather than baking its module into the
 # binary: a module inside an executable is a module only that executable can
@@ -421,7 +421,7 @@ add_subdirectory(qml)
 # cmake/ClimatEngineGuard.cmake refuses at configure time if libclimat's target
 # graph reaches Qt6::Gui. This reads the actual dynamic dependencies of a linked
 # executable, which is the same question asked of the artefact rather than of
-# the model — see the script for why both exist.
+# the model - see the script for why both exist.
 #
 # It is pointed at tst_httpclient because that binary links the widest part of
 # the engine: the network client, the cache store and the clock, plus Qt Test.
@@ -436,7 +436,7 @@ add_subdirectory(qml)
 #
 # DEPENDS tst_environment so that ctest runs the canary first. When the machine's
 # text rasterisation has moved, every image differs and none of those
-# differences is a defect — having the one legible failure appear above thirty
+# differences is a defect - having the one legible failure appear above thirty
 # image diffs is the entire reason the canary exists.
 #
 # LABELS so that `ctest -LE slow` skips it: a minute of rendering is the right
@@ -458,7 +458,7 @@ endif()
 #
 # R2 and R3 from docs/08-risks.md, asked of the artefact. cmake/
 # ClimatLicenceGuard.cmake asks the same two questions of the build's own model
-# at configure time and cannot see a module that arrives without being named —
+# at configure time and cannot see a module that arrives without being named -
 # through a QML import, or through some future component's dependency graph.
 #
 # Registered as a ctest rather than only as a CI job because it is a property of
@@ -532,7 +532,7 @@ endif()
 #
 # Registered here rather than in widgets/CMakeLists.txt because enable_testing()
 # runs from the top-level directory after that one is entered, so an add_test()
-# there registers nothing at all — a guard that is silently absent from a green
+# there registers nothing at all - a guard that is silently absent from a green
 # ctest run.
 if(TARGET climat-widget)
     find_program(CLIMAT_NM NAMES nm llvm-nm)

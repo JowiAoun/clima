@@ -31,7 +31,7 @@ QDateTime instant(const QJsonValue &value)
 }
 
 // CAP 1.2, sent verbatim by this service, so these are transcriptions rather
-// than mappings. The default is Unknown in each case — a value nobody here has
+// than mappings. The default is Unknown in each case - a value nobody here has
 // seen is not a value to guess at.
 AlertSeverity severityFrom(const QString &value)
 {
@@ -147,13 +147,13 @@ QFuture<Result<AlertSet>> NwsAlertProvider::fetchAlerts(const AlertRequest &requ
     http.kind       = DataKind::Alerts;
     http.coordinate = request.coord;
 
-    // point=<lat>,<lon> — latitude first, one parameter. The opposite order to
+    // point=<lat>,<lon> - latitude first, one parameter. The opposite order to
     // ECCC's bbox, which is why the spelling is a CoordinateForm rather than
     // something each provider assembles.
     http.coordinateForm      = CoordinateForm::LatitudeCommaLongitude;
     http.coordinateParameter = QStringLiteral("point");
 
-    // Unlike GeoMet, this service sends an ETag — verified — so the conditional
+    // Unlike GeoMet, this service sends an ETag - verified - so the conditional
     // request HttpClient adds is real here and most polls come back 304.
     const QString key = RequestKey::forRequest(http).toString();
 
@@ -194,7 +194,7 @@ QFuture<Result<AlertSet>> NwsAlertProvider::fetchAlerts(const AlertRequest &requ
         if (!result.hasValue()) {
             const Error transportError = result.error();
 
-            // "Parameter \"point\" is invalid: out of bounds" — the service
+            // "Parameter \"point\" is invalid: out of bounds" - the service
             // declining the question rather than failing to answer it. The
             // header has the argument for why this becomes Unsupported and what
             // that costs.
@@ -277,7 +277,7 @@ Result<AlertSet> NwsAlertProvider::parse(const QByteArray &body, const QDateTime
     const QJsonObject root = document.object();
 
     // The problem+json shape. Reached when a body is parsed outside the transport
-    // — a fixture, or the tools/provider-probe path — rather than on the live
+    // - a fixture, or the tools/provider-probe path - rather than on the live
     // error path, which HttpClient has already turned into an Error.
     if (root.contains(QStringLiteral("detail")) && !root.contains(QStringLiteral("features"))) {
         const int status = root.value(QStringLiteral("status")).toInt();
@@ -325,7 +325,7 @@ Result<AlertSet> NwsAlertProvider::parse(const QByteArray &body, const QDateTime
             messageTypeFrom(properties.value(QStringLiteral("messageType")).toString());
 
         // The issuer's own grading, spelled their way. For NWS that is the CAP
-        // word itself, which makes issuerLabel look redundant here — it is not,
+        // word itself, which makes issuerLabel look redundant here - it is not,
         // it is the field the sheet renders, and it has to be populated by every
         // provider or the sheet renders a blank for one of them.
         alert.issuerLabel = properties.value(QStringLiteral("severity")).toString();

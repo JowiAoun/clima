@@ -15,7 +15,7 @@ Item {
     width: implicitWidth
     height: implicitHeight
     // Reaching the end of the strip fades the pager back rather than moving it,
-    // so this is `tint` and not `move` — the button changes appearance in place.
+    // so this is `tint` and not `move` - the button changes appearance in place.
     // The caller may override this binding (the day strip fades its pagers all
     // the way out rather than to 0.32); the Behavior still governs whatever the
     // property ends up bound to.
@@ -66,7 +66,7 @@ Item {
     // it floats over a chart and a wider one would cover more of the series;
     // what grows is the area around it, into the margin the pager already sits
     // in. Declared after the Shape so it takes the taps, which is the only
-    // ordering that works — see TouchTarget.
+    // ordering that works - see TouchTarget.
     // The hover it carries is the plate's too, rather than a second handler
     // over the same control: with two, the pointing hand appeared 11 px before
     // the plate lit up.

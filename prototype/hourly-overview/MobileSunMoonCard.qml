@@ -3,8 +3,8 @@
 // Sun & Moon: the two things overhead, and how far through their day each is.
 //
 // The desktop gives these a card each in the twelve-card grid. The phone puts
-// them together because they are one question — what is the sky doing over the
-// next few hours — and because at 390 px two full DetailSunCards is a screen
+// them together because they are one question - what is the sky doing over the
+// next few hours - and because at 390 px two full DetailSunCards is a screen
 // and a half of scrolling for four clock times.
 //
 // The top row is the pair of readings that are *not* times: how strong the sun

@@ -3,7 +3,7 @@
 // The phone and tablet shell: five destinations under a bottom nav.
 //
 // The desktop answer to "what is the weather doing" is one tall scrolling page
-// — WeatherPage — because a 1340 px window can afford to put the hero, the
+// - WeatherPage - because a 1340 px window can afford to put the hero, the
 // hourly chart and twelve detail cards in the same column and let the reader
 // scroll. A phone cannot: the same page at 390 px is roughly eight screens
 // deep, and the fourth of them is unreachable in any sense that matters.
@@ -21,7 +21,7 @@
 // the component at rest position zero, and the whole content area of a phone
 // is the worst possible place to break it: a reader who tapped "Hourly" is
 // waiting on the one thing they asked for. The pill is what has to move,
-// because the pill is what changed — it is the same object in a new place, and
+// because the pill is what changed - it is the same object in a new place, and
 // watching it travel is what tells you the bar has five positions and you are
 // now at the second. The page underneath is not a transition, it is a
 // destination.
@@ -39,7 +39,7 @@ Item {
     // derived from this item's width, and that is the whole reason it is a
     // property: `--viewport mobile --size 900x844` means review the phone at
     // 900 px, and a shell that re-derived the class from its own width would
-    // give the reviewer a tablet instead. Android pins it too — see Main.
+    // give the reviewer a tablet instead. Android pins it too - see Main.
     property string viewportClass: "mobile"
 
     readonly property string navStyle:
@@ -59,7 +59,7 @@ Item {
     //
     // The other three are the shell's to remember because nothing else holds
     // them; the day the chart is of belongs to `Data`, which every strip in
-    // both shells reads and writes — see DayStrip, which says why that number
+    // both shells reads and writes - see DayStrip, which says why that number
     // cannot be kept in two places. This is the entry point `--day` and
     // `--poke day` write to and nothing else, so it pushes and reads back the
     // same way a strip does, and the clamped answer wins.
@@ -82,7 +82,7 @@ Item {
     // Ambient motion, forwarded the same way. The precipitation field behind
     // the hourly chart is the only thing under this shell that moves when
     // nothing has changed, and `--grab` clears this so a headless frame is the
-    // same frame every run — frozen it still draws rain, because precip.js
+    // same frame every run - frozen it still draws rain, because precip.js
     // seeds every drop from its hour.
     //
     // It travels with the four above rather than being reached for directly
@@ -93,7 +93,7 @@ Item {
 
     // The place picker, opened by the location bar's chevron and by
     // `--poke picker=1`. On the shell rather than on the page because the sheet
-    // has to cover the nav bar too — see the PlacePicker at the bottom of this
+    // has to cover the nav bar too - see the PlacePicker at the bottom of this
     // file.
     property bool pickerOpen: false
     onPickerOpenChanged: picker.open = pickerOpen
@@ -120,7 +120,7 @@ Item {
     // this shell that cannot be asserted from the outside and is the easiest
     // thing to break: `source` is bound to the tab and to nothing else, and a
     // geometry change that reached it would rebuild the page, replay every
-    // card's entrance and throw away the reader's scroll position — for the
+    // card's entrance and throw away the reader's scroll position - for the
     // crime of rotating the device. See tests/qml/tst_shell.qml.
     readonly property Item currentPage: pageLoader.item as Item
 
@@ -150,7 +150,7 @@ Item {
         }
 
         // The rail swap and every resize. `pushLayout` is a push and not a
-        // binding — see below — so nothing arrives at the page unless something
+        // binding - see below - so nothing arrives at the page unless something
         // calls it, and a tablet turned on its side is exactly the case where
         // the column count and both insets all change at once.
         onWidthChanged: root.pushLayout(item)
@@ -162,7 +162,7 @@ Item {
 
     // ---- shell state, page state -------------------------------------------
     // Values are *pushed* down and requests come back up as signals. The
-    // obvious alternative — Qt.binding() from the shell into the page — was
+    // obvious alternative - Qt.binding() from the shell into the page - was
     // written first and is quietly broken: the moment the reader touches the
     // control the page assigns its own property, which destroys the binding,
     // and every later push from the shell silently stops arriving. A poke that
@@ -193,12 +193,12 @@ Item {
     // A function rather than three `Qt.binding()`s, and the comment above says
     // why: a binding pushed into a page is destroyed the first time the page
     // assigns the property itself, and every later push silently stops. The
-    // banner makes that failure reachable in a way the nav never did — the nav's
+    // banner makes that failure reachable in a way the nav never did - the nav's
     // height is fixed, and the banner's changes when it is dismissed, when the
     // severity changes, and when a second alert arrives.
     //
     // Called from onLoaded, from every one of those changes, and from the
-    // page's own resize — which is what a rotation is, and where all three of
+    // page's own resize - which is what a rotation is, and where all three of
     // these change at once.
     function pushLayout(page) {
         if (page === null)
@@ -240,7 +240,7 @@ Item {
     // a navigation stack to pop. Any tab but the first goes to the first; on
     // the first the event is left unaccepted, which closes the app. That is the
     // convention every Android launcher-facing screen follows, and the
-    // alternative — swallowing it on the home screen — leaves a reader holding
+    // alternative - swallowing it on the home screen - leaves a reader holding
     // a gesture that does nothing at all.
     //
     // A sheet outranks a tab: the picker and the alert sheet cover the nav bar,
@@ -250,7 +250,7 @@ Item {
     // which is the Qt 5 spelling: it is deprecated, and it only ever fired for
     // the hardware key that handsets stopped shipping years ago.
     //
-    // The PRESS, and that is not arbitrary — it was `onReleased` first, and the
+    // The PRESS, and that is not arbitrary - it was `onReleased` first, and the
     // picker's own `Keys.onEscapePressed` accepts the press and leaves the
     // release unaccepted. So one tap of Escape closed the sheet on the way down
     // and changed the tab on the way up: two navigations from one key, and the
@@ -276,7 +276,7 @@ Item {
     //
     // HERE, on the shell, and not on any of the five pages. MobileShell destroys
     // and rebuilds its page on every tab change, so a per-page banner would be
-    // constructed five times in a session — re-running its reveal each time,
+    // constructed five times in a session - re-running its reveal each time,
     // and losing a dismissal on every tap of the nav bar. It also has to be
     // visible from all five destinations, which a page cannot arrange.
     //
@@ -305,8 +305,8 @@ Item {
             root.pickerOpen = open
             root.push(pageLoader.item)
             // Focus comes back when the sheet goes. The picker takes it on the
-            // way in — its search field calls forceActiveFocus() so you can
-            // type a place name immediately — and without this it keeps it on
+            // way in - its search field calls forceActiveFocus() so you can
+            // type a place name immediately - and without this it keeps it on
             // the way out, on a field nobody can see any more. Every key the
             // shell handles is dead from then on, which on Android is the back
             // gesture.
@@ -322,7 +322,7 @@ Item {
         onOpenChanged: if (!open) root.forceActiveFocus()
     }
 
-    // Bottom bar or left rail, and one component either way — see ShellNav for
+    // Bottom bar or left rail, and one component either way - see ShellNav for
     // why that is not two files. Placed with numbers rather than anchors so
     // that turning the device moves it instead of leaving it anchored to an
     // edge the other arrangement does not use.

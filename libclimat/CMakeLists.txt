@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Jowi Aoun
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# The engine. Qt Core, Qt Network, Qt Sql — and provably nothing that draws.
+# The engine. Qt Core, Qt Network, Qt Sql - and provably nothing that draws.
 # Two optional Core-only modules join them below: Qt Positioning and Qt D-Bus,
 # the two backends behind "use my location".
 #
@@ -16,7 +16,7 @@
 #
 # Core, Network, Sql. Not Gui, not Qml, not Quick, and climat_forbid_gui() at the
 # bottom of this file makes that a configure-time error rather than a rule in a
-# document — see cmake/ClimatEngineGuard.cmake for why the promise is worth a
+# document - see cmake/ClimatEngineGuard.cmake for why the promise is worth a
 # hundred lines of CMake to keep.
 #
 # ---- STATIC, and the target name --------------------------------------------
@@ -119,7 +119,7 @@ add_library(libclimat STATIC
     net/validatorstore.cpp
 
     # How a forecast leaves this process. It is here rather than in daemon/
-    # because both ends of the wire need it and one of them is not the daemon —
+    # because both ends of the wire need it and one of them is not the daemon -
     # and because it is pure data with no I/O and no clock, which is what lets
     # a test build a snapshot out of a recorded fixture and compare the bytes.
     wire/snapshot.h
@@ -135,7 +135,7 @@ set_target_properties(libclimat PROPERTIES
 #
 # The User-Agent's version comes from PROJECT_VERSION, the same variable
 # app/climatconfig.h.in reads, so the string a weather service sees and the
-# string `climat --version` prints cannot disagree. See climatidentity.h.in — this
+# string `climat --version` prints cannot disagree. See climatidentity.h.in - this
 # is a compliance string, not a nicety.
 configure_file(climatidentity.h.in climatidentity.h @ONLY)
 
@@ -149,7 +149,7 @@ configure_file(climatidentity.h.in climatidentity.h @ONLY)
 # images depend on, and offline, which is the app's headline property.
 #
 # The data is NOT ours. It is GeoNames, CC-BY 4.0, and REUSE.toml declares it
-# with GeoNames as the copyright holder rather than with ours — the same
+# with GeoNames as the copyright holder rather than with ours - the same
 # distinction the bundled typeface gets in app/CMakeLists.txt, and for the same
 # reason. tools/geonames/ is the packer, and its output is committed so that a
 # build never needs a network.
@@ -169,7 +169,7 @@ qt_add_resources(libclimat "climat_geonames"
 # Three recorded afternoons, compiled in. `--fixture toronto` has to work from
 # an installed binary on a machine with no source tree, because the whole point
 # of it is that a reviewer, a CI runner and a golden-image test all see the same
-# pixels — and "check out the repository first" is not a property those three
+# pixels - and "check out the repository first" is not a property those three
 # have in common.
 #
 # The data is Open-Meteo's, under CC BY 4.0, and REUSE.toml declares it that way
@@ -180,7 +180,7 @@ qt_add_resources(libclimat "climat_geonames"
 # BASE strips the source path so a fixture lands at `:/climat/fixtures/<name>/`.
 # fixtureprovider.cpp lists the catalogue by running QDir over that prefix, so
 # the directory name IS the fixture name and there is no second list to keep in
-# step — adding a fixture is four lines here and nothing anywhere else.
+# step - adding a fixture is four lines here and nothing anywhere else.
 #
 # 116 kB of JSON before compression, against the <15 MB budget in
 # docs/03-tech-stack.md §3.4.
@@ -205,7 +205,7 @@ qt_add_resources(libclimat "climat_fixtures"
 
 # ---- optional: Qt Positioning -----------------------------------------------
 #
-# "My location" — docs/04-architecture.md §4.9 puts Qt Positioning against
+# "My location" - docs/04-architecture.md §4.9 puts Qt Positioning against
 # GeoClue2 on Linux, Windows Location on Windows and CoreLocation on macOS.
 #
 # The find_package is at the TOP LEVEL and not here, which is worth a note
@@ -213,11 +213,11 @@ qt_add_resources(libclimat "climat_fixtures"
 # imported target created by a find_package in a subdirectory is visible only
 # in that subdirectory and below, and Qt Positioning brings a set of plugin
 # targets with it that Qt's own executable finalizer resolves from *app/* and
-# *gallery/* — sibling directories that would never see them. The build fails
+# *gallery/* - sibling directories that would never see them. The build fails
 # there, naming Qt6::QGeoPositionInfoSourceFactoryGeoclue2Plugin, which is a
 # long way from the line that caused it.
 #
-# Qt6::Positioning links Qt6::Core and nothing else — checked, and it has to
+# Qt6::Positioning links Qt6::Core and nothing else - checked, and it has to
 # be: climat_forbid_gui() at the bottom of this file would refuse the configure
 # otherwise, which is exactly the guard doing its job. The QML bindings that
 # would have pulled in QtQml are a separate Qt6::PositioningQuick target that
@@ -234,7 +234,7 @@ endif()
 # ---- optional: the Location portal, over Qt D-Bus ---------------------------
 #
 # The second backend behind DeviceLocator, and the only one that works from
-# inside a Flatpak — see places/portallocator.h. Qt D-Bus links Qt Core and
+# inside a Flatpak - see places/portallocator.h. Qt D-Bus links Qt Core and
 # nothing else, so climat_forbid_gui() at the bottom of this file still holds,
 # and it is a Linux-only feature by nature: there is no session bus anywhere
 # else. The find_package is at the top level for the reason Positioning's is.
@@ -250,7 +250,7 @@ endif()
 # ---- include paths ----------------------------------------------------------
 #
 # The repository root, so that every include inside the engine reads
-# `#include "libclimat/net/httpclient.h"` — the path the file actually has. The
+# `#include "libclimat/net/httpclient.h"` - the path the file actually has. The
 # alternative, relative includes, means `../../core/clock.h` in a header whose
 # meaning then depends on where the *including* file sits, and a header that
 # moves breaks its consumers rather than itself.
@@ -281,7 +281,7 @@ target_compile_options(libclimat PRIVATE
 # space on one code path and not another.
 #
 # PRIVATE. Neither macro changes a type's layout, so there is no ODR hazard in
-# one translation unit having them and another not — which means they can be
+# one translation unit having them and another not - which means they can be
 # this library's house rules rather than something imposed on every consumer.
 # app/ and the QML module get to make their own decision.
 target_compile_definitions(libclimat PRIVATE

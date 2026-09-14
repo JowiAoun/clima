@@ -4,7 +4,7 @@
 // The alert view model: what is on the screen, what a dismissal means, and how
 // often we ask.
 //
-// tests/tst_alerts.cpp covers the domain type — which of four timestamps ends a
+// tests/tst_alerts.cpp covers the domain type - which of four timestamps ends a
 // hazard, which of two alerts outranks the other. This file covers the layer
 // above it, and the three things that layer decides on its own. None of them is
 // visible in a screenshot and all three fail silently.
@@ -16,7 +16,7 @@
 // that arrived from a cache written yesterday is filtered against today, so
 // nothing here can put an ended warning on the screen because the network went
 // away. The test for it is the one where the payload never changes and the
-// clock does — if rebuild() only ran on `apply()`, a tornado warning would sit
+// clock does - if rebuild() only ran on `apply()`, a tornado warning would sit
 // on the screen until the next successful poll.
 //
 // ============================================================================
@@ -31,7 +31,7 @@
 //
 //   a raise un-dismisses A Moderate acknowledged and then upgraded to Severe
 //                        has to come back at full height. This is the rule that
-//                        makes dismissal safe, and it is one `>` — flip it and
+//                        makes dismissal safe, and it is one `>` - flip it and
 //                        an upgrade to Extreme stays collapsed.
 //
 //   entries are pruned   A stored acknowledgement for a hazard that ended in
@@ -190,7 +190,7 @@ private Q_SLOTS:
 private:
     // The view model is a process-wide singleton with a private constructor, so
     // every test shares one. `init()`/`cleanup()` below put it back to a known
-    // state rather than constructing a new one — see init() for what "known"
+    // state rather than constructing a new one - see init() for what "known"
     // has to include.
     AlertsData  *m_alerts = nullptr;
     FrozenClock  m_clock;
@@ -215,7 +215,7 @@ void TestAlertsData::init()
 
     // Order matters. The stored acknowledgements have to be emptied BEFORE
     // setSettings() reloads them, or a test starts holding the previous test's
-    // dismissals — which passes or fails depending on which order QTest happens
+    // dismissals - which passes or fails depending on which order QTest happens
     // to run the slots in, and that is the worst kind of test to debug.
     Settings::instance()->setAcknowledgedAlerts({});
 
@@ -258,7 +258,7 @@ void TestAlertsData::theWorstAlertLeadsAndTheRestAreCountedBehindIt()
     QCOMPARE(m_alerts->top().value(QStringLiteral("severityKey")).toString(),
              QStringLiteral("extreme"));
 
-    // "+2 more" — everything the banner is not showing.
+    // "+2 more" - everything the banner is not showing.
     QCOMPARE(m_alerts->moreCount(), 2);
 
     // Both spellings of the severity travel with it. `severityKey` indexes
@@ -284,8 +284,8 @@ void TestAlertsData::nothingIsOnTheScreenBeforeAnythingHasBeenApplied()
     QCOMPARE(m_alerts->moreCount(), 0);
     QVERIFY(m_alerts->top().isEmpty());
 
-    // `top` being empty is not what a banner binds to — alertsdata.h says a
-    // banner binds `visible: Alerts.count > 0` — but an empty map rather than a
+    // `top` being empty is not what a banner binds to - alertsdata.h says a
+    // banner binds `visible: Alerts.count > 0` - but an empty map rather than a
     // map of empty strings is what makes that possible.
     QVERIFY(!m_alerts->isAcknowledged());
     QVERIFY(!m_alerts->isUnconfirmed());
@@ -320,7 +320,7 @@ void TestAlertsData::anEndedHazardLeavesTheScreenWithoutANewPayload()
     QCOMPARE(m_alerts->count(), 1);
 
     // The hazard ends at 06:00 on the 7th. Move the clock past it and change
-    // nothing else — no new set, no successful poll, no network at all. This is
+    // nothing else - no new set, no successful poll, no network at all. This is
     // the situation where the app has been open all night and the service has
     // been unreachable since midnight.
     m_clock.setNow(at(7, 6, 1));
@@ -333,7 +333,7 @@ void TestAlertsData::anEndedHazardLeavesTheScreenWithoutANewPayload()
     QCOMPARE(m_alerts->count(), 0);
     QVERIFY(m_alerts->top().isEmpty());
 
-    // And it is still an available place — the coverage did not go away, the
+    // And it is still an available place - the coverage did not go away, the
     // hazard did.
     QVERIFY(m_alerts->isAvailable());
 }
@@ -382,7 +382,7 @@ void TestAlertsData::anActiveHazardIsShownWithTheTimeItEnds()
 
 void TestAlertsData::aModelWithNoClockShowsNothingRatherThanGuessing()
 {
-    // "AND THERE IS NO FALLBACK, deliberately" — alertsdata.h. A fallback to
+    // "AND THERE IS NO FALLBACK, deliberately" - alertsdata.h. A fallback to
     // QDateTime::currentDateTimeUtc() would make a run that forgot to set the
     // clock keep working, look right, and quietly judge a recorded alert
     // against today. An invalid instant instead, which phaseAt() answers Ended
@@ -433,7 +433,7 @@ void TestAlertsData::bothTogetherAreWhatSaysLastConfirmed()
     QVERIFY(m_alerts->isUnconfirmed());
 
     // And the label the sheet prints beside it. `confirmedAt` is the last time
-    // a poll SUCCEEDED, which is not when this set was built — a set served
+    // a poll SUCCEEDED, which is not when this set was built - a set served
     // from cache after a failed refresh keeps the older instant.
     QVERIFY2(m_alerts->confirmedLabel().startsWith(QStringLiteral("Last confirmed")),
              qPrintable(m_alerts->confirmedLabel()));
@@ -474,7 +474,7 @@ void TestAlertsData::acknowledgingCollapsesTheTopAlertAndNothingElse()
     QVERIFY(m_alerts->isAcknowledged());
 
     // Collapsed, NOT removed. It is still the top alert, it is still counted,
-    // and it is still in the sheet — "dismissal is acknowledgement, it is not
+    // and it is still in the sheet - "dismissal is acknowledgement, it is not
     // deletion".
     QCOMPARE(m_alerts->count(), 2);
     QCOMPARE(m_alerts->top().value(QStringLiteral("id")).toString(), QStringLiteral("worst"));
@@ -531,7 +531,7 @@ void TestAlertsData::aDropInSeverityStaysCollapsed()
 
     // Downgraded. The reader has already seen and dismissed something worse, so
     // re-raising for the milder version would be teaching them to dismiss
-    // without reading — which is the behaviour the whole design is avoiding.
+    // without reading - which is the behaviour the whole design is avoiding.
     Alert eased     = heatAdvisory();
     eased.id        = QStringLiteral("urn:oid:siskiyou.001.4");
     eased.severity  = AlertSeverity::Minor;
@@ -577,7 +577,7 @@ void TestAlertsData::anAcknowledgementIsStoredAgainstEveryKeyTheHazardAnswersTo(
 
     QCOMPARE(Settings::instance()->acknowledgedAlerts().size(), 2);
 
-    // The successor carries only the second key — it references the hazard, not
+    // The successor carries only the second key - it references the hazard, not
     // the message we saw. It still matches.
     Alert successor        = heatAdvisory();
     successor.id           = QStringLiteral("urn:oid:siskiyou.001.6");
@@ -613,9 +613,9 @@ void TestAlertsData::anAcknowledgementSurvivesARestart()
     const QStringList stored = Settings::instance()->acknowledgedAlerts();
     QCOMPARE(stored.size(), 1);
 
-    // Three fields — key, severity, expiry — separated by a unit separator
+    // Three fields - key, severity, expiry - separated by a unit separator
     // rather than by a comma or a pipe, "because the key it has to survive is
-    // an NWS URN — colons, dots and digits — and picking a printable delimiter
+    // an NWS URN - colons, dots and digits - and picking a printable delimiter
     // is picking one that will eventually appear in the data".
     QCOMPARE(stored.constFirst().count(QChar(0x1f)), 2);
 
@@ -634,7 +634,7 @@ void TestAlertsData::anAcknowledgementForAnEndedHazardIsPrunedOnLoad()
     QCOMPARE(Settings::instance()->acknowledgedAlerts().size(), 1);
 
     // Past the hazard's end (06:00 on the 7th). "An entry whose hazard is over
-    // is a trap the next time the same county is warned about the same thing" —
+    // is a trap the next time the same county is warned about the same thing" -
     // without the prune, next August's Heat Advisory for Siskiyou County would
     // arrive already dismissed.
     m_clock.setNow(at(8, 0));
@@ -683,7 +683,7 @@ void TestAlertsData::theStoredKeyMayContainAnythingAUrnCan()
 {
     // The reason the separator is U+001F. An NWS identity key is a URN with
     // colons, dots and digits in it, and any printable delimiter would
-    // eventually split one in half — at which point the stored line has four
+    // eventually split one in half - at which point the stored line has four
     // fields, is skipped as malformed, and the dismissal silently stops working
     // for exactly the alerts that update most often.
     Alert urn        = heatAdvisory();
@@ -738,7 +738,7 @@ void TestAlertsData::theScheduleIsTheOneInTheArchitectureDocument()
 
 void TestAlertsData::aHiddenWindowStopsPollingAltogether()
 {
-    // Not "polls more slowly". Stopped — this is the line the bandwidth
+    // Not "polls more slowly". Stopped - this is the line the bandwidth
     // arithmetic in alertsdata.h rests on, and it is the schedule's most
     // important entry and its least obvious one.
     m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
@@ -777,7 +777,7 @@ void TestAlertsData::aHiddenWindowKeepsPollingWhenItWasAskedToInterrupt()
 {
     // §4.5's own exception, and the thing that makes a notification worth
     // having: a warning that only ever arrives while the reader is already
-    // looking at the banner is not a warning. Fifteen minutes — the slowest
+    // looking at the banner is not a warning. Fifteen minutes - the slowest
     // rate that keeps the feature true.
     m_alerts->apply(setOf({ heatAdvisory() }, at(6, 0)));
 
@@ -797,7 +797,7 @@ void TestAlertsData::showingTheWindowAsksForWhatWasMissed()
 {
     // The other half of "hidden means stopped". Stopping bounds the bandwidth
     // and also means the set on screen is as old as the moment the window was
-    // hidden, so bringing it back has to ask — otherwise a warning issued
+    // hidden, so bringing it back has to ask - otherwise a warning issued
     // while the app sat in the dock is missing from the banner for a further
     // three minutes, which is the one moment the banner is for.
     //
@@ -848,7 +848,7 @@ void TestAlertsData::aPlaceWithNoCoverageIsNotAskedOnShowing()
 // ============================================================================
 // What is worth interrupting somebody for.
 //
-// The POLICY, asserted through `announced` — which is why that signal exists.
+// The POLICY, asserted through `announced` - which is why that signal exists.
 // Whether a notification reaches a desktop is tst_notifier's question and needs
 // a session bus; whether one should be posted at all is this file's, and needs
 // nothing.
@@ -889,7 +889,7 @@ void TestAlertsData::anUpdateAtTheSameGradeIsNotAnnouncedTwice()
 
     QSignalSpy announced(m_alerts, &AlertsData::announced);
 
-    // NWS re-sends an alert in full under a new id on every update — 24 of the
+    // NWS re-sends an alert in full under a new id on every update - 24 of the
     // 25 alerts in force in California on the recording afternoon were
     // updates. Identity is the hazard, so this is not news.
     Alert again = heatAdvisory();
@@ -959,7 +959,7 @@ void TestAlertsData::aRaiseInSeverityIsAnnouncedAgain()
     QSignalSpy announced(m_alerts, &AlertsData::announced);
 
     // The same hazard, graded worse. That is news, and it replaces rather than
-    // stacks — the same rule the banner's dismissal follows.
+    // stacks - the same rule the banner's dismissal follows.
     Alert worse   = heatAdvisory();
     worse.id       = QStringLiteral("urn:oid:siskiyou.001.3");
     worse.severity = AlertSeverity::Extreme;
@@ -987,7 +987,7 @@ void TestAlertsData::nothingIsAnnouncedWithThePreferenceOff()
 void TestAlertsData::showingTheWindowTakesTheNotificationDown()
 {
     // The banner says everything the notification does and says it better, so
-    // opening the window takes the notification down — but it must NOT forget
+    // opening the window takes the notification down - but it must NOT forget
     // that the reader has been told, or hiding the window again would announce
     // the same hazard a second time.
     Settings::instance()->setAlertNotifications(true);
@@ -1012,7 +1012,7 @@ void TestAlertsData::aWarningTheReaderWasLookingAtIsNotAnnouncedOnMinimising()
     // Minimising must not fire a notification for every warning the reader was
     // just reading. Announcing is gated on the window being hidden, so a
     // hazard that stood only while it was visible would otherwise be "new" the
-    // instant it was hidden — which is what running the announcement pass on
+    // instant it was hidden - which is what running the announcement pass on
     // the visibility change made possible.
     //
     // The answer is that a hazard on the banner is RECORDED as told without
@@ -1038,7 +1038,7 @@ void TestAlertsData::aHazardThatEndsTakesItsNotificationWithIt()
 
     QSignalSpy withdrawn(m_alerts, &AlertsData::withdrawn);
 
-    // Past `ends` — 06:00 on the 7th.
+    // Past `ends` - 06:00 on the 7th.
     m_clock.setNow(at(7, 6, 1));
     m_alerts->apply(setOf({ heatAdvisory() }, at(7, 6, 1)));
 

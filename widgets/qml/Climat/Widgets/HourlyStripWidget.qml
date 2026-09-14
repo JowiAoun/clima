@@ -47,7 +47,7 @@ WidgetSurface {
 
         // The number of columns, once. `root.width / count` inside the delegate
         // would be the *tile's* width rather than this row's, which is the tile
-        // minus its padding — and the last column would hang over the edge.
+        // minus its padding - and the last column would hang over the edge.
         readonly property int count: Math.min(root.times.length, 12)
 
         Repeater {
@@ -67,7 +67,7 @@ WidgetSurface {
                 // the glyphs below stay on one line.
                 //
                 // Twelve labels across 340 px is 28 px each, and "10 PM" wants
-                // 34 — so the first render ran them together into "9 PM0 PM1
+                // 34 - so the first render ran them together into "9 PM0 PM1
                 // PM", which is not a crowded axis but a wrong one: it reads as
                 // an hour that does not exist. Six labels is the same
                 // information at a width it fits in.

@@ -55,7 +55,7 @@ QString clockLabel(const QDateTime &instant, const QTimeZone &zone)
     return TimeFormat::instance()->clock(instant.toTimeZone(zone).time());
 }
 
-// "3:00 p.m." — the reference's spelling for a sentence, as distinct from the
+// "3:00 p.m." - the reference's spelling for a sentence, as distinct from the
 // "3:00 PM" a label uses. detaildata.js used both, in the same two places, and
 // TimeFormat keeps the distinction because losing it would mean a body sentence
 // shouting its meridiem at the reader mid-paragraph.
@@ -111,8 +111,8 @@ QString toneFor(bool good, bool caution)
 // libclimat/domain/forecast.h opens with this argument and it lands here: "a
 // plain double for a field MET Norway does not carry means the gust row reads
 // '0 km/h' during a gale and nothing anywhere goes red." Every block below
-// therefore carries a `reading` — the value and its unit, already formatted, or
-// an em dash — and every QML file that PRINTS a reading uses that rather than
+// therefore carries a `reading` - the value and its unit, already formatted, or
+// an em dash - and every QML file that PRINTS a reading uses that rather than
 // gluing `value` to `unit`. The numeric `value` beside it stays, because a bar
 // and a colour ramp need something finite to scale against; zero is a harmless
 // length and only a harmful sentence.
@@ -161,9 +161,9 @@ QVariantMap stop(double p, const QString &colour)
 // Empty strings, empty lists, zeroes. Never a plausible reading. A card that
 // says 20° for one frame and 31° for the rest has told the reader something
 // false, and docs/README.md ranks not fabricating above everything else this app
-// does — a brief lie is still the thing that rule is about.
+// does - a brief lie is still the thing that rule is about.
 //
-// Nor is it the em dash. `readingOf()` answers "—" and that is a different
+// Nor is it the em dash. `readingOf()` answers "-" and that is a different
 // sentence: "we asked the provider and it carries no value here". Before the
 // first snapshot nobody has asked, and a card has not earned the right to say
 // so. Absent, here, is silent.
@@ -178,7 +178,7 @@ QVariantMap stop(double p, const QString &colour)
 //
 //   riseMin, setMin, nowMin
 //                minutesFromLocalMidnight()'s own absent value. Zero is not
-//                nothing here, it is midnight — DetailSunCard would draw a day
+//                nothing here, it is midnight - DetailSunCard would draw a day
 //                that begins and ends at it, with the sun mark sitting on the
 //                crossing.
 //
@@ -188,7 +188,7 @@ QVariantMap stop(double p, const QString &colour)
 //
 // tests/tst_conditionsdata.cpp asserts that each of these key sets equals the
 // set the build function produces from a real fixture, because the failure mode
-// of this block is a key added to a builder and forgotten here — which is
+// of this block is a key added to a builder and forgotten here - which is
 // invisible until it is several hundred lines of console again.
 
 // minutesFromLocalMidnight()'s "there is no such instant". See timeaxis.h.
@@ -413,7 +413,7 @@ QVariantMap neutralMoon()
 
 // `available` false rather than absent, for the same reason the pollen block
 // carries one: MET Norway has no moon product at all, and 0% illuminated is not
-// "we were not told" — it is a new moon, which is a reading, and a card is not
+// "we were not told" - it is a new moon, which is a reading, and a card is not
 // allowed to assert one it does not have.
 QVariantMap neutralMoonPhase()
 {
@@ -454,7 +454,7 @@ ConditionsData::ConditionsData(QObject *parent)
 {
     // Born with the shape, not with fifteen empty maps. QML binds `Detail.wind`
     // and everything under it while its component is constructed, which on a
-    // start with nothing cached happens before any snapshot exists — see the
+    // start with nothing cached happens before any snapshot exists - see the
     // neutral block above for what the alternative sounded like.
     clear();
 
@@ -502,7 +502,7 @@ void ConditionsData::clear()
 
     // Reset to the neutral shape rather than emptied. An empty map is a map
     // whose every key is `undefined`, and this function runs at construction and
-    // again at the head of every setSnapshot() — which is to say at both of the
+    // again at the head of every setSnapshot() - which is to say at both of the
     // moments a binding can be evaluated with no weather behind it.
     m_location      = neutralLocation();
     m_current       = neutralCurrent();
@@ -586,7 +586,7 @@ void ConditionsData::buildContext()
     //
     // See the declaration of m_observation. Open-Meteo's `current` block is
     // stamped to the quarter hour, which is why the reference reads 12:28
-    // rather than 12:00 — it is a reading and not a slot, and it is the right
+    // rather than 12:00 - it is a reading and not a slot, and it is the right
     // one to show whenever it is actually current.
     const QDateTime provided = m_forecast.current.time;
     const bool      usable   = provided.isValid() && qAbs(provided.secsTo(m_now)) <= 3600;
@@ -596,13 +596,13 @@ void ConditionsData::buildContext()
 
         // ---- one definition of "now" --------------------------------------
         //
-        // The `current` block is the right source for an *instant* — a
+        // The `current` block is the right source for an *instant* - a
         // temperature, a wind, a humidity read at 4:47 rather than on the hour
-        // — and the wrong one for anything describing a stretch.
+        // - and the wrong one for anything describing a stretch.
         //
         // `weatherCode` is a stretch. forecast.h says so where it groups the
-        // code with the accumulations — it "describes a stretch of weather
-        // rather than a moment" — and hourconvention.cpp acts on it: every
+        // code with the accumulations - it "describes a stretch of weather
+        // rather than a moment" - and hourconvention.cpp acts on it: every
         // entry in `m_hours` carries the code for the hour *starting* at its
         // stamp, which is the hour we are standing in. Open-Meteo's `current`
         // block is a separate product on its own convention, and the two
@@ -612,7 +612,7 @@ void ConditionsData::buildContext()
         // When they disagreed the app stated both at once. The card read
         // "Mainly sunny" a few centimetres above a chart whose Now column drew
         // heavy rain, and the sentence under the card announced a rain that had
-        // already started — while it was, in fact, raining. Whichever value is
+        // already started - while it was, in fact, raining. Whichever value is
         // nearer the truth, saying both is a defect of ours, and the series the
         // rest of the page is drawn from is the one to keep: the chart, the
         // strip, the precipitation wash and this card's own next-rain clause
@@ -634,7 +634,7 @@ void ConditionsData::buildContext()
     } else if (m_hourNow < m_hours.size()) {
         // Rebuilt from the hour we are standing in. Field for field rather than
         // by any clever means, because the two structs differ in exactly one
-        // way — an HourlyPoint has no dew point on some providers — and a memcpy
+        // way - an HourlyPoint has no dew point on some providers - and a memcpy
         // would not have noticed.
         const HourlyPoint &hour = m_hours.at(m_hourNow);
         m_observation                     = {};
@@ -782,7 +782,7 @@ void ConditionsData::buildCloud()
     const bool day = now.isDay.value_or(true);
     const QString condition = now.weatherCode
         ? climat::conditionText(*now.weatherCode, day)
-        : QStringLiteral("—");
+        : QStringLiteral("-");
 
     const double later = value(m_hours.value(qMin(m_hourNow + 3, int(m_hours.size()) - 1)).cloudCover);
     const QString trend = trendOf(value(now.cloudCover), later, 5);
@@ -873,14 +873,14 @@ void ConditionsData::buildWind()
     //
     // beaufortForce() is the only function in libclimat/domain/scales.h that
     // returns a number rather than a word, so it has nowhere to put the empty
-    // string the others answer NaN with — it returns 0, and beaufortName(0) is
+    // string the others answer NaN with - it returns 0, and beaufortName(0) is
     // "Calm". That made a missing reading indistinguishable from still air:
-    // `reading` said "—" and the verdict beside it said Calm, in the same card.
+    // `reading` said "-" and the verdict beside it said Calm, in the same card.
     //
     // ECMWF omits variables at some coordinates (see
     // tests/fixtures/openmeteo/toronto-ecmwf-gaps.json), so this is reachable
     // rather than theoretical. neutralWind() above has always spelled the
-    // honest answer — an empty name — and this is what puts the built map back
+    // honest answer - an empty name - and this is what puts the built map back
     // in step with it.
     const bool measured = !qIsNaN(kmh);
 
@@ -890,7 +890,7 @@ void ConditionsData::buildWind()
         { QStringLiteral("gustReading"), readingOf(now.windGust, Units::Quantity::Wind) },
         { QStringLiteral("gust"), roundedDisplay(now.windGust, Units::Quantity::Wind) },
         { QStringLiteral("unit"), units->bareSymbol(Units::Quantity::Wind) },
-        // Beaufort 5 — a fresh breeze, when loose paper starts blowing about.
+        // Beaufort 5 - a fresh breeze, when loose paper starts blowing about.
         // detaildata.js's ceiling, converted rather than re-chosen because it is
         // a wind speed and not an axis.
         { QStringLiteral("scaleMax"), int(std::lround(units->convert(Units::Quantity::Wind, 30.0))) },
@@ -919,7 +919,7 @@ void ConditionsData::buildHumidity()
 {
     const CurrentConditions &now = m_observation;
 
-    // Eight columns, matching the reference's bar array — a shorter window than
+    // Eight columns, matching the reference's bar array - a shorter window than
     // the twelve every other card draws, and deliberately: this one is bars, and
     // twelve bars at this width are stripes.
     QVariantList series;
@@ -993,7 +993,7 @@ void ConditionsData::buildAirQuality()
     const double index = now.europeanAqi ? double(*now.europeanAqi) : qQNaN();
     const auto   worst = now.dominantPollutant();
 
-    // Up, because the *index* is rising — which for air quality is the bad
+    // Up, because the *index* is rising - which for air quality is the bad
     // direction. The trend tracks the number; the body says whether that is
     // good news. docs/10-design-system.md §10.5.
     double later = qQNaN();
@@ -1010,7 +1010,7 @@ void ConditionsData::buildAirQuality()
         // "no air-quality product here" is not it. Every place that PRINTS the
         // index reads this; the numeric `value` above is for the ramps and the
         // bar, which need something finite to scale against.
-        { QStringLiteral("reading"), qIsNaN(index) ? QStringLiteral("—")
+        { QStringLiteral("reading"), qIsNaN(index) ? QStringLiteral("-")
                                                    : QString::number(int(index)) },
         { QStringLiteral("max"), 100 },
         { QStringLiteral("band"), qIsNaN(index) ? QString() : aqiBand(index) },
@@ -1025,7 +1025,7 @@ void ConditionsData::buildAirQuality()
         // Through pollutantLabel(), like the `pollutant` field six lines up.
         // `pollutantId(...).toUpper()` was a second, private copy of the same
         // table and it produced NITROGEN_DIOXIDE where the field beside it
-        // said NO₂ — two spellings of one species, in one card, one of them a
+        // said NO₂ - two spellings of one species, in one card, one of them a
         // machine identifier.
         { QStringLiteral("body"),
           worst ? tr("%1 is the main pollutant right now.")
@@ -1110,7 +1110,7 @@ void ConditionsData::buildSunMoon()
     const DailyPoint day       = today();
     const QDate      reference = m_now.toTimeZone(m_zone).date();
 
-    // Minutes from local midnight, measured from ONE reference date — not from
+    // Minutes from local midnight, measured from ONE reference date - not from
     // each instant's own midnight. libclimat/domain/timeaxis.h exists for this:
     // above the Arctic circle in summer, sunrise is that day's midnight and
     // sunset is the *next* day's, and an arc measured from two midnights comes
@@ -1124,13 +1124,13 @@ void ConditionsData::buildSunMoon()
     const int     dayMins  = daylight ? (int(*daylight) % 3600) / 60 : 0;
 
     // Two fields rather than one, because the sun and moon cards draw the suffix
-    // smaller and beside the reading — see DetailSunCard.qml. Under a 24-hour
+    // smaller and beside the reading - see DetailSunCard.qml. Under a 24-hour
     // clock `suffix` is empty and `hhmm` carries the whole reading, so the card
     // degrades to one field rather than to a stray "PM".
     //
     // The arithmetic that used to be here is in app/viewmodels/timeformat.cpp,
     // together with the note about QLocale's "h" being a 24-hour hour unless the
-    // format string also carries AP — which is what produced "20:42 PM" on every
+    // format string also carries AP - which is what produced "20:42 PM" on every
     // sunset after noon the first time this was written.
     const auto hhmm = [&](const QDateTime &instant) {
         return instant.isValid()
@@ -1166,8 +1166,8 @@ void ConditionsData::buildSunMoon()
     const int moonSet  = minutesFromLocalMidnight(day.moonset, m_zone, reference);
     const Reading lit  = moonIllumination(day.moonPhase);
 
-    // The moon fails to rise on about one calendar day a month — its rising
-    // drifts fifty minutes later each day and eventually skips a midnight — so
+    // The moon fails to rise on about one calendar day a month - its rising
+    // drifts fifty minutes later each day and eventually skips a midnight - so
     // an absent moonrise is ordinary and the card must not read as broken.
     const int upMinutes = (day.moonrise.isValid() && day.moonset.isValid())
         ? qAbs(moonSet - moonRise)
@@ -1216,7 +1216,7 @@ void ConditionsData::buildMoonPhase(const DailyPoint &day, const QDate &referenc
     const bool    waxing  = isWaxing(day.moonPhase);
 
     // The next full moon, from the provider's own phase readings where the
-    // horizon reaches it and from the mean cycle where it does not — see
+    // horizon reaches it and from the mean cycle where it does not - see
     // libclimat/domain/forecast.h, which explains which of the two answered and
     // how far out the second one can be.
     const std::optional<QDate> nextFull = nextFullMoon(m_forecast.daily, reference);
@@ -1250,7 +1250,7 @@ void ConditionsData::buildMoonPhase(const DailyPoint &day, const QDate &referenc
           ForecastData::moonPhaseLabel(moonPhaseName(day.moonPhase)) },
         // Three sentences and not one with `%n` in it. Qt only chooses a plural
         // form from a TRANSLATION, so in the source language `%n day(s)` stays
-        // literally "day(s)" — which is how the card came to read "It is full
+        // literally "day(s)" - which is how the card came to read "It is full
         // again in 28 day(s)". Branching gives every language a whole sentence
         // to translate and gives this one the words it actually uses; the case
         // that made it necessary is `days == 1`, once every twenty-nine and a
@@ -1430,7 +1430,7 @@ void ConditionsData::buildSummary()
     // An onset, not merely the next wet hour: `from` names a time the reader is
     // meant to act on, and an hour that is already raining does not have one.
     // The scan therefore wants a wet hour whose predecessor was dry, which is
-    // what makes the clause hold when the standing hour is itself wet — before,
+    // what makes the clause hold when the standing hour is itself wet - before,
     // a rain that had been falling since two o'clock was announced as starting
     // at five, which is the same sentence a forecast would use for a dry
     // afternoon.
@@ -1454,7 +1454,7 @@ void ConditionsData::buildSummary()
 
     // Assembled as whole sentences and joined, rather than concatenated with
     // punctuation glued on. "9:00 a.m." already ends in a full stop, so a
-    // template that added one produced "from 9:00 a.m.." — the sort of thing
+    // template that added one produced "from 9:00 a.m.." - the sort of thing
     // that is invisible while the sentence is a literal in a mock file and
     // unavoidable the moment it is generated.
     QStringList sentences;
@@ -1464,7 +1464,7 @@ void ConditionsData::buildSummary()
 
     if (startsAt >= 0) {
         // The NWS bands precip.js classifies with, said in words. Capitalised
-        // here because it opens its own sentence — which it does not do in
+        // here because it opens its own sentence - which it does not do in
         // every language, and is why the whole clause is one translatable unit
         // rather than a noun slotted into a frame.
         const QString weight = peakMm >= 7.6 ? tr("Heavy rain")

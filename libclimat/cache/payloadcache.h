@@ -15,8 +15,8 @@
 // shape. Two caches is how the two disagree.
 //
 // So the cache read belongs beside the fetch, in the provider, and this is the
-// shared body of it. OpenMeteoGeocoder wrote it first — see its `lookUp` and
-// `store` — and the three providers that came after would each have written it
+// shared body of it. OpenMeteoGeocoder wrote it first - see its `lookUp` and
+// `store` - and the three providers that came after would each have written it
 // again, slightly differently, which is the interesting failure: they would
 // have disagreed about whether a stale entry is a hit.
 //
@@ -34,7 +34,7 @@
 // flag for the UI, because there already is one and it is better: the entry's
 // own `fetchedAt`. A Forecast carrying the timestamp it was actually fetched at
 // renders as "updated 40 minutes ago" without anything downstream being told
-// that a fallback happened — and the day the network comes back the same line
+// that a fallback happened - and the day the network comes back the same line
 // reads "updated just now" for the same reason. One number, no second state to
 // keep in step.
 //
@@ -79,7 +79,7 @@ struct Hit {
 // same answer.
 [[nodiscard]] Hit lookUp(const CacheStore *cache, const QString &key);
 
-// Writes the response body under `key`. Silent about failure — see the header.
+// Writes the response body under `key`. Silent about failure - see the header.
 // An empty body is not written: a 304 carries none, and overwriting a good row
 // with nothing is the one way this could make things worse.
 void store(CacheStore *cache, const QString &key, const QString &providerId,

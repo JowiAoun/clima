@@ -4,7 +4,7 @@
 //
 // The visualisation is the WHO scale itself, bent into a dial: 0 at the
 // bottom-left, 11 at the bottom-right, and the index marked on it. Colour is
-// the reading here — a UV of 7 is not "a number out of eleven", it is *orange*,
+// the reading here - a UV of 7 is not "a number out of eleven", it is *orange*,
 // and the dial says so in the same language every UV forecast uses.
 //
 // The traversed stretch is drawn as a run of short stroked arcs rather than one
@@ -12,7 +12,7 @@
 // segment samples `Detail.bands.uv` at its own midpoint, which is the same
 // trick SeriesBars uses per bar. Beyond the reading the dial is the plain gauge
 // track, so it reads as "reached this far out of eleven" before the eye finds
-// the dot — the coloured arc is carrying the value, not decorating it.
+// the dot - the coloured arc is carrying the value, not decorating it.
 import QtQuick
 import QtQuick.Shapes
 import "theme.js" as Theme
@@ -39,7 +39,7 @@ DetailCard {
         readonly property int segments: 44
         readonly property real ringWidth: 7
 
-        // The marker is the widest thing on the dial, so it — not the stroke —
+        // The marker is the widest thing on the dial, so it - not the stroke -
         // sets how much room the ring has to leave around itself. 14/2.5 is the
         // one "now" mark the whole grid uses; this card was the last at 20/3,
         // which also made its ring 3px smaller in radius than the air-quality
@@ -71,14 +71,14 @@ DetailCard {
         // Everything downstream of the paint is derived from `t` and so travels
         // with it for free: the untouched remainder of the track starts where
         // the paint stops, and the mark sits on the head, taking the colour of
-        // the band it is currently crossing. One property, one gesture — and
+        // the band it is currently crossing. One property, one gesture - and
         // the same pair of properties in the air-quality and cloud-cover dials,
         // because three rings sharing one geometry should share one arrival.
         //
         // What does *not* move is the number in the middle. §10.6 permits a
         // reading to count up; it is wrong here. The digit is the answer, and a
         // dial that spends half a second saying 0, 2, 4, 6 is a dial that is
-        // briefly lying about the UV index — while the arc beside it is already
+        // briefly lying about the UV index - while the arc beside it is already
         // telling the true story. A counted reading also re-centres itself the
         // frame it grows a second digit, which is the air-quality dial's 25
         // sliding sideways under its own ring, and §10.6 does not allow text to
@@ -101,7 +101,7 @@ DetailCard {
         }
 
         // Only the traversed stretch is banded, so the segment list stops at
-        // the reading — and the last segment is cut short to end exactly on it,
+        // the reading - and the last segment is cut short to end exactly on it,
         // rather than at the nearest segment boundary. Rounding to a boundary
         // left the paint up to half a segment past the mark, which a 20px mark
         // covered and a 14px one does not.
@@ -135,12 +135,12 @@ DetailCard {
                 readonly property real segMid: (segFrom + segEnd) / 2
 
                 // Clipped to the sweeping head. Clamped at `segFrom` because an
-                // arc that ends before it starts is not an empty arc — SVG
+                // arc that ends before it starts is not an empty arc - SVG
                 // takes the long way round and paints 300° of it.
                 readonly property real segTo: Math.max(segFrom, Math.min(segEnd, viz.t))
                 // Nothing to draw yet. `opacity`, not `visible`: hiding part of
                 // a chart subtree corrupts clip state for its neighbours
-                // (§10.8), and this is a binding rather than a fade — there is
+                // (§10.8), and this is a binding rather than a fade - there is
                 // no Behavior on it and it never lands between 0 and 1.
                 opacity: segTo > segFrom ? 1 : 0
 
@@ -162,7 +162,7 @@ DetailCard {
         // One arc rather than a run of segments, which is what a flat colour
         // buys: there is no ramp left to sample per segment, so the stretch can
         // be a single stroke. That matters beyond tidiness. It was previously
-        // the same coloured segments dimmed as a group — dimmed as a group
+        // the same coloured segments dimmed as a group - dimmed as a group
         // because consecutive round caps overlap by more than half a segment
         // and two 30% caps composite to 51%, so fading them individually made
         // the ring lumpy. Fixing that needed `layer.enabled` on a wrapper Item,

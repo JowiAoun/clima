@@ -5,7 +5,7 @@
 // tries.
 //
 // docs/04-architecture.md §4.11 says it plainly: golden-file provider tests run
-// "against recorded API responses committed to `tests/fixtures/` — no network
+// "against recorded API responses committed to `tests/fixtures/` - no network
 // in CI". That is a rule with two failure modes, and only one of them is
 // obvious.
 //
@@ -22,7 +22,7 @@
 //      pointing at the discard port on loopback for every non-local host. Qt
 //      consults the application proxy factory from both QNetworkAccessManager
 //      and plain QTcpSocket, and QAbstractSocket bypasses the proxy for
-//      loopback addresses on its own — which is exactly the split needed here:
+//      loopback addresses on its own - which is exactly the split needed here:
 //      HttpStub keeps working, and anything else fails to connect.
 //
 //   2. COUNTS.  Every query the factory is asked is recorded with the host it
@@ -31,7 +31,7 @@
 //      into an assertion.
 //
 // Install it once per test binary, from initTestCase. The factory is
-// process-global — that is Qt's design, not a shortcut — so installing it twice
+// process-global - that is Qt's design, not a shortcut - so installing it twice
 // simply replaces it.
 
 #pragma once

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Current conditions — the page headline.
+// Current conditions - the page headline.
 //
 // The one card that answers the question the app was opened to ask, so it is
 // allowed to be loud in a way nothing else on the page is: a 64 px number, a
@@ -21,7 +21,7 @@
 // transition between. That leaves arrival, and §10.7 is precise about what
 // earns an arrival: a reveal has to show where a value sits on its scale
 // rather than merely assert it. This card draws no scale. It asserts a number,
-// a condition, a sentence and six readings, and an assertion is instant — there
+// a condition, a sentence and six readings, and an assertion is instant - there
 // is no journey for the eye to read, so animating one would be inventing one.
 //
 // The two ideas that come up every time, and why neither survives:
@@ -35,7 +35,7 @@
 //
 //   The wind slug's bearing arrow rotating to its heading. This is the one
 //   element here that genuinely is a value's position on a scale, so it is the
-//   only tempting case — but it is a 16 px glyph, and sweeping it into place
+//   only tempting case - but it is a 16 px glyph, and sweeping it into place
 //   would put the page's slowest motion on its smallest element while the 64 px
 //   number beside it sits still. DetailWindCard is where a bearing gets to be
 //   drawn at a size worth watching; this row is the glance, that card is the
@@ -43,7 +43,7 @@
 //
 // Nothing responds to resize either, and deliberately: the slug grid re-columns
 // 6 → 3 → 2 and the high/low pair drops out below 620 px. Both pop, because
-// §10.6 is clear that reflow is not a transition — a window drag that made this
+// §10.6 is clear that reflow is not a transition - a window drag that made this
 // card ease between column counts would read as lag, not as a layout.
 import QtQuick
 import QtQuick.Shapes
@@ -59,7 +59,7 @@ Item {
     // The six measurables MSN puts under the summary. Each is also a card in
     // the grid below: this row is the glance, that grid is the answer.
     //
-    // `dot` and `arrow` are the two that carry more than a number — air quality
+    // `dot` and `arrow` are the two that carry more than a number - air quality
     // is meaningless without its band, and a wind speed without a bearing is
     // half a reading.
     readonly property var slugs: [
@@ -83,7 +83,7 @@ Item {
     implicitHeight: slugGrid.y + slugGrid.height + pad
     height: implicitHeight
 
-    // No border. Contrast against the page defines the card — see
+    // No border. Contrast against the page defines the card - see
     // docs/10-design-system.md §10.1.
     Rectangle {
         anchors.fill: parent
@@ -192,7 +192,7 @@ Item {
         //
         // A divergence: the reference fills this space with a radar map, which
         // we have nothing to draw. Left empty, a card this wide reads as a
-        // layout that ran out of content — and the high and low are the two
+        // layout that ran out of content - and the high and low are the two
         // numbers the summary sentence gestures at without stating.
         Row {
             id: rangeRow

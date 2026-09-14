@@ -8,8 +8,8 @@
 //
 // A value on the wire is a number, `null` (the provider carries no reading) or
 // `undefined` (the field mask never asked for it). JavaScript will happily
-// treat the last two as 0 — `null + 1` is 1, `Math.max(null, 5)` is 5,
-// `(0).toFixed(0)` is "0" — and every one of those produces a tile that states
+// treat the last two as 0 - `null + 1` is 1, `Math.max(null, 5)` is 5,
+// `(0).toFixed(0)` is "0" - and every one of those produces a tile that states
 // a fact nobody measured. libclimat/wire/snapshot.h calls this rule 2 and
 // spends a paragraph on it; this file is the QML-side half.
 //
@@ -21,7 +21,7 @@
 // WHY .pragma library
 //
 // Because it is pure computation over values that are handed in, with no state
-// and no bindings of its own — the case a shared JS library is actually for.
+// and no bindings of its own - the case a shared JS library is actually for.
 // (Theme.qml is the opposite case and its header explains why: a `.pragma
 // library` produces no change notification, so a *token table* could not live
 // in one. Nothing here is watched.)
@@ -57,7 +57,7 @@ function numOr(v, fallback) {
 // which QML hands to JavaScript as a sequence wrapper: it has a `length`, it
 // indexes, and `Array.isArray()` returns FALSE for it. A guard written as
 // `Array.isArray(v) ? v : []` therefore turns every series in the snapshot into
-// an empty array — the tiles lay out correctly, draw nothing, and look exactly
+// an empty array - the tiles lay out correctly, draw nothing, and look exactly
 // like a tile waiting for its first snapshot.
 //
 // Copied into a fresh array rather than returned as the wrapper, because the
@@ -99,11 +99,11 @@ function at(root, path) {
 
 // The en dash Units::formatDisplay already answers for a NaN, so a tile that
 // mixes a unit-bearing reading with a bare one shows one dash and not two.
-var DASH = "–"
+var DASH = "-"
 
 // The one place a reading becomes text. An absent value is a dash and not
 // an empty string, because a blank space where a number goes reads as a layout
-// bug and a dash reads as "the provider does not carry this" — which is what it
+// bug and a dash reads as "the provider does not carry this" - which is what it
 // means.
 function text(v, decimals, suffix) {
     var n = num(v)
@@ -126,7 +126,7 @@ function degrees(v, convert) {
 // ---- series -----------------------------------------------------------------
 
 // The largest and smallest real values in a series, ignoring the holes.
-// Returns null when there is nothing real in it at all — which a caller has to
+// Returns null when there is nothing real in it at all - which a caller has to
 // handle, because an axis over no data is not an axis.
 function extent(values) {
     var lo = Infinity, hi = -Infinity, seen = false

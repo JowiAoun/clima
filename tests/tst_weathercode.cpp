@@ -21,7 +21,7 @@ using namespace climat;
 
 namespace {
 
-// Every code Open-Meteo documents for `weather_code`. The list is closed —
+// Every code Open-Meteo documents for `weather_code`. The list is closed -
 // WMO 4677 has ninety-nine entries and a forecast model emits these.
 QList<int> emittedCodes()
 {
@@ -66,7 +66,7 @@ void TestWeatherCode::everyEmittedCodeHasAPhrase()
 
 void TestWeatherCode::everyEmittedCodeHasAGlyph()
 {
-    // Not "returns something" — `conditionFor` has a default — but "returns
+    // Not "returns something" - `conditionFor` has a default - but "returns
     // something other than the default", which is the only way to catch a code
     // that was never given a row.
     for (int code : emittedCodes()) {
@@ -117,7 +117,7 @@ void TestWeatherCode::theSixTypesAreSpelledThePrecipJsWay()
 void TestWeatherCode::dayAndNightDifferOnlyWhereTheSkyIsVisible()
 {
     // Clear, mainly clear, partly cloudy and rain have a night form. Fog,
-    // snow, sleet, drizzle, thunder and hail do not — there is no moon to draw
+    // snow, sleet, drizzle, thunder and hail do not - there is no moon to draw
     // behind any of them, and inventing one would mean six more glyphs for a
     // difference nobody can see at 26 px.
     for (int code : { 0, 1, 2, 61, 63, 65, 80, 81, 82 })
@@ -132,7 +132,7 @@ void TestWeatherCode::dayAndNightDifferOnlyWhereTheSkyIsVisible()
 void TestWeatherCode::anUnknownCodeIsCloudyAndSilent()
 {
     // -1 is how the adapter spells "this hour carried no code". WMO defines
-    // codes a forecast model will never emit — duststorms, funnel clouds —
+    // codes a forecast model will never emit - duststorms, funnel clouds -
     // and inventing a picture for one would have the app claim something
     // nobody forecast.
     for (int code : { -1, 4, 20, 39, 98, 1000 }) {
@@ -189,11 +189,11 @@ void TestWeatherCode::everyCodeTheFallbackCanEmitIsAlsoKnownHere()
 {
     // The list above is Open-Meteo's, and for as long as it was the only list
     // these tables were checked against, four codes went unnoticed: MET Norway
-    // maps its eight sleet symbols onto WMO 68, 69, 83 and 84 — real mixed
-    // precipitation codes that Open-Meteo does not use — and every one of them
+    // maps its eight sleet symbols onto WMO 68, 69, 83 and 84 - real mixed
+    // precipitation codes that Open-Meteo does not use - and every one of them
     // fell through to the default. On the fallback provider a sleet hour drew a
     // plain overcast cloud, carried no precipitation type so the chart's wash
-    // skipped it, and had no wording so the row read "—".
+    // skipped it, and had no wording so the row read "-".
     //
     // It is exactly the failure the fallback exists to avoid, and it could only
     // be found by asking the fallback what it can say. So this asks.
@@ -234,7 +234,7 @@ void TestWeatherCode::oneCodeFoldsToItself()
 
 void TestWeatherCode::aWholeDayIsNamedByItsLargestCode()
 {
-    // What Open-Meteo's own daily `weather_code` is — measured, see the header.
+    // What Open-Meteo's own daily `weather_code` is - measured, see the header.
     // The order of the argument must not matter: a day is a set, not a sequence.
     QCOMPARE(mostSignificantCode({ 0, 3, 61, 95, 2 }), std::optional<int>(95));
     QCOMPARE(mostSignificantCode({ 95, 2, 61, 3, 0 }), std::optional<int>(95));
@@ -252,13 +252,13 @@ void TestWeatherCode::theWholeDayRuleRanksAShowerAboveHeavySnowAndThatIsKnown()
 
 void TestWeatherCode::aLabelledSpanShowsTheHourItNames()
 {
-    // The label says 2 PM, so 2 PM's sky is what is drawn — NOT the cloudier of
+    // The label says 2 PM, so 2 PM's sky is what is drawn - NOT the cloudier of
     // the two hours it covers. Folding cloud cover by maximum is what turned
     // the reference capture of a clear afternoon into a cloudy one.
     QCOMPARE(codeForLabelledSpan({ 0, 3 }), std::optional<int>(0));
     QCOMPARE(codeForLabelledSpan({ 1, 2 }), std::optional<int>(1));
 
-    // And it is not "the clearer" either — the first hour wins whichever way
+    // And it is not "the clearer" either - the first hour wins whichever way
     // round the pair is.
     QCOMPARE(codeForLabelledSpan({ 3, 0 }), std::optional<int>(3));
 }
@@ -267,7 +267,7 @@ void TestWeatherCode::aLabelledSpanNeverDropsAnEventItCovers()
 {
     // The bug this function exists for. A thunderstorm in the second hour of a
     // column is a thunderstorm the column has to show, wherever in the span it
-    // falls — the band draws one glyph per two hours and for as long as it
+    // falls - the band draws one glyph per two hours and for as long as it
     // asked only about the hour it landed on, 7 of 79 forecast days whose own
     // day card said thunderstorm drew no bolt anywhere in it.
     QCOMPARE(codeForLabelledSpan({ 0, 95 }), std::optional<int>(95));
@@ -278,7 +278,7 @@ void TestWeatherCode::aLabelledSpanNeverDropsAnEventItCovers()
 void TestWeatherCode::aLabelledSpanTakesTheWorstOfSeveralEvents()
 {
     // Once there is more than one event in the span the day rule applies among
-    // them — the labelled hour has no special claim on a column that has two
+    // them - the labelled hour has no special claim on a column that has two
     // different things falling in it.
     QCOMPARE(codeForLabelledSpan({ 51, 95 }), std::optional<int>(95));
     QCOMPARE(codeForLabelledSpan({ 95, 51 }), std::optional<int>(95));

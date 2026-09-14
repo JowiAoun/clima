@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2026 Jowi Aoun
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# The top of the build. Everything here is policy — versions, identity, the
-# options that switch pieces of the tree on and off — and nothing here compiles
+# The top of the build. Everything here is policy - versions, identity, the
+# options that switch pieces of the tree on and off - and nothing here compiles
 # anything. The targets live one directory down, in app/.
 #
 #   nix develop -c cmake --preset dev
@@ -13,7 +13,7 @@
 # `qt_standard_project_setup` story we depend on and the first that ships
 # `CMAKE_<LANG>_LINKER_LAUNCHER` for the whole toolchain. The devshell pins
 # CMake 4.x, which has dropped compatibility with `cmake_minimum_required`
-# below 3.5 — well under us, so this floor is safe. If a dependency ever trips
+# below 3.5 - well under us, so this floor is safe. If a dependency ever trips
 # that, the answer is to fix the dependency, not to lower this number.
 cmake_minimum_required(VERSION 3.21)
 
@@ -37,7 +37,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # and QStandardPaths all have to agree on, and every one of those is a separate
 # file that would otherwise carry its own copy of the string. A cache variable
 # rather than a plain `set` so a downstream packager can rename the app without
-# patching sources — a fork, a nightly channel, a distro rebrand.
+# patching sources - a fork, a nightly channel, a distro rebrand.
 set(CLIMAT_APP_ID "io.github.JowiAoun.Climat" CACHE STRING
     "Reverse-DNS application ID: desktop file, AppStream, D-Bus, icon name")
 
@@ -46,7 +46,7 @@ set(CLIMAT_APP_ID "io.github.JowiAoun.Climat" CACHE STRING
 # This goes in the User-Agent every request carries, and it is an obligation
 # rather than a courtesy: docs/02-data-sources.md §2.9 records MET Norway's
 # requirement for an identifying User-Agent with a contact, and notes that a
-# generic one gets 403. api.weather.gov enforces the same thing today — an empty
+# generic one gets 403. api.weather.gov enforces the same thing today - an empty
 # User-Agent is refused outright.
 #
 # A cache variable, and this is the one that a downstream packager genuinely
@@ -59,7 +59,7 @@ set(CLIMAT_CONTACT "https://github.com/JowiAoun/climat/issues" CACHE STRING
 # The daemon's object path: the app ID with its dots turned into slashes.
 #
 # Computed here rather than in daemon/ because there are two ends of that bus
-# and both have to spell it identically — climat-daemon exports the object and
+# and both have to spell it identically - climat-daemon exports the object and
 # climat-widget calls it. A path they disagree about is a service that registers
 # successfully and then answers nothing, which looks like a daemon bug from one
 # side and a widget bug from the other. Both configure the same
@@ -78,7 +78,7 @@ option(CLIMAT_BUILD_TESTS  "Build the test suite"                               
 # ---- Qt ---------------------------------------------------------------------
 # 6.8 is the LTS floor from D2. Ask for exactly the components the code uses:
 # an unused `find_package` component is a dependency the packager has to satisfy
-# for nothing, and — more to the point here — a chance to pull in a module whose
+# for nothing, and - more to the point here - a chance to pull in a module whose
 # licence we cannot accept. See cmake/ClimatLicenceGuard.cmake.
 include(ClimatLicenceGuard)
 include(ClimatEngineGuard)
@@ -114,7 +114,7 @@ qt_standard_project_setup(REQUIRES 6.8)
 #   * Optional, because a packager should not have to satisfy a dependency for
 #     a feature their users may never press. libclimat compiles the backend out
 #     when this is absent and DeviceLocator::create() hands back a locator that
-#     reports Unavailable — the same branch a user who denied permission takes,
+#     reports Unavailable - the same branch a user who denied permission takes,
 #     so there is one code path and it is exercised either way.
 #
 #   * Here rather than in libclimat/, where the code that uses it lives, because
@@ -138,7 +138,7 @@ endif()
 # Qt D-Bus backs SystemAppearance: the XDG desktop portal is how an app learns
 # that the session went dark, and it is the only route that works from inside a
 # Flatpak. Optional for the same two reasons Positioning is, plus a third that
-# is specific to it — there is no session bus on Windows, so requiring it would
+# is specific to it - there is no session bus on Windows, so requiring it would
 # make one of our two shipping desktop targets unbuildable for a Linux feature.
 #
 # The fallbacks are real rather than nominal: QStyleHints::colorScheme() answers
@@ -157,7 +157,7 @@ if(NOT TARGET Qt6::DBus)
 endif()
 
 # Where qt_add_qml_module lays out its module directories. This is not a tidiness
-# preference — it is what makes the build's own QML modules discoverable as
+# preference - it is what makes the build's own QML modules discoverable as
 # modules rather than as resources baked into one executable:
 #
 #   * `all_qmllint` can resolve `import Climat`
@@ -171,7 +171,7 @@ endif()
 set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
 
 # The engine first, because app/ links it. It is also the only directory here
-# whose sources are MPL-2.0 rather than GPL-3.0-or-later — see D6, and
+# whose sources are MPL-2.0 rather than GPL-3.0-or-later - see D6, and
 # libclimat/CMakeLists.txt, which explains why the build file itself is not.
 add_subdirectory(libclimat)
 
@@ -186,7 +186,7 @@ add_subdirectory(cli)
 # are real: the whole thing is a session-bus service, and Windows has no
 # session bus, so on Windows this is not a feature that is switched off but a
 # concept that does not exist. A Linux build without Qt DBus is the same
-# situation as a Linux build without Qt Positioning — the app is complete, and
+# situation as a Linux build without Qt Positioning - the app is complete, and
 # one optional thing beside it is not built.
 #
 # The app does not link it and does not know about it. A desktop with no daemon
@@ -196,7 +196,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET Qt6::DBus)
 
     # And the process that draws what it serves. Gated with the daemon rather
     # than separately, because a widget host with nothing to read from is not a
-    # degraded feature — every number on its tiles comes over that bus, and it
+    # degraded feature - every number on its tiles comes over that bus, and it
     # would come up, register nothing, and show ten skeletons.
     add_subdirectory(widgets)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -228,7 +228,7 @@ if(CLIMAT_DEV_TOOLS)
 
     # And its opposite number: the same shape of report, built from a *live*
     # fetch rather than from a recording. The two answer different questions
-    # and neither replaces the other — a recorded fixture guards against
+    # and neither replaces the other - a recorded fixture guards against
     # regression in us, and only a real request notices Open-Meteo renaming a
     # field or changing a unit. See tools/openmeteo-probe/main.cpp.
     add_subdirectory(tools/openmeteo-probe)
@@ -244,7 +244,7 @@ if(CLIMAT_DEV_TOOLS)
 endif()
 
 # What a Linux install puts on disk beside the binary: the desktop entry, the
-# AppStream component and the icon theme. Not guarded by an option — a build
+# AppStream component and the icon theme. Not guarded by an option - a build
 # that cannot be installed is not a build anybody can package, and the
 # directory returns immediately on every platform that has no use for it.
 #
@@ -263,17 +263,17 @@ if(CLIMAT_BUILD_TESTS)
 endif()
 
 # The .deb. Last, and included here rather than from packaging/, because CPack
-# reads its configuration out of the directory that includes it — a CPack set up
+# reads its configuration out of the directory that includes it - a CPack set up
 # one directory down produces a package with a default name and no dependencies,
 # and says nothing about it. See the file for why it has to be built against
 # system Qt.
-# Linux only, and Windows is not an omission. Both Windows artefacts — the
-# portable ZIP and the MSI — bundle Qt, which makes them LGPLv3 conveyances
+# Linux only, and Windows is not an omission. Both Windows artefacts - the
+# portable ZIP and the MSI - bundle Qt, which makes them LGPLv3 conveyances
 # that have to carry the written source offer and the third-party licence
 # bundle. A `cpack -G ZIP` here would produce an archive that satisfies neither,
 # from a one-line invocation, on anybody's machine. The release workflow stages
 # the install, adds those two files, and builds both artefacts from that one
-# tree — so there is no route to a Windows archive that has not been through
+# tree - so there is no route to a Windows archive that has not been through
 # it. See .github/workflows/release.yml and packaging/QT-SOURCE-OFFER.txt.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include(ClimatCPack)

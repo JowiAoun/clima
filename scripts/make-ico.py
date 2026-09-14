@@ -8,7 +8,7 @@
 Why this exists rather than a dependency: an .ico is a six-byte header, a
 sixteen-byte directory entry per image, and then the images. Since Windows
 Vista those images may be PNG files stored verbatim, which is exactly what we
-already have on disk — so the whole format is forty lines of struct.pack, and
+already have on disk - so the whole format is forty lines of struct.pack, and
 the alternative is asking every contributor to install ImageMagick to convert
 eight PNGs into one file.
 
@@ -40,7 +40,7 @@ def main() -> int:
     for size in SIZES:
         png = icons_dir / f"climat-{size}.png"
         if not png.is_file():
-            print(f"make-ico: {png} is missing — run scripts/icons.sh render", file=sys.stderr)
+            print(f"make-ico: {png} is missing - run scripts/icons.sh render", file=sys.stderr)
             return 1
         images.append((size, png.read_bytes()))
 

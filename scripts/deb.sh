@@ -17,7 +17,7 @@
 # the .deb's Depends field is only correct if the Qt that was linked is the Qt
 # that Debian ships. Build it in the Nix devshell instead and shlibdeps looks up
 # a /nix/store path, finds no package owning it, and produces a .deb that
-# depends on essentially nothing — which installs cleanly on a machine with no
+# depends on essentially nothing - which installs cleanly on a machine with no
 # Qt and then does not start.
 #
 # That failure is invisible locally, because the machine that built it has Qt.
@@ -32,7 +32,7 @@ image="${CLIMAT_DEB_IMAGE:-debian:trixie}"
 mode="${1:-build}"
 
 if ! command -v docker > /dev/null 2>&1; then
-  echo "deb: docker not found — it is how this reaches a Debian userland" >&2
+  echo "deb: docker not found - it is how this reaches a Debian userland" >&2
   exit 1
 fi
 

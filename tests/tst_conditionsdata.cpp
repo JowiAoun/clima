@@ -8,8 +8,8 @@
 //
 // `Detail` is a QML singleton whose fifteen blocks are QVariantMaps, and QML
 // binds `Detail.wind.gust` while the component holding that binding is being
-// constructed. On any start that has to fetch — a first run with a cold cache,
-// an expired forecast, a socket that is still opening — construction happens
+// constructed. On any start that has to fetch - a first run with a cold cache,
+// an expired forecast, a socket that is still opening - construction happens
 // before the first snapshot, so those bindings are evaluated against whatever
 // the maps hold at that moment.
 //
@@ -26,8 +26,8 @@
 // ============================================================================
 // WHY IT IS A KEY-SET COMPARISON AND NOT A LIST OF EXPECTED KEYS
 //
-// The fix is a neutral shape per block — the same keys the build function
-// produces, with every value at its nothing — and its failure mode is drift:
+// The fix is a neutral shape per block - the same keys the build function
+// produces, with every value at its nothing - and its failure mode is drift:
 // somebody adds `d.gustDirection` to buildWind() and does not add it to
 // neutralWind(). That is invisible. It compiles, the card draws correctly the
 // moment data arrives, and the only symptom is one more line of console on
@@ -80,7 +80,7 @@ private Q_SLOTS:
 private:
     // The blocks, as (name, getter) so a failure names the one that drifted.
     // `activities` is deliberately absent: it is a QVariantList, and an empty
-    // list is already well formed — it answers `.length` with 0 and a Repeater
+    // list is already well formed - it answers `.length` with 0 and a Repeater
     // bound to it draws nothing. Only the maps had holes.
     using Block = std::pair<const char *, QVariantMap (ConditionsData::*)() const>;
     static QList<Block> blocks();
@@ -132,20 +132,20 @@ void TestConditionsData::initTestCase()
 //
 // Two surfaces described the same instant from two sources and contradicted
 // each other: the card said "Mainly sunny" while the chart's Now column, a few
-// centimetres below, drew heavy rain — and it was raining.
+// centimetres below, drew heavy rain - and it was raining.
 //
 // `weatherCode` describes a stretch of weather rather than a moment, which is
 // why hourconvention.cpp moves it with the accumulations it belongs to. The
 // chart, the hour strip, the precipitation wash and this card's own next-rain
 // clause all read that series. The `current` block is a separate product on its
-// own convention, so it is trusted for the instants — the temperature at 4:47
-// rather than at four — and not for the stretch.
+// own convention, so it is trusted for the instants - the temperature at 4:47
+// rather than at four - and not for the stretch.
 //
 // Two things had to be arranged for this to be a test of anything, and both are
 // findings in their own right.
 //
 // The fixture's `current` block is stamped 06:30 against a `recordedAt` of
-// 12:28 — six hours stale — so `buildContext` rejects it and rebuilds the
+// 12:28 - six hours stale - so `buildContext` rejects it and rebuilds the
 // observation from the standing hour. Every golden image and every other test
 // therefore runs the *fallback*, where the card and the chart agree because
 // they are already the same value. The branch the live app takes has never been
@@ -155,7 +155,7 @@ void TestConditionsData::initTestCase()
 // And no fixture reproduces the disagreement even then: all four carry a
 // `current` code equal to the standing hour's. The contradiction is introduced
 // rather than recorded, which states the rule more plainly than a fixture could
-// — the current block is overruled on this field however loudly it disagrees.
+// - the current block is overruled on this field however loudly it disagrees.
 void TestConditionsData::theConditionComesFromTheHourWeAreStandingIn()
 {
     const Fixture fixture = fixtures::load(QStringLiteral("toronto"));
@@ -176,7 +176,7 @@ void TestConditionsData::theConditionComesFromTheHourWeAreStandingIn()
     const AirQuality quality = airFuture.result().value();
 
     // What the standing hour says, taken through the same conversion the app
-    // applies — index i carries the code for the hour STARTING at its stamp.
+    // applies - index i carries the code for the hour STARTING at its stamp.
     QVERIFY(forecast.current.time.isValid());
     const QDateTime now = forecast.current.time;
 
@@ -200,7 +200,7 @@ void TestConditionsData::theConditionComesFromTheHourWeAreStandingIn()
     // is not decoration: it is what proves this test is exercising the branch it
     // claims to. Without moving the clock above, the card falls back to the
     // standing hour, agrees with it for a reason that has nothing to do with the
-    // fix, and passes whether or not the fix is there — which is what the first
+    // fix, and passes whether or not the fix is there - which is what the first
     // draft of this test did. Asserting the temperature comes back says the
     // block was in play, and states the other half of the rule while it is at
     // it: instants are exactly what the block is kept for.
@@ -222,7 +222,7 @@ void TestConditionsData::theConditionComesFromTheHourWeAreStandingIn()
 }
 
 // The clause says "from", and "from" names a time to act on. A rain that has
-// been falling for two hours does not have one — announcing it as starting at
+// been falling for two hours does not have one - announcing it as starting at
 // five is the same sentence a dry afternoon would get, which is what the card
 // said while it was raining.
 void TestConditionsData::aRainAlreadyFallingIsNotAnnouncedAsStartingLater()
@@ -357,7 +357,7 @@ void TestConditionsData::nothingInTheNeutralShapeIsUndefined()
 // docs/README.md's first non-negotiable, asked of the one frame that has no
 // data behind it: a card may say nothing, and may not say something.
 //
-// Every string is empty except `trend`, which is "none" — the word TrendBadge
+// Every string is empty except `trend`, which is "none" - the word TrendBadge
 // hides itself on, and the model's own vocabulary for a reading that is not
 // doing anything. Nothing in the shape is a formatted reading: no em dash
 // either, because "we asked and there is no value" is a claim that has not been

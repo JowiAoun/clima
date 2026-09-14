@@ -3,13 +3,13 @@
 // Pressure detail card.
 //
 // Twelve hours of barometric pressure as a sparkline with the reading beneath
-// it — the same anatomy as Temperature and Feels like, deliberately. Three
+// it - the same anatomy as Temperature and Feels like, deliberately. Three
 // sparkline cards that disagree about their marker size and their fill read as
 // three chart libraries sharing a grid, which is what the last review found
 // here: this card's "now" dot was 20 px against the exemplar's 14, the single
 // heaviest mark in the twelve. One marker, one fill, one reading size.
 //
-// The wash under the curve is not a claim that the area means anything —
+// The wash under the curve is not a claim that the area means anything -
 // nobody adds up an afternoon of millibars. Its baseline is the floor of the
 // chart box rather than zero pressure, so there is no quantity there to
 // misread; it is weight beneath the line, and it is what stops this card
@@ -21,7 +21,7 @@
 // against the real range, a slow rise looks like a slow rise.
 //
 // On arrival it draws itself in from the left, the same gesture and the same
-// token as the other two sparkline cards — three cards that agree about their
+// token as the other two sparkline cards - three cards that agree about their
 // marker and their fill and then arrive three different ways are still three
 // chart libraries sharing a grid.
 import QtQuick
@@ -38,7 +38,7 @@ DetailCard {
     // this one visualisation, so they live here and not in theme.js.
     readonly property color lineStart: Theme.isLight ? "#3f7fc4" : "#96c6fa"
     readonly property color lineEnd:   Theme.isLight ? "#6b3fc4" : "#a375ff"
-    // The forecast stretch — the same line with the certainty taken out of it.
+    // The forecast stretch - the same line with the certainty taken out of it.
     readonly property color lineAhead: Theme.isLight ? "#595a4fa8" : "#59c3b4f2"
     // The wash, mid-way between the two ends of the line so it belongs to the
     // whole curve rather than to either half of it. Carried at a higher alpha
@@ -95,7 +95,7 @@ DetailCard {
         // right on `reveal`, so the ribbon, its wash and the dimmed forecast
         // all appear in the order the hours did.
         //
-        // A clip rather than a regenerated path — re-splining a growing subset
+        // A clip rather than a regenerated path - re-splining a growing subset
         // of the points would shift the control points of the stretch already
         // drawn, and the ribbon (two offset copies of the curve) would wriggle
         // twice over. `layer.enabled` is what makes the clip bite: Shapes
@@ -170,7 +170,7 @@ DetailCard {
         }
 
         // "Now", ringed so it stays visible wherever the line puts it. 14 with
-        // a 2.5 ring — the one mark every card in the grid uses.
+        // a 2.5 ring - the one mark every card in the grid uses.
         //
         // Outside the sweep, and grown in when the drawing edge passes it: a
         // mark sitting there before the line arrives is pointing at nothing,
@@ -203,8 +203,8 @@ DetailCard {
             anchors.bottom: parent.bottom
         }
 
-        // The unit, as the one label beside the reading. `d.at` — "12:28 PM
-        // (Now)" — used to be stacked under it, and it is two facts the card
+        // The unit, as the one label beside the reading. `d.at` - "12:28 PM
+        // (Now)" - used to be stacked under it, and it is two facts the card
         // already carries: the observation time is the page's, identical on all
         // twelve cards, and "now" is what the ringed mark on the curve says.
         Text {

@@ -20,7 +20,7 @@ include(GNUInstallDirs)
 #
 # `project(climat VERSION …)` is the one source of truth, and the AppStream
 # <releases> block is the one place a human writes release notes. They are
-# different kinds of thing — a number and a history — so neither can be
+# different kinds of thing - a number and a history - so neither can be
 # generated from the other, which leaves them free to disagree.
 #
 # They disagree exactly once: on the release where somebody bumped the version
@@ -45,7 +45,7 @@ endif()
 
 # ---- the two generated files ------------------------------------------------
 #
-# @ONLY because both formats use ${…} for their own purposes — a desktop entry's
+# @ONLY because both formats use ${…} for their own purposes - a desktop entry's
 # Exec field takes field codes, and neither wants CMake expanding something it
 # meant to keep.
 #
@@ -88,7 +88,7 @@ option(CLIMAT_INSTALL_AUTOSTART
 #
 # The daemon's goes to /etc/xdg/autostart and not to applications/: it is a
 # background service, and the whole reason it exists is the days nobody opens
-# the weather app. The widget host's goes to applications/ and is a launcher —
+# the weather app. The widget host's goes to applications/ and is a launcher -
 # on GNOME the shell extension spawns it and this entry is not how anyone gets
 # the tiles, but on every other desktop it is.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET climat-daemon)
@@ -107,14 +107,14 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET climat-daemon)
     # ---- and the one that starts the daemon on demand ------------------------
     #
     # Under the prefix, unlike the autostart entry, so it stages, relocates and
-    # exports like everything else — and it is therefore NOT behind
+    # exports like everything else - and it is therefore NOT behind
     # CLIMAT_INSTALL_AUTOSTART. The Flatpak that has to switch that option off is
     # the install that needs this file most: it is the only mechanism by which a
     # sandboxed daemon ever starts on a desktop with no GNOME extension on it.
     #
     # The file name has to BE the bus name. The bus looks up an activation
     # request by matching it against the file's own name, and flatpak's export
-    # check requires the same thing before it will publish it — a service file
+    # check requires the same thing before it will publish it - a service file
     # named anything else is silently ignored by both.
     configure_file(
         linux/climat-daemon.service.in
@@ -138,7 +138,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET climat-daemon)
     # "Read-only file system" *after* compiling the whole application, which is
     # the most expensive possible place to discover a packaging rule.
     #
-    # A Flatpak could not use this file anyway — nothing outside the sandbox
+    # A Flatpak could not use this file anyway - nothing outside the sandbox
     # reads /app, and autostart inside one is the Background portal's job, which
     # is a permission prompt and belongs with the notifications work. So the
     # manifest passes -DCLIMAT_INSTALL_AUTOSTART=OFF and the daemon is started by
@@ -188,7 +188,7 @@ install(
 # Debian policy §12.5 requires every package to carry one, and this one is not
 # a formality. `climat` is statically linked and carries Inter, the GeoNames
 # place index and several recorded weather-service payloads inside the
-# executable — five licences that are not ours, in a file that would otherwise
+# executable - five licences that are not ours, in a file that would otherwise
 # claim the whole thing is GPL. See packaging/linux/copyright, which is the
 # SPDX metadata in the source tree collapsed into the format Debian reads.
 #

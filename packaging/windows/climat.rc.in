@@ -15,7 +15,7 @@
 //     quotes when it warns about an unsigned binary, and what a corporate
 //     software inventory reads. An executable with no version block reads as
 //     anonymous, which is the worst possible look for something already
-//     unsigned — see docs/known-gaps.md.
+//     unsigned - see docs/known-gaps.md.
 //
 // The `1` on the ICON line is not decorative: Windows uses the lowest-numbered
 // icon resource as the application icon, so it has to be first and it has to

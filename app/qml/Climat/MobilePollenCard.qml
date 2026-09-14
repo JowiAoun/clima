@@ -9,7 +9,7 @@
 //
 // The three rings underneath are the same reading at one level of detail down.
 // They are rings rather than bars because the question is "how much of the way
-// to bad is this", which is a fraction of something — and a fraction wants an
+// to bad is this", which is a fraction of something - and a fraction wants an
 // unfilled remainder you can see, which is what `trackLine` is for.
 import QtQuick
 import QtQuick.Shapes

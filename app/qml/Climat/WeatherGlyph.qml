@@ -4,11 +4,11 @@
 //
 // Deliberately drawn rather than shipped as assets: it keeps the prototype a
 // single `qml` invocation with no asset pipeline. Production swaps these for
-// Meteocons (MIT) converted to Qt Quick Shapes via svgtoqml — decision D10.
+// Meteocons (MIT) converted to Qt Quick Shapes via svgtoqml - decision D10.
 //
 // ---- the vocabulary ---------------------------------------------------------
 //
-// Thirteen kinds, and they are exactly `climat::ConditionKind` spelled out —
+// Thirteen kinds, and they are exactly `climat::ConditionKind` spelled out -
 // see libclimat/domain/weathercode.h, which owns the WMO table that produces
 // them. That equality is the point rather than a coincidence: this file used
 // to know seven, so `drawableToday()` existed in the engine to fold the other
@@ -18,8 +18,8 @@
 // have lightning in it.
 //
 // So the fold is gone and the six are drawn. If a kind is ever added to the
-// enum without a picture here it renders empty rather than wrong — every one
-// of the booleans below is false — and tests/qml/tst_weatherglyph.qml fails on
+// enum without a picture here it renders empty rather than wrong - every one
+// of the booleans below is false - and tests/qml/tst_weatherglyph.qml fails on
 // exactly that, by grabbing each kind and looking at the pixels.
 //
 // ---- what is deliberately not distinguished ---------------------------------
@@ -29,8 +29,8 @@
 // that is where the difference is carried; a moon behind a cloud that is
 // raining is a sky nobody can see.
 //
-// Six kinds have no night form at all, for the same reason — an overcast sky
-// with something falling out of it looks the same at midnight — and
+// Six kinds have no night form at all, for the same reason - an overcast sky
+// with something falling out of it looks the same at midnight - and
 // weathercode.h's `dayAndNightDifferOnlyWhereTheSkyIsVisible` is the test that
 // pins it.
 // Every delegate below reads `root` for the icon box it is a fraction of, and
@@ -54,7 +54,7 @@ Item {
     // the third ground is what that missed: DayIconBadge's night plate is
     // neither a card nor a pale disc, and a glyph on it was drawn in the card
     // colours because there was no way to say "mid". `glyph.rain` measured
-    // 1.31:1 there — raindrops on the night half of a rainy day card that were
+    // 1.31:1 there - raindrops on the night half of a rainy day card that were
     // arithmetically not visible, and that nothing could have caught, because a
     // token is only ever scored against one ground and this one had three.
     //
@@ -99,7 +99,7 @@ Item {
     readonly property bool hasCloud: kind === "partly-day" || kind === "partly-night"
                                      || root.soloCloud
 
-    // The marks are essential — they are the difference between snow and rain —
+    // The marks are essential - they are the difference between snow and rain -
     // so each carries the pale-ground value the day plate needs. See the note
     // on `rainOnLight` in theme.js for the measurement that put it there.
     readonly property bool onPale: ground === "pale"
@@ -118,8 +118,8 @@ Item {
                                    : onDeep ? Theme.glyph.cloudBottomOnNight
                                             : Theme.glyph.cloudBottom
 
-    // The moon only ever appears on a card or on the night plate — a clear or
-    // partly-cloudy NIGHT is what draws it, and those take the night badge —
+    // The moon only ever appears on a card or on the night plate - a clear or
+    // partly-cloudy NIGHT is what draws it, and those take the night badge -
     // so it has two values rather than three.
     readonly property color moonInk: onDeep ? Theme.glyph.moonOnNight : Theme.glyph.moon
 
@@ -135,7 +135,7 @@ Item {
         //
         // This was a flat circle of `sunGlyphWarm` at 16 %, 1.28x the sun's
         // diameter. A flat circle has an edge you can trace, which is §10.1's
-        // test for a stacked wash rather than a glow — and at the 26 px this
+        // test for a stacked wash rather than a glow - and at the 26 px this
         // glyph is normally drawn at, the edge is a couple of pixels and nobody
         // ever saw it. Staged at 72 px on the current-conditions card it is an
         // unmistakable hard-rimmed ring around the sun.
@@ -211,7 +211,7 @@ Item {
                           0.42,
                           // Not a phase. This crescent means "night", and the
                           // sky it is drawn over is a forecast hour rather than
-                          // a date — so it says which way it points rather than
+                          // a date - so it says which way it points rather than
                           // taking a default that would look like a claim.
                           false)
             }
@@ -249,7 +249,7 @@ Item {
 
     // ---- what falls ------------------------------------------------------
     //
-    // One band under the cloud — y 0.74 to the bottom edge — and four shapes
+    // One band under the cloud - y 0.74 to the bottom edge - and four shapes
     // that share it. `rain`'s three drops keep the exact fractions, widths and
     // 12-degree lean they have had since the prototype, so every recorded rainy
     // frame under tests/golden still matches byte for byte and only the kinds
@@ -319,7 +319,7 @@ Item {
     }
 
     // Fog. Bars in the cloud's own underside colour, because fog *is* the
-    // cloud — the one condition where the sky is at eye level.
+    // cloud - the one condition where the sky is at eye level.
     Repeater {
         model: root.hazeMarks()
         delegate: Rectangle {
@@ -340,7 +340,7 @@ Item {
     // read as emerging rather than as a sticker.
     //
     // Hail has one too. `ConditionKind::Hail` is reached only from WMO 96 and
-    // 99, and both of those are "thunderstorm with slight/heavy hail" — so a
+    // 99, and both of those are "thunderstorm with slight/heavy hail" - so a
     // hail glyph that dropped the lightning would be claiming a calmer sky
     // than the forecast did, and would differ from `thunder` in the wrong
     // direction.
@@ -361,8 +361,8 @@ Item {
     // shorter bump to the right. Coordinates are fractions of the icon box.
     // Two decimals, through a typed parameter.
     //
-    // The obvious spelling — the sum with `.toFixed(2)` written on the end of
-    // it — is four qmllint `missing-property` warnings: the locals those
+    // The obvious spelling - the sum with `.toFixed(2)` written on the end of
+    // it - is four qmllint `missing-property` warnings: the locals those
     // functions add are `var`, so the sum comes back as a QJSPrimitiveValue,
     // and `toFixed` is not a member of one. Handing the number to something
     // declared `real` is what tells qmllint it is a double, and a double has
@@ -429,7 +429,7 @@ Item {
                 out.push({ x: 0.25 + i * 0.21, y: 0.74 + (i === 1 ? 0.07 : 0),
                            w: 0.070, h: 0.22, min: 1.8 });
         } else if (root.falls === "drizzle") {
-            // Four, finer and shorter. Drizzle is not rain drawn smaller — it
+            // Four, finer and shorter. Drizzle is not rain drawn smaller - it
             // is more drops carrying less water, so the count is half of what
             // says so and the length is the other half.
             for (i = 0; i < 4; ++i)
@@ -437,7 +437,7 @@ Item {
                            w: 0.055, h: 0.13, min: 1.4 });
         } else if (root.falls === "sleet") {
             // Rain's outer two columns, at rain's exact size. The middle one
-            // is frozen, below — a sleet glyph is a rain glyph with one drop
+            // is frozen, below - a sleet glyph is a rain glyph with one drop
             // turned to ice, which is what sleet is.
             out.push({ x: 0.25, y: 0.74, w: 0.070, h: 0.22, min: 1.8 });
             out.push({ x: 0.67, y: 0.74, w: 0.070, h: 0.22, min: 1.8 });
@@ -450,7 +450,7 @@ Item {
             return [{ cx: 0.495, cy: 0.86, d: 0.15 }];
 
         // Hail flanks the bolt rather than sitting under it: the two are the
-        // same storm and overlapping them would lose both. Close in, though —
+        // same storm and overlapping them would lose both. Close in, though -
         // pushed out to the icon's edges they stop reading as part of the same
         // picture and start reading as two dots the cloud has grown.
         if (root.falls === "hail")
@@ -465,7 +465,7 @@ Item {
             return [];
 
         // Rain's three columns, at their centres, with the same middle-column
-        // stagger — a snowy hour and a rainy hour should sit at the same
+        // stagger - a snowy hour and a rainy hour should sit at the same
         // rhythm in a row of glyphs, and differ only in what is falling.
         var out = [];
         for (var i = 0; i < 3; ++i)
@@ -482,7 +482,7 @@ Item {
         // Three was tried and the room is not there: the solo cloud's flat base
         // is at 0.80 and the icon ends at 1.00, so three bars and two gaps fit
         // only by making both gaps about a pixel at the size this is normally
-        // drawn — the first bar merged into the cloud's underside and the glyph
+        // drawn - the first bar merged into the cloud's underside and the glyph
         // read as a cloud standing on a shelf. Two bars with real air between
         // them say the same thing and survive being small.
         //

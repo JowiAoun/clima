@@ -12,7 +12,7 @@
 #   ./record.sh                       use build/dev, write into this directory
 #   ./record.sh /path/to/build /tmp   somewhere else, to diff against what is here
 #
-# Re-record when the wire format changes — libclimat/wire/snapshot.cpp — and
+# Re-record when the wire format changes - libclimat/wire/snapshot.cpp - and
 # expect tests/tst_widgets.cpp to need re-reading afterwards, because its
 # assertions name specific keys.
 
@@ -23,7 +23,7 @@ out="${2:-$(dirname "$0")}"
 daemon="$build/daemon/climat-daemon"
 
 if [ ! -x "$daemon" ]; then
-    echo "no climat-daemon at $daemon — build it first:" >&2
+    echo "no climat-daemon at $daemon - build it first:" >&2
     echo "  nix develop -c cmake --build $build --target climat-daemon" >&2
     exit 1
 fi

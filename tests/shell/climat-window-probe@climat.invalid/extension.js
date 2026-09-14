@@ -8,9 +8,9 @@
 // WHAT THIS ANSWERS
 //
 // The Ubuntu widget story rests on one mechanism, and the mechanism is not
-// obvious enough to take on trust. GNOME Shell cannot host a QML surface — an
+// obvious enough to take on trust. GNOME Shell cannot host a QML surface - an
 // extension is GJS running inside gnome-shell's own process, and
-// extensions.gnome.org forbids shipping binaries — so a Climat widget cannot be
+// extensions.gnome.org forbids shipping binaries - so a Climat widget cannot be
 // drawn *by* the extension. It has to be our own Qt process, whose window the
 // extension then adopts and pins to the desktop. That is the DING pattern, and
 // `Meta.WaylandClient` is the whole of it.
@@ -18,8 +18,8 @@
 // The part worth testing is that the client identity is established by an
 // inherited socket fd. `meta_wayland_client_spawnv()` creates a socketpair,
 // keeps the server end, and hands the child the other end as WAYLAND_SOCKET.
-// Everything downstream — owns_window(), hide_from_window_list(), make_dock()
-// — is a question about *that* wl_client.
+// Everything downstream - owns_window(), hide_from_window_list(), make_dock()
+// - is a question about *that* wl_client.
 //
 // Two consequences follow, and this probe exists to prove or disprove them on
 // a real machine rather than reason about them:
@@ -135,8 +135,8 @@ export default class ClimatWindowProbe extends Extension {
         const v = {owns_window: true, mode: MODE};
 
         // make_dock/make_desktop are mutter's own re-typing calls. DING does
-        // not use them — it encodes flags in the window title and parses them
-        // back out — because it predates them. They are what a new extension
+        // not use them - it encodes flags in the window title and parses them
+        // back out - because it predates them. They are what a new extension
         // should use: a DOCK is on every workspace and out of the overview by
         // construction, which is most of what the title hack was emulating.
         if (MODE === 'dock' || MODE === 'desktop') {

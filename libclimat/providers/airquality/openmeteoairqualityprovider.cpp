@@ -21,7 +21,7 @@ namespace {
 
 // The one place the provider's own name is written down. HttpClient disables by
 // this string on a 403 and the cache keys by it, so the forecast provider on the
-// other host must use the same one — see the header.
+// other host must use the same one - see the header.
 const char kProviderId[] = "open-meteo";
 
 // ---- the hourly series we ask for -------------------------------------------
@@ -32,8 +32,8 @@ const char kProviderId[] = "open-meteo";
 // sync and the one that fails silently: an unknown parameter is not an error to
 // Open-Meteo, it is just a series that never arrives.
 //
-// The series that are not in an enum — dust, aerosol optical depth, ammonia,
-// UV — are listed here because there is nothing to enumerate them over. They
+// The series that are not in an enum - dust, aerosol optical depth, ammonia,
+// UV - are listed here because there is nothing to enumerate them over. They
 // are single readings, not families.
 QStringList pollutantSeries()
 {
@@ -104,7 +104,7 @@ std::optional<int> integer(const QJsonValue &value)
 
 // "2026-07-31T05:00" in the location's own zone, plus the offset the response
 // reported, becomes an instant. Qt::ISODate on a string with no zone suffix
-// yields a QDateTime in *local* time — the machine's — so the offset has to be
+// yields a QDateTime in *local* time - the machine's - so the offset has to be
 // applied explicitly or a fixture parsed in Toronto and in Berlin produces two
 // different answers from the same bytes.
 QDateTime instantAt(const QJsonValue &value, int utcOffsetSeconds)
@@ -214,7 +214,7 @@ Attribution OpenMeteoAirQualityProvider::attribution() const
 bool OpenMeteoAirQualityProvider::covers(Coordinate coord) const
 {
     // Global. The interesting question at this provider is not whether it
-    // answers here — it always does — but what is in the answer, which is what
+    // answers here - it always does - but what is in the answer, which is what
     // capabilitiesAt() is for.
     return coord.isValid();
 }
@@ -235,14 +235,14 @@ Capabilities OpenMeteoAirQualityProvider::capabilitiesAt(Coordinate coord) const
 
     // Global, verified: both indices and all six pollutants are non-null in
     // Toronto as well as Berlin. These do not depend on a payload, so they are
-    // never undetermined — a UI can put the Air Quality tab up before the first
+    // never undetermined - a UI can put the Air Quality tab up before the first
     // byte arrives and it will not have to take it down again.
     const CapabilityFlags always = Capability::CurrentConditions | Capability::Hourly
         | Capability::AirQualityIndex | Capability::Pollutants | Capability::UvIndex;
 
     const auto verdict = m_verdicts.constFind(verdictKey(coord));
     if (verdict == m_verdicts.cend()) {
-        // Nothing fetched here yet. Not "no" — see iforecastprovider.h: a "no"
+        // Nothing fetched here yet. Not "no" - see iforecastprovider.h: a "no"
         // that becomes a "yes" two seconds later is a card that pops in, which
         // reads as a bug because it is one.
         return Capabilities(always, Capability::Pollen | Capability::Ammonia);
@@ -296,7 +296,7 @@ OpenMeteoAirQualityProvider::fetchAirQuality(const ForecastRequest &request)
 
     // The key the last parsed payload for this exact request is filed under.
     // Same string the coalescer and the validator store use, because "the same
-    // request" has to mean one thing — libclimat/net/requestkey.h.
+    // request" has to mean one thing - libclimat/net/requestkey.h.
     const QString key = RequestKey::forRequest(http).toString();
 
     // The persistent half of the two caches this class uses. `m_lastParsed`
@@ -350,7 +350,7 @@ OpenMeteoAirQualityProvider::fetchAirQuality(const ForecastRequest &request)
         // A conditional GET that comes back Not Modified has succeeded: the
         // payload we already parsed is confirmed current, and the body is
         // deliberately empty (HttpResponse::notModified). Answering it with the
-        // last parsed value — its expiry moved forward — is what makes the
+        // last parsed value - its expiry moved forward - is what makes the
         // conditional request worth sending at all, and it is the whole of the
         // saving: a few hundred bytes instead of ten kilobytes, several times
         // an hour, per user.
@@ -367,7 +367,7 @@ OpenMeteoAirQualityProvider::fetchAirQuality(const ForecastRequest &request)
             if (remembered == m_lastParsed.cend()) {
                 // 304 for something we never had. The server is revalidating
                 // against a validator somebody else stored. Not retryable and
-                // not our data — say so rather than returning an empty answer.
+                // not our data - say so rather than returning an empty answer.
                 Error error(ErrorKind::Parse,
                             QStringLiteral("304 for a payload this process never parsed"));
                 error.setProviderId(id());
@@ -472,7 +472,7 @@ Result<AirQuality> OpenMeteoAirQualityProvider::parse(const QByteArray &body,
     }
 
     // Read every series once, up front. Each one knows whether it was present
-    // at any hour, which is the gate — computed here, for all series, by the
+    // at any hour, which is the gate - computed here, for all series, by the
     // same rule, with nothing in it that knows the word "Europe".
     QList<Series> pollutantValues;
     QList<Series> subIndexValues;
@@ -525,7 +525,7 @@ Result<AirQuality> OpenMeteoAirQualityProvider::parse(const QByteArray &body,
 
         // The optional-whole, not six optional species. Absent outside the CAMS
         // European domain, which is the difference between "no pollen product"
-        // and "no pollen today" — see airquality.h.
+        // and "no pollen today" - see airquality.h.
         if (airQuality.hasPollen) {
             QMap<PollenSpecies, double> pollen;
             for (int i = 0; i < int(PollenSpecies::Count); ++i) {

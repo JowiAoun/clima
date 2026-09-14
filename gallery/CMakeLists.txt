@@ -11,9 +11,9 @@
 # ---- why it is a binary and not a flag ---------------------------------------
 #
 # It was a flag: `climat --gallery` opened a component library inside the weather
-# app. That is a storybook shipping to end users — about eleven hundred lines of
+# app. That is a storybook shipping to end users - about eleven hundred lines of
 # rail, filter, specimen and catalogue in a product with a <15 MB budget
-# (docs/03-tech-stack.md §3.4) — and the argument against it is not really the
+# (docs/03-tech-stack.md §3.4) - and the argument against it is not really the
 # kilobytes. A developer tool reachable from the product's own binary is a
 # developer tool that has to keep working in the product's own release build,
 # and every flag it adds is a flag someone can reach by accident.
@@ -53,7 +53,7 @@ set(climat_gallery_js_files
 # Same flattening as app/, and here it is load-bearing rather than tidy.
 # `Climat.Gallery` maps to `qrc:/qt/qml/Climat/Gallery/`, exactly one directory
 # below `qrc:/qt/qml/Climat/`, which is what lets gallery.js reach the colour
-# ramps with `.import "../theme.js"` — the one thing in here that cannot come
+# ramps with `.import "../theme.js"` - the one thing in here that cannot come
 # across as a QML type, because a `.pragma library` cannot import a singleton.
 # Leave the source layout doubled into the alias and that resolves one directory
 # too deep, at runtime, as an import that silently imports nothing.
@@ -67,7 +67,7 @@ endforeach()
 # directory over, and for the same reason turned around: a QML module baked
 # straight into an executable is a module only that executable can import.
 #
-# Here the second consumer is the test suite. `tests/qml/` runs the catalogue —
+# Here the second consumer is the test suite. `tests/qml/` runs the catalogue -
 # instantiating all sixty-odd components and asserting none of them errors is
 # the broadest smoke test this tree can have, and it costs almost nothing
 # because Gallery.qml and Specimen.qml already know how to do it. That test has
@@ -97,7 +97,7 @@ target_include_directories(climatgalleryqml PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Both, for the reason app/CMakeLists.txt gives at the same line: the plugin
 # registers the module with the engine, the backing library carries the usage
-# requirements — Qt6::Quick, and the include directory that makes
+# requirements - Qt6::Quick, and the include directory that makes
 # `#include "appoptions.h"` in galleryoptions.cpp resolve. Neither one alone
 # gets a build that both compiles and runs.
 #

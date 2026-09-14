@@ -4,8 +4,8 @@
 // Every tappable area on every screen a finger reaches, measured against
 // Theme.metric.hitMin.
 //
-// The gallery's overlay is how a person reviews this — HitTargets.qml, the
-// "Touch targets" toggle in the rail — and it found four defects the first time
+// The gallery's overlay is how a person reviews this - HitTargets.qml, the
+// "Touch targets" toggle in the rail - and it found four defects the first time
 // it was switched on. This is the same scan with nobody looking at it, which is
 // what stops the fifth from arriving: a target is small because somebody sized
 // a control to its mark instead of to a fingertip, and that is a mistake that
@@ -18,8 +18,8 @@
 // remember. The desktop groups are deliberately out: `usesMobileShell` is false
 // there, the input device is a pointer whose contact patch is one pixel, and a
 // 17 px pager chevron on a 1340 px page is not the same defect as a 17 px link
-// on a phone. If the desktop page ever runs on a touch screen — a tablet in
-// landscape does not, it runs this shell — that decision is worth revisiting.
+// on a phone. If the desktop page ever runs on a touch screen - a tablet in
+// landscape does not, it runs this shell - that decision is worth revisiting.
 //
 // ---- what a failure looks like -------------------------------------------------
 //
@@ -51,7 +51,7 @@ TestCase {
 
     // A real window, shown, and that is not incidental. `Item.visible` is
     // effective visibility: an item inside a QQuickView that was never shown
-    // reports false, and so does every one of its descendants — so the scan's
+    // reports false, and so does every one of its descendants - so the scan's
     // "skip what is hidden" rule would skip an entire screen and report a phone
     // with no controls on it. Under the offscreen platform this window costs
     // nothing and makes `visible` mean here what it means in the app.
@@ -105,7 +105,7 @@ TestCase {
     function test_thereIsSomethingToMeasure() {
         var all = specimens()
         verify(all.length > 10,
-               "only " + all.length + " mobile specimens — is the catalogue loading?")
+               "only " + all.length + " mobile specimens - is the catalogue loading?")
     }
 
     // The scan itself, pinned against a component whose target count is a fact
@@ -114,7 +114,7 @@ TestCase {
     //
     // Without this, a Qt release that renamed `gesturePolicy` or `containsMouse`
     // would turn every assertion below into a scan that found nothing and passed
-    // — which is the exact way the first version of HitTargets failed.
+    // - which is the exact way the first version of HitTargets failed.
     function test_theScannerFindsHandlers() {
         var nav = Qt.createComponent("Climat", "ShellNav").createObject(stage, {})
         verify(nav !== null)

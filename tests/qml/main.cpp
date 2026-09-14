@@ -3,8 +3,8 @@
 //
 // The QML test runner.
 //
-// Everything under tests/ before this file tested libclimat — a network client,
-// a cache, an adapter — and one view model. That is about 3,500 lines of C++.
+// Everything under tests/ before this file tested libclimat - a network client,
+// a cache, an adapter - and one view model. That is about 3,500 lines of C++.
 // The other 13,400 lines of this application are QML, and none of it had a test
 // of any kind: the acceptance check for the whole port was that `--grab`
 // produced identical bytes, which proves a scene renders the same as it used to
@@ -17,7 +17,7 @@
 // The tests are QML because their subject is QML. A C++ test that reaches into
 // a QQmlEngine to instantiate `DetailUvCard` and read a property back is
 // testing the same thing through a keyhole, and it cannot express the assertion
-// that matters most here — that the component's *bindings* resolve.
+// that matters most here - that the component's *bindings* resolve.
 #include <QtQuickTest/quicktest.h>
 
 #include <QGuiApplication>
@@ -31,8 +31,8 @@
 #include "settings.h"
 
 // Both modules, and the second one is not a convenience. `Climat.Gallery` holds
-// gallery.js — the catalogue of every component in the tree, which is what
-// tst_specimen walks — and contrast.js, the WCAG arithmetic the palette page
+// gallery.js - the catalogue of every component in the tree, which is what
+// tst_specimen walks - and contrast.js, the WCAG arithmetic the palette page
 // audits with. Testing against the same catalogue the gallery browses is the
 // point: a component added to the tree and forgotten in the catalogue is
 // already visible as a gap in the gallery, and now it is the same gap in CI.
@@ -54,7 +54,7 @@ public Q_SLOTS:
         // `Engine.places` and `Engine.search` are built by AppEngine::configure
         // and nothing here had called it. The app calls it in main() before the
         // QML engine loads, so those models are never null in the real
-        // program — which means a test that leaves them null is not finding a
+        // program - which means a test that leaves them null is not finding a
         // bug, it is inventing a state and then reporting it.
         //
         // Testing components against an engine the application never runs is
@@ -74,7 +74,7 @@ public Q_SLOTS:
         AppFont::install();
 
         // Nothing here may open a socket. The fixture provider is offline and
-        // no test types into a search box, so today nothing tries — this makes
+        // no test types into a search box, so today nothing tries - this makes
         // that a guarantee rather than an observation, and the same guarantee
         // tst_networkisolation holds the engine to.
         NetworkGuard::install();

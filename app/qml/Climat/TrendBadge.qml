@@ -12,14 +12,14 @@
 //   - On the page, `DetailCard` binds it to a card's `trend`, which comes from
 //     `Detail`. A refresh replaces the whole snapshot at once and rebuilds the
 //     card with it, so a badge is constructed with its direction rather than
-//     watched changing its mind — and under `--fixture` the clock is frozen and
+//     watched changing its mind - and under `--fixture` the clock is frozen and
 //     the value cannot move at all (§10.6).
 //   - In the gallery, the four arrows on the "Trend badge" page are four
 //     separate specimens with four fixed props, not one badge cycling. A
 //     remount destroys and rebuilds them; it does not change anyone's mind.
 //
-// So a direction transition — the arrow swinging, the disc cross-fading between
-// trendUp and trendDown — would be motion built for a state that does not
+// So a direction transition - the arrow swinging, the disc cross-fading between
+// trendUp and trendDown - would be motion built for a state that does not
 // exist, tested only by the developer who wrote it.
 //
 // Nor does it animate on arrival. The badge is punctuation on the status line,

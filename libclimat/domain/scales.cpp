@@ -15,7 +15,7 @@ namespace {
 // One translation context for the file, so a translator sees "Low", "Moderate"
 // and "High" as a set rather than scattered across whichever class happened to
 // hold them. Previously that context was ConditionsData, which is a view model
-// — a name that told a translator nothing about which "Moderate" this was.
+// - a name that told a translator nothing about which "Moderate" this was.
 QString tr(const char *source)
 {
     return QCoreApplication::translate("climat::scales", source);
@@ -57,7 +57,7 @@ QString visibilityBand(double km)
 int beaufortForce(double kmh)
 {
     // NaN is "no reading", and 0 is the only int that can carry that. The
-    // caller has to test the reading rather than the force — see the header;
+    // caller has to test the reading rather than the force - see the header;
     // this is the one function here that cannot answer with an empty string.
     if (qIsNaN(kmh))
         return 0;
@@ -119,14 +119,14 @@ QString pollutantLabel(const QString &id)
     //
     // Both spellings of each species, and that is not redundancy.
     //
-    // The left column is what `climat::pollutantId()` emits — "ozone",
-    // "nitrogen_dioxide" — because that is what the two callers actually pass:
+    // The left column is what `climat::pollutantId()` emits - "ozone",
+    // "nitrogen_dioxide" - because that is what the two callers actually pass:
     // app/viewmodels/conditionsdata.cpp calls pollutantLabel(pollutantId(...))
     // and widgets/wx.cpp calls it on the id that arrived over the wire. This
     // table opened with only the chemical short forms, which pollutantId() has
     // never produced, so four of the six species fell through to the fallback
     // and the air-quality card printed OZONE, NITROGEN_DIOXIDE,
-    // SULPHUR_DIOXIDE and CARBON_MONOXIDE — the same defect this function was
+    // SULPHUR_DIOXIDE and CARBON_MONOXIDE - the same defect this function was
     // written to fix, surviving in the four rows nobody spot-checked.
     //
     // The short forms stay because a snapshot written by another version of

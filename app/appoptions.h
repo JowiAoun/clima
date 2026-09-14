@@ -10,7 +10,7 @@
 //
 //   * `--help` printed nothing, because there was nothing to print it from.
 //   * `--version` printed nothing either.
-//   * A misspelled flag was silently ignored — `--vieport mobile` opened the
+//   * A misspelled flag was silently ignored - `--vieport mobile` opened the
 //     desktop shell and looked like the flag did nothing.
 //   * `--size 30x` warned and carried on, so a headless grab produced a
 //     perfectly good screenshot at the wrong size and a warning nobody read.
@@ -24,7 +24,7 @@
 // Nothing here knows what a viewport preset is worth in pixels, or which sky
 // phase paints which gradient. Viewports.qml and Theme.qml own those tables and
 // stay the only place they are written down. What this file owns is the CLI's
-// *vocabulary* — the set of words the parser accepts and lists in --help — and
+// *vocabulary* - the set of words the parser accepts and lists in --help - and
 // the two lists below are exactly that and nothing more. If a preset is ever
 // added to Viewports.qml without being added here, the flag is rejected with a
 // message listing what is accepted, which is a loud failure rather than a
@@ -48,7 +48,7 @@
 // in the .cpp). Only their *registration with the parser* is conditional: the
 // properties themselves always exist, so QML can read AppOptions.metric in
 // every build and get "" in the ones where the flag was never offered. The
-// alternative — #ifdef'ing the Q_PROPERTY list — would mean Main.qml failing to
+// alternative - #ifdef'ing the Q_PROPERTY list - would mean Main.qml failing to
 // load in a packaged build, and failing at the point of use, which is the same
 // class of bug the QML_FILES list in app/CMakeLists.txt exists to prevent.
 #pragma once
@@ -110,7 +110,7 @@ public:
     // prints and exits, which is what a command-line program is supposed to do.
     static void parseCommandLine(const QCoreApplication &app);
 
-    // The instance parseCommandLine() filled. Never null — before the parse it
+    // The instance parseCommandLine() filled. Never null - before the parse it
     // is simply an AppOptions holding every default, so a unit test or a tool
     // that never calls parseCommandLine() still gets a usable object.
     static AppOptions *instance();
@@ -136,7 +136,7 @@ public:
     //   1. --fixture <name>, or --fixture off, which always wins
     //   2. CLIMAT_FIXTURE in the environment, which is how CI says it once for
     //      a whole job rather than on every command
-    //   3. a capture — --grab or --film — which defaults to the fixture,
+    //   3. a capture - --grab or --film - which defaults to the fixture,
     //      because a screenshot taken from the live network is a screenshot of
     //      a different afternoon every time it is taken
     //
@@ -147,21 +147,21 @@ public:
     // ---- except that --place names a place, and a fixture cannot answer -----
     //
     // A fixture is one recorded place. It answers with that place's weather
-    // whatever coordinate it is handed — that is what makes it reproducible.
+    // whatever coordinate it is handed - that is what makes it reproducible.
     // So `--place Reykjavik --grab out.png` used to take rule 3, fetch nothing,
     // and write a PNG with "Reykjavik, Capital Region" in the location bar over
     // Toronto's recorded afternoon: 26 °C, high 28, low 16, on a day Reykjavik
     // reached 16.
     //
     // That is not a silent default, it is a mislabelled forecast, and it is
-    // worse than it sounds because the output is a file — the warning would
+    // worse than it sounds because the output is a file - the warning would
     // scroll past in a terminal while the picture goes into a bug report or a
     // README.
     //
     // So an implied fixture yields to a named place: rule 3 and rule 2 both
     // check `--place` and step aside, saying so on stderr, and the run goes
     // live. Rule 1 does not, because `--fixture <name> --place <query>` is two
-    // explicit and incompatible instructions — that combination is rejected in
+    // explicit and incompatible instructions - that combination is rejected in
     // parseCommandLine rather than silently resolved either way.
     //
     // `--grab` with no `--place` is untouched, which is the property every
@@ -189,7 +189,7 @@ public:
     qreal       scroll()      const { return m_scroll; }
 
 private:
-    // Private, and that is not tidiness — it is what makes create() run.
+    // Private, and that is not tidiness - it is what makes create() run.
     //
     // QQmlPrivate::singletonConstructionMode() tests is_default_constructible
     // *before* it looks for a factory, so a QML_SINGLETON that can be

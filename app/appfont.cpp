@@ -16,15 +16,15 @@ namespace {
 // Inter ships a variable font, InterVariable.ttf, whose `wght` axis runs 100 to
 // 900 and which declares nine named instances including Bold. It is one file
 // instead of two, it is the format the project recommends, and it is the wrong
-// choice here. Measured on this Qt — 6.11.1, both the offscreen and the xcb
+// choice here. Measured on this Qt - 6.11.1, both the offscreen and the xcb
 // platform plugins, same answer from each:
 //
 //     QFontDatabase::applicationFontFamilies()  ->  ("Inter Variable")
 //     QFontDatabase::styles("Inter Variable")   ->  ("Regular")
 //
 // One style. Qt's FreeType font database registers the file's default instance
-// and does not expand the other eight, so `font.bold: true` — which 58 lines in
-// the QML tree set — does not select Inter Bold. It selects Inter Regular and
+// and does not expand the other eight, so `font.bold: true` - which 58 lines in
+// the QML tree set - does not select Inter Bold. It selects Inter Regular and
 // asks FreeType to fatten the outline, and the giveaway is the advance width:
 //
 //     "Heavy rain expected 27° Weather details" at 34 px
@@ -51,7 +51,7 @@ namespace {
 // way, and `font.bold` picks the second one everywhere. They also cost less:
 // 832 KB for the pair against 880 KB for the variable file.
 //
-// Reach for the variable font when a weight between these two is wanted — a
+// Reach for the variable font when a weight between these two is wanted - a
 // Medium for a settings surface, say. `QFont::setVariableAxis` addresses the
 // axis directly and does not depend on instance enumeration, so it works today;
 // it just cannot be reached through `font.bold`.
@@ -61,7 +61,7 @@ namespace {
 // `:/qt/qml/Climat/fonts/…`, which is where qt_add_qml_module's RESOURCES put a
 // file listed as `fonts/Inter-Regular.ttf`: the module's own resource prefix,
 // then the path relative to app/CMakeLists.txt. Not aliased flat the way the
-// .qml and .js files are — those are flattened so that the module directory
+// .qml and .js files are - those are flattened so that the module directory
 // matches its URI, and a font is not a QML type, so a subdirectory is just a
 // subdirectory.
 constexpr auto kFontResources = std::array{
@@ -74,7 +74,7 @@ constexpr auto kFontResources = std::array{
 QString AppFont::install()
 {
     // Collected rather than taken from the first file, because both files
-    // declare the same family — "Inter", styles Regular and Bold — and the
+    // declare the same family - "Inter", styles Regular and Bold - and the
     // check worth making is that they *agree*. Two faces registering two
     // families is a packaging mistake (someone dropped in InterDisplay-Bold,
     // whose family is "Inter Display") and its symptom is a bold heading in a
@@ -109,7 +109,7 @@ QString AppFont::install()
     // Modify the application font rather than construct one. A QFont built from
     // a family name alone leaves every other field unresolved, and assigning it
     // back is how an app quietly loses the point size the platform chose for it
-    // — which is the size the user's desktop asked for, at the DPI they asked
+    // - which is the size the user's desktop asked for, at the DPI they asked
     // for, and none of our business.
     //
     // Nothing visible depends on that size today: all 158 Text items in the two

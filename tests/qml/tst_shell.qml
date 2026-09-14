@@ -5,7 +5,7 @@
 //
 // Every other assertion about this shell is a picture: the golden images cover
 // what the phone, the portrait tablet and the landscape tablet look like. What
-// they cannot cover is *identity* and *sequence* — whether the page you are
+// they cannot cover is *identity* and *sequence* - whether the page you are
 // looking at is the same object it was a moment ago, and whether a value that
 // is pushed rather than bound is still arriving after the thing that pushes it
 // has changed twice.
@@ -31,7 +31,7 @@ TestCase {
     // and every back-navigation assertion failed with the tab unmoved.
     //
     // `when: windowShown` is what makes that window real. It is also what makes
-    // the shell visible, which the layout needs — an item in a view that was
+    // the shell visible, which the layout needs - an item in a view that was
     // never shown lays out but reports `visible: false` all the way down.
     Item {
         id: host
@@ -89,7 +89,7 @@ TestCase {
     //
     // The whole of the landscape work rests on this. The nav moves from the
     // bottom to the left, the page loses 76 px of width and gains the height
-    // the bar was taking, and the content splits into two columns — and none of
+    // the bar was taking, and the content splits into two columns - and none of
     // that may touch `Loader.source`, because a page rebuilt on rotation
     // re-runs every card's reveal and loses where the reader had scrolled to.
     function test_turningTheDeviceDoesNotRebuildThePage() {
@@ -104,7 +104,7 @@ TestCase {
 
         compare(shell.railed, true, "a landscape tablet takes the rail")
         compare(shell.currentPage, before,
-                "the page was rebuilt by a rotation — check Loader.source")
+                "the page was rebuilt by a rotation - check Loader.source")
 
         shell.destroy()
     }
@@ -124,7 +124,7 @@ TestCase {
 
     // ---- what the shell pushes down -----------------------------------------
     //
-    // Pushed, never bound — see MobileShell's note. A push that stops arriving
+    // Pushed, never bound - see MobileShell's note. A push that stops arriving
     // is invisible: the page keeps whatever it was last told, which is a
     // plausible number, so the failure looks like a layout that is slightly
     // wrong rather than like a mechanism that is dead.
@@ -146,7 +146,7 @@ TestCase {
 
         // Narrow enough that a second column stops being worth it. It is below
         // the rail's threshold too, and it has to be: a rail needs 900 px, and
-        // 900 minus the rail minus the margins is still 796 — so a shell that
+        // 900 minus the rail minus the margins is still 796 - so a shell that
         // has a rail always has two columns, and there is no width at which
         // this shell shows one column beside a rail.
         shell.width = 700

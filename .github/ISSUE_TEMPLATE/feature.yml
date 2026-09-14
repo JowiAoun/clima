@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        The plan already covers a lot of ground — [`docs/06-roadmap.md`](https://github.com/JowiAoun/climat/blob/main/docs/06-roadmap.md)
+        The plan already covers a lot of ground - [`docs/06-roadmap.md`](https://github.com/JowiAoun/climat/blob/main/docs/06-roadmap.md)
         has eight milestones, and [`docs/known-gaps.md`](https://github.com/JowiAoun/climat/blob/main/docs/known-gaps.md)
         says what is deliberately missing today. If your idea is in either, comment there
         instead so the discussion stays in one place.

@@ -12,7 +12,7 @@
 //
 // So the kind is an enum and the message is decoration. The rule for adding a
 // kind is that somebody has to be able to name the different thing they would
-// *do* about it — if two kinds always lead to the same branch, they are one
+// *do* about it - if two kinds always lead to the same branch, they are one
 // kind with two messages.
 //
 // ---- why there is no error code space, and no errno -------------------------
@@ -45,7 +45,7 @@ enum class ErrorKind {
     //
     // This is a policy refusal, not a transport failure, and it is the single
     // most important value in this enum. MET Norway and api.weather.gov both
-    // return it for a User-Agent they will not serve — verified: api.weather.gov
+    // return it for a User-Agent they will not serve - verified: api.weather.gov
     // answers 403 to an empty UA today. Retrying is how a project gets its IP
     // banned rather than merely refused, so HttpClient treats this as a hard
     // stop for the provider's whole process lifetime and never sends again.
@@ -61,7 +61,7 @@ enum class ErrorKind {
     ServerError,
 
     // 404, 410, and the rest of the 4xx range that is about *this* request
-    // rather than about us. Not retryable — the same request will fail again.
+    // rather than about us. Not retryable - the same request will fail again.
     NotFound,
 
     // A status we have no specific handling for. Carries `httpStatus`.
@@ -84,7 +84,7 @@ enum class ErrorKind {
     Storage,
 
     // The provider does not cover this coordinate, or does not offer this
-    // product here. Not a failure so much as an absence — docs §4.4: "A
+    // product here. Not a failure so much as an absence - docs §4.4: "A
     // provider that returns nothing must make the UI *hide* the feature, not
     // show a broken one."
     Unsupported,
@@ -110,7 +110,7 @@ public:
     [[nodiscard]] QString providerId() const { return m_providerId; }
     void                  setProviderId(QString id) { m_providerId = std::move(id); }
 
-    // When it is worth trying again. Invalid means "no advice" — either because
+    // When it is worth trying again. Invalid means "no advice" - either because
     // the failure is permanent or because nobody told us. Set from Retry-After
     // when the server sent one, and from the backoff schedule otherwise, so a
     // caller that wants to show "retrying at 14:05" has a number to show.
@@ -122,7 +122,7 @@ public:
     // disagrees with the table below is a caller reading the kind wrong.
     [[nodiscard]] bool isRetryable() const;
 
-    // For logs and for QCOMPARE failure output. Not for users — user-facing
+    // For logs and for QCOMPARE failure output. Not for users - user-facing
     // strings are the app's job and go through Qt Linguist.
     [[nodiscard]] QString toString() const;
 

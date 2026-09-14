@@ -12,7 +12,7 @@
 //
 // So this test asserts the environment before any image is compared, and it is
 // ordered first for that reason. It measures the handful of numbers that decide
-// where a glyph lands, and if any of them has moved it says so — once, in
+// where a glyph lands, and if any of them has moved it says so - once, in
 // words, naming the number.
 //
 // What it deliberately does not do is assert a *good* value. There is no
@@ -113,7 +113,7 @@ void TestEnvironment::theMetricsAreWhatTheGoldensWereTakenAt()
 
     // The bootstrap path, and the only way this file is ever written. Running
     // the test with CLIMAT_WRITE_FINGERPRINT=1 records the current machine as
-    // the reference — which is a thing to do deliberately, inside the pinned
+    // the reference - which is a thing to do deliberately, inside the pinned
     // container, at the same time as re-recording the images, and never as a
     // way of making a red test go green.
     if (!qEnvironmentVariableIsEmpty("CLIMAT_WRITE_FINGERPRINT")) {
@@ -126,7 +126,7 @@ void TestEnvironment::theMetricsAreWhatTheGoldensWereTakenAt()
 
     QFile file(fingerprintPath());
     QVERIFY2(file.open(QIODevice::ReadOnly),
-             qPrintable(QStringLiteral("cannot read %1 — run once with "
+             qPrintable(QStringLiteral("cannot read %1 - run once with "
                                        "CLIMAT_WRITE_FINGERPRINT=1 to record it")
                             .arg(fingerprintPath())));
 

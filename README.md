@@ -9,7 +9,7 @@
 
 ![Climat on a phone, a tablet and a desktop](docs/images/hero.png)
 
-**Status: early. Version 0.1.0, and the version number is honest** — this
+**Status: early. Version 0.1.0, and the version number is honest.** This
 installs, runs and shows you real weather, and several things the plan calls for
 are not built yet. [What is missing](docs/known-gaps.md) is written down rather
 than left to be discovered.
@@ -20,7 +20,7 @@ what the app actually draws.
 
 ## What it does today
 
-- **Hourly and ten-day forecasts** — temperature, precipitation, wind, humidity,
+- **Hourly and ten-day forecasts:** temperature, precipitation, wind, humidity,
   pressure, visibility, UV and air quality, as charts rather than a grid of
   numbers.
 - **Severe weather warnings**, live, from Environment and Climate Change Canada
@@ -33,13 +33,13 @@ what the app actually draws.
   in turn.
 - **A dark and a light theme**, following the desktop's own setting through the
   XDG portal.
-- **Preferences** — a gear beside the place name on the desktop, or the Me tab
+- **Preferences:** a gear beside the place name on the desktop, or the Me tab
   on a phone. The background can follow the sky over the place on screen or hold
   still; the clock is 24-hour or AM/PM everywhere at once, tiles included; and
   units are °C or °F as a pair of presets **over** five independent preferences,
   so °C with mph or inches of rain with millimetres of visibility is one tap and
   not an impossibility.
-- **Phone, tablet and desktop layouts** — one product, three arrangements,
+- **Phone, tablet and desktop layouts:** one product, three arrangements,
   chosen by the width of the window.
 - **Ten desktop widgets**, drawn from the same components as the app, pinned
   under your windows on GNOME by a shell extension that draws no weather itself,
@@ -47,14 +47,14 @@ what the app actually draws.
   asking for it directly. One process fetches; every tile and the top-bar
   indicator read from it over the session bus, so a desktop full of widgets is
   one client of the forecast service and not eight.
-- **`climat-cli`** — the forecast for a status bar, a script or a terminal.
+- **`climat-cli`:** the forecast for a status bar, a script or a terminal.
   `climat-cli now`, `hourly`, `daily`, `places`; `--json` and `--csv` for a
   script, in canonical units so a preference nobody opened cannot move a number
   something parses. It reads the same cache the app fills, so a status bar
   polling every minute is not a second client of the forecast service.
 
 - **"Use my location"** through GeoClue2 on a desktop and through the
-  `org.freedesktop.portal.Location` portal inside a Flatpak — your own desktop
+  `org.freedesktop.portal.Location` portal inside a Flatpak. Your own desktop
   asks you, once, and the app is told a city and never a street.
 
 - **Offline-first.** It renders from its cache and reconciles with the network,
@@ -79,7 +79,7 @@ if it were a feature list is the thing this project is trying not to be.
   above does not port: it is a session bus and a window that can be hidden.
 
 - **No translations.** Every string is marked and the catalogue is kept current
-  by CI — 271 of them — and not one language has been translated. A machine
+  by CI (271 of them), and not one language has been translated. A machine
   translation would be worse than none.
 - **The widgets have never been pinned on a KDE session.** They pin themselves
   on GNOME, which was measured by hand, and on wlroots, which is measured in CI
@@ -93,7 +93,7 @@ All of them, with what would close each: [`docs/known-gaps.md`](docs/known-gaps.
 ### Linux
 
 **Flatpak** is the primary channel. It brings its own Qt, so it works on any
-distribution — including Ubuntu 24.04, which ships Qt 6.4 and cannot run the
+distribution, including Ubuntu 24.04, which ships Qt 6.4 and cannot run the
 `.deb`.
 
 ```sh
@@ -108,7 +108,7 @@ sudo apt install ./climat_0.1.0_amd64.deb
 ```
 
 It declares `libqt6core6t64 (>= 6.8.2)` and apt will refuse to install it on
-anything older. That is the intended behaviour — a package that installed and
+anything older. That is the intended behaviour: a package that installed and
 then would not start is worse than one that says why.
 
 ### Windows
@@ -127,17 +127,17 @@ gh attestation verify climat-0.1.0-windows-x64.msi --repo JowiAoun/climat
 ```
 
 That proves the file came out of this repository's release workflow at a named
-commit. It is weaker than a signature in one way — Windows does not check it —
-and stronger in another, since it names the source revision.
+commit. It is weaker than a signature in one way (Windows does not
+check it) and stronger in another, since it names the source revision.
 
 ## What it looks like
 
 | | |
 |---|---|
-| **Desktop** — one scrolling column, the chart card open on Overview <br> ![](docs/images/desktop.png) | **Phone** — five destinations under a nav bar <br> ![](docs/images/phone.png) |
-| **Tablet** — two content columns, bottom bar <br> ![](docs/images/tablet.png) | **Tablet, turned** — the nav becomes a left rail <br> ![](docs/images/tablet-landscape.png) |
+| **Desktop:** one scrolling column, the chart card open on Overview <br> ![](docs/images/desktop.png) | **Phone:** five destinations under a nav bar <br> ![](docs/images/phone.png) |
+| **Tablet:** two content columns, bottom bar <br> ![](docs/images/tablet.png) | **Tablet, turned:** the nav becomes a left rail <br> ![](docs/images/tablet-landscape.png) |
 
-**Desktop widgets** — six of the ten. On GNOME a shell extension launches
+**Desktop widgets:** six of the ten. On GNOME a shell extension launches
 Climat's own Qt process and pins its window below everything else; it draws none
 of this itself, because GNOME Shell cannot host a QML surface. On KDE and every
 wlroots compositor the same binary asks for a desktop-layer surface and there is
@@ -147,14 +147,14 @@ and the measurements.
 ![](docs/images/widgets.png)
 
 The tablet is not a third layout. It is the phone's shell with two questions
-answered differently — how many content columns the width buys, and whether the
+answered differently: how many content columns the width buys, and whether the
 navigation is a bar or a rail. See
 [`docs/10-design-system.md`](docs/10-design-system.md) §10.12.
 
 ## Build from source
 
 Everything goes through a Nix devshell, which pins Qt, the compiler, FreeType
-and fontconfig by store hash — that is what makes the golden images reproducible
+and fontconfig by store hash, which is what makes the golden images reproducible
 on a machine that is not this one.
 
 ```sh
@@ -176,7 +176,7 @@ scripts/dev-run.sh --place "Halifax"           # live ECCC alerts
 scripts/dev-run.sh --fixture seattle           # four NWS alerts, offline
 ```
 
-The desktop tiles are a second binary reading from a third — a weather service
+The desktop tiles are a second binary reading from a third: a weather service
 the session bus starts on demand once Climat is installed. Nothing is installed
 in a build tree, so this starts one beside them:
 
@@ -185,7 +185,7 @@ scripts/widgets-run.sh                         # the tiles, with a daemon to rea
 CLIMAT_FIXTURE=toronto scripts/widgets-run.sh   # …from recorded data
 ```
 
-Without a Nix devshell, any Qt 6.8 or newer works —
+Without a Nix devshell, any Qt 6.8 or newer works;
 [`BUILDING.md`](BUILDING.md) has the distribution package lists and the
 CMake options.
 
@@ -204,7 +204,7 @@ CLIMAT_BINARY=build/dev/gallery/climat-gallery scripts/dev-run.sh
 ```
 
 It has a touch-target overlay that draws every tap area a layout leaves under
-44 px, which is how nine undersized controls were found — including a 14×14
+44 px, which is how nine undersized controls were found, including a 14×14
 disclosure chevron on every phone screen.
 
 ## Stack
@@ -216,7 +216,7 @@ alerts are region-routed to ECCC and the NWS. Reverse geocoding is offline, from
 a 412 KiB bundled GeoNames index, so turning a coordinate into "Toronto,
 Ontario" never leaves the machine.
 
-There is no server. There never will be — every request goes from your machine
+There is no server. There never will be: every request goes from your machine
 to a public weather service, and nothing goes anywhere else.
 
 ## Data and attribution
@@ -224,7 +224,7 @@ to a public weather service, and nothing goes anywhere else.
 Weather from [Open-Meteo](https://open-meteo.com/) (CC-BY 4.0), which aggregates
 ECMWF, NOAA, DWD, Météo-France, the UK Met Office and fourteen more national
 services; [MET Norway](https://api.met.no/) as fallback; alerts from
-[ECCC](https://api.weather.gc.ca/) (Open Government Licence – Canada 2.0) and
+[ECCC](https://api.weather.gc.ca/) (Open Government Licence - Canada 2.0) and
 the [US National Weather Service](https://api.weather.gov/) (public domain);
 place names from [GeoNames](https://www.geonames.org/) (CC-BY 4.0).
 
@@ -234,10 +234,10 @@ from the provider registry rather than maintained by hand. The full record is in
 
 ## Licence
 
-- `libclimat` — **MPL-2.0**, so the engine stays reusable outside a GPL program
-- the application — **GPL-3.0-or-later**
-- authored assets and documentation — **CC-BY-SA-4.0**
-- bundled Inter — **OFL-1.1**; bundled GeoNames data — **CC-BY 4.0**
+- `libclimat`: **MPL-2.0**, so the engine stays reusable outside a GPL program
+- the application: **GPL-3.0-or-later**
+- authored assets and documentation: **CC-BY-SA-4.0**
+- bundled Inter: **OFL-1.1**; bundled GeoNames data: **CC-BY 4.0**
 
 The repository is [REUSE 3.3](https://reuse.software/) compliant: every file
 carries an SPDX header, and `reuse lint` gates every commit. Every release
@@ -253,5 +253,5 @@ commits, `git commit -s`, and if a change moves a golden image or a README
 image, the pull request has to say why the pixels moved.
 
 The planning documents in [`docs/`](docs/README.md) are a frozen baseline,
-amended in place with dated corrections when the code contradicts them —
+amended in place with dated corrections when the code contradicts them;
 `docs/07-packaging.md` §7.6 is a good example of what that looks like.

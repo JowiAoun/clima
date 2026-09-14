@@ -4,7 +4,7 @@
 // The shot catalogue, and the copy of it that lives in C++.
 //
 // `--shot` has to reject a bad id before any QML has loaded, so GalleryOptions
-// carries its own list — C++ cannot read a `.pragma library`. That is a second
+// carries its own list - C++ cannot read a `.pragma library`. That is a second
 // copy of shots.js, and a second copy with nothing checking it is a flag that
 // quietly refuses a sheet somebody added, or offers one that no longer exists.
 // The symptom in both directions is "--shot foo says foo is not a shot", which
@@ -16,7 +16,7 @@
 //
 // It also builds every sheet, which is the part that actually catches things.
 // A sheet is three shells, a Row, a Repeater and a size computed from
-// Viewports — a shape with several ways to come out empty, and an empty sheet
+// Viewports - a shape with several ways to come out empty, and an empty sheet
 // renders as a correctly sized window full of sky.
 import QtQuick
 import QtTest
@@ -94,7 +94,7 @@ TestCase {
                data.shot + " is shorter than the devices in it")
 
         compare(QmlWarnings.count, 0,
-                data.shot + " built with warnings — " + QmlWarnings.summary())
+                data.shot + " built with warnings - " + QmlWarnings.summary())
 
         sheet.destroy()
     }

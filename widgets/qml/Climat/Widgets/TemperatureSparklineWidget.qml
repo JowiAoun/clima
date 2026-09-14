@@ -10,7 +10,7 @@
 // for `hourly.temperature` and the daemon sends `hourly.time` whether it was
 // asked or not, because twelve numbers with no axis look perfectly usable and
 // are silently wrong the moment the slice starts anywhere other than the hour
-// you assumed. Nothing here prints a time — and the first and last labels below
+// you assumed. Nothing here prints a time - and the first and last labels below
 // come off that axis, so a slice that started an hour late would say so.
 //
 // ============================================================================

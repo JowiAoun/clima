@@ -8,7 +8,7 @@
 //
 // Every one of these strings is a CMake variable rather than a literal, and
 // that is the whole point of the file. The User-Agent Climat sends carries its
-// version, and the version has to be the release's version — a hardcoded string
+// version, and the version has to be the release's version - a hardcoded string
 // here would drift from the tag on the first release nobody remembered to grep
 // for, and the failure mode is not a build error but a client that lies about
 // itself to MET Norway. `@PROJECT_VERSION@` comes from the same `project()`
@@ -19,7 +19,7 @@
 // docs/02-data-sources.md §2.9 records what MET Norway asks for:
 // `Climat/<version> (+https://…; contact@…)`, and states plainly that a generic
 // User-Agent gets a 403. api.weather.gov is the same story and is stricter in
-// practice — an empty User-Agent is refused today, verified against the live
+// practice - an empty User-Agent is refused today, verified against the live
 // service. So this is a compliance string, and CLIMAT_CONTACT is a cache
 // variable so that a distribution rebuilding Climat can point it at a channel
 // *they* actually read. A fork that keeps our issue tracker in its User-Agent

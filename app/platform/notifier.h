@@ -13,12 +13,12 @@
 //                                            icon. Tried first.
 //   2. org.freedesktop.Notifications         the service every Linux desktop
 //                                            has implemented since 2005. For
-//                                            a session with no portal — a
+//                                            a session with no portal - a
 //                                            bare compositor, an old
 //                                            distribution.
 //
-// The fallback is taken only when the portal *answers* that it cannot — the
-// name is not on the bus, or the interface is not on the object — and not on
+// The fallback is taken only when the portal *answers* that it cannot - the
+// name is not on the bus, or the interface is not on the object - and not on
 // any other error. A portal that exists and refuses has made a decision, and
 // going around it to the service underneath would be exactly the thing a
 // portal is there to prevent.
@@ -26,8 +26,8 @@
 // ============================================================================
 // WHAT IS NOT HERE
 //
-// Actions. A notification here says what the desktop's own alert would say —
-// the event, the grade, until when — and clicking it is the desktop's
+// Actions. A notification here says what the desktop's own alert would say -
+// the event, the grade, until when - and clicking it is the desktop's
 // business. Wiring "open the app on the sheet" needs a route back into a
 // process that may have been closed, which is the daemon's job and a later
 // one.
@@ -35,7 +35,7 @@
 // Windows toasts and macOS Notification Center. Neither has a session bus,
 // and this class is compiled to a stub without one: available() is false, the
 // preference row does not appear, and nothing is promised. docs/04 §4.9 lists
-// both; the shape here — an id, a title, a body, a priority — is the shape
+// both; the shape here - an id, a title, a body, a priority - is the shape
 // each of them wants, so the port is a second file and not a redesign.
 
 #pragma once
@@ -57,7 +57,7 @@ public:
     explicit Notifier(QObject *parent = nullptr);
     ~Notifier() override;
 
-    // Whether this build can post one at all — that is, whether it was
+    // Whether this build can post one at all - that is, whether it was
     // compiled with Qt D-Bus. What decides whether the preference row is
     // shown, and deliberately a question about the BUILD rather than about
     // the session.
@@ -65,7 +65,7 @@ public:
     // Asking whether a session bus is connected would be the more precise
     // question and it is the wrong one here, for a reason that is about
     // pictures. Every golden image is rendered headless, where there is no
-    // session bus, while a developer's `--grab` has one — so a row whose
+    // session bus, while a developer's `--grab` has one - so a row whose
     // visibility turned on that would be in the screenshot on one machine and
     // absent on the next, and the failure would appear in CI on an unrelated
     // change with nothing in the diff to explain it. docs/screenshots.md and

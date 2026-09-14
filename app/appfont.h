@@ -10,7 +10,7 @@
 // CoreText picks one on macOS. On the machine this was written on the answer was
 // DejaVu Sans. Two consequences, and the second is the expensive one.
 //
-//   The product looks different on every operating system. Not subtly — the
+//   The product looks different on every operating system. Not subtly - the
 //   metrics differ, so the wrap points differ, so a two-line body that fits in a
 //   fixed-height card here overflows it there, and nobody sees that until a user
 //   posts a screenshot.
@@ -39,8 +39,8 @@ namespace AppFont {
 
 // Registers the bundled faces and makes them the application font.
 //
-// Call once, after the QGuiApplication exists — the font database needs the
-// platform integration up — and before the QML engine loads anything, because a
+// Call once, after the QGuiApplication exists - the font database needs the
+// platform integration up - and before the QML engine loads anything, because a
 // Text item resolves its family from the application font when it is created.
 //
 // Returns the family name that was installed, which is the name the *files*

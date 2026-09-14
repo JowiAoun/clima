@@ -14,14 +14,14 @@ CachePolicy policyFor(DataKind kind)
     //
     //   Current conditions          10 min    ETag / If-Modified-Since   yes
     //   Hourly / daily forecast     30 min    ETag                       yes
-    //   15-minute nowcast            5 min    —                          yes
-    //   Ensemble / model comparison 60 min    —                          yes
-    //   Air quality                 60 min    —                          yes
+    //   15-minute nowcast            5 min    -                          yes
+    //   Ensemble / model comparison 60 min    -                          yes
+    //   Air quality                 60 min    -                          yes
     //   Alerts                       3 min    CAP sent/expires           NO
     //   Radar frames                 5 min    timeline manifest          yes
-    //   Basemap tiles               30 days   —                          yes
-    //   Historical archive / ERA5   immutable —                          n/a
-    //   Geocoding results            7 days   —                          yes
+    //   Basemap tiles               30 days   -                          yes
+    //   Historical archive / ERA5   immutable -                          n/a
+    //   Geocoding results            7 days   -                          yes
     switch (kind) {
     case DataKind::CurrentConditions:
         return { 10min, Revalidation::EntityTag, true, false };
@@ -41,7 +41,7 @@ CachePolicy policyFor(DataKind kind)
     case DataKind::AirQuality:
         // Sixty minutes against a source that updates twice a day. The TTL is
         // not tracking the data's rate of change, it is bounding how long we
-        // hold a stale row before asking again — CAMS publishes at
+        // hold a stale row before asking again - CAMS publishes at
         // unpredictable wall-clock times and there is no validator to ask with.
         return { 60min, Revalidation::None, true, false };
 
@@ -49,7 +49,7 @@ CachePolicy policyFor(DataKind kind)
         // The only row with staleWhileRevalidate false, and the only one where
         // that is a safety property rather than a freshness preference. §4.5:
         // "never show an expired alert". The CAP message's own <expires> is
-        // the authority — Revalidation::CapLifetime — and this three-minute
+        // the authority - Revalidation::CapLifetime - and this three-minute
         // TTL only decides how often we ask, not how long a warning is valid.
         return { 3min, Revalidation::CapLifetime, false, false };
 
@@ -61,7 +61,7 @@ CachePolicy policyFor(DataKind kind)
 
     case DataKind::BasemapTile:
         // Thirty days, and the cap on the whole tile directory is a separate
-        // concern — §4.5 puts tiles in a size-capped LRU directory of their
+        // concern - §4.5 puts tiles in a size-capped LRU directory of their
         // own, default 200 MB, precisely because a TTL is not a size bound.
         return { 24h * 30, Revalidation::None, true, false };
 
@@ -72,7 +72,7 @@ CachePolicy policyFor(DataKind kind)
         return { 0s, Revalidation::None, true, true };
 
     case DataKind::Geocoding:
-        // Seven days, keyed by query and language — the key is built by the
+        // Seven days, keyed by query and language - the key is built by the
         // caller and includes both, because "Paris" in French and "Paris" in
         // Japanese are two answers to two questions.
         return { 24h * 7, Revalidation::None, true, false };

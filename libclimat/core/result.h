@@ -22,7 +22,7 @@
 // ---- the default constructor is a failure -----------------------------------
 //
 // Result<T> is default-constructible only because QFuture's result storage
-// wants it to be, and a default-constructed Result is an *error* — Cancelled,
+// wants it to be, and a default-constructed Result is an *error* - Cancelled,
 // "result never produced". A future that was destroyed before it was fulfilled
 // therefore reads as a failure rather than as an empty success, which is the
 // only default that is safe when the whole point of the type is that success

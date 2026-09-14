@@ -12,7 +12,7 @@
 // nobody opens the weather app, and `climat --daemon` would mean linking Qt
 // Quick into a process that draws nothing and paying its startup cost.
 //
-// It links libclimat and Qt DBus. No Gui, no Quick, no QML — and
+// It links libclimat and Qt DBus. No Gui, no Quick, no QML - and
 // climat_forbid_gui() in the build file makes that a configure-time error
 // rather than a rule in a document.
 //
@@ -24,24 +24,24 @@
 // disappears after five idle minutes is a daemon whose widgets go stale in a
 // way that looks like a bug in the widget.
 //
-// It IS D-Bus-activatable — packaging/linux/climat-daemon.service.in — and this
+// It IS D-Bus-activatable - packaging/linux/climat-daemon.service.in - and this
 // comment used to say the opposite, at length, so it is worth being clear about
 // what changed and what did not.
 //
 // The argument was: a bus-activated process is spawned by dbus-daemon, so
 // gnome-shell can never own its Wayland client and can never adopt its window.
 // That is true, it was measured (docs/widgets.md, finding 1), and it rules
-// activation out — for the WIDGET HOST, which is the process with a window to
+// activation out - for the WIDGET HOST, which is the process with a window to
 // adopt. This one has no window, no Wayland connection and nothing for a shell
 // to own. The constraint was carried one process too far, and the cost of
 // carrying it was a desktop full of tiles that had nothing to read: the GNOME
-// extension starts this daemon, and on KDE, Sway, Hyprland, Wayfire and river —
-// where `climat-widget --pin` needs no extension at all — nothing did.
+// extension starts this daemon, and on KDE, Sway, Hyprland, Wayfire and river -
+// where `climat-widget --pin` needs no extension at all - nothing did.
 //
 // So there are now three ways it starts, in order of how little they ask of the
 // user: the bus activates it when a widget host or the extension looks for it,
 // an /etc/xdg/autostart entry starts it at login where one can be installed, and
-// anybody can run it by hand. All three are idempotent — see the name
+// anybody can run it by hand. All three are idempotent - see the name
 // registration below, which exits 5 rather than fighting over the name.
 
 #include "daemonadaptor.h"
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     //
     // QStandardPaths::AppDataLocation is <organizationName>/<applicationName>,
     // and libclimat/cache/cachestore.cpp resolves the database under it. So
-    // these two lines are not identity — they are the address of the places
+    // these two lines are not identity - they are the address of the places
     // table, and a process that gets them wrong opens a different file and
     // finds an empty world.
     //
@@ -160,8 +160,8 @@ int main(int argc, char *argv[])
     // sends, and the whole value of the recording is that it does not.
     //
     // It waits for the snapshot to SETTLE, which is not the same as waiting for
-    // the first one. Three fetches are in flight — the forecast, the air
-    // quality and the alerts — and each publishes as it lands, so a recorder
+    // the first one. Three fetches are in flight - the forecast, the air
+    // quality and the alerts - and each publishes as it lands, so a recorder
     // that took the first non-empty answer would write a file with no
     // air-quality index and `alertsKnown: false` in it. That file would then be
     // the fixture every widget was reviewed against, and the AQI dial would
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
 
     if (!reply.isValid() || reply.value() != QDBusConnectionInterface::ServiceRegistered) {
         // The overwhelmingly common cause is a daemon already running, which is
-        // not an error worth a stack trace — it is the system working.
+        // not an error worth a stack trace - it is the system working.
         std::fprintf(stderr,
                      "climat-daemon: %s is already owned. Another daemon is running;\n"
                      "              pass --replace to take over from it.\n",

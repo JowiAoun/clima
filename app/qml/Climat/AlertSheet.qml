@@ -11,17 +11,17 @@
 // Two admissions live at the bottom of this sheet, and they are separate
 // sentences because they are separate facts:
 //
-//   "Some alert sources could not be reached"  — a whole service did not
+//   "Some alert sources could not be reached"  - a whole service did not
 //       answer. There may be warnings here we have never seen. This is
 //       AlertSet::complete, and it is the reason alerts fan out across every
 //       covering provider instead of falling through a chain.
 //
-//   "Last confirmed HH:MM"  — we are showing an alert whose issuer was due to
+//   "Last confirmed HH:MM"  - we are showing an alert whose issuer was due to
 //       refresh it and whom we could not reach. The alert is real; our copy of
 //       it is old.
 //
 // Neither is decoration. docs/06-roadmap.md §6.6's requirement is that no
-// *ended* alert is displayed; this is the other half of the same promise —
+// *ended* alert is displayed; this is the other half of the same promise -
 // never silently keep an alert, and never silently drop one.
 //
 // `Bound` because this file has Repeater delegates that read ids from the file
@@ -139,7 +139,7 @@ Item {
 
                         // The worst one open, the rest closed. A sheet that
                         // opened everything would be a wall of NWS boilerplate
-                        // — their descriptions run to a dozen wrapped lines —
+                        // - their descriptions run to a dozen wrapped lines -
                         // and one that opened nothing would make the reader tap
                         // to find out what the banner was about.
                         expanded: index === 0

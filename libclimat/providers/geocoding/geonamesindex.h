@@ -7,7 +7,7 @@
 // ============================================================================
 // WHY THIS IS OFFLINE, WHICH IS THE INTERESTING PART
 //
-// Reverse geocoding — a coordinate in, "Toronto, Ontario" out — has one obvious
+// Reverse geocoding - a coordinate in, "Toronto, Ontario" out - has one obvious
 // implementation and it does not work. Nominatim is the OpenStreetMap
 // geocoder, it is free, and asked once from a developer machine with a
 // properly identifying User-Agent naming the project and a contact address, it
@@ -36,7 +36,7 @@
 //   4. It is the SAME DATASET the forward geocoder searches. Open-Meteo's
 //      geocoding API is GeoNames; this file is GeoNames. Type "Toronto" and
 //      the API returns geonameid 6167865. Stand at 43.65 N, 79.38 W and this
-//      index returns geonameid 6167865. One entity, one id, one saved place —
+//      index returns geonameid 6167865. One entity, one id, one saved place -
 //      so the app cannot end up with a searched Toronto and a detected Toronto
 //      as two rows in the places table. Nominatim would have returned an OSM
 //      relation id, which has no correspondence to a GeoNames id at all, and
@@ -47,14 +47,14 @@
 // ---- nearest is the wrong answer, and the fix is one byte a row -------------
 //
 // Stand at Yonge and Queen in downtown Toronto. The nearest row in this
-// dataset is Moss Park, 880 m away, population 20 506 — a neighbourhood.
+// dataset is Moss Park, 880 m away, population 20 506 - a neighbourhood.
 // Then Etobicoke, then Thornhill. Toronto itself is 6.4 km away, because a
 // city's row sits at its centroid and a city is bigger than a point. The same
 // thing happens in Singapore, in Tokyo and in Paris: plain nearest-neighbour
 // over GeoNames answers with a subdivision nobody outside the city has heard
 // of.
 //
-// So every row carries a modelled radius — its *reach* — derived at pack time
+// So every row carries a modelled radius - its *reach* - derived at pack time
 // from population by treating the settlement as a disc at a typical urban
 // density: r = sqrt(P / (pi * rho)). Toronto gets 21 km, Reykjavík 4.4 km, a
 // 16 000-person town 1.6 km. tools/geonames/pack.mjs derives it and explains
@@ -62,14 +62,14 @@
 //
 // The rule then has two steps, and the second one is not decoration:
 //
-//   * Among candidates within the cutoff, take the smallest d / reach — the
+//   * Among candidates within the cutoff, take the smallest d / reach - the
 //     settlement whose footprint you are furthest *inside*. If that ratio is
 //     at most 1, you are standing in it, and that is the answer.
 //
 //   * If every ratio exceeds 1 you are standing in open country, and the
 //     ranking flips to plain distance. Without this step, a point 30 km from a
 //     village and 60 km from a city would be labelled with the city, because a
-//     big reach forgives a big distance — which is right when you are inside
+//     big reach forgives a big distance - which is right when you are inside
 //     the city and wrong when you are not.
 //
 // ---- the grid ---------------------------------------------------------------
@@ -134,7 +134,7 @@
 // ---- coordinates are stored to four decimals, and that is not a compromise --
 //
 // `Coordinate::keyDecimals` is 4. Every outbound request in this engine is
-// rounded to four decimals before it is hashed or sent — libclimat/domain/
+// rounded to four decimals before it is hashed or sent - libclimat/domain/
 // coordinate.h explains why, and MET Norway's terms ask for it by name. A
 // fifth decimal stored here would be a digit no cache key, no URL and no
 // comparison in the product could ever see.
@@ -211,7 +211,7 @@ public:
         double distanceKm = 0.0;
         double reachKm = 0.0;
 
-        // True when the point is inside the settlement's modelled footprint —
+        // True when the point is inside the settlement's modelled footprint -
         // "you are in Toronto" rather than "the nearest place is Toronto".
         // The caller may want to say it differently.
         bool insideFootprint = false;

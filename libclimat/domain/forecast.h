@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: MPL-2.0
 //
-// The forecast, in the shape the rest of Climat reads it — whoever produced it.
+// The forecast, in the shape the rest of Climat reads it - whoever produced it.
 //
 // Every provider adapts into this and nothing downstream knows which one
 // answered except the one field that records it. That is design principle 2 in
@@ -14,7 +14,7 @@
 // EVERY VALUE IS OPTIONAL, AND THAT IS THE WHOLE POINT
 //
 // Every measurement below is a `Reading`, which is std::optional<double>. Not
-// "every measurement a provider might lack" — every measurement, including the
+// "every measurement a provider might lack" - every measurement, including the
 // ones all of them have. libclimat/domain/reading.h argues the case; the short
 // version is that a plain double for a field MET Norway does not carry means
 // the gust row reads "0 km/h" during a gale and nothing anywhere goes red.
@@ -28,14 +28,14 @@
 //   instantaneous   temperature, humidity, pressure, wind, cloud cover.
 //                   The value AT `time`.
 //
-//   accumulated     precipitation, rain, showers, snowfall — and, because it
+//   accumulated     precipitation, rain, showers, snowfall - and, because it
 //                   describes a stretch of weather rather than a moment, the
 //                   weather code.
 //                   The value over the hour ENDING AT `time`, i.e. the
 //                   half-open interval [time - 1h, time).
 //
-// "Ending at" and not "beginning at", because that is Open-Meteo's convention —
-// its documentation for `precipitation` reads "sum of the preceding hour" — and
+// "Ending at" and not "beginning at", because that is Open-Meteo's convention -
+// its documentation for `precipitation` reads "sum of the preceding hour" - and
 // Open-Meteo is the primary. A domain model whose convention disagreed with its
 // primary provider would put the shifting work in the common path instead of in
 // the fallback, which is exactly backwards.
@@ -73,7 +73,7 @@ namespace climat {
 // WMO code 0-99 (docs/02-data-sources.md §2.2). Open-Meteo emits these
 // directly; MET Norway's symbol vocabulary is mapped onto them in
 // libclimat/providers/metno/symbolcode.h, which documents the exact subset that
-// mapping can produce — including four codes Open-Meteo never emits.
+// mapping can produce - including four codes Open-Meteo never emits.
 using WeatherCode = std::optional<int>;
 
 // ---- a moment ---------------------------------------------------------------
@@ -136,7 +136,7 @@ struct HourlyPoint {
 
     Reading pressureMsl;               // hPa
     Reading cloudCover;                // %
-    Reading visibility;                // km — see CurrentConditions above
+    Reading visibility;                // km - see CurrentConditions above
     Reading uvIndex;
 
     WeatherCode         weatherCode;
@@ -173,7 +173,7 @@ struct DailyPoint {
 
     WeatherCode weatherCode;
 
-    // Absent for a provider with no sun product — MET Norway's Locationforecast
+    // Absent for a provider with no sun product - MET Norway's Locationforecast
     // is one, and its Sunrise 3.0 endpoint is a separate request we do not make.
     // A UI reading these must hide the sun arc rather than draw an arc from
     // midnight to midnight.
@@ -184,7 +184,7 @@ struct DailyPoint {
     //
     // `daylight` is not derivable from the pair above and this is the field
     // that says so. Above the Arctic circle in summer Open-Meteo answers with
-    // sunrise at that day's midnight and sunset at the *next* day's midnight —
+    // sunrise at that day's midnight and sunset at the *next* day's midnight -
     // two perfectly valid timestamps whose difference a Sun card will read as
     // zero unless it measures both from one reference (see
     // libclimat/domain/timeaxis.h). 86400 here is the unambiguous statement that
@@ -204,7 +204,7 @@ struct DailyPoint {
     QDateTime moonset;
 
     // 0 and 1 are new, 0.5 is full, and the number in between is a position in
-    // the cycle rather than a brightness. Use `moonIllumination()` — the lit
+    // the cycle rather than a brightness. Use `moonIllumination()` - the lit
     // fraction is not linear in the phase, and reading it as one reports a
     // waxing crescent as a quarter lit.
     Reading moonPhase;
@@ -218,7 +218,7 @@ struct DailyPoint {
 // it. Absent in, absent out.
 Reading moonIllumination(Reading moonPhase);
 
-// The traditional name for a phase, untranslated — an identifier the UI looks
+// The traditional name for a phase, untranslated - an identifier the UI looks
 // up a localised string with, in the same spirit as the condition kinds in
 // libclimat/domain/weathercode.h: "new", "waxing-crescent", "first-quarter",
 // "waxing-gibbous", "full", "waning-gibbous", "last-quarter",
@@ -230,7 +230,7 @@ Reading moonIllumination(Reading moonPhase);
 // somebody looks up.
 QString moonPhaseName(Reading moonPhase);
 
-// Whether the lit fraction is growing — the first half of the cycle, new to
+// Whether the lit fraction is growing - the first half of the cycle, new to
 // full. It is the half of the phase that the illuminated fraction throws away:
 // a waxing and a waning gibbous are the same number and mirror images, so a
 // disc drawn from the fraction alone is lit on the wrong limb for half of every
@@ -239,8 +239,8 @@ QString moonPhaseName(Reading moonPhase);
 bool isWaxing(Reading moonPhase);
 
 // The mean interval between one new moon and the next, in days. The real one
-// varies by up to about seven hours either side — the orbit is an ellipse and
-// the Earth is moving along its own — so this is the average and not a period.
+// varies by up to about seven hours either side - the orbit is an ellipse and
+// the Earth is moving along its own - so this is the average and not a period.
 inline constexpr double kSynodicMonth = 29.530588853;
 
 // The date of the next full moon at or after `from`, in whatever calendar the
@@ -253,7 +253,7 @@ inline constexpr double kSynodicMonth = 29.530588853;
 //
 // It usually does not reach. The cycle is 29.5 days and a forecast horizon is
 // sixteen at best, so a little under half the time the answer is past the end
-// of the series — and "we cannot say" is a bad answer to a question with a
+// of the series - and "we cannot say" is a bad answer to a question with a
 // known arithmetic. So the fallback advances the first reading along the mean
 // cycle above, which puts the answer between zero and thirty days out. That is
 // accurate to within a few hours, which lands on the right calendar date except
@@ -264,7 +264,7 @@ inline constexpr double kSynodicMonth = 29.530588853;
 // `days` is expected in ascending date order, which is what every provider
 // gives. Out of order, no pair brackets and the fallback answers instead.
 //
-// Absent if no row at or after `from` carries a phase at all — MET Norway
+// Absent if no row at or after `from` carries a phase at all - MET Norway
 // carries none, and a card that read a missing moon as a new one would say the
 // next full moon is a fortnight away every day of the month.
 std::optional<QDate> nextFullMoon(const QList<DailyPoint> &days, const QDate &from);
@@ -274,7 +274,7 @@ std::optional<QDate> nextFullMoon(const QList<DailyPoint> &days, const QDate &fr
 struct Forecast {
     // Which provider produced this. Recorded for the About screen, for the
     // "source: MET Norway" line the UI shows when the fallback served, and for
-    // diagnostics — NOT for behaviour. See the header comment.
+    // diagnostics - NOT for behaviour. See the header comment.
     QString providerId;
 
     // The coordinate the provider answered for, which is not always the one we
@@ -289,8 +289,8 @@ struct Forecast {
     Reading elevation;
 
     // The zone `DailyPoint::date` is grouped by and the zone a UI formats in.
-    // May be invalid when a provider does not report one — MET Norway does not
-    // — in which case the caller supplied it or it is UTC. See
+    // May be invalid when a provider does not report one - MET Norway does not
+    // - in which case the caller supplied it or it is UTC. See
     // ForecastRequest::timeZone.
     QTimeZone timeZone;
 

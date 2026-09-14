@@ -9,7 +9,7 @@ Comment:
  those arrives under somebody else's licence, and a copyright file that named
  only the GPL would be describing a package that is not this one.
  .
- The authoritative, per-file record is the SPDX metadata in the source tree —
+ The authoritative, per-file record is the SPDX metadata in the source tree -
  every file carries an SPDX-License-Identifier header, and REUSE.toml covers
  the binaries and the JSON that cannot. `reuse lint` over the source is what
  keeps this file honest. What follows is that record collapsed to the grouping
@@ -24,7 +24,7 @@ Copyright: 2026 Jowi Aoun
 License: MPL-2.0
 Comment:
  The engine is deliberately weaker-copyleft than the application it serves, so
- that it stays reusable outside a GPL program — decision D6 in
+ that it stays reusable outside a GPL program - decision D6 in
  docs/03-tech-stack.md. It links no Qt GUI module and a CMake assertion
  enforces that.
 
@@ -66,7 +66,7 @@ Files: libclimat/providers/fixture/data/toronto/alerts.json
 Copyright: Environment and Climate Change Canada
 License: LicenseRef-OGL-Canada-2.0
 Comment:
- Recorded from api.weather.gc.ca under the Open Government Licence – Canada
+ Recorded from api.weather.gc.ca under the Open Government Licence - Canada
  2.0. The attribution that licence requires is returned verbatim by
  EcccAlertProvider::attribution().
 

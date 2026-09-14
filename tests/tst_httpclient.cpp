@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// HttpClient, against a QTcpServer on loopback. No network, ever — see
+// HttpClient, against a QTcpServer on loopback. No network, ever - see
 // tests/support/networkguard.h, which makes that a property of the process
 // rather than a habit of the author.
 //
@@ -179,7 +179,7 @@ void TestHttpClient::aRequestHeaderCannotOverrideTheUserAgent()
 {
     // A provider that sets its own User-Agent is refused rather than obeyed.
     // The compliance string is exactly one string and there is no route around
-    // it — including a header map entry with different casing.
+    // it - including a header map entry with different casing.
     m_stub.enqueue(StubResponse::ok(QByteArrayLiteral("{}")));
 
     HttpRequest request = forecastRequest();
@@ -440,14 +440,14 @@ void TestHttpClient::aMapDragCoalescesBecauseTheCoordinateIsRoundedFirst()
     HttpClient client(&m_clock);
 
     // Six centre coordinates from one drag. They differ in the fifth decimal
-    // and beyond — under two metres, well inside a grid cell 11 km across — so
+    // and beyond - under two metres, well inside a grid cell 11 km across - so
     // they are one request.
     //
     // Note what this does *not* claim. Rounding creates cell boundaries, and a
     // drag that crosses one legitimately issues a second request: 13.4049567
     // and 13.4049480 are nine millimetres apart and land either side of
-    // 13.40495. That is correct — they are different grid cells, and the
-    // forecast is allowed to differ — and it is asserted from the other side
+    // 13.40495. That is correct - they are different grid cells, and the
+    // forecast is allowed to differ - and it is asserted from the other side
     // by tst_requestkey.cpp's adjacentCellsAreDifferentKeys(). Every
     // coordinate below is deliberately inside one cell, because this test is
     // about the hundred requests that collapse and not about the one that

@@ -11,13 +11,13 @@
 //
 // So this is a semicircle: not the body's path, but its progress. The track is
 // the whole time up, the filled part is what has elapsed, and the mark is now.
-// It claims less and it is legible at half the size — and it does not pretend
+// It claims less and it is legible at half the size - and it does not pretend
 // to be a sinusoid it has not got the pixels to draw.
 //
 // ---- motion ------------------------------------------------------------------
 // The fill sweeps from the rise to now, once, on arrival. Same hook and same
 // justification as a detail card's reveal: the journey is the reading. Bind
-// `reveal` from outside — the card owns the timing so both arcs on it leave
+// `reveal` from outside - the card owns the timing so both arcs on it leave
 // together.
 import QtQuick
 import QtQuick.Shapes
@@ -61,7 +61,7 @@ Item {
 
     // Elapsed fraction of the time up. Both differences are taken modulo a day
     // so a set-before-rise pair measures the up-window rather than a negative
-    // number — the same normalisation DetailSunCard does, for the same reason.
+    // number - the same normalisation DetailSunCard does, for the same reason.
     readonly property real upMin: ((setMin - riseMin) % 1440 + 1440) % 1440
     readonly property real sinceRise: ((nowMin - riseMin) % 1440 + 1440) % 1440
     readonly property real progress:
@@ -81,7 +81,7 @@ Item {
 
         // The whole time up, dotted. Dotted rather than solid because it is
         // the part that has not happened: the reference draws it the same way
-        // and it is the same idea as `trackLine` — the unfilled remainder of
+        // and it is the same idea as `trackLine` - the unfilled remainder of
         // something.
         ShapePath {
             fillColor: "transparent"

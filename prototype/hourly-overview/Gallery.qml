@@ -4,7 +4,7 @@
 // the gradient it is actually composited over.
 //
 // It exists because almost every defect found in this prototype so far was
-// invisible in the code and obvious in a render — and because a component is
+// invisible in the code and obvious in a render - and because a component is
 // easiest to get wrong in the states no current screen happens to use. The
 // catalogue is gallery.js; this file is only the browser around it.
 //
@@ -26,7 +26,7 @@ Item {
     property string pick: ""
 
     // ---- device frames -------------------------------------------------------
-    // "" is free — the component at whatever size the catalogue gives it, which
+    // "" is free - the component at whatever size the catalogue gives it, which
     // is what the gallery did before any of this existed and is still the right
     // default for a glyph or a badge.
     //
@@ -38,13 +38,13 @@ Item {
     // choose rather than a thing you inherit from the window.
     //
     // The frame is not scaled to fit. A 1340x762 desktop frame inside a 1500 px
-    // window overflows the pane and the pane scrolls, which is honest — a
+    // window overflows the pane and the pane scrolls, which is honest - a
     // half-size preview of a 11 px axis label tells you nothing about whether it
     // is legible.
     property string viewport: ""
 
     // The sky a mobile or tablet frame is painted with. Desktop frames and
-    // free mode stay at `dusk` — the palette the desktop page runs on — for
+    // free mode stay at `dusk` - the palette the desktop page runs on - for
     // the same reason the app does.
     property string skyPhase: "dusk"
 
@@ -131,7 +131,7 @@ Item {
     // Selection is keyed on the name, not on object identity. A Repeater over
     // a JS array hands its delegate a wrapper around the entry rather than the
     // entry itself, so `modelData === current` is false even for the row that
-    // is selected — which silently cost the rail both its highlight and its
+    // is selected - which silently cost the rail both its highlight and its
     // scroll-to-selection. Item names are unique across the catalogue.
     readonly property string currentName: current ? current.name : ""
 
@@ -196,7 +196,7 @@ Item {
     //
     //   fills      a screen or a shell: it takes the whole device.
     //   stage.w    it takes a width from its host, so in a frame that width is
-    //              the one the shell at this viewport would give it — not the
+    //              the one the shell at this viewport would give it - not the
     //              number in the catalogue, which was only ever a stand-in for
     //              a host that was not there.
     //   neither    a glyph, a badge, a toggle: natural size, whatever the frame.
@@ -522,7 +522,7 @@ Item {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             clip: true
-            // Specimens draw with Shapes, which ignore ancestor clipping — see
+            // Specimens draw with Shapes, which ignore ancestor clipping - see
             // docs/10-design-system.md §10.8. Without the layer, a specimen
             // taller than the pane paints its chart over the heading.
             layer.enabled: true
@@ -575,7 +575,7 @@ Item {
                         // A card framed at 390x844 in a 950 px window would
                         // otherwise be composited over the slice of the
                         // window's gradient that happens to be behind it, which
-                        // is not the slice the app gives it — and being drawn on
+                        // is not the slice the app gives it - and being drawn on
                         // the right background is the whole premise here.
                         PageBackdrop {
                             visible: root.framed
@@ -609,7 +609,7 @@ Item {
                         // The device edge. A border is the one thing that can
                         // draw it: the frame's whole job is to show where the
                         // screen stops, and a component that runs to the edge
-                        // — which every screen here does — has nothing else to
+                        // - which every screen here does - has nothing else to
                         // separate it from the pane behind.
                         Rectangle {
                             visible: root.framed

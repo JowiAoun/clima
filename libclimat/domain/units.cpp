@@ -35,8 +35,8 @@ double convert(Quantity quantity, const QString &unit, double canonical)
             return canonical * 0.02952998;
         if (unit == QLatin1String("mmhg"))
             return canonical * 0.7500617;
-        // "mb" is hPa under another name — one millibar is one hectopascal
-        // exactly — and it is offered because that is the word half the world's
+        // "mb" is hPa under another name - one millibar is one hectopascal
+        // exactly - and it is offered because that is the word half the world's
         // forecasts use.
         return canonical;
 

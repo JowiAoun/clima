@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: MPL-2.0
 //
-// MET Norway Locationforecast 2.0, the fallback — built now, not later.
+// MET Norway Locationforecast 2.0, the fallback - built now, not later.
 //
 //     https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=&lon=
 //
@@ -11,7 +11,7 @@
 // docs/06-roadmap.md is explicit that shipping the fallback late is the
 // documented bug in a competing app: the primary goes down, the fallback path
 // runs for the first time in production, and it does not work. An untested
-// fallback is not a fallback — it is a second way to fail, written down.
+// fallback is not a fallback - it is a second way to fail, written down.
 //
 // So it is here, in the same commit as the interface it implements, with a
 // recorded fixture and a test that forces the primary to a typed error and
@@ -28,7 +28,7 @@
 // there must never be one.
 //
 //   * the User-Agent is built from CMake identity and cannot be overridden per
-//     request — HttpRequest has no route to it,
+//     request - HttpRequest has no route to it,
 //   * `conditional` is left at its default of true, so If-None-Match goes out
 //     whenever a validator is on file and a 304 is answered from the last
 //     parsed payload,
@@ -45,11 +45,11 @@
 // that has been hammering it.
 //
 // ============================================================================
-// A DIFFERENT SHAPE, ADAPTED — NOT A DIFFERENT MODEL
+// A DIFFERENT SHAPE, ADAPTED - NOT A DIFFERENT MODEL
 //
 // The payload is GeoJSON: one Feature whose `properties.timeseries` is a list
 // of entries, each carrying an `instant` block and up to three forward-looking
-// blocks — `next_1_hours`, `next_6_hours`, `next_12_hours`.
+// blocks - `next_1_hours`, `next_6_hours`, `next_12_hours`.
 //
 // ---- the hour a number belongs to -------------------------------------------
 //
@@ -57,7 +57,7 @@
 // impossible to see afterwards. A `next_1_hours` block hanging off the entry at
 // T describes [T, T+1h). The domain records accumulations on the point that
 // ENDS the period, because that is Open-Meteo's convention and Open-Meteo is
-// the primary — libclimat/domain/forecast.h argues it.
+// the primary - libclimat/domain/forecast.h argues it.
 //
 // So the block at T lands on the point at T+1h, which in this payload is
 // always the next entry. Two consequences, both deliberate:
@@ -77,7 +77,7 @@
 //
 // MET thins the series: about 60 hourly entries, then one every six hours out
 // to roughly nine and a half days. `HourlyPoint::time` is explicit for exactly
-// this reason — a consumer that assumes uniform spacing draws the second half
+// this reason - a consumer that assumes uniform spacing draws the second half
 // of this forecast six times too wide.
 //
 // Where both blocks exist the 1-hour one wins, and the 6-hour one is used only
@@ -85,7 +85,7 @@
 // the transition hour from being counted twice.
 //
 // ============================================================================
-// WHAT IT CANNOT SUPPLY — SAID THROUGH capabilitiesAt(), NOT THROUGH ZEROS
+// WHAT IT CANNOT SUPPLY - SAID THROUGH capabilitiesAt(), NOT THROUGH ZEROS
 //
 // The `compact` product carries seven variables. Everything below is genuinely
 // absent, and every one of them is a flag this provider does not set:
@@ -103,7 +103,7 @@
 //     air quality, pollen       not this API at all
 //     historical archive        not this API at all
 //     a time zone               timestamps are UTC and it has no opinion about
-//                               local midnight — see below
+//                               local midnight - see below
 //
 // Half of that list is available from the `complete` product instead of
 // `compact`, at roughly three times the payload. That is a deliberate trade and
@@ -115,8 +115,8 @@
 //
 // A daily series needs a definition of midnight. Open-Meteo resolves one from
 // the coordinate (`timezone=auto`) and reports it back; MET Norway returns UTC
-// instants and nothing else. So the caller supplies it — ForecastRequest::
-// timeZone — and the Forecast records the zone its days were actually grouped
+// instants and nothing else. So the caller supplies it - ForecastRequest::
+// timeZone - and the Forecast records the zone its days were actually grouped
 // by, so a UI formatting from `Forecast::timeZone` is always self-consistent
 // even when the caller supplied nothing and got UTC.
 //
@@ -143,7 +143,7 @@ class MetNoForecastProvider : public QObject, public IForecastProvider
 
 public:
     // Neither is owned; both must outlive this. See openmeteoairqualityprovider.h
-    // — a provider that built its own network client would be a provider outside
+    // - a provider that built its own network client would be a provider outside
     // the User-Agent and 403 policy, which for this provider specifically is the
     // policy their terms of service are about.
     MetNoForecastProvider(HttpClient *http, Clock *clock, QObject *parent = nullptr);
@@ -163,7 +163,7 @@ public:
 
     QFuture<Result<Forecast>> fetchForecast(const ForecastRequest &request) override;
 
-    // Parsing, with no network and no event loop — the golden-file test surface
+    // Parsing, with no network and no event loop - the golden-file test surface
     // of docs/04-architecture.md §4.11, and what tools/provider-probe calls to
     // print a recorded fixture.
     //
@@ -180,8 +180,8 @@ private:
     CacheStore *m_cache = nullptr;
     QUrl        m_baseUrl;
 
-    // The last successfully parsed payload per RequestKey, so a 304 — which
-    // their terms ask us to make possible — has something to answer with.
+    // The last successfully parsed payload per RequestKey, so a 304 - which
+    // their terms ask us to make possible - has something to answer with.
     QHash<QString, Forecast> m_lastParsed;
 };
 

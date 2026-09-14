@@ -16,7 +16,7 @@ double roundTo(double value, int decimals)
     const double scale = std::pow(10.0, decimals);
 
     // std::round is half-away-from-zero, which is what a human means by
-    // rounding and — more to the point — is symmetric about the equator and
+    // rounding and - more to the point - is symmetric about the equator and
     // the prime meridian. std::nearbyint would follow the current rounding
     // mode, which is a global somebody else can change.
     return std::round(value * scale) / scale;
@@ -60,7 +60,7 @@ QString Coordinate::longitudeString(int decimals) const
 
 bool Coordinate::operator==(const Coordinate &other) const
 {
-    // Exact, on purpose. This is not "are these the same place" — that question
+    // Exact, on purpose. This is not "are these the same place" - that question
     // is answered by comparing rounded() values, and every place in the
     // codebase that cares is asking it of an already-rounded pair. An epsilon
     // here would make equality non-transitive and quietly break QHash.

@@ -24,7 +24,7 @@
 #
 # Same reason the golden images are: a fixture at a frozen clock, Theme
 # stillness collapsing every animation duration to zero, and a flake-pinned Qt.
-# So `check` is a real gate rather than a formality — it can tell the difference
+# So `check` is a real gate rather than a formality - it can tell the difference
 # between "the README images are stale" and "somebody edited a PNG".
 set -euo pipefail
 
@@ -38,7 +38,7 @@ images_dir="$root/docs/images"
 sheets_js="$root/gallery/qml/Climat/Gallery/shots.js"
 
 # The shot ids, read out of the catalogue rather than listed here. A third copy
-# of this list would be the one that goes stale — the C++ already keeps a second
+# of this list would be the one that goes stale - the C++ already keeps a second
 # for --help, and tests/qml/tst_shots.qml is what holds those two together.
 mapfile -t shots < <(sed -n 's/^ *id: "\([a-z-]*\)",$/\1/p' "$sheets_js")
 
@@ -48,12 +48,12 @@ if [ "${#shots[@]}" -eq 0 ]; then
 fi
 
 if [ ! -x "$binary" ]; then
-  echo "shots: no gallery at $binary — build it first" >&2
+  echo "shots: no gallery at $binary - build it first" >&2
   exit 1
 fi
 
 if [ ! -x "$widget_binary" ]; then
-  echo "shots: no widget host at $widget_binary — build it first" >&2
+  echo "shots: no widget host at $widget_binary - build it first" >&2
   exit 1
 fi
 
@@ -81,7 +81,7 @@ export XDG_CACHE_HOME="$scratch/cache"
 #
 # The reference images are 12-hour, and they have to be pinned to something
 # rather than inherited: `Settings::clockFormat` now defaults to the reader's
-# own locale — a French desktop writes 15:30 — while every capture runs under
+# own locale - a French desktop writes 15:30 - while every capture runs under
 # LC_ALL=C.UTF-8, whose short format is 24-hour. Left to the default, the
 # pictures would be a picture of the C locale rather than of the product, and
 # they would change the day anybody touched the locale pin above.
@@ -93,7 +93,7 @@ export XDG_CACHE_HOME="$scratch/cache"
 # Both binaries, because both are photographed and they keep separate
 # preference files: `climat` and `climat-gallery` share an organisation and not an
 # application name, so a pin written for one leaves the other reading its
-# default. That is exactly how this was found — the seven gallery cards
+# default. That is exactly how this was found - the seven gallery cards
 # carrying a time moved while every app image held still.
 #
 # climat-widget needs no line of its own: it deliberately answers to the app's
@@ -107,12 +107,12 @@ done
 # ---- the desktop tiles ------------------------------------------------------
 #
 # Not a gallery sheet, because the tiles are a different binary with a different
-# QML module — see widgets/CMakeLists.txt for why they cannot be imported into
+# QML module - see widgets/CMakeLists.txt for why they cannot be imported into
 # one. Rendered here anyway so that the README's widget image is gated by the
 # same `check` as every other one.
 #
 # `--now` is what makes it deterministic. Two things on a tile move without new
-# data arriving — the sun mark and the age footer — and both are correct
+# data arriving - the sun mark and the age footer - and both are correct
 # behaviour that would otherwise produce a different PNG every run.
 # widgets/widgetclock.h has the argument. The instant is inside the Seattle
 # fixture's own afternoon, so the sun is up and the arc has somewhere to put its

@@ -42,7 +42,7 @@ bool Error::isRetryable() const
     // UserAgentRejected is first in this list and it is the reason the list is
     // a switch rather than a default. A 403 that answers our identifying
     // User-Agent is a statement about our client, and the identical request
-    // will earn the identical refusal — plus one more entry in whatever log
+    // will earn the identical refusal - plus one more entry in whatever log
     // eventually gets our address blocked.
     case ErrorKind::UserAgentRejected:
     case ErrorKind::NotFound:

@@ -32,8 +32,8 @@ Status execOrFail(QSqlDatabase &database, const QString &sql)
 // Three tables, and the design decision behind the middle one is the one worth
 // reading.
 //
-// forecast_blob stores the RAW PROVIDER PAYLOAD — the bytes exactly as they
-// arrived — and not a parsed model. That is a deliberate inversion of the
+// forecast_blob stores the RAW PROVIDER PAYLOAD - the bytes exactly as they
+// arrived - and not a parsed model. That is a deliberate inversion of the
 // obvious design, and the reasoning is:
 //
 //   * Parsing is cheap and refetching is not. A hundred kilobytes of JSON
@@ -42,8 +42,8 @@ Status execOrFail(QSqlDatabase &database, const QString &sql)
 //     free service's rate limit.
 //
 //   * A change to the domain model must not invalidate the cache. If the rows
-//     held serialised HourlyPoints, then adding a field to HourlyPoint — which
-//     will happen a dozen times before 1.0 — means either a migration that
+//     held serialised HourlyPoints, then adding a field to HourlyPoint - which
+//     will happen a dozen times before 1.0 - means either a migration that
 //     cannot reconstruct the new field from the old rows, or throwing the
 //     whole cache away on upgrade. Holding the payload means a new binary
 //     re-parses what it already has and comes up warm.
@@ -59,7 +59,7 @@ Status createVersion1(QSqlDatabase &database)
     // ---- places -------------------------------------------------------------
     //
     // The user's saved locations. `id` is an alias for SQLite's rowid, so a
-    // place keeps its identity across renames — a settings row pointing at
+    // place keeps its identity across renames - a settings row pointing at
     // "the place we last showed" must not follow a name.
     //
     // The coordinate is stored at full precision even though every request
@@ -71,7 +71,7 @@ Status createVersion1(QSqlDatabase &database)
     //
     // Because a default-constructed QString is *null*, not empty, and Qt's
     // SQLite driver binds a null QString as SQL NULL. A place from the
-    // geocoder with no admin1 — plenty of countries have none — therefore
+    // geocoder with no admin1 - plenty of countries have none - therefore
     // arrives here as NULL, and `NOT NULL DEFAULT ''` rejects the insert with
     // "NOT NULL constraint failed" rather than applying the default. A DEFAULT
     // fills in a column the statement did not mention; it does not rewrite a
@@ -82,7 +82,7 @@ Status createVersion1(QSqlDatabase &database)
     // remember. Letting them be NULL is both less code and more honest: an
     // absent admin1 *is* absent, and QVariant::toString() maps it back to the
     // empty QString the caller started with. What stays NOT NULL is what a
-    // null would actually be a bug in — a place has a name and a position.
+    // null would actually be a bug in - a place has a name and a position.
     Status status = execOrFail(database, QStringLiteral(R"sql(
         CREATE TABLE places (
             id           INTEGER PRIMARY KEY,
@@ -117,7 +117,7 @@ Status createVersion1(QSqlDatabase &database)
     //
     // `payload` is nullable, and a NULL payload is not a cache entry. It is the
     // row storeValidators() creates when an ETag arrives before anyone has
-    // decided the body was worth keeping — see CacheStore, which treats a NULL
+    // decided the body was worth keeping - see CacheStore, which treats a NULL
     // payload as a miss on read.
     //
     // `expires_at` NULL means never: the immutable row of §4.5's table, ERA5
@@ -154,8 +154,8 @@ Status createVersion1(QSqlDatabase &database)
     // The engine's own key/value store, and deliberately not the same thing as
     // app/settings.h.
     //
-    // That file is a QSettings holding *preferences* — units, appearance,
-    // window geometry — which belong to the GUI and are edited by a human. This
+    // That file is a QSettings holding *preferences* - units, appearance,
+    // window geometry - which belong to the GUI and are edited by a human. This
     // table holds engine state that has to travel with the cache it describes:
     // which place was last shown, when each provider was last successfully
     // reached, the id of the CAP message we already notified about. A Plasma
@@ -165,7 +165,7 @@ Status createVersion1(QSqlDatabase &database)
     //
     // NOT NULL on the key because SQLite, for backward compatibility with a
     // bug it shipped in 2001, allows NULLs in a PRIMARY KEY column that does
-    // not say otherwise — and a settings table with two NULL-keyed rows is a
+    // not say otherwise - and a settings table with two NULL-keyed rows is a
     // preference that saved twice and loads neither.
     status = execOrFail(database, QStringLiteral(R"sql(
         CREATE TABLE settings (
@@ -186,7 +186,7 @@ Status createVersion1(QSqlDatabase &database)
 //
 // ---- geonames_id: what makes a saved place survive a rename -----------------
 //
-// Every place in Climat comes from GeoNames — the forward geocoder is
+// Every place in Climat comes from GeoNames - the forward geocoder is
 // Open-Meteo's search API, which is GeoNames, and the offline reverse geocoder
 // is a packed cities15000, which is also GeoNames. So a place has an upstream
 // identity, and until now the schema threw it away and identified a saved
@@ -201,8 +201,8 @@ Status createVersion1(QSqlDatabase &database)
 // is worth refreshing.
 //
 // UNIQUE, so that adding the same city twice is a constraint failure rather
-// than two rows the user then has to notice. NULL is allowed and repeatable —
-// SQLite does not consider two NULLs equal — which is what lets any number of
+// than two rows the user then has to notice. NULL is allowed and repeatable -
+// SQLite does not consider two NULLs equal - which is what lets any number of
 // dropped map pins, which have no GeoNames identity at all, coexist.
 //
 // ---- favourite becomes is_home ----------------------------------------------
@@ -327,7 +327,7 @@ Status runMigrations(QSqlDatabase &database, const QList<Migration> &migrations,
         return Error(ErrorKind::Storage,
                      QStringLiteral("the cache database is at schema version %1 and this build "
                                     "understands up to %2. It was written by a newer Climat. "
-                                    "Delete it to start fresh — it is a cache, and nothing in it "
+                                    "Delete it to start fresh - it is a cache, and nothing in it "
                                     "is unrecoverable.")
                          .arg(from)
                          .arg(to));

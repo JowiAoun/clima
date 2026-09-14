@@ -12,13 +12,13 @@
 #
 #   1. Both JS files PARSE as ES modules. gjs resolves imports after parsing, so
 #      a module that fails only on `resource:///org/gnome/shell/...` is a module
-#      whose own syntax is fine — and that is exactly what a checkout has to be
+#      whose own syntax is fine - and that is exactly what a checkout has to be
 #      able to establish, because those resources only exist inside gnome-shell.
 #
 #   2. The D-Bus introspection XML the extension carries is VALID and describes
 #      the same methods climat-daemon exports. This is a hand-maintained copy of
-#      daemon/daemonadaptor.h — it has to be, since the extension ships from
-#      extensions.gnome.org and the daemon from Flathub — so the one thing that
+#      daemon/daemonadaptor.h - it has to be, since the extension ships from
+#      extensions.gnome.org and the daemon from Flathub - so the one thing that
 #      can be checked here is that it parses and that its names match.
 #
 #   3. Every Meta.WaylandClient method the extension calls EXISTS on this
@@ -53,7 +53,7 @@ command -v gjs >/dev/null || fail "no gjs. On Debian and Ubuntu: apt install gjs
 # than a fixed path.
 # A plain glob rather than `compgen -G`: compgen is a bash builtin that is not
 # available in every bash this repository's devshell might hand us, and it
-# failed silently here — reporting "no mutter typelib" on a machine that has one,
+# failed silently here - reporting "no mutter typelib" on a machine that has one,
 # which is the worst kind of skip.
 mutter_dir=""
 for typelib in /usr/lib/*/mutter-*/Meta-*.typelib /usr/lib64/mutter-*/Meta-*.typelib; do
@@ -86,7 +86,7 @@ for file in extension.js prefs.js; do
     fi
     if ! grep -qE 'ImportError|does not exist' <<<"$output"; then
         # It ran to completion, which for these two files means the shell's
-        # resources were somehow present. Not a failure — just not the outcome
+        # resources were somehow present. Not a failure - just not the outcome
         # this check was written around, and worth saying so.
         echo "note: $file evaluated without an ImportError"
     fi

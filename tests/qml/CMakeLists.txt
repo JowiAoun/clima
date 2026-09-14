@@ -36,7 +36,7 @@ target_link_libraries(tst_qml PRIVATE
 add_test(NAME tst_qml COMMAND tst_qml)
 
 # The same pinned environment scripts/grab.sh exports, and for the same reasons
-# — with one addition. `QT_QPA_PLATFORM=offscreen` is not a convenience here:
+# - with one addition. `QT_QPA_PLATFORM=offscreen` is not a convenience here:
 # QtQuickTest creates a real QQuickView per test file, so on a headless runner
 # without it this does not fail, it hangs.
 #
@@ -44,8 +44,8 @@ add_test(NAME tst_qml COMMAND tst_qml)
 # number reads both, and `tst_specimen` builds every component there is.
 #
 # XDG_CONFIG_HOME and XDG_DATA_HOME point into the build tree because the setup
-# object runs the app's real startup — Settings::prepareStorage() and
-# AppEngine::configure() — which writes an INI file and opens a SQLite cache.
+# object runs the app's real startup - Settings::prepareStorage() and
+# AppEngine::configure() - which writes an INI file and opens a SQLite cache.
 # A test suite that leaves things in the developer's ~/.config is a test suite
 # whose second run is not the same as its first.
 set_tests_properties(tst_qml PROPERTIES

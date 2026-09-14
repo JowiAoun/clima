@@ -9,7 +9,7 @@
 // listed three things as not built: the unit switch that re-renders every
 // screen, the place picker LocationBar's chevron would open, and the provider
 // chooser. The first two are here. The third is not, and is deliberately not
-// listed as missing any more — a provider chooser is a feature for somebody who
+// listed as missing any more - a provider chooser is a feature for somebody who
 // already knows which model they prefer, and the fallback chain means the app
 // answers that question for everybody else.
 //
@@ -18,22 +18,22 @@
 // PreferencesSheet puts the same two on a sheet. Not a copy: this screen used to
 // carry its own Appearance and Units cards, written here, and the moment the
 // desktop needed settings at all that would have been two screens to keep in
-// step — with the phone's the one people would have kept editing, because it is
+// step - with the phone's the one people would have kept editing, because it is
 // the one anybody could reach.
 //
 // They are two components rather than one for this page's benefit: MobilePage
 // lays its children out in a Flow, so on a tablet two half-width cards sit side
 // by side and one tall card could only ever be a column.
 //
-// Everything downstream — the hero, the chart axis, the hourly list, the day
-// strip — is bound to the same Units singleton, so the whole app changes on the
+// Everything downstream - the hero, the chart axis, the hourly list, the day
+// strip - is bound to the same Units singleton, so the whole app changes on the
 // tap.
 //
 // ---- the data sources card is GENERATED -------------------------------------
 // docs/08-risks.md R12 is "a new provider gets added without its credit", and
 // its mitigation is that this card comes out of the provider registry. It does:
 // `Engine.sources` is ProviderRegistry::attributions(), and the registry
-// REFUSES to hold a provider whose Attribution is incomplete — an uncredited
+// REFUSES to hold a provider whose Attribution is incomplete - an uncredited
 // provider is not added, and never added means its data cannot reach this
 // screen either.
 //
@@ -45,9 +45,9 @@ import QtQuick
 MobilePage {
     id: root
 
-    // The row shape for the two cards below. It used to serve four of them —
+    // The row shape for the two cards below. It used to serve four of them -
     // Appearance and Units are PrefGroup/PrefRow now, which is a richer row with
-    // a subtitle and a control slot — and it stays for the two that are a name
+    // a subtitle and a control slot - and it stays for the two that are a name
     // and a value with nothing to explain.
     //
     // Not replaced by PrefRow as well, which was the tempting tidy-up: a place
@@ -69,7 +69,7 @@ MobilePage {
 
         // The floor, and it used to be 42. A settings row is a target whose
         // size is its affordance, so two more pixels is the fix and not a
-        // workaround for one — which is the same call the metric picker's menu
+        // workaround for one - which is the same call the metric picker's menu
         // rows make, and the reason they are now the same height.
         height: Theme.metric.hitMin
 

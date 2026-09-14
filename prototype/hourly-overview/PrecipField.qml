@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The falling half of the precipitation effect: what is coming down, and how
-// hard. Drawn over the series — the wash it belongs with is drawn under it, see
+// hard. Drawn over the series - the wash it belongs with is drawn under it, see
 // PrecipBands.qml for why they are two components.
 //
 // Everything is a Rectangle, deliberately. A streak is a thin rounded one, a
 // flake is a round one, a splash is four of them; there is not a Shape in the
 // file. Shapes escape ancestor clipping (§10.8) and would need a layer of their
 // own to bound, and a hundred layered particles is not a thing to do to a
-// scene graph — where plain rectangles are batched, clipped by the Flickable
+// scene graph - where plain rectangles are batched, clipped by the Flickable
 // that already clips everything else, and free.
 //
 // Motion is one clock. §10.6 says never animate on a timer that runs when
 // nothing is happening, and this is the exception that proves it: rain is not a
 // state *transition*, it is a state, and the only honest way to draw it is
-// moving. So the rule is kept where it can be — the clock does not run when
+// moving. So the rule is kept where it can be - the clock does not run when
 // there is no precipitation, when the chart is behind the list view, or under
 // `--grab`, and there is exactly one of it however heavy the weather gets.
 import QtQuick
@@ -30,7 +30,7 @@ Item {
     property real contentWidth: width
 
     // False freezes the field at a deterministic frame rather than emptying it,
-    // so a headless grab still shows rain — the same rain, every run.
+    // so a headless grab still shows rain - the same rain, every run.
     property bool animated: true
 
     // Spell captions. Off where something else already names the weather, on
@@ -44,7 +44,7 @@ Item {
 
     // Seconds, wrapping every Precip.LOOP of them. Every particle's own
     // progress is `(clock * rate + offset) mod 1`, and precip.js quantises the
-    // rates so that product is whole at the wrap — otherwise the entire field
+    // rates so that product is whole at the wrap - otherwise the entire field
     // jumps at once, once a minute, which is exactly rare enough to get blamed
     // on something else.
     property real clock: 0
@@ -177,7 +177,7 @@ Item {
 
             // Thrown clear of the puddle, not straddling it. Left at the jet's
             // own height and leaning the same few degrees, the three of them
-            // resolved into one downward arrow — a rendering that says the
+            // resolved into one downward arrow - a rendering that says the
             // opposite of what a splash is.
             Repeater {
                 model: 2

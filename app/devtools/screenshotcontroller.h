@@ -12,9 +12,9 @@
 // longest one.
 //
 // ---- why this compiles at all in a packaged build ---------------------------
-// Only just. `--grab` ships — the issue template says "attach `climat --grab
+// Only just. `--grab` ships - the issue template says "attach `climat --grab
 // bug.png`", and a flag that only exists in a developer build cannot be in an
-// issue template — so the code that implements --grab has to ship with it, and
+// issue template - so the code that implements --grab has to ship with it, and
 // that code is here. Everything past it is behind CLIMAT_DEV_TOOLS: the film
 // timer, the poke table, the walk and the scroll are compiled out, and what a
 // packaged binary carries is one QTimer and one grabToImage.
@@ -26,7 +26,7 @@
 //
 // ---- why the timers are still timers ----------------------------------------
 // A grab has to happen after the scene has settled, and "settled" is not a
-// state Qt Quick will tell you about — there is no signal for "every animation
+// state Qt Quick will tell you about - there is no signal for "every animation
 // this frame started has finished". The details grid staggers twelve cards into
 // a reveal, each with its own delay; the numbers in the .cpp are longer than all
 // of them put together, measured, and they are the reason two --grab runs of the
@@ -42,7 +42,7 @@
 //
 // That difference is invisible until you measure it. This port was written with
 // QTimer first, and eight runs of `--grab --poke metric=uv --poke day=3 --poke
-// list=true` produced three different PNGs — one or two levels apart across a
+// list=true` produced three different PNGs - one or two levels apart across a
 // fifty-pixel square, an animation caught a fraction of a frame further along
 // because the gap between the poke and the shutter was no longer a whole number
 // of frames.
@@ -59,7 +59,7 @@
 // ---- why it does not read the command line ----------------------------------
 // It did, once: every value below was an `AppOptions::instance()->...` call
 // three frames deep in a private slot. That was fine while there was one
-// executable, and it stopped being fine the moment there were two —
+// executable, and it stopped being fine the moment there were two -
 // `climat-gallery` parses its own flags into its own GalleryOptions, and a
 // harness that reaches for the weather app's singleton would have read an
 // AppOptions nobody ever filled and quietly photographed nothing.
@@ -95,8 +95,8 @@ class ScreenshotController : public QObject
     // item and not a Window.color in the first place.
     Q_PROPERTY(QQuickWindow *window READ window WRITE setWindow NOTIFY windowChanged)
 
-    // Whichever shell is live, or null. Null is normal — in the gallery there
-    // is no shell at all — and every use of it below says so rather than
+    // Whichever shell is live, or null. Null is normal - in the gallery there
+    // is no shell at all - and every use of it below says so rather than
     // throwing, because a poke that cannot land should report that and let the
     // rest of the list through.
     Q_PROPERTY(QQuickItem *shell READ shell WRITE setShell NOTIFY shellChanged)
@@ -138,7 +138,7 @@ public:
     explicit ScreenshotController(QObject *parent = nullptr);
 
     // Called from Main.qml's Component.onCompleted, *after* the window geometry
-    // has been settled — deliberately, and not from componentComplete() here.
+    // has been settled - deliberately, and not from componentComplete() here.
     //
     // The ordering is load-bearing. `--viewport mobile` resizes the window,
     // which swaps the desktop shell for the phone's, which destroys the item
@@ -182,7 +182,7 @@ private:
 
     // `page.foo = value` if the page has a `foo`, otherwise nothing. QML's rule
     // for assigning a property an object may not have is to throw, and a throw
-    // in the middle of applying flags takes every later flag with it — which is
+    // in the middle of applying flags takes every later flag with it - which is
     // how three of the four capture paths once came to print one error and then
     // hang, never having started the timer that both writes the file and quits.
     bool offer(QQuickItem *item, const char *property, const QVariant &value);
@@ -204,8 +204,8 @@ private:
     // The two filming defaults are the ones the QML Timer carried before any of
     // this was C++: eight frames, one every 60 ms. They are duplicated in
     // AppOptions because --frames and --every are only ever a way of overriding
-    // them, and a caller that does not offer those flags — the gallery does, a
-    // future test harness might not — still gets a working reel.
+    // them, and a caller that does not offer those flags - the gallery does, a
+    // future test harness might not - still gets a working reel.
     int           m_frames  = 8;
     int           m_every   = 60;
 
@@ -220,7 +220,7 @@ private:
     bool          m_list    = false;
 
 #ifdef CLIMAT_DEV_TOOLS
-    // The state flags — metric, day, list — applied as soon as there is a shell
+    // The state flags - metric, day, list - applied as soon as there is a shell
     // to apply them to.
     void applyOpeningState();
 

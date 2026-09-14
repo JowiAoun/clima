@@ -15,8 +15,8 @@
 #
 # ---- two targets, and the split is for the tests ----------------------------
 #
-# `climat_daemon_core` is the service — everything that decides what a snapshot
-# says — and it links no D-Bus. `climat-daemon` is the executable that puts it on
+# `climat_daemon_core` is the service - everything that decides what a snapshot
+# says - and it links no D-Bus. `climat-daemon` is the executable that puts it on
 # the bus. The split exists so that tests/tst_snapshotservice.cpp can construct
 # the service and call GetSnapshot's implementation without a session bus,
 # which a runner does not have and a test must not need.
@@ -34,7 +34,7 @@ add_library(climat_daemon_core STATIC
 
 # The catalogue travels inside the binary rather than beside it. ListWidgets
 # then answers the same bytes whether the daemon was started from a build
-# directory, a .deb or inside a Flatpak — and there is exactly one copy of the
+# directory, a .deb or inside a Flatpak - and there is exactly one copy of the
 # file in the repository, which is the entire point of widgets/catalogue.json.
 #
 # On the core library, because catalogue() is the core's method; Qt carries a

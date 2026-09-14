@@ -4,7 +4,7 @@
 //
 // One entry per component, grouped. An entry names the file to instantiate and
 // the properties to instantiate it with, so adding a component to the gallery
-// is a few lines here rather than a new QML file — and a component that is in
+// is a few lines here rather than a new QML file - and a component that is in
 // the tree but not in this list shows up as a gap you can see.
 //
 // `variants` renders the same component several times side by side. That is
@@ -25,7 +25,7 @@
 // `stage.w` and the viewport frames interact, and the rule is worth stating:
 // a stage width is a stand-in for a host that is not there, so when a frame
 // *is* there the frame wins and the component gets the width that viewport's
-// shell would actually give it. `stage.h` is left alone — a height in this
+// shell would actually give it. `stage.h` is left alone - a height in this
 // catalogue is usually the component saying it has no opinion, and the frame
 // has none either.
 .pragma library
@@ -46,7 +46,7 @@ function _curve(n, w, h) {
 }
 
 // Precipitation levels, as specimens. The page can only ever show the weather
-// its mock data has, and at 18–28 °C that is rain — so every frozen level below
+// its mock data has, and at 18-28 °C that is rain - so every frozen level below
 // exists solely here, which is the argument for having a gallery at all.
 //
 // `hours` wide of one level, with a dry hour at each end so the wash has an
@@ -100,7 +100,7 @@ var groups = [
                   { label: "no trend", props: { title: "Card title", status: "Status", body: "One line.", trend: "none" } }
               ] },
             { name: "Temperature",   file: "DetailTemperatureCard.qml",   blurb: "Twelve-hour sparkline; observed solid, forecast dimmed." },
-            { name: "Feels like",    file: "DetailFeelsLikeCard.qml",     blurb: "Two curves and the band between them — the card's subject is the distance." },
+            { name: "Feels like",    file: "DetailFeelsLikeCard.qml",     blurb: "Two curves and the band between them - the card's subject is the distance." },
             { name: "Cloud cover",   file: "DetailCloudCoverCard.qml",    blurb: "Dial, ramped off the cloud palette: clear reads sky-blue, overcast near-white." },
             { name: "Precipitation", file: "DetailPrecipitationCard.qml", blurb: "The number says how much; the columns say when." },
             { name: "Wind",          file: "DetailWindCard.qml",          blurb: "Compass rose: blunt end into the wind, reach scales with speed." },
@@ -108,7 +108,7 @@ var groups = [
             { name: "UV",            file: "DetailUvCard.qml",            blurb: "WHO bands are the palette, so the ring itself carries the reading." },
             { name: "Air quality",   file: "DetailAirQualityCard.qml",    blurb: "The same dial as UV, on the European AQI bands." },
             { name: "Visibility",    file: "DetailVisibilityCard.qml",    blurb: "A sight line down the long axis of the box." },
-            { name: "Pressure",      file: "DetailPressureCard.qml",      blurb: "Sparkline against a fixed 1005–1020 mb scale." },
+            { name: "Pressure",      file: "DetailPressureCard.qml",      blurb: "Sparkline against a fixed 1005-1020 mb scale." },
             { name: "Sun",           file: "DetailSunCard.qml",           blurb: "Altitude as a sinusoid; the horizon is zero, so daylight's width is the day length." },
             { name: "Moon",          file: "DetailMoonCard.qml",          blurb: "The sun card's twin, on the night ramp." }
         ]
@@ -117,10 +117,10 @@ var groups = [
         name: "Screens",
         items: [
             { name: "Weather page", file: "WeatherPage.qml", stage: { w: 1300, h: 740 }, fills: true,
-              blurb: "The whole thing: location, current conditions, hourly, details. Scrolls — its Flickable is layered, which is what keeps every chart on it inside the viewport." },
+              blurb: "The whole thing: location, current conditions, hourly, details. Scrolls - its Flickable is layered, which is what keeps every chart on it inside the viewport." },
             // 980, not the page's own 1244: the gallery's rail takes 232 px, so a
             // full-width stage runs off the right of a default window and clips
-            // the dew-point slug and the high/low — the two things furthest right.
+            // the dew-point slug and the high/low - the two things furthest right.
             { name: "Current conditions", file: "CurrentConditions.qml", stage: { w: 980, h: 0 },
               blurb: "The page headline. Every number on it is read from the same place the detail card for that measurable reads from, so the two cannot drift." },
             { name: "Weather details grid", file: "WeatherDetails.qml", stage: { w: 1244, h: 0 },
@@ -143,7 +143,7 @@ var groups = [
     {
         // Everything below runs at 390 px in the app. Reviewing it at the
         // gallery's own stage width is reviewing a layout the phone never
-        // draws — pick the Mobile viewport in the rail, or pass
+        // draws - pick the Mobile viewport in the rail, or pass
         // `--viewport mobile` alongside `--gallery`.
         name: "Mobile screens",
         items: [
@@ -185,13 +185,13 @@ var groups = [
             { name: "Mobile hero", file: "MobileCurrentWeather.qml", stage: { w: 362, h: 0 },
               blurb: "The desktop headline with no card, no high/low, and six slugs wrapped three by two." },
             { name: "Hour strip", file: "MobileHourStrip.qml", stage: { w: 362, h: 0 },
-              blurb: "Twenty-four hours, two at a time. The band's top edge is the temperature — the reference draws it flat." },
+              blurb: "Twenty-four hours, two at a time. The band's top edge is the temperature - the reference draws it flat." },
             { name: "Ten-day strip", file: "MobileDailyStrip.qml", stage: { w: 362, h: 0 },
               blurb: "A readout, not a control. Highs bold, lows not: the pair is the reading and one of them has to lead." },
             { name: "Sun & moon", file: "MobileSunMoonCard.qml", stage: { w: 330, h: 0 },
               blurb: "Two arcs on one reveal. They have to leave together or it reads as a race." },
             { name: "Sky arc", file: "SkyArc.qml", stage: { w: 170, h: 0 },
-              blurb: "Progress from rise to set. Not DetailSunCard's altitude sinusoid — at this size that is a bump with nothing to read.",
+              blurb: "Progress from rise to set. Not DetailSunCard's altitude sinusoid - at this size that is a bump with nothing to read.",
               variants: [
                   { label: "mid-morning", props: { riseMin: 364, setMin: 1243, nowMin: 620,
                                                    riseLabel: "6:04", riseSuffix: "AM", riseName: "Sunrise",
@@ -246,7 +246,7 @@ var groups = [
                   { label: "up",    props: { direction: "up",    glyphSize: 22 } }
               ] },
             { name: "Location bar", file: "LocationBar.qml",
-              blurb: "Sits on the page gradient rather than on a surface — there is nothing here to lift off the background.",
+              blurb: "Sits on the page gradient rather than on a surface - there is nothing here to lift off the background.",
               variants: [
                   { label: "home",     props: { label: "Toronto, Ontario", isHome: true } },
                   { label: "not home", props: { label: "Reykjavík, Iceland", isHome: false } }
@@ -301,7 +301,7 @@ var groups = [
                   { label: "rain-night",   props: { kind: "rain-night",   glyphSize: 44 } }
               ] },
             { name: "Day icon badge", file: "DayIconBadge.qml",
-              blurb: "The glyph on its pale day plate — clouds get a darker variant there or they vanish.",
+              blurb: "The glyph on its pale day plate - clouds get a darker variant there or they vanish.",
               variants: [
                   { label: "day",   props: { kind: "partly-day",   night: false, badgeSize: 56 } },
                   { label: "night", props: { kind: "partly-night", night: true,  badgeSize: 56 } }
@@ -347,13 +347,13 @@ var groups = [
             { name: "Precipitation strip", file: "PrecipitationStrip.qml", stage: { w: 480, h: 28 },
               blurb: "One cell per label interval; past hours are hatched, not blank." },
             { name: "Precipitation wash", file: "PrecipBands.qml", stage: { w: 480, h: 120 },
-              blurb: "When it falls. Hue is the type, alpha the intensity — a narrow ladder on purpose, because \"is it raining here\" has to read the same at every level.",
+              blurb: "When it falls. Hue is the type, alpha the intensity - a narrow ladder on purpose, because \"is it raining here\" has to read the same at every level.",
               variants: _levels(8) },
             { name: "Precipitation field", file: "PrecipField.qml", stage: { w: 480, h: 200 },
               blurb: "What is falling, and how hard. Ten levels off one particle model: type picks the shape, intensity scales the count, size and speed. Shown without the wash it normally sits over.",
               variants: _levels(8) },
             { name: "Hatch", file: "HatchPattern.qml", stage: { w: 240, h: 90 },
-              blurb: "\"The past — there is no forecast here\", so absent data reads as deliberate." }
+              blurb: "\"The past - there is no forecast here\", so absent data reads as deliberate." }
         ]
     }
 ];

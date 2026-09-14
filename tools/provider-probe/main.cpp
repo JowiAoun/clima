@@ -9,8 +9,8 @@
 // A test asserts. This prints, which is a different job: the assertions in
 // tests/tst_airquality.cpp say the pollen gate is closed in Toronto and open in
 // Berlin, and this puts the two side by side so a human can *see* that one card
-// is missing rather than empty. docs/08-risks.md R9 — "region-gate honestly,
-// never fabricate" — is the kind of rule that is easy to satisfy in an assertion
+// is missing rather than empty. docs/08-risks.md R9 - "region-gate honestly,
+// never fabricate" - is the kind of rule that is easy to satisfy in an assertion
 // and still get visibly wrong on a screen, and this is the cheapest place to
 // look before there is a screen.
 //
@@ -61,14 +61,14 @@ QString show(const Reading &reading, int decimals = 1, const QString &unit = {})
     // absent reading prints as an em dash, never as 0. If this tool ever prints
     // "0.0 km/h" for MET Norway's wind gust, something has started fabricating.
     if (!reading.has_value())
-        return QStringLiteral("—");
+        return QStringLiteral("-");
     return QString::number(*reading, 'f', decimals) + unit;
 }
 
 QString localTime(const QDateTime &instant, const QTimeZone &zone)
 {
     if (!instant.isValid())
-        return QStringLiteral("—");
+        return QStringLiteral("-");
     return instant.toTimeZone(zone).toString(QStringLiteral("ddd HH:mm"));
 }
 
@@ -98,9 +98,9 @@ void probeAirQuality(const QString &place, const QString &file)
           << QString::fromUtf8(air.timeZone.id()) << "\n";
     out() << "  hours           " << air.hourly.size() << "\n";
     out() << "  European AQI    "
-          << (now.europeanAqi ? QString::number(*now.europeanAqi) : QStringLiteral("—"))
+          << (now.europeanAqi ? QString::number(*now.europeanAqi) : QStringLiteral("-"))
           << "        US AQI  "
-          << (now.usAqi ? QString::number(*now.usAqi) : QStringLiteral("—")) << "\n";
+          << (now.usAqi ? QString::number(*now.usAqi) : QStringLiteral("-")) << "\n";
 
     if (const std::optional<Pollutant> dominant = now.dominantPollutant()) {
         out() << "  dominant        " << pollutantId(*dominant) << "  "
@@ -113,17 +113,17 @@ void probeAirQuality(const QString &place, const QString &file)
         const auto pollutant = static_cast<Pollutant>(i);
         const auto value     = now.pollutants.constFind(pollutant);
         out() << "    " << pollutantId(pollutant).leftJustified(18)
-              << (value == now.pollutants.cend() ? QStringLiteral("—")
+              << (value == now.pollutants.cend() ? QStringLiteral("-")
                                                  : QString::number(*value, 'f', 1))
               << "  " << pollutantUnit(pollutant) << "\n";
     }
 
-    // THE GATE, printed. Toronto must show the card as absent — not as six
-    // zeroes — and Berlin must show real numbers, four of which are legitimately
+    // THE GATE, printed. Toronto must show the card as absent - not as six
+    // zeroes - and Berlin must show real numbers, four of which are legitimately
     // 0.0 because it is July and those species are out of season.
     out() << "\n  pollen          ";
     if (!air.hasPollen) {
-        out() << "NOT AVAILABLE HERE — the card is hidden, not empty\n";
+        out() << "NOT AVAILABLE HERE - the card is hidden, not empty\n";
         out() << "                  (every species was null at every hour; CAMS produces "
                  "pollen for\n"
                  "                   its European domain only)\n";
@@ -135,7 +135,7 @@ void probeAirQuality(const QString &place, const QString &file)
             const auto value   = pollen ? pollen->constFind(species) : QMap<PollenSpecies,
                                                                            double>::const_iterator();
             out() << "    " << pollenSpeciesId(species).leftJustified(18)
-                  << (!pollen || value == pollen->cend() ? QStringLiteral("—")
+                  << (!pollen || value == pollen->cend() ? QStringLiteral("-")
                                                          : QString::number(*value, 'f', 1))
                   << "  grains/m³\n";
         }
@@ -166,7 +166,7 @@ void probeMetNorway()
 
     const Forecast &forecast = parsed.value();
 
-    rule(QStringLiteral("MET Norway Locationforecast 2.0 (compact) — the fallback"));
+    rule(QStringLiteral("MET Norway Locationforecast 2.0 (compact) - the fallback"));
     out() << "  coordinate      " << forecast.coordinate.toKeyString() << "   elevation "
           << show(forecast.elevation, 0, QStringLiteral(" m")) << "\n";
     out() << "  issued          " << forecast.issuedAt.toString(Qt::ISODate) << "\n";
@@ -175,7 +175,7 @@ void probeMetNorway()
     out() << "  hours           " << forecast.hourly.size() << "   days "
           << forecast.daily.size() << "\n";
 
-    out() << "\n  the first eight hours — note that the first has no precipitation and no\n"
+    out() << "\n  the first eight hours - note that the first has no precipitation and no\n"
              "  weather code, because those would describe the hour BEFORE the forecast\n"
              "  starts, which is the past.\n\n";
     out() << "    time        temp    wind    gust    precip  code  humidity  UV\n";
@@ -187,12 +187,12 @@ void probeMetNorway()
               << show(point.windGust, 1).leftJustified(8)
               << show(point.precipitation, 1).leftJustified(8)
               << (point.weatherCode ? QString::number(*point.weatherCode)
-                                    : QStringLiteral("—")).leftJustified(6)
+                                    : QStringLiteral("-")).leftJustified(6)
               << show(point.relativeHumidity, 0).leftJustified(10)
               << show(point.uvIndex, 1) << "\n";
     }
 
-    out() << "\n  the six-hourly tail — the series thins after about two and a half days,\n"
+    out() << "\n  the six-hourly tail - the series thins after about two and a half days,\n"
              "  which is why HourlyPoint carries an explicit timestamp.\n\n";
     for (int i = forecast.hourly.size() - 4; i < forecast.hourly.size(); ++i) {
         const HourlyPoint &point = forecast.hourly.at(i);
@@ -201,7 +201,7 @@ void probeMetNorway()
               << "precip " << show(point.precipitation, 1) << "\n";
     }
 
-    out() << "\n  derived daily — max, min and sums over the hours in each Toronto day.\n"
+    out() << "\n  derived daily - max, min and sums over the hours in each Toronto day.\n"
              "  sunrise and sunset are absent because Locationforecast has no sun product,\n"
              "  and the UI hides the arc rather than drawing one from midnight to midnight.\n\n";
     out() << "    date          high    low     precip  code  sunrise\n";
@@ -211,16 +211,16 @@ void probeMetNorway()
               << show(day.temperatureMin, 1, QStringLiteral("°")).leftJustified(8)
               << show(day.precipitationSum, 1).leftJustified(8)
               << (day.weatherCode ? QString::number(*day.weatherCode)
-                                  : QStringLiteral("—")).leftJustified(6)
+                                  : QStringLiteral("-")).leftJustified(6)
               << (day.sunrise.isValid() ? day.sunrise.toString(Qt::ISODate)
-                                        : QStringLiteral("—"))
+                                        : QStringLiteral("-"))
               << "\n";
     }
 
     out() << "\n  the WMO codes this adapter can produce:\n    ";
     for (const int code : metNoWeatherCodes())
         out() << code << " ";
-    out() << "\n  68, 69, 83 and 84 are sleet — rain and snow together. Open-Meteo never\n"
+    out() << "\n  68, 69, 83 and 84 are sleet - rain and snow together. Open-Meteo never\n"
              "  emits them, so a code-to-icon table built from Open-Meteo's documentation\n"
              "  has four holes that only appear while the fallback is serving.\n";
 }
@@ -231,12 +231,12 @@ int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
 
-    out() << "climat provider probe — recorded fixtures, no network\n";
+    out() << "climat provider probe - recorded fixtures, no network\n";
 
-    rule(QStringLiteral("AIR QUALITY — the Europe pollen gate, seen rather than asserted"));
-    probeAirQuality(QStringLiteral("Toronto — outside the CAMS European domain"),
+    rule(QStringLiteral("AIR QUALITY - the Europe pollen gate, seen rather than asserted"));
+    probeAirQuality(QStringLiteral("Toronto - outside the CAMS European domain"),
                     QStringLiteral("toronto.json"));
-    probeAirQuality(QStringLiteral("Berlin — inside it"), QStringLiteral("berlin.json"));
+    probeAirQuality(QStringLiteral("Berlin - inside it"), QStringLiteral("berlin.json"));
 
     probeMetNorway();
 

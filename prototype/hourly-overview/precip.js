@@ -3,13 +3,13 @@
 // Precipitation as an interval, not as a number per hour.
 //
 // A column of millimetres answers "how much" and makes you read an axis to find
-// out "when" — but "when" is the question a forecast is actually opened to
+// out "when" - but "when" is the question a forecast is actually opened to
 // answer. So precipitation gets a second, non-numeric encoding: the hours it
 // falls in are washed and textured, and the texture says what kind and how
 // hard. That reads at a glance, on every metric tab, without displacing the
 // series the tab is about.
 //
-// This file is the whole model — thresholds, the runs they group into, and a
+// This file is the whole model - thresholds, the runs they group into, and a
 // deterministic particle field. It draws nothing and names no colours:
 // `PrecipBands` and `PrecipField` render what this describes, `theme.js` says
 // in what colour.
@@ -40,7 +40,7 @@ var SLEET_MAX_C = 2.5;
 // Types are the visual vocabulary, not a meteorological taxonomy: two kinds of
 // falling water that look different get two entries, and two that look the same
 // share one. `thunder` and `hail` cannot be derived from an amount and a
-// temperature — they come from the provider's weather code.
+// temperature - they come from the provider's weather code.
 var TYPES = ["drizzle", "rain", "sleet", "snow", "hail", "thunder"];
 var LEVELS = ["light", "moderate", "heavy"];
 
@@ -82,7 +82,7 @@ function cells(mmArr, tempArr, codeArr) {
 // rather than out of a weather situation.
 //
 // The amount is chosen to land in the band asked for rather than passed
-// through, because `spans` reclassifies from the amount anyway — so a cell
+// through, because `spans` reclassifies from the amount anyway - so a cell
 // claiming "heavy" at 1 mm would be quietly overruled and the specimen would
 // be lying about which level it is showing.
 //
@@ -177,7 +177,7 @@ function bandW(span, hourWidth, maxX) {
 // ---------------------------------------------------------------------------
 // Every drop's position, size and timing is a hash of its hour and its index
 // within that hour. Nothing here calls Math.random, so the same forecast draws
-// the same rain on every run — the promise mockdata.js already makes, and the
+// the same rain on every run - the promise mockdata.js already makes, and the
 // one that lets a headless grab be a golden image.
 
 function _hash(x) {
@@ -198,7 +198,7 @@ function _between(a, b, lo, hi) {
 // The field is animated by one clock that runs 0 → LOOP and repeats, and every
 // particle's own progress is `(clock * rate + offset) mod 1`. That wraps
 // seamlessly only where `LOOP * rate` is a whole number, so rates are quantised
-// to LOOP steps below. Without it the whole field jumps once per loop — a
+// to LOOP steps below. Without it the whole field jumps once per loop - a
 // glitch rare enough to be blamed on anything.
 var LOOP = 60;
 
@@ -211,7 +211,7 @@ function _quantise(rate) {
 //   kind    "streak" a falling line | "flake" drifting | "pellet" hard and fast
 //   count   drops per hour at moderate intensity
 //   len     streak length in px; `size` is a flake or pellet's diameter
-//   rate    falls per second — 1.0 crosses the plot once a second
+//   rate    falls per second - 1.0 crosses the plot once a second
 //   splash  splashes per drop; frozen things do not splash
 //   slant   degrees off vertical, so the field reads as falling rather than as
 //           a picket fence
@@ -220,7 +220,7 @@ var STYLE = {
                rate: [0.50, 0.70], splash: 0.25, slant: 5 },
     rain:    { kind: "streak", count:  4, len: [14, 30],   width: 1.0, alpha: 0.62,
                rate: [0.90, 1.30], splash: 0.55, slant: 4 },
-    // Sleet is not one thing falling, it is rain with ice in it — and drawn as
+    // Sleet is not one thing falling, it is rain with ice in it - and drawn as
     // short rain it reads as rain in a hurry. `mix` puts that share of its
     // drops down as pellets instead, which at this size is the only thing that
     // separates the two.
@@ -238,7 +238,7 @@ var STYLE = {
 };
 
 // Intensity scales the field rather than switching it. Twice the drops, longer
-// and faster, is what heavier weather looks like out of a window — and it means
+// and faster, is what heavier weather looks like out of a window - and it means
 // six named levels are six points on a continuum rather than six pictures
 // somebody has to keep in sync.
 var GAIN = {
@@ -301,7 +301,7 @@ function drops(cs, hourWidth, plotHeight) {
 
 // Splashes are the half of the reference's effect that sells it: without them
 // the drops fall through the chart and nothing arrives anywhere. They are not
-// tied to a particular drop — matching each one to its own impact would need
+// tied to a particular drop - matching each one to its own impact would need
 // the field to know where the ground is, and on a temperature chart there is no
 // ground. Scattering them over the plot reads the same and costs nothing.
 function splashes(cs, hourWidth, plotHeight) {

@@ -15,8 +15,8 @@
 # adding a user-facing sentence shows that sentence in its diff. Nothing loads
 # it at run time.
 #
-# A LANGUAGE catalogue is `climat_<locale>.ts` beside it — `climat_fr.ts`,
-# `climat_pt_BR.ts` — and there are none yet, which is stated in
+# A LANGUAGE catalogue is `climat_<locale>.ts` beside it - `climat_fr.ts`,
+# `climat_pt_BR.ts` - and there are none yet, which is stated in
 # docs/known-gaps.md rather than papered over with a machine translation.
 # Adding one is a file and a line in app/CMakeLists.txt; nothing else changes,
 # because app/apptranslator.cpp already looks for whatever was compiled in.
@@ -24,7 +24,7 @@
 # ---- two flags that are not incidental --------------------------------------
 #
 #   -I .            every include in this tree is written from the repository
-#                   root — `#include "app/viewmodels/alertsdata.h"` — and
+#                   root - `#include "app/viewmodels/alertsdata.h"` - and
 #                   lupdate resolves includes against the including file's own
 #                   directory. Without this it never parses alertsdata.h, does
 #                   not know the class, and reports "Qualifying with unknown
@@ -47,15 +47,15 @@ template="$root/app/translations/climat.ts"
 mode="${1:-update}"
 
 if ! command -v lupdate > /dev/null 2>&1; then
-  echo "i18n: lupdate is not on PATH — it comes with Qt's LinguistTools (qt6-tools)." >&2
+  echo "i18n: lupdate is not on PATH - it comes with Qt's LinguistTools (qt6-tools)." >&2
   exit 2
 fi
 
 generate() {
   # Into a file of the caller's choosing, so that `check` can compare rather
   # than overwrite the thing it is checking.
-  # widgets/ as well as app/ and cli/. The tiles carry their own qsTr() calls —
-  # a tile says "No weather service" and "Updated N min ago" — and leaving that
+  # widgets/ as well as app/ and cli/. The tiles carry their own qsTr() calls -
+  # a tile says "No weather service" and "Updated N min ago" - and leaving that
   # directory out meant this gate reported "ok" for strings no translator would
   # ever be offered, which is the failure it exists to prevent.
   lupdate -I "$root" -recursive "$root/app" "$root/cli" "$root/widgets" \
@@ -72,7 +72,7 @@ case "$mode" in
 
   check)
     if [ ! -r "$template" ]; then
-      echo "i18n: no template at app/translations/climat.ts — run scripts/i18n.sh update" >&2
+      echo "i18n: no template at app/translations/climat.ts - run scripts/i18n.sh update" >&2
       exit 1
     fi
 
@@ -87,7 +87,7 @@ case "$mode" in
     generate "$fresh"
 
     if diff -u "$template" "$fresh" > "$scratch/diff"; then
-      echo "i18n: ok — the template matches the source"
+      echo "i18n: ok - the template matches the source"
       exit 0
     fi
 

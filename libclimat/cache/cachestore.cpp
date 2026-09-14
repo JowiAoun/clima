@@ -18,9 +18,9 @@ namespace climat {
 namespace {
 
 // Every CacheStore gets its own named QSqlDatabase connection. The default
-// connection is a process-wide global, and two stores sharing it — a test
+// connection is a process-wide global, and two stores sharing it - a test
 // opening a second store while the first is alive, or a future tile cache
-// beside the forecast cache — would silently reconfigure each other's PRAGMAs
+// beside the forecast cache - would silently reconfigure each other's PRAGMAs
 // and close each other's file.
 QString nextConnectionName()
 {
@@ -76,7 +76,7 @@ QString CacheStore::defaultDatabasePath()
     // AppDataLocation and not CacheLocation, deliberately. The file holds the
     // user's saved places and the engine's settings alongside the forecasts,
     // and CacheLocation is a directory the platform is entitled to empty
-    // without asking — on a Flatpak upgrade, or when a disk-cleaner runs. §4.5
+    // without asking - on a Flatpak upgrade, or when a disk-cleaner runs. §4.5
     // names AppDataLocation and this is why.
     const QString directory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     return directory + QStringLiteral("/cache.sqlite");
@@ -239,7 +239,7 @@ Result<CacheEntry> CacheStore::get(const QString &key) const
     if (!query.next())
         return Error(ErrorKind::NotFound, QStringLiteral("no cache entry for %1").arg(key));
 
-    // A row with no payload is a validator record, not a cache entry — see
+    // A row with no payload is a validator record, not a cache entry - see
     // storeValidators() below and the forecast_blob comment in migrations.cpp.
     // Reporting it as a hit would hand the caller zero bytes to parse.
     const QVariant payload = query.value(5);
@@ -521,7 +521,7 @@ void CacheStore::storeValidators(const QString &key, const Validators &validator
     // ways round: HttpClient records an ETag the moment a 200 arrives, which is
     // *before* the caller has parsed the body and decided to keep it, so the
     // row may not exist yet. When it does not, this leaves a row with a NULL
-    // payload — a validator record, which get() reports as a miss and a later
+    // payload - a validator record, which get() reports as a miss and a later
     // put() fills in.
     //
     // The alternative, a separate validators table, means two rows per request

@@ -4,8 +4,8 @@
 // The wind rose's hover, the rule that keeps it the only one, and the compass
 // gaps it is drawn over.
 //
-// DetailCard.qml's hover block sets out the rule — a card moves on hover only
-// where the still card is silent about something the reading itself does — and
+// DetailCard.qml's hover block sets out the rule - a card moves on hover only
+// where the still card is silent about something the reading itself does - and
 // two invariants everything else depends on:
 //
 //   - a card at rest is the card that existed before any of this, to the pixel,
@@ -18,7 +18,7 @@
 // `hoverPhase` back would prove the envelope arithmetic and nothing about
 // whether the wedge is wired to it: a card that forgot to multiply by it passes
 // that test and fails every golden. Grabbing the card at rest, again mid-drift
-// and again after the pointer leaves catches both halves — that something moved,
+// and again after the pointer leaves catches both halves - that something moved,
 // and that it all came back.
 //
 // The twelve rows that must *not* move are the half that rots. A grid where one
@@ -37,7 +37,7 @@ TestCase {
     when: windowShown
 
     // A TestCase is invisible by default and an invisible subtree is never
-    // rendered, so every grab would come back the clear colour — which reads as
+    // rendered, so every grab would come back the clear colour - which reads as
     // "nothing moved" and would make this file agree with itself forever.
     // tst_weatherglyph.qml learnt this the same way.
     visible: true
@@ -79,8 +79,8 @@ TestCase {
 
     // The card the running function built, so `cleanup()` can get rid of it even
     // when an assertion or a scripting error walked out first. Every grab is a
-    // grab of `stage`, so one orphan left parented there — drifting, because it
-    // was hovered when the function died — silently joins every later
+    // grab of `stage`, so one orphan left parented there - drifting, because it
+    // was hovered when the function died - silently joins every later
     // comparison.
     property var live: null
     property var liveGrid: null
@@ -168,7 +168,7 @@ TestCase {
         if (row.moves)
             verify(!stirred.equals(rest),
                    row.tag + " drew the same card a third of a crossing in. The "
-                   + "drift is not reaching the wedge — check that `driftBy` is "
+                   + "drift is not reaching the wedge - check that `driftBy` is "
                    + "multiplied into the path and by `hoverPhase`.")
         else
             verify(stirred.equals(rest),
@@ -182,13 +182,13 @@ TestCase {
 
         verify(settled.equals(rest),
                row.tag + " did not come back. Every hover gesture is multiplied by "
-               + "`hoverPhase`, which is exactly 0 at rest — a card that lands "
+               + "`hoverPhase`, which is exactly 0 at rest - a card that lands "
                + "anywhere else has a gesture the envelope does not reach, and the "
                + "golden images for that card become a coin toss.")
     }
 
     // The drift is a translation along one axis and nothing else. A wedge that
-    // rotated, grew or breathed would satisfy the test above just as well —
+    // rotated, grew or breathed would satisfy the test above just as well -
     // and rotating is exactly what this gesture did in its first form and was
     // wrong for. A bearing is a measurement; turning the wedge off it draws a
     // wind that is not blowing.
@@ -219,7 +219,7 @@ TestCase {
         verify(Math.abs(b.n - a.n) < a.n * 0.12,
                "the accent covers " + a.n + " pixels and then " + b.n
                + ". A drift changes where the wedge is, not how much of it there "
-               + "is — check that the path is built about a moved centre rather "
+               + "is - check that the path is built about a moved centre rather "
                + "than being stretched.")
 
         // Screen axes: x right, y down. A bearing is degrees clockwise from
@@ -240,7 +240,7 @@ TestCase {
         verify(across < along * 0.4,
                "the wedge moved " + across.toFixed(2) + " px across the wind "
                + "against " + along.toFixed(2) + " along it. That is a turn, and a "
-               + "bearing is a measurement — the wedge keeps its angle and only "
+               + "bearing is a measurement - the wedge keeps its angle and only "
                + "its position may change.")
     }
 
@@ -261,12 +261,12 @@ TestCase {
     // ---- the compass gaps --------------------------------------------------
 
     // The ring is broken at each cardinal so the letter has somewhere to sit,
-    // and the gust band is the ring painted green — so the band has to be broken
+    // and the gust band is the ring painted green - so the band has to be broken
     // in the same four places. It was not: the band was one span with its ends
     // pushed clear of any gap they landed in, which cannot help when the band's
     // *centre* is in the gap. A wind from within 12° of a cardinal drew the arc
-    // straight through the letter, and the Toronto fixture blows from 194° —
-    // fourteen degrees off due south — so that is what shipped.
+    // straight through the letter, and the Toronto fixture blows from 194° -
+    // fourteen degrees off due south - so that is what shipped.
     //
     // Green rather than the accent's exact value: the point is that no part of
     // the band is inside a letter, not what colour the band is this week, and a
@@ -291,12 +291,12 @@ TestCase {
             compare(green, 0,
                     "the gust band paints " + green + " pixels inside the \"" + box.text
                     + "\" label. The ring has no arc in that gap and neither may the "
-                    + "band — see `gustPath`.")
+                    + "band - see `gustPath`.")
         }
     }
 
     // The pixel check above can only ever ask about the one bearing the fixture
-    // has, and Toronto blows from 194° — fourteen degrees clear of due south and
+    // has, and Toronto blows from 194° - fourteen degrees clear of due south and
     // therefore outside the S gap, which is exactly where the old code happened
     // to work. It shipped a band drawn through the letter at 191° and every
     // golden image agreed with it.
@@ -334,7 +334,7 @@ TestCase {
     }
 
     // Nothing is lost either. Clipping a band to the gaps must remove the gaps
-    // and not a degree more — a band that came back short would be understating
+    // and not a degree more - a band that came back short would be understating
     // how unsettled the wind is, which is the one thing it is drawn to say.
     function test_clippingRemovesTheGapsAndNothingElse() {
         for (var deg = 0; deg < 360; deg += 7) {
@@ -478,7 +478,7 @@ TestCase {
         mouseMove(card, card.width / 2, card.height / 2)
         tryVerify(function() { return card.hovered }, 2000)
 
-        // Hovered, and pinned. Not "settles back to 0" — it never leaves it.
+        // Hovered, and pinned. Not "settles back to 0" - it never leaves it.
         compare(card.hoverPhase, 0,
                 "a card under stillness opened its envelope; a --grab that caught "
                 + "a pointer would then photograph a card mid-drift")

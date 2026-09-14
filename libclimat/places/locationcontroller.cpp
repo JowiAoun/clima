@@ -44,7 +44,7 @@ Status LocationController::load()
     endResetModel();
 
     // Which row to open on, in order of preference: the one last looked at,
-    // then home, then the first. Each fallback is a real case — a fresh
+    // then home, then the first. Each fallback is a real case - a fresh
     // install has no remembered current, and a database restored from a backup
     // may have a remembered id that no longer exists.
     int wanted = -1;
@@ -238,7 +238,7 @@ int LocationController::addPlace(const Place &place, bool makeCurrent)
 
     // The first place is home. An app whose only saved place is not its home
     // has a home nothing points at, and the next start would fall back to row
-    // 0 anyway — this makes the fallback a stored fact instead of an accident.
+    // 0 anyway - this makes the fallback a stored fact instead of an accident.
     saved.isHome = m_places.isEmpty();
 
     if (!persist(saved))
@@ -364,7 +364,7 @@ bool LocationController::setHome(int row)
 
     // The old home is cleared *before* the new one is written. The places table
     // carries a partial unique index over is_home, so the other order is a
-    // constraint failure rather than an overwrite — which is exactly what the
+    // constraint failure rather than an overwrite - which is exactly what the
     // index is for, and why this order is not an accident.
     const int previous = homeIndex();
     if (previous >= 0) {

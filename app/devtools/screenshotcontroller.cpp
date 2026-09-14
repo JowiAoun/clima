@@ -25,7 +25,7 @@ namespace when {
 constexpr int grab = 1600;
 
 // After first paint, before anything a person would call "settled". Both the
-// walk and the scroll need a laid-out scene rather than a settled one —
+// walk and the scroll need a laid-out scene rather than a settled one -
 // contentHeight is still 0 during componentComplete, and a contentY assigned
 // against it is clamped straight back to zero.
 constexpr int placement = 400;
@@ -135,7 +135,7 @@ void ScreenshotController::start()
     // The precipitation field is the one thing on this page that moves without
     // being asked, so a grab of it would otherwise catch a different frame
     // every run and no two golden images would agree. Frozen, it still draws
-    // rain — precip.js seeds every drop from its hour, so the frozen frame is a
+    // rain - precip.js seeds every drop from its hour, so the frozen frame is a
     // deterministic one rather than an empty one.
     //
     // Offered rather than assigned, which is MobileShell.push()'s rule and is
@@ -163,7 +163,7 @@ void ScreenshotController::grabTo(const QString &file, bool quitWhenSaved)
         return;
     }
 
-    // The result is kept alive by this lambda and by nothing else — it is a
+    // The result is kept alive by this lambda and by nothing else - it is a
     // shared pointer whose only other owner was the local above. Capture it by
     // value or the render thread finishes into a deleted object.
     connect(result.data(), &QQuickItemGrabResult::ready, this,
@@ -256,14 +256,14 @@ void ScreenshotController::applyPokes()
             // The place picker is a sheet the shell owns, and it is the one
             // piece of UI in this app that is otherwise reachable only by
             // clicking. Without this poke it could be reviewed by a person and
-            // by nothing else — which for a screen with a search field, a saved
+            // by nothing else - which for a screen with a search field, a saved
             // list and a failure state is the wrong side of the line.
             offer(m_shell, "pickerOpen", on);
         } else if (target == QLatin1String("prefs")) {
             // The preferences sheet, which only the desktop shell has: the phone
             // shows the same two groups inline on its Me tab, and `--poke tab=me`
             // is how that is photographed. Saying so beats offering a property
-            // the mobile shell does not have and reporting nothing — `offer`
+            // the mobile shell does not have and reporting nothing - `offer`
             // is silent by design, and silence here would read as a sheet that
             // failed to open.
             if (!m_mobile)
@@ -298,7 +298,7 @@ void ScreenshotController::applyPokes()
                 qWarning("--poke hits: only meaningful in the component gallery");
         } else if (target == QLatin1String("remount")) {
             // Rebuilding the specimen replays whatever the component does on
-            // mount, which for a detail card is the only animation it has — the
+            // mount, which for a detail card is the only animation it has - the
             // data behind these cards never changes while the app runs.
             if (m_gallery != nullptr)
                 QMetaObject::invokeMethod(m_gallery, "remount");

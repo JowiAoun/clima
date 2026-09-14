@@ -1,13 +1,13 @@
 <!-- SPDX-FileCopyrightText: 2026 Jowi Aoun -->
 <!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 
-# Climat — Plan Index
+# Climat - Plan Index
 
 Planning baseline: **2026-07-30**.
 
 ## Executive summary
 
-**The gap is real.** No weather app — open source or proprietary — combines global coverage,
+**The gap is real.** No weather app - open source or proprietary - combines global coverage,
 a radar map, severe-weather alerts, MSN-class charts, and first-class Linux + Windows + macOS
 support. The closest cross-platform open-source app (Vremenar, Qt 6) covers two countries;
 the closest radar app (Supercell Wx, Qt 6 + MapLibre) is a US-centric expert tool with no
@@ -15,31 +15,31 @@ forecast UI; the best Linux apps (Mousam, GNOME Weather) are Linux-only with no 
 alerts. See [`01-landscape.md`](01-landscape.md).
 
 **The stack is right, with one correction.** Qt 6's core is C++, but Qt 6 UIs are written in
-**QML** with C++ underneath — so this is a **C++20 engine + QML interface**, not pure C++.
+**QML** with C++ underneath - so this is a **C++20 engine + QML interface**, not pure C++.
 See [`03-tech-stack.md`](03-tech-stack.md) §3.0.
 
 **The biggest technical finding is a licensing one.** Qt Charts, Qt Graphs, Qt Lottie and
 Qt Quick 3D are **GPLv3-only, not LGPL**. Using any of them silently forces the whole app to
 GPLv3 and permanently closes the iOS App Store. We therefore build our own scene-graph chart
-kit — which we wanted anyway, because MSN-class weather charts are not "a line chart with a
+kit - which we wanted anyway, because MSN-class weather charts are not "a line chart with a
 legend". See §3.1 and D3.
 
 **The hardest data problem is radar, not forecast.** Open-Meteo gives us everything for
 forecasts, air quality and history with no key and no backend. But it has **no alerts
 product**, and the convenient global radar source (RainViewer) is licensed for
-personal/educational use only — so radar and alerts both need region-routed provider chains.
+personal/educational use only - so radar and alerts both need region-routed provider chains.
 See [`02-data-sources.md`](02-data-sources.md).
 
 **The differentiator is trust, not features.** You noted MSN is good except its predictions.
 We can't out-forecast ECMWF, but Open-Meteo exposes ECMWF IFS, ECMWF AIFS, GFS, ICON,
-AROME, UKMO and full ensembles from one API — so Climat can show *model disagreement and
+AROME, UKMO and full ensembles from one API - so Climat can show *model disagreement and
 confidence ranges* instead of one confident wrong number. Nothing mainstream does this.
 See [`05-feature-parity.md`](05-feature-parity.md) §5.6.
 
 **Timeline: ≈38 weeks to 1.0** for one focused developer, with a shippable artefact at every
 one of the eight milestones. See [`06-roadmap.md`](06-roadmap.md).
 
-**Five decisions are yours to make before M0 ends** — licence split, product name, app ID,
+**Five decisions are yours to make before M0 ends** - licence split, product name, app ID,
 macOS signing budget, and team shape. See [`08-risks.md`](08-risks.md) §8.2.
 
 ## Reading order

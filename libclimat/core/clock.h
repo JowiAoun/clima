@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: MPL-2.0
 //
-// What time it is — asked, never assumed.
+// What time it is - asked, never assumed.
 //
 // ============================================================================
 // THE RULE
@@ -32,8 +32,8 @@
 //
 // One injected object collapses all of that. `--fixture` constructs a
 // FrozenClock at the timestamp the recorded payloads were captured, hands it to
-// everything that is constructed afterwards, and the entire product — TTLs,
-// backoff, alert expiry, the "now" marker on the hourly strip — behaves exactly
+// everything that is constructed afterwards, and the entire product - TTLs,
+// backoff, alert expiry, the "now" marker on the hourly strip - behaves exactly
 // as it did on the afternoon the fixtures were recorded. Downstream code has no
 // idea it is in fixture mode and never asks.
 //
@@ -48,7 +48,7 @@
 // NTP corrects a drifting laptop, and it can go backwards. A backoff that
 // measures "wait thirty seconds" against wall-clock time therefore has a
 // failure mode where a clock correction turns thirty seconds into a negative
-// number and every retry fires at once — a thundering herd at exactly the
+// number and every retry fires at once - a thundering herd at exactly the
 // moment a server has told us it is unhappy.
 //
 // So the interface has two hands. `now()` answers "what time is it", which is
@@ -122,7 +122,7 @@ private:
 class FrozenClock final : public Clock
 {
 public:
-    // Defaults to 2026-01-01T00:00:00Z — an arbitrary instant, chosen only so
+    // Defaults to 2026-01-01T00:00:00Z - an arbitrary instant, chosen only so
     // that a default-constructed FrozenClock is still a valid one and a test
     // that forgot to say when it is does not silently start at the epoch, where
     // half the arithmetic in this codebase would go negative.
@@ -136,7 +136,7 @@ public:
     void advance(std::chrono::milliseconds by);
 
     // Moves the wall clock without moving the monotonic one. This is a clock
-    // correction, an NTP step, a DST boundary — the case the two-handed
+    // correction, an NTP step, a DST boundary - the case the two-handed
     // interface exists for, and the only way to write a test for code that
     // must survive it.
     void setNow(QDateTime at);

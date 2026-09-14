@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Coordinate rounding and the request key, as arithmetic and string handling.
-// No client, no socket, no event loop — this is the layer everything above it
+// No client, no socket, no event loop - this is the layer everything above it
 // inherits its notion of "the same request" from, and it is worth asserting on
 // its own before it is asserted through three other classes.
 
@@ -116,8 +116,8 @@ void TestRequestKey::oneKeyPerRoundedCell()
 
 void TestRequestKey::adjacentCellsAreDifferentKeys()
 {
-    // Rounding must not collapse everything. A move of 0.001° — about 110 m,
-    // and enough to change grid cell for a 2 km convection-allowing model — is
+    // Rounding must not collapse everything. A move of 0.001° - about 110 m,
+    // and enough to change grid cell for a 2 km convection-allowing model - is
     // a different request.
     HttpRequest here = berlinForecast();
     HttpRequest there = berlinForecast();
@@ -160,7 +160,7 @@ void TestRequestKey::providerAndEndpointSeparateTheNamespaces()
 
 void TestRequestKey::theHostIsPartOfTheKey()
 {
-    // A self-hosted Open-Meteo (documented and realistic — §2.8) answers the
+    // A self-hosted Open-Meteo (documented and realistic - §2.8) answers the
     // same endpoint at a different host, and it is not the same answer.
     HttpRequest hosted = berlinForecast();
     hosted.url = QUrl(QStringLiteral("http://127.0.0.1:9090/v1/forecast"));

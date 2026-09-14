@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Sun detail card — the day drawn as the sun's own path across the sky.
+// Sun detail card - the day drawn as the sun's own path across the sky.
 //
 // The curve is a sinusoid in altitude: zero at sunrise and sunset, one at solar
 // noon, negative outside. The horizon line is altitude zero, so the stretch
 // above it *is* the daylight and its width on the card *is* the day length.
-// Nothing here is a decorative bell — move riseMin or setMin and the crossings,
+// Nothing here is a decorative bell - move riseMin or setMin and the crossings,
 // the sun mark and the warm stretch all move with them.
 //
 // The horizontal span is a full 24 hours centred on solar noon, which is why the
@@ -14,19 +14,19 @@
 // The arrival is a single gesture with a single origin: sunrise. The curve grows
 // outward from that crossing in both directions while the sun leaves it and
 // walks the arc to where it actually is now, so the distance the mark covers is
-// how far through the day we are. Nothing moves afterwards — see the `reveal`
+// how far through the day we are. Nothing moves afterwards - see the `reveal`
 // block below.
 //
 // DetailMoonCard.qml is this card's twin and is deliberately the same card with
 // two things changed: a cool ramp instead of a warm one, and the moon at its
-// phase instead of a sun disc on the mark. Everything else — the band geometry,
+// phase instead of a sun disc on the mark. Everything else - the band geometry,
 // the horizon, the crossing dots, the annotation under the span, the two clock
-// figures — is written the same way in both files on purpose. A geometry change
+// figures - is written the same way in both files on purpose. A geometry change
 // here belongs there too; the grid puts them side by side and they are read as a
 // pair.
 // A card is a `DetailCard { content: Item { id: viz } }`, so everything drawn
-// here lives inside a Component and reaches the two ids around it — `root` for
-// the card and `viz` for the visualisation — across that boundary. Without this
+// here lives inside a Component and reaches the two ids around it - `root` for
+// the card and `viz` for the visualisation - across that boundary. Without this
 // pragma neither is resolvable at compile time: qmllint reports every one of
 // them as an unqualified access, and qmlcachegen, which is the half that costs
 // something, cannot ahead-of-time compile the binding and leaves it to be
@@ -36,7 +36,7 @@
 //
 // Bound makes the enclosing scope's ids lexical, which is what they already
 // read as. It is safe here because every delegate in this file declares its
-// `required property` — that is the one thing Bound takes away, and none of
+// `required property` - that is the one thing Bound takes away, and none of
 // these were relying on it.
 pragma ComponentBehavior: Bound
 
@@ -86,7 +86,7 @@ DetailCard {
 
         // ---- the band the arc is drawn in ------------------------------------
         // The mark rides the curve, so the band has to be inset by the mark's own
-        // radius at both ends or the ring hangs outside the content box — which
+        // radius at both ends or the ring hangs outside the content box - which
         // is exactly what this card used to do at the top. The horizon is placed
         // from the inset rather than from the curve's own extremes, so both cards
         // in the pair put it at the same height whatever their tails do.
@@ -113,8 +113,8 @@ DetailCard {
         // ---- the arrival -----------------------------------------------------
         // Two pens and a mark, all three leaving the rise crossing together and
         // all three driven by the card's one-shot `reveal`. The curve draws
-        // itself outward from the rise — right toward the set and on down the
-        // far tail, left back into the night before — and the mark walks the
+        // itself outward from the rise - right toward the set and on down the
+        // far tail, left back into the night before - and the mark walks the
         // same curve from the rise to now.
         //
         // Sunrise is the origin because it is the only instant on this card that
@@ -170,8 +170,8 @@ DetailCard {
                     x1: 0; y1: viz.horizonY - viz.amp; x2: 0; y2: viz.horizonY
                     // The same three stops the arc and the mark are ramped off,
                     // read out of `skyRamp` rather than written again. QML
-                    // cannot generate GradientStop *elements* from a Repeater —
-                    // hence three of them — but it can bind each one's position
+                    // cannot generate GradientStop *elements* from a Repeater -
+                    // hence three of them - but it can bind each one's position
                     // and colour, which is all the duplication there ever was.
                     // Written out, the two copies sit a hundred lines apart, and
                     // a palette pass that edits one and not the other leaves a
@@ -207,7 +207,7 @@ DetailCard {
                 // Uncovered as the pen reaches it, so a crossing is never marked
                 // on curve that has not been drawn. The rise is where the pen
                 // starts, so that one is there from the first frame. Opacity
-                // rather than `visible` — §10.8.
+                // rather than `visible` - §10.8.
                 opacity: viz.tPenR >= modelData ? 1 : 0
                 x: viz.xAt(modelData) - width / 2
                 y: viz.horizonY - height / 2
@@ -230,7 +230,7 @@ DetailCard {
 
         // How long the sun is up, centred on the stretch of horizon it measures.
         // It sits just under the horizon because that band is empty by
-        // construction — the arc is above it between the crossings — and the card
+        // construction - the arc is above it between the crossings - and the card
         // is too short to spend a row of its own on the label.
         Text {
             id: spanLabel

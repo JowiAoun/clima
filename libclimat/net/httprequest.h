@@ -6,21 +6,21 @@
 // ---- the URL arrives in pieces, on purpose ----------------------------------
 //
 // A provider hands over a base URL with no query string, a list of parameters,
-// and — separately — a coordinate. It does not hand over a finished URL, and
+// and - separately - a coordinate. It does not hand over a finished URL, and
 // the reason is the one rule this whole layer is built around:
 //
 //     the coordinate is rounded BEFORE it is hashed, and before it is sent.
 //
 // If providers built their own URLs, each of them would have to remember to
 // round, and the first one that forgot would issue a fresh request for every
-// frame of a map drag — a hundred identical forecasts, a hundred rows in
+// frame of a map drag - a hundred identical forecasts, a hundred rows in
 // somebody's rate-limit ledger, and no symptom on our side except a slow tab.
 // Composing the URL in one place means it is impossible to get wrong once, let
 // alone once per provider. See libclimat/domain/coordinate.h for why four
 // decimals is the right number and not merely a round one.
 //
-// The parameter *names* differ — Open-Meteo says `latitude`/`longitude`, MET
-// Norway says `lat`/`lon` — so those are per-request strings rather than a
+// The parameter *names* differ - Open-Meteo says `latitude`/`longitude`, MET
+// Norway says `lat`/`lon` - so those are per-request strings rather than a
 // constant. A request with no coordinate at all (a radar timeline manifest, a
 // tile) leaves the optional empty and the two names are ignored.
 
@@ -45,7 +45,7 @@ namespace climat {
 // How the coordinate is spelled in the query string.
 //
 // Three shapes rather than one because the services genuinely disagree, and the
-// alternative — a provider composing its own URL — would put the rounding rule
+// alternative - a provider composing its own URL - would put the rounding rule
 // above back in every provider's hands. Everything here still goes through the
 // single `rounded()` call in composeUrl(), which is the property this enum
 // exists to preserve.
@@ -53,11 +53,11 @@ enum class CoordinateForm {
     // latitude=43.6532&longitude=-79.3832. Open-Meteo, MET Norway.
     LatitudeLongitudePair,
 
-    // point=43.6532,-79.3832 — latitude first. api.weather.gov.
+    // point=43.6532,-79.3832 - latitude first. api.weather.gov.
     LatitudeCommaLongitude,
 
-    // bbox=-79.3832,43.6532,-79.3832,43.6532 — LONGITUDE first, and the same
-    // point twice. A zero-area bounding box is how OGC API — Features Part 1
+    // bbox=-79.3832,43.6532,-79.3832,43.6532 - LONGITUDE first, and the same
+    // point twice. A zero-area bounding box is how OGC API - Features Part 1
     // asks "what covers this point", and it is what api.weather.gc.ca is asked
     // with. See libclimat/providers/eccc/ecccalertprovider.h for why that rather
     // than the CQL2 spatial filter the plan called for.
@@ -66,7 +66,7 @@ enum class CoordinateForm {
 
 struct HttpRequest {
     // Which provider is asking. This is the unit a 403 disables, so it has to
-    // be the provider's stable id — "open-meteo", "met-no", "nws" — and not a
+    // be the provider's stable id - "open-meteo", "met-no", "nws" - and not a
     // per-request label.
     QString providerId;
 
@@ -76,7 +76,7 @@ struct HttpRequest {
     // key is meant to read the same across both.
     QString endpoint;
 
-    // Scheme, host and path. No query — see the header comment.
+    // Scheme, host and path. No query - see the header comment.
     QUrl url;
 
     // Which row of the TTL table this answer belongs in.
@@ -101,7 +101,7 @@ struct HttpRequest {
     // of the same parameters are the same request.
     QList<QPair<QString, QString>> parameters;
 
-    // Provider-specific request headers. User-Agent is *not* one of these —
+    // Provider-specific request headers. User-Agent is *not* one of these -
     // HttpClient sets it and refuses to let a caller override it, because it
     // is the one header a compliance obligation hangs off.
     QMap<QByteArray, QByteArray> headers;
@@ -122,7 +122,7 @@ struct HttpResponse {
     // What this response told us to remember for next time.
     Validators validators;
 
-    // When the answer arrived, from the injected Clock — never from the wall
+    // When the answer arrived, from the injected Clock - never from the wall
     // clock directly, so a fixture run's cache expires exactly when the
     // fixture says it does.
     QDateTime fetchedAt;
@@ -137,7 +137,7 @@ struct HttpResponse {
     // caller reads its cached payload; the entry's expiry moves forward.
     //
     // This flag is why 304 is not modelled as an Error. A conditional request
-    // that gets 304 has *succeeded* — the data is confirmed current — and
+    // that gets 304 has *succeeded* - the data is confirmed current - and
     // reporting it as a failure would make every caller special-case a
     // successful outcome.
     bool notModified = false;

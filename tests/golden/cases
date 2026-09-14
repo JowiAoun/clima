@@ -11,7 +11,7 @@
 # distribution packager should be able to build and check this repository from
 # what their distribution already ships. Four fields and no quoting rules is
 # also a format a reviewer can read in a diff, which matters more here than
-# structure — this file is edited by people deciding what is worth watching.
+# structure - this file is edited by people deciding what is worth watching.
 #
 # Blank lines and # comments are ignored. `binary` is `app` or `gallery`.
 #
@@ -22,8 +22,8 @@
 # got wrong before. The gallery pages carry their component's name, so a diff on
 # `moon.png` says which card moved without anybody opening the image.
 #
-# Both schemes for the scenes where the two differ structurally — the light
-# theme has no stars, a hairline card edge and an inverted accent — and dark
+# Both schemes for the scenes where the two differ structurally - the light
+# theme has no stars, a hairline card edge and an inverted accent - and dark
 # only for the rest, because a second copy of a page that differs by six
 # colours is a second image to re-record for no extra information.
 
@@ -37,14 +37,14 @@ desktop-uv-light|app|1340x762|--scheme light --metric uv
 
 # Visibility, because it is the chart that was drawn outside its own plot box.
 # Toronto's afternoon reaches 64 km against an axis the registry stops at 25, so
-# two thirds of the curve was above the frame — for as long as this suite has
+# two thirds of the curve was above the frame - for as long as this suite has
 # existed, and invisibly, because no case photographed this metric. The axis now
 # gives way by whole steps; this is the picture of it doing so.
 desktop-visibility|app|1340x762|--scheme dark --metric visibility
 
 # The temperature pair, which is one comparison told from both sides: whichever
 # reading the reader asked for is the filled area and the other is a line over
-# it. Two cases because the roles swap, and the swap is the whole feature — a
+# it. Two cases because the roles swap, and the swap is the whole feature - a
 # single case would photograph one half of it and pass while the other half drew
 # nothing. `--poke feels=true` is the toggle, which is the only way the
 # overview's line is reachable in a capture.
@@ -89,8 +89,8 @@ mobile-night|app|390x844|--scheme dark --viewport mobile --sky night
 #
 # Both orientations, because they are two different layouts and not one layout
 # at two sizes: portrait is two columns under a bottom bar, landscape is two
-# columns beside a left rail. Every tab is not worth photographing here — the
-# phone already covers what each page contains — but Me is, because it is the
+# columns beside a left rail. Every tab is not worth photographing here - the
+# phone already covers what each page contains - but Me is, because it is the
 # one screen whose cards are all half-width and so the one where the second
 # column is the whole of what changed.
 tablet|app|834x1112|--scheme dark --viewport tablet
@@ -104,8 +104,8 @@ tablet-landscape-hourly|app|1112x834|--scheme dark --viewport tablet-landscape -
 #
 # A handheld builds half the star field and one constellation instead of three.
 # The night sky is the only place it shows, and it has to be photographed or the
-# claim that a reduced sky is the SAME sky with fewer stars — same seeds, same
-# positions — is a claim nobody ever checks.
+# claim that a reduced sky is the SAME sky with fewer stars - same seeds, same
+# positions - is a claim nobody ever checks.
 mobile-night-reduced|app|390x844|--scheme dark --viewport mobile --sky night --perf reduced
 
 # ---- severe weather ---------------------------------------------------------
@@ -113,7 +113,7 @@ mobile-night-reduced|app|390x844|--scheme dark --viewport mobile --sky night --p
 # The `seattle` fixture, which is the only one that carries alerts: four of them
 # at one coordinate on the afternoon of 5 August 2026, recorded from
 # api.weather.gov. Every other case above uses `toronto`, whose alerts.json is
-# an empty collection — so a change to the banner cannot silently move any of
+# an empty collection - so a change to the banner cannot silently move any of
 # the thirty-two images that came before these.
 #
 # It has to be a fixture. Alerts are the most volatile product in the app; a
@@ -133,7 +133,7 @@ gallery-severity-glyph|gallery|900x300|--scheme dark "Severity glyph"
 # ---- touch ------------------------------------------------------------------
 #
 # The overlay, over the screen it was switched on for. Nine defects came out of
-# the first run of it — a 14x14 disclosure chevron among them — and an image is
+# the first run of it - a 14x14 disclosure chevron among them - and an image is
 # what stops the tenth being argued about: every rectangle here is green, and a
 # red one in a diff names the control and prints its size inside it.
 #

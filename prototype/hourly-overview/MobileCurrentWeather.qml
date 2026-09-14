@@ -37,7 +37,7 @@ Item {
     // The six the desktop shows, without the disclosure chevrons the
     // reference puts on each. A chevron is a promise that tapping the slug
     // opens the measurable, and this prototype has no per-measurable screen on
-    // the phone to open — LocationBar's own note about the non-rotating
+    // the phone to open - LocationBar's own note about the non-rotating
     // chevron is the same rule: do not draw an affordance the app cannot keep.
     readonly property var slugs: [
         { label: qsTr("Air quality"), value: String(Detail.airQuality.value),

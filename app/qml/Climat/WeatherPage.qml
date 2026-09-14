@@ -12,7 +12,7 @@
 // "tell me about one thing in particular". Each section is a narrower question
 // than the one above it.
 //
-// Sections are separated by space alone — no rules, no wrapper panels. A panel
+// Sections are separated by space alone - no rules, no wrapper panels. A panel
 // around a section would be a wash containing washes, which is the one thing
 // §10.1 says never to build: the cards inside it would come out at 0.135 and
 // read as a lighter patch. Contrast against the page is what defines a surface
@@ -20,7 +20,7 @@
 //
 // ---- motion -----------------------------------------------------------------
 // The shell animates one thing: the scroll thumb's colour. That is the whole
-// budget, and the reason is that the page is not short of movement — it is a
+// budget, and the reason is that the page is not short of movement - it is a
 // container for four sections that each already move. The tab bar tints, the day
 // strip slides its selection, the chart crossfades to the list and blends its
 // feels-like series, the details grid arrives as a twelve-card wave. Motion
@@ -29,8 +29,8 @@
 //
 // So the section-by-section entrance on load is rejected, and not only because
 // §10.6 forbids a component that is unreadable until its animation finishes.
-// Staggering four sections in means the headline — the one thing the app was
-// opened to read — is the thing being withheld, and the wave the details grid
+// Staggering four sections in means the headline - the one thing the app was
+// opened to read - is the thing being withheld, and the wave the details grid
 // already runs would then be a wave inside a wave.
 import QtQuick
 
@@ -52,14 +52,14 @@ Item {
     property alias pickerOpen: picker.open
 
     // `--poke prefs=1`. The mobile shell has no property of this name and that
-    // is deliberate rather than an omission — the phone shows the same
+    // is deliberate rather than an omission - the phone shows the same
     // preferences inline on its Me tab, which `--tab me` already reaches, and a
     // property here that silently did nothing there would be worse than the
     // warning ScreenshotController prints.
     property alias prefsOpen: prefs.open
 
     // A real flick, not an assignment. Setting `contentY` goes through
-    // QQuickFlickable::setContentY(), which calls movementEnding() — so `moving`
+    // QQuickFlickable::setContentY(), which calls movementEnding() - so `moving`
     // never becomes true and the scroll thumb's recolour, the only animation
     // this shell has, could not be filmed at all. Driven by `--poke flick=`.
     function flickBy(velocity) { scroll.flick(0, velocity) }
@@ -75,7 +75,7 @@ Item {
     // ---- the alert banner ---------------------------------------------------
     //
     // A sibling of the Flickable, above it, and NOT the first child of the
-    // column below — which is where it would naturally go and where it would be
+    // column below - which is where it would naturally go and where it would be
     // wrong. The column scrolls, so a warning placed in it is a warning that
     // leaves the screen the moment the reader looks at the chart. The Flickable
     // also sets `layer.enabled: true`, and a banner inside that layer would be
@@ -101,7 +101,7 @@ Item {
         anchors.top: banner.visible ? banner.bottom : parent.top
 
         // clip bounds the rectangles; the layer bounds the Shapes, which ignore
-        // ancestor clipping entirely — every chart on this page draws with one,
+        // ancestor clipping entirely - every chart on this page draws with one,
         // and without the layer they paint straight over the sections above and
         // below as it scrolls. See docs/10-design-system.md §10.8.
         clip: true
@@ -132,7 +132,7 @@ Item {
                 // are the two things on this page that are not weather.
                 //
                 // The Item takes the bar's own height and no more, so the row is
-                // laid out exactly as it was before the gear existed — both
+                // laid out exactly as it was before the gear existed - both
                 // children overflow it by 9 px into the section gap that is
                 // already there, which is the arrangement LocationBar's header
                 // describes and defends.
@@ -209,7 +209,7 @@ Item {
 
                     // The two corners the strip above can be standing on. Only
                     // this shell merges the two cards, so only this shell says
-                    // so — the phone's week strip is a row of pills with a gap
+                    // so - the phone's week strip is a row of pills with a gap
                     // under it and nothing to join.
                     tabCoverLeft: dayStrip.leftCover
                     tabCoverRight: dayStrip.rightCover
@@ -225,7 +225,7 @@ Item {
     }
 
     // The picker is a sheet over the whole page, so it is a sibling of the
-    // Flickable rather than a child of the column the bar sits in — a panel
+    // Flickable rather than a child of the column the bar sits in - a panel
     // inside a scrolling column would scroll away from the chevron that opened
     // it.
     PlacePicker {
@@ -245,7 +245,7 @@ Item {
 
     // The sequence every desktop application has bound to preferences for thirty
     // years. Written out rather than taken from StandardKey.Preferences, which
-    // Qt maps to nothing at all on Windows and Linux — it is a macOS-only
+    // Qt maps to nothing at all on Windows and Linux - it is a macOS-only
     // binding, so the shortcut would exist on the one platform this app does not
     // ship.
     Shortcut {
@@ -262,14 +262,14 @@ Item {
     // Which settles the one animation a page shell is always offered: the
     // overlay-scrollbar fade, in on scroll and out again on idle. It is the
     // obvious motion here and it is wrong here, because the thing it fades away
-    // is the only cue that there is a page below the fold — on a page this tall
+    // is the only cue that there is a page below the fold - on a page this tall
     // the indicator is never redundant, so there is never a moment it is right
     // to hide. Keeping it and changing its weight says the same thing without
     // taking the cue back.
     //
     // Its `visible` binding is left as a hard toggle, which is the second
-    // tempting animation and also wrong. The state does occur — at 900x2800 the
-    // whole page fits and the indicator correctly disappears — but the only
+    // tempting animation and also wrong. The state does occur - at 900x2800 the
+    // whole page fits and the indicator correctly disappears - but the only
     // thing that can reach it is a window resize, and what it is really
     // reporting is whether the content still overflows the viewport. That makes
     // it layout, and §10.6 is unambiguous that layout does not animate on
@@ -314,7 +314,7 @@ Item {
             height: Math.max(28, parent.height * scroll.height / Math.max(1, scroll.contentHeight))
             y: (parent.height - height) * (scroll.contentY / Math.max(1, root.maxContentY))
 
-            // Was a literal 160 — one of the eight durations for four jobs that
+            // Was a literal 160 - one of the eight durations for four jobs that
             // §10.6 was written to stop. A weight change is a tint.
             Behavior on color {
                 ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }

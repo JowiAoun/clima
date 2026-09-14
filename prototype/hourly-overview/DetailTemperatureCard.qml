@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Temperature detail card — the worked example the other detail cards follow.
+// Temperature detail card - the worked example the other detail cards follow.
 //
 // The visualisation is a twelve-hour sparkline with the reading printed over
 // it. The line is what the temperature is *doing*; the number is where it is
@@ -8,7 +8,7 @@
 //
 // On arrival the curve draws itself in from the left, because the line is a
 // history and history runs that way: the reader watches the morning happen and
-// arrives at "now" with it. The number does not count up — a temperature has no
+// arrives at "now" with it. The number does not count up - a temperature has no
 // meaningful zero to climb from, and a reading that is wrong for half a second
 // is worse than one that is simply there.
 import QtQuick
@@ -31,7 +31,7 @@ DetailCard {
         id: viz
 
         readonly property var series: root.d.series
-        // Pad the range so the curve never touches the box edges — a line
+        // Pad the range so the curve never touches the box edges - a line
         // flush against the top reads as clipped rather than as a maximum.
         readonly property real lo: Math.min.apply(null, series) - 2
         readonly property real hi: Math.max.apply(null, series) + 2
@@ -57,7 +57,7 @@ DetailCard {
 
         // Where "now" falls along the sweep. The drawing edge is at
         // `width * reveal`, so comparing `reveal` against this is the same
-        // instant the line reaches the mark — no second timer to keep in step.
+        // instant the line reaches the mark - no second timer to keep in step.
         readonly property real nowP: width > 0 ? nowX / width : 1
 
         // The sweep. A window over the chart whose right edge travels left to
@@ -75,7 +75,7 @@ DetailCard {
         // texture is never drawn into it, which is the bound we want. Filmed
         // both ways to be sure: with `clip: true` alone the first two frames of
         // the sweep paint the whole twelve hours, then the clip starts biting
-        // part-way through — an animation that works only once it is nearly
+        // part-way through - an animation that works only once it is nearly
         // over. The layer costs a little stroke antialiasing and is not
         // optional.
         Item {

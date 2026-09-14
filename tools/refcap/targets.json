@@ -23,7 +23,7 @@
   },
 
   "day-junction": {
-    "description": "Day strip meeting the panel below it — the tab/panel seam",
+    "description": "Day strip meeting the panel below it - the tab/panel seam",
     "url": "https://www.msn.com/en-us/weather/hourlyforecast/in-Seattle,Washington?loc={loc}&weadegreetype={units}",
     "selector": "[class*=\"carousel-DS\"]",
     "pad": { "top": 12, "right": 12, "bottom": 120, "left": 12 },
@@ -47,7 +47,7 @@
   },
 
   "trend-chart": {
-    "description": "Multi-day trend chart — a second, differently-built chart worth comparing",
+    "description": "Multi-day trend chart - a second, differently-built chart worth comparing",
     "url": "https://www.msn.com/en-us/weather/forecast/in-Seattle,Washington?loc={loc}&weadegreetype={units}",
     "selector": "[class*=\"trendChartContainer-DS\"]",
     "pad": 8,

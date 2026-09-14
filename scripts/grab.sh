@@ -6,7 +6,7 @@
 #
 # This is the single entry point for capture: CI calls it, the golden-image
 # tests will call it, and the README's screenshots come out of it. Two runs an
-# hour apart produce the same bytes, and that — not the picture — is the
+# hour apart produce the same bytes, and that - not the picture - is the
 # product. Everything below the usage block exists to keep that true.
 #
 #   scripts/grab.sh out.png                      the forecast, default window
@@ -19,8 +19,8 @@
 #
 # The convention is one sentence: THE LAST ARGUMENT IS THE FILE TO WRITE, and
 # everything before it goes to the binary untouched. It has to end in .png,
-# which is what turns `scripts/grab.sh --size 1340x900` — a flag whose value
-# would otherwise become the filename — into an error rather than a surprise.
+# which is what turns `scripts/grab.sh --size 1340x900` - a flag whose value
+# would otherwise become the filename - into an error rather than a surprise.
 #
 # `scripts/dev-run.sh --help` lists the flags. This script's own options are the
 # two above and nothing else; the rest of its behaviour is environment, and it
@@ -59,11 +59,11 @@ export QT_QPA_PLATFORM=offscreen
 # llvmpipe, and deliberately not QT_QUICK_BACKEND=software.
 #
 # 29 files in the QML module set `Shape.preferredRendererType:
-# Shape.CurveRenderer` — `grep -rl CurveRenderer app/qml` to recount after a
+# Shape.CurveRenderer` - `grep -rl CurveRenderer app/qml` to recount after a
 # refactor. The software backend has no curve renderer at all: it draws every
 # Shape through QPainter and ignores the request without a word. A capture taken
 # that way is a photograph of a renderer nobody runs, and it is not a small
-# difference — the antialiasing on every glyph, badge, fillet and chart edge in
+# difference - the antialiasing on every glyph, badge, fillet and chart edge in
 # this app comes off a different code path than the one a user sees. llvmpipe is
 # a real GL implementation that happens to run on the CPU, so it takes the path
 # the GPU takes and gets there without one.
@@ -71,10 +71,10 @@ export QT_QPA_PLATFORM=offscreen
 # The measured caveat, which matters more than the intent: on Qt 6.11 the
 # offscreen platform plugin advertises no OpenGL capability, so Qt Quick loads
 # its software adapter before either of these variables is consulted. Today they
-# change nothing — `QSG_INFO=1 scripts/grab.sh x.png` prints "Loading backend
+# change nothing - `QSG_INFO=1 scripts/grab.sh x.png` prints "Loading backend
 # software" and the PNG is byte-identical with them set or unset. They stay
-# because the day a headless capture does reach GL — xvfb behind the xcb
-# platform, or an offscreen plugin that grows the capability — is the day this
+# because the day a headless capture does reach GL - xvfb behind the xcb
+# platform, or an offscreen plugin that grows the capability - is the day this
 # must be llvmpipe rather than whatever driver the host has, and a golden image
 # that silently changed renderer between two commits is a long afternoon.
 #
@@ -95,15 +95,15 @@ unset QT_QUICK_BACKEND QSG_RHI_BACKEND QMLSCENE_DEVICE
 # Everything above pins what the pixels look like. This pins *when* they are
 # read, which is the other half of the same promise and was not pinned at all.
 #
-# Qt Quick's default render loop is threaded, and `grabToImage()` — what
-# app/devtools/screenshotcontroller.cpp calls — completes on the render thread.
+# Qt Quick's default render loop is threaded, and `grabToImage()` - what
+# app/devtools/screenshotcontroller.cpp calls - completes on the render thread.
 # The capture is therefore a race with whatever the scene is still doing.
 # `basic` is the single-threaded loop: rendered and read back on this thread, in
 # order, with nothing in flight.
 #
 # What it is believed to have fixed, stated with the evidence rather than more
 # confidently than that. One golden run in five produced two pages with the
-# preferences gear — a whole Shape — missing, which is what a lost grab race
+# preferences gear - a whole Shape - missing, which is what a lost grab race
 # looks like. It has not recurred in the fourteen runs since this line, and
 # every recorded image still matched when it was added, so it changes which
 # frame is captured and not what is in it. Fourteen runs is not proof of a race
@@ -128,13 +128,13 @@ export QT_FONT_DPI=96
 #
 # QLocale reads the locale for its decimal separator and its month names, and
 # QDateTime reads the zone. The house rule is that nothing in this app reads the
-# wall clock, so TZ should be inert — pinned anyway, because "should be inert"
+# wall clock, so TZ should be inert - pinned anyway, because "should be inert"
 # is a claim about today's code and this file is the thing that catches the
 # commit that stops it being true.
 #
 # The empty platform theme is "no desktop theme": no GTK, no host font
 # rendering settings, no dark-mode preference arriving from a session bus. Note
-# that qt-env.sh upgrades an empty value to `generic` for a Nix-store Qt — the
+# that qt-env.sh upgrades an empty value to `generic` for a Nix-store Qt - the
 # two mean the same thing here, since the offscreen integration advertises no
 # theme of its own and Qt falls back to the generic one either way.
 export QT_QPA_PLATFORMTHEME=
@@ -152,14 +152,14 @@ export QT_FORCE_STDERR_LOGGING=1
 # family, so Qt rendered every string in whatever fontconfig picked and two
 # machines with different font packages produced different pixels no matter how
 # many variables this file exported. That is closed. The app ships Inter and
-# installs it as the application font before the engine loads anything — see
-# app/appfont.cpp — so the glyphs come out of the binary. Proof, if it is ever
+# installs it as the application font before the engine loads anything - see
+# app/appfont.cpp - so the glyphs come out of the binary. Proof, if it is ever
 # in doubt: run a capture with FONTCONFIG_FILE pointing at a config with no
 # font directories in it, so the host has no fonts at all, and the page still
 # renders in Inter.
 #
 # What is left is how those glyphs are *rasterised*. Hinting, antialiasing and
-# subpixel order are fontconfig's to decide, per host, and Qt asks it — with no
+# subpixel order are fontconfig's to decide, per host, and Qt asks it - with no
 # platform theme and no QFont::setHintingPreference from us, the answer arrives
 # through QFontconfigDatabase all the same. Measured with the same binary and
 # the same font, host fontconfig against an empty one:
@@ -182,20 +182,20 @@ export QT_FORCE_STDERR_LOGGING=1
 # And the clock. Measured on the plain `--size 1340x900` scene: 20 captures in a
 # row are byte-identical on an idle machine, and roughly one in ten differs on a
 # busy one. The difference is 35 pixels, one channel level each, in a 7x12 box
-# around the pager chevron at (89, 852) — a Shape that settled half a pixel
+# around the pager chevron at (89, 852) - a Shape that settled half a pixel
 # further along because the shutter landed one frame off.
 #
 # It is not the C++ port. Sixteen captures of each, interleaved, under twenty-two
 # spinning processes: the app and prototype/hourly-overview/run.sh produced the
 # same alternate image at the same rate. It is that "settled" is a number of
-# milliseconds rather than a state — see app/devtools/screenshotcontroller.h,
-# which says so — and a loaded machine fits a different number of frames into
+# milliseconds rather than a state - see app/devtools/screenshotcontroller.h,
+# which says so - and a loaded machine fits a different number of frames into
 # the same number of milliseconds.
 #
 # What that costs the golden-image work: a byte comparison is still the right
 # test, and it will flake on a busy runner. Budget a retry, or compare with a
 # tolerance of one level over a pixel count. Either way, do not spend an
-# afternoon bisecting a thirty-five-pixel diff — it is this.
+# afternoon bisecting a thirty-five-pixel diff - it is this.
 
 # --env: hand the environment to something else. Placed after the exports and
 # before the argument handling, because a command run this way wants all of the
@@ -222,7 +222,7 @@ case "$out" in
         exit 1 ;;
     *.png | *.PNG) ;;
     *)
-        echo "grab.sh: the last argument is the file to write and has to end in .png — got \"$out\"." >&2
+        echo "grab.sh: the last argument is the file to write and has to end in .png - got \"$out\"." >&2
         echo "         usage: scripts/grab.sh [climat options…] <out.png>" >&2
         exit 1 ;;
 esac

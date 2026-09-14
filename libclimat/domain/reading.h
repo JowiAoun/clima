@@ -14,7 +14,7 @@
 // steady. Nothing would have failed. No test would go red. The app would simply
 // have said something untrue, in the calm voice of a number.
 //
-// A sentinel — NaN, -9999 — moves the problem rather than solving it: every
+// A sentinel - NaN, -9999 - moves the problem rather than solving it: every
 // consumer has to remember to check, the check is a different one per type, and
 // the first arithmetic that forgets propagates the sentinel into an average.
 //
@@ -26,15 +26,15 @@
 //
 // sizeof(std::optional<double>) is 16 rather than 8. An hourly series of 384
 // points with twenty fields is 123 kB instead of 61 kB, once, per location.
-// That is not a budget anybody is near — docs/03-tech-stack.md's budgets are
-// about the binary and about frame time — and the copy is still a memcpy,
+// That is not a budget anybody is near - docs/03-tech-stack.md's budgets are
+// about the binary and about frame time - and the copy is still a memcpy,
 // which is what keeps the domain types "immutable and copy-cheap so snapshots
 // cross threads without locking" (docs/04-architecture.md §4.8).
 //
 // ---- the rule -------------------------------------------------------------
 //
 // Every measurement in libclimat/domain/ is a Reading. Not "every measurement a
-// provider might not have" — every measurement. A field that is optional only
+// provider might not have" - every measurement. A field that is optional only
 // for the providers that lack it is a field whose type has to change the day a
 // third provider is added, and by then there are consumers.
 //

@@ -3,8 +3,8 @@
 // Health & activities: five verdicts, one per row.
 //
 // Nothing here is a measurement, so nothing here is a chart. Each row is a
-// question the reader already knows the units of — do I need a coat, do I need
-// an umbrella — answered in words, with a dot carrying the same answer for the
+// question the reader already knows the units of - do I need a coat, do I need
+// an umbrella - answered in words, with a dot carrying the same answer for the
 // eye that is scanning rather than reading.
 //
 // The dot is the last thing on the row, not the first. A column of coloured
@@ -16,11 +16,11 @@
 // Nobody publishes "do you need an umbrella". There is no such product at
 // Open-Meteo, at MET Norway or anywhere else in docs/02-data-sources.md, so
 // every verdict here is a rule Climat applies to numbers that are already on
-// this screen — the rules are written out in
+// this screen - the rules are written out in
 // app/viewmodels/conditionsdata.cpp's buildActivities().
 //
 // Hence the footnote. docs/08-risks.md R9 is about not fabricating, and a
-// derived verdict is not a fabrication — but a derived verdict presented in the
+// derived verdict is not a fabrication - but a derived verdict presented in the
 // same voice as a measurement is, whether or not the arithmetic is sound. One
 // line is what the difference costs.
 import QtQuick
@@ -83,7 +83,7 @@ Item {
                     }
                 }
 
-                // Between rows, not under the last one — a rule under the
+                // Between rows, not under the last one - a rule under the
                 // final row would be a line with nothing below it, which reads
                 // as a list that has been cut off.
                 Rectangle {
@@ -103,7 +103,7 @@ Item {
         anchors.top: list.bottom
         anchors.topMargin: 10
         width: parent.width
-        text: qsTr("Worked out by Climat from the forecast above — not a published forecast "
+        text: qsTr("Worked out by Climat from the forecast above - not a published forecast "
                  + "product.")
         color: Theme.ink.dim
         font.pixelSize: Theme.type.label

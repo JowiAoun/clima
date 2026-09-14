@@ -24,7 +24,7 @@ constexpr auto portalInterface = "org.freedesktop.portal.Settings";
 // motion has no such key: the closest thing anyone implements is GNOME's
 // `enable-animations`, which the portal exposes verbatim, so on KDE or a bare
 // wlroots session this simply goes unanswered and animations stay on. That is
-// the honest outcome — better than inventing a default from a key nobody set.
+// the honest outcome - better than inventing a default from a key nobody set.
 constexpr auto appearanceNamespace = "org.freedesktop.appearance";
 constexpr auto colorSchemeKey      = "color-scheme";
 constexpr auto gnomeNamespace      = "org.gnome.desktop.interface";
@@ -43,8 +43,8 @@ QString schemeFromPortalValue(uint value)
 }
 
 // ReadOne landed in portal Settings v2 and hands back the value directly.
-// Read is the v1 spelling and wraps it twice — a QDBusVariant inside a
-// QDBusVariant — which is the detail that makes a naive port silently read an
+// Read is the v1 spelling and wraps it twice - a QDBusVariant inside a
+// QDBusVariant - which is the detail that makes a naive port silently read an
 // empty QVariant and conclude the desktop is dark.
 QVariant readPortalSetting(const QString &nameSpace, const QString &key, bool *ok)
 {
@@ -149,8 +149,8 @@ void SystemAppearance::connectToPortal()
         applyReduceMotion(!animations.toBool());
 
     // Subscribed whether or not either read succeeded. A portal that starts
-    // after the app does — or a key that only exists once somebody changes it
-    // — still arrives here, and that is the whole reason to prefer this source
+    // after the app does - or a key that only exists once somebody changes it
+    // - still arrives here, and that is the whole reason to prefer this source
     // over polling one.
     QDBusConnection::sessionBus().connect(
         QLatin1String(portalService), QLatin1String(portalPath),

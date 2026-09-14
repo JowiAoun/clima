@@ -6,7 +6,7 @@
 // vertical scroll owned by the page, a centred content column, and sections
 // separated by space alone. Written once because five screens needed the same
 // four decisions, and the first two of them had already disagreed about the
-// bottom padding — which on a phone means the last row of a page sitting
+// bottom padding - which on a phone means the last row of a page sitting
 // underneath the nav bar where nobody can read it.
 //
 //   MobilePage {
@@ -15,12 +15,12 @@
 //   }
 //
 // Children need a width and nothing else, and the width is stated in COLUMNS
-// rather than in pixels — see `spanWidth`. On a phone there is one column and
+// rather than in pixels - see `spanWidth`. On a phone there is one column and
 // both answers are the same number, which is why every page reads the same
 // there as it did before columns existed.
 //
 // The layer is not optional. Every chart in this prototype draws with Qt Quick
-// Shapes, and Shapes ignore ancestor clipping entirely — see §10.8. Without it
+// Shapes, and Shapes ignore ancestor clipping entirely - see §10.8. Without it
 // the hourly strip paints straight over the nav bar as the page scrolls.
 import QtQuick
 
@@ -31,7 +31,7 @@ Item {
 
     // How much of the bottom of the page is covered by the nav bar. The shell
     // hands this down rather than the page reading the token itself, so a page
-    // shown without a shell — in the gallery, say — is not padded for chrome
+    // shown without a shell - in the gallery, say - is not padded for chrome
     // that is not there.
     property real bottomInset: 0
 
@@ -58,7 +58,7 @@ Item {
     //
     // Which viewport class the shell is running. Pushed down by MobileShell,
     // for two reasons that the page cannot work out for itself: the window's
-    // width is not the page's — a landscape rail takes 76 px of it — and
+    // width is not the page's - a landscape rail takes 76 px of it - and
     // `--viewport mobile --size 900x844` means review the phone at 900 px, not
     // promote it to a tablet.
     //
@@ -74,9 +74,9 @@ Item {
         Viewports.contentColumns(root.effectiveClass, root.width - root.margin * 2)
 
     // The content block: every column plus the gaps between them. It stops
-    // growing rather than stretching — at 834 px a full-width hero puts the
+    // growing rather than stretching - at 834 px a full-width hero puts the
     // temperature and the condition at opposite ends of the screen with a
-    // hand-span of nothing between them — and the cap is per column, so a
+    // hand-span of nothing between them - and the cap is per column, so a
     // tablet gets two cards the size of a phone's rather than one card twice
     // the size of anything the design has been reviewed at.
     readonly property real columnWidth:
@@ -87,14 +87,14 @@ Item {
     // The width a section gets, in columns.
     //
     // A function and not an attached `span` property, because QML has no
-    // attached properties without C++ behind them and the alternative — the
-    // page walking `children` at every resize and assigning widths — is a
+    // attached properties without C++ behind them and the alternative - the
+    // page walking `children` at every resize and assigning widths - is a
     // masonry pass, which §10.6 rules out for the reason it always does: a
     // layout that is computed from what happens to be in it is a layout nobody
     // can predict from reading the file.
     //
     // Floored so two halves plus a gap can never exceed the block by a
-    // rounding error, which in a Flow is not a rounding error — it is the
+    // rounding error, which in a Flow is not a rounding error - it is the
     // second card wrapping to its own row.
     function spanWidth(span) {
         var n = Math.min(span, root.columns)
@@ -118,7 +118,7 @@ Item {
         // a full-width child takes a row to itself and two half-width children
         // share one, which is exactly the two-column arrangement with no code
         // to arrange it. At one column every child is full width, every row
-        // holds one, and a Flow *is* a Column — which is what lets the phone's
+        // holds one, and a Flow *is* a Column - which is what lets the phone's
         // eight golden images stay byte for byte what they were.
         //
         // Flow's single `spacing` is both the gap between columns and the gap

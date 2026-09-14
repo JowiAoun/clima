@@ -31,7 +31,7 @@ QByteArray readResource(const QString &path)
     return file.readAll();
 }
 
-// The credit belongs to whoever produced the numbers, which is Open-Meteo — the
+// The credit belongs to whoever produced the numbers, which is Open-Meteo - the
 // recording changed nothing about them. What the note adds is the one fact a
 // credit line cannot carry: that this is a photograph and of what moment.
 Attribution recordedCredit(const Attribution &original, const Fixture &fixture)
@@ -70,7 +70,7 @@ QStringList names()
 {
     // QDir over a resource prefix, sorted. A hard-coded list here would be a
     // fourth place to keep in step with the CMake FILES list, the directory on
-    // disk and REUSE.toml — and the one that fails as a runtime "unknown
+    // disk and REUSE.toml - and the one that fails as a runtime "unknown
     // fixture" rather than as a build error.
     QDir dir(QString::fromLatin1(kRoot));
     return dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
@@ -138,7 +138,7 @@ FixtureForecastProvider::FixtureForecastProvider(Fixture fixture, QObject *paren
 {
     // Learned once, at construction, from the payload this provider will
     // always answer with. There is nothing here that a later fetch could
-    // teach — which is why this provider never reports anything undetermined.
+    // teach - which is why this provider never reports anything undetermined.
     const Result<Forecast> parsed = openmeteo::adaptForecast(m_fixture.forecast, id());
     if (parsed.hasValue())
         m_capabilities = openmeteo::capabilitiesFor(parsed.value());
@@ -172,8 +172,8 @@ Attribution FixtureForecastProvider::attribution() const
 bool FixtureForecastProvider::covers(Coordinate coord) const
 {
     // Everywhere, and this is not laziness. A fixture answers with the place it
-    // recorded whatever it is asked about, because the alternative — refusing
-    // any coordinate but its own — means `--fixture toronto` on a machine whose
+    // recorded whatever it is asked about, because the alternative - refusing
+    // any coordinate but its own - means `--fixture toronto` on a machine whose
     // saved place is Berlin comes up with an empty chain and a blank screen,
     // which is the one outcome the whole offline-first design exists to
     // prevent. The recorded place is what the app selects on start; a request
@@ -200,7 +200,7 @@ QFuture<Result<Forecast>> FixtureForecastProvider::fetchForecast(const ForecastR
     if (adapted.hasValue()) {
         // The recording's own moment, not the clock's. They are the same number
         // when the clock is the FrozenClock this fixture is meant to be paired
-        // with — and when they are not, the honest answer is still the moment
+        // with - and when they are not, the honest answer is still the moment
         // the bytes were captured, because that is the age of the data.
         adapted.value().fetchedAt = m_fixture.recordedAt;
     }
@@ -347,9 +347,9 @@ Attribution FixtureAlertProvider::attribution() const
         original.name       = QStringLiteral("Environment and Climate Change Canada");
         original.creditLine = QStringLiteral(
             "Data provided by Environment and Climate Change Canada. "
-            "Contains information licensed under the Open Government Licence – Canada.");
+            "Contains information licensed under the Open Government Licence - Canada.");
         original.homepage    = QUrl(QStringLiteral("https://weather.gc.ca/"));
-        original.licenceName = QStringLiteral("Open Government Licence – Canada 2.0");
+        original.licenceName = QStringLiteral("Open Government Licence - Canada 2.0");
         original.licenceUrl  = QUrl(
             QStringLiteral("https://open.canada.ca/en/open-government-licence-canada"));
     }
@@ -396,7 +396,7 @@ QFuture<Result<AlertSet>> FixtureAlertProvider::fetchAlerts(const AlertRequest &
         parsed.value().coordinate = request.coord;
 
         // Confirmed at the moment of the recording, which is also `now` under
-        // the FrozenClock. So a fixture run never shows "last confirmed" — it is
+        // the FrozenClock. So a fixture run never shows "last confirmed" - it is
         // not out of date, it is a photograph of a moment.
         parsed.value().confirmedAt = m_fixture.recordedAt;
     }

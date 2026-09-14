@@ -43,7 +43,7 @@ const QHash<QString, int> &symbolTable()
         { QStringLiteral("rainshowersandthunder"), 95 },
         { QStringLiteral("heavyrainshowersandthunder"), 95 },
 
-        // sleet showers — 83/84, "showers of rain and snow mixed"
+        // sleet showers - 83/84, "showers of rain and snow mixed"
         { QStringLiteral("lightsleetshowers"), 83 },
         { QStringLiteral("sleetshowers"), 84 },
         { QStringLiteral("heavysleetshowers"), 84 },
@@ -70,7 +70,7 @@ const QHash<QString, int> &symbolTable()
         { QStringLiteral("rainandthunder"), 95 },
         { QStringLiteral("heavyrainandthunder"), 95 },
 
-        // steady sleet — 68/69, "rain or drizzle and snow"
+        // steady sleet - 68/69, "rain or drizzle and snow"
         { QStringLiteral("lightsleet"), 68 },
         { QStringLiteral("sleet"), 69 },
         { QStringLiteral("heavysleet"), 69 },
@@ -108,7 +108,7 @@ SymbolCode parseSymbolCode(const QString &symbol)
         const QString variant = base.mid(underscore + 1);
         base = base.left(underscore);
 
-        // polartwilight is neither day nor night — it is the long dusk above
+        // polartwilight is neither day nor night - it is the long dusk above
         // the Arctic circle, which is exactly the condition MET's own users
         // care about and exactly the one a boolean cannot hold. Left absent,
         // so a UI picks its twilight artwork from the sun position rather than

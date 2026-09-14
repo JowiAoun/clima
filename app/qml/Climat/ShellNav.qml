@@ -11,7 +11,7 @@
 // This was BottomNav until a tablet in landscape needed the same five targets
 // somewhere else. A second file would have been the obvious split and it would
 // have been two copies of the pill, the model, the tokens and the tint
-// animation kept in step by hand — and the pill is the part that is easiest to
+// animation kept in step by hand - and the pill is the part that is easiest to
 // get subtly wrong and hardest to notice.
 //
 // So the *arrangement* is the property and everything else is shared.
@@ -24,25 +24,25 @@
 // that rule is right everywhere the surface sits *in* the page. This one sits
 // *over* it: the page scrolls underneath, so at 0.07 the reader would watch a
 // temperature curve slide through the word "Hourly". The pager buttons already
-// established the exception — a thing that floats over moving content is
-// tinted and mostly opaque — and `surface.nav` is that token for this bar.
+// established the exception - a thing that floats over moving content is
+// tinted and mostly opaque - and `surface.nav` is that token for this bar.
 //
 // The hairline along the leading edge is the second half of the same decision.
 // §10.1 warns off borders because a border across a junction is the seam the
 // junction exists to hide, but this is not a junction: it is the edge where a
 // floating bar stops and scrolling content begins, and it is the only cue that
 // the content continues behind it. Which edge that is follows the arrangement
-// — the top of a bottom bar, the right of a left rail.
+// - the top of a bottom bar, the right of a left rail.
 //
 // ---- motion ------------------------------------------------------------------
 // The pill slides between tabs rather than cutting, at `move`, because it is
 // the one element here that is genuinely the same object in a new place. It
 // slides along whichever axis the bar runs. The glyphs and labels tint at
-// `tint`. Nothing else moves, and nothing moves on a timer — the bar is at
+// `tint`. Nothing else moves, and nothing moves on a timer - the bar is at
 // rest until it is touched.
 //
 // `Bound` because the cell is a Component instantiated by two Repeaters, and a
-// Component is a scope of its own — every `root.` inside it reads as unqualified
+// Component is a scope of its own - every `root.` inside it reads as unqualified
 // access to qmllint and cannot be ahead-of-time compiled by qmlcachegen. Bound
 // scoping is what makes those lookups resolvable; the delegate already declares
 // its model role as `required`, which is the other half of what it asks for.
@@ -64,7 +64,7 @@ Item {
     readonly property bool rail: orientation === Qt.Vertical
 
     // The bar's own extent, without the strip beyond it. The shell needs both
-    // numbers — one to place the bar, one to pad the page — and they must come
+    // numbers - one to place the bar, one to pad the page - and they must come
     // from the same place or the last row of a page hides under the nav.
     readonly property real barHeight: Theme.metric.navHeight
 
@@ -81,7 +81,7 @@ Item {
 
     // One dimension each. A bar states its height and takes its width from
     // whatever is placing it; a rail is the other way round. The shell assigns
-    // both outright, which is what a rotation needs — see MobileShell.
+    // both outright, which is what a rotation needs - see MobileShell.
     implicitWidth: rail ? Theme.metric.navRailWidth : 0
     implicitHeight: rail ? 0 : barHeight + safeArea
     width: implicitWidth
@@ -97,7 +97,7 @@ Item {
     // A rail does NOT divide its height: 834 px in five parts puts 167 px
     // between one destination and the next, which stops reading as one control
     // with five positions and starts reading as five buttons that happen to
-    // share an edge — and it puts the last of them at the bottom corner, which
+    // share an edge - and it puts the last of them at the bottom corner, which
     // is the one place a hand holding a tablet cannot reach.
     readonly property real cellExtent:
         rail ? root.contentExtent + 14 : width / Tabs.list.length
@@ -108,7 +108,7 @@ Item {
     readonly property real runOrigin:
         rail ? Math.max(0, (height - cellExtent * Tabs.list.length) / 2) : 0
 
-    // The pill is a horizontal lozenge in both arrangements — it sits behind a
+    // The pill is a horizontal lozenge in both arrangements - it sits behind a
     // glyph with a label under it, and that shape does not rotate with the bar.
     readonly property real pillWidth:
         Math.min(64, (rail ? width : cellExtent) - 8)

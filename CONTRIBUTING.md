@@ -66,7 +66,7 @@ neighbour: `app`, `libclimat`, `gallery`, `packaging`, `net`, `alerts`,
 `golden`, `android`, `design`, `build`, `licensing`.
 
 Write a body whenever the *why* is not obvious from the diff. Explain the
-motivation and the consequence, not the code — the diff already has the code.
+motivation and the consequence, not the code - the diff already has the code.
 
 ## Three rules that are not obvious
 
@@ -76,7 +76,7 @@ Not on your files, not on the tree. It reflows 13,400 lines and destroys the
 aligned comment blocks that are this codebase's distinguishing feature. The
 same goes for `clang-format` over the C++: the repository has no formatting
 gate, and [`.github/workflows/ci.yml`](.github/workflows/ci.yml) records the
-measurements behind that decision — every stock style wanted between 5,585 and
+measurements behind that decision - every stock style wanted between 5,585 and
 35,380 replacements, and a hand-tuned config still wanted 2,719.
 
 New code is reviewed for style by a person. Match the file you are editing.
@@ -103,7 +103,7 @@ which is also how you inherit the right licence for wherever you happen to be.
 `reuse annotate` will write one for you.
 
 Binaries and JSON, which have nowhere to put a comment, go in `REUSE.toml`
-instead — one explicit path each, never a glob.
+instead - one explicit path each, never a glob.
 
 (This paragraph is prose rather than a code block on purpose: `reuse` reads
 example headers in fenced blocks as real declarations, so a sample here would
@@ -149,7 +149,7 @@ CLIMAT_BUILD_DIR=build/lint nix develop --command bash scripts/check-qmllint.sh
 `check-qml-files.sh` is the one people trip over: the QML module lists every
 file explicitly and never globs, so a new `.qml` has to be added to
 `app/CMakeLists.txt` by hand. Forget it and the type simply does not exist, and
-QML reports that at the point of *use* — naming a file you did not touch.
+QML reports that at the point of *use* - naming a file you did not touch.
 
 `check-qmllint.sh` is a ratchet, not a threshold. It fails when the warning
 count goes **up**. Unqualified property access is what stops `qmlcachegen`
@@ -164,7 +164,7 @@ been green while the app printed four warnings a launch, because QTestLib
 installs its own message handler and silently replaced ours.
 
 Tests live in `tests/` as Qt Test, and in `tests/qml/` as QtQuickTest. There is
-no Catch2 and no GoogleTest — decision D8 rules out any dependency fetched at
+no Catch2 and no GoogleTest - decision D8 rules out any dependency fetched at
 configure time, so that a distribution packager can build this from what they
 already ship.
 
@@ -177,7 +177,7 @@ climat --grab bug.png
 ```
 
 That captures exactly what the app rendered, at the size it rendered it, with no
-window manager in the way — which answers half the questions a report otherwise
+window manager in the way - which answers half the questions a report otherwise
 generates. Tell us the install channel (Flatpak, `.deb`, MSI, source) and
 whether you are on Wayland or X11.
 
@@ -185,4 +185,4 @@ whether you are on Wayland or X11.
 
 Do not open a public issue for a vulnerability. See
 [`SECURITY.md`](SECURITY.md), which also explains why the attack surface here is
-smaller than you might expect — there is no server, no account and no telemetry.
+smaller than you might expect - there is no server, no account and no telemetry.

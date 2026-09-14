@@ -7,7 +7,7 @@
 // disclosure chevron and a home marker; a fourth item spelling out a word would
 // be the widest thing on it and would compete with the name of the place the
 // page is about. A gear is the one pictogram every desktop has already taught
-// everybody, which is a claim that can be made about nothing else here — see
+// everybody, which is a claim that can be made about nothing else here - see
 // WeatherGlyph, whose sun and cloud are drawn rather than borrowed precisely
 // because weather symbols are not standard.
 //
@@ -16,7 +16,7 @@
 // A ring with eight trapezoids around it, generated rather than written out: the
 // arithmetic is four lines and eight hand-placed quadrilaterals is eight chances
 // for one to sit a fraction off its neighbours. The hole is a second circle in
-// the same path, wound the other way, so the even-odd fill rule cuts it out —
+// the same path, wound the other way, so the even-odd fill rule cuts it out -
 // which is what keeps this one ShapePath instead of a filled gear with a
 // page-coloured disc on top of it. A disc would be opaque, and every surface in
 // this app is a wash over a gradient.
@@ -68,8 +68,8 @@ Item {
 
             PathSvg {
                 // No toFixed anywhere, which is not an oversight. Rounding the
-                // coordinates was cosmetic — an SVG path is not read by anybody
-                // — and every call was an unresolvable member lookup: qmllint
+                // coordinates was cosmetic - an SVG path is not read by anybody
+                // - and every call was an unresolvable member lookup: qmllint
                 // types the result of arithmetic on untyped locals as
                 // QJSPrimitiveValue, which has no `toFixed`, and an unresolvable
                 // lookup is what stops qmlcachegen compiling the binding ahead

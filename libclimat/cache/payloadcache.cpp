@@ -42,8 +42,8 @@ void store(CacheStore *cache, const QString &key, const QString &providerId,
     entry.contentType = response.contentType;
     entry.fetchedAt   = response.fetchedAt;
 
-    // The response's own expiry when it has one — HttpClient has already taken
-    // the later of the server's Expires and our table's TTL — and our table's
+    // The response's own expiry when it has one - HttpClient has already taken
+    // the later of the server's Expires and our table's TTL - and our table's
     // answer otherwise, so that a provider sending no cache headers at all
     // still lands in the right row of §4.5.
     entry.expiresAt = response.expiresAt.isValid() ? response.expiresAt

@@ -3,7 +3,7 @@
 //
 // Saved places: the round trip through SQLite, and the list model over it.
 //
-// The assertion that matters most in this file is the dullest one —
+// The assertion that matters most in this file is the dullest one -
 // `theAppOpensOnTheHomePlaceFromCache`. The app has a 400 ms cold-start budget
 // and the first frame is drawn from the cached forecast, so the place name in
 // the location bar has to be known before any network call completes. That is
@@ -194,7 +194,7 @@ void TestPlaces::addingTheSamePinTwiceIsAlsoOnePlace()
     LocationController places(&store);
     QVERIFY(places.load().hasValue());
 
-    // No GeoNames identity — a dropped map pin. Two pins eleven metres apart
+    // No GeoNames identity - a dropped map pin. Two pins eleven metres apart
     // round to the same coordinate, produce the same cache key and the same
     // URL, and are the same place by every operational definition the engine
     // has.
@@ -236,7 +236,7 @@ void TestPlaces::theAppOpensOnTheHomePlaceFromCache()
     }
 
     // The cold start. One open, one load, and the place name is available on
-    // the line after — no signal, no event loop turn, nothing to wait for.
+    // the line after - no signal, no event loop turn, nothing to wait for.
     {
         CacheStore store(&clock);
         QVERIFY(store.open(path).hasValue());
@@ -247,7 +247,7 @@ void TestPlaces::theAppOpensOnTheHomePlaceFromCache()
 
         QCOMPARE(places.count(), 3);
         QCOMPARE(places.currentIndex(), 1);
-        // "Berlin" and not "Berlin, Berlin" — the city-state's admin1 repeats
+        // "Berlin" and not "Berlin, Berlin" - the city-state's admin1 repeats
         // its name, and Place::label() drops the repetition.
         QCOMPARE(places.currentLabel(), QStringLiteral("Berlin"));
         QVERIFY(places.currentIsHome());
@@ -280,7 +280,7 @@ void TestPlaces::theAppReopensOnThePlaceItWasLastShowing()
         QVERIFY(places.load().hasValue());
 
         // Where the user left off beats home. Home is the fallback, not the
-        // policy — an app that jumped back to home every launch would lose the
+        // policy - an app that jumped back to home every launch would lose the
         // place somebody has been watching all week.
         QCOMPARE(places.currentIndex(), 2);
         QCOMPARE(places.currentLabel(), QString::fromUtf8("Tromsø"));
@@ -300,7 +300,7 @@ void TestPlaces::aRememberedPlaceThatIsGoneFallsBackToHome()
     places.addPlace(toronto());
     places.addPlace(berlin());
 
-    // A row id that never existed — a database restored from a backup, or a
+    // A row id that never existed - a database restored from a backup, or a
     // place deleted by another process.
     QVERIFY(store.setSetting(QStringLiteral("places.current"), QStringLiteral("9999")).hasValue());
 
@@ -329,7 +329,7 @@ void TestPlaces::settingHomeMovesItAndOnlyOnePlaceIsEverHome()
     QCOMPARE(homeChanged.count(), 1);
 
     // Exactly one, checked against the database rather than against the model
-    // — the partial unique index over is_home is what actually guarantees it,
+    // - the partial unique index over is_home is what actually guarantees it,
     // and a model that got the write order wrong would have failed the write
     // rather than produced two homes.
     int homes = 0;
@@ -435,7 +435,7 @@ void TestPlaces::reorderingRewritesSortOrderAndSurvivesAReopen()
     QCOMPARE(places.currentIndex(), 1);
     QCOMPARE(places.currentLabel(), QStringLiteral("Toronto, Ontario"));
 
-    // Home followed too — it is a property of the row and not of the position.
+    // Home followed too - it is a property of the row and not of the position.
     QCOMPARE(places.homeIndex(), 1);
 
     LocationController reopened(&store);
@@ -478,7 +478,7 @@ void TestPlaces::thereIsAlwaysALocatorAndItNeverThrows()
 {
     // DeviceLocator::create() returns something whatever the build is. When Qt
     // Positioning was not compiled in, or when it was and found no source, the
-    // answer is the same one a user who denied permission gets — one branch,
+    // answer is the same one a user who denied permission gets - one branch,
     // exercised either way.
     //
     // Nothing here asserts that a fix arrives. A test that needed GeoClue2,

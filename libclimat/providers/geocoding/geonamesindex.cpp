@@ -20,7 +20,7 @@ constexpr qsizetype headerBytes = 52 + 4 * sectionCount;
 
 // The mean radius of the earth, IUGG. Not the equatorial radius: every
 // distance here is a comparison between two candidate cities and a spherical
-// earth is the right amount of model for that — the error against a proper
+// earth is the right amount of model for that - the error against a proper
 // geodesic is a few parts in a thousand, which is metres at the distances that
 // decide anything, and a WGS84 inverse solution would be a hundred lines to
 // change no answer.
@@ -75,7 +75,7 @@ public:
     }
 
     // LEB128. Bounded at ten septets, which is every value a 64-bit integer
-    // can hold — an unbounded loop on corrupt input reads to the end of the
+    // can hold - an unbounded loop on corrupt input reads to the end of the
     // section and calls it a number.
     bool readVarint(quint64 *out)
     {
@@ -138,7 +138,7 @@ bool readPlainColumn(Cursor &cursor, QVector<quint16> &out, int count, int ceili
 
 // Newline-separated UTF-8. QByteArray::split on an empty section yields one
 // empty entry, which is the right answer for a table whose only member is the
-// empty string, and the wrong one for a table that should have had none — so
+// empty string, and the wrong one for a table that should have had none - so
 // the caller checks the count it was promised.
 QStringList splitNames(const QByteArray &section)
 {
@@ -238,7 +238,7 @@ Status GeonamesIndex::load(const QByteArray &packed)
 
     // qUncompress refuses anything it did not recognise by returning an empty
     // array, which is indistinguishable from a payload that was legitimately
-    // empty — so the length is checked rather than the emptiness.
+    // empty - so the length is checked rather than the emptiness.
     const QByteArray payload = qUncompress(packed.mid(headerBytes));
     if (payload.size() != qsizetype(payloadLength)) {
         return malformed(QStringLiteral("its payload decompressed to %1 bytes and not the %2 its "
@@ -394,7 +394,7 @@ GeonamesCity GeonamesIndex::cityAt(int row) const
 double GeonamesIndex::distanceKm(const Coordinate &a, const Coordinate &b)
 {
     // Haversine. The half-versed-sine form rather than the spherical law of
-    // cosines because the latter loses all its precision at small distances —
+    // cosines because the latter loses all its precision at small distances -
     // which is every distance that decides anything here.
     const double lat1 = a.latitude * degreesToRadians;
     const double lat2 = b.latitude * degreesToRadians;
@@ -525,7 +525,7 @@ std::optional<GeonamesIndex::Match> GeonamesIndex::nearest(const Coordinate &at,
         return std::nullopt;
 
     // Step one: the point is inside somebody's footprint. Step two: it is not,
-    // and the answer reverts to plain distance — see the header comment for
+    // and the answer reverts to plain distance - see the header comment for
     // why a big city must not win from 60 km away when a village is at 30.
     if (ratioRow >= 0 && ratioValue <= 1.0) {
         Match match;

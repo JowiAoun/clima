@@ -48,7 +48,7 @@ command: climat
 # own /usr/libexec/flatpak-validate-icon rejects the same file, and accepts the
 # 512 px PNG beside it. Nothing is wrong with the drawing.
 #
-# Dropping it costs nothing a user sees. Flatpak's icon pipeline is PNG-based —
+# Dropping it costs nothing a user sees. Flatpak's icon pipeline is PNG-based -
 # it exports the hicolor PNGs above into the host's icon theme, and 512 px is
 # larger than any shell asks for. The scalable icon still ships in the .deb.
 cleanup:
@@ -75,8 +75,8 @@ cleanup:
 #
 #   * No --talk-name=org.kde.StatusNotifierWatcher. There is no tray, and
 #     docs/widgets.md records why it was not built: on GNOME an SNI icon needs a
-#     third-party extension to be visible at all, and on Windows — where a tray
-#     is genuinely the right shape — there is no session bus and therefore no
+#     third-party extension to be visible at all, and on Windows - where a tray
+#     is genuinely the right shape - there is no session bus and therefore no
 #     daemon to read from. A sandbox hole opened in advance of the code that
 #     needs it is a hole nobody remembers to close.
 #
@@ -94,22 +94,22 @@ cleanup:
 #     installs a service file to /app/share/dbus-1/services, flatpak exports it
 #     with the Exec rewritten to `flatpak run --command=climat-daemon`, and the
 #     bus starts it when a widget host asks for the weather. That needs no
-#     permission of any kind — the name is under the app ID, which this app owns
-#     by default — and it gets the daemon its own sandbox instance rather than a
+#     permission of any kind - the name is under the app ID, which this app owns
+#     by default - and it gets the daemon its own sandbox instance rather than a
 #     life inside whichever process happened to want it first.
 #
 #     The GNOME extension still starts one when nothing else has, and the two
 #     cannot collide: the loser of the race exits 5.
 finish-args:
   # The forecast. This is the only thing the app sends anywhere, and it sends
-  # a coordinate and receives JSON — see libclimat/net/httpclient.h for the
+  # a coordinate and receives JSON - see libclimat/net/httpclient.h for the
   # User-Agent policy that goes with it.
   - --share=network
 
   # Wayland first, X11 as the fallback, and --share=ipc with it: X11 shared
   # memory is what MIT-SHM needs, and without it an X11 session falls back to
   # sending every frame over the socket. --device=dri is the GPU, and this app
-  # is a Qt Quick scene graph — without it every frame is rendered on the CPU.
+  # is a Qt Quick scene graph - without it every frame is rendered on the CPU.
   - --socket=wayland
   - --socket=fallback-x11
   - --share=ipc
@@ -119,7 +119,7 @@ modules:
   # ---- layer-shell-qt, so the widgets can pin themselves ---------------------
   #
   # `zwlr_layer_shell_v1` is how climat-widget puts tiles on the desktop
-  # everywhere except GNOME — KDE Plasma, Sway, Hyprland, Wayfire, river. See
+  # everywhere except GNOME - KDE Plasma, Sway, Hyprland, Wayfire, river. See
   # packaging/plasma/README.md.
   #
   # It is built here because org.kde.Sdk does not ship it. Everything it needs
@@ -127,8 +127,8 @@ modules:
   # Qt's private QtWaylandClient headers are all in the 6.11 SDK, so this is a
   # source module and not a bundled binary.
   #
-  # Without it the Flatpak still runs — widgets/CMakeLists.txt makes it optional
-  # and `--pin` reports its absence as the reason — but the Flatpak is the
+  # Without it the Flatpak still runs - widgets/CMakeLists.txt makes it optional
+  # and `--pin` reports its absence as the reason - but the Flatpak is the
   # primary Linux channel, and "the primary channel is the one that cannot pin
   # on KDE" is not a footnote anybody should have to find.
   #
@@ -160,7 +160,7 @@ modules:
       - -DCLIMAT_DEV_TOOLS=OFF
 
       # The daemon's autostart entry installs to an absolute /etc/xdg/autostart
-      # — it has to, because the XDG search path is a fixed list — and /etc is
+      # - it has to, because the XDG search path is a fixed list - and /etc is
       # read-only in this sandbox, so leaving it on fails the install step after
       # the whole application has compiled. A Flatpak could not use the file
       # anyway: nothing outside the sandbox reads /app, and autostart inside one

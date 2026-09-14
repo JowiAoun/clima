@@ -91,7 +91,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
-        QStringLiteral("Climat's component gallery — every component in the app, on one\n"
+        QStringLiteral("Climat's component gallery - every component in the app, on one\n"
                        "screen, on the gradient it is actually composited over.\n"
                        "\n"
                        "It exists because almost every defect found in this design so far was\n"
@@ -117,7 +117,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
     const QCommandLineOption viewportOption(
         QStringLiteral("viewport"),
         QStringLiteral("Stage every specimen inside a device frame of this size, with the "
-                       "page gradient painted inside it: %1. The window is not resized — the "
+                       "page gradient painted inside it: %1. The window is not resized - the "
                        "rail alone is 232 px wide.")
             .arg(AppOptions::viewportIds().join(QStringLiteral(", "))),
         QStringLiteral("id"));
@@ -225,7 +225,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(viewportOption)) {
         const QString id = parser.value(viewportOption);
         if (!AppOptions::viewportIds().contains(id))
-            fail(QStringLiteral("--viewport: expected one of %1 — got \"%2\"")
+            fail(QStringLiteral("--viewport: expected one of %1 - got \"%2\"")
                      .arg(AppOptions::viewportIds().join(QStringLiteral(", ")), id));
         self->m_viewport = id;
     }
@@ -233,7 +233,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(skyOption)) {
         const QString phase = parser.value(skyOption);
         if (!AppOptions::skyPhases().contains(phase))
-            fail(QStringLiteral("--sky: expected one of %1 — got \"%2\"")
+            fail(QStringLiteral("--sky: expected one of %1 - got \"%2\"")
                      .arg(AppOptions::skyPhases().join(QStringLiteral(", ")), phase));
         self->m_sky = phase;
     }
@@ -241,7 +241,7 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(schemeOption)) {
         const QString name = parser.value(schemeOption);
         if (!AppOptions::schemes().contains(name))
-            fail(QStringLiteral("--scheme: expected one of %1 — got \"%2\"")
+            fail(QStringLiteral("--scheme: expected one of %1 - got \"%2\"")
                      .arg(AppOptions::schemes().join(QStringLiteral(", ")), name));
         self->m_scheme = name;
     }
@@ -253,14 +253,14 @@ void GalleryOptions::parseCommandLine(const QCoreApplication &app)
     if (parser.isSet(shotOption)) {
         const QString id = parser.value(shotOption);
         if (!GalleryOptions::shotIds().contains(id))
-            fail(QStringLiteral("--shot: expected one of %1 — got \"%2\"")
+            fail(QStringLiteral("--shot: expected one of %1 - got \"%2\"")
                      .arg(GalleryOptions::shotIds().join(QStringLiteral(", ")), id));
         self->m_shot = id;
     }
 
     // A sheet is the whole product; a card, the details grid and a catalogue
     // pick are each one piece of it. Asking for both is a contradiction rather
-    // than a precedence question — the same rule --card and --details are held
+    // than a precedence question - the same rule --card and --details are held
     // to two lines below, and for the same reason.
     if (!self->m_shot.isEmpty() && (!self->m_card.isEmpty() || parser.isSet(detailsOption)))
         fail(QStringLiteral("--shot composes whole devices; --card and --details each "

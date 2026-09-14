@@ -5,7 +5,7 @@
 // without the rest of the app in the way: the component library, one detail
 // card, or the details grid.
 //
-// This was DevPreviews.qml — an Item inside the weather app's window that
+// This was DevPreviews.qml - an Item inside the weather app's window that
 // switched itself on when one of three flags was passed. It is a window of its
 // own now, which is why the second half of the file reads as the second half of
 // app/qml/Climat/Main.qml: the backdrop, the sky rule, the geometry and the
@@ -21,7 +21,7 @@
 // `import Climat` is where everything below that is not a Loader comes from:
 // Theme, Viewports, Clock, PageBackdrop, WeatherDetails and ScreenshotController
 // are the app's, resolved through the engine's import machinery rather than
-// through any path — which is what makes them the app's and not a copy.
+// through any path - which is what makes them the app's and not a copy.
 import QtQuick
 import QtQuick.Window
 import Climat
@@ -34,14 +34,14 @@ Window {
     height: 762
 
     // The app's floors, not a tighter pair of the gallery's own. The rail alone
-    // is 232 px, so this window is useless at 360 — but `--card Uv --size
+    // is 232 px, so this window is useless at 360 - but `--card Uv --size
     // 390x844` is a perfectly reasonable thing to ask for, and a minimum that
     // silently clamps a --size is a screenshot at a size nobody chose.
     minimumWidth: 360
     minimumHeight: 480
     color: Theme.page.bg
 
-    title: qsTr("Climat — components")
+    title: qsTr("Climat - components")
 
     // --card and --details each show one thing on its own; the catalogue is
     // what is left. The parser has already refused the two together, so this is
@@ -50,7 +50,7 @@ Window {
         GalleryOptions.card !== "" || GalleryOptions.details || win.shooting
 
     // --shot composes whole devices rather than one component, so it turns the
-    // catalogue off like the other two preview modes do — and unlike them it
+    // catalogue off like the other two preview modes do - and unlike them it
     // also decides the window's size, because the sheet's dimensions are
     // derived from Viewports and there is no sensible number to type instead.
     readonly property bool shooting: GalleryOptions.shot !== ""
@@ -93,7 +93,7 @@ Window {
         file: GalleryOptions.card !== "" ? "Detail" + GalleryOptions.card + "Card.qml" : ""
     }
 
-    // The grid lays out in full and does not scroll itself — the page owns that.
+    // The grid lays out in full and does not scroll itself - the page owns that.
     // Shown on its own it still needs somewhere to scroll and something to bound
     // its cards' Shapes, so the preview supplies both.
     Loader {
@@ -119,7 +119,7 @@ Window {
 
     // The composed device sheets the README is made of. Behind a Loader rather
     // than declared with `visible: false`, because a sheet builds up to three
-    // whole shells — a phone, a tablet and a desktop page at once — and an
+    // whole shells - a phone, a tablet and a desktop page at once - and an
     // inactive Loader builds none of them.
     Loader {
         id: shotLoader
@@ -159,14 +159,14 @@ Window {
 
                 // Whatever the app would be showing at this hour, so a component
                 // framed as a phone is reviewed on the sky the phone would
-                // actually give it — stars included. Not win.skyPhase, which is
+                // actually give it - stars included. Not win.skyPhase, which is
                 // `dusk` on a window this wide.
                 skyPhase: GalleryOptions.sky !== "" ? GalleryOptions.sky : Clock.skyPhase
             }
         }
     }
 
-    // The shutters, out of the Climat module — the same class the app drives,
+    // The shutters, out of the Climat module - the same class the app drives,
     // with its inputs bound to this parser instead of that one. `shell` is left
     // null because there is no shell here, which is a case every poke already
     // knows how to report.
@@ -203,7 +203,7 @@ Window {
             win.height = GalleryOptions.sizeHeight
         } else if (!win.previewing) {
             // Room for the rail plus a stage, but only when nobody said
-            // otherwise — hence Math.max and not an assignment. The two preview
+            // otherwise - hence Math.max and not an assignment. The two preview
             // modes stay at the default, because one card alone on a gradient
             // does not need 1500 px of it.
             win.width = Math.max(win.width, 1500)

@@ -20,7 +20,7 @@
 //
 // The cost is that the two files have to agree on their key sets. Theme.qml
 // reads both through the same typed properties, so a key missing here is a
-// binding that silently falls back to undefined — and Theme.qml asserts the
+// binding that silently falls back to undefined - and Theme.qml asserts the
 // shape at startup rather than letting that happen quietly.
 //
 // ---- the constraint this palette is answering -------------------------------
@@ -33,7 +33,7 @@
 //
 // One rule genuinely changes, and it is written up in §10.1: light mode gets a
 // hairline on the outer card edge. On a dark page the range above the
-// background does the work. On a light page there is almost none — 10% black
+// background does the work. On a light page there is almost none - 10% black
 // over #eef1f7 is about a 1.13:1 step, which is enough to see that a card is
 // there and not enough to see where two abutting cards meet.
 
@@ -43,7 +43,7 @@
 //
 // Slightly blue rather than neutral. A pure grey page under cards that are grey
 // washes is a screen with no temperature in it at all, and the weather palette
-// — every ramp, every glyph — is built around blues.
+// - every ramp, every glyph - is built around blues.
 var page = {
     bg: "#eef1f7"
 };
@@ -71,7 +71,7 @@ var surface = {
     rowNow: "#26e8a900",
 
     // The two opaque ones. Content scrolls under them, so they cannot be a
-    // wash — §10.1 grants the nav and the menu that exception and nothing else.
+    // wash - §10.1 grants the nav and the menu that exception and nothing else.
     nav:    "#f2f7f9fc",
     menu:   "#f7ffffff"
 };
@@ -81,7 +81,7 @@ var surface = {
 // `dim` is the one that wanted care, and the one that proves an eye is not a
 // photometer. It was set to #6b7794 by mirroring dark's #7a86a2 and judging it
 // by looking, with a note here estimating it at "about 3.8:1". The gallery's
-// contrast column, once it existed, measured 3.48:1 — under the 4.5:1 that a
+// contrast column, once it existed, measured 3.48:1 - under the 4.5:1 that a
 // token carrying axis labels and body copy owes, and under my own guess by
 // enough to matter. Darkened until it clears: 4.52:1 on a card.
 //
@@ -99,8 +99,8 @@ var line = {
     grid:     "#1a000000",
     gridWeak: "#0f000000",
     track:    "#26000000",
-    // These two are the only lines in the group that carry meaning — where the
-    // present is, and where the recording stops and the prediction starts — so
+    // These two are the only lines in the group that carry meaning - where the
+    // present is, and where the recording stops and the prediction starts - so
     // they are the only two held to 3:1. Both were mirrored straight from dark
     // at 0x59 and 0x4d and measured 2.36:1 and 2.09:1, because the same alpha
     // over a pale ground is a far weaker line than over a navy one. Raised
@@ -127,23 +127,23 @@ var line = {
 // It was deepened once to #e8a900 by eye and that was still far too pale:
 // 1.62:1 on a card. The reason it looked acceptable is that a pill is a large
 // filled shape, and a large filled shape reads at a contrast that would be
-// illegible as a line — but `accent.fill` is not only a fill. It is the border
+// illegible as a line - but `accent.fill` is not only a fill. It is the border
 // of today's cell in the calendar, the border of the open metric picker, and in
 // HourlyList and PlacePicker it is *text*. A hairline and a word at 1.62:1 are
 // not "a bit low", they are absent.
 //
 // So it is held to 4.5:1 as text rather than 3:1 as a component, which lands it
-// at #835f00 — a deep amber. That in turn forced `ink`, and this is the pair
+// at #835f00 - a deep amber. That in turn forced `ink`, and this is the pair
 // worth understanding: there is no fill that carries dark ink at 4.5:1 *and*
 // clears 4.5:1 against a light card, because those two pull the same value in
 // opposite directions. On navy the accent can be bright and take dark ink; on a
 // pale page it has to be dark, and the ink on it has to be light. So the light
-// theme inverts the pair outright — near-white on deep amber, 5.73:1 — which is
+// theme inverts the pair outright - near-white on deep amber, 5.73:1 - which is
 // the one place this theme is not a mirror of the other.
 //
 // Note this is deliberately not the desktop's accent colour. Accent here is
-// structure — the selected metric pill, the nav pill, the wash behind the now
-// row — and `ink` is tuned to it. Repainting it purple would break three
+// structure - the selected metric pill, the nav pill, the wash behind the now
+// row - and `ink` is tuned to it. Repainting it purple would break three
 // legibility relationships at once.
 var accent = {
     fill: "#835f00",
@@ -156,7 +156,7 @@ var control = {
     // The knob, and the one token here that could not simply be mirrored. In
     // dark it is a pale grey riding a dark track and the state is obvious. The
     // straight inversion is a white knob on a pale track, which measured 1.69:1
-    // — an "off" switch you cannot tell is a switch.
+    // - an "off" switch you cannot tell is a switch.
     //
     // The convention the rest of the light world settled on is the answer: an
     // unselected control is identified by a *darker* handle, not a brighter
@@ -186,7 +186,7 @@ var overlay = {
 //
 // Hue-invariant, lightness-varying: warm for rising, cool for falling, and the
 // three verdict levels keep the green/amber/red that every other weather
-// product uses. `caution` is the one that could not simply be nudged — #e8c93f
+// product uses. `caution` is the one that could not simply be nudged - #e8c93f
 // is a mid yellow that lands near 1.9:1 on this page, so it goes to a dark
 // amber rather than a slightly deeper yellow. §4.10 forbids colour-only
 // encoding anyway, so each of these is always paired with a glyph or a word.
@@ -204,16 +204,16 @@ var state = {
 // The cloud is the interesting one, and it was half-solved already. In dark the
 // cloud is white on a night sky. On a near-white page a white cloud is not a
 // cloud, it is a hole. theme.js already carries cloudTopOnLight/OnLight for the
-// day badge — a pale plate inside a dark theme, which is the same problem in
-// miniature — so the light theme's ordinary cloud is that pair, and the pale
+// day badge - a pale plate inside a dark theme, which is the same problem in
+// miniature - so the light theme's ordinary cloud is that pair, and the pale
 // plate inside the light theme needs one darker still.
 //
 // moonShade inverts outright: in dark it is the navy of the unlit limb against
 // a lit face, and here it is the shadow on a gold one.
 //
 // Every value below was set by looking and then corrected by measuring, and the
-// corrections were not small. A glyph is the information — a sun, a cloud, the
-// moon — so each is held to 3:1 against the card it is drawn on, and the two
+// corrections were not small. A glyph is the information - a sun, a cloud, the
+// moon - so each is held to 3:1 against the card it is drawn on, and the two
 // stops of a gradient are scored as a pair, since an object is legible if
 // either end of it separates from the ground.
 //
@@ -222,7 +222,7 @@ var state = {
 // to #9d7d36 (1.75 -> 3.01), and with the face darkened the pale unlit limb
 // stopped working at all, so `moonShade` inverts a second time to a shadow
 // (1.54 -> 3.01 against the new face). `sunWarm` and `cloudTop` stay bright and
-// stay under 3:1 on their own — they are the lit tops of objects whose darker
+// stay under 3:1 on their own - they are the lit tops of objects whose darker
 // edge carries them, which is what the pair rule is for.
 var glyph = {
     sunWarm:            "#f5b942",
@@ -231,8 +231,8 @@ var glyph = {
     moonShade:          "#2c3854",
 
     // Darker than the OnLight pair below, and the first draft got this wrong by
-    // reusing it. That pair was tuned for the day badge — a 40 px plate at
-    // #fdfefe→#dde5f0 with a cloud drawn on it — where near-white works because
+    // reusing it. That pair was tuned for the day badge - a 40 px plate at
+    // #fdfefe→#dde5f0 with a cloud drawn on it - where near-white works because
     // the plate is smaller and brighter than anything around it. A card in this
     // theme is not: it is a wash a few percent off the page, so a near-white
     // cloud on it has almost nothing to be seen against. Rendered, the ten-day
@@ -254,7 +254,7 @@ var glyph = {
     // the same reason: on a light ground "more" is darker.
     //
     // The OnLight pair is the day plate, and in this scheme the plate is a warm
-    // gold disc rather than a white one — so these go a further step down than
+    // gold disc rather than a white one - so these go a further step down than
     // their card values, exactly as the clouds above do.
     rain:               "#3d7fb8",
     rainOnLight:        "#2a5580",
@@ -267,7 +267,7 @@ var glyph = {
     snowOnLight:        "#3f5c85",
 
     // Lightning cannot be brighter than the page, so the bolt deepens into
-    // amber — the same inversion §10.11 records for the storm band's flash.
+    // amber - the same inversion §10.11 records for the storm band's flash.
     bolt:               "#a85c0a",
     boltOnLight:        "#7a4406",
 
@@ -301,7 +301,7 @@ var badge = {
     dayBottom:   "#f6d98a",
     // Deepened, and the reason is measured rather than aesthetic. At the old
     // #6d9ae8 → #3f63bd this plate sat in the middle of the luminance range,
-    // where neither a pale mark nor a dark one clears 3:1 — `glyph.rain` on it
+    // where neither a pale mark nor a dark one clears 3:1 - `glyph.rain` on it
     // measured **1.31:1**, so the night half of a rainy day card had raindrops
     // that were, arithmetically, not visible. A plate has to commit to being
     // light or dark for anything to be legible on it, and a night plate that
@@ -324,14 +324,14 @@ var scaffold = {
 // colours.
 //
 // #ff8a70 is a warning on navy and a peach on #eef1f7. So each hue is taken
-// down to where it separates from a white page — and `ink`, which carries a
+// down to where it separates from a white page - and `ink`, which carries a
 // word at 4.5:1, ends up darker still. That is the same direction the whole
 // light theme moves in, only further, because a warning that reads as a pastel
 // has stopped being a warning.
 //
 // The washes needed more than a deeper hue. Amber and slate at the dark
-// palette's alphas came out at 1.16 and 1.19 against the page — below the 1.2
-// this file's own surface ladder holds itself to — because both sit close to
+// palette's alphas came out at 1.16 and 1.19 against the page - below the 1.2
+// this file's own surface ladder holds itself to - because both sit close to
 // #eef1f7 in luminance and raising the alpha of a bright hue only produces a
 // larger bright plate. Deepening the wash colour is what fixed them; the
 // measurement is in tests/qml/tst_theme.qml, which fails if either drifts back.
@@ -363,7 +363,7 @@ var severity = {
 //
 // `flash` is the case with no light-mode equivalent at all. Lightning in dark
 // is a frame of near-white over the storm band. Nothing can be brighter than a
-// white page, so in light mode the band *deepens* for that frame instead — the
+// white page, so in light mode the band *deepens* for that frame instead - the
 // sign of the effect changes, which PrecipField.qml handles, and §10.11 records
 // it.
 var precip = {
@@ -396,7 +396,7 @@ var precip = {
 // answer indexes into is not its business.
 //
 // The four differ in hue at roughly constant lightness, which is the rule dark
-// already follows — §10.12 says the difference between phases is "hue and
+// already follows - §10.12 says the difference between phases is "hue and
 // clarity, not lightness". Applying an existing rule at a new lightness is not a
 // new rule. Two of them will read as nearly identical, and that is honest: a
 // bright night and a bright day are the same brightness by construction and
@@ -407,7 +407,7 @@ var precip = {
 // want; dimming the page because the sun is down is the app overruling a
 // preference it was handed a moment ago.
 //
-// stars is 0 in all four, and that is a rule rather than a value — see
+// stars is 0 in all four, and that is a rule rather than a value - see
 // star.dark in Theme.qml and §10.12. The field exists because at night the sky
 // is the darkest surface on the screen and darkness is the one place on this
 // page that can afford texture without competing. On a near-white page there is
@@ -433,7 +433,7 @@ var sky = {
 // there to be read, and a ramp that is computed is a ramp that cannot be
 // reviewed in the gallery next to the one it is derived from.
 //
-// The three categorical ramps — precip, aqi, uv — are NOT transformed. Their
+// The three categorical ramps - precip, aqi, uv - are NOT transformed. Their
 // hues are published authority bands (the WHO UV scale, the European AQI
 // bands), a reader cross-checks them against the source, and §10.5 is explicit
 // that where an authority publishes bands, the bands are the palette. Only

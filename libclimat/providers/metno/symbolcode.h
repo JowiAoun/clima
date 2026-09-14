@@ -6,13 +6,13 @@
 // Open-Meteo speaks WMO 4677 codes 0-99 (docs/02-data-sources.md §2.2). MET
 // Norway speaks strings: "lightrainshowers_day", "heavysleetandthunder",
 // "partlycloudy_night". The domain model carries a WMO code because the primary
-// provider does, so the fallback has to translate — and translation is where a
+// provider does, so the fallback has to translate - and translation is where a
 // fallback quietly becomes wrong, because a symbol nobody mapped becomes an
 // icon nobody drew and there is no error anywhere.
 //
 // The vocabulary is 44 base symbols, from MET's own legend
 // (metno/weathericons, weather/legend.csv). Every one of them is in the table
-// in symbolcode.cpp, and tst_metno.cpp asserts that — the list is short enough
+// in symbolcode.cpp, and tst_metno.cpp asserts that - the list is short enough
 // to be exhaustive and long enough that "I think I got them all" is not a
 // claim worth making.
 //
@@ -29,7 +29,7 @@
 // not a transcription error here and it must not be "fixed": the string in the
 // payload is the one with the typo, and a table that spells it correctly
 // matches nothing. Both spellings are accepted, so this keeps working on the
-// day MET correct it — which they cannot really do without breaking every
+// day MET correct it - which they cannot really do without breaking every
 // client that got it right.
 //
 // (Note that the correctly-spelled `lightrainshowersandthunder` exists in the
@@ -37,7 +37,7 @@
 //
 // ---- 2. Four of the codes produced here are codes Open-Meteo never emits ----
 //
-// MET's "sludd" — sleet, rain and snow falling together — has no equivalent in
+// MET's "sludd" - sleet, rain and snow falling together - has no equivalent in
 // the subset of WMO codes Open-Meteo publishes. The full WMO 4677 table does
 // have them:
 //
@@ -45,8 +45,8 @@
 //     83, 84   showers of rain and snow mixed, slight / moderate or heavy
 //
 // and those are what this table produces, because they are what the weather
-// *is*. The alternative — folding sleet onto 66/67, freezing rain, which is in
-// Open-Meteo's subset — would put a value in the field that the UI already
+// *is*. The alternative - folding sleet onto 66/67, freezing rain, which is in
+// Open-Meteo's subset - would put a value in the field that the UI already
 // knows how to draw and that describes different weather. Freezing rain is
 // liquid that freezes on contact and closes roads; sleet is wet snow.
 //
@@ -83,7 +83,7 @@ namespace climat {
 struct SymbolCode {
     WeatherCode code;
 
-    // Absent for a symbol with no variants — "cloudy", "rain", "fog" — which is
+    // Absent for a symbol with no variants - "cloudy", "rain", "fog" - which is
     // MET's way of saying the sky looks the same either way, not a gap. A
     // caller must not read "no day/night suffix" as "night".
     std::optional<bool> isDay;
@@ -92,12 +92,12 @@ struct SymbolCode {
 };
 
 // Parses one `symbol_code`. An unknown string returns an invalid SymbolCode
-// rather than a guess — a weather code the UI cannot draw is better than a
+// rather than a guess - a weather code the UI cannot draw is better than a
 // wrong one it can.
 SymbolCode parseSymbolCode(const QString &symbol);
 
 // Every WMO code this translation can produce, sorted and deduplicated. Exists
-// so that a test — here or in the UI — can assert an icon table covers the
+// so that a test - here or in the UI - can assert an icon table covers the
 // fallback provider's output, including the four codes Open-Meteo never emits.
 QList<int> metNoWeatherCodes();
 

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // A chevron, pointing one of four ways.
 //
-// Extracted because the mobile shell grew five of them in an afternoon — the
+// Extracted because the mobile shell grew five of them in an afternoon - the
 // location bar's disclosure, every card header's "more" affordance, the metric
-// dropdown, the month picker — and they had already drifted to three stroke
+// dropdown, the month picker - and they had already drifted to three stroke
 // widths. It is one stroked path; the point is that there is one of it.
 //
 // It does not rotate between directions. `direction` is a property rather than

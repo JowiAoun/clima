@@ -11,7 +11,7 @@
 // What is worth asserting is that the five spellings move TOGETHER. The whole
 // reason this class exists is that six places in this application formatted a
 // time by hand, five of them hardcoded a 12-hour clock and one followed the
-// locale — so under LC_ALL=C the chart said "3 PM" and the alert banner
+// locale - so under LC_ALL=C the chart said "3 PM" and the alert banner
 // underneath it said "23:00", in the same window, in the same second. A
 // preference that reached four of the six would be worse than none, because the
 // two it missed would look like the app ignoring it.
@@ -24,7 +24,7 @@
 //
 // Same reason tst_conditionsdata does: its subject is app/, not libclimat.
 // `climat_forbid_gui()` is deliberately not applied, which the function in
-// tests/CMakeLists.txt cannot express — so this is registered by hand there.
+// tests/CMakeLists.txt cannot express - so this is registered by hand there.
 #include "settings.h"
 #include "timeformat.h"
 
@@ -49,7 +49,7 @@ private Q_SLOTS:
 void TestTimeFormat::initTestCase()
 {
     // Before anything constructs a Settings, which TimeFormat does on first use.
-    // Without this the test writes to the developer's own preferences — and
+    // Without this the test writes to the developer's own preferences - and
     // worse, reads them: a developer who had set 24-hour would see this suite
     // pass for the wrong reason.
     QStandardPaths::setTestModeEnabled(true);
@@ -93,8 +93,8 @@ void TestTimeFormat::everySpellingFollowsTheFormat_data()
     QTest::newRow("24h noon") << "24h" << QTime(12, 0)
         << "12:00" << "12:00" << "12:00" << "" << "12:00";
 
-    // Single-digit minutes, which have to pad in both formats — "8:5" is not a
-    // time — while the 24-hour HOUR pads and the 12-hour one does not.
+    // Single-digit minutes, which have to pad in both formats - "8:5" is not a
+    // time - while the 24-hour HOUR pads and the 12-hour one does not.
     QTest::newRow("12h early") << "12h" << QTime(8, 5)
         << "8 AM" << "8:05 AM" << "8:05" << "AM" << "8:05 a.m.";
     QTest::newRow("24h early") << "24h" << QTime(8, 5)
@@ -118,8 +118,8 @@ void TestTimeFormat::everySpellingFollowsTheFormat()
     QTEST(clock->sentence(time), "sentence");
 
     // An invalid time is empty in every spelling, not "12:00 AM". Every caller
-    // passes an instant that may be absent — a place where the sun does not set
-    // has no sunset — and a formatter that invented midnight for it would put a
+    // passes an instant that may be absent - a place where the sun does not set
+    // has no sunset - and a formatter that invented midnight for it would put a
     // confident wrong time on the sun card.
     QVERIFY(clock->hour(QTime()).isEmpty());
     QVERIFY(clock->clock(QTime()).isEmpty());
@@ -141,7 +141,7 @@ void TestTimeFormat::anUnknownFormatReadsAsTwelveHour()
 }
 
 // The signal three view models rebuild their whole snapshot on. Once per real
-// change and not at all for a write of the value that is already stored —
+// change and not at all for a write of the value that is already stored -
 // without which every unit row's redraw would also rebuild every hour label.
 void TestTimeFormat::theFormatChangeIsAnnouncedOnce()
 {

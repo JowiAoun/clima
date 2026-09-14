@@ -12,14 +12,14 @@
 // copies of the same rows, and a lock contention bug that only appears on the
 // machines of people who like widgets.
 //
-// So exactly one process — climat-daemon — owns the network and the cache, and
+// So exactly one process - climat-daemon - owns the network and the cache, and
 // everything else subscribes. The daemon is the single writer; the app, the
 // widget host and the tray are readers.
 //
 // ============================================================================
 // WHY JSON AND NOT A TYPED D-BUS SIGNATURE
 //
-// A typed signature — a(sdd) and so on — is smaller, faster and checked by the
+// A typed signature - a(sdd) and so on - is smaller, faster and checked by the
 // bus. It is also the wrong trade here, for one reason: **the two ends ship on
 // different clocks and from different places.**
 //
@@ -29,7 +29,7 @@
 // by a version. With a typed signature, adding one field is an interface break
 // that desynchronises them and produces an unmarshalling error rather than a
 // missing number. With JSON, an older reader ignores a key it does not know
-// and a newer reader finds it absent — which is the failure mode you want when
+// and a newer reader finds it absent - which is the failure mode you want when
 // you cannot make the two ends update together.
 //
 // The cost is a parse on each end. A masked snapshot is a few hundred bytes to
@@ -43,7 +43,7 @@
 //      and you also get `hourly.time`, whether or not you asked. An array of
 //      twelve numbers with no axis looks perfectly usable and is silently
 //      wrong the moment a slice starts anywhere other than the hour you
-//      assumed — and it looks plausible, which is how it would ship. Same for
+//      assumed - and it looks plausible, which is how it would ship. Same for
 //      `daily.date`.
 //
 //   2. **Absent is null, and null is not zero.** `Reading` is
@@ -88,7 +88,7 @@ inline constexpr int kSchemaVersion = 1;
 // Paths are dotted and a branch selects everything under it: "current" implies
 // "current.temperature", and "current.temperature" implies only itself. The
 // empty mask means everything, because a reader that names no fields is asking
-// for the whole thing rather than for nothing — the opposite convention would
+// for the whole thing rather than for nothing - the opposite convention would
 // turn a forgotten argument into a silently empty widget.
 class FieldMask
 {
@@ -135,7 +135,7 @@ struct SnapshotSource {
 
     // Which provider answered, and whether this came off the network this
     // cycle or out of the cache. Both travel so that a widget can say "updated
-    // 40 minutes ago" and mean it — the daemon going away must leave a stale
+    // 40 minutes ago" and mean it - the daemon going away must leave a stale
     // reading on screen, never a blank tile.
     QString servedBy;
     bool    fromCache = false;
@@ -148,14 +148,14 @@ struct SnapshotSource {
 //
 //   schema       the version of this shape
 //   placeId      the canonical id actually resolved to, which is not always
-//                the one that was asked for — "home" is an alias
+//                the one that was asked for - "home" is an alias
 //   generatedAt  when the snapshot was built
 //   timezone     the place's IANA zone
 //   state        "live" | "cached" | "unknown"
 //
 // `timezone` is unconditional because every timestamp in the payload is only
-// half a fact without it, and a mask narrow enough to exclude `place` — one
-// asking for a bare series — is exactly the mask a sparkline uses.
+// half a fact without it, and a mask narrow enough to exclude `place` - one
+// asking for a bare series - is exactly the mask a sparkline uses.
 //
 // `state` has three values rather than two on purpose. "cached" is a reading
 // that was true forty minutes ago; "unknown" is no reading at all. They render

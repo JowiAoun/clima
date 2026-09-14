@@ -13,7 +13,7 @@
 // correctly.
 //
 // This one is about the fixture reaching the app with that fact intact. Between
-// the two lives a shift — libclimat/domain/hourconvention.h — that has to happen
+// the two lives a shift - libclimat/domain/hourconvention.h - that has to happen
 // exactly once, and the failure when it does not is invisible: the chart draws,
 // the axis is right, the curve is right, and the wash sits one column over. The
 // forecast says it starts raining at ten when it starts raining at nine, and
@@ -85,7 +85,7 @@ Forecast TestFixtureProvider::forecastOf(const QString &name)
 
     QFuture<Result<Forecast>> future = provider.fetchForecast(request);
 
-    // Already finished when it returns — no event loop, no thread. That is the
+    // Already finished when it returns - no event loop, no thread. That is the
     // property the app's first frame depends on, so it is worth asserting
     // rather than waiting on.
     Q_ASSERT(future.isFinished());
@@ -117,7 +117,7 @@ void TestFixtureProvider::torontoIsFrozenAtTheInstantTheMockDescribed()
     const Fixture fixture = fixtures::load(QStringLiteral("toronto"));
     QVERIFY(fixture.isValid());
 
-    // 12:28 PM in Toronto — the observation app/qml/Climat's mock data always
+    // 12:28 PM in Toronto - the observation app/qml/Climat's mock data always
     // claimed to be describing, and therefore the instant that keeps the
     // committed screenshots comparable to the ones taken before there was any
     // live data. The date is the payload's own; see below for why that is not
@@ -133,7 +133,7 @@ void TestFixtureProvider::torontoIsFrozenAtTheInstantTheMockDescribed()
 // errored. toronto/fixture.json said recordedAt 2026-07-30; forecast.json's
 // daily array ran 07-29, 07-30, 07-31. So the frozen clock named a day the
 // recording did not describe. The app then did exactly what it should with the
-// clock it was handed and resolved "today" to 07-30 — the middle of the array —
+// clock it was handed and resolved "today" to 07-30 - the middle of the array -
 // which slid every label one place along: the card headed Today drew the
 // previous day's high and low, and the payload's own today sat under Tomorrow.
 //
@@ -174,8 +174,8 @@ void TestFixtureProvider::everyFixtureDescribesADayItsOwnPayloadContains()
         // A day either side, but only for the fixture the app actually opens
         // on. That one backs every committed screenshot, so its day strip has
         // to have a real Yesterday and a real Tomorrow to draw. The others are
-        // narrow recordings kept for one assertion each — kampala is two days
-        // long because it exists to pin a single wet hour — and demanding a
+        // narrow recordings kept for one assertion each - kampala is two days
+        // long because it exists to pin a single wet hour - and demanding a
         // week of context from them would mean re-recording data that other
         // tests pin to the byte.
         if (name != fixtures::defaultName())
@@ -205,7 +205,7 @@ void TestFixtureProvider::everyFixtureParses()
         QVERIFY2(forecast.hourly.constLast().time > fixture.recordedAt, qPrintable(name));
 
         // And it must carry the timestamp the bytes were captured at, not the
-        // moment they were read — that is what "updated N minutes ago" reads.
+        // moment they were read - that is what "updated N minutes ago" reads.
         QCOMPARE(forecast.fetchedAt, fixture.recordedAt);
     }
 }
@@ -313,7 +313,7 @@ void TestFixtureProvider::theCreditIsOpenMeteosAndSaysItIsARecording()
     const FixtureForecastProvider provider(fixtures::load(QStringLiteral("toronto")));
     const Attribution             credit = provider.attribution();
 
-    // Complete, or ProviderRegistry::add() would refuse it — which is the gate
+    // Complete, or ProviderRegistry::add() would refuse it - which is the gate
     // that makes the About screen impossible to leave stale.
     QVERIFY2(credit.isComplete(), qPrintable(credit.firstMissingField()));
 

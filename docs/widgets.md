@@ -23,7 +23,7 @@ mutter still does not implement `wlr-layer-shell`, so there is no protocol by
 which an outside process can ask to be a desktop layer.
 
 So a Climat widget is **not drawn by the extension**. It is our own Qt process,
-whose window the extension adopts and pins. That is the DING pattern — the same
+whose window the extension adopts and pins. That is the DING pattern - the same
 one Ubuntu's own desktop-icons extension uses, which is running on the machine
 these measurements were taken on.
 
@@ -35,15 +35,15 @@ components with the app instead of being a second implementation.
 
 ## One process fetches; the rest draw
 
-`climat-daemon` owns the network, the cache and the clock. Everything else —
-widgets, the tray, eventually the app — reads from it over the session bus.
+`climat-daemon` owns the network, the cache and the clock. Everything else -
+widgets, the tray, eventually the app - reads from it over the session bus.
 
 Three reasons, in the order they bite. **SQLite has one writer**, and a desktop
 with six widgets is eight processes writing one database. **The free tier is
 per-client**, so eight processes each honouring a 15-minute TTL is eight times
 the requests for one desktop's worth of weather, which is the difference
 between a good citizen and a scraper (R5). And **the alert poll has to be in
-one place** — `docs/04-architecture.md` §4.5 budgets it at ~264 KB a day on the
+one place** - `docs/04-architecture.md` §4.5 budgets it at ~264 KB a day on the
 assumption that there is one of it, and eight independent pollers is eight
 tombstone state machines that can disagree about whether a warning was
 cancelled.
@@ -63,10 +63,10 @@ io.github.JowiAoun.Climat.Daemon1
 | `ListWidgets() → s` | `widgets/catalogue.json`, verbatim |
 | `ListPlaces() → as` | Canonical place ids |
 | `SnapshotChanged(token, json)` | signal |
-| `PlacesChanged()` | signal: the saved places moved under you — subscribe again |
+| `PlacesChanged()` | signal: the saved places moved under you - subscribe again |
 
 **The token is the signal's first argument on purpose.** A D-Bus signal is a
-broadcast, so without it every widget is woken — and made to parse a snapshot —
+broadcast, so without it every widget is woken - and made to parse a snapshot -
 every time any other widget refreshes. A reader adds a match rule with
 `arg0='<its token>'` and the bus filters before delivery. That is what keeps
 the ~0 % idle CPU line in `docs/03-tech-stack.md` §3.4 true on a desktop full
@@ -85,7 +85,7 @@ is worth more than one of them exercising it twice. `climat-widget` holds one
 subscription per tile and adds an **arg0 match rule** for each token, so the bus
 filters before delivery and one tile's refresh does not wake the other seven.
 The GNOME extension's panel indicator holds a single subscription and filters in
-its callback, because GJS's proxy wrapper exposes no argument matching — which
+its callback, because GJS's proxy wrapper exposes no argument matching - which
 costs one wakeup per other subscriber and, for one indicator, is nothing.
 
 ```sh
@@ -104,20 +104,20 @@ Three things, and the order is how little each asks of the user.
 | **An autostart entry** | `/etc/xdg/autostart`, where a package can write one. Login-time, which is what a pinned tile wants: a reading that is already current when the desktop appears. |
 | **By hand** | `climat-daemon`. |
 
-All three are idempotent — whichever loses the race finds the name owned and
-exits 5 — and none of them is a fallback for the others.
+All three are idempotent - whichever loses the race finds the name owned and
+exits 5 - and none of them is a fallback for the others.
 
 **Activation is new, and it reverses a decision this document made.** Finding 1
 below rules out D-Bus activation for the *widget host*, because a bus-activated
 process is spawned by `dbus-daemon` and gnome-shell can therefore never own its
 Wayland client. That was measured and it stands. What went wrong is that the
 same conclusion was written into the daemon, which has no window, no Wayland
-connection and nothing for a shell to adopt — and the cost only appeared once
+connection and nothing for a shell to adopt - and the cost only appeared once
 `--pin` put tiles on compositors where there is no extension to start anything.
 On a Flatpak install on KDE, nothing started the daemon, ever.
 
 That last one is how `tests/fixtures/wire/` is recorded, and it goes through the
-same encoder the bus does — a recorded fixture produced any other way would
+same encoder the bus does - a recorded fixture produced any other way would
 drift from what the daemon actually sends, which is the whole of what makes the
 recording worth having.
 
@@ -132,8 +132,8 @@ recording worth having.
 | Harness | `scripts/shell-probe.sh` + `tests/shell/climat-window-probe@climat.invalid/` |
 
 The probe spawns a target through `Meta.WaylandClient`, waits for a window, and
-reports whether it can be adopted. It runs a **nested** shell — an ordinary
-Wayland client of the live session — rather than `--headless`, which runs as a
+reports whether it can be adopted. It runs a **nested** shell - an ordinary
+Wayland client of the live session - rather than `--headless`, which runs as a
 display server and could take the seat out from under the session you are
 testing from.
 
@@ -146,7 +146,7 @@ testing from.
 ```
 
 Window type 2 is `Meta.WindowType.DOCK`. The window is out of alt-tab
-(`in_tab_list: false`) and still composited (`in_window_actors: true`) — hidden
+(`in_tab_list: false`) and still composited (`in_window_actors: true`) - hidden
 from the window list rather than from the user.
 
 The run carries its own control: DING's window, mapped in the same shell by a
@@ -160,7 +160,7 @@ discriminates; it is not returning true for everything on screen.
 ### 1. D-Bus activation is the wrong mechanism, not a workable one
 
 The question this spike was written to answer was *"can a host-side GNOME
-extension D-Bus-activate a name owned by a Flatpak-installed app?"* It can —
+extension D-Bus-activate a name owned by a Flatpak-installed app?"* It can -
 and it must not.
 
 `MetaWaylandClient` identity is established by an inherited socket fd:
@@ -171,13 +171,13 @@ and no `MetaWaylandClient` ever owns it. `owns_window()` would return false and
 the window could never be adopted, re-typed or hidden.
 
 **The extension must spawn the widget host itself.** D-Bus is how the widget
-host then talks to the daemon — it is not how the widget host gets started.
+host then talks to the daemon - it is not how the widget host gets started.
 
 ### 2. A Flatpak install survives the spawn, which was the real risk
 
 `flatpak run` execs `bwrap`. If bwrap had closed the inherited fd or filtered
 the environment, the DING pattern would have been available to the `.deb` and
-not to the Flatpak — and the Flatpak is the Ubuntu 24.04 story, so that would
+not to the Flatpak - and the Flatpak is the Ubuntu 24.04 story, so that would
 have taken the whole plan with it.
 
 Both halves were measured separately before the full run:
@@ -189,13 +189,13 @@ Both halves were measured separately before the full run:
 And `wl_display_connect()` prefers `WAYLAND_SOCKET` over `WAYLAND_DISPLAY`, so
 the app uses the compositor's fd rather than the socket flatpak bind-mounts.
 
-The host binary case is strictly easier — no bwrap, no env filter — so it is
+The host binary case is strictly easier - no bwrap, no env filter - so it is
 covered a fortiori and was not run separately.
 
 ### 3. `make_dock()` replaces DING's title-parsing hack
 
-DING encodes its flags **in the window title** — `@!B` for bottom, `D` for all
-desktops, `H` to hide from the window list — and re-parses the title on every
+DING encodes its flags **in the window title** - `@!B` for bottom, `D` for all
+desktops, `H` to hide from the window list - and re-parses the title on every
 change. That is not how it would be written today; it predates the API.
 
 mutter 14 exposes exactly six methods on `MetaWaylandClient`:
@@ -206,13 +206,13 @@ hide_from_window_list  make_desktop  make_dock  owns_window  show_in_window_list
 
 `make_dock()` gets `on_all_workspaces` and exclusion from the overview by
 construction, which is most of what the title flags were emulating. Climat's
-extension uses it — `packaging/gnome-shell/climat@JowiAoun.github.io/extension.js`
-— and nothing we send a widget travels through a window title.
+extension uses it - `packaging/gnome-shell/climat@JowiAoun.github.io/extension.js`
+- and nothing we send a widget travels through a window title.
 
 ### 4. `get_sandboxed_app_id()` returns null here, so it cannot identify us
 
 A window from a Flatpak app is normally identifiable by its sandbox id. For a
-process spawned through `MetaWaylandClient` it came back **null** — the client
+process spawned through `MetaWaylandClient` it came back **null** - the client
 connected on the inherited fd, so no security context was attached to it.
 
 This costs nothing, because `owns_window()` is the right question anyway and is
@@ -226,7 +226,7 @@ afternoon finding that out.
 
 **gnome-shell will not load an extension from inside a Flatpak.** Extensions
 live in `~/.local/share/gnome-shell/extensions`, and the app has no
-`--filesystem=home` — deliberately.
+`--filesystem=home` - deliberately.
 
 So the extension is published to extensions.gnome.org on its own, with its own
 `shell-version` compatibility list, and updates on a different clock from the
@@ -236,7 +236,7 @@ annoyances:
 - **the D-Bus interface between them is versioned**, and the daemon keeps
   answering an older field mask than the one it would choose today;
 - **the extension degrades to nothing** when the app is absent. It must not
-  error, block the shell, or leave a broken tile — a user who removes the
+  error, block the shell, or leave a broken tile - a user who removes the
   Flatpak should see the widgets disappear, not a stack trace in their journal.
 
 ---
@@ -254,7 +254,7 @@ inside, and standing one up on a runner would test that stack rather than the
 one users have. It is a manual acceptance test whose answer is recorded above,
 so that nobody has to re-run it to know what it said.
 
-The assertion block is exercised in the ordinary way — against the verdict the
+The assertion block is exercised in the ordinary way - against the verdict the
 real run produced, and against three injected defects (`make_dock` silently
 doing nothing, the window still in alt-tab, the window no longer composited),
 each of which fails it. The script end-to-end has been run in the form
@@ -266,7 +266,7 @@ normalised to booleans.
 ## Five things the tiles corrected once they ran
 
 The mechanism above was measured before anything was built on it. What follows
-was not measurable in advance — it only appears when a widget is on screen —
+was not measurable in advance - it only appears when a widget is on screen -
 and each of the five produced a tile that looked plausible and was wrong.
 
 ### 5. QML builds a second singleton when the type is default-constructible
@@ -288,7 +288,7 @@ however correct it is. The engine gets a fresh object; C++ goes on holding the
 one it made; nothing warns at build time or at run time.
 
 Here that meant the command line parsed correctly, the recorded snapshot loaded
-correctly, and every tile came up empty — because QML's `WidgetOptions` had no
+correctly, and every tile came up empty - because QML's `WidgetOptions` had no
 widget list and QML's `DaemonLink` had never been told about the file. The fix
 is one access specifier: the constructors of `DaemonLink`, `WidgetOptions` and
 `Wx` are private, which is what `app/settings.h` and `app/viewmodels/units.h`
@@ -297,7 +297,7 @@ already did without saying why.
 ### 6. A JSON array is not a JavaScript array
 
 `QJsonObject::toVariantMap()` is what keeps a JSON `null` a null QVariant all
-the way into QML — rule 2 of the wire format survives the trip because of it.
+the way into QML - rule 2 of the wire format survives the trip because of it.
 What it also does is turn every array into a **QVariantList**, which QML hands
 to JavaScript as a sequence wrapper: it has a `length`, it indexes, and
 `Array.isArray()` returns **false** for it.
@@ -306,7 +306,7 @@ A guard written as `Array.isArray(v) ? v : []` therefore turns every series in
 the snapshot into an empty one. The tiles lay out correctly, draw nothing, and
 look exactly like a tile waiting for its first snapshot. `wire.js` copies into a
 real array instead, because the wrapper also has none of `Array`'s methods and
-`.concat()` on one throws inside a binding — where a throw is an expression that
+`.concat()` on one throws inside a binding - where a throw is an expression that
 silently evaluates to `undefined`.
 
 ### 7. A tile has no page behind it
@@ -317,7 +317,7 @@ On a desktop there is not: there is a wallpaper the user chose and this process
 knows nothing about.
 
 Rendered as-is, a dark-mode tile was 7 % white over a photograph with white text
-on it — legible over some wallpapers and invisible over the rest, and
+on it - legible over some wallpapers and invisible over the rest, and
 unfixable from the theme, because the token means what it says. So a tile paints
 `Theme.page.bg` at 92 % and carries its own page. The same argument makes the
 hairline card edge unconditional here rather than a light-mode exception:
@@ -327,7 +327,7 @@ defines a card, which is exactly the premise a wallpaper removes.
 ### 8. A loading skeleton is a claim, and it was making a false one
 
 Every tile drew three grey bars while it had no snapshot. Correct for the
-fraction of a second before the first one arrives — and the same picture,
+fraction of a second before the first one arrives - and the same picture,
 indefinitely, when no snapshot was ever coming.
 
 That state was not rare. It is what a desktop looks like whenever the daemon is
@@ -338,7 +338,7 @@ the journal either: the only warning on that path was for a session bus that
 could not be reached, which is not the case that happens.
 
 `docs/README.md` ranks not fabricating a reading above everything else. This was
-the same lie told with a picture instead of a digit — and worse than a wrong
+the same lie told with a picture instead of a digit - and worse than a wrong
 number, because a wrong number is at least reported. A skeleton is read as *the
 software is working on it*, and that is what sends somebody to look at the
 widget code rather than at the service that is not running.
@@ -353,18 +353,18 @@ sentence that names what is wrong, because "not running", "not answering" and
 | a skeleton | subscribed, or an activation request is in flight |
 | The Climat weather service is not running. | nothing owns the name and the bus could not start one |
 | The Climat weather service is not answering. | something owns the name and did not reply |
-| No place yet. Open Climat and choose one. | a working daemon with an empty place database — a first run |
+| No place yet. Open Climat and choose one. | a working daemon with an empty place database - a first run |
 
 The third one is the interesting one, and it was a second silent failure hiding
 behind the first: a package installs the widgets and the daemon together, so the
 tiles can reach a healthy daemon on a machine where nobody has opened Climat and
 chosen anywhere. `Subscribe` answers with an empty token, which is the daemon
-saying *I have no place by that id* — and that answer had been on the wire,
+saying *I have no place by that id* - and that answer had been on the wire,
 unread, since the day the interface was written.
 
 ### 9. Two lines in `main()` are the address of the database
 
-Once the tiles could say what was wrong, they said it: **no such place** — on a
+Once the tiles could say what was wrong, they said it: **no such place** - on a
 machine with seven saved cities and Toronto as home.
 
 `QStandardPaths::AppDataLocation` is `<organizationName>/<applicationName>`, and
@@ -383,7 +383,7 @@ the weather for a city anybody chose. Both processes were working perfectly.
 
 **Why nothing caught it.** Every test and every screenshot of the tiles runs the
 daemon with `--fixture`, which resolves its place out of a recorded file and
-never opens the places table at all — the mode that exists so CI can never touch
+never opens the places table at all - the mode that exists so CI can never touch
 the network is also the mode that never touches the database. The one path
 nobody automated was the only path a user takes. `tests/tst_widgets.cpp` now
 reads all three `main()` functions and fails when they disagree, which is a
@@ -400,29 +400,29 @@ long as there was nothing else looking at the database.
 Fixing the address exposed the next thing behind it: a daemon that reads the
 places table once, at startup, and a subscription that resolves `home` to a row
 id at the moment it is made. Change your home place in the app and every tile on
-the desktop went on drawing the old city — correctly serving a subscription
+the desktop went on drawing the old city - correctly serving a subscription
 nobody would have made on purpose.
 
 The app cannot be the one to say so: it does not know this daemon exists, and a
 bus call from it would be the first line of it finding out. So the daemon
-watches the database instead — a settle timer behind a `QFileSystemWatcher` on
+watches the database instead - a settle timer behind a `QFileSystemWatcher` on
 the file, the WAL and the directory, with a re-read on every poll as the
 guarantee behind it, since file notifications are best-effort across network
 homes and containers.
 
 When the list really has changed (a fingerprint over the rows, the home flag,
-the coordinates and the current place — not the file's mtime, since this process
+the coordinates and the current place - not the file's mtime, since this process
 writes to that database itself on every fetch):
 
 - every existing subscription is **re-resolved**, so a reader that ignores the
   news still ends up with the right city;
 - `PlacesChanged` goes out on the bus, for the reader that has **no**
-  subscription to re-resolve — which is every widget on a desktop where the
+  subscription to re-resolve - which is every widget on a desktop where the
   tiles went up before anybody chose a place.
 
 Measured on a copy of a real profile: a running `climat-widget`, untouched,
 followed a home change from Toronto to Vancouver and back within one frame of
-the settle interval — including the hourly axis moving to the new city's own
+the settle interval - including the hourly axis moving to the new city's own
 zone.
 
 ---
@@ -433,15 +433,15 @@ zone.
 
 | | |
 |---|---|
-| The adoption mechanism | Measured on GNOME Shell 46, Wayland — the verdict above |
+| The adoption mechanism | Measured on GNOME Shell 46, Wayland - the verdict above |
 | The wire format and its field mask | `tst_wiresnapshot`, 17 assertions, three encoder rules |
-| `climat-daemon` | Exercised end to end on a private session bus: introspection, a masked `GetSnapshot`, `Subscribe` delivering its own token, `Unsubscribe`. Serving a **real** places table — as against a fixture — was measured against a copy of a live profile, which is how finding 9 was found |
+| `climat-daemon` | Exercised end to end on a private session bus: introspection, a masked `GetSnapshot`, `Subscribe` delivering its own token, `Unsubscribe`. Serving a **real** places table - as against a fixture - was measured against a copy of a live profile, which is how finding 9 was found |
 | `climat-widget` and the ten tiles | Rendered against four recorded snapshots in both schemes; `tst_widgets` asserts the catalogue, the dispatch and the module list agree, plus every `Wx` boundary |
 | Starting the daemon | D-Bus activation, run against a private bus with its own service directory: no daemon, no autostart, and `climat-widget` alone brought one up and filled its tiles. The three states a tile can be empty in were each photographed. |
 | The link-line guard | `widget_has_no_engine`, verified by injecting the defect |
 | The GNOME extension | `scripts/check-extension.sh`: both modules parse, the introspection XML matches what it calls, and every `Meta.WaylandClient` method it calls exists on this machine's mutter. Verified by injecting both defects. |
 | Pinning on KDE and wlroots | `scripts/check-layer-shell.sh`, in CI: a real headless wlroots compositor, six assertions, one of which is the same binary with `--pin off` failing them |
-| The reader's units and clock | `app/settings.cpp`, `app/viewmodels/units.cpp` and `app/viewmodels/timeformat.cpp` are compiled into the widget host, so a tile prints °F and a 24-hour clock because the app's own preference says so — one mapping, two processes |
+| The reader's units and clock | `app/settings.cpp`, `app/viewmodels/units.cpp` and `app/viewmodels/timeformat.cpp` are compiled into the widget host, so a tile prints °F and a 24-hour clock because the app's own preference says so - one mapping, two processes |
 
 ```sh
 climat-widget --list
@@ -451,7 +451,7 @@ climat-widget --pin on --anchor bottom-right --margin 16
 ```
 
 In a build tree there is nothing installed for the bus to activate, so the tiles
-will say the weather service is not running — correctly — until one is started
+will say the weather service is not running - correctly - until one is started
 beside them. `scripts/widgets-run.sh` is that:
 
 ```sh
@@ -461,7 +461,7 @@ scripts/widgets-run.sh --columns 2 --widget uv-dial --widget wind-rose
 ```
 
 It starts a daemon, hands everything else to `climat-widget`, and stops the one
-it started — never one that was already there. `--snapshot` is the other way,
+it started - never one that was already there. `--snapshot` is the other way,
 and the one CI uses: it reads a recorded file and never touches the bus at all,
 so the script stays out of the way when it sees that flag.
 
@@ -470,7 +470,7 @@ so the script stays out of the way when it sees that flag.
 A tile shows the units and the clock format the reader chose in the app, because
 both processes read the same INI and share the code that interprets it. A
 *change* follows too: the host watches the file and its directory, waits for
-the write to settle, and re-reads — `Settings::watchForExternalChanges()` in
+the write to settle, and re-reads - `Settings::watchForExternalChanges()` in
 `app/settings.cpp`, the same four pieces the daemon uses to follow the places
 table. Switch to a 24-hour clock in the app and the tiles respell within a
 second.
@@ -480,12 +480,12 @@ and a preference is a fact about the reader rather than about the weather; the
 INI was already the one place both processes agreed on, so it stays the
 channel. One consequence worth knowing: `Settings::reloadFromDisk()` announces a
 change against what its signals *last said*, not against a read taken just
-before it re-syncs — QSettings flushes itself on the event loop after any
+before it re-syncs - QSettings flushes itself on the event loop after any
 write, and that flush re-reads a changed file silently.
 
 ### The first snapshot a cold daemon serves
 
-A daemon that has never fetched — a login, an upgrade, a D-Bus activation —
+A daemon that has never fetched - a login, an upgrade, a D-Bus activation -
 answers its first `GetSnapshot` from the cache, synchronously, before its first
 fetch has returned. It has to be synchronous: the host subscribes and asks in
 the same turn of the event loop, and every future the provider registry hands
@@ -493,7 +493,7 @@ back is settled one turn later. So `SnapshotService::warmFromCache()` asks each
 provider in the chain for its cached bytes directly and takes the first answer
 that is already finished. The snapshot says `cached`, the tile draws it and
 ages it, and the fetch that follows brings it up to date. A machine with no
-cache at all still gets `unknown` and a sentence — the case the old gap
+cache at all still gets `unknown` and a sentence - the case the old gap
 described is now the only case left, and it is the honest one.
 
 ### The second mechanism
@@ -504,7 +504,7 @@ compositor rather than a build option.
 | | GNOME | KDE, Sway, Hyprland, Wayfire, river, labwc |
 |---|---|---|
 | Mechanism | the shell adopts our window | we ask for a layer surface |
-| Protocol | none — mutter exposes no such thing | `zwlr_layer_shell_v1` |
+| Protocol | none - mutter exposes no such thing | `zwlr_layer_shell_v1` |
 | What ships | ~600 lines of GJS, separately, from extensions.gnome.org | nothing extra |
 | Identity | an inherited socket fd, so we must be *spawned* | an ordinary Wayland client |
 | Placement | `make_dock()` + `lower()` + saved geometry | `--anchor`, `--margin`, `--layer` |
@@ -517,7 +517,7 @@ exists, none of the rest of that column is needed.
 **A guard that matters more than it looks.** The availability probe in
 `widgets/layershell.cpp` refuses to run when `WAYLAND_SOCKET` is set, and that
 is not tidiness. `wl_display_connect(nullptr)` reads that variable, takes
-ownership of the descriptor and unsets it — and that descriptor is precisely
+ownership of the descriptor and unsets it - and that descriptor is precisely
 the one the GNOME extension handed us to establish who we are. Probing there
 would consume the handshake, leave Qt with no socket to connect to, and produce
 tiles that never appear under the one shell that spawns us.
@@ -534,7 +534,7 @@ tiles that never appear under the one shell that spawns us.
   cheapest of the three because "a Plasma applet *is* QML"; that is wrong, and
   `packaging/plasma/README.md` has the correction. Every tile reads
   `WidgetFeed`, `DaemonLink`, `Wx` and `Units`, which are C++ types a plasmoid
-  cannot import unless the module is installed as a shared QML plugin — and
+  cannot import unless the module is installed as a shared QML plugin - and
   Plasma 6 ships no generic D-Bus binding for QML, so a pure-QML second
   implementation is not available either. **`--pin` is what KDE gets instead**,
   and it is a better outcome than an applet: the same binary, the same tiles,
@@ -543,16 +543,16 @@ tiles that never appear under the one shell that spawns us.
 
 - **The SNI tray.** Dropped rather than deferred. It was in the plan as the
   cheap validator for the wire schema, and the schema now has two independent
-  readers — a Qt host and a GJS indicator — which is a stronger check than one
+  readers - a Qt host and a GJS indicator - which is a stronger check than one
   more Qt process would have been. As a *feature* it earns less than it costs:
   GNOME hides SNI icons entirely without a third-party extension, KDE gets a
-  better answer from layer-shell, and Windows — where a tray genuinely is the
-  right shape — has no session bus and therefore no daemon to read from.
+  better answer from layer-shell, and Windows - where a tray genuinely is the
+  right shape - has no session bus and therefore no daemon to read from.
 
 - **The Background portal.** A Flatpak cannot write to `/etc/xdg/autostart`, so
   a Flatpak-installed daemon does not autostart. D-Bus activation covers the
-  case that matters — the daemon is running by the time the first tile has
-  anything to ask — and what the portal would add on top is a daemon that is
+  case that matters - the daemon is running by the time the first tile has
+  anything to ask - and what the portal would add on top is a daemon that is
   *already* running when the desktop appears, so the first reading is not
   fetched while somebody watches. That is a permission prompt, and it belongs
   with the notifications work rather than here.

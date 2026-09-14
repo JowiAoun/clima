@@ -10,8 +10,8 @@
 // behind each one.
 //
 // Recorded rather than hand-written because the three defects this file exists
-// to catch are all defects of *belief* — about a unit, about an interval,
-// about what a timestamp means — and a fixture somebody wrote by hand encodes
+// to catch are all defects of *belief* - about a unit, about an interval,
+// about what a timestamp means - and a fixture somebody wrote by hand encodes
 // the same beliefs as the parser and agrees with it happily.
 
 #include "libclimat/domain/hourconvention.h"
@@ -101,7 +101,7 @@ private Q_SLOTS:
 void TestOpenMeteoAdapter::fixturesAreReadable()
 {
     // A guard against the whole file passing because CLIMAT_SOURCE_DIR is wrong
-    // and every fixture is empty — which would make every assertion below
+    // and every fixture is empty - which would make every assertion below
     // compare two default-constructed things and succeed.
     const QStringList names = {
         QStringLiteral("toronto-summer.json"),       QStringLiteral("kampala-precip-spike.json"),
@@ -141,7 +141,7 @@ void TestOpenMeteoAdapter::torontoParsesEveryBlock()
 
     // The response labels its first hour "2026-07-30T00:00" with
     // utc_offset_seconds = -14400. That is 04:00 UTC, and it is the instant
-    // that gets stored — see libclimat/domain/timeaxis.h.
+    // that gets stored - see libclimat/domain/timeaxis.h.
     QCOMPARE(forecast.hourly.first().time, utc(2026, 7, 30, 4));
     QCOMPARE(*forecast.hourly.first().temperature, 17.8);
 
@@ -175,7 +175,7 @@ void TestOpenMeteoAdapter::visibilityArrivesInMetresAndIsStoredInKilometres()
     const Forecast forecast = adapt(QStringLiteral("toronto-summer.json"));
 
     // The recorded first hour is 30100 in the payload. Left alone it would be
-    // plotted against metrics.js's 0–25 km axis, where every hour of every day
+    // plotted against metrics.js's 0-25 km axis, where every hour of every day
     // pins to the top and the Visibility tab becomes a flat line that looks
     // like a working chart of a variable that never changes.
     const Reading visibility = forecast.hourly.first().visibility;
@@ -195,8 +195,8 @@ void TestOpenMeteoAdapter::visibilityArrivesInMetresAndIsStoredInKilometres()
 
 void TestOpenMeteoAdapter::snowfallStaysInCentimetresBesidePrecipitationInMillimetres()
 {
-    // The two units live in the same JSON object — `precipitation` in mm,
-    // `snowfall` in cm — and a reader who assumes one unit for the block is
+    // The two units live in the same JSON object - `precipitation` in mm,
+    // `snowfall` in cm - and a reader who assumes one unit for the block is
     // out by a factor of ten on the field that is not it.
     const Forecast forecast = adapt(QStringLiteral("andes-snow.json"));
 
@@ -221,7 +221,7 @@ void TestOpenMeteoAdapter::nullsBecomeAbsentReadingsRatherThanZero()
 {
     const Forecast forecast = adapt(QStringLiteral("toronto-summer.json"));
 
-    // Index 405 is a null hour in the middle of an otherwise complete series —
+    // Index 405 is a null hour in the middle of an otherwise complete series -
     // the sixteenth day, where the model this blend uses runs out before the
     // others do. As zero it would draw a 0 °C spike into an August chart.
     const HourlyPoint &gap = forecast.hourly.at(405);
@@ -316,7 +316,7 @@ void TestOpenMeteoAdapter::theWmoCodeBecomesAPrecipitationTypeAndAGlyph()
 
 void TestOpenMeteoAdapter::everyCodeInTheRecordedResponsesIsRecognised()
 {
-    // A code with no wording is rendered "—" by the UI, which is honest but
+    // A code with no wording is rendered "-" by the UI, which is honest but
     // useless. Every code the live service has actually been observed emitting
     // must have a phrase; this is the test that goes red when Open-Meteo starts
     // sending one we have not seen.
@@ -348,12 +348,12 @@ void TestOpenMeteoAdapter::precipitationIsShiftedOntoTheHourItFallsIn()
 {
     // Kampala, recorded because it had the one thing a search of a dozen
     // cities turned up: a single wet hour with dry hours on both sides. An
-    // isolated spike is what makes an off-by-one unambiguous — inside a long
+    // isolated spike is what makes an off-by-one unambiguous - inside a long
     // band, a shift of one hour looks like a band of the same length.
     const Forecast raw = adapt(QStringLiteral("kampala-precip-spike.json"));
 
     // What the provider sent. `precipitation[10]` is stamped 10:00 local and
-    // it is the sum over the hour PRECEDING that stamp — so the rain fell
+    // it is the sum over the hour PRECEDING that stamp - so the rain fell
     // between 09:00 and 10:00.
     QCOMPARE(raw.hourly.size(), 48);
     QCOMPARE(*raw.hourly.at(9).precipitation, 0.00);
@@ -370,7 +370,7 @@ void TestOpenMeteoAdapter::precipitationIsShiftedOntoTheHourItFallsIn()
 
     // precip.js draws the wash for hour i across [i, i+1). So the band starts
     // at the timestamp of the slot that now holds the rain, and that timestamp
-    // is 09:00 — the hour a reader deciding whether to go out is asking about.
+    // is 09:00 - the hour a reader deciding whether to go out is asking about.
     QCOMPARE(localHour(chart.at(9).time, raw.timeZone), 9);
     QCOMPARE(chart.at(9).time, utc(2026, 7, 31, 6));   // 09:00 EAT, UTC+3
 
@@ -445,7 +445,7 @@ void TestOpenMeteoAdapter::openMeteoLabelsADstDayWithTwentyFourHours()
     //
     // Both recorded responses cross a real DST transition in Toronto. Both
     // carry utc_offset_seconds = -14400 for every row, and both label their
-    // transition day with exactly 24 hours — 01:00 once on the day it happens
+    // transition day with exactly 24 hours - 01:00 once on the day it happens
     // twice, and 02:00 present on the day it does not exist.
     // Counted out of `hourly.time` itself rather than out of the bytes: the
     // daily block stamps sunrise and sunset with the same date prefix, and a
@@ -467,7 +467,7 @@ void TestOpenMeteoAdapter::openMeteoLabelsADstDayWithTwentyFourHours()
                                  QStringLiteral("toronto-dst-spring.json") }) {
         const QJsonObject root = QJsonDocument::fromJson(fixture(name)).object();
 
-        // One offset, EDT, applied to every row — including the rows that are
+        // One offset, EDT, applied to every row - including the rows that are
         // in EST. That single number is the whole defect.
         QCOMPARE(root.value(QLatin1String("utc_offset_seconds")).toInt(), -14400);
     }
@@ -553,7 +553,7 @@ void TestOpenMeteoAdapter::sunTimesSurviveTheZoneCorrection()
     // And the correction the fourth trap needs. On 2025-11-02 the payload says
     // sunrise is at 07:55; Toronto was on EST that morning and the sun rose at
     // 06:55. Read as an instant and re-expressed in the real zone, we get the
-    // right one — which is the difference between a Sun card that is right and
+    // right one - which is the difference between a Sun card that is right and
     // one that is an hour out for four months of the year.
     const Forecast fall = adapt(QStringLiteral("toronto-dst-fall.json"));
     const DailyPoint &transition = fall.daily.at(1);
@@ -602,7 +602,7 @@ void TestOpenMeteoAdapter::midnightSunIsAFullArcRatherThanAnEmptyOne()
 void TestOpenMeteoAdapter::aModelWithoutUvOrVisibilityLeavesThoseColumnsEmpty()
 {
     // The same endpoint, the same parameters, `models=ecmwf_ifs025`. IFS does
-    // not carry UV or visibility, so both columns are null for all 72 hours —
+    // not carry UV or visibility, so both columns are null for all 72 hours -
     // which is a different fact from "no value this hour", and it is the fact
     // that decides whether a metric tab is drawn at all.
     const Forecast forecast = adapt(QStringLiteral("toronto-ecmwf-gaps.json"));

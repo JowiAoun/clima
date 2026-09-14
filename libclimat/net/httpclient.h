@@ -19,7 +19,7 @@
 // theoretical: api.weather.gov answers 403 to an empty User-Agent today,
 // verified against the live service. The string is built from CMake variables
 // in libclimat/climatidentity.h so the version in it cannot drift from the
-// release, and HttpRequest deliberately has no way to override it — a
+// release, and HttpRequest deliberately has no way to override it - a
 // per-request header map that could set User-Agent is a per-request header map
 // that eventually does.
 //
@@ -37,7 +37,7 @@
 // fixed.
 //
 // The routing layer above is expected to fall through to the next provider in
-// the chain — docs/04-architecture.md §4.4 — so a disabled provider degrades
+// the chain - docs/04-architecture.md §4.4 - so a disabled provider degrades
 // the app rather than breaking it.
 //
 // ============================================================================
@@ -46,7 +46,7 @@
 // Coalescing, keyed by RequestKey. Three view models asking for the same
 // forecast during a warm start make one request and share one answer. A map
 // drag makes one request, because the coordinate is rounded to four decimals
-// before it is hashed and before it is sent — see libclimat/net/requestkey.h,
+// before it is hashed and before it is sent - see libclimat/net/requestkey.h,
 // which is where that is done and why.
 //
 // The mechanism is QFuture: every caller for a key in flight gets a copy of
@@ -57,7 +57,7 @@
 //
 // If-None-Match and If-Modified-Since go out whenever a validator is on file,
 // and a 304 comes back as a *successful* HttpResponse with `notModified` set
-// rather than as an error — the data is confirmed current, which is a success
+// rather than as an error - the data is confirmed current, which is a success
 // however few bytes it took. MET Norway's terms require this. A response's
 // Expires header is honoured when it is later than our own TTL, on the grounds
 // that a provider knows more about the shelf life of its own data than §4.5's
@@ -123,8 +123,8 @@ public:
     ~HttpClient() override;
 
     // The exact bytes sent as User-Agent on every request. Public because the
-    // About → Data sources screen should be able to show it — a user who has
-    // been rate-limited deserves to see what we told the server we were — and
+    // About → Data sources screen should be able to show it - a user who has
+    // been rate-limited deserves to see what we told the server we were - and
     // because it is the one string a test can assert without a network.
     [[nodiscard]] static QByteArray userAgent();
 
@@ -144,7 +144,7 @@ public:
     // The request, or the reason there isn't one. Never a partial success:
     // docs/04-architecture.md §4.4.
     //
-    // The returned future is already finished when the provider is disabled —
+    // The returned future is already finished when the provider is disabled -
     // no round trip, no event loop turn required before the caller can read it.
     QFuture<Result<HttpResponse>> send(const HttpRequest &request);
 
@@ -152,7 +152,7 @@ public:
     [[nodiscard]] QStringList disabledProviders() const;
 
     // Requests currently on the wire or waiting out a backoff. One per key,
-    // however many callers are waiting on it — which is what makes this the
+    // however many callers are waiting on it - which is what makes this the
     // number a coalescing test asserts.
     [[nodiscard]] int inFlightCount() const;
 

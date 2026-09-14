@@ -8,7 +8,7 @@
 //     climat-widget --snapshot tests/fixtures/wire/toronto.json --grab tiles.png
 //
 // The same shape as app/appoptions.h and for the same reason: the command line
-// is parsed once, in C++, into a singleton QML binds to — rather than scraped
+// is parsed once, in C++, into a singleton QML binds to - rather than scraped
 // out of `Qt.application.arguments` inside a .qml file, which is what
 // Main.qml used to do in 180 lines.
 //
@@ -51,7 +51,7 @@ class WidgetOptions : public QObject
 
     // A contact sheet rather than one frame. The app has the same three flags
     // and they are here for a reason a tile makes sharper: the states worth
-    // looking at are the ones that arrive over TIME — a first snapshot landing,
+    // looking at are the ones that arrive over TIME - a first snapshot landing,
     // and a daemon going away under a tile that has to keep drawing. Neither is
     // visible in a single shutter.
     Q_PROPERTY(QString film READ film CONSTANT)
@@ -68,7 +68,7 @@ public:
     // What `--pin` was asked for. Not a bool, because the three answers are
     // genuinely different: `Off` never asks the compositor, `Auto` asks and
     // accepts an ordinary window if it cannot have one, and `On` refuses to
-    // start rather than put an unpinned window on somebody's desktop — which is
+    // start rather than put an unpinned window on somebody's desktop - which is
     // what an autostart entry needs, since nobody is watching it start.
     enum class Pin { Auto, On, Off };
 
@@ -107,7 +107,7 @@ private:
     // Private, and that is load-bearing rather than tidy: a public
     // `WidgetOptions(QObject *parent = nullptr)` makes this type default-constructible,
     // and Qt's singletonConstructionMode() checks default-constructible BEFORE
-    // it looks for create() — so QML would build a second instance and never
+    // it looks for create() - so QML would build a second instance and never
     // call the factory. widgets/daemonlink.h has the full argument and what it
     // looked like when it happened.
     explicit WidgetOptions(QObject *parent = nullptr);

@@ -21,7 +21,7 @@ Item {
     property string metricId: "overview"
     property bool listView: false
 
-    // Ambient motion — currently the precipitation field, which is the only
+    // Ambient motion - currently the precipitation field, which is the only
     // thing here that moves when nothing has changed. Off under `--grab`, so a
     // headless frame is the same frame every time.
     property bool animated: true
@@ -43,12 +43,12 @@ Item {
     readonly property bool supportsFeelsLike: metric.id === "overview" && Data.hasApparent
 
     // ---- scales and metrics ---------------------------------------------
-    // The NARROWEST a column may be, not the width one will be — see
+    // The NARROWEST a column may be, not the width one will be - see
     // `columnWidth` below, which is what the chart is actually drawn on.
     //
     // Settable, not readonly: the mobile shell runs this same card at 362 px,
     // where a day cannot be fitted legibly at all and the floor is what decides
-    // how much of it is on screen. It is still the token by default — a caller
+    // how much of it is on screen. It is still the token by default - a caller
     // overriding it is stating a width the token cannot know about, not
     // disagreeing with it.
     property real hourWidth: Theme.metric.minHourWidth
@@ -69,8 +69,8 @@ Item {
     //
     // So the column width is the plot's width divided among the day's hours,
     // and `hourWidth` becomes the floor under it rather than the answer. The
-    // floor is what a phone hits — its plot is 268 px, which puts 24 hours at
-    // 11.6 px a column, narrower than the 27 px glyphs drawn on them — and
+    // floor is what a phone hits - its plot is 268 px, which puts 24 hours at
+    // 11.6 px a column, narrower than the 27 px glyphs drawn on them - and
     // there the chart keeps scrolling, with the arrows still meaning days. That
     // is the honest split: the desktop shows the whole day because it fits, and
     // the phone shows as much of it as is legible.
@@ -91,7 +91,7 @@ Item {
     readonly property real contentW: (Data.count - 1) * columnWidth
     readonly property var labelIndices: Data.labelIndices
     // Where the present falls on the plot. `Data.nowIndex` is an offset that
-    // may sit outside the window — see forecastdata.h — so this can be negative
+    // may sit outside the window - see forecastdata.h - so this can be negative
     // for a day still ahead and past `contentW` for one already gone, and both
     // are the answer rather than a case to guard. Clamped only because the two
     // things that read it are a width and an x, and a negative width is a Qt
@@ -111,7 +111,7 @@ Item {
 
     // The card takes whatever height it is given and hands the remainder to the
     // plot. That works when it fills a window and does nothing at all in a
-    // scrolling column, where an item has to say how tall it wants to be — so
+    // scrolling column, where an item has to say how tall it wants to be - so
     // this is the same relation solved the other way round: the height at which
     // the plot comes out at its preferred size.
     //
@@ -120,7 +120,7 @@ Item {
     //
     // Settable for the same reason `hourWidth` is. A 252 px plot plus its
     // header band and strip is 398 px of card, which on a 390x844 phone is
-    // half the screen for one of five things on it — and the plot is the part
+    // half the screen for one of five things on it - and the plot is the part
     // that can afford to give: the header band and the strip are fixed-height
     // rows that would become illegible rather than merely shorter.
     property real preferredPlotHeight: Theme.metric.plotHeight
@@ -137,8 +137,8 @@ Item {
     // This is a genuine tween and not a crossfade: the points themselves are
     // interpolated and the path is regenerated from them, so every intermediate
     // frame is a curve the renderer could have been given as data. `view`,
-    // because it is one view of today becoming another — the same hours, read a
-    // second way — and deliberately the same token as the metric handover's
+    // because it is one view of today becoming another - the same hours, read a
+    // second way - and deliberately the same token as the metric handover's
     // incoming half, which is the other thing on this card that replaces the
     // series without moving the frame around it. It was 430 ms, one of the eight
     // strays §10.6 was written to end.
@@ -146,7 +146,7 @@ Item {
     // every other metric that declares an overlay draws it always.
     //
     // It used to be a *blend*, morphing the filled curve from temperature to
-    // apparent — which showed one of the two readings at a time and so could
+    // apparent - which showed one of the two readings at a time and so could
     // not show the thing the toggle is for. 30° means something next to the 27°
     // it is being compared with, and a chart that replaces one with the other
     // has drawn neither comparison.
@@ -170,13 +170,13 @@ Item {
     // different units. Morphing one curve into the other would claim they are
     // the same measurement changing; sliding the axis from 40 °C to 40 km/h
     // would put a tick label through numbers that mean nothing on either scale.
-    // And area → bars cannot be tweened at all — §10.7 makes bars and curves
+    // And area → bars cannot be tweened at all - §10.7 makes bars and curves
     // different *claims about the data*, so an in-between shape would be a
     // claim we do not have.
     //
     // What every metric on this card does share is the axis baseline. So the
     // outgoing series folds onto it, everything that names the metric changes
-    // at that instant — when the plot is empty and nothing can be misread — and
+    // at that instant - when the plot is empty and nothing can be misread - and
     // the incoming series grows back off it. That is §10.6's own description of
     // honest motion, "a bar growing off its baseline", applied to a switch
     // rather than to an arrival, and it is the one gesture that serves a curve
@@ -194,8 +194,8 @@ Item {
     // 1 = the series at full extent, 0 = flat on the baseline.
     property real seriesExtent: 1
 
-    // Set once the object is built, so properties handed in at construction —
-    // the gallery builds specimens with `metricId` already set — configure the
+    // Set once the object is built, so properties handed in at construction -
+    // the gallery builds specimens with `metricId` already set - configure the
     // chart instead of animating it.
     property bool ready: false
 
@@ -244,7 +244,7 @@ Item {
     // ---- canonical in, display out ----------------------------------------
     // `Data` holds one series per metric in the engine's own units, and the
     // axis above is in the reader's. Everything that reaches a pixel goes
-    // through Metrics, which is the only thing here that knows which is which —
+    // through Metrics, which is the only thing here that knows which is which -
     // a curve plotted in millimetres against an axis in inches draws perfectly
     // and is off by a factor of twenty-five.
     function seriesValue(i) {
@@ -260,7 +260,7 @@ Item {
     // Everything the axis has to hold, which is not the same as the series. The
     // wind chart draws a gust line over its mean and gusts are above the mean by
     // definition, so an axis fitted to the series alone drew them off the top of
-    // the box — the same defect as a fixed axis clipping, arrived at from the
+    // the box - the same defect as a fixed axis clipping, arrived at from the
     // other direction.
     // Counted whether or not the line is currently drawn: the axis is the frame
     // the reading is read against, and a frame that jumped every time the reader
@@ -294,8 +294,8 @@ Item {
     }
 
     // The wash and the field, classified where the thresholds live. `Data`
-    // supplies the millimetres — canonical, always, because these bands are
-    // statements about millimetres — and the type per hour, which comes off the
+    // supplies the millimetres - canonical, always, because these bands are
+    // statements about millimetres - and the type per hour, which comes off the
     // provider's WMO code and is the only way to know that an hour is thunder
     // rather than heavy rain.
     readonly property var precipCells: Precip.cellsTyped(Data.precipMm, Data.precipTypes)
@@ -304,7 +304,7 @@ Item {
     readonly property var overlayPoints: buildOverlay(plotHeight, columnWidth, metric)
 
     // How completely the raised day card above is standing on this card's top
-    // corners, 0 to 1 — see DayStrip, which computes it and is the only caller.
+    // corners, 0 to 1 - see DayStrip, which computes it and is the only caller.
     // Zero for the mobile shell and the gallery, where nothing merges into this
     // card and both corners are simply corners.
     property real tabCoverLeft: 0
@@ -317,18 +317,18 @@ Item {
     //
     // And a corner with a tab standing on it is not a corner. The first and last
     // day cards reach the ends of the strip, where their bottom edge is straight
-    // and this card's is curving away from it — 14 px of page background showing
+    // and this card's is curving away from it - 14 px of page background showing
     // through a junction whose whole job is to have no seam in it. The fillets
     // cannot close that one: they fill the reflex corner *beside* a tab, and
     // beside a tab at the end of the strip there is no panel to fill into.
     //
     // A fraction rather than a switch, so the corner flattens on the same beat
-    // as the card's own bottom corners — both are `cardRadius * (1 - landed)`,
+    // as the card's own bottom corners - both are `cardRadius * (1 - landed)`,
     // and that is not a coincidence, it is the same edge.
     //
     // `undefined` where nothing covers the corner, and that is not a stylistic
-    // choice. Assigning a per-corner radius AT ALL — even the same number
-    // `radius` already holds — moves the rectangle onto Qt's individual-corner
+    // choice. Assigning a per-corner radius AT ALL - even the same number
+    // `radius` already holds - moves the rectangle onto Qt's individual-corner
     // scene-graph path, which antialiases the arc one level differently. Bound
     // unconditionally it changed four pixels in eleven recorded images that have
     // no day strip over them at all. A binding that evaluates to `undefined`
@@ -367,7 +367,7 @@ Item {
     //
     // Toggling `visible` on the chart panel corrupted clipping elsewhere in the
     // scene: the section heading in the tab bar stopped painting, and list rows
-    // escaped the ListView's clip. Both are the same underlying problem — the
+    // escaped the ListView's clip. Both are the same underlying problem - the
     // panel contains a clipped Flickable, and hiding that subtree leaves the clip
     // state wrong for other nodes. A Loader avoids it entirely, and not keeping an
     // invisible chart alive is the better shape anyway.
@@ -385,7 +385,7 @@ Item {
         // active: true, not `!root.listView`.
         //
         // Removing the chart subtree from the scene makes unrelated Text items
-        // elsewhere in the window stop painting — the section heading in the tab
+        // elsewhere in the window stop painting - the section heading in the tab
         // bar and the "Chart" switch label both vanish. Those items report as
         // perfectly healthy at runtime (right text, size, colour, visible, opacity
         // 1), so the scene is correct and only the render is wrong. Ruled out:
@@ -394,7 +394,7 @@ Item {
         // alive underneath is the one thing that reliably fixes it.
         //
         // Cost is a chart that stays built while the list is shown. Revisit when
-        // the C++ port lands (decision D3) — this smells like a Qt scene-graph bug
+        // the C++ port lands (decision D3) - this smells like a Qt scene-graph bug
         // that a QSGGeometryNode implementation may simply not trip.
         // …but staying loaded is not the same as staying *visible*, and that
         // distinction went missing. While every surface was an opaque navy fill
@@ -463,7 +463,7 @@ Item {
                 // `clip` bounds the rectangles and the text; it does not bound
                 // Qt Quick Shapes (docs/10-design-system.md §10.8), and the hour
                 // glyphs are Shapes. Off the right of a 1340-wide window the
-                // escapees land outside the window and are never seen — the
+                // escapees land outside the window and are never seen - the
                 // component gallery, which stages this panel at 1000, is where
                 // they showed up: cloud and sun glyphs floating in open page
                 // 300px past the panel edge.
@@ -479,13 +479,13 @@ Item {
                 // On anything wide enough there is nothing to decide: the day
                 // is drawn to the plot's exact width, contentWidth equals width,
                 // and every position below clamps to 0. This is the phone's
-                // path — 24 hours at its own 40 px floor is 920 px of content
-                // in a 268 px view — and there the honest place to open is the
+                // path - 24 hours at its own 40 px floor is 920 px of content
+                // in a 268 px view - and there the honest place to open is the
                 // hour the reader is in, with a little of the day behind it.
                 //
                 // Observed hours are kept on screen rather than none. The past
-                // treatment is a reading — those hours happened, and the veil
-                // and the hatch are what say so — and a chart that opens
+                // treatment is a reading - those hours happened, and the veil
+                // and the hatch are what say so - and a chart that opens
                 // exactly on the now line never shows it at all.
                 //
                 // ---- how many, and why it is odd ------------------------
@@ -499,12 +499,12 @@ Item {
                 // the left edge has to fall exactly one column before a label
                 // or the card opens with half a glyph and "AM" sliced off by
                 // the clip. Labels run every `labelStep` from "Now" where the
-                // window has one — so the count of observed hours has to be
+                // window has one - so the count of observed hours has to be
                 // ODD, and the choice is between one and three. Two is not
                 // available, whatever a screen's width would prefer.
                 //
                 // Three at a desktop's twenty-three visible columns is an
-                // eighth of the view — and moot there, because the desktop
+                // eighth of the view - and moot there, because the desktop
                 // fits the day and never scrolls. Three at a phone's six is
                 // half of it, which is the thing that made this worth having.
                 readonly property int visibleColumns:
@@ -515,8 +515,8 @@ Item {
                 //
                 // Assigned rather than bound: this is where the chart opens,
                 // not where it has to stay. What decides "still where it opens"
-                // is whether the reader has moved it — not how many times it
-                // has been positioned — so the guard is `touched` and every
+                // is whether the reader has moved it - not how many times it
+                // has been positioned - so the guard is `touched` and every
                 // input that scrolls this card sets it.
                 //
                 // That is what `Component.onCompleted` alone could not do, and
@@ -524,7 +524,7 @@ Item {
                 //
                 // A COLD START HAS NO DATA. main.cpp puts AppEngine's
                 // configure() ahead of the QML engine so a cache hit is
-                // published before the first frame, and a live fetch is not —
+                // published before the first frame, and a live fetch is not -
                 // appengine.cpp says so where it pumps an already-finished
                 // future. So on a real first run this positioned against an
                 // empty window, where contentWidth is 0 and everything clamps
@@ -534,7 +534,7 @@ Item {
                 //
                 // AND LAYOUT ARRIVES IN STAGES. A card in a tablet's grid is
                 // handed a narrow width and then its real one, and
-                // `openPastHours` divides by that width — so a position
+                // `openPastHours` divides by that width - so a position
                 // computed at the first is a position computed for a phone.
                 property bool touched: false
 
@@ -553,7 +553,7 @@ Item {
 
                 // On a day that is not today the clamp does the work: `nowIndex`
                 // is negative for a day ahead, so this asks for a negative
-                // contentX and gets 0 — midnight, which is where a chart of a
+                // contentX and gets 0 - midnight, which is where a chart of a
                 // date should open. For a day behind it asks for more than
                 // there is and gets the end of the day.
                 //
@@ -593,7 +593,7 @@ Item {
                                 // A binding subscribes to the properties it
                                 // reads and a method call is not one, and this
                                 // Repeater's model is the same list on two
-                                // different days — so the call was evaluated
+                                // different days - so the call was evaluated
                                 // once and the band kept saying "Now" over a
                                 // day that had already happened. See
                                 // forecastdata.h.
@@ -667,7 +667,7 @@ Item {
                         // Precipitation, under the series: the hours it falls
                         // in, washed. Under and not over, because the series'
                         // own colour is a value and a wash laid over it would
-                        // be stating a different one — see PrecipBands.qml.
+                        // be stating a different one - see PrecipBands.qml.
                         PrecipBands {
                             anchors.fill: parent
                             cells: root.precipCells
@@ -726,7 +726,7 @@ Item {
                         // yet puts the present at or before column zero and this
                         // comes out empty, and a day that is over puts it past
                         // the last column and this covers the plot. Which is
-                        // exactly right — every hour of Tuesday is observed.
+                        // exactly right - every hour of Tuesday is observed.
                         Item {
                             width: root.nowX
                             height: plot.height
@@ -741,7 +741,7 @@ Item {
                             }
                         }
 
-                        // now — drawn only where there is a now to draw. On any
+                        // now - drawn only where there is a now to draw. On any
                         // other day the line would sit on the plot's edge and
                         // claim midnight, or the last hour, was this moment.
                         Rectangle {
@@ -910,7 +910,7 @@ Item {
             // "further along this day" left for an arrow to mean, and the thing
             // a reader wants next from a chart of Wednesday is Thursday.
             //
-            // They write `Data`, which the day strip above reads back — so
+            // They write `Data`, which the day strip above reads back - so
             // paging here slides the strip's selection with it, and the strip's
             // own pagers and these are two controls over one number rather than
             // two ideas of which day is on screen.
@@ -955,7 +955,7 @@ Item {
                 visible: !root.listView
                 // The swatch is the metric's colour identity, and a fill is what
                 // `tint` is for. It carries the ramp across the handover so the
-                // legend does not blink to a new colour on its own — the stops
+                // legend does not blink to a new colour on its own - the stops
                 // are bound through animatable properties because a Behavior
                 // cannot be attached to a GradientStop.
                 Rectangle {
@@ -1017,8 +1017,8 @@ Item {
 
             // Bigger than the 15 px it was, because the thing it is a picture
             // OF is a fraction of a disc. At 15 px a moon 85% lit has a
-            // terminator two pixels wide and draws as a plain gold circle —
-            // the same picture a full moon draws — so the legend showed one
+            // terminator two pixels wide and draws as a plain gold circle -
+            // the same picture a full moon draws - so the legend showed one
             // moon while the words beside it and the Moon phase card below
             // said another. It is the same component the card uses; the only
             // thing that was wrong with it here was that it was too small to

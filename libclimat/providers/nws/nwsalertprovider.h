@@ -7,8 +7,8 @@
 //
 // No key, no account. The service resolves the point to its own UGC zones
 // server-side, which is the finding that deleted a subsystem: the alternative
-// design ships a zone shapefile, 25–100 MB of it, and does the point-in-polygon
-// locally. `?point=` makes that unnecessary and it is not an approximation —
+// design ships a zone shapefile, 25-100 MB of it, and does the point-in-polygon
+// locally. `?point=` makes that unnecessary and it is not an approximation -
 // the zones are the authority and they are being asked directly.
 //
 // ============================================================================
@@ -22,14 +22,14 @@
 //
 // That is not a failure and it must not reach the user as one. It is the
 // service saying the question was not for them, which is exactly what
-// ErrorKind::Unsupported means — and Unsupported is the one kind the alert
+// ErrorKind::Unsupported means - and Unsupported is the one kind the alert
 // fan-out in registry.cpp does not count against AlertSet::complete. Reported
 // as anything else, a user in Halifax gets "alerts unavailable" forever,
 // because Nova Scotia is inside the loose Canadian box and the loose Canadian
 // box overlaps Maine.
 //
-// The cost of mapping 400 to Unsupported is that a 400 caused by OUR bug — a
-// malformed parameter — would be swallowed the same way. Two things bound it:
+// The cost of mapping 400 to Unsupported is that a 400 caused by OUR bug - a
+// malformed parameter - would be swallowed the same way. Two things bound it:
 // the request has exactly one parameter and it is built by composeUrl() from a
 // validated coordinate, and the message from HttpClient now carries the
 // service's own `detail` string, so the log says which of the two happened.
@@ -43,7 +43,7 @@
 // the message id therefore means a dismissed alert un-dismisses itself the next
 // time the office touches it, which is often.
 //
-// The obvious alternative — key on (event, sender, area) — is disproved by
+// The obvious alternative - key on (event, sender, area) - is disproved by
 // tests/fixtures/alerts/nws/seattle-four.json, which contains TWO Air Quality
 // Alerts with:
 //
@@ -53,11 +53,11 @@
 //
 // differing only in `effective` and in id, referencing nothing and each other
 // not at all. They are two separate hazards. A key built from what they share
-// merges them, and merging them hides one — which is the failure mode this
+// merges them, and merging them hides one - which is the failure mode this
 // whole workflow exists to prevent, arrived at through tidiness.
 //
 // So identity is the set {own id} ∪ {referenced ids}, and two messages are the
-// same hazard when those sets intersect — libclimat/domain/alert.h. An update
+// same hazard when those sets intersect - libclimat/domain/alert.h. An update
 // matches its predecessor through the reference it carries; two unrelated
 // alerts share nothing and stay two.
 //
@@ -71,7 +71,7 @@
 //   falls back to `expires` for exactly this, and that fallback is why it is a
 //   function rather than a field.
 //
-//   Six of the nine recorded alerts have severity "Unknown" — every Air Quality
+//   Six of the nine recorded alerts have severity "Unknown" - every Air Quality
 //   Alert does. Mapped to AlertSeverity::Unknown, which sorts BELOW Minor and
 //   still displays. Mapping it to Minor would be inventing a grade the issuer
 //   declined to give; dropping it would hide a real alert.
@@ -109,7 +109,7 @@ public:
 
     QFuture<Result<AlertSet>> fetchAlerts(const AlertRequest &request) override;
 
-    // English only — api.weather.gov serves `language: en-US` and has no
+    // English only - api.weather.gov serves `language: en-US` and has no
     // bilingual field pairs, so unlike ECCC's there is no language parameter to
     // take. `fetchedAt` is passed in so a fixture parsed twice is identical.
     static Result<AlertSet> parse(const QByteArray &body, const QDateTime &fetchedAt);

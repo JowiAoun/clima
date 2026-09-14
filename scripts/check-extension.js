@@ -26,7 +26,7 @@ function check(name, ok, detail) {
     if (ok) {
         print(`${name}: ok`);
     } else {
-        printerr(`${name}: FAILED — ${detail}`);
+        printerr(`${name}: FAILED - ${detail}`);
         failures += 1;
     }
 }
@@ -70,7 +70,7 @@ if (xmlMatch) {
 
         // Every method the extension calls, against what the XML declares. The
         // GJS proxy wrapper generates <Name>Remote() from the XML, so a method
-        // the extension calls but the XML omits is a TypeError at click time —
+        // the extension calls but the XML omits is a TypeError at click time -
         // which for `RequestRefreshRemote` means a menu item that throws in the
         // journal and does nothing on screen.
         const declared = new Set((iface ? iface.methods : []).map(m => m.name));
@@ -79,7 +79,7 @@ if (xmlMatch) {
                   'the extension calls it and the XML does not describe it');
             check(`extension: calls ${method}Remote`,
                   source.includes(`${method}Remote(`),
-                  'declared in the XML and never used — dead interface surface');
+                  'declared in the XML and never used - dead interface surface');
         }
 
         const signals = new Set((iface ? iface.signals : []).map(s => s.name));
@@ -92,7 +92,7 @@ if (xmlMatch) {
 //
 // The check that would have saved an afternoon. The spike this extension grew
 // out of called `query_window_belongs_to`, which is DING's own wrapper name and
-// not a method on MetaWaylandClient at all — a TypeError an hour into a nested
+// not a method on MetaWaylandClient at all - a TypeError an hour into a nested
 // shell run. Every name below is one this extension calls.
 
 let Meta = null;
@@ -113,12 +113,12 @@ if (Meta) {
               'the extension calls it and this mutter does not have it');
 
         // `_client.<method>(` and not `<method>(`. The looser search passed on
-        // the word appearing in a comment — and the comments in extension.js
+        // the word appearing in a comment - and the comments in extension.js
         // name every one of these methods while explaining them, so renaming a
         // call site left the check green. Anchoring on the receiver is what
         // makes this an assertion about code.
         check(`extension: calls ${method}`, source.includes(`_client.${method}(`),
-              'checked for here and not called — either this list has gone stale '
+              'checked for here and not called - either this list has gone stale '
               + 'or a call site was renamed');
     }
 

@@ -10,7 +10,7 @@
 // The reference has no opaque cards at all: the page is one vertical gradient
 // and every surface is a thin white wash over it, so a card's actual colour is
 // whatever the gradient is doing behind it at that scroll depth. Flat fills
-// cannot reproduce that — they are one colour everywhere, and the page stops
+// cannot reproduce that - they are one colour everywhere, and the page stops
 // reading as a single lit surface with things resting on it.
 //
 // Alpha ladder, matching the reference's three levels: 0.05 recedes, 0.07 is
@@ -29,7 +29,7 @@ var surfaceAlpha = {
 };
 
 var color = {
-    // Page gradient stops. Declared here, applied in Main.qml — QML cannot
+    // Page gradient stops. Declared here, applied in Main.qml - QML cannot
     // generate GradientStop elements from a Repeater, so they are written out.
     pageStop0:     "#203580",   // 0.00
     pageStop1:     "#443e73",   // 0.06
@@ -52,7 +52,7 @@ var color = {
                                   // one takes cardBg and merges with the panel
 
     // Ink for text sitting *on* the accent, which is a light yellow. This was
-    // previously cardBg — fine while cardBg was an opaque dark navy, invisible
+    // previously cardBg - fine while cardBg was an opaque dark navy, invisible
     // the moment it became a white wash.
     onAccent:      "#141d33",
 
@@ -72,7 +72,7 @@ var color = {
     // mean different things and will not always want the same alpha.
     forecastDim:   "#59ffffff",
 
-    // The unfilled part of a gauge — a dial track, a bar's empty remainder. It
+    // The unfilled part of a gauge - a dial track, a bar's empty remainder. It
     // has to be present enough that the filled part reads as a fraction of
     // something, which gridLine at 0.11 is not.
     trackLine:     "#2effffff",
@@ -95,7 +95,7 @@ var color = {
     daySelectedBorder:  "#33ffffff",
 
     // Pager buttons float over the chart, so they stay more opaque than a
-    // surface — but still tinted rather than painted, or they punch a flat
+    // surface - but still tinted rather than painted, or they punch a flat
     // hole in the gradient.
     pagerBg:       "#99141d33",
     pagerBgHover:  "#b3141d33",
@@ -112,7 +112,7 @@ var color = {
     cloudBottom:   "#c1cddf",
     rainDrop:      "#7fb6e8",
 
-    // Clouds are drawn white, which vanishes on the pale day badge — this variant
+    // Clouds are drawn white, which vanishes on the pale day badge - this variant
     // keeps them readable there without changing them everywhere else.
     cloudTopOnLight:    "#fbfdff",
     cloudBottomOnLight: "#9db0cc",
@@ -143,7 +143,7 @@ var color = {
 
     // A status that is a verdict rather than a number: pollen bands, the
     // activity list's good/caution/poor dots. Three, because a fourth level is
-    // a scale and a scale wants a ramp — see §10.5.
+    // a scale and a scale wants a ramp - see §10.5.
     statusGood:    "#4ec98a",
     statusCaution: "#e8c93f",
     statusPoor:    "#f0654f",
@@ -162,7 +162,7 @@ var color = {
 // Opaque colours with the alpha applied at use, unlike everything above, and
 // for a reason: six types times three intensities is eighteen washes, and
 // eighteen hand-written #AARRGGBB literals is a table nobody can check. Type
-// chooses the hue, intensity chooses the alpha, and the two are independent —
+// chooses the hue, intensity chooses the alpha, and the two are independent -
 // which is the actual design, so it is what the tokens should say.
 //
 // The rain hue and its mid alpha are measured off the reference: its rainy
@@ -203,18 +203,18 @@ var precip = {
 
 // Radii are deliberately generous. The reference reads "soft" because almost
 // nothing in it meets at a hard edge, and the tab/panel junction is filleted
-// rather than squared — see TabFillet.qml.
+// rather than squared - see TabFillet.qml.
 // The sky, by time of day.
 //
-// Five stops each, the same five positions PageBackdrop declares — QML cannot
+// Five stops each, the same five positions PageBackdrop declares - QML cannot
 // generate GradientStop elements from a Repeater, so the *positions* are
 // written out there and only the colours come from here.
 //
 // **Every phase is dark.** That is the constraint the whole palette is built
 // on and it is not a stylistic preference: §10.1's surfaces are white washes
-// at 0.05–0.10, and a wash is only a surface if there is something darker
+// at 0.05-0.10, and a wash is only a surface if there is something darker
 // behind it. A literal daylight sky would make every card on every screen
-// invisible at once. So "day" is a clean deep blue rather than a bright one —
+// invisible at once. So "day" is a clean deep blue rather than a bright one -
 // the difference between phases is hue and clarity, not lightness, and it
 // reads as time of day because the four are seen against each other.
 //
@@ -235,7 +235,7 @@ var star = {
     // turns a sky into a diagram.
     //
     // 0.13, and it was 0.24 first. At that weight the Plough drew a visible
-    // line straight through "Expect sunny skies" — the sky is the one thing on
+    // line straight through "Expect sunny skies" - the sky is the one thing on
     // the screen that has to lose every contest it enters.
     line: "#22c8d8ff"
 };
@@ -265,7 +265,7 @@ var metric = {
     detailPadV:       16,
     detailGap:        16,
 
-    // Between two sections of the page — the hero and the hourly block, the
+    // Between two sections of the page - the hero and the hourly block, the
     // hourly block and the details grid. Wider than any gap inside a section,
     // which is what makes them read as separate things without a rule between
     // them.
@@ -281,7 +281,7 @@ var metric = {
     mobileGap:        14,
 
     // A mobile card's inset. Its own tokens rather than the detail card's,
-    // which are named for the twelve-card grid and measured off it — sharing
+    // which are named for the twelve-card grid and measured off it - sharing
     // them would mean a change to that grid silently re-padding every screen
     // on the phone.
     mobileCardPadH:   16,
@@ -315,7 +315,7 @@ var type = {
     detailTitle: 14,
 
     // The reading: the one number a card exists to show. A card carrying two
-    // co-equal readings — sunrise and sunset, speed and gust — uses the pair
+    // co-equal readings - sunrise and sunset, speed and gust - uses the pair
     // size for both. There is no third option: a card wanting one is really
     // asking for a different layout.
     reading:     34,
@@ -338,13 +338,13 @@ var type = {
 };
 
 // Motion, as tokens for exactly the reason type sizes are tokens: the first
-// pass at this gave *ranges* in a document — "140–160 ms", "190 ms" — and the
+// pass at this gave *ranges* in a document - "140-160 ms", "190 ms" - and the
 // components that bothered to animate at all came back with 130, 140, 150, 160,
 // 170, 190, 340 and 430. Eight durations for four jobs. A range is not a rule.
 //
 // Easing is not in here because `Easing.OutCubic` is a QML enum and this is a
 // plain JS library. Write it literally; it is a name rather than a magic number,
-// and it greps. **OutCubic unless there is a stated reason** — things decelerate
+// and it greps. **OutCubic unless there is a stated reason** - things decelerate
 // into place because they are arriving, not departing.
 var motion = {
     // A fill, a text colour, a border. Should feel instant rather than
@@ -355,7 +355,7 @@ var motion = {
     // that you are never waiting for it.
     move:    190,
 
-    // One view becoming another — chart to list, a card opening.
+    // One view becoming another - chart to list, a card opening.
     view:    340,
 
     // A value finding its place: a dial sweeping to its reading, a bar

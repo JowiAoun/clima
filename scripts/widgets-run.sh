@@ -12,7 +12,7 @@
 # Everything after the script name goes to climat-widget untouched, so its
 # `--help` is the authority on the flag surface. Which fixture the daemon serves
 # is environment rather than a flag, because it is the *other* process's
-# business — the same split scripts/dev-run.sh makes for CLIMAT_PRESET.
+# business - the same split scripts/dev-run.sh makes for CLIMAT_PRESET.
 #
 # ---- why this exists at all -------------------------------------------------
 #
@@ -32,7 +32,7 @@
 # Because the daemon answers that question better than a probe would. It refuses
 # to take a name somebody else owns and exits 5 immediately (daemon/main.cpp),
 # so starting a second one costs a process that is gone before this script
-# reaches the next line — and the alternative, asking the bus first, is a race
+# reaches the next line - and the alternative, asking the bus first, is a race
 # with a window in it and a dependency on whichever of busctl, gdbus or
 # dbus-send this machine happens to have.
 set -euo pipefail
@@ -43,7 +43,7 @@ repo="$(cd "$here/.." && pwd)"
 preset="${CLIMAT_PRESET:-dev}"
 build_dir="$repo/build/$preset"
 
-# The host is built through dev-run.sh below, which builds the whole preset —
+# The host is built through dev-run.sh below, which builds the whole preset -
 # so by the time the daemon is needed it exists. Building here as well would be
 # a second ninja run to discover that there is nothing to do.
 daemon="$build_dir/daemon/climat-daemon"
@@ -59,7 +59,7 @@ done
 
 daemon_pid=""
 
-# Only ever our own child, and only if it is still alive — which it will not be
+# Only ever our own child, and only if it is still alive - which it will not be
 # when the name was already owned. A daemon somebody else started is a shared
 # service and stopping it would take the weather away from everything else on
 # the desktop, which is the same reason the GNOME extension leaves it running.
@@ -74,14 +74,14 @@ if [[ -x "$daemon" ]]; then
     daemon_args=()
     [[ -n "${CLIMAT_FIXTURE:-}" ]] && daemon_args=(--fixture "${CLIMAT_FIXTURE}")
 
-    # Its output belongs on this terminal — a daemon that cannot reach the
+    # Its output belongs on this terminal - a daemon that cannot reach the
     # network says so there, and that is the answer to a tile drawing nothing.
     "$daemon" "${daemon_args[@]}" &
     daemon_pid=$!
 fi
 
 # Started and not waited for. The host watches the bus name and subscribes the
-# moment it appears — the same path that handles a daemon restarted by hand — so
+# moment it appears - the same path that handles a daemon restarted by hand - so
 # a tile that comes up before the daemon has registered fills in on its own
 # rather than needing this script to synchronise anything.
 CLIMAT_BINARY="$build_dir/widgets/climat-widget" "$here/dev-run.sh" "$@"

@@ -28,21 +28,21 @@ is a CI job, gated on `workflow_dispatch` because it has never executed.
 
 None of that is the gate. **The gate is delivering a severe weather alert to a
 phone that is asleep**, and it is not a rendering problem or a packaging
-problem — it is a problem Qt does not have an answer to.
+problem - it is a problem Qt does not have an answer to.
 
 ### What the desktop does, and why it does not port
 
 On a desktop, alert polling is `AlertsData`'s timer: three minutes with the
 window focused, ten idle, and **stopped entirely when the window is hidden**.
-That last rule is what makes the poll cost defensible — see
-`docs/04-architecture.md` §4.5 — and it is also exactly the rule that makes the
+That last rule is what makes the poll cost defensible - see
+`docs/04-architecture.md` §4.5 - and it is also exactly the rule that makes the
 feature useless on a phone, where the window is hidden almost all of the time.
 
 An Android app that wants to poll while it is not on screen needs, in order:
 
 1. **A `WorkManager` periodic job**, which is Java. Qt gives you `QJniObject`
    and nothing above it, so this is hand-written JNI plus a Java class in the
-   package source directory — the first Java in this repository.
+   package source directory - the first Java in this repository.
 2. **A notification channel**, created at first run, with the severity opt-in
    the desktop already has mapped onto Android's channel importance levels.
 3. **Battery-optimisation UX.** Doze batches `WorkManager` jobs into
@@ -65,7 +65,7 @@ product decision, not an engineering one, and the decision is between:
 
 - **Ship the app without background alerts.** Alerts appear when the app is
   opened, which is honest, useful, and how most weather apps behaved before
-  push. The app must then say so in its own settings screen — an alert toggle
+  push. The app must then say so in its own settings screen - an alert toggle
   that silently means "when you happen to look" is the failure this whole
   feature exists to avoid.
 - **Ship a foreground service.** Reliable, visible in the notification shade
@@ -89,7 +89,7 @@ screen next to the toggle that controls them.
 
 `ConditionsData::buildContext` has two ways to decide what "now" is. Open-Meteo
 sends a `current` block stamped to the quarter hour, and that is used whenever it
-is actually current — within an hour of the clock. When it is not, the
+is actually current - within an hour of the clock. When it is not, the
 observation is rebuilt from the hour the reader is standing in.
 
 **The fixtures always take the second branch.** `tests/fixtures/wire/toronto.json`
@@ -99,15 +99,15 @@ photographs the fallback. The branch the app takes on every real run has no
 picture of it anywhere.
 
 That is not academic. The card drawing `current.weather_code` while the chart
-drew the hourly series was a visible contradiction — "Mainly sunny" a few
-centimetres above a Now column showing heavy rain, in the rain — and it could
+drew the hourly series was a visible contradiction - "Mainly sunny" a few
+centimetres above a Now column showing heavy rain, in the rain - and it could
 not have been caught by any capture, because in a capture the two are the same
 value. It was found by someone looking at the running app. `tst_conditionsdata`
 now moves the clock onto the block's own stamp to reach the branch, which tests
 the arithmetic but photographs nothing.
 
 Closing it means re-recording the fixtures so `current.time` sits inside the
-hour `recordedAt` names — `scripts/` has the recorder — and then re-accepting
+hour `recordedAt` names - `scripts/` has the recorder - and then re-accepting
 the goldens, which will move: the hero would show the block's readings rather
 than the hour's, which differ by a degree or two. Worth doing next time the
 fixtures are refreshed for another reason, since the two changes land in the
@@ -119,21 +119,21 @@ same images.
 
 The day strip moves the hourly window: pick Friday and the chart, the list and
 the precipitation strip are Friday's, midnight to midnight. **The twelve detail
-cards below it are not.** They are `Detail` — `app/viewmodels/conditionsdata.h`
-— which is built entirely around the present observation, and a card that reads
+cards below it are not.** They are `Detail` - `app/viewmodels/conditionsdata.h`
+- which is built entirely around the present observation, and a card that reads
 "Peaks at 4:00 p.m." means today whatever the strip says.
 
 This is defensible as it stands and it is not invisible. On the desktop the two
 are separate sections with their own headers and the details carry the
 observation stamp, so neither claims to be the other. On the phone one line did
-claim it — the Hourly screen's daily summary put today's sentence under the
-selected day's high and low — and that line is now hidden on any day but today,
+claim it - the Hourly screen's daily summary put today's sentence under the
+selected day's high and low - and that line is now hidden on any day but today,
 which is honest and is also obviously a stopgap.
 
 Closing it means giving `ConditionsData` the same treatment `ForecastData` just
 had: a selected day, a window that follows it, and a decision per block about
 what each of the fifteen means on a day that is not today. Several of them have
-no meaning at all there — "feels like" is a reading, not a forecast, and an air
+no meaning at all there - "feels like" is a reading, not a forecast, and an air
 quality index four days out is a different product from the one this shows.
 So it is a design question first and a port second, and the honest intermediate
 is what exists now: the sections that follow the day say so, and the ones that
@@ -145,8 +145,8 @@ do not are dated.
 
 `tests/qml/tst_hittargets.qml` measures every tappable area on every screen the
 mobile shell can reach, and it does not measure `WeatherPage` or the twelve
-detail cards. That is deliberate — a desktop is a pointer device, and a pointer
-is one pixel — but it is a gap and not a proof: a 1024 px touch screen runs the
+detail cards. That is deliberate - a desktop is a pointer device, and a pointer
+is one pixel - but it is a gap and not a proof: a 1024 px touch screen runs the
 desktop page today, and nothing checks what that is like to use.
 
 The two controls the mobile shell borrows from the desktop, `PagerButton` and
@@ -154,7 +154,7 @@ The two controls the mobile shell borrows from the desktop, `PagerButton` and
 
 Closing this means either adding the desktop groups to that test and raising
 whatever it finds, or deciding that a touch device never gets the desktop page
-— which is a change to `Viewports.classOf` and to nothing else.
+- which is a change to `Viewports.classOf` and to nothing else.
 
 ---
 
@@ -180,7 +180,7 @@ The tiles reach a desktop two different ways and both of them work:
 
 - **GNOME.** A shell extension spawns `climat-widget`, adopts the window,
   re-types it as a dock and lowers it. Mutter exposes no protocol for this, so
-  there is no other way in. Measured by hand on GNOME Shell 46, Wayland — see
+  there is no other way in. Measured by hand on GNOME Shell 46, Wayland - see
   `docs/widgets.md`.
 - **Everywhere else.** `climat-widget --pin` asks the compositor for a
   `zwlr_layer_shell_v1` surface and places itself. Measured in CI, against a
@@ -188,7 +188,7 @@ The tiles reach a desktop two different ways and both of them work:
 
 The gap is in the second row. **wlroots is not KWin.** It is the reference
 implementation of that protocol, KWin was written against the same protocol, and
-the surface `climat-widget` creates uses nothing outside version 1 of it — which
+the surface `climat-widget` creates uses nothing outside version 1 of it - which
 is a good argument and is not a measurement. `docs/widgets.md` exists because
 the GNOME mechanism was measured before anything was built on it, and the same
 standard applies here.
@@ -196,8 +196,8 @@ standard applies here.
 Two smaller ones travel with it. The GNOME extension declares
 `shell-version` 45 to 48 and only 46 has been run, which is a claim to re-check
 before the first upload to extensions.gnome.org. And the monitor-hotplug
-recovery in `widgets/layershell.cpp` — unplug the screen a pinned surface lives
-on and the tiles come back on another one — has been exercised against sway's
+recovery in `widgets/layershell.cpp` - unplug the screen a pinned surface lives
+on and the tiles come back on another one - has been exercised against sway's
 `output … unplug`, which is a developer command, not a cable.
 
 **What closes it:** `climat-widget --pin on` on a Plasma 6 session and on one
@@ -220,7 +220,7 @@ signing certificate, and there is no way to produce one from CI.
 That is corrected to **unsigned MSI**, and the reason is the signing rather
 than the format. An unsigned MSIX cannot be side-loaded at all until the user
 imports a certificate into their trusted root store, which is a worse thing to
-ask of somebody than dismissing a warning — it teaches them to trust an
+ask of somebody than dismissing a warning - it teaches them to trust an
 arbitrary publisher permanently in order to run one program once. An unsigned
 MSI simply warns.
 
@@ -242,7 +242,7 @@ version one instead of sitting beside it.
 3. **`SHA256SUMS` and build provenance**, which the release workflow already
    attaches. `gh attestation verify` proves an artefact came out of this
    workflow at this commit. That is weaker than a signature in exactly one way
-   — it is not checked by the operating system — and stronger in one way, since
+   - it is not checked by the operating system - and stronger in one way, since
    it names the source revision.
 
 Until 1 happens, the README has to say the build is unsigned. A project that
@@ -258,13 +258,13 @@ oversight.**
 
 Notarising a macOS application requires an Apple Developer ID at $99/year.
 Without notarisation, Gatekeeper on a current macOS refuses to open a
-downloaded app at all — not a warning, a refusal — and the workaround is a
+downloaded app at all - not a warning, a refusal - and the workaround is a
 right-click-open dance that changes with every release. Shipping a DMG nobody
 can open would be worse than shipping none.
 
 The engine is licensed to keep the door open: `libclimat` is MPL-2.0 precisely
 so that a macOS build is a packaging decision later rather than a licensing
-problem. The Mac App Store stays ruled out regardless — D6, GPLv3 against the
+problem. The Mac App Store stays ruled out regardless - D6, GPLv3 against the
 App Store terms.
 
 ---
@@ -279,7 +279,7 @@ the Qt Quick features it relies on settle, so the package declares
 
 That is the right failure. A package that installed and then would not start is
 worse than one that says why up front. 24.04 users, and anybody on a
-distribution older than Debian 13, get the Flatpak — which carries its own Qt
+distribution older than Debian 13, get the Flatpak - which carries its own Qt
 out of `org.kde.Platform` and does not care what the host has. That is the
 whole reason `docs/07-packaging.md` §7.1 makes Flathub the P0 channel.
 

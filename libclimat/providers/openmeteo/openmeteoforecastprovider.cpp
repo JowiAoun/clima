@@ -26,7 +26,7 @@ constexpr int kPastDays = 1;
 
 // Which capabilities this provider could conceivably have somewhere. Anything
 // outside this set is known-absent everywhere and is never reported as
-// undetermined — a UI must not hold space for an ensemble tab on the grounds
+// undetermined - a UI must not hold space for an ensemble tab on the grounds
 // that `/v1/forecast` might one day return one.
 CapabilityFlags supportedEverywhere()
 {
@@ -69,7 +69,7 @@ QString OpenMeteoForecastProvider::id() const
 QString OpenMeteoForecastProvider::displayName() const
 {
     // Not translated here. iforecastprovider.h: "For humans. Translated by the
-    // app, not here." — and this one is a proper noun anyway.
+    // app, not here." - and this one is a proper noun anyway.
     return QStringLiteral("Open-Meteo");
 }
 
@@ -81,7 +81,7 @@ Attribution OpenMeteoForecastProvider::attribution() const
 bool OpenMeteoForecastProvider::covers(Coordinate coord) const
 {
     // Global. The only thing that is not covered is a coordinate that is not
-    // one — a NaN out of a half-initialised map, a longitude of 400 — and
+    // one - a NaN out of a half-initialised map, a longitude of 400 - and
     // `covers` is the right place to catch it, because the alternative is a
     // request that goes out and comes back 400.
     return coord.isValid();
@@ -116,7 +116,7 @@ HttpRequest OpenMeteoForecastProvider::buildRequest(const ForecastRequest &reque
     out.kind       = DataKind::Forecast;
 
     // Handed over as a coordinate rather than baked into the parameters, so
-    // that HttpClient rounds it — once, in one place, before it is hashed and
+    // that HttpClient rounds it - once, in one place, before it is hashed and
     // before it is sent. libclimat/net/httprequest.h is emphatic about why.
     out.coordinate         = request.coord;
     out.latitudeParameter  = QStringLiteral("latitude");
@@ -124,7 +124,7 @@ HttpRequest OpenMeteoForecastProvider::buildRequest(const ForecastRequest &reque
 
     out.parameters = {
         // The zone resolved from the coordinate. We do not trust the naive
-        // timestamps it produces — libclimat/domain/timeaxis.h — but we do need
+        // timestamps it produces - libclimat/domain/timeaxis.h - but we do need
         // the IANA id and the offset it used, and this is the only parameter
         // that reports them.
         { QStringLiteral("timezone"), QStringLiteral("auto") },
@@ -155,7 +155,7 @@ Capabilities OpenMeteoForecastProvider::capabilitiesAt(Coordinate coord) const
     if (learned != m_learned.constEnd())
         return *learned;
 
-    // Nothing fetched here yet, so nothing is known. Not "no" — a UI that
+    // Nothing fetched here yet, so nothing is known. Not "no" - a UI that
     // renders "no" hides the UV tab for the two seconds before the payload
     // lands and then pops it in, which looks like a bug and is one.
     return Capabilities({}, supportedEverywhere());
@@ -189,7 +189,7 @@ QFuture<Result<Forecast>> OpenMeteoForecastProvider::fetchForecast(const Forecas
     //
     // docs/04-architecture.md §4.1, principle 1: "the UI renders from cache,
     // then reconciles with the network". A fresh entry is the whole answer and
-    // no request is made — §4.5 puts the hourly forecast's TTL at 30 minutes,
+    // no request is made - §4.5 puts the hourly forecast's TTL at 30 minutes,
     // and thirty minutes of identical bytes is thirty minutes of somebody
     // else's bandwidth.
     const payloadcache::Hit cached = payloadcache::lookUp(m_cache, key);
@@ -222,8 +222,8 @@ QFuture<Result<Forecast>> OpenMeteoForecastProvider::fetchForecast(const Forecas
 
     QFuture<Result<HttpResponse>> transfer = m_http->send(http);
 
-    // A watcher parented to this, deleted when it finishes. The alternative —
-    // `.then()` — runs its continuation on whichever thread finished the
+    // A watcher parented to this, deleted when it finishes. The alternative -
+    // `.then()` - runs its continuation on whichever thread finished the
     // future, and this object's QHash of learned capabilities is not thread
     // safe. A watcher delivers on the thread that owns it, which is the thread
     // that owns us, which is the rule libclimat/net/httpclient.h already sets.
@@ -241,7 +241,7 @@ QFuture<Result<Forecast>> OpenMeteoForecastProvider::fetchForecast(const Forecas
                     // §4.5 ticks stale-while-revalidate for every forecast row,
                     // and §4.1 says the app must never show an empty screen
                     // because an API is down. So the stale bytes are served,
-                    // carrying the timestamp they were actually fetched at —
+                    // carrying the timestamp they were actually fetched at -
                     // which is what makes the UI say "updated 3 hours ago"
                     // rather than pretending this is current.
                     if (cached.present) {

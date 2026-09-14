@@ -40,7 +40,7 @@ Window {
     // `dusk`, which is the palette this prototype has always had.
     //
     // That split is deliberate and it is not timidity. The desktop page is a
-    // 1340 px window that is mostly cards — the background is a rim around
+    // 1340 px window that is mostly cards - the background is a rim around
     // them and a wash under them, and the reader never sees enough of it for a
     // constellation to be anything but noise behind a chart. A phone is the
     // opposite: the hero sits directly on the sky with no card at all, and
@@ -52,9 +52,9 @@ Window {
     //
     // ---- which clock -------------------------------------------------------
     // detaildata.sun, because it is the clock that carries minutes. The two
-    // mock files now agree about the instant — `mockdata.nowIndex` is 12:00,
+    // mock files now agree about the instant - `mockdata.nowIndex` is 12:00,
     // the hour this observation falls in, and both take the same sunrise and
-    // sunset — so this is a choice of resolution and not a choice of source.
+    // sunset - so this is a choice of resolution and not a choice of source.
     // The resolution is the whole point: dawn and dusk are the seventy minutes
     // either side of a crossing, and an hour index cannot say where in that
     // band it is.
@@ -66,7 +66,7 @@ Window {
 
     // The page background is painted as an item, not left to Window.color.
     // grabToImage() captures contentItem, which does not include the window's
-    // clear colour — so every headless screenshot came out with a black page
+    // clear colour - so every headless screenshot came out with a black page
     // behind the cards, which is not what is on screen.
     PageBackdrop {
         anchors.fill: parent
@@ -83,7 +83,7 @@ Window {
     property bool previewGallery: false
     property string galleryPick: ""
 
-    // Which device frame the gallery stages its specimens in. Empty is free —
+    // Which device frame the gallery stages its specimens in. Empty is free -
     // the component at its own size, which is what the gallery did before
     // frames existed and is still right for a glyph.
     property string galleryViewport: ""
@@ -95,12 +95,12 @@ Window {
             Loader {
                 source: "Detail" + win.previewCard + "Card.qml"
                 onStatusChanged: if (status === Loader.Error)
-                    console.warn("preview: no such card —", source)
+                    console.warn("preview: no such card -", source)
             }
         }
     }
 
-    // The grid lays out in full and does not scroll itself — the page owns that.
+    // The grid lays out in full and does not scroll itself - the page owns that.
     // Shown on its own it still needs somewhere to scroll and something to bound
     // its cards' Shapes, so the preview supplies both.
     Loader {
@@ -136,7 +136,7 @@ Window {
                 viewport: win.galleryViewport
                 // Whatever the app would be showing at this hour, so a
                 // component framed as a phone is reviewed on the sky the phone
-                // would actually give it — stars included.
+                // would actually give it - stars included.
                 skyPhase: win.forcedSky !== ""
                           ? win.forcedSky
                           : Sky.phaseAt(Detail.sun.nowMin, Detail.sun.riseMin,
@@ -167,7 +167,7 @@ Window {
     //
     // Two shells, one product. `WeatherPage` is the desktop's single scrolling
     // column; `MobileShell` is the phone's five tabs under a nav bar. Which one
-    // runs is a function of the window width and nothing else — there is no
+    // runs is a function of the window width and nothing else - there is no
     // "mobile build".
     //
     // A Loader rather than both in the tree with one hidden. Keeping both would
@@ -207,7 +207,7 @@ Window {
 
     // --scroll N drops the page N pixels down before grabbing. The details grid
     // is below the fold at every window size that fits on a laptop, so without
-    // this a headless review of the page can only ever see its top third — and
+    // this a headless review of the page can only ever see its top third - and
     // the sections it cannot see are the ones with twelve charts in them.
     //
     // Deferred for the same reason the walk is: contentHeight is still 0 during
@@ -225,8 +225,8 @@ Window {
     // A still frame cannot show motion. `--grab` is enough to review a layout
     // and useless for reviewing a transition: it lands wherever the animation
     // happened to be when the grab timer fired, which is usually after it
-    // finished — deliberately so, since golden images want a settled frame. An
-    // animation that is wrong — or missing entirely — grabs identically to one
+    // finished - deliberately so, since golden images want a settled frame. An
+    // animation that is wrong - or missing entirely - grabs identically to one
     // that is right.
     //
     //   --film <prefix> --frames N --every MS
@@ -279,7 +279,7 @@ Window {
                 win.page.flickBy(-Math.abs(isNaN(vel) || vel === 0 ? 1400 : vel))
                 break
             // Rebuilding the specimen replays whatever the component does on
-            // mount, which for a detail card is the only animation it has —
+            // mount, which for a detail card is the only animation it has -
             // the data behind these cards never changes while the app runs.
             case "remount":
                 if (galleryLoader.item !== null)
@@ -397,7 +397,7 @@ Window {
                 }
             } else {
                 console.warn("--viewport: expected one of",
-                             Viewports.ids().join(", "), "— got", args[vp + 1])
+                             Viewports.ids().join(", "), "- got", args[vp + 1])
             }
         }
 
@@ -429,7 +429,7 @@ Window {
             if (Theme.sky[phase] !== undefined)
                 win.forcedSky = phase
             else
-                console.warn("--sky: expected night, dawn, day or dusk — got", phase)
+                console.warn("--sky: expected night, dawn, day or dusk - got", phase)
         }
 
         var m = args.indexOf("--metric")
@@ -452,7 +452,7 @@ Window {
 
         var g = args.indexOf("--gallery")
         if (g >= 0) {
-            // An optional component name may follow — every word of it up to
+            // An optional component name may follow - every word of it up to
             // the next flag, so `--gallery weather glyph` works without quotes.
             var words = []
             for (var w = g + 1; w < args.length && args[w].indexOf("--") !== 0; ++w)
@@ -464,8 +464,8 @@ Window {
             win.galleryPick = words.join(" ")
 
             // The gallery wants room for its rail plus a stage, but only when
-            // nobody said otherwise. `--size` is now parsed before this — it
-            // has to be, since the width decides which shell runs — so this
+            // nobody said otherwise. `--size` is now parsed before this - it
+            // has to be, since the width decides which shell runs - so this
             // has to ask rather than simply enlarging, or `--gallery --size
             // 900x600` would silently come back at 1500x950.
             if (args.indexOf("--size") < 0) {
@@ -541,7 +541,7 @@ Window {
             // The precipitation field is the one thing on this page that moves
             // without being asked, so a grab of it would otherwise catch a
             // different frame every run and no two golden images would agree.
-            // Frozen, it still draws rain — precip.js seeds every drop from its
+            // Frozen, it still draws rain - precip.js seeds every drop from its
             // hour, so the frozen frame is a deterministic one rather than an
             // empty one.
             //
@@ -549,7 +549,7 @@ Window {
             // and is here for the same reason: under `--gallery` there is no
             // shell at all, and a shell whose current screen has no chart has
             // no such property. Assigning one an object does not have throws,
-            // and a throw here takes the rest of this block with it — the two
+            // and a throw here takes the rest of this block with it - the two
             // lines below included. That is how three of the four capture
             // paths came to print one error and then hang forever, having
             // never started the timer that both writes the file and quits.

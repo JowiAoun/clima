@@ -13,7 +13,7 @@
 //
 // Everywhere else there is a protocol for exactly this. `zwlr_layer_shell_v1`
 // lets a client say "put my surface on the desktop layer, anchored top-right,
-// 24 px in, and do not give it keyboard focus" — and the compositor does it.
+// 24 px in, and do not give it keyboard focus" - and the compositor does it.
 // KWin implements it, and so does every wlroots compositor: Sway, Hyprland,
 // Wayfire, river, labwc. One protocol, one binary, no applet and no plugin.
 //
@@ -29,7 +29,7 @@
 //      It installs an event filter and swaps the shell integration when the
 //      platform surface appears; a window that already has a surface has
 //      already committed to xdg-shell. layer-shell-qt warns and carries on, so
-//      getting this wrong produces an ordinary window and no error — which is
+//      getting this wrong produces an ordinary window and no error - which is
 //      why widgets/qml/Climat/Widgets/WidgetWindow.qml is `visible: false` and
 //      widgets/main.cpp does the showing.
 //
@@ -38,7 +38,7 @@
 //      the scope as arguments and the rest is sent in the same commit.
 //
 //   3. The availability probe must not run when WAYLAND_SOCKET is set. See
-//      layershell.cpp — it is a footgun with our own name on it.
+//      layershell.cpp - it is a footgun with our own name on it.
 //
 // ============================================================================
 // OPTIONAL AT CONFIGURE TIME

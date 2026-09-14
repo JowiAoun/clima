@@ -5,7 +5,7 @@
 // The banner is a glance and this is the reading. So this component makes the
 // opposite trade at every point: it shows the issuer's headline in full rather
 // than the event name, it keeps their paragraph breaks, and it separates the
-// description from the instruction because those are two different things —
+// description from the instruction because those are two different things -
 // what is happening, and what you are being asked to do about it.
 //
 // ---- the body is the issuer's, and it is not reflowed ------------------------
@@ -14,7 +14,7 @@
 // WHAT...` bullets; ECCC's carry "Locations:", "Time span:", "Remarks:" on
 // their own lines. Both are meant to be read as written. `Text.WordWrap` with
 // the newlines preserved is what keeps that, and `Text.RichText` would be worse
-// than useless — an alert body is untrusted text from the internet, and it is
+// than useless - an alert body is untrusted text from the internet, and it is
 // the one string in this app that would be worth someone's while to inject
 // markup into.
 import QtQuick

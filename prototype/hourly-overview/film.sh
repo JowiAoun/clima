@@ -5,7 +5,7 @@
 # Films a transition and tiles the frames into one contact sheet.
 #
 # A still frame cannot show motion, and `--grab` lands wherever the animation
-# happened to be — usually after it finished. So an animation that is wrong, or
+# happened to be - usually after it finished. So an animation that is wrong, or
 # missing altogether, grabs identically to one that is right. This is the tool
 # for looking at motion; `--grab` is the tool for looking at layout.
 #
@@ -16,7 +16,7 @@
 # Frames read left to right, top to bottom. Frame 00 is the state *before* the
 # poke; every frame after it is the transition. A contact sheet whose frames all
 # look identical means either nothing is animating or the whole thing finished
-# inside one interval — turn `--every` down and look again.
+# inside one interval - turn `--every` down and look again.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -37,7 +37,7 @@ while [[ $# -gt 0 && "$1" != "--" ]]; do
         --every)  every="$2";  shift 2 ;;
         --width)  width="$2";  shift 2 ;;
         *)
-            echo "film.sh: unknown option '$1' — run.sh options go after a '--' separator" >&2
+            echo "film.sh: unknown option '$1' - run.sh options go after a '--' separator" >&2
             exit 1 ;;
     esac
 done
@@ -50,11 +50,11 @@ trap 'rm -rf "$tmp"' EXIT
 
 count=$(ls "$tmp"/f-*.png 2>/dev/null | wc -l)
 if [[ "$count" -eq 0 ]]; then
-    echo "film.sh: no frames were written — did the app fail to start?" >&2
+    echo "film.sh: no frames were written - did the app fail to start?" >&2
     exit 1
 fi
 if [[ "$count" -ne "$frames" ]]; then
-    echo "film.sh: warning — asked for $frames frames, got $count" >&2
+    echo "film.sh: warning - asked for $frames frames, got $count" >&2
 fi
 
 cols=$(( count < 4 ? count : 4 ))

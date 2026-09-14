@@ -12,7 +12,7 @@
 // Those are not the same sentence and a tile that prints the first when it
 // means the second is telling somebody there is no tornado warning on the
 // strength of a failed HTTP request. The wire keeps them apart with
-// `alertsKnown` alongside the list — see libclimat/wire/snapshot.cpp — and this
+// `alertsKnown` alongside the list - see libclimat/wire/snapshot.cpp - and this
 // is the tile that exists to respect the distinction.
 //
 // ============================================================================
@@ -27,7 +27,7 @@
 //
 // Severity carries a glyph, a colour and the word. docs/04-architecture.md
 // §4.10 forbids colour-only encoding, and this is the tile where getting it
-// wrong matters most — a red bar means nothing to a reader who cannot see red,
+// wrong matters most - a red bar means nothing to a reader who cannot see red,
 // and this is the one tile that is trying to tell them to take shelter.
 
 import QtQuick
@@ -41,7 +41,7 @@ WidgetSurface {
     readonly property var alerts: Wire.arr(Wire.at(root.snap, "alerts"))
     readonly property bool known: Wire.at(root.snap, "alertsKnown") === true
     // `worst` and not `top`: QQuickItem already declares a FINAL anchor-line
-    // property called `top`, and shadowing it is a hard load failure — "Cannot
+    // property called `top`, and shadowing it is a hard load failure - "Cannot
     // override FINAL property", reported against this file from the Loader two
     // files away. The daemon has already sorted by Alert::outranks, so index 0
     // is the one that matters.
@@ -94,8 +94,8 @@ WidgetSurface {
             }
 
             // Where it applies, which is the one thing a reader needs from a
-            // tile: whether this is about them. The issuer's own grading —
-            // "yellow warning" — is on the wire and is deliberately *not* here,
+            // tile: whether this is about them. The issuer's own grading -
+            // "yellow warning" - is on the wire and is deliberately *not* here,
             // because for the NWS it is the word "Moderate", which is what the
             // severity glyph beside it already says. The app's banner has room
             // to show both; a 320 px tile does not, and repeating the severity

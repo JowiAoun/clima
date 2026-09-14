@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// What the hourly chart is a chart OF, and — where it cannot show all of it —
+// What the hourly chart is a chart OF, and - where it cannot show all of it -
 // where it opens.
 //
 // ============================================================================
@@ -13,19 +13,19 @@
 // be about, and the pair of controls would then mean two different things at two
 // window widths.
 //
-// The column width is therefore derived — the plot's width divided among the
-// day's hours — with `hourWidth` as the floor under it rather than the answer.
+// The column width is therefore derived - the plot's width divided among the
+// day's hours - with `hourWidth` as the floor under it rather than the answer.
 // A desktop card lands well above the floor and draws the day whole; a phone
 // lands on it and scrolls, because its 268 px plot puts 24 hours at 11.6 px a
 // column and the glyphs drawn on them are 27. That is the split this file
-// asserts at both ends — including at 1024, the narrowest window this shell
+// asserts at both ends - including at 1024, the narrowest window this shell
 // exists at, which is where the floor was originally set too high and left a
 // third of the desktop range scrolling with no scroll control on it.
 //
 // ============================================================================
 // WHY THIS IS NOT A GOLDEN IMAGE
 //
-// It partly is — `mobile-hourly` and `desktop` record the answer at two widths.
+// It partly is - `mobile-hourly` and `desktop` record the answer at two widths.
 // What they cannot record is the two ways of arriving at it, and both of them
 // were wrong:
 //
@@ -33,14 +33,14 @@
 //     Component.onCompleted, which on a live first fetch runs before the first
 //     snapshot: contentWidth is 0, every position clamps to 0, and the card
 //     opens on last night. Every capture in this repository uses a fixture, and
-//     a fixture is published before the QML engine loads — so the defect was
+//     a fixture is published before the QML engine loads - so the defect was
 //     invisible to all fifty of them and obvious the first time somebody opened
 //     the app on a cold cache.
 //
 //   * LAYOUT ARRIVES IN STAGES. A card in a tablet's grid is handed a narrow
 //     width and then its real one. The number of observed hours is a function
 //     of that width, so a position computed at the first is a position computed
-//     for a phone — which is exactly what the tablet-landscape golden did when
+//     for a phone - which is exactly what the tablet-landscape golden did when
 //     the width rule was first written.
 //
 // So what is asserted here is the *relationship*: whatever width this card ends
@@ -53,7 +53,7 @@
 // The header band draws an entry per labelled hour, two columns wide and
 // centred on its label, so the left edge has to fall exactly one column before
 // a label or the card opens with half a glyph and a sliced "AM". Labels run
-// every `labelStep` from "Now" — which is itself always one — so the count of
+// every `labelStep` from "Now" - which is itself always one - so the count of
 // observed hours has to be odd. One or three; two is not available at any
 // width, and a rule that returned it would be a rule that clips.
 import QtQuick
@@ -114,7 +114,7 @@ TestCase {
 
     // Today, whatever ran before this. `Data` is one object for the whole
     // process, so the day another test file selected is the day this one would
-    // measure — and on a day window `nowIndex` is an offset outside the window,
+    // measure - and on a day window `nowIndex` is an offset outside the window,
     // which is a different set of numbers entirely.
     function initTestCase() {
         Data.selectedDay = Data.todayIndex
@@ -155,7 +155,7 @@ TestCase {
     }
 
     // The cliff. The arrows step days, so a desktop chart that scrolls has
-    // content on it the reader has no control to reach — which means the floor
+    // content on it the reader has no control to reach - which means the floor
     // has to stay under the fitted width at every width this shell runs at, not
     // just at the default one.
     function test_theWholeDayStillFitsAtTheNarrowestDesktop() {
@@ -165,7 +165,7 @@ TestCase {
     }
 
     // And the other end of it. A phone cannot show 24 legible columns, so the
-    // floor takes over and the chart scrolls — with the arrows still meaning
+    // floor takes over and the chart scrolls - with the arrows still meaning
     // days, which is what keeps the control honest at both widths.
     function test_aNarrowCardFallsBackToTheFloorAndScrolls() {
         compare(narrow.columnWidth, narrow.hourWidth,
@@ -196,7 +196,7 @@ TestCase {
 
     // And what odd is *for*: the label immediately inside the left edge is a
     // labelled hour, so it is drawn whole. Only the scrolling card has a left
-    // edge that can land anywhere — the wide one opens at column 0 and stays
+    // edge that can land anywhere - the wide one opens at column 0 and stays
     // there, because there is nowhere else for a chart of a whole day to be.
     function test_theLeftEdgeLandsOneColumnBeforeALabel() {
         var flick = scroller(narrow)
@@ -250,7 +250,7 @@ TestCase {
     }
 
     // A day change is not a scroll. Whichever day it is on, the desktop card
-    // still draws that day whole — which is the property that lets the arrows
+    // still draws that day whole - which is the property that lets the arrows
     // mean one thing at that width.
     function test_everyDayFillsTheWideCardExactly() {
         for (var day = 0; day < Data.days.length; ++day) {

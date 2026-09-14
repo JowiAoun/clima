@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // One instance of one component, built from a file name and a property bag.
 //
-// The gallery is data-driven — see gallery.js — which means it cannot declare
+// The gallery is data-driven - see gallery.js - which means it cannot declare
 // its specimens statically. Qt.createComponent + createObject takes both the
 // file and the properties as values, so a new entry in the catalogue is a few
 // lines of data rather than another QML file.
@@ -19,7 +19,7 @@ Item {
     property string source
     property var props: ({})
 
-    // Components with no implicit size of their own — a chart panel, a tab bar —
+    // Components with no implicit size of their own - a chart panel, a tab bar -
     // are given a stage to fill. Everything else is left at its natural size,
     // which is part of what the gallery is for.
     property real stageWidth: 0
@@ -29,7 +29,7 @@ Item {
     property string error: ""
 
     // Everything this specimen has ever created, so nothing can be orphaned by
-    // a rebuild that lost track of it — which is exactly what happened: two
+    // a rebuild that lost track of it - which is exactly what happened: two
     // cards ended up drawn on top of each other in one box.
     property var built: []
 
@@ -46,19 +46,19 @@ Item {
 
     // Scheduled, never called directly. Two reasons, both real:
     //
-    // Re-entrancy — `createObject(root, props)` reads `props`, and reading a
+    // Re-entrancy - `createObject(root, props)` reads `props`, and reading a
     // binding that has not been evaluated yet evaluates it and emits
     // propsChanged, which lands back in rebuild() while the first one is still
     // inside createObject. Both then finished, and neither had seen the other's
     // instance to destroy it.
     //
-    // Coalescing — source, props and the two stage dimensions all change
+    // Coalescing - source, props and the two stage dimensions all change
     // together when the gallery moves to another component. Qt.callLater
     // dedupes by function identity, so four triggers in one pass build once
     // instead of four times.
     // Bumped from outside to force a rebuild without changing anything about
     // what is being built. A detail card's data never changes while the app
-    // runs, so the only motion it has is whatever it does on mount — and the
+    // runs, so the only motion it has is whatever it does on mount - and the
     // only way to watch that twice is to mount it again.
     property int remountToken: 0
     onRemountTokenChanged: Qt.callLater(rebuild)
@@ -71,7 +71,7 @@ Item {
 
     // A deferred rebuild outlives its specimen: moving from a component with
     // two variants to one with a single variant makes the Repeater drop a
-    // delegate, and the callLater still fires — on an object whose QML context
+    // delegate, and the callLater still fires - on an object whose QML context
     // has gone, where Qt.createComponent fails with "Cannot create a component
     // in an invalid context". Harmless to the render and noisy in the log, and
     // it is the kind of message that trains you to ignore the log.

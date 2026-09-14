@@ -17,7 +17,7 @@
 # it, and shipping an unmeasured second mechanism would have been the opposite.
 #
 # This is the measurement. `WLR_BACKENDS=headless sway` stands up a wlroots
-# compositor with a virtual output, no GPU and no seat — and wlroots is the
+# compositor with a virtual output, no GPU and no seat - and wlroots is the
 # reference implementation of the protocol KWin also speaks, so a layer surface
 # sway accepts is one Plasma, Hyprland, Wayfire, river and labwc accept too.
 #
@@ -36,7 +36,7 @@
 #                   margin can actually be observed.
 #
 #   3. NOT A WINDOW `swaymsg -t get_tree` does not know about it. A layer
-#                   surface is not in the window tree — no alt-tab, no tiling,
+#                   surface is not in the window tree - no alt-tab, no tiling,
 #                   nothing moves when it appears.
 #
 #   4. FALSIFIABLE  the same binary with `--pin off` IS in that tree and logs no
@@ -49,8 +49,8 @@
 #                   and says why, rather than putting a floating window on
 #                   somebody's desktop and calling it done.
 #
-# The monitor-hotplug case — unplug the output a pinned surface lives on and it
-# comes back on another one — is assertion 6, and it is the reason
+# The monitor-hotplug case - unplug the output a pinned surface lives on and it
+# comes back on another one - is assertion 6, and it is the reason
 # widgets/layershell.cpp has a Remap in it.
 
 set -euo pipefail
@@ -64,13 +64,13 @@ fixture="$repo/tests/fixtures/wire/seattle.json"
 fail() { printf 'check-layer-shell: %s\n' "$1" >&2; exit 1; }
 skip() { printf 'check-layer-shell: %s SKIPPED.\n' "$1" >&2; exit 0; }
 
-[ -x "$widget" ] || fail "no climat-widget at $widget — build it first, or pass a path"
+[ -x "$widget" ] || fail "no climat-widget at $widget - build it first, or pass a path"
 [ -r "$fixture" ] || fail "no fixture at $fixture"
 
-command -v sway >/dev/null || skip "no sway, so there is no compositor to test against —"
-command -v swaymsg >/dev/null || skip "no swaymsg —"
-command -v grim >/dev/null || skip "no grim, so the placement cannot be photographed —"
-command -v ffmpeg >/dev/null || skip "no ffmpeg, so the photograph cannot be measured —"
+command -v sway >/dev/null || skip "no sway, so there is no compositor to test against -"
+command -v swaymsg >/dev/null || skip "no swaymsg -"
+command -v grim >/dev/null || skip "no grim, so the placement cannot be photographed -"
+command -v ffmpeg >/dev/null || skip "no ffmpeg, so the photograph cannot be measured -"
 
 # ---- a short runtime directory ----------------------------------------------
 #
@@ -109,7 +109,7 @@ echo "refuses when it cannot pin: ok"
 # only evidence is the picture.
 #
 # WLR_RENDERER=pixman keeps this off the GPU. wlroots would otherwise want a DRM
-# render node for its GLES2 renderer, and a CI runner has none — so the software
+# render node for its GLES2 renderer, and a CI runner has none - so the software
 # renderer is what makes this the same check everywhere rather than one that only
 # a workstation can run. Overridable, because on a machine with a GPU the GL path
 # is the one users are actually on.
@@ -118,12 +118,12 @@ echo "refuses when it cannot pin: ok"
 #
 # A fixed `sleep 6` before the screenshot is a bet on how long Qt takes to start,
 # and the machine that loses that bet is a loaded CI runner rendering in
-# software — where the tiles arrive at second seven and every assertion below
+# software - where the tiles arrive at second seven and every assertion below
 # reads an empty screen. That failure would say "nothing was drawn in the corner
 # the tiles were anchored to", which is exactly wrong about what happened.
 #
-# So it waits for the widget to be *on screen* by either route — a layer surface
-# in the log, or an ordinary window in the tree — and only then settles and
+# So it waits for the widget to be *on screen* by either route - a layer surface
+# in the log, or an ordinary window in the tree - and only then settles and
 # photographs. The control case reaches the second condition, the pinned cases
 # the first, and a widget that never starts at all runs into `timeout 120 sway`
 # and fails as it should.
@@ -169,8 +169,8 @@ TEARDOWN
 # ---- can this machine run a compositor at all? -------------------------------
 #
 # Asked separately, and before anything is asserted, because the two answers are
-# different kinds of thing. A machine with no way to stand up wlroots — no
-# renderer it can use, no seat, a $XDG_RUNTIME_DIR it cannot bind in — has told
+# different kinds of thing. A machine with no way to stand up wlroots - no
+# renderer it can use, no seat, a $XDG_RUNTIME_DIR it cannot bind in - has told
 # us nothing about climat-widget, and reporting that as a failure would put a red
 # cross on a change that is fine. Every failure after this line is about the
 # code.
@@ -182,7 +182,7 @@ if ! XDG_RUNTIME_DIR="$run" WLR_BACKENDS=headless WLR_LIBINPUT_NO_DEVICES=1 \
      WLR_RENDERER="${WLR_RENDERER:-pixman}" \
      timeout 60 sway -c "$run/probe.conf" > "$run/probe.log" 2>&1; then
     sed 's/^/  /' "$run/probe.log" >&2
-    skip "sway could not start here, so there is no compositor to measure against —"
+    skip "sway could not start here, so there is no compositor to measure against -"
 fi
 echo "compositor: sway starts headless here"
 
@@ -193,11 +193,11 @@ tiles="$widget --snapshot $fixture --widget current-conditions --widget uv-dial 
 
 # Mean luminance of a crop of the photograph, as an integer. This is how the
 # anchor and the margin get asserted: they are sent to the compositor after the
-# surface exists, so they are not in any log line — the only place they can be
+# surface exists, so they are not in any log line - the only place they can be
 # observed is where the pixels ended up.
 #
 # `file=-` rather than reading the log, because `metadata=print` writes at info
-# level and -v error swallows it — which produces an empty measurement and an
+# level and -v error swallows it - which produces an empty measurement and an
 # assertion that cannot fail.
 #
 # The scale is broadcast YUV, so black is 16 and white is 235, not 0 and 255.
@@ -217,7 +217,7 @@ echo "== pinned =="
 run_sway pinned 2 "exec \"$tiles --pin on --anchor top-right --margin 24 > $run/pinned.widget.log 2>&1\""
 
 surface="$(grep -o 'new layer surface: namespace [^ ]* layer [0-9]*' "$run/pinned.log" | head -n1 || true)"
-[ -n "$surface" ] || fail "no layer surface was created — sway logged none"
+[ -n "$surface" ] || fail "no layer surface was created - sway logged none"
 echo "$surface"
 
 grep -q 'namespace climat-widgets' <<<"$surface" \
@@ -262,14 +262,14 @@ grep -q 'new layer surface' "$run/plain.log" \
 echo "no layer surface: ok"
 
 grep -q '"app_id": *"[^"]' "$run/plain.tree.json" \
-    || fail "--pin off produced no ordinary window either — the widget did not start"
+    || fail "--pin off produced no ordinary window either - the widget did not start"
 echo "an ordinary window in the tree: ok"
 
 # ---- 6: the monitor goes away -----------------------------------------------
 #
 # A layer surface belongs to an output. Unplug that output and the compositor
 # dismisses the surface, layer-shell-qt closes the window, and a host whose only
-# window that is would exit — a two-screen desktop would lose its tiles the
+# window that is would exit - a two-screen desktop would lose its tiles the
 # first time somebody undocked. widgets/layershell.cpp puts them back; this is
 # what says so.
 #
@@ -277,7 +277,7 @@ echo "an ordinary window in the tree: ok"
 #
 # The trigger waits for the first surface rather than sleeping towards it. On a
 # slow machine a fixed delay unplugs the output before the tiles have arrived on
-# it, and then "the tiles did not come back" is true and means nothing — they
+# it, and then "the tiles did not come back" is true and means nothing - they
 # had not been there to come back.
 
 cat > "$run/hotplug.trigger.sh" <<TRIGGER

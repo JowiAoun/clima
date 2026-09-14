@@ -6,15 +6,15 @@
 //
 // This file is about arithmetic on four timestamps, and it exists because
 // getting that arithmetic wrong is invisible. An app that hides an alert at
-// `expires` looks completely correct — the banner appears, the sheet works, the
-// severity colour is right — and takes a Heat Advisory off the screen at five
+// `expires` looks completely correct - the banner appears, the sheet works, the
+// severity colour is right - and takes a Heat Advisory off the screen at five
 // in the morning on the day of the heat. There is no screenshot in which that
 // is visible, so it has to be a test.
 //
 // The values below are not invented. They are the instants in
 // tests/fixtures/alerts/nws/siskiyou-heat-advisory.json, which is a real alert
-// recorded from the live service, and the shape they make — expires eighteen
-// hours before ends — is the shape 19 of the 25 alerts in force in California
+// recorded from the live service, and the shape they make - expires eighteen
+// hours before ends - is the shape 19 of the 25 alerts in force in California
 // that afternoon had.
 
 #include "libclimat/domain/alert.h"
@@ -132,7 +132,7 @@ void TestAlerts::theWholeExpiryTable_data()
         << at(6, 3) << int(AlertPhase::Active);
     QTest::newRow("one minute before expires")
         << at(6, 11, 59) << int(AlertPhase::Active);
-    QTest::newRow("one minute after expires — still active")
+    QTest::newRow("one minute after expires - still active")
         << at(6, 12, 1) << int(AlertPhase::Active);
     QTest::newRow("one minute before ends")
         << at(7, 5, 59) << int(AlertPhase::Active);
@@ -236,7 +236,7 @@ void TestAlerts::rankingIsTotalSoASortIsStable()
 {
     // Two alerts equal on every graded axis and on onset. Without the final
     // tie-break on id, std::stable_sort would leave their order to whatever the
-    // provider happened to emit — and a golden image of a two-alert banner would
+    // provider happened to emit - and a golden image of a two-alert banner would
     // alternate between runs.
     const Alert first  = graded(AlertSeverity::Moderate, QStringLiteral("aaa"));
     const Alert second = graded(AlertSeverity::Moderate, QStringLiteral("bbb"));
@@ -265,7 +265,7 @@ void TestAlerts::twoAlertsSharingEveryFieldButKeysAreTwoHazards()
 {
     // Seattle's two Air Quality Alerts: same event, same sender, same geocodes,
     // no references, different ids. This is the case that rules out an identity
-    // built from what they have in common — the obvious design merges them and
+    // built from what they have in common - the obvious design merges them and
     // hides one.
     Alert one = graded(AlertSeverity::Unknown, QStringLiteral("x"));
     Alert two = graded(AlertSeverity::Unknown, QStringLiteral("y"));

@@ -11,7 +11,7 @@
 // before there was anything to migrate: "a migration written after the rename
 // has already lost the data it was supposed to carry". It also says, in the
 // same paragraph, why the function takes its table as an argument instead of
-// reading supersededIdentities() directly — "so that it is testable without a
+// reading supersededIdentities() directly - "so that it is testable without a
 // rename having happened: a test hands it two identities it created itself and
 // checks the file arrived".
 //
@@ -166,7 +166,7 @@ void TestSettings::init()
 void TestSettings::anEmptyTableOfSupersededIdentitiesCopiesNothing()
 {
     // The state today and the common case forever. It has to be cheap and it
-    // has to be silent — this runs in main() on every single launch.
+    // has to be silent - this runs in main() on every single launch.
     QVERIFY(!Settings::migrateConfigDirectory({}));
 }
 
@@ -191,7 +191,7 @@ void TestSettings::anOrganisationRenameCarriesThePreferencesForward()
     QVERIFY2(Settings::migrateConfigDirectory({ old }), "the rename carried nothing forward");
 
     // The file arrived, byte for byte, under the name this build will read.
-    // Not "a file exists" — the contents are the user's preferences and a
+    // Not "a file exists" - the contents are the user's preferences and a
     // truncated copy is worse than none.
     QCOMPARE(readFile(currentFile), QByteArrayLiteral("[General]\ntemperatureUnit=fahrenheit\n"));
 
@@ -205,14 +205,14 @@ void TestSettings::anOrganisationRenameCarriesThePreferencesForward()
 
 void TestSettings::anApplicationRenameCarriesThemForwardToo()
 {
-    // The shape that did NOT work, and the likelier half of a rebrand — the
+    // The shape that did NOT work, and the likelier half of a rebrand - the
     // organisation is a domain and tends to outlive a product name.
     //
     // QSettings resolves to <config>/<organisation>/<application>.ini, so an
     // application rename leaves the directory exactly where it was and moves
     // only the FILENAME. A migration that compared directories saw `legacy ==
     // current`, skipped, and left the old file sitting unread beside the new
-    // one — every preference back to its default, no error anywhere, which is
+    // one - every preference back to its default, no error anywhere, which is
     // precisely the data-loss event app/settings.h says this helper exists to
     // prevent.
     const SettingsIdentity old{ QCoreApplication::organizationName(),
@@ -268,7 +268,7 @@ void TestSettings::aFileThatAlreadyExistsIsNeverOverwritten()
 void TestSettings::aSharedDirectoryIsNotMistakenForHavingAlreadyMigrated()
 {
     // The directory is named after the ORGANISATION, so it can exist because a
-    // sibling application under the same organisation has run — or because a
+    // sibling application under the same organisation has run - or because a
     // previous release of this one did, under its old name. Neither says
     // anything about whether THIS application has preferences yet.
     //
@@ -286,7 +286,7 @@ void TestSettings::aSharedDirectoryIsNotMistakenForHavingAlreadyMigrated()
 
     QVERIFY(writeFile(legacyFile, QByteArrayLiteral("[General]\nappearance=dark\n")));
 
-    // The shared directory now exists and contains a file — just not ours.
+    // The shared directory now exists and contains a file - just not ours.
     QVERIFY(QDir(configDirectoryFor(currentIdentity())).exists());
     QVERIFY(!QFile::exists(currentFile));
 
@@ -315,7 +315,7 @@ void TestSettings::theFirstIdentityThatExistsWins()
 {
     // "newest first", says the header on supersededIdentities(). Two renames
     // deep, both files still on disk, and the one that must come forward is the
-    // most recent — the older one is preferences the user has already
+    // most recent - the older one is preferences the user has already
     // superseded once.
     //
     // Two different ORGANISATIONS, so the two are genuinely two places: within
@@ -365,8 +365,8 @@ void TestSettings::anIdentityEqualToTheCurrentOneIsNotCopiedOntoItself()
 void TestSettings::everySubdirectoryComesForwardToo()
 {
     // copyTree recurses, and it has to: the config location is a directory, not
-    // a file, and anything Climat later puts beside climat.ini — a cached place
-    // list, a per-widget layout — lives in it.
+    // a file, and anything Climat later puts beside climat.ini - a cached place
+    // list, a per-widget layout - lives in it.
     const SettingsIdentity old{ QStringLiteral("ClimatTestNested"),
                                 QCoreApplication::applicationName() };
     const QString legacyDir   = configDirectoryFor(old);
@@ -389,7 +389,7 @@ void TestSettings::everySubdirectoryComesForwardToo()
     QCOMPARE(readFile(currentDir + QStringLiteral("/widgets/tile.json")),
              QByteArrayLiteral("nested\n"));
 
-    // Hidden files too — QDir::Hidden is in the entry filter, and on Unix a
+    // Hidden files too - QDir::Hidden is in the entry filter, and on Unix a
     // dotfile is an ordinary way to store something.
     QCOMPARE(readFile(currentDir + QStringLiteral("/.hidden")), QByteArrayLiteral("dotfile\n"));
 
@@ -402,7 +402,7 @@ void TestSettings::everySubdirectoryComesForwardToo()
 void TestSettings::theShippedTableIsEmptyAndThatIsTheCorrectAnswer()
 {
     // Climat has written preferences under exactly one identity. This asserts
-    // the table has not grown a speculative entry — an identity in this list
+    // the table has not grown a speculative entry - an identity in this list
     // that never existed is a file probe on every launch, and one that is wrong
     // is a migration from somebody else's application.
     QVERIFY(Settings::supersededIdentities().isEmpty());
@@ -417,7 +417,7 @@ void TestSettings::aFreshInstallReadsTheDocumentedDefaults()
     // Through the object that reads them, on a store with nothing in it.
     //
     // This used to build a QSettings on a QTemporaryDir, assert it was empty,
-    // and then never use it again — the three assertions below read the live
+    // and then never use it again - the three assertions below read the live
     // singleton, whose init() had just written every value they checked. So it
     // asserted what the test itself had set, and went on passing when the
     // clock's default stopped being a constant. An empty file and a reload is
@@ -466,7 +466,7 @@ void TestSettings::aValueSurvivesBeingWrittenAndReadBack_data()
     QTest::addColumn<QString>("property");
     QTest::addColumn<QString>("value");
 
-    // The five unit properties, which "are per quantity, never bundled" —
+    // The five unit properties, which "are per quantity, never bundled" -
     // §4.10, and "the single most repeated complaint under every weather app's
     // reviews". A mixture has to be storable, so each is written on its own.
     QTest::newRow("temperature") << QStringLiteral("temperatureUnit")   << QStringLiteral("fahrenheit");
@@ -486,7 +486,7 @@ void TestSettings::aValueSurvivesBeingWrittenAndReadBack()
     Settings *settings = Settings::instance();
 
     // Through the metaobject, so this covers the property a QML binding
-    // actually writes rather than the C++ setter beside it — QML_SINGLETON
+    // actually writes rather than the C++ setter beside it - QML_SINGLETON
     // reaches these by name.
     QVERIFY2(settings->setProperty(property.toUtf8().constData(), value),
              qPrintable(property));
@@ -542,8 +542,8 @@ void TestSettings::geometryIsOneFactAndIsWrittenInOneGo()
 }
 
 // ============================================================================
-// The acknowledged-alert list. Opaque to Settings — app/viewmodels/alertsdata.cpp
-// owns the format — which makes this the one property where the storage layer
+// The acknowledged-alert list. Opaque to Settings - app/viewmodels/alertsdata.cpp
+// owns the format - which makes this the one property where the storage layer
 // has to carry bytes it cannot interpret.
 // ============================================================================
 
@@ -559,7 +559,7 @@ void TestSettings::theAcknowledgedListRoundTripsThroughAnIniFile()
     settings->setAcknowledgedAlerts(stored);
     QCOMPARE(settings->acknowledgedAlerts(), stored);
 
-    // Emptying it is a value, not an absence — a user who reveals their last
+    // Emptying it is a value, not an absence - a user who reveals their last
     // dismissed alert must not have the list read back as whatever was there
     // before.
     settings->setAcknowledgedAlerts({});
@@ -571,7 +571,7 @@ void TestSettings::aListEntryMayContainTheCharactersAnIniFileUsesItself()
     // A QSettings INI writer escapes what it has to, and an NWS identity key is
     // full of exactly the characters that need it. If any of these came back
     // split, joined or truncated, a dismissal would silently stop working for
-    // the alerts that update most often — and it would look like the
+    // the alerts that update most often - and it would look like the
     // acknowledgement logic was wrong rather than the storage.
     Settings *settings = Settings::instance();
 
@@ -597,7 +597,7 @@ void TestSettings::aListEntryMayContainTheCharactersAnIniFileUsesItself()
 void TestSettings::thePreferencesAreInAFileAnAnswerCanNameAndAUserCanRead()
 {
     // "'Which file?' is the first question of every support conversation and an
-    // About box should be able to answer it." And it has to be a FILE — on
+    // About box should be able to answer it." And it has to be a FILE - on
     // Windows without QSettings::setDefaultFormat(IniFormat) this would be a
     // registry path, which cannot be backed up by copying, cannot be read at
     // line 4, and is not writable by a portable unzip-and-run build.
@@ -621,7 +621,7 @@ void TestSettings::thePreferencesAreInAFileAnAnswerCanNameAndAUserCanRead()
 // between "reads it at start" and "follows it", and the discipline in all of
 // them is that the other process is simulated with BYTES rather than with a
 // second QSettings. Two QSettings on one path in one process share a parsed
-// copy of the file and agree with each other without a disk read in between —
+// copy of the file and agree with each other without a disk read in between -
 // a test written that way passes with reloadFromDisk() doing nothing at all.
 // ============================================================================
 
@@ -693,7 +693,7 @@ void TestSettings::theWatcherReloadsWithoutBeingAsked()
     // This case found a second bug in the first draft, and it is the reason
     // reloadFromDisk() compares against what it last announced rather than
     // against a read taken just before its sync. QSettings flushes itself on
-    // the event loop after a setValue — init() made several — and that flush
+    // the event loop after a setValue - init() made several - and that flush
     // re-read the changed file before the settle timer fired, so a "before"
     // read at reload time already said 24h and the change was never emitted.
     // The wait below spins the loop, which is what makes this case reach it.
@@ -743,7 +743,7 @@ void TestSettings::theWatcherSurvivesTheFileBeingReplaced()
     QSignalSpy second(settings, &Settings::clockFormatChanged);
     QVERIFY(replace(QByteArrayLiteral("[time]\nformat=12h\n")));
     QVERIFY2(second.wait(3000),
-             "the second replacement was not noticed — the watcher was told about an inode "
+             "the second replacement was not noticed - the watcher was told about an inode "
              "that no longer exists and nothing re-armed it");
     QCOMPARE(settings->clockFormat(), QStringLiteral("12h"));
 }
@@ -769,7 +769,7 @@ void TestSettings::aFreshInstallTakesItsClockFromTheLocale()
 
     // And through Settings, on a store with the key ABSENT, which is the wiring
     // rather than the constant. Without this the case passes against
-    // `load(key::clockFormat, "12h")` — the exact regression it is named for —
+    // `load(key::clockFormat, "12h")` - the exact regression it is named for -
     // because init() writes 12h before every test and the assertions above
     // never touch the object that reads it.
     Settings *settings = Settings::instance();

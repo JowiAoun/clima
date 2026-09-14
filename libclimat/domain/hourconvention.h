@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: MPL-2.0
 //
-// Which hour a number belongs to — the one-line conversion that decides
+// Which hour a number belongs to - the one-line conversion that decides
 // whether every rain band in the app is drawn an hour late.
 //
 // ============================================================================
@@ -18,7 +18,7 @@
 // reads "Preceding hour sum", and libclimat/providers/metno/ shifts MET Norway's
 // `next_1_hours` blocks into it.
 //
-// app/qml/Climat/precip.js picks the second, and not casually — its comment
+// app/qml/Climat/precip.js picks the second, and not casually - its comment
 // above `bandX`/`bandW` argues for it:
 //
 //     "An hour's sample is an instant, but the rain it reports is an interval
@@ -54,7 +54,7 @@
 //     hourly[t] vs sum of minutely_15 over [t, t + 1h)   total error  177.45 mm
 //
 // with exact agreement on the heavy hours (13.90, 32.50, 68.80 mm). The same
-// experiment on `temperature_2m` — instantaneous, and therefore the control —
+// experiment on `temperature_2m` - instantaneous, and therefore the control -
 // agrees to 0.000 °C at lag zero. Verified live 2026-07-31, `models=gfs_hrrr`
 // so that both series come from one model.
 //
@@ -80,7 +80,7 @@
 namespace climat {
 
 // The same hours, re-read so that every accumulated quantity describes the
-// hour STARTING at its timestamp — the convention app/qml/Climat/precip.js
+// hour STARTING at its timestamp - the convention app/qml/Climat/precip.js
 // draws on. Returns one fewer point than it is given; empty in, empty out.
 //
 // Instantaneous quantities are untouched: they are readings at the timestamp,
@@ -91,8 +91,8 @@ namespace climat {
 [[nodiscard]] QList<HourlyPoint> asHourStarting(const QList<HourlyPoint> &hourEnding);
 
 // The whole forecast, with its hourly series converted. The daily series is
-// untouched — a daily total is already keyed to a calendar date rather than to
-// an interval boundary — and so is `current`, whose precipitation is the
+// untouched - a daily total is already keyed to a calendar date rather than to
+// an interval boundary - and so is `current`, whose precipitation is the
 // preceding hour by definition and is displayed as "in the last hour".
 [[nodiscard]] Forecast asHourStarting(const Forecast &forecast);
 

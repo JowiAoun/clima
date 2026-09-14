@@ -9,8 +9,8 @@
 // The real portal is a permission dialog. A test cannot click it, and a test
 // that reached the real GeoClue would be testing where the runner is. So this
 // binary IS the portal: it owns org.freedesktop.portal.Desktop on the bus it
-// is given and implements the three objects the protocol names — the portal,
-// a request and a session — with the same paths, the same signals and the same
+// is given and implements the three objects the protocol names - the portal,
+// a request and a session - with the same paths, the same signals and the same
 // response codes the spec gives them. The locator under test talks to it over
 // D-Bus exactly as it would talk to xdg-desktop-portal; nothing is stubbed
 // on the client side.
@@ -26,9 +26,9 @@
 //
 // That the real portal's dialog is worded the way the accuracy asked for
 // implies. CITY accuracy is a number in a map; what the desktop shows the
-// reader for it is the desktop's. Everything else — the two paths, the race
+// reader for it is the desktop's. Everything else - the two paths, the race
 // the subscription order closes, refusal against error against timeout, a
-// stranger's session ignored, the session closed after the fix — is here.
+// stranger's session ignored, the session closed after the fix - is here.
 
 #include "libclimat/places/portallocator.h"
 
@@ -273,7 +273,7 @@ void TestPortalLocator::initTestCase()
     NetworkGuard::install();
 
     QVERIFY2(QDBusConnection::sessionBus().isConnected(),
-             "no session bus — this test is meant to run under dbus-run-session");
+             "no session bus - this test is meant to run under dbus-run-session");
     QVERIFY2(m_portalBus.isConnected(), "the portal-side connection did not connect");
 }
 
@@ -294,7 +294,7 @@ void TestPortalLocator::putThePortalOnTheBus()
 
     QVERIFY(m_portalBus.registerObject(PortalLocator::objectPath(), m_portal));
     QVERIFY2(m_portalBus.registerService(PortalLocator::service()),
-             "could not own org.freedesktop.portal.Desktop — is the real portal on this bus?");
+             "could not own org.freedesktop.portal.Desktop - is the real portal on this bus?");
 }
 
 void TestPortalLocator::takeThePortalOffTheBus()
@@ -335,7 +335,7 @@ void TestPortalLocator::noPortalOnTheBusIsUnavailableAndDoesNotBlock()
     QSignalSpy failed(&locator, &DeviceLocator::failed);
     locator.requestPosition();
 
-    // Nothing waits for it. The answer — whatever it is — is not on the stack.
+    // Nothing waits for it. The answer - whatever it is - is not on the stack.
     QCOMPARE(failed.count(), 0);
     QVERIFY(locator.isRequestInFlight());
 
@@ -375,7 +375,7 @@ void TestPortalLocator::aFixArrivesAndTheSessionIsClosed()
     QVERIFY(!locator.isRequestInFlight());
 
     // The session is closed once the fix is in, and it is the portal's own
-    // path that was closed — the one it handed back, not the one the token
+    // path that was closed - the one it handed back, not the one the token
     // predicted.
     QVERIFY(sessionUsed.startsWith(QStringLiteral("/org/freedesktop/portal/desktop/session/fake/")));
     QTRY_COMPARE_WITH_TIMEOUT(m_portal->closesOf(sessionUsed), 1, 3000);
@@ -445,7 +445,7 @@ void TestPortalLocator::nothingArrivingIsATimeout()
         return locator.requestPathFor(token);
     };
 
-    // Granted, and then silence — GeoClue indoors, with no fix to give.
+    // Granted, and then silence - GeoClue indoors, with no fix to give.
     QString sessionUsed;
     m_portal->onStart = [&sessionUsed](FakePortal &portal, const QString &request,
                                        const QString &session) {
@@ -517,7 +517,7 @@ void TestPortalLocator::cancelReportsNothingAndClosesTheSession()
         return locator.requestPathFor(token);
     };
 
-    // Granted, then a fix — but the caller has changed its mind in between.
+    // Granted, then a fix - but the caller has changed its mind in between.
     QString sessionUsed;
     m_portal->onStart = [&sessionUsed](FakePortal &portal, const QString &request,
                                        const QString &session) {
@@ -569,7 +569,7 @@ void TestPortalLocator::theAccuracyAskedForIsCity()
 void TestPortalLocator::aSessionCreatedForACancelledRequestIsClosed()
 {
     // The window the serial exists for. A CreateSession reply that lands after
-    // its request was cancelled used to be dropped on the floor — but the
+    // its request was cancelled used to be dropped on the floor - but the
     // portal had already created the session, and xdg-desktop-portal reaps one
     // only when the owning bus name goes away, so it kept GeoClue reporting to
     // nobody for the life of the process.
@@ -584,7 +584,7 @@ void TestPortalLocator::aSessionCreatedForACancelledRequestIsClosed()
     // Cancelled in the SAME turn of the event loop, before anything can have
     // answered: an asyncCall cannot complete without the loop running, so the
     // portal has not been asked yet and certainly has not replied. That is the
-    // window, and it needs no delayed reply to reach — it is simply the one
+    // window, and it needs no delayed reply to reach - it is simply the one
     // sequence cancelReportsNothingAndClosesTheSession deliberately avoids by
     // waiting for the session to exist first.
     locator.requestPosition();
@@ -605,7 +605,7 @@ void TestPortalLocator::aPermissionDialogNobodyAnswersIsBounded()
 {
     // The other new clock. timeout() bounds the arrival of a POSITION and does
     // not start until the portal has said yes, so a dialog left open is
-    // covered by its own generous bound instead — which is three minutes in
+    // covered by its own generous bound instead - which is three minutes in
     // the product and has to be settable to be reachable here.
     //
     // Granted never, and the session created: the portal shows the prompt and

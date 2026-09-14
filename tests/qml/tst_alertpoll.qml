@@ -3,8 +3,8 @@
 //
 // The window tells the alert poll what it is doing.
 //
-// AlertsData's schedule — three minutes focused, ten idle, stopped when
-// hidden — was tested from the day it landed, through setWindowState(). What
+// AlertsData's schedule - three minutes focused, ten idle, stopped when
+// hidden - was tested from the day it landed, through setWindowState(). What
 // nothing tested was whether anything CALLED setWindowState(), and nothing
 // did: the app polled every three minutes from launch to quit, minimised or
 // not, and tst_alertsdata could not see it because it drives the view model
@@ -41,8 +41,8 @@ TestCase {
         // is the whole of this case. AlertsData's own defaults are visible and
         // focused, so asserting "an open window polls" against a fresh
         // singleton asserts nothing at all: it passes with the
-        // Component.onCompleted line — the one caller this file exists to
-        // protect — deleted outright. That was the first version of this test,
+        // Component.onCompleted line - the one caller this file exists to
+        // protect - deleted outright. That was the first version of this test,
         // and it is the same class of bug as the one the branch started from.
         Alerts.setWindowState(false, false)
         compare(Alerts.pollIntervalMs(), 0, "the singleton did not start from stopped")
@@ -56,7 +56,7 @@ TestCase {
         // exposed means polling, at one of the two visible rates.
         var interval = Alerts.pollIntervalMs()
         verify(interval === 3 * 60 * 1000 || interval === 10 * 60 * 1000,
-               "the window did not push its state at startup — the poll is at "
+               "the window did not push its state at startup - the poll is at "
                + interval + ", where an exposed window should be at 3 or 10 minutes")
     }
 
@@ -68,7 +68,7 @@ TestCase {
         // with both assigned warns about the conflict on every change.
         win.visible = false
         compare(Alerts.pollIntervalMs(), 0,
-                "a hidden window must stop polling — this is the line the "
+                "a hidden window must stop polling - this is the line the "
                 + "bandwidth arithmetic in alertsdata.h rests on")
 
         win.visible = true

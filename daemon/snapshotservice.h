@@ -11,7 +11,7 @@
 //
 //   1. **SQLite has one writer.** Six widgets, a tray and the app is eight
 //      processes opening the same database. libclimat's cache would survive it
-//      — it is WAL and the writes are small — but "survive" is the wrong bar
+//      - it is WAL and the writes are small - but "survive" is the wrong bar
 //      for something a user leaves running for a month.
 //
 //   2. **The free tier is per-client, not per-window.** Open-Meteo's terms are
@@ -26,7 +26,7 @@
 //
 // So: this process owns the network, the cache and the clock. Widgets own
 // pixels. The app will eventually read from here too, but it does not yet and
-// nothing here assumes it does — the daemon is additive, and a desktop with no
+// nothing here assumes it does - the daemon is additive, and a desktop with no
 // daemon running is exactly the app that shipped before this existed.
 //
 // ============================================================================
@@ -34,7 +34,7 @@
 //
 // Last-known data and an honest timestamp, never a blank tile. Every snapshot
 // carries `fetchedAt`, so a widget whose daemon has gone away keeps drawing
-// what it has and says "updated 40 minutes ago" — and goes on being right
+// what it has and says "updated 40 minutes ago" - and goes on being right
 // about that for as long as it is up. This is the same rule as non-negotiable
 // 1 in docs/README.md, applied one process further out.
 //
@@ -129,7 +129,7 @@ Q_SIGNALS:
 
     // The saved places changed under us: one was added, removed, moved or made
     // home. Existing subscriptions are re-pointed here before this goes out, so
-    // a reader that ignores it still ends up with the right city — what it is
+    // a reader that ignores it still ends up with the right city - what it is
     // for is the reader whose Subscribe FAILED, which is every widget on a
     // desktop where the tiles were put up before anybody chose a place. There
     // is no subscription to re-point for those, and this is the only thing that
@@ -157,7 +157,7 @@ private:
         // second one used to be thrown away.
         //
         // A reader subscribes to "home". That is canonicalised to a row id here
-        // so the fetch, the cache and the publish all key on one string — and
+        // so the fetch, the cache and the publish all key on one string - and
         // for as long as only the id was kept, "home" meant *whichever place
         // was home the moment you asked*. Change home in the app and every
         // widget on the desktop went on drawing the old city, correctly
@@ -179,8 +179,8 @@ private:
     Watched &ensureWatched(const QString &placeId);
 
     // The cache, synchronously, before the network. A widget host that starts
-    // beside a daemon that has never fetched — a login, an upgrade, a D-Bus
-    // activation — calls GetSnapshot in the same event-loop turn it subscribed
+    // beside a daemon that has never fetched - a login, an upgrade, a D-Bus
+    // activation - calls GetSnapshot in the same event-loop turn it subscribed
     // in, and fetch() below cannot answer inside that turn: every provider
     // future, even one served from the cache, is settled through the event
     // loop. So this asks each provider in the chain for its cached bytes
@@ -197,7 +197,7 @@ private:
     //
     // The places table belongs to the app: it is where somebody searches for a
     // city, sets a home and deletes the one they mistyped. This process reads
-    // it and nothing tells it when it changes — deliberately, because the app
+    // it and nothing tells it when it changes - deliberately, because the app
     // does not know this daemon exists (see the header) and a bus call from it
     // would be the first line of it finding out.
     //

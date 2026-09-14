@@ -8,18 +8,18 @@
 //
 // libclimat speaks one set of units and only one: °C, km/h, hPa, km, mm, and
 // libclimat/domain/forecast.h says so on every field. That is not a metric
-// preference — it is the property that lets a cached payload survive a change
+// preference - it is the property that lets a cached payload survive a change
 // of preference, and that keeps `precip.js`'s NWS intensity thresholds (2.5
 // mm/h moderate, 7.6 mm/h heavy) meaning what the NWS meant by them when the
 // reader has asked for inches.
 //
 // So the conversion is *late*: it happens in app/viewmodels/, on the way out,
 // and everything upstream of that line is canonical. app/qml/Climat/metrics.js
-// wrote this rule down before there was anything to enforce it —
+// wrote this rule down before there was anything to enforce it -
 //
 //     "Header/readout formatting. Kept here so the chart never decides units."
 //
-// — and this file is that sentence promoted from a comment above one function
+// - and this file is that sentence promoted from a comment above one function
 // to the only place in the program that knows a conversion factor. There is no
 // other. Grep for 1.8 and 0.621 and 0.02953; they are here and nowhere.
 //
@@ -29,7 +29,7 @@
 // This is the half that is easy to get wrong and impossible to un-see
 // afterwards. metrics.js's temperature axis runs 0 → 40 in steps of 10, which
 // is four round numbers a person would have chosen. Convert those four numbers
-// and the Fahrenheit axis reads 32.0 / 50.0 / 68.0 / 86.0 / 104.0 — every
+// and the Fahrenheit axis reads 32.0 / 50.0 / 68.0 / 86.0 / 104.0 - every
 // gridline a fraction, none of them a number anybody thinks in.
 //
 // The fix is not to round afterwards, which moves the gridlines off the values
@@ -69,14 +69,14 @@ class Units : public QObject
     Q_PROPERTY(QString visibility READ visibilityUnit NOTIFY changed)
     Q_PROPERTY(QString precipitation READ precipitationUnit NOTIFY changed)
 
-    // "metric" | "imperial" | "custom" — a READING of the five above, never a
+    // "metric" | "imperial" | "custom" - a READING of the five above, never a
     // sixth preference. See `applySystem` for why the distinction is the whole
     // of the design here.
     Q_PROPERTY(QString system READ system NOTIFY changed)
 
 public:
     // The quantities that have a unit preference, plus the ones that do not
-    // and still need a symbol. `None` is not "dimensionless" — the UV index and
+    // and still need a symbol. `None` is not "dimensionless" - the UV index and
     // the air-quality index are genuinely unitless and go through here so that
     // a caller never has to branch on whether a conversion applies.
     enum class Quantity {
@@ -110,7 +110,7 @@ public:
 
     // Display → canonical. Not currently called by anything in the product and
     // deliberately present anyway: the day a UI takes a temperature as *input*
-    // — a threshold for a notification, a units field in a text box — the
+    // - a threshold for a notification, a units field in a text box - the
     // inverse has to exist, and a half-invertible conversion table is one where
     // somebody eventually writes the other direction by hand at the call site.
     [[nodiscard]] double toCanonical(Quantity quantity, double display) const;
@@ -137,7 +137,7 @@ public:
     // display values and needs the label back.
     Q_INVOKABLE QString formatDisplay(Quantity quantity, double display) const;
 
-    // The axis for a quantity, IN THE DISPLAY UNIT — see the header. Returns
+    // The axis for a quantity, IN THE DISPLAY UNIT - see the header. Returns
     // {min, max, step}; an empty list for a quantity with no fixed axis.
     [[nodiscard]] QList<double> axis(Quantity quantity) const;
 
@@ -155,18 +155,18 @@ public:
     // five currently happen to spell one of them.
     //
     // The difference is not a word game and it is visible in one keystroke.
-    // Choosing "imperial" here sets fahrenheit/mph/inHg/mi/in — and then setting
+    // Choosing "imperial" here sets fahrenheit/mph/inHg/mi/in - and then setting
     // precipitation back to millimetres is allowed, leaves the other four alone,
     // and makes `system()` answer "custom". A real switch could not do that:
-    // it would own the five, and °C-with-mph — the single most repeated
-    // complaint under every weather app's reviews — would be unreachable.
+    // it would own the five, and °C-with-mph - the single most repeated
+    // complaint under every weather app's reviews - would be unreachable.
     //
     // So the preset is an accelerator for the common case and the per-quantity
     // rows underneath it remain the truth. A settings screen showing both is
     // showing the model rather than hiding it: docs/04-architecture.md §4.10.
     //
     // `system()` returns "custom" for any mixture, which is a state the UI has
-    // to be able to draw — neither radio filled — rather than one it may round
+    // to be able to draw - neither radio filled - rather than one it may round
     // to the nearest preset.
     [[nodiscard]] QString system() const;
 
@@ -188,9 +188,9 @@ public:
 
 Q_SIGNALS:
     // One signal for all five. A view model rebuilds its whole snapshot when
-    // any unit changes — there is no cheaper granularity worth having, because
+    // any unit changes - there is no cheaper granularity worth having, because
     // the temperature series and the "feels like" series and the day strip all
-    // move together — and five signals connected to one slot is five ways to
+    // move together - and five signals connected to one slot is five ways to
     // forget the fifth.
     void changed();
 
@@ -200,7 +200,7 @@ private:
     [[nodiscard]] Settings *settings() const;
 
     // Which unit the reader chose for a quantity. The one thing this class
-    // knows that libclimat/domain/units.h does not — the arithmetic moved there
+    // knows that libclimat/domain/units.h does not - the arithmetic moved there
     // when climat-cli needed it, and what stayed here is the preference.
     [[nodiscard]] QString unitFor(Quantity quantity) const;
 };

@@ -102,7 +102,7 @@ QVariantList Metrics::list() const
     const Units *units = Units::instance();
 
     // Fills in the four fields that depend on the unit in force. `axis()`
-    // returns {min, max, step} chosen FOR that unit — see units.h on why a
+    // returns {min, max, step} chosen FOR that unit - see units.h on why a
     // converted axis lands on 32.0 / 50.0 / 68.0.
     const auto scaled = [units](QVariantMap metric, double fallbackMin, double fallbackMax,
                                 double fallbackStep, int decimals) {
@@ -121,8 +121,8 @@ QVariantList Metrics::list() const
     // Overview and Feels like are the same pair of series with the roles
     // swapped: whichever one the reader asked for is the filled area, and the
     // other is a line over it. That is the comparison both charts exist to
-    // make — 30° only means something next to the 27° it is being compared
-    // with — and it is what the toggle used to do by *replacing* the curve,
+    // make - 30° only means something next to the 27° it is being compared
+    // with - and it is what the toggle used to do by *replacing* the curve,
     // which showed one reading at a time and no comparison at all.
     //
     // On Overview the line is the toggle's; on Feels like it is always there,
@@ -162,7 +162,7 @@ QVariantList Metrics::list() const
         wind[QStringLiteral("overlay")]       = QStringLiteral("windGust");
         wind[QStringLiteral("overlayLegend")] = tr("Gusts");
         // Dashed, and the only overlay that is. A gust line is the *envelope*
-        // of the series under it — same quantity, upper bound — and a dash is
+        // of the series under it - same quantity, upper bound - and a dash is
         // how a bound is conventionally drawn. The temperature pair are two
         // readings of two different things that happen to share an axis, and a
         // second reading is a solid line.
@@ -251,7 +251,7 @@ QVariantList Metrics::displayAll(const QVariantMap &metric, const QVariantList &
 // that means the same thing every time you look at it is what lets a reader
 // compare Tuesday with Friday, and an auto axis makes a flat day look dramatic.
 // What it must not be is a *clip*. Every one of those nine was written down as
-// the range the weather usually sits in, and weather leaves it — 32 km of
+// the range the weather usually sits in, and weather leaves it - 32 km of
 // visibility against a 25 km axis, gusts past 40, an August afternoon past 40°,
 // a January morning below zero, a deep low under 995 hPa. The curve was drawn
 // anyway, off the top of the plot box, past the last gridline and out of the
@@ -260,7 +260,7 @@ QVariantList Metrics::displayAll(const QVariantMap &metric, const QVariantList &
 // So the fixed bounds are a *preferred* range: the axis shows at least that
 // much, and gives way at either end by whole steps when the data asks. Whole
 // steps, because the labelled rhythm is the other half of what makes a fixed
-// axis readable — an axis running to 32.4 is not one anybody chose.
+// axis readable - an axis running to 32.4 is not one anybody chose.
 //
 // autoScale is untouched. Precipitation asked for its axis to follow the data
 // and this is not that question.
@@ -312,7 +312,7 @@ QVariantList Metrics::axisTicks(const QVariantMap &metric, const QVariantList &v
     }
 
     // Off the resolved bounds and not the registry's, or an axis that gave way
-    // would grow a stretch with no gridlines on it — which is the same defect
+    // would grow a stretch with no gridlines on it - which is the same defect
     // as clipping, one step further out.
     const double min = axisMin(metric, values);
     const double max = axisMax(metric, values);
@@ -336,7 +336,7 @@ QVariantList Metrics::axisTicks(const QVariantMap &metric, const QVariantList &v
 QString Metrics::formatDisplay(const QVariantMap &metric, double value) const
 {
     if (qIsNaN(value))
-        return QStringLiteral("–");
+        return QStringLiteral("-");
     const int decimals = metric.value(QStringLiteral("decimals")).toInt();
     return QString::number(value, 'f', decimals)
          + metric.value(QStringLiteral("unit")).toString();

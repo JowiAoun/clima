@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Wind detail card — a compass rose on the left, the readings on the right.
+// Wind detail card - a compass rose on the left, the readings on the right.
 //
 // Wind is two facts that do not fit in one glyph: how hard it is blowing and
 // where it is coming from. The numbers carry the first, because a speed is a
@@ -21,7 +21,7 @@
 //
 // All three arrive rather than appear: the vane swings off north onto the
 // bearing, the wedge grows out to its reach, and the gust band opens to its
-// width — one gesture on the card's one-shot `reveal`. The two numbers do not
+// width - one gesture on the card's one-shot `reveal`. The two numbers do not
 // move. A speed is a reading and a reading is legible from the first frame.
 //
 // And point at the card and the wedge sets off downwind, because a drawing of
@@ -29,8 +29,8 @@
 // knows about wind. That is the one hover gesture in the grid; the rule it is
 // kept to is in DetailCard.qml and the mechanics are further down.
 // A card is a `DetailCard { content: Item { id: viz } }`, so everything drawn
-// here lives inside a Component and reaches the two ids around it — `root` for
-// the card and `viz` for the visualisation — across that boundary. Without this
+// here lives inside a Component and reaches the two ids around it - `root` for
+// the card and `viz` for the visualisation - across that boundary. Without this
 // pragma neither is resolvable at compile time: qmllint reports every one of
 // them as an unqualified access, and qmlcachegen, which is the half that costs
 // something, cannot ahead-of-time compile the binding and leaves it to be
@@ -40,7 +40,7 @@
 //
 // Bound makes the enclosing scope's ids lexical, which is what they already
 // read as. It is safe here because every delegate in this file declares its
-// `required property` — that is the one thing Bound takes away, and none of
+// `required property` - that is the one thing Bound takes away, and none of
 // these were relying on it.
 pragma ComponentBehavior: Bound
 
@@ -62,7 +62,7 @@ DetailCard {
         id: viz
 
         // Belongs to this visualisation and to nothing else, so it lives here
-        // rather than in theme.js — design system §10, the wind-rose exception.
+        // rather than in theme.js - design system §10, the wind-rose exception.
         readonly property color windAccent: "#55b17e"
 
         readonly property real dirDeg: root.d.directionDeg
@@ -73,7 +73,7 @@ DetailCard {
         // north is the reading's own zero and starting anywhere else would be
         // decoration dressed as data.
         //
-        // It takes the short way round — 66° anticlockwise for a WNW wind, not
+        // It takes the short way round - 66° anticlockwise for a WNW wind, not
         // 294° the other way. A vane settles onto the wind; a near-full
         // revolution in half a second reads as a spinner, which is the one thing
         // an arrival on this page must not look like. `dirDelta` is the signed
@@ -112,8 +112,8 @@ DetailCard {
         // this card asks that question, so the wedge does what the air does and
         // travels downwind.
         //
-        // A drift and not a turn. The bearing is a measurement — turning the
-        // wedge off it would be drawing a wind that is not blowing — so nothing
+        // A drift and not a turn. The bearing is a measurement - turning the
+        // wedge off it would be drawing a wind that is not blowing - so nothing
         // rotates. The wedge keeps its angle and moves along the one axis the
         // reading already names, from the upwind side of the dial to the
         // downwind side, and then starts again from where it came in. The reset
@@ -123,7 +123,7 @@ DetailCard {
         // The travel is bounded by the dial rather than chosen: `driftBack` and
         // `driftOn` are the room actually left between the wedge and the ring at
         // either end, so it sweeps everything available to it and never crosses
-        // out. That falls out well — a light wind is a stub with most of the
+        // out. That falls out well - a light wind is a stub with most of the
         // dial to cross, and a gale already fills it and barely moves, which is
         // the same fact the wedge's length is carrying.
         //
@@ -162,13 +162,13 @@ DetailCard {
         readonly property real driftBy:
             (-driftBack + (driftBack + driftOn) * drift) * root.hoverPhase
 
-        // Wedge reach downwind, against the working ceiling `Detail.wind` carries —
+        // Wedge reach downwind, against the working ceiling `Detail.wind` carries -
         // a ceiling that decides what the reader sees is data, not styling. At
         // 30 km/h it puts 13 km/h a little past halfway out, and anything at or
         // above the ceiling stops just short of the ring.
         //
         // Only the speed's share of the reach is revealed. 0.46 is the scale's
-        // own zero — where a dead calm leaves the wedge — so the reach grows off
+        // own zero - where a dead calm leaves the wedge - so the reach grows off
         // that the way a bar grows off its baseline, rather than swelling out of
         // a point that means nothing.
         readonly property real wedgeApexR:
@@ -204,7 +204,7 @@ DetailCard {
         readonly property string ringPath: spansPath(0, 360)
 
         // The band is the ring painted green wherever the gusts reach, so it is
-        // literally the ring's own call with a narrower span — which is why the
+        // literally the ring's own call with a narrower span - which is why the
         // two cannot disagree about where a letter sits. The argument, and the
         // bug that made it necessary, are in ChartMath.compassSpans.
         //
@@ -292,8 +292,8 @@ DetailCard {
         // The readings. Bearing first, because it is what the rose is showing;
         // then the mean, then the gust, each with its unit and its name.
         //
-        // Mean and gust are co-equal — neither is the number the card exists to
-        // show on its own — so both take the pair size rather than one of them
+        // Mean and gust are co-equal - neither is the number the card exists to
+        // show on its own - so both take the pair size rather than one of them
         // taking the reading size and the other a scaled-down guess.
         Column {
             id: readout

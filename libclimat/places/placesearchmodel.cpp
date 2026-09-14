@@ -77,7 +77,7 @@ void PlaceSearchModel::setLanguage(const QString &language)
     m_language = language;
 
     // The language is part of the question, so changing it re-asks it. Not
-    // immediately — through the same debounce, because a language picker bound
+    // immediately - through the same debounce, because a language picker bound
     // to a combo box can emit twice while the user scrolls it.
     if (!m_query.isEmpty())
         m_debounce.start();
@@ -161,7 +161,7 @@ void PlaceSearchModel::dispatch()
             [this, watcher, generation] {
                 watcher->deleteLater();
 
-                // A cancelled future has no result to read — QFuture::result()
+                // A cancelled future has no result to read - QFuture::result()
                 // on one asserts. It happens when the geocoder's QObject
                 // context goes away mid-flight.
                 if (watcher->isCanceled()) {

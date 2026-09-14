@@ -28,9 +28,9 @@ namespace {
 //
 // Deliberately a separate number from climat::wire::kSchemaVersion rather than
 // an include of it, and that is the point rather than an oversight. The widget
-// host and the daemon ship from different places on different clocks — the
+// host and the daemon ship from different places on different clocks - the
 // GNOME extension from extensions.gnome.org, the app and its daemon from
-// Flathub (docs/widgets.md) — so a build of this file will routinely meet a
+// Flathub (docs/widgets.md) - so a build of this file will routinely meet a
 // daemon that was compiled from a different commit. Tying the two numbers
 // together in CMake would make them agree on the developer's machine and
 // nowhere else, which is the one place the disagreement does not matter.
@@ -54,7 +54,7 @@ constexpr auto kSignature = "ss";
 // twenty-four-hour sparkline would draw a fortnight as a sawtooth.
 //
 // From the front, because rule 3 of the wire format says a slice starts at now
-// — index 0 of a recording is already the current hour.
+// - index 0 of a recording is already the current hour.
 //
 // `count` < 0 means all of it, and 0 means the branch was not asked for at all
 // and goes away entirely.
@@ -93,7 +93,7 @@ void trimSeries(QJsonObject &root, const QString &branch, int count)
 // places, and a tile that said "no weather" for both would send them to neither.
 //
 // They are sentences and not codes because the alternative is a mapping in QML,
-// which puts the words a long way from the code that knows which is true — and
+// which puts the words a long way from the code that knows which is true - and
 // tr() here is the same choice DaemonLink::incompatibility already made.
 QString notRunningText()
 {
@@ -221,7 +221,7 @@ void DaemonLink::connectToBus()
 {
     // The reason starts as "not running" (see the constructor) and every return
     // below leaves it that way. Only two things clear it: a handshake that
-    // worked, and an activation request still in flight — which are exactly the
+    // worked, and an activation request still in flight - which are exactly the
     // two cases where a snapshot really is on its way.
     QDBusConnection bus = QDBusConnection::sessionBus();
     if (!bus.isConnected()) {
@@ -232,7 +232,7 @@ void DaemonLink::connectToBus()
     m_usingBus = true;
 
     // WatchForOwnerChange rather than ForRegistration alone, so that
-    // `climat-daemon --replace` — one daemon handing the name to another — is a
+    // `climat-daemon --replace` - one daemon handing the name to another - is a
     // re-subscribe rather than a permanent disconnection.
     m_watcher = new QDBusServiceWatcher(QStringLiteral(CLIMAT_DAEMON_SERVICE), bus,
                                         QDBusServiceWatcher::WatchForOwnerChange, this);
@@ -250,7 +250,7 @@ void DaemonLink::connectToBus()
     // What it is for is the tile that has no subscription. A widget host that
     // started before the user had chosen a place got an empty token from
     // Subscribe, said so on the tile, and had nothing left that would ever make
-    // it ask again — no timer, no retry, and the daemon has no way to push to a
+    // it ask again - no timer, no retry, and the daemon has no way to push to a
     // subscription that was never created. This is that missing edge.
     bus.connect(QStringLiteral(CLIMAT_DAEMON_SERVICE), QStringLiteral(CLIMAT_DAEMON_PATH),
                 QStringLiteral(CLIMAT_DAEMON_INTERFACE), QStringLiteral("PlacesChanged"), this,
@@ -268,14 +268,14 @@ void DaemonLink::connectToBus()
 //
 // packaging/linux/climat-daemon.service.in makes the daemon activatable; this is
 // the request that uses it. Without both halves a desktop that is not GNOME has
-// nothing that starts the service between one login and the next — the
+// nothing that starts the service between one login and the next - the
 // extension is the only thing that ever did, and `--pin` put tiles on four other
 // compositors where there is no extension.
 //
 // Asynchronous, and deliberately. Activation is a fork, an exec and a name
 // registration, and the daemon opens its cache on the way up; a blocking call
 // would hold this process before its first frame for as long as all of that
-// takes. Nothing is waiting for the answer anyway — the service watcher above
+// takes. Nothing is waiting for the answer anyway - the service watcher above
 // is already armed, so a daemon that appears is picked up by the same path that
 // handles one which was restarted by hand.
 void DaemonLink::startDaemon()
@@ -307,7 +307,7 @@ void DaemonLink::startDaemon()
                 // separate messages: nothing installed a .service file (a build
                 // tree, or a package that skipped it), or one is installed and
                 // the binary it names is gone. Both mean the same thing to
-                // whoever is reading — there is no weather service and nothing
+                // whoever is reading - there is no weather service and nothing
                 // is going to produce one.
                 qCWarning(lcWidgets,
                           "no climat-daemon on the session bus, and the bus could not start one: "
@@ -343,7 +343,7 @@ void DaemonLink::onServiceUnregistered(const QString &)
     //
     // The reason below reaches those tiles too and is ignored by them, because
     // a feed with data has no waiting state left to explain. It is here for the
-    // tile that never got its first snapshot — a desktop where the daemon died
+    // tile that never got its first snapshot - a desktop where the daemon died
     // during the handshake has both kinds on it at once.
     setReason(notRunningText());
 }
@@ -430,7 +430,7 @@ void DaemonLink::loadEmbeddedCatalogue()
 {
     // The same file the daemon serves, compiled into this binary as well.
     //
-    // Two copies of the bytes, one copy of the file — widgets/catalogue.json is
+    // Two copies of the bytes, one copy of the file - widgets/catalogue.json is
     // listed in exactly one place in the repository and both targets embed it.
     // The daemon's answer wins when there is a daemon, because it is the one
     // that will have been upgraded alongside the data; this is what makes
@@ -466,7 +466,7 @@ void DaemonLink::attach(WidgetFeed *feed)
     }
 
     // Every feed attaches after main() has already decided what this process is
-    // reading from — QML is loaded last — so whatever went wrong is known by
+    // reading from - QML is loaded last - so whatever went wrong is known by
     // now and this tile can be told immediately rather than after a timeout.
     feed->setWaitingReason(m_reason);
 }
@@ -506,7 +506,7 @@ void DaemonLink::resubscribe(WidgetFeed *feed)
     //
     // Not a failure of the call: the daemon answered, and the answer is that it
     // has no place by that id (daemon/snapshotservice.cpp, canonical()). Which
-    // is a first run, and a common one — a package installs the widgets and the
+    // is a first run, and a common one - a package installs the widgets and the
     // autostart entry together, so the tiles can reach a working daemon on a
     // desktop where nobody has opened Climat yet and chosen anywhere.
     //
@@ -561,7 +561,7 @@ void DaemonLink::resubscribe(WidgetFeed *feed)
     //
     // One extra call at startup, once per tile, against a local process. That
     // buys a deterministic first paint, which is worth more than the round trip
-    // costs — and it is the same arguments, so the daemon answers it out of the
+    // costs - and it is the same arguments, so the daemon answers it out of the
     // memory it already filled for the subscription.
     const QDBusReply<QString> first =
         daemon.call(QStringLiteral("GetSnapshot"), feed->place(), feed->fields(), feed->hours(),
@@ -606,8 +606,8 @@ void DaemonLink::setReason(const QString &reason)
     m_reason = reason;
 
     // Pushed to every feed, including the ones that have data and will ignore
-    // it. Filtering here would put the state order in two files — this one and
-    // WidgetSurface.qml — and they would disagree the first time either moved.
+    // it. Filtering here would put the state order in two files - this one and
+    // WidgetSurface.qml - and they would disagree the first time either moved.
     for (WidgetFeed *feed : std::as_const(m_feeds))
         feed->setWaitingReason(reason);
 }
@@ -616,7 +616,7 @@ void DaemonLink::onPlacesChanged()
 {
     // Every feed, not only the ones that failed. A subscription made against
     // "home" was resolved to a row id when it was made, and the daemon has
-    // already re-pointed it — but a tile naming a specific place that has just
+    // already re-pointed it - but a tile naming a specific place that has just
     // been deleted, or one whose subscription predates the place it wants,
     // is only put right by asking again. Four tiles is four round trips to a
     // local process, on an event that happens when somebody edits their places.

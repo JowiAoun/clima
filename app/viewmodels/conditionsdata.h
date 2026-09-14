@@ -18,7 +18,7 @@
 //                   provider, converted once through app/viewmodels/units.h.
 //
 //   verdicts        `band`, `status`, `tone`, `beaufortName`. Published scales
-//                   applied to a measurement — the WHO's UV bands, the European
+//                   applied to a measurement - the WHO's UV bands, the European
 //                   AQI's, Beaufort. Ours to compute, not ours to invent, and
 //                   each one names its authority at the function that computes
 //                   it.
@@ -33,8 +33,8 @@
 // ============================================================================
 // WHAT HAS NO PROVIDER BEHIND IT, AND HOW THAT IS HANDLED
 //
-// Two blocks here are not data products anywhere, and docs/08-risks.md R9 —
-// "region-gate honestly, never fabricate" — decides what to do about each.
+// Two blocks here are not data products anywhere, and docs/08-risks.md R9 -
+// "region-gate honestly, never fabricate" - decides what to do about each.
 //
 //   pollen        IS a product, in Europe only. So it is gated, not computed:
 //                 `hasPollen` comes from Capability::Pollen at this coordinate
@@ -46,7 +46,7 @@
 //
 //   activities    is NOT a product anywhere. Nobody publishes "do you need an
 //                 umbrella". So it is computed here, from our own numbers, by
-//                 rules written down at `buildActivities()` — and the card says
+//                 rules written down at `buildActivities()` - and the card says
 //                 it is ours. An app that presented a derived verdict as a
 //                 provider's is doing the thing R9 is about, whether or not the
 //                 arithmetic is sound.
@@ -93,8 +93,8 @@ class ConditionsData : public QObject
     Q_PROPERTY(QVariantMap sun READ sun NOTIFY changed)
     Q_PROPERTY(QVariantMap moon READ moon NOTIFY changed)
 
-    // The phase, as its own card. `moon` above is where the moon is — rise,
-    // set, how long it is up — and this is what it looks like, which is a
+    // The phase, as its own card. `moon` above is where the moon is - rise,
+    // set, how long it is up - and this is what it looks like, which is a
     // different question with a different answer on the same night. Splitting
     // them is what lets each card draw one picture instead of two.
     Q_PROPERTY(QVariantMap moonPhase READ moonPhase NOTIFY changed)
@@ -118,7 +118,7 @@ public:
     // before it looks for a factory, so a QML_SINGLETON that can be
     // default-constructed is default-constructed and create() is never called.
     // app/appoptions.h has the same note and the same fix; the symptom here was
-    // perfect — the type registered, every binding evaluated, and QML read a
+    // perfect - the type registered, every binding evaluated, and QML read a
     // second, empty snapshot while C++ pushed into the one AppEngine owns.
     // Nothing warned. The screen came up with `undefined` in every card.
     explicit ConditionsData(QObject *parent);
@@ -128,7 +128,7 @@ public:
     void setSnapshot(const climat::Forecast &forecast, const climat::AirQuality &airQuality,
                      const QDateTime &now, const climat::Place &place, bool hasPollen);
 
-    // For the one case where there is a place but no forecast yet — the
+    // For the one case where there is a place but no forecast yet - the
     // location bar has to say where it is pointing before the data arrives, or
     // the first frame has a hole in it where the name goes.
     void setPlace(const climat::Place &place);
@@ -191,7 +191,7 @@ private:
     // What "now" reads, which is not always the provider's `current` block.
     //
     // A live response's `current` is stamped within a few minutes of the
-    // request and is the better reading — it is a nowcast at fifteen-minute
+    // request and is the better reading - it is a nowcast at fifteen-minute
     // resolution, not an hourly average. A RECORDED response's `current` is
     // stamped at the moment of recording, which is a different instant from the
     // one the fixture's clock is frozen at, and using it puts a hero reading

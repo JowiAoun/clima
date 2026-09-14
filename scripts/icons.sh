@@ -10,7 +10,7 @@
 # Why the PNGs are committed at all, when there is a generator right here:
 #
 # A packager building from a source tarball has librsvg or does not, and an
-# icon that fails to appear is not a build failure — it is an app with a grey
+# icon that fails to appear is not a build failure - it is an app with a grey
 # square in the launcher and a Flathub submission that gets bounced. So the
 # rendered sizes are artefacts of the repository, and this script's real job is
 # `check`: proving the committed bytes are still what the master renders to, so
@@ -18,7 +18,7 @@
 # icon that quietly disagrees with itself at four sizes out of eight.
 #
 # Run it under `nix develop`. The flake pins librsvg by store hash, which is
-# what makes "the same bytes on every machine" true rather than hopeful — the
+# what makes "the same bytes on every machine" true rather than hopeful - the
 # same argument scripts/golden.sh makes at greater length.
 set -euo pipefail
 
@@ -41,7 +41,7 @@ sizes=(16 24 32 48 64 128 256 512)
 command="${1:-render}"
 
 if ! command -v rsvg-convert > /dev/null 2>&1; then
-  echo "icons: rsvg-convert not found — run this inside \`nix develop\`" >&2
+  echo "icons: rsvg-convert not found - run this inside \`nix develop\`" >&2
   exit 1
 fi
 

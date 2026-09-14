@@ -106,7 +106,7 @@ export default class ClimatPreferences extends ExtensionPreferences {
                     // Written back in the catalogue's own order rather than in
                     // the order things were switched on, so the layout on the
                     // desktop does not depend on the sequence somebody clicked
-                    // in — which is not a thing anybody remembers doing.
+                    // in - which is not a thing anybody remembers doing.
                     settings.set_strv('widgets',
                                       known.filter(w => enabled.has(w.id)).map(w => w.id));
                 });

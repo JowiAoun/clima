@@ -833,7 +833,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Nothing on this screen is a map. The radar view is MapLibre Native over a vector basemap — decision D4 in docs/03-tech-stack.md — and this panel stands in for it so the shell can be reviewed with all five tabs present.</source>
+        <source>Nothing on this screen is a map. The radar view is MapLibre Native over a vector basemap - decision D4 in docs/03-tech-stack.md - and this panel stands in for it so the shell can be reviewed with all five tabs present.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -938,7 +938,7 @@
 <context>
     <name>MobileActivitiesCard</name>
     <message>
-        <source>Worked out by Climat from the forecast above — not a published forecast product.</source>
+        <source>Worked out by Climat from the forecast above - not a published forecast product.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1132,7 +1132,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The page follows the sky over the place on screen — night, dawn, day and dusk. Off holds it at one palette.</source>
+        <source>The page follows the sky over the place on screen - night, dawn, day and dusk. Off holds it at one palette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

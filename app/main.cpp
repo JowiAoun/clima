@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     // organisation and application names, so these two decide where the
     // forecast cache and the preferences file will live long before there is
     // either. The app ID is the reverse-DNS name the rest of the desktop stack
-    // keys off — the desktop entry's basename, the icon name, the D-Bus name —
+    // keys off - the desktop entry's basename, the icon name, the D-Bus name -
     // and setDesktopFileName is what lets a Wayland compositor match this
     // window to that entry. Without it the window gets a generic icon and no
     // app-menu association, which is the sort of thing nobody notices until
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     // Before anything constructs a QSettings, because the format is decided at
     // construction and never revisited: a QSettings built before this line
     // reads the Windows registry while every later one reads an INI file, and
-    // nothing complains — the preferences simply do not stick. Also the moment
+    // nothing complains - the preferences simply do not stick. Also the moment
     // a superseded config directory gets copied forward. See settings.h.
     Settings::prepareStorage();
 
@@ -54,13 +54,13 @@ int main(int argc, char *argv[])
     // After the QGuiApplication, because the font database needs the platform
     // integration up. There is no third position that works.
     //
-    // The return value is deliberately dropped here — QML reads the family back
+    // The return value is deliberately dropped here - QML reads the family back
     // off the application font as `Theme.type.family`, which is one source of
     // truth rather than two spellings of "Inter". See app/appfont.h.
     AppFont::install();
 
     // Before the QML engine loads: a translator installed after a component is
-    // built does not reach the strings already in it. No-op today — there are
+    // built does not reach the strings already in it. No-op today - there are
     // no language catalogues yet, which app/apptranslator.h explains.
     climat::AppTranslator::install(&app);
 
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     // Before the QML engine, and that is the whole reason this line is here
     // rather than in a Component.onCompleted. `Data` and `Detail` are read
     // while Main.qml's first objects are being constructed, so the snapshot has
-    // to exist by then — and it can, because docs/04-architecture.md §4.1's
+    // to exist by then - and it can, because docs/04-architecture.md §4.1's
     // first step is a cache read that opens no socket and returns inside this
     // call. A window that came up empty and filled in a frame later would be
     // the "renders from cache" promise kept in spirit and broken in the one
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     // A QML file that fails to construct its root object leaves the engine
-    // holding nothing and the event loop with no window to show — the app comes
+    // holding nothing and the event loop with no window to show - the app comes
     // up as an invisible process that has to be killed. Exit instead, non-zero,
     // so a headless capture in CI fails as a failure rather than as a timeout.
     //

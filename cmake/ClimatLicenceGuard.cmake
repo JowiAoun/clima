@@ -6,7 +6,7 @@
 # The Qt Company dual-licenses Qt, and not every module gets the same second
 # licence. Most of Qt is LGPLv3-or-commercial, which we can use in a
 # dynamically linked GPL-3.0-or-later app. A handful of modules are
-# GPLv3-or-commercial only — Qt Charts, Qt Graphs, Qt Lottie, Qt Quick 3D and
+# GPLv3-or-commercial only - Qt Charts, Qt Graphs, Qt Lottie, Qt Quick 3D and
 # Qt VirtualKeyboard among them. Linking one of those does not stop the app
 # building and does not print a warning; it silently makes the whole binary
 # GPLv3-only, which retroactively breaks the MPL-2.0 promise libclimat makes to
@@ -17,18 +17,18 @@
 # So the toolchain tells you here. This is a source-level guard: it catches
 # `find_package(Qt6 COMPONENTS Charts)` and a `target_link_libraries` naming a
 # banned target. It cannot catch a module that arrives transitively through
-# some other package, and it makes no claim to. The honest binary-level check —
-# reading the actual DT_NEEDED list of the linked executable — belongs in CI,
+# some other package, and it makes no claim to. The honest binary-level check -
+# reading the actual DT_NEEDED list of the linked executable - belongs in CI,
 # where there is a linked executable to read. Until then this covers the way
 # the mistake actually gets made: someone adds a component because they want a
 # chart, and it works.
 
 set(CLIMAT_BANNED_QT_MODULES
-    Charts              # QtCharts          — GPLv3 / commercial
-    Graphs              # QtGraphs          — GPLv3 / commercial (Charts' successor)
-    Lottie              # QtLottieAnimation — GPLv3 / commercial
-    Quick3D             # QtQuick3D         — GPLv3 / commercial
-    VirtualKeyboard     # QtVirtualKeyboard — GPLv3 / commercial
+    Charts              # QtCharts          - GPLv3 / commercial
+    Graphs              # QtGraphs          - GPLv3 / commercial (Charts' successor)
+    Lottie              # QtLottieAnimation - GPLv3 / commercial
+    Quick3D             # QtQuick3D         - GPLv3 / commercial
+    VirtualKeyboard     # QtVirtualKeyboard - GPLv3 / commercial
     CACHE INTERNAL "Qt modules whose licence would relicense the whole app"
 )
 
@@ -49,7 +49,7 @@ function(climat_guard_qt_components)
                 "Qt6::${component} is not permitted in Climat.\n"
                 "  ${reason}\n"
                 "  If you need what it does, write it against the scene graph "
-                "instead — that is what ClimatCharts is for (docs/04-architecture.md §4.6).")
+                "instead - that is what ClimatCharts is for (docs/04-architecture.md §4.6).")
         endif()
     endforeach()
 endfunction()

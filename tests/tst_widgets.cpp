@@ -9,8 +9,8 @@
 // Two kinds of thing, and it is worth being honest about the boundary.
 //
 // The first is `Wx`, which is where every number a tile prints goes through a
-// function. Its whole job is to keep an absent reading absent — QVariant in,
-// empty string out for anything that is not a number — and that is a pure
+// function. Its whole job is to keep an absent reading absent - QVariant in,
+// empty string out for anything that is not a number - and that is a pure
 // function of its argument, so it is tested the ordinary way.
 //
 // The second is a set of THREE-WAY CONSISTENCY checks between files that have
@@ -76,7 +76,7 @@ QString withoutComments(const QString &source)
     return kept.join(u'\n');
 }
 
-// The argument to a QCoreApplication/QGuiApplication setter, verbatim — the
+// The argument to a QCoreApplication/QGuiApplication setter, verbatim - the
 // text, not the value, because two of these are a macro and comparing what
 // each file WROTE is the question. `QStringLiteral(CLIMAT_APP_NAME)` in one
 // file and `QStringLiteral("climat")` in another would be equal at run time on
@@ -147,7 +147,7 @@ private:
 void TestWidgets::initTestCase()
 {
     // Before anything constructs a Settings. This file writes a preference now
-    // — clockIsTwelveHourWithASeparateSuffix states the format it asserts — and
+    // - clockIsTwelveHourWithASeparateSuffix states the format it asserts - and
     // without this it would write the developer's real one.
     QStandardPaths::setTestModeEnabled(true);
 
@@ -164,7 +164,7 @@ void TestWidgets::initTestCase()
     m_buildFile = readFile(QStringLiteral("widgets/CMakeLists.txt"));
     QVERIFY2(!m_buildFile.isEmpty(), "widgets/CMakeLists.txt is missing");
 
-    // Not a QML singleton here — there is no engine. create() is what QML would
+    // Not a QML singleton here - there is no engine. create() is what QML would
     // call and it hands back the same object, so the behaviour under test is
     // the behaviour a tile gets.
     m_wx = Wx::create(nullptr, nullptr);
@@ -256,7 +256,7 @@ void TestWidgets::theWidgetHostWatchesTheFileItReads()
 {
     // tst_settings proves the watcher works. Nothing proved that the widget
     // host arms it, and that is the shape of the bug this whole branch started
-    // from — AlertsData::setWindowState was written, documented and tested,
+    // from - AlertsData::setWindowState was written, documented and tested,
     // and had no caller for as long as it existed.
     //
     // Read out of the source for the reason the identity check above is: the
@@ -278,13 +278,13 @@ void TestWidgets::allFourProcessesShareOneStorageIdentity()
     // QStandardPaths::AppDataLocation is <organizationName>/<applicationName>,
     // and libclimat/cache/cachestore.cpp puts the database under it. So these
     // two calls in three main() functions are not identity, they are an
-    // address — and three processes that are supposed to share one database
+    // address - and three processes that are supposed to share one database
     // agree about it in three separate files with nothing joining them up.
     //
     // The daemon disagreed. It set organizationName("climat") and
     // applicationName("climat-daemon"), opened
     // ~/.local/share/climat/climat-daemon/cache.sqlite, and found no places in
-    // it — so every Subscribe answered "no such place" and every tile on every
+    // it - so every Subscribe answered "no such place" and every tile on every
     // desktop stayed empty, while both processes ran perfectly.
     //
     // Nothing caught it, and the reason is worth keeping: every automated test
@@ -296,7 +296,7 @@ void TestWidgets::allFourProcessesShareOneStorageIdentity()
     // and writes what it fetched back into the same cache, so a status bar
     // polling every minute is one more client of the forecast service and not
     // a second one. An identity of its own would give it an empty places table
-    // — every invocation answering "no saved place" on a machine with several.
+    // - every invocation answering "no saved place" on a machine with several.
     //
     // climat-gallery is deliberately absent. It sets the same organisation and a
     // name of its OWN, which is the opposite requirement: it is a developer
@@ -350,7 +350,7 @@ void TestWidgets::allFourProcessesShareOneStorageIdentity()
 // other evidence was a warning that could not fire, since the one warning here
 // was for a session bus that could not be reached.
 //
-// None of this touches D-Bus. That is not a limitation of a headless test — it
+// None of this touches D-Bus. That is not a limitation of a headless test - it
 // is the point: DaemonLink has to be able to answer "why is there nothing" from
 // what it knows, and the two states below are established before any bus is
 // consulted. The bus paths were exercised by hand against a real daemon on a
@@ -368,7 +368,7 @@ void TestWidgets::aFeedWithNoSourceSaysThereIsNoService()
     feed.componentComplete();
 
     QVERIFY2(!feed.waitingReason().isEmpty(),
-             "a tile with no daemon, no file and nothing on its way said nothing at all — "
+             "a tile with no daemon, no file and nothing on its way said nothing at all - "
              "which is the skeleton-forever bug this property exists to close");
     QVERIFY(feed.waitingReason().contains(QStringLiteral("not running")));
     QVERIFY(!feed.hasData());
@@ -404,7 +404,7 @@ void TestWidgets::aReadableSnapshotLeavesNothingToExplain()
     QVERIFY(feed.hasData());
 
     // Data outranks every explanation of its absence. A tile that has a reading
-    // shows the reading and its age — never a sentence about why it has none.
+    // shows the reading and its age - never a sentence about why it has none.
     QVERIFY(feed.waitingReason().isEmpty());
 }
 
@@ -472,7 +472,7 @@ void TestWidgets::glyphKindDegradesRatherThanVanishing()
     // map has to come back as one of the thirteen the component can draw.
     //
     // It used to be seven, and a `drawableToday()` in the engine folded the
-    // other six into them on the way here — so a widget showing a thunderstorm
+    // other six into them on the way here - so a widget showing a thunderstorm
     // drew an ordinary shower, and this test passed. Thirteen is the whole of
     // ConditionKind now, so the assertion is only that the widget host and the
     // app read the same table; tests/qml/tst_weatherglyph.qml is the one that
@@ -578,7 +578,7 @@ void TestWidgets::instantsAreReadInThePlacesOwnZone()
 
     // nowMinutesInZoneOf reads the *real* clock, so it cannot be compared with a
     // literal. What it can be compared with is itself, in two offsets an hour
-    // apart — which is the property the sun mark depends on.
+    // apart - which is the property the sun mark depends on.
     const int here = m_wx->nowMinutesInZoneOf(QVariant(QStringLiteral("2026-01-01T00:00:00+00:00")));
     const int east = m_wx->nowMinutesInZoneOf(QVariant(QStringLiteral("2026-01-01T00:00:00+01:00")));
     QVERIFY(here >= 0 && east >= 0);

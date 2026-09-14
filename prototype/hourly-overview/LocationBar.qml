@@ -40,7 +40,7 @@ Item {
         // ---- disclosure chevron ------------------------------------------
         // It does not rotate. A disclosure chevron flips when something is
         // disclosed, and `changeRequested()` opens a place picker that this
-        // prototype does not have — a chevron that turns over and reveals
+        // prototype does not have - a chevron that turns over and reveals
         // nothing is an animation making a promise the app cannot keep.
         Item {
             width: 14
@@ -88,8 +88,8 @@ Item {
                 Behavior on color {
                     ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }
                 }
-                // The marker is a toggle — `homeToggled()` is its whole reason
-                // for having a tap target — so the ring must not snap between
+                // The marker is a toggle - `homeToggled()` is its whole reason
+                // for having a tap target - so the ring must not snap between
                 // states while the wash behind it fades.
                 Behavior on border.color {
                     ColorAnimation { duration: Theme.motion.tint; easing.type: Easing.OutCubic }

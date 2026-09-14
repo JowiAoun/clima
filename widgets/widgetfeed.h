@@ -10,7 +10,7 @@
 //         days:   0
 //     }
 //
-// A widget declares what it needs and reads `snapshot` — it never sees a bus,
+// A widget declares what it needs and reads `snapshot` - it never sees a bus,
 // a token or a match rule. The mask is not a suggestion: the daemon sends only
 // what was asked for, so a wind rose is not sent 408 hourly points.
 //
@@ -28,7 +28,7 @@
 //
 // A typed C++ object would mean a property per field, which is 40-odd
 // properties that all have to answer "I do not know" somehow, and the somehow
-// would be a sentinel. We have been here before — see the header of
+// would be a sentinel. We have been here before - see the header of
 // libclimat/domain/forecast.h, where a plain double for a missing gust made the
 // hero read "Feels like 0°" on a 28 °C afternoon.
 //
@@ -70,7 +70,7 @@ class WidgetFeed : public QObject, public QQmlParserStatus
     Q_PROPERTY(QVariantMap snapshot READ snapshot NOTIFY snapshotChanged)
 
     // True once anything at all has arrived. A tile shows its skeleton until
-    // this is true and never afterwards — see the class comment.
+    // this is true and never afterwards - see the class comment.
     Q_PROPERTY(bool hasData READ hasData NOTIFY snapshotChanged)
 
     // "live" | "cached" | "unknown", straight from the wire. Three values and
@@ -97,14 +97,14 @@ class WidgetFeed : public QObject, public QQmlParserStatus
     // was never honest about is the state it is actually in most of the time:
     // there is no daemon, nothing is coming, and three grey bars go on claiming
     // to be loading for as long as the desktop is up. That is the one failure
-    // in this process that a user cannot tell apart from a hang — and the file
+    // in this process that a user cannot tell apart from a hang - and the file
     // that draws it says so in its own comment ("most of the time this tile is
     // waiting for a daemon that has not been started").
     //
     // So DaemonLink sets this the moment it knows nothing is coming, and it is
     // the whole of what separates "loading" from "there is nothing to load
     // from". The sentence is built in C++, beside the code that establishes the
-    // fact, rather than mapped from a code in QML — the same shape as
+    // fact, rather than mapped from a code in QML - the same shape as
     // DaemonLink::incompatibility, which is the other state that replaces a
     // tile's body with words.
     //
@@ -139,7 +139,7 @@ public:
     // Called by DaemonLink when a snapshot for this feed's token arrives.
     void deliver(const QVariantMap &snapshot);
 
-    // Also DaemonLink's, and not QML's — which is why it is a plain setter and
+    // Also DaemonLink's, and not QML's - which is why it is a plain setter and
     // not a WRITE on the property. A tile declares what it needs; why it has
     // not been given it is a fact about the bus, and the bus is the one thing a
     // widget file is not allowed to know about.

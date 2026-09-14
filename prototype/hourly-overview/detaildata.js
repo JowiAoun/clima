@@ -4,7 +4,7 @@
 //
 // Stand-in for the provider, shaped the way `libclimat` will return it: plain
 // values plus the short series a card needs to draw a trend. No formatting
-// decisions — units, rounding and wording belong to the card.
+// decisions - units, rounding and wording belong to the card.
 //
 // The numbers deliberately match the captured reference for the same location
 // and hour, so a card can be held against `reference/msn/…` and compared
@@ -27,7 +27,7 @@ var location = {
 // The page headline.
 //
 // Every number it shows already lives in one of the per-measurable blocks below
-// and is read from there — the temperature from `temperature`, the condition
+// and is read from there - the temperature from `temperature`, the condition
 // from `cloudCover`, the apparent temperature from `feelsLike`. Copying 27° into
 // a second place is how a page ends up disagreeing with itself, and a hero that
 // contradicts the card three rows down is worse than no hero.
@@ -74,7 +74,7 @@ var precipitation = {
     // what the reader sees, which makes it data and not styling.
     //
     // This was 10, which is a wet day by the standards of the reference's
-    // forecast and not by the standards of ours — the afternoon band alone is
+    // forecast and not by the standards of ours - the afternoon band alone is
     // 18 mm, so a 10 mm ceiling would have drawn every wet day as full.
     scaleMax: 25,
     // Probability per hour, for cards that want a small distribution. The same
@@ -87,14 +87,14 @@ var precipitation = {
 
 var wind = {
     speed: 13, gust: 24, unit: "km/h",
-    // Beaufort 5 — a fresh breeze, when loose paper starts blowing about. Above
+    // Beaufort 5 - a fresh breeze, when loose paper starts blowing about. Above
     // this a card can clamp; below it the scale would compress every ordinary
     // day into the first third.
     scaleMax: 30,
     directionDeg: 294, directionLabel: "WNW",
     beaufort: 3, beaufortName: "Gentle breeze",
     trend: "steady", status: "Gentle breeze",
-    // The reference's sentence is about the *evening*, not now — it only looked
+    // The reference's sentence is about the *evening*, not now - it only looked
     // like it contradicted the 13 km/h reading because it elided mid-qualifier.
     body: "Evening averages near 8 km/h, gusting to 12, from the NNW."
 };
@@ -118,7 +118,7 @@ var uv = {
 var airQuality = {
     value: 25, max: 100,
     band: "Good", pollutant: "PM2.5", pollutantValue: 4.4, pollutantUnit: "µg/m³",
-    // Up, because the *index* is rising — which for air quality is the bad
+    // Up, because the *index* is rising - which for air quality is the bad
     // direction. The trend tracks the number; the body says whether that is
     // good news. See docs/10-design-system.md §10.5.
     trend: "up", status: "Good",
@@ -129,7 +129,7 @@ var visibility = {
     value: 16, unit: "km",
     // As far as a public forecast bothers to distinguish: past 20 km the answer
     // is just "you can see". `peak` below is today's best, which is a reading,
-    // not a ceiling — scaling 16 km against 45 made an "Excellent" card draw a
+    // not a ceiling - scaling 16 km against 45 made an "Excellent" card draw a
     // third of a bar.
     scaleMax: 20,
     band: "Excellent", peak: 45, peakAt: "1:00 p.m.",
@@ -179,7 +179,7 @@ var observedOn = "Thursday, 30 July 2026";
 //
 // `tone` is one of good | caution | poor and maps to the three status tokens.
 // Three levels, not five: a fourth would make it a scale, and a scale wants a
-// ramp and an axis — see §10.5.
+// ramp and an axis - see §10.5.
 // ---------------------------------------------------------------------------
 
 var pollen = {
@@ -187,7 +187,7 @@ var pollen = {
     tone: "caution",
     main: "Grass",
     body: "Grass pollen is the main allergen today. Moderate risk for sensitive individuals.",
-    // `level` is normalised 0–1 for the ring; `label` is what the ring says.
+    // `level` is normalised 0-1 for the ring; `label` is what the ring says.
     items: [
         { name: "Grass",  label: "Moderate", tone: "caution", level: 0.58 },
         { name: "Tree",   label: "Low",      tone: "good",    level: 0.18 },

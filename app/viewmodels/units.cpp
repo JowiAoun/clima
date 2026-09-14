@@ -17,8 +17,8 @@ QVariantMap choice(const QString &id, const QString &label)
     return QVariantMap{ { QStringLiteral("id"), id }, { QStringLiteral("label"), label } };
 }
 
-// The arithmetic lives in libclimat/domain/units.h now — the factors, the
-// symbols, the decimals and the two presets — because climat-cli prints a
+// The arithmetic lives in libclimat/domain/units.h now - the factors, the
+// symbols, the decimals and the two presets - because climat-cli prints a
 // temperature and links no QML engine. This class is what is left: the
 // reader's CHOICE, read from Settings and pushed into those functions, and
 // the QML-facing shape of the result.
@@ -69,7 +69,7 @@ Settings *Units::settings() const
     return Settings::instance();
 }
 
-// Which unit the reader chose for a quantity — the one thing this class knows
+// Which unit the reader chose for a quantity - the one thing this class knows
 // that libclimat/domain/units.h does not.
 QString Units::unitFor(Quantity quantity) const
 {
@@ -96,7 +96,7 @@ QString Units::precipitationUnit() const { return settings()->precipitationUnit(
 // ---- the conversions -----------------------------------------------------------
 //
 // The whole table. Canonical in, display out, and an unrecognised preference
-// falls through to the canonical unit rather than to zero — a settings file
+// falls through to the canonical unit rather than to zero - a settings file
 // edited by hand should give the wrong unit at worst, never a blank chart.
 
 double Units::convert(Quantity quantity, double canonical) const
@@ -119,8 +119,8 @@ QString Units::bareSymbol(Quantity quantity) const
 QString Units::symbol(Quantity quantity) const
 {
     // A degree sign hugs its number and a word does not. This is the same
-    // spacing metrics.js and detaildata.js already used — "27°" but "13 km/h"
-    // — recorded once rather than at every call site.
+    // spacing metrics.js and detaildata.js already used - "27°" but "13 km/h"
+    // - recorded once rather than at every call site.
     switch (quantity) {
     case Quantity::Temperature:
     case Quantity::Direction:
@@ -147,7 +147,7 @@ QString Units::format(Quantity quantity, double canonical) const
 QString Units::formatDisplay(Quantity quantity, double display) const
 {
     if (qIsNaN(display))
-        return QStringLiteral("–");
+        return QStringLiteral("-");
     return QString::number(display, 'f', decimals(quantity)) + symbol(quantity);
 }
 
@@ -162,7 +162,7 @@ QList<double> Units::axis(Quantity quantity) const
     switch (quantity) {
     case Quantity::Temperature:
         if (temperatureUnit() == QLatin1String("fahrenheit"))
-            return { 20, 110, 30 };     // −7 °C to 43 °C, four gridlines
+            return { 20, 110, 30 };     // -7 °C to 43 °C, four gridlines
         return { 0, 40, 10 };
 
     case Quantity::Wind: {

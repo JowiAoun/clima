@@ -21,7 +21,7 @@
 //      outside Central Europe and North America, for instance)."
 //
 // Pollen is the case that proves it. Open-Meteo has a pollen product. It is
-// the same endpoint, the same parameters, the same account — none — and in
+// the same endpoint, the same parameters, the same account - none - and in
 // Toronto every one of the six species is null for every hour, because CAMS
 // produces pollen for its European domain and nowhere else. A per-provider
 // `capabilities()` has exactly two things it can say about that, and both are
@@ -34,13 +34,13 @@
 //
 // A coordinate alone is not always enough either. Whether Open-Meteo has pollen
 // at 43.70,-79.42 is a fact about the CAMS Europe domain, and the domain's
-// boundary is not something this codebase should be holding a copy of — see
+// boundary is not something this codebase should be holding a copy of - see
 // libclimat/providers/airquality/openmeteoairqualityprovider.h, which argues at
 // length that the response is a more trustworthy witness than a bounding box we
 // typed in.
 //
 // Which means that before the first fetch, the truthful answer is "I do not
-// know yet". Not "no" — a UI that renders "no" hides the pollen card in Berlin
+// know yet". Not "no" - a UI that renders "no" hides the pollen card in Berlin
 // for the two seconds before the payload lands, and then pops it in, which
 // looks like a bug and is one. Not "yes" either, for the same reason in
 // reverse.
@@ -54,13 +54,13 @@
 //
 // and everything in neither set is known-absent. After one successful fetch the
 // undetermined set for that place is empty and stays empty, because the verdict
-// is remembered — again, see the air-quality provider for what is remembered
+// is remembered - again, see the air-quality provider for what is remembered
 // and at what resolution.
 //
 // ============================================================================
 // ATTRIBUTION IS A PURE VIRTUAL, AND THE REGISTRY REFUSES AN INVALID ONE
 //
-// docs/08-risks.md R12: "Attribution drift — a new provider gets added without
+// docs/08-risks.md R12: "Attribution drift - a new provider gets added without
 // its credit", mitigated by "`Attribution` is a required member of every
 // provider interface; the About screen is generated from the registry, so it
 // cannot go stale."
@@ -70,8 +70,8 @@
 // About screen then renders a provider with no credit line, which is a licence
 // breach that looks like a layout bug.
 //
-// So there are two gates. `attribution()` is pure virtual — you cannot forget
-// it — and ProviderRegistry::add() *rejects* a provider whose Attribution is
+// So there are two gates. `attribution()` is pure virtual - you cannot forget
+// it - and ProviderRegistry::add() *rejects* a provider whose Attribution is
 // not complete, at the moment it is registered, with an error naming the
 // missing field. An uncredited provider is not "added but not shown"; it is not
 // added, which means its data never reaches a screen either. That is the only
@@ -107,9 +107,9 @@ namespace climat {
 // Everything docs/02-data-sources.md §2.9 obliges us to display for one source.
 //
 // A struct rather than a formatted string, because §2.9's obligations differ in
-// shape — Open-Meteo wants a credit line plus the names of the model owners
+// shape - Open-Meteo wants a credit line plus the names of the model owners
 // behind it, ECCC wants one exact sentence, MET Norway wants a credit plus the
-// User-Agent we identify ourselves with — and a screen that has to render all
+// User-Agent we identify ourselves with - and a screen that has to render all
 // of them needs the parts, not one provider's idea of a paragraph.
 struct Attribution {
     // "Open-Meteo", "MET Norway". The source, not the model behind it.
@@ -129,7 +129,7 @@ struct Attribution {
     QString licenceName;
     QUrl    licenceUrl;
 
-    // The model owners named behind an aggregator — "ECMWF", "NOAA", "DWD",
+    // The model owners named behind an aggregator - "ECMWF", "NOAA", "DWD",
     // "Météo-France". §2.9 requires these for Open-Meteo specifically, and an
     // empty list is legitimate for a source that is its own model.
     QStringList upstream;
@@ -161,7 +161,7 @@ struct Attribution {
 //
 // The underlying type is quint32 and the values are contiguous, which looks
 // like premature tidiness and is not. QFlags only grew support for enums with a
-// 64-bit underlying type in Qt 6.9, and D2's floor is 6.8 — so a flag at bit 32
+// 64-bit underlying type in Qt 6.9, and D2's floor is 6.8 - so a flag at bit 32
 // compiles on the developer's Qt and silently truncates on the one the LTS
 // floor promises. There are four bits spare below; when they run out the answer
 // is a second flag set for a second product family, not a wider integer.
@@ -207,7 +207,7 @@ enum class Capability : quint32 {
 
     // Products that arrive in later milestones. Declared now so that the
     // registry's routing table can be written against a stable enum rather than
-    // grown a value at a time — an enum that changes shape every milestone is
+    // grown a value at a time - an enum that changes shape every milestone is
     // an enum every persisted capability set has to be migrated against.
     Alerts = 1U << 26,
     Radar  = 1U << 27,
@@ -229,7 +229,7 @@ public:
 
     // Do not draw an empty version of it, and do not decide yet. A UI showing a
     // tab bar before the first payload lands should reserve the space or leave
-    // it out — but must not draw the card, because there is nothing in it.
+    // it out - but must not draw the card, because there is nothing in it.
     [[nodiscard]] bool isUndetermined(Capability capability) const;
 
     // The provider has this product and does not have it here. Hide it, and
@@ -251,7 +251,7 @@ private:
 
     // Invariant: disjoint from m_available. A capability cannot be both known
     // to work and unknown, and the constructor enforces it by clearing the
-    // overlap rather than by asserting — a provider that says both means the
+    // overlap rather than by asserting - a provider that says both means the
     // first, and crashing the app over it helps nobody.
     CapabilityFlags m_undetermined;
 };
@@ -268,7 +268,7 @@ enum class Resolution {
 struct ForecastRequest {
     Coordinate coord;
 
-    // Days ahead. Open-Meteo serves 16, MET Norway about 9.5 — a provider
+    // Days ahead. Open-Meteo serves 16, MET Norway about 9.5 - a provider
     // clamps rather than failing, because a fallback that refused a request the
     // primary would have accepted is not a fallback.
     int days = 10;
@@ -285,8 +285,8 @@ struct ForecastRequest {
     // is ErrorKind::NotFound, and a stale one is served *as an answer* carrying
     // the timestamp it was fetched at.
     //
-    // This is step 1 of docs/04-architecture.md §4.1's first principle — "the UI
-    // renders from cache, then reconciles" — and it is a request flag rather
+    // This is step 1 of docs/04-architecture.md §4.1's first principle - "the UI
+    // renders from cache, then reconciles" - and it is a request flag rather
     // than a separate method because the two steps have to go through the same
     // chain: a cached read that skipped the registry would not know which
     // provider last served this place, and would draw MET Norway's forecast
@@ -300,13 +300,13 @@ struct ForecastRequest {
     //
     // Not an afterthought: Open-Meteo resolves it from the coordinate with
     // `timezone=auto` and reports it back, and MET Norway does not report one at
-    // all — its timestamps are UTC and it has no opinion about local midnight.
+    // all - its timestamps are UTC and it has no opinion about local midnight.
     // Which means a MET Norway daily series has to be grouped by a zone
     // somebody supplied, and the somebody is the app, which knows the location's
     // zone from the search result that created it.
     //
     // Invalid means UTC, and a provider that had to fall back on that says so by
-    // not advertising Capability::Daily — a ten-day view whose days start at the
+    // not advertising Capability::Daily - a ten-day view whose days start at the
     // wrong midnight is worse than no ten-day view.
     QTimeZone timeZone;
 };
@@ -315,7 +315,7 @@ struct ForecastRequest {
 
 // Common to every provider, whatever product it serves. Split out so that the
 // registry can hold a heterogeneous set of them and still ask every one for its
-// credit line — which is what makes the About screen generated rather than
+// credit line - which is what makes the About screen generated rather than
 // maintained.
 class IProvider
 {
@@ -334,8 +334,8 @@ public:
     // Required. See the header: the registry refuses an incomplete one.
     [[nodiscard]] virtual Attribution attribution() const = 0;
 
-    // Whether this provider serves this place at all. A regional provider — NWS
-    // in the United States, ECCC in Canada — answers false elsewhere and is
+    // Whether this provider serves this place at all. A regional provider - NWS
+    // in the United States, ECCC in Canada - answers false elsewhere and is
     // left out of the chain rather than tried and failed.
     [[nodiscard]] virtual bool covers(Coordinate coord) const = 0;
 
@@ -354,8 +354,8 @@ class IForecastProvider : public IProvider
 public:
     ~IForecastProvider() override;
 
-    // Either a Forecast or a typed Error. Never a partial success — see the
-    // header — because ProviderRegistry branches on the error's kind to decide
+    // Either a Forecast or a typed Error. Never a partial success - see the
+    // header - because ProviderRegistry branches on the error's kind to decide
     // whether the next provider in the chain should be tried.
     virtual QFuture<Result<Forecast>> fetchForecast(const ForecastRequest &request) = 0;
 };

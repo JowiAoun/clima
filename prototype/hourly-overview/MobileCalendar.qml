@@ -5,7 +5,7 @@
 // Not a seven-column calendar grid, and that is the interesting decision here.
 // A week grid puts the weekday alignment first: Mondays stack under Mondays,
 // and the shape of the month is legible. It also gives every cell a seventh of
-// the screen — 52 px on a phone — which is enough for a date and nothing else.
+// the screen - 52 px on a phone - which is enough for a date and nothing else.
 //
 // This is a forecast, not a diary. What the reader wants from it is "when is
 // the warm stretch" and "which days are wet", and both are read by scanning
@@ -15,8 +15,8 @@
 // the same trade.
 //
 // Today is marked with a border and an accent date, not a lighter fill. A
-// raised wash inside the card's own would composite to 0.165 — the stacked
-// surface §10.1 exists to prevent — and this is the case its note about
+// raised wash inside the card's own would composite to 0.165 - the stacked
+// surface §10.1 exists to prevent - and this is the case its note about
 // borders allows for: nothing else will do.
 import QtQuick
 import "theme.js" as Theme

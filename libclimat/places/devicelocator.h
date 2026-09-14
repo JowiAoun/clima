@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: MPL-2.0
 //
-// "My location" — asked for, never assumed, and never on the critical path.
+// "My location" - asked for, never assumed, and never on the critical path.
 //
 // docs/04-architecture.md §4.9 puts Qt Positioning against GeoClue2 on Linux,
 // Windows Location on Windows and CoreLocation on macOS. Qt Positioning wraps
@@ -12,7 +12,7 @@
 //
 //   1. NOTHING WAITS FOR IT. The app opens on the home place, from SQLite,
 //      inside a 400 ms cold-start budget. A GeoClue2 fix takes anywhere from
-//      tens of milliseconds to never — it is a D-Bus round trip to a service
+//      tens of milliseconds to never - it is a D-Bus round trip to a service
 //      that may itself be waiting on a portal dialog, a Wi-Fi scan or a GPS
 //      lock. `requestPosition()` returns immediately and answers by signal, and
 //      the UI it feeds must already be showing something by then.
@@ -35,8 +35,8 @@
 //
 // Inside a Flatpak sandbox, GeoClue2 is not reachable on the session bus, and
 // Qt Positioning's GeoClue2 backend does not know about the portal that is.
-// So there are two backends behind this interface — qtpositioninglocator.h
-// for a desktop, portallocator.h for `org.freedesktop.portal.Location` — and
+// So there are two backends behind this interface - qtpositioninglocator.h
+// for a desktop, portallocator.h for `org.freedesktop.portal.Location` - and
 // create() picks, in an order its comment gives. The manifest needs nothing
 // for it: Flatpak's default policy already permits `org.freedesktop.portal.*`.
 //
@@ -44,7 +44,7 @@
 //
 // It does not name the place. A coordinate is not a location as far as a user
 // is concerned, and turning one into "Toronto, Ontario" is
-// libclimat/providers/geocoding/offlinereversegeocoder.h — offline, because
+// libclimat/providers/geocoding/offlinereversegeocoder.h - offline, because
 // Nominatim answers 403 to the first request. The two are separate on purpose:
 // this class knows about permissions and D-Bus, that one knows about places,
 // and neither wants the other's failure modes.
@@ -77,7 +77,7 @@ public:
         PermissionDenied,
 
         // The backend accepted the request and produced nothing in time. Worth
-        // a retry, at the user's request rather than automatically — a laptop
+        // a retry, at the user's request rather than automatically - a laptop
         // indoors can take a long time and retrying costs battery.
         Timeout,
 
@@ -91,7 +91,7 @@ public:
     // Unavailable when it was not. Ownership passes to `parent`.
     //
     // A factory rather than a constructor, so that the choice is made once, in
-    // one place, at build time — and not by an `#ifdef` at every call site.
+    // one place, at build time - and not by an `#ifdef` at every call site.
     [[nodiscard]] static DeviceLocator *create(QObject *parent = nullptr);
 
     // Whether this build has a positioning backend at all. Cheap, synchronous
@@ -116,8 +116,8 @@ public:
 
 Q_SIGNALS:
     // `accuracyMetres` is negative when the backend did not say. A caller that
-    // cares — deciding whether a fix is precise enough to pick a city rather
-    // than a region — has to handle that, so it is a documented value rather
+    // cares - deciding whether a fix is precise enough to pick a city rather
+    // than a region - has to handle that, so it is a documented value rather
     // than a zero that looks like perfect accuracy.
     void located(const climat::Coordinate &coordinate, double accuracyMetres);
 

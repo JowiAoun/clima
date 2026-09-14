@@ -3,7 +3,7 @@
 //
 // The one place a conversion factor is written down.
 //
-// Every number libclimat hands out is canonical — °C, km/h, hPa, km, mm — and
+// Every number libclimat hands out is canonical - °C, km/h, hPa, km, mm - and
 // every number a reader sees has been through exactly one of the functions
 // below. They used to live in app/viewmodels/units.cpp, behind the QML
 // singleton that also knows which unit the reader chose; they moved here the
@@ -13,7 +13,7 @@
 //
 // The unit is a NAME, passed in, never looked up: "fahrenheit", "mph", "inhg".
 // Which name applies is a preference, and a preference is the caller's to
-// hold — Settings in the app, an INI read in the CLI, a flag in a test. A
+// hold - Settings in the app, an INI read in the CLI, a flag in a test. A
 // name this file does not know converts by the identity and prints the
 // canonical symbol, so an INI hand-edited to a spelling that does not exist
 // still puts a number on the screen.

@@ -8,7 +8,7 @@
 //
 // An extension is GJS running inside gnome-shell's own process. It cannot host
 // a Qt Quick surface, extensions.gnome.org forbids shipping binaries, and
-// mutter still does not implement wlr-layer-shell — so there is no protocol by
+// mutter still does not implement wlr-layer-shell - so there is no protocol by
 // which an outside process can ask to be a desktop layer either.
 //
 // So a Climat widget is *our own Qt process*, and this file's whole job is to
@@ -56,7 +56,7 @@ import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/ex
 // ---- the daemon ------------------------------------------------------------
 //
 // Kept in step with daemon/daemonconfig.h.in by hand, because this file ships
-// from extensions.gnome.org and the app ships from Flathub — there is no build
+// from extensions.gnome.org and the app ships from Flathub - there is no build
 // that sees both. The names are part of the interface contract and change only
 // with the schema version below.
 
@@ -115,7 +115,7 @@ const INDICATOR_FIELDS = [
 //
 // A crashed widget host comes back, and a widget host that cannot start does
 // not spin. Doubling from two seconds to a minute, reset the moment a window is
-// actually adopted — so a genuine crash loop settles into one attempt a minute
+// actually adopted - so a genuine crash loop settles into one attempt a minute
 // in the journal rather than several thousand.
 const RESPAWN_FIRST_MS = 2000;
 const RESPAWN_MAX_MS = 60000;
@@ -130,8 +130,8 @@ function log_(message) {
 //
 // The tiles read from climat-daemon, so something has to start it. On a .deb or
 // an AppImage install that is /etc/xdg/autostart; a Flatpak has no way to put a
-// file there, and the portal that would replace it — org.freedesktop.portal.
-// Background — is a permission prompt the app has not been given yet.
+// file there, and the portal that would replace it - org.freedesktop.portal.
+// Background - is a permission prompt the app has not been given yet.
 //
 // So the extension starts it when nothing else has. Cheap, idempotent and
 // self-correcting: the daemon refuses to start when its name is already owned
@@ -140,7 +140,7 @@ function log_(message) {
 //
 // Spawned with an ordinary Gio.Subprocess and NOT through Meta.WaylandClient.
 // The daemon draws nothing, so there is no window to adopt and no reason for
-// the shell to own its Wayland client — it does not have one.
+// the shell to own its Wayland client - it does not have one.
 class DaemonStarter {
     constructor() {
         this._watchId = 0;
@@ -189,8 +189,8 @@ class DaemonStarter {
             this._watchId = 0;
         }
 
-        // The daemon is deliberately NOT killed here. It is a shared service —
-        // the app reads from it too — and an extension that stopped the weather
+        // The daemon is deliberately NOT killed here. It is a shared service -
+        // the app reads from it too - and an extension that stopped the weather
         // for everything else on the desktop every time the screen locked would
         // be doing something nobody asked for.
     }
@@ -217,7 +217,7 @@ class WidgetHost {
     // The command that starts the tiles, or null when Climat is not installed.
     //
     // A host binary wins over the Flatpak: a developer with a build in their
-    // PATH is testing that build. Both work — `flatpak run` execs bwrap, and
+    // PATH is testing that build. Both work - `flatpak run` execs bwrap, and
     // the inherited socket fd and WAYLAND_SOCKET both survive it, which was the
     // single riskiest assumption in this design and is the one docs/widgets.md
     // spends the most space on.
@@ -262,8 +262,8 @@ class WidgetHost {
         const argv = this._command();
         if (argv === null) {
             // Once, quietly, and then never again. A user who has the extension
-            // enabled and the app uninstalled is a normal state — they removed
-            // the Flatpak — and it must not produce a notification storm or a
+            // enabled and the app uninstalled is a normal state - they removed
+            // the Flatpak - and it must not produce a notification storm or a
             // stack trace in their journal.
             log_('the Climat app is not installed, so there are no widgets to show.');
             return false;
@@ -323,7 +323,7 @@ class WidgetHost {
 
         // owns_window() is the question, and it is a question about the
         // wl_client rather than about anything visible. Matching on a window
-        // title or a sandboxed app id would be guessing — and the sandbox id
+        // title or a sandboxed app id would be guessing - and the sandbox id
         // comes back null for a client that connected on an inherited fd, which
         // is measured in docs/widgets.md and is a reasonable-looking idea that
         // does not work.
@@ -397,8 +397,8 @@ class WidgetHost {
         w.lower();
     }
 
-    // The user dragged them. There is nothing to drag a DOCK by today — it has
-    // no titlebar — but the handler is here because the geometry has to survive
+    // The user dragged them. There is nothing to drag a DOCK by today - it has
+    // no titlebar - but the handler is here because the geometry has to survive
     // a shell restart either way, and reading it back off the window is the
     // only source of truth for it.
     _remember() {
@@ -427,7 +427,7 @@ class WidgetHost {
 
     // Called when settings change: the tile list, the place, the column count.
     // A restart rather than a message, because the host reads all three at
-    // startup and there is no interface for changing them afterwards — which is
+    // startup and there is no interface for changing them afterwards - which is
     // the right trade for something a user touches twice a year.
     restart() {
         this.stop();
@@ -495,7 +495,7 @@ class ClimatIndicator extends PanelMenu.Button {
         this._watchId = 0;
 
         this._label = new St.Label({
-            text: '—',
+            text: '-',
             yAlign: Clutter.ActorAlign.CENTER,
             styleClass: 'climat-indicator-label',
         });
@@ -521,7 +521,7 @@ class ClimatIndicator extends PanelMenu.Button {
     }
 
     // Watched rather than called once. The daemon is an ordinary process that
-    // can be upgraded, killed or started after the shell — and when it goes
+    // can be upgraded, killed or started after the shell - and when it goes
     // away the last reading stays on screen rather than blanking, because a
     // stale number with nothing claiming it is current is more use than a dash.
     _connect() {
@@ -601,7 +601,7 @@ class ClimatIndicator extends PanelMenu.Button {
         // measured, in the top bar, all day.
         this._label.text = typeof current.temperature === 'number'
             ? `${Math.round(current.temperature)}°`
-            : '—';
+            : '-';
 
         const place = snapshot.place || {};
         this._place.label.text = place.name || _('Climat');

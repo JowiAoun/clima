@@ -15,21 +15,21 @@
 #
 # The filter is for `check` and `capture`. Re-recording under one produces an
 # image that a full run does not reproduce, and the failure is a case that
-# differs immediately after being accepted — which reads like a nondeterministic
+# differs immediately after being accepted - which reads like a nondeterministic
 # renderer and is not one.
 #
 # The cause is one line below: XDG_CONFIG_HOME, XDG_DATA_HOME and XDG_CACHE_HOME
 # are redirected into ONE scratch directory for the whole invocation, not one per
 # case. That is deliberate and it is what keeps a capture out of the developer's
-# own settings — but it also means the cases in a run share a places database.
+# own settings - but it also means the cases in a run share a places database.
 # The first case to render writes its own place as home; every later case with a
 # different fixture then draws its location bar's home marker unfilled. Run the
 # Seattle cases alone and Seattle is home; run them after the Toronto ones and it
 # is not. Two pixels, in the same place, every time.
 #
 # So `accept` re-records everything, and the ordering is part of what is
-# recorded. If that ever becomes intolerable — a hundred cases to re-record for
-# one — the fix is a scratch per case rather than a filter that is trusted.
+# recorded. If that ever becomes intolerable - a hundred cases to re-record for
+# one - the fix is a scratch per case rather than a filter that is trusted.
 #
 # ---- how this is reproducible on a machine that is not yours ----------------
 #
@@ -37,7 +37,7 @@
 # repository has something stronger already: flake.nix pins nixpkgs by revision
 # in flake.lock, so `nix develop` produces the same Qt, the same FreeType and
 # the same fontconfig everywhere, down to the store hash. A `debian:trixie`
-# tag is a moving target by comparison — the image behind it is rebuilt, and
+# tag is a moving target by comparison - the image behind it is rebuilt, and
 # `trixie` in six months is not `trixie` today.
 #
 # So the rule is: run this under `nix develop`. CI does. If you run it outside
@@ -47,7 +47,7 @@
 #
 # The other half is FONTCONFIG_FILE, exported below. It replaces the host's
 # fontconfig outright with tests/golden/fontconfig.conf, which declares no font
-# directories at all — so no host font can be substituted — and pins hinting and
+# directories at all - so no host font can be substituted - and pins hinting and
 # antialiasing, which is where the same face on two machines otherwise lands
 # glyphs at different subpixel offsets. Measured: the identical scene under
 # host, pinned and empty fontconfig produced three different checksums.
@@ -78,7 +78,7 @@ case "$command" in
         exit 0
         ;;
     *)
-        echo "golden: unknown command \"$command\" — check, accept or capture" >&2
+        echo "golden: unknown command \"$command\" - check, accept or capture" >&2
         exit 2
         ;;
 esac
@@ -93,8 +93,8 @@ for binary in "$app" "$gallery"; do
     fi
 done
 
-# The pinned capture environment. Identical to scripts/grab.sh's — that file
-# carries the long argument for each line — plus the fontconfig replacement,
+# The pinned capture environment. Identical to scripts/grab.sh's - that file
+# carries the long argument for each line - plus the fontconfig replacement,
 # which is what makes these comparable across machines rather than merely
 # repeatable on one.
 export QT_QPA_PLATFORM=offscreen
@@ -103,7 +103,7 @@ export GALLIUM_DRIVER=llvmpipe
 unset QT_QUICK_BACKEND QSG_RHI_BACKEND QMLSCENE_DEVICE
 
 # The single-threaded render loop. With the default threaded one, grabToImage()
-# completes on the render thread and the capture races the scene — which is how
+# completes on the render thread and the capture races the scene - which is how
 # one run in five came back with the preferences gear missing from two pages.
 # scripts/grab.sh carries the evidence and its limits, and docs/screenshots.md
 # has the ±1 difference this does not fix.
@@ -134,7 +134,7 @@ export XDG_CACHE_HOME="$scratch/cache"
 #
 # The reference images are 12-hour, and they have to be pinned to something
 # rather than inherited: `Settings::clockFormat` now defaults to the reader's
-# own locale — a French desktop writes 15:30 — while every capture runs under
+# own locale - a French desktop writes 15:30 - while every capture runs under
 # LC_ALL=C.UTF-8, whose short format is 24-hour. Left to the default, the
 # pictures would be a picture of the C locale rather than of the product, and
 # they would change the day anybody touched the locale pin above.
@@ -146,7 +146,7 @@ export XDG_CACHE_HOME="$scratch/cache"
 # Both binaries, because both are photographed and they keep separate
 # preference files: `climat` and `climat-gallery` share an organisation and not an
 # application name, so a pin written for one leaves the other reading its
-# default. That is exactly how this was found — the seven gallery cards
+# default. That is exactly how this was found - the seven gallery cards
 # carrying a time moved while every app image held still.
 #
 # climat-widget needs no line of its own: it deliberately answers to the app's
@@ -178,7 +178,7 @@ while IFS='|' read -r name binary size args; do
     esac
 
     # Deliberately unquoted: the arguments column is a list, and the whole
-    # point is that it splits. Quoted values in it — "Feels like" — are handled
+    # point is that it splits. Quoted values in it - "Feels like" - are handled
     # by eval rather than by word splitting, because a gallery entry's name has
     # a space in it and there is no way to say that with IFS alone.
     eval "set -- $args"
@@ -250,12 +250,12 @@ fi
 if [[ ${#differing[@]} -gt 0 ]]; then
     echo "golden: ${#differing[@]} image(s) differ: ${differing[*]}" >&2
     echo "golden: the rendering next to each is written as <name>.png.actual.png." >&2
-    echo "golden: if tst_environment also failed, the machine changed and not the app —" >&2
+    echo "golden: if tst_environment also failed, the machine changed and not the app -" >&2
     echo "golden: re-record rather than reading the diffs." >&2
 fi
 
 if [[ $status -eq 0 ]]; then
-    echo "golden: ok — $captured image(s) match"
+    echo "golden: ok - $captured image(s) match"
 fi
 
 exit $status

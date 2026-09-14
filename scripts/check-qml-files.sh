@@ -11,7 +11,7 @@
 #
 # A globbed QML module is correct until someone adds a file and builds without
 # re-running CMake. The new file is then simply not in the module, so the type
-# it declares does not exist — and QML reports that at the point of *use*. The
+# it declares does not exist - and QML reports that at the point of *use*. The
 # error names HourlyOverview.qml, which nobody touched, and says a type is not a
 # type; the file that is actually missing is not mentioned. It is a genuinely
 # expensive twenty minutes, and it is the same twenty minutes every time.
@@ -26,7 +26,7 @@ repo="$(cd "$here/.." && pwd)"
 
 # Every QML module in the tree: the source-relative path its files live at, and
 # the CMakeLists.txt that has to name them. The path is what appears in the
-# build file, so it is also what this greps for — see below.
+# build file, so it is also what this greps for - see below.
 #
 # Three, because the component gallery and the desktop widget host are each
 # their own executable with their own QML module. Adding a fourth means adding a
@@ -34,8 +34,8 @@ repo="$(cd "$here/.." && pwd)"
 # approves of.
 #
 # widgets/ is checked for the files it OWNS. Its CMakeLists.txt also lists a
-# handful of app/qml/Climat/ files by absolute path — the presentation components
-# a tile shares with the app — and those are deliberately outside this check:
+# handful of app/qml/Climat/ files by absolute path - the presentation components
+# a tile shares with the app - and those are deliberately outside this check:
 # they are already covered by the app's own entry, and a second claim on them
 # here would report every one of them as "on disk but not listed" the moment the
 # widget host stopped using one.
@@ -75,7 +75,7 @@ for entry in "${modules[@]}"; do
     done
 
     # What is on disk. LC_ALL=C so the ordering is the byte ordering everywhere
-    # and not whatever the caller's locale thinks about case — this list is
+    # and not whatever the caller's locale thinks about case - this list is
     # compared with `comm`, which requires both sides sorted the same way.
     #
     # A glob and not `find`, so it stays in this directory. A submodule's files
@@ -97,12 +97,12 @@ for entry in "${modules[@]}"; do
     # Stripping the comments is not optional: these files explain their own
     # resource layout in prose and name example paths while doing it, and a path
     # inside a `#` comment is not a file in the module. Matching a path prefix
-    # rather than parsing the set() blocks is deliberate though — it survives the
+    # rather than parsing the set() blocks is deliberate though - it survives the
     # list being reordered, renamed or split into more variables, which a block
     # parser would not.
     #
     # The absent `/` in the character class is what keeps `qml/Climat` from
-    # claiming `qml/Climat/Gallery`'s files — one is a path prefix of the other,
+    # claiming `qml/Climat/Gallery`'s files - one is a path prefix of the other,
     # and a name that may not contain a slash is the whole of the distinction.
     LC_ALL=C sed 's/#.*$//' "$cmake_file" \
         | LC_ALL=C grep -oE "$prefix/[A-Za-z0-9_.-]+\.(qml|js)" \
@@ -136,7 +136,7 @@ for entry in "${modules[@]}"; do
 done
 
 if [[ $status -eq 0 ]]; then
-    echo "check-qml-files: ok — $counted files across ${#modules[@]} modules, lists match disk"
+    echo "check-qml-files: ok - $counted files across ${#modules[@]} modules, lists match disk"
 fi
 
 exit "$status"

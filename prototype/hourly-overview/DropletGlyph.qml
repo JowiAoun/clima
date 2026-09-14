@@ -3,7 +3,7 @@
 // A raindrop built from rectangles rather than a Shape.
 //
 // Qt Quick Shapes escape ancestor clipping, and this glyph lives inside a
-// horizontally scrolling Flickable — as a Shape, the droplet of the first
+// horizontally scrolling Flickable - as a Shape, the droplet of the first
 // off-screen bucket drew outside the card entirely. A circle plus a rotated
 // square is a coarser teardrop, but it clips like everything else.
 import QtQuick

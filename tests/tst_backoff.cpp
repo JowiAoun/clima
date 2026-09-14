@@ -91,7 +91,7 @@ void TestBackoff::jitterActuallySpreads()
     }
 
     // A uniform draw puts roughly 200 in each half. The bound is loose because
-    // this is a statistical property of a seeded generator, not an exact one —
+    // this is a statistical property of a seeded generator, not an exact one -
     // but a schedule with no jitter at all, or one that only wobbles near the
     // ceiling, lands 0 in one of the two and fails.
     QVERIFY2(lowerHalf > 120 && upperHalf > 120,
@@ -127,8 +127,8 @@ void TestBackoff::retryAfterIsClamped()
     QCOMPARE(backoff.clampToCap(5s), 5s);
     QCOMPARE(backoff.clampToCap(7 * 24h), 30min);
 
-    // A negative Retry-After — a server sending a date in the past, which
-    // happens — becomes "now" rather than "before now".
+    // A negative Retry-After - a server sending a date in the past, which
+    // happens - becomes "now" rather than "before now".
     QCOMPARE(backoff.clampToCap(-10s), 0ms);
 }
 

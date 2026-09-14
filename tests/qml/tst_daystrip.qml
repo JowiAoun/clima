@@ -22,15 +22,15 @@
 //
 // The merge is a pure function of one number, so the invariant is algebraic and
 // can be checked at a hundred points in no time at all. Waiting on the real
-// animation would sample it four or five times — measured: `scripts/film.sh`
+// animation would sample it four or five times - measured: `scripts/film.sh`
 // asking for 8 ms between frames gets nearer 50, because grabbing a frame costs
-// more than a frame does — and four samples of a 190 ms window is how this got
+// more than a frame does - and four samples of a 190 ms window is how this got
 // shipped in the first place.
 //
 // Assigning `merge` replaces its binding, which is why every delegate is only
 // swept once and nothing here reads a card's selection afterwards. It also goes
-// through the Behavior — a Behavior intercepts writes from JavaScript exactly as
-// it does writes from a binding — so `Theme.stillness` is on for the whole file.
+// through the Behavior - a Behavior intercepts writes from JavaScript exactly as
+// it does writes from a binding - so `Theme.stillness` is on for the whole file.
 // That is the same switch reduced motion and `--grab` use, it collapses the
 // duration to zero, and without it every step of the sweep starts a 190 ms
 // animation and reads back the value it had before.
@@ -61,7 +61,7 @@ TestCase {
         // `strip` is not a card that still reacts to a selection afterwards.
         //
         // 950 px is chosen, not round. Eleven cards overflow it, which is the
-        // only way to scroll a tab onto the right-hand end — and card 4 ends at
+        // only way to scroll a tab onto the right-hand end - and card 4 ends at
         // 916, inside the strip, but at 988 once selected, outside it. That is
         // the case a reader hits by clicking the rightmost card they can see,
         // and at most widths no card is in it.
@@ -90,8 +90,8 @@ TestCase {
     function cleanupTestCase() {
         Theme.stillness = wasStill
 
-        // `Data` is one object for the whole process — `ForecastData::create`
-        // hands out AppEngine's, deliberately, and says why — so a selection
+        // `Data` is one object for the whole process - `ForecastData::create`
+        // hands out AppEngine's, deliberately, and says why - so a selection
         // left here is a selection the next test FILE inherits. QtQuickTest runs
         // them in alphabetical order, which put this one in front of
         // tst_hourlychart and had it opening a chart of a Tuesday.
@@ -140,7 +140,7 @@ TestCase {
     // The panel below is a rounded rectangle; a tab that reaches the end of the
     // strip stands on one of its top corners, and a corner with a tab on it is
     // not a corner. Left round, it meets the tab's straight bottom edge across
-    // 14 px of page background — which is what the first and last day cards did.
+    // 14 px of page background - which is what the first and last day cards did.
     //
     // These are the numbers HourlyOverview turns into `cardRadius * (1 - cover)`,
     // and they are geometry rather than "is this card the first one": a card
@@ -210,7 +210,7 @@ TestCase {
     // ---- keeping the selection on screen ----------------------------------
     //
     // `Theme.stillness` is on for this file, so the scroll animation has a zero
-    // duration — but it is still an animation, and an animation lands on the
+    // duration - but it is still an animation, and an animation lands on the
     // next frame rather than on the next statement. Hence the wait.
 
     function visibleExtent(index) {
@@ -243,8 +243,8 @@ TestCase {
     //
     // The strip is sized from the card rather than the card looked for in a
     // strip of a chosen width. There is a band of widths where a given card is
-    // fully visible and its widened self is not — 72 px wide, out of a 186 px
-    // pitch — and picking a round number lands outside it more often than in,
+    // fully visible and its widened self is not - 72 px wide, out of a 186 px
+    // pitch - and picking a round number lands outside it more often than in,
     // which is a test that passes by measuring nothing.
     function test_selectingTheRightmostVisibleCardMakesRoomForIt() {
         var flick = scrollerOf(ends)
@@ -253,7 +253,7 @@ TestCase {
         // The selection starts *after* the card under test, so that selecting
         // it is a pure widening. Start it before and the card that shrinks is
         // ahead of this one, pulling it 72 px left by exactly as much as it
-        // grows — the strip absorbs the change and there is nothing to reveal.
+        // grows - the strip absorbs the change and there is nothing to reveal.
         ends.currentIndex = cardsOf(ends).length - 1
         flick.contentX = 0
         wait(50)
@@ -283,7 +283,7 @@ TestCase {
     //
     // `--day 9` and a selection restored with the window both land in
     // Component.onCompleted, where the Flickable is 0 px wide and there is
-    // nothing to scroll against. That used to be the end of it — the request
+    // nothing to scroll against. That used to be the end of it - the request
     // returned, nobody asked again, and the strip opened on its first page with
     // the selected card off the right-hand edge. The flag looked inert and the
     // selection looked absent, which is two symptoms of one missed replay.
@@ -394,7 +394,7 @@ TestCase {
     // Nothing here asks which direction the change is going, and this is what
     // that buys: run the same expressions backwards and the join comes apart
     // before the card lifts, because both are monotonic in the one driver. The
-    // spelling this replaced asked — `duration: selected ? move : 0` — and a
+    // spelling this replaced asked - `duration: selected ? move : 0` - and a
     // Behavior can fire before the binding feeding its duration is re-evaluated,
     // so "leaving goes in one frame" held on some runs and not on others.
     function test_bothBeatsRunTheSameWayBackwards() {

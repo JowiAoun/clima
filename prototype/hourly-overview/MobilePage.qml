@@ -6,7 +6,7 @@
 // vertical scroll owned by the page, a centred content column, and sections
 // separated by space alone. Written once because five screens needed the same
 // four decisions, and the first two of them had already disagreed about the
-// bottom padding — which on a phone means the last row of a page sitting
+// bottom padding - which on a phone means the last row of a page sitting
 // underneath the nav bar where nobody can read it.
 //
 //   MobilePage {
@@ -17,7 +17,7 @@
 // Children are added to a Column, so they need a width and nothing else.
 //
 // The layer is not optional. Every chart in this prototype draws with Qt Quick
-// Shapes, and Shapes ignore ancestor clipping entirely — see §10.8. Without it
+// Shapes, and Shapes ignore ancestor clipping entirely - see §10.8. Without it
 // the hourly strip paints straight over the nav bar as the page scrolls.
 import QtQuick
 import "theme.js" as Theme
@@ -29,7 +29,7 @@ Item {
 
     // How much of the bottom of the page is covered by the nav bar. The shell
     // hands this down rather than the page reading the token itself, so a page
-    // shown without a shell — in the gallery, say — is not padded for chrome
+    // shown without a shell - in the gallery, say - is not padded for chrome
     // that is not there.
     property real bottomInset: 0
 
@@ -42,8 +42,8 @@ Item {
 
     readonly property real margin: Theme.metric.mobileMargin
 
-    // The column stops growing rather than stretching. At 834 px — the shell
-    // runs on tablets too — a full-width hero puts the temperature and the
+    // The column stops growing rather than stretching. At 834 px - the shell
+    // runs on tablets too - a full-width hero puts the temperature and the
     // condition at opposite ends of the screen with a hand-span of nothing
     // between them.
     readonly property real columnWidth:

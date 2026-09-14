@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Moon detail card — DetailSunCard.qml's twin, and deliberately the same card.
+// Moon detail card - DetailSunCard.qml's twin, and deliberately the same card.
 //
 // The curve is a sinusoid in altitude: zero at moonrise and moonset, one at the
 // moon's transit, negative outside. The horizon line is altitude zero, so the
@@ -15,8 +15,8 @@
 //     ChartMath.moonPath from `illumination`, so a first quarter and a waning
 //     gibbous do not draw the same card.
 //
-// Everything else — band geometry, horizon, crossing dots, the annotation under
-// the span, the two clock figures, and the arrival — is written the same way as
+// Everything else - band geometry, horizon, crossing dots, the annotation under
+// the span, the two clock figures, and the arrival - is written the same way as
 // in the sun card on purpose. A geometry change here belongs there too, and so
 // does a change to the motion: the pair is read side by side and two twins that
 // arrive differently stop being twins.
@@ -27,8 +27,8 @@
 // past moonset, not parked on the arc. The window wraps, which is what puts a
 // set-before-rise night on the same footing as the sun's rise-before-set day.
 // A card is a `DetailCard { content: Item { id: viz } }`, so everything drawn
-// here lives inside a Component and reaches the two ids around it — `root` for
-// the card and `viz` for the visualisation — across that boundary. Without this
+// here lives inside a Component and reaches the two ids around it - `root` for
+// the card and `viz` for the visualisation - across that boundary. Without this
 // pragma neither is resolvable at compile time: qmllint reports every one of
 // them as an unqualified access, and qmlcachegen, which is the half that costs
 // something, cannot ahead-of-time compile the binding and leaves it to be
@@ -38,7 +38,7 @@
 //
 // Bound makes the enclosing scope's ids lexical, which is what they already
 // read as. It is safe here because every delegate in this file declares its
-// `required property` — that is the one thing Bound takes away, and none of
+// `required property` - that is the one thing Bound takes away, and none of
 // these were relying on it.
 pragma ComponentBehavior: Bound
 
@@ -65,7 +65,7 @@ DetailCard {
         // Light mode is not a tint of this. Silver-to-cool-blue is a range that
         // exists above a dark card; over a pale one the whole ramp sits within a
         // few percent of the surface and the arc disappears, which is what the
-        // first light render showed — the Sun card beside it kept its arc,
+        // first light render showed - the Sun card beside it kept its arc,
         // because saturated gold survives either ground, and the Moon's did not.
         // So the light ramp keeps the hue relationship and moves the range down.
         readonly property var skyRamp: Theme.isLight
@@ -137,7 +137,7 @@ DetailCard {
         // Two pens and a mark leave the rise crossing together on the card's
         // one-shot `reveal`: the curve draws itself outward from moonrise, and
         // the mark walks that curve from moonrise to now. Here the walk is the
-        // whole answer — the moon climbs, transits, sets, and keeps going down
+        // whole answer - the moon climbs, transits, sets, and keeps going down
         // the dim tail, which is how it ends up parked below the horizon at
         // half past twelve in the afternoon.
         //
@@ -169,7 +169,7 @@ DetailCard {
             // Below the horizon: the same curve, at track weight. It is the
             // unfilled remainder of the day, which is what trackLine is for, and
             // it is drawn because a bare hump gives no sense of where in the
-            // whole twenty-four hours we are — which on this card is the whole
+            // whole twenty-four hours we are - which on this card is the whole
             // answer, since the moon is down.
             ShapePath {
                 fillColor: "transparent"
@@ -190,7 +190,7 @@ DetailCard {
                 fillGradient: LinearGradient {
                     x1: 0; y1: viz.horizonY - viz.amp; x2: 0; y2: viz.horizonY
                     // The same three stops the arc and the mark are ramped off,
-                    // read out of `skyRamp` rather than written again — see the
+                    // read out of `skyRamp` rather than written again - see the
                     // twin in DetailSunCard.qml, which had the identical pair of
                     // copies a hundred lines apart.
                     GradientStop { position: viz.skyRamp[0].p; color: viz.skyRamp[0].c }
@@ -224,14 +224,14 @@ DetailCard {
                 // Uncovered as the pen reaches it, so a crossing is never marked
                 // on curve that has not been drawn. The rise is where the pen
                 // starts, so that one is there from the first frame. Opacity
-                // rather than `visible` — §10.8.
+                // rather than `visible` - §10.8.
                 opacity: viz.tPenR >= modelData ? 1 : 0
                 x: viz.xAt(modelData) - width / 2
                 y: viz.horizonY - height / 2
             }
         }
 
-        // Now: 14 px, ringed, and — this being the moon — showing the phase. The
+        // Now: 14 px, ringed, and - this being the moon - showing the phase. The
         // ring is drawn last so it sits over the glyph: without it the shadowed
         // limb merges straight into the dim stretch the mark is standing on.
         Item {
@@ -273,8 +273,8 @@ DetailCard {
 
         // How long the moon is up, centred on the stretch of horizon it measures,
         // and under it the one fact the status line below does not already carry.
-        // The status line says "Waning Gibbous"; printing that again here — which
-        // this card used to do — spends a line saying nothing.
+        // The status line says "Waning Gibbous"; printing that again here - which
+        // this card used to do - spends a line saying nothing.
         Text {
             id: spanLabel
             text: root.d.upLength

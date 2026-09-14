@@ -5,7 +5,7 @@
 //
 // docs/02-data-sources.md §2.1 picks it and says why: global, no API key ever,
 // CC-BY 4.0, eighteen models, and a free tier whose limits are per *user*
-// rather than per application because every client calls it from its own IP —
+// rather than per application because every client calls it from its own IP -
 // which is the same fact that lets Climat ship with no server at all (§2.8).
 // Our worst case is about 150 calls a day against a 10 000 a day ceiling.
 //
@@ -32,22 +32,22 @@
 // iforecastprovider.h argues that capabilities belong per (provider, location)
 // rather than per provider, and Open-Meteo is the case that proves it twice
 // over. `models=ecmwf_ifs025` returns `uv_index` and `visibility` as null for
-// every hour because IFS does not carry them — a recorded example is
-// tests/fixtures/openmeteo/toronto-ecmwf-gaps.json — and a provider-level
+// every hour because IFS does not carry them - a recorded example is
+// tests/fixtures/openmeteo/toronto-ecmwf-gaps.json - and a provider-level
 // "Open-Meteo has UV" would draw an empty UV tab with a full axis.
 //
 // So: before this provider has seen a payload for a place it answers
 // `undetermined` for every variable, and after one it answers from what
 // actually arrived. The verdict is remembered against the rounded coordinate,
 // the same quantisation HttpClient hashes with (four decimals,
-// libclimat/domain/coordinate.h) — so a map drag asks about one place rather
+// libclimat/domain/coordinate.h) - so a map drag asks about one place rather
 // than a hundred, and a remembered verdict is reused rather than re-derived.
 //
 // ============================================================================
 // SIXTEEN DAYS, ONE PAST DAY
 //
 // `forecast_days=16` is the maximum and it costs about 54 kB. `past_days=1` is
-// what makes the hourly strip able to start before "now" — app/qml/Climat's
+// what makes the hourly strip able to start before "now" - app/qml/Climat's
 // chart shows fifteen observed hours behind the marker and mockdata.js's
 // series starts at 21:00 the previous evening, which is not reachable from a
 // forecast that begins at today's midnight.
@@ -87,7 +87,7 @@ public:
     // draws before the network answers and a start with no network draws at
     // all. Not owned; must outlive this. Null turns the whole of §4.5's
     // stale-while-revalidate off, which is what a test about parsing rather
-    // than about caching passes — the same shape OpenMeteoGeocoder takes.
+    // than about caching passes - the same shape OpenMeteoGeocoder takes.
     void setCache(CacheStore *cache);
 
     // The id a 403 disables and a cache row is keyed by. Never changes.
@@ -102,7 +102,7 @@ public:
     QFuture<Result<Forecast>> fetchForecast(const ForecastRequest &request) override;
 
     // The base URL, without a query. Overridable so that a test can point the
-    // provider at tests/support/httpstub.h's loopback server — which is the
+    // provider at tests/support/httpstub.h's loopback server - which is the
     // only way to exercise this class at all, since no test may reach the
     // internet (docs/04-architecture.md §4.11).
     void          setBaseUrl(const QUrl &url);
@@ -128,7 +128,7 @@ private:
 
     // Keyed by Coordinate::toKeyString(), the same spelling the cache and the
     // request coalescer use. mutable because capabilitiesAt() is const and
-    // this is a memo rather than state — the answer it caches is a fact about
+    // this is a memo rather than state - the answer it caches is a fact about
     // the world, not about this object.
     mutable QHash<QString, Capabilities> m_learned;
 };

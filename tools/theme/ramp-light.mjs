@@ -12,14 +12,14 @@
 //
 // ---- what it does and does not touch ----------------------------------------
 //
-// SIX CONTINUOUS ramps — temp, wind, humidity, cloud, pressure, visibility —
+// SIX CONTINUOUS ramps - temp, wind, humidity, cloud, pressure, visibility -
 // are remapped. Their job is "more of this quantity, further along", and the
 // direction of "more" reverses with the ground: on navy a high value is drawn
 // bright, on white it has to be drawn dark. So lightness is INVERTED into the
 // band a dark mark needs, while hue and chroma are preserved, because the hue
 // is what says which quantity you are looking at.
 //
-// THREE CATEGORICAL ramps — precip, aqi, uv — are passed through unchanged
+// THREE CATEGORICAL ramps - precip, aqi, uv - are passed through unchanged
 // except for their alpha envelope. Their colours are published authority bands
 // (the WHO UV scale, the European AQI bands); a reader cross-checks them
 // against the issuer, and §10.5 says that where an authority publishes bands,
@@ -43,7 +43,7 @@ const L_CEIL = 0.62;
 // at 0.13-0.27 and a wash that faint over white is nothing. These do not: the
 // area fills are already at 0.8 and the strokes at 0.94, and the inversion
 // below is what buys their visibility. Gaining them as well took temp.fill from
-// 0.80 to 0.98, which is an area fill that has stopped being translucent — and
+// 0.80 to 0.98, which is an area fill that has stopped being translucent - and
 // the grid lines it is drawn over exist to be seen through it.
 const ALPHA_GAIN = 1.0;
 

@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Sunrise / sunset marker: a half-disc and a horizon line. Direction of travel is
-// carried by which side of the line the disc is on — risen above it for sunrise,
-// dropped below it for sunset — not by colour, and not by an arrow. An earlier
+// carried by which side of the line the disc is on - risen above it for sunrise,
+// dropped below it for sunset - not by colour, and not by an arrow. An earlier
 // comment here promised a chevron that has never been drawn; the shapes below are
 // the whole glyph.
 import QtQuick

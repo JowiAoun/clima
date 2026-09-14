@@ -3,7 +3,7 @@
 //
 // One device, drawn around a real screen.
 //
-// The screen inside is not a picture of the app — it is the app: a MobileShell
+// The screen inside is not a picture of the app - it is the app: a MobileShell
 // or a WeatherPage built from the same module the product ships, laid out at
 // the exact width `Viewports` says that device is. So a README image cannot
 // show a layout the app does not produce, which is the failure mode every
@@ -21,7 +21,7 @@ import Climat
 Item {
     id: root
 
-    // A preset id out of Viewports — "mobile", "tablet", "tablet-landscape",
+    // A preset id out of Viewports - "mobile", "tablet", "tablet-landscape",
     // "desktop". The screen takes its size from there rather than from
     // arguments, so a frame and the app agree about what a tablet is by
     // construction.
@@ -50,7 +50,7 @@ Item {
     // Row spaces them by their unscaled widths, so a half-size hero comes out
     // with the devices overlapping and a hole on the right.
     //
-    // So the zoom lives in the implicit size — the frame really is smaller —
+    // So the zoom lives in the implicit size - the frame really is smaller -
     // and an inner item of natural size carries the transform. Layout and
     // drawing then agree, and the content inside still lays out at the device's
     // true pixel width, which is the entire point of framing it at all.
@@ -78,7 +78,7 @@ Item {
         transformOrigin: Item.TopLeft
         transform: Scale { xScale: root.zoom; yScale: root.zoom }
 
-        // The body. Darker than any surface in the palette on purpose — a bezel
+        // The body. Darker than any surface in the palette on purpose - a bezel
         // that lands inside the app's own surface ladder reads as another card.
         Rectangle {
             anchors.fill: parent
@@ -106,7 +106,7 @@ Item {
             clip: true
 
             // Behind the shell, because neither WeatherPage nor MobileShell
-            // paints its own sky — app/qml/Climat/Main.qml puts a PageBackdrop
+            // paints its own sky - app/qml/Climat/Main.qml puts a PageBackdrop
             // under the Loader for exactly this reason, and a frame is that
             // window.
             PageBackdrop {
@@ -118,14 +118,14 @@ Item {
 
         // The rounded corners of the screen, painted back over the content.
         //
-        // `clip` above is rectangular — Qt Quick clips to a bounding box, not
-        // to a Rectangle's radius — so the shell's square corners otherwise
+        // `clip` above is rectangular - Qt Quick clips to a bounding box, not
+        // to a Rectangle's radius - so the shell's square corners otherwise
         // poke into the rim.
         //
         // One rectangle the size of the whole frame, filled with nothing and
         // outlined with a border exactly as thick as the bezel. A border
         // follows its rectangle's radius, so its *inner* edge is a rounded rect
-        // inset by `bezel` with radius `screenRadius` — the screen's outline,
+        // inset by `bezel` with radius `screenRadius` - the screen's outline,
         // to the pixel. The rest of the border lands on bezel that is already
         // this colour, so the only thing it changes is the four corners.
         Rectangle {

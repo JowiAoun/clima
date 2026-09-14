@@ -3,8 +3,8 @@
 // Humidity detail card.
 //
 // Eight hours as a row of filling gauges: each column is drawn full height in
-// the track colour — the whole 0–100% range — with the lower part filled in
-// blue to the hour's relative humidity. Reading the array against a fixed 0–100
+// the track colour - the whole 0-100% range - with the lower part filled in
+// blue to the hour's relative humidity. Reading the array against a fixed 0-100
 // scale is what makes it a visualisation rather than a decoration: 45% is a bar
 // filled just under halfway, and it would be visibly a different picture at 80%.
 //
@@ -13,8 +13,8 @@
 // other, so neither gets shrunk to make the point.
 //
 // On arrival the fills grow off the floor of their tracks, one stagger apart,
-// left to right — the array assembles the way the day runs. The tracks do not
-// grow: they are the 0–100 scale each fill is read against (§10.7), and a track
+// left to right - the array assembles the way the day runs. The tracks do not
+// grow: they are the 0-100 scale each fill is read against (§10.7), and a track
 // that arrived with its fill would leave the first frames with eight bars and
 // nothing to judge them by.
 import QtQuick
@@ -48,7 +48,7 @@ DetailCard {
         readonly property real barGap: 7
         readonly property real arrayW: count * barW + (count - 1) * barGap
 
-        // Gauges are scaled over the full 0–100% range, not over the series'
+        // Gauges are scaled over the full 0-100% range, not over the series'
         // own span. Relative humidity has a meaningful zero and a meaningful
         // ceiling; stretching eight readings across the box would make a calm
         // afternoon look like a storm.
@@ -72,7 +72,7 @@ DetailCard {
         readonly property int drawnCount: drawnRank(count)
 
         // The step is tightened when a series is long enough that a full
-        // stagger apiece would run past the card's own reveal — eight columns
+        // stagger apiece would run past the card's own reveal - eight columns
         // fit at the full 45, twelve would not. Whatever the count, the last
         // column has landed within `Theme.motion.reveal` of the first starting,
         // so a card that ripples still arrives on the grid's wave rather than
@@ -104,7 +104,7 @@ DetailCard {
                     // value source rather than a binding on `root.reveal`: the
                     // card's reveal is a single eased ramp, and slicing an eased
                     // ramp into eight windows gives eight differently-eased
-                    // columns crushed into its first third. Nothing restarts it —
+                    // columns crushed into its first third. Nothing restarts it -
                     // the card's reveal only ever goes 0 → 1, so the guard latches.
                     property real barGrow: 0
 
@@ -127,7 +127,7 @@ DetailCard {
                     Rectangle {
                         // An hour at 0% has nothing to draw. Clamping the height
                         // up to the bar width instead would print a 9px stub for
-                        // a reading that is not there — the same guard
+                        // a reading that is not there - the same guard
                         // DetailPrecipitationCard puts on its chance strip.
                         visible: bar.barValue > 0
                         width: viz.barW

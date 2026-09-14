@@ -30,8 +30,8 @@ QString parameterDigest(const HttpRequest &request)
     std::sort(canonical.begin(), canonical.end());
 
     // The URL goes into the digest too. Two Open-Meteo endpoints can share an
-    // endpoint label and differ only in host — /v1/forecast against a
-    // self-hosted instance is not the same answer as against the public one —
+    // endpoint label and differ only in host - /v1/forecast against a
+    // self-hosted instance is not the same answer as against the public one -
     // and a key that ignored the host would serve one for the other.
     canonical.prepend(request.url.toString(QUrl::FullyEncoded));
 
@@ -51,8 +51,8 @@ QString parameterDigest(const HttpRequest &request)
 
 RequestKey RequestKey::forRequest(const HttpRequest &request)
 {
-    // THE line. Everything downstream — the coalescer, the cache, the stored
-    // ETag — inherits its notion of "the same place" from here.
+    // THE line. Everything downstream - the coalescer, the cache, the stored
+    // ETag - inherits its notion of "the same place" from here.
     const QString place = request.coordinate.has_value()
         ? request.coordinate->rounded().toKeyString()
         : QStringLiteral("-");
@@ -83,7 +83,7 @@ QUrl composeUrl(const HttpRequest &request)
 
     if (request.coordinate.has_value()) {
         // Rounded, with the same helper the key uses. The URL and the key
-        // therefore agree by construction rather than by review — and every
+        // therefore agree by construction rather than by review - and every
         // form below reads this one value, so a provider cannot opt out of the
         // rounding by choosing a different spelling.
         const Coordinate coordinate = request.coordinate->rounded();
@@ -101,7 +101,7 @@ QUrl composeUrl(const HttpRequest &request)
             break;
 
         case CoordinateForm::DegenerateBoundingBox: {
-            // west,south,east,north — longitude first, which is the opposite
+            // west,south,east,north - longitude first, which is the opposite
             // order to the one above and the reason this is a form rather than
             // a string a provider assembles. A bbox with the pair the wrong way
             // round is not an error to the service; it is an empty answer off

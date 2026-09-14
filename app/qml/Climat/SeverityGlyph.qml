@@ -7,7 +7,7 @@
 // the worst possible place to break that rule: about one man in twelve cannot
 // separate the red from the amber, and those two are the difference between
 // "stay indoors" and "it will be hot". So the grade is carried three times over
-// — this shape, the colour, and the word beside it — and any one of the three
+// - this shape, the colour, and the word beside it - and any one of the three
 // is enough on its own.
 //
 //   extreme   an octagon. The stop sign, and the only shape here with no
@@ -15,7 +15,7 @@
 //             rather than as more of the same.
 //   severe    a triangle, point up. The hazard triangle every road sign uses.
 //   moderate  a triangle, smaller, with a flat interior bar rather than a
-//             point — a caution rather than a hazard.
+//             point - a caution rather than a hazard.
 //   minor     a circle with a bar: information.
 //   unknown   a circle with a hollow centre. The issuer declined to grade, and
 //             a mark that guessed at one would be inventing what they withheld.
@@ -94,8 +94,8 @@ Item {
 
     // ---- severe and moderate: a triangle -------------------------------------
     //
-    // A 45°-rotated square whose lower half is clipped away — which gives a
-    // triangle — inside an item that stretches it vertically.
+    // A 45°-rotated square whose lower half is clipped away - which gives a
+    // triangle - inside an item that stretches it vertically.
     //
     // Both halves of that are needed and the first attempt had neither right.
     // It drew the rotated square and then ADDED a full-width bar under it to
@@ -104,7 +104,7 @@ Item {
     // makes a triangle; the bar was making it something else.
     //
     // The stretch is the second half. A diamond's top half is always exactly
-    // twice as wide as it is tall, and a hazard triangle is not — at 2:1 it
+    // twice as wide as it is tall, and a hazard triangle is not - at 2:1 it
     // reads as an arrowhead. `Scale` on a PARENT rather than on the rectangle
     // itself, because Qt Quick applies the `transform` list in the item's own
     // unrotated coordinates: scaling y there and then rotating 45° yields a
@@ -137,7 +137,7 @@ Item {
     }
 
     // The interior mark, outside the clip so it stays crisp and unstretched.
-    // Severe gets an exclamation — a bar and a dot; moderate gets the bar
+    // Severe gets an exclamation - a bar and a dot; moderate gets the bar
     // alone. Real hazard iconography makes exactly this distinction, and it is
     // the third copy of a fact the colour and the word already carry.
     Rectangle {

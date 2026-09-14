@@ -29,7 +29,7 @@ void WidgetFeed::componentComplete()
 {
     // Attach here and not in the constructor. QML assigns properties between
     // the two, so subscribing earlier would ask the daemon for the default
-    // place with an empty field mask — which the wire format reads as "send
+    // place with an empty field mask - which the wire format reads as "send
     // everything" (libclimat/wire/snapshot.h), so the mistake would be a working
     // widget receiving eight times the payload it needs. Silent, and the sort
     // of thing that is only ever found by looking at bus traffic.

@@ -4,7 +4,7 @@
 // happen to look like today. Keep them in one place so the whole app can be
 // re-skinned without touching layout code.
 //
-// **Nothing in the tree reads this file directly any more — read Theme.qml.**
+// **Nothing in the tree reads this file directly any more - read Theme.qml.**
 // This is the table; Theme.qml is the singleton that republishes it as QML
 // properties, which is what lets a binding on a token be re-evaluated when the
 // token changes. A `.pragma library` is evaluated once per engine and never
@@ -23,13 +23,13 @@
 // the 67 were `#XXffffff` and three more were `#XX141d33` dark tints, so the
 // "white over dark" assumption was baked into the value and the name agreed with
 // it. A light theme cannot be produced by re-valuing a table like that, because
-// half of it is not a decision — it is a description of the decision that was
+// half of it is not a decision - it is a description of the decision that was
 // already made somewhere else.
 //
 // §10.1's constraint is the one to design against: *the surface ladder decides
-// the background, not the other way round*. So the groups below name jobs —
+// the background, not the other way round*. So the groups below name jobs -
 // what is a surface, what is ink, what is a line, what is a control, what is
-// drawn over content — and the values are answers to those questions. Swapping
+// drawn over content - and the values are answers to those questions. Swapping
 // the answers is now a change to this file and nothing else.
 //
 // The groups, and what belongs in each:
@@ -41,13 +41,13 @@
 //   accent     the one saturated colour, and the only ink legible on it
 //   control    interactive chrome: toggles, pagers, nav glyphs
 //   overlay    drawn *over* content it must not let through
-//   state      a verdict — a trend direction, a good/caution/poor band
+//   state      a verdict - a trend direction, a good/caution/poor band
 //   glyph      the paints a weather glyph is drawn in
 //   badge      the day/night disc behind a glyph
 //   scaffold   deliberately off-palette: something not built yet
 //
-// `metric`, `type`, `motion` and `scale` are theme-invariant — a 14 px radius is
-// 14 px in any palette — so they are not roles and did not move.
+// `metric`, `type`, `motion` and `scale` are theme-invariant - a 14 px radius is
+// 14 px in any palette - so they are not roles and did not move.
 .pragma library
 
 // Surfaces are translucent, not painted.
@@ -55,7 +55,7 @@
 // The reference has no opaque cards at all: the page is one vertical gradient
 // and every surface is a thin white wash over it, so a card's actual colour is
 // whatever the gradient is doing behind it at that scroll depth. Flat fills
-// cannot reproduce that — they are one colour everywhere, and the page stops
+// cannot reproduce that - they are one colour everywhere, and the page stops
 // reading as a single lit surface with things resting on it.
 //
 // Alpha ladder, matching the reference's three levels: 0.05 recedes, 0.07 is
@@ -78,9 +78,9 @@ var surfaceAlpha = {
 // the flat fallback for the one case that cannot take a gradient.
 //
 // There used to be `pageStop0…4` here as well, a second copy of `sky.dusk.stops`
-// left over from when dusk was the only sky there was. Nothing read them — the
+// left over from when dusk was the only sky there was. Nothing read them - the
 // desktop page and the phone both go through `PageBackdrop`, which reads
-// `sky[phase].stops` — so they were deleted rather than renamed. A palette with
+// `sky[phase].stops` - so they were deleted rather than renamed. A palette with
 // two spellings of the same five colours is a palette that will eventually
 // disagree with itself.
 var page = {
@@ -92,8 +92,8 @@ var page = {
 //
 // `recede`, `base` and `raised` are the whole ladder. A card is `base`; an
 // unselected day is `recede`; hover, selection and emphasis are `raised`. There
-// were five more names for exactly these three values — `cardBg`, `dayCardBg`,
-// `stripBg`, `stripPast`, `pillHover`, `switchActive` — each naming the *place*
+// were five more names for exactly these three values - `cardBg`, `dayCardBg`,
+// `stripBg`, `stripPast`, `pillHover`, `switchActive` - each naming the *place*
 // a wash was used rather than the level it sits at, which is how a ladder with
 // three rungs grows nine names and then drifts apart one rung at a time.
 //
@@ -121,7 +121,7 @@ var surface = {
 
 // ---- ink ---------------------------------------------------------------------
 // Text, in three weights of presence. Ink for anything sitting *on* the accent
-// is `accent.ink` and lives with the fill it has to be legible on — see there
+// is `accent.ink` and lives with the fill it has to be legible on - see there
 // for why the two are one pair rather than two tokens in two groups.
 var ink = {
     primary: "#ffffff",
@@ -132,7 +132,7 @@ var ink = {
 // ---- line --------------------------------------------------------------------
 // Everything a pixel wide. Three jobs, and they are not interchangeable:
 // gridlines *measure*, dividers and hairlines *separate*, and `track` is the
-// unfilled remainder of a gauge — which is a reading, not a decoration (§10.7).
+// unfilled remainder of a gauge - which is a reading, not a decoration (§10.7).
 //
 // These are the same white washes the surfaces are, at today's palette, and they
 // are deliberately not the same tokens. A light theme darkens a line and keeps a
@@ -141,7 +141,7 @@ var line = {
     grid:     "#1cffffff",
     gridWeak: "#10ffffff",
 
-    // The unfilled part of a gauge — a dial track, a bar's empty remainder. It
+    // The unfilled part of a gauge - a dial track, a bar's empty remainder. It
     // has to be present enough that the filled part reads as a fraction of
     // something, which `grid` at 0.11 is not.
     track:    "#2effffff",
@@ -156,7 +156,7 @@ var line = {
     // mean different things and will not always want the same alpha.
     forecast: "#5fffffff",
 
-    // The dashed comparison line a metric may draw over its own series — gust
+    // The dashed comparison line a metric may draw over its own series - gust
     // over wind, apparent over actual. The series proper is a ramp rather than
     // a token, which is why only its companion is here.
     series:   "#8cffffff",
@@ -194,7 +194,7 @@ var accent = {
 // control that carry its own colour.
 //
 // The pager buttons float over the chart, so they stay more opaque than a
-// surface — but still tinted rather than painted, or they punch a flat hole in
+// surface - but still tinted rather than painted, or they punch a flat hole in
 // the gradient. `navGlyph` is an inactive tab icon; it is the same value as
 // `ink.muted` today and stays its own token, because a tab bar and a paragraph
 // are not obliged to dim by the same amount in every palette.
@@ -219,7 +219,7 @@ var overlay = {
     pastHatch: "#1effffff",
 
     // HatchPattern's own default, for an instance nobody has told what it is
-    // hatching — which today is the gallery specimen and nothing else. A caller
+    // hatching - which today is the gallery specimen and nothing else. A caller
     // that means the chart's past passes `pastHatch`.
     hatch:     "#16ffffff",
 
@@ -232,7 +232,7 @@ var overlay = {
     // reading rather than a word, and a reading has to be exact at a glance.
     readout:   "#e6141d33",
 
-    // A modal dim over the whole window — the place picker. Darker and cooler
+    // A modal dim over the whole window - the place picker. Darker and cooler
     // than anything else here on purpose: it is the one overlay whose job is to
     // put the page *away* rather than to keep something on it readable.
     scrim:     "#99060b18"
@@ -274,7 +274,7 @@ var glyph = {
 
     cloudTop:    "#ffffff",
     cloudBottom: "#c1cddf",
-    // Clouds are drawn white, which vanishes on the pale day badge — these keep
+    // Clouds are drawn white, which vanishes on the pale day badge - these keep
     // them readable there without changing them everywhere else.
     cloudTopOnLight:    "#fbfdff",
     cloudBottomOnLight: "#7b95bb",
@@ -285,13 +285,13 @@ var glyph = {
     // of each other rather than each getting a colour of its own. Rain and
     // drizzle are the same drop at two lengths; sleet is a `rain` drop and a
     // `snow` pellet alternating, which is the whole of what sleet is; hail is
-    // `snow` pellets under a `bolt`, because WMO 96 and 99 — the only two codes
-    // that reach ConditionKind::Hail — are thunderstorms with hail in them and
+    // `snow` pellets under a `bolt`, because WMO 96 and 99 - the only two codes
+    // that reach ConditionKind::Hail - are thunderstorms with hail in them and
     // not a separate sky.
     //
     // Each mark needs a second value for the one pale ground in the app: the
     // day plate under DayIconBadge. This is the same argument cloudTopOnLight
-    // makes one block up, and the numbers say it louder here — a `rain` drop on
+    // makes one block up, and the numbers say it louder here - a `rain` drop on
     // dark's #fdfefe plate measures 2.13:1, under the 3:1 an essential mark
     // owes its background, which is why the selected day card in the ten-day
     // strip has been drawing raindrops nobody could see.
@@ -341,7 +341,7 @@ var badge = {
     dayBottom:   "#dde5f0",
     // Deepened, and the reason is measured rather than aesthetic. At the old
     // #6d9ae8 → #3f63bd this plate sat in the middle of the luminance range,
-    // where neither a pale mark nor a dark one clears 3:1 — `glyph.rain` on it
+    // where neither a pale mark nor a dark one clears 3:1 - `glyph.rain` on it
     // measured **1.31:1**, so the night half of a rainy day card had raindrops
     // that were, arithmetically, not visible. A plate has to commit to being
     // light or dark for anything to be legible on it, and a night plate that
@@ -364,7 +364,7 @@ var scaffold = {
 
 // ---- severity ----------------------------------------------------------------
 // The five CAP grades a severe-weather alert can carry, as a table keyed by
-// libclimat's own severity key — "extreme", "severe", "moderate", "minor",
+// libclimat's own severity key - "extreme", "severe", "moderate", "minor",
 // "unknown".
 //
 // A FOURTH CATEGORICAL GROUP, NOT A STRETCH OF state.good/caution/poor
@@ -397,7 +397,7 @@ var scaffold = {
 //           because that is what makes the banner read as an alert instead of
 //           as another card.
 //
-// Measured against the composited plate — every `ink` clears 4.5:1 and every
+// Measured against the composited plate - every `ink` clears 4.5:1 and every
 // `edge`/`glyph` clears 3:1 in both schemes, and every plate separates from the
 // page by at least 1.3:1. tests/qml/tst_theme.qml asserts all three, because
 // unlike the audited colour roles this table is keyed by data and the gallery's
@@ -421,7 +421,7 @@ var severity = {
     // The issuer declined to grade. Six of the nine alerts in
     // tests/fixtures/alerts/ arrive this way, so this is not the rare case it
     // looks like. Neutral, and deliberately NOT the quietest thing on the
-    // screen — an ungraded alert is still an alert.
+    // screen - an ungraded alert is still an alert.
     unknown:  { wash: "#24aab4c8", edge: "#ffc0c8d8", glyph: "#ffc0c8d8", ink: "#ffd6dce8" }
 };
 
@@ -431,7 +431,7 @@ var severity = {
 // Opaque colours with the alpha applied at use, unlike everything above, and
 // for a reason: six types times three intensities is eighteen washes, and
 // eighteen hand-written #AARRGGBB literals is a table nobody can check. Type
-// chooses the hue, intensity chooses the alpha, and the two are independent —
+// chooses the hue, intensity chooses the alpha, and the two are independent -
 // which is the actual design, so it is what the tokens should say.
 //
 // The rain hue and its mid alpha are measured off the reference: its rainy
@@ -472,15 +472,15 @@ var precip = {
 
 // The sky, by time of day.
 //
-// Five stops each, the same five positions PageBackdrop declares — QML cannot
+// Five stops each, the same five positions PageBackdrop declares - QML cannot
 // generate GradientStop elements from a Repeater, so the *positions* are
 // written out there and only the colours come from here.
 //
 // **Every phase is dark.** That is the constraint the whole palette is built
 // on and it is not a stylistic preference: §10.1's surfaces are white washes
-// at 0.05–0.10, and a wash is only a surface if there is something darker
+// at 0.05-0.10, and a wash is only a surface if there is something darker
 // behind it. A literal daylight sky would make every card on every screen
-// invisible at once. So "day" is a clean deep blue rather than a bright one —
+// invisible at once. So "day" is a clean deep blue rather than a bright one -
 // the difference between phases is hue and clarity, not lightness, and it
 // reads as time of day because the four are seen against each other.
 //
@@ -501,7 +501,7 @@ var star = {
     // turns a sky into a diagram.
     //
     // 0.13, and it was 0.24 first. At that weight the Plough drew a visible
-    // line straight through "Expect sunny skies" — the sky is the one thing on
+    // line straight through "Expect sunny skies" - the sky is the one thing on
     // the screen that has to lose every contest it enters.
     line: "#22c8d8ff",
 
@@ -529,7 +529,7 @@ var metric = {
     // all centred in 2 x this.
     //
     // 48 was the floor to begin with, and it put a cliff at 1286 px of window:
-    // below that the desktop stopped fitting the day and started scrolling —
+    // below that the desktop stopped fitting the day and started scrolling -
     // with no scroll control, because the arrows step days. 24 moves the cliff
     // to 734, which is below the width the desktop shell exists at at all.
     minHourWidth:     24,
@@ -556,7 +556,7 @@ var metric = {
     detailPadV:       16,
     detailGap:        16,
 
-    // Between two sections of the page — the hero and the hourly block, the
+    // Between two sections of the page - the hero and the hourly block, the
     // hourly block and the details grid. Wider than any gap inside a section,
     // which is what makes them read as separate things without a rule between
     // them.
@@ -572,7 +572,7 @@ var metric = {
     mobileGap:        14,
 
     // A mobile card's inset. Its own tokens rather than the detail card's,
-    // which are named for the twelve-card grid and measured off it — sharing
+    // which are named for the twelve-card grid and measured off it - sharing
     // them would mean a change to that grid silently re-padding every screen
     // on the phone.
     mobileCardPadH:   16,
@@ -598,7 +598,7 @@ var metric = {
     mobileContentMax: 620,
 
     // The smallest a control may be in either direction, in device-independent
-    // pixels. Not a rounded-up version of what the mouse needs — a pointer is
+    // pixels. Not a rounded-up version of what the mouse needs - a pointer is
     // a pixel and a fingertip's contact patch is about 8 mm, so every platform
     // guideline that has measured it lands within a few px of the same number:
     // Apple says 44, Google says 48 dp, the WCAG 2.2 target-size floor is 24
@@ -618,7 +618,7 @@ var metric = {
 // `font.pixelSize` is an int in Qt. A fractional value fails object creation and
 // Qt reports it only as `Type X unavailable` from the *parent* file.
 //
-// Sizes only. `Theme.type.family` — the face these sizes are set in — exists and
+// Sizes only. `Theme.type.family` - the face these sizes are set in - exists and
 // is deliberately not here: the name of the bundled typeface is already written
 // down inside the font file, and a second copy in this table is a copy that can
 // disagree with it. Theme.qml reads it off the running application instead, and
@@ -633,7 +633,7 @@ var type = {
     detailTitle: 14,
 
     // The reading: the one number a card exists to show. A card carrying two
-    // co-equal readings — sunrise and sunset, speed and gust — uses the pair
+    // co-equal readings - sunrise and sunset, speed and gust - uses the pair
     // size for both. There is no third option: a card wanting one is really
     // asking for a different layout.
     reading:     34,
@@ -656,12 +656,12 @@ var type = {
 };
 
 // Motion, as tokens for exactly the reason type sizes are tokens: the first
-// pass at this gave *ranges* in a document — "140–160 ms", "190 ms" — and the
+// pass at this gave *ranges* in a document - "140-160 ms", "190 ms" - and the
 // components that bothered to animate at all came back with 130, 140, 150, 160,
 // 170, 190, 340 and 430. Eight durations for four jobs. A range is not a rule.
 //
 // Easing is not in here because `Easing.OutCubic` is a QML enum and this is a
-// plain JS library. **OutCubic unless there is a stated reason** — things
+// plain JS library. **OutCubic unless there is a stated reason** - things
 // decelerate into place because they are arriving, not departing.
 //
 // Theme.qml can hold the enum and now does, as `Theme.motion.easing`. The sixty
@@ -676,7 +676,7 @@ var motion = {
     // that you are never waiting for it.
     move:    190,
 
-    // One view becoming another — chart to list, a card opening.
+    // One view becoming another - chart to list, a card opening.
     view:    340,
 
     // A value finding its place: a dial sweeping to its reading, a bar
@@ -799,8 +799,8 @@ var ramp = {
 // ---------------------------------------------------------------------------
 // Performance tiers
 // ---------------------------------------------------------------------------
-// How much of the night sky is built. Not how it is drawn — every tier draws
-// the same stars the same way — but how many of them there are.
+// How much of the night sky is built. Not how it is drawn - every tier draws
+// the same stars the same way - but how many of them there are.
 //
 // The sky is the only thing in this app whose cost is a *count* rather than a
 // consequence of the data: 130 Rectangles, 9 Shapes with a radial gradient
@@ -812,7 +812,7 @@ var ramp = {
 // The counts are prefixes and not samples, and that is the whole reason this
 // works: sky.js seeds every star from its own index, so `field(70)` is the
 // first seventy of the same hundred and thirty. A reduced sky is the same sky
-// with fewer stars in it, in the same places — so a golden image per tier is
+// with fewer stars in it, in the same places - so a golden image per tier is
 // stable, and switching tiers cannot move a constellation.
 var perf = {
     full: {
@@ -821,7 +821,7 @@ var perf = {
         constellations: 3
     },
     // Roughly half the field, half the beacons, and one figure. The figures are
-    // the expensive third — a stroked Shape plus its own vertex stars — and one
+    // the expensive third - a stroked Shape plus its own vertex stars - and one
     // of them still says "those points make a shape", which is the entire job.
     reduced: {
         starField:      70,

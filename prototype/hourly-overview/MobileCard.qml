@@ -16,7 +16,7 @@
 //   }
 //
 // The body reports its own height and the card grows to it. That is the
-// opposite of DetailCard, which is a fixed 300x250 box in a grid — on a phone
+// opposite of DetailCard, which is a fixed 300x250 box in a grid - on a phone
 // a card is as tall as what is in it, and a fixed height would mean either a
 // clipped hourly strip or a pollen card with a hand-span of nothing under it.
 //
@@ -33,7 +33,7 @@ Item {
     property string link: ""
     property bool bleed: false
 
-    // The body. Anchor nothing — it is given a width and asked how tall it is.
+    // The body. Anchor nothing - it is given a width and asked how tall it is.
     property Component content
 
     signal linkActivated()
@@ -46,7 +46,7 @@ Item {
     implicitHeight: body.y + body.height + padV
     height: implicitHeight
 
-    // No border. Contrast against the page defines a card — §10.1.
+    // No border. Contrast against the page defines a card - §10.1.
     Rectangle {
         anchors.fill: parent
         radius: Theme.metric.cardRadius
@@ -109,14 +109,14 @@ Item {
             // visual item, so it takes no cell in the Row's layout.
             //
             // On the header this would tint the link from anywhere along a
-            // 350 px bar — promising a tap where there is nothing to tap.
+            // 350 px bar - promising a tap where there is nothing to tap.
             HoverHandler { id: linkHover; cursorShape: Qt.PointingHandCursor }
             TapHandler { onTapped: root.linkActivated() }
         }
     }
 
     // A rule, not a gap. The header names what is below it, so the two belong
-    // to each other more than either belongs to the next card — and space
+    // to each other more than either belongs to the next card - and space
     // alone, which is what separates sections on this page, would say the
     // opposite.
     Rectangle {

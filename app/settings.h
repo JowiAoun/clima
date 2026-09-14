@@ -28,7 +28,7 @@
 // ---- why the migration helper is here on day one ----------------------------
 // The application and organisation names are baked into the settings path, and
 // docs/07-packaging.md §7.2 says plainly that changing the app ID later breaks
-// users' saved data. It does — QSettings would simply start reading a directory
+// users' saved data. It does - QSettings would simply start reading a directory
 // that does not exist, and every preference would silently revert to its
 // default with no error anywhere. Writing the copy-forward now, while the table
 // of superseded identities is empty and nothing can go wrong, makes a future
@@ -62,12 +62,12 @@ class Settings : public QObject
     QML_ELEMENT
     QML_SINGLETON
 
-    // "system" | "light" | "dark". Nothing reads it yet — the theme work is
-    // W3 — but the key exists so the preference survives that work landing.
+    // "system" | "light" | "dark". Nothing reads it yet - the theme work is
+    // W3 - but the key exists so the preference survives that work landing.
     Q_PROPERTY(QString appearance READ appearance WRITE setAppearance NOTIFY appearanceChanged)
 
-    // Whether the page gradient follows the sky over the place on screen —
-    // night, dawn, day, dusk — or holds at one palette. On by default, which is
+    // Whether the page gradient follows the sky over the place on screen -
+    // night, dawn, day, dusk - or holds at one palette. On by default, which is
     // what this app has always done. See app/qml/Climat/Main.qml, which owns the
     // rule this switches between, and which pins it under `--grab` for the same
     // reason it pins the colour scheme there.
@@ -82,7 +82,7 @@ class Settings : public QObject
 
     // Window geometry. Position is stored as well as size, because a
     // multi-monitor user who always puts Climat on the left screen wants it
-    // there again; whether it can be honoured is a platform question — see
+    // there again; whether it can be honoured is a platform question - see
     // Main.qml, which restores the size and deliberately does not restore the
     // position on Wayland.
     Q_PROPERTY(int  windowWidth  READ windowWidth  WRITE setWindowWidth  NOTIFY windowGeometryChanged)
@@ -93,8 +93,8 @@ class Settings : public QObject
 
     // Whether a warning interrupts the reader when they are not looking at the
     // window. Off by default and deliberately: it is the one preference here
-    // that changes what this process does when nobody is watching it — see
-    // app/viewmodels/alertsdata.h on the poll schedule — and a weather app that
+    // that changes what this process does when nobody is watching it - see
+    // app/viewmodels/alertsdata.h on the poll schedule - and a weather app that
     // started notifying without being asked is one people turn off once and
     // never turn on again.
     Q_PROPERTY(bool alertNotifications READ alertNotifications WRITE setAlertNotifications
@@ -115,7 +115,7 @@ public:
     static Settings *instance();
     static Settings *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 
-    // Call from main() before anything constructs a QSettings — including this
+    // Call from main() before anything constructs a QSettings - including this
     // class. Sets the INI default and copies a superseded config directory
     // forward if there is one.
     static void prepareStorage();
@@ -145,7 +145,7 @@ public:
     // and the tiles kept saying "3 PM" until the host was restarted.
     //
     // reloadFromDisk() re-reads the file and emits the change signal for every
-    // value that moved — and only those, so a reload that found nothing new is
+    // value that moved - and only those, so a reload that found nothing new is
     // silent, and a binding on the clock format is not re-evaluated because
     // somebody resized the window. watchForExternalChanges() arms a watcher on
     // the file and its directory and calls reloadFromDisk() when they settle;
@@ -217,7 +217,7 @@ Q_SIGNALS:
 private:
     // Private for the same reason AppOptions' is: QML picks a default
     // constructor over a create() factory without saying so, and the result is
-    // two Settings objects — one QML writes to and one nothing reads.
+    // two Settings objects - one QML writes to and one nothing reads.
     Settings();
 
     // Writes only when the value actually changed, so a binding that reassigns
@@ -254,13 +254,13 @@ private:
 
     // Emits for anything that has moved since the signals last said otherwise,
     // WITHOUT re-reading the file. Called by reloadFromDisk() after its sync,
-    // and by store() before a write — see there for the window it closes.
+    // and by store() before a write - see there for the window it closes.
     void announceExternalChanges();
 
     QScopedPointer<QSettings> m_settings;
 
     // What the change signals last announced. Kept by store() and by
-    // reloadFromDisk(), and compared by the latter — see its comment for why
+    // reloadFromDisk(), and compared by the latter - see its comment for why
     // a read taken at reload time is not the same thing.
     Values m_seen;
 

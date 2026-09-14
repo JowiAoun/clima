@@ -7,7 +7,7 @@
 //
 //   1. The guard trips. A deliberate attempt to reach a public host is
 //      recorded and blocked. Without this, "no external attempts were
-//      recorded" would be equally true of a guard that was never installed —
+//      recorded" would be equally true of a guard that was never installed -
 //      which is the failure mode that would let the whole rule quietly stop
 //      working.
 //
@@ -65,7 +65,7 @@ void TestNetworkIsolation::theGuardRecordsAndBlocksAnExternalConnection()
     // It must not connect. The proxy points at the discard port on loopback,
     // so this fails fast rather than waiting out a DNS timeout.
     QVERIFY2(!socket.waitForConnected(2000),
-             "a test reached api.open-meteo.com — the network guard is not installed");
+             "a test reached api.open-meteo.com - the network guard is not installed");
 
     const QStringList attempts = NetworkGuard::externalAttempts();
     QCOMPARE(attempts.size(), 1);

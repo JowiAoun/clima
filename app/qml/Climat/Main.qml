@@ -4,7 +4,7 @@
 // The window, and deliberately almost nothing else.
 //
 // This file used to be five hundred lines, and four hundred of them were an
-// argv scraper and five capture timers. Those are C++ now — AppOptions parses
+// argv scraper and five capture timers. Those are C++ now - AppOptions parses
 // the command line, Settings remembers what should outlive the process, and
 // ScreenshotController owns the shutters. What is left is the product: a
 // backdrop, a shell, and the two rules that choose the shell.
@@ -35,7 +35,7 @@ Window {
     property string forcedViewport: ""
 
     // A handheld is never a desktop, whatever its width. A tablet held in
-    // landscape is 1112 px across — past the desktop threshold — and the
+    // landscape is 1112 px across - past the desktop threshold - and the
     // desktop page is the wrong answer for it twice over: a hover crosshair
     // nobody can hover, and a twelve-card grid of 300 px cards laid out for a
     // pointer. `Viewports.classOf` cannot know this, because a 1112 px window
@@ -54,13 +54,13 @@ Window {
 
     // ---- the sky -----------------------------------------------------------
     // The background follows the clock: a deep blue by day, a starred indigo at
-    // night, warmed at the two crossings. Or it does not, and holds at `dusk` —
-    // the palette this prototype has always had — which is what
+    // night, warmed at the two crossings. Or it does not, and holds at `dusk` -
+    // the palette this prototype has always had - which is what
     // `Settings.dynamicBackground` switches between and what the preferences
     // screen's first row is.
     //
     // Clock owns what time it is and which of the four phases that falls in, so
-    // that the component gallery's window — which paints this same backdrop —
+    // that the component gallery's window - which paints this same backdrop -
     // reads the hour from the same place rather than from its own copy of the
     // same three arguments.
     //
@@ -75,7 +75,7 @@ Window {
     // reason and with the same cost. A golden image is taken with whatever is in
     // the INI of the machine that took it, so a capture that read this
     // preference would be a picture that changes when a developer flips a switch
-    // — the failure would appear in CI, on an unrelated pull request, with
+    // - the failure would appear in CI, on an unrelated pull request, with
     // nothing in the diff to explain it. The scheme has been pinned under
     // `--grab` since the day the theme landed; this is that decision applied to
     // the other half of the backdrop.
@@ -106,7 +106,7 @@ Window {
     //
     // Rule 2 is the one worth defending. `Settings.appearance` defaults to
     // "system", so without it a golden image would come out in whatever theme
-    // the machine that ran CI happened to be in — the same image passing on one
+    // the machine that ran CI happened to be in - the same image passing on one
     // runner and failing on the next, for a reason nothing in the diff would
     // show. A capture already restores no window geometry for exactly this
     // reason; the scheme is the same argument about a different property.
@@ -121,8 +121,8 @@ Window {
     }
 
     // A Binding rather than an assignment, because the desktop can change its
-    // mind while the app is open — that is the entire point of subscribing to
-    // the portal — and an assignment made once at startup would leave this
+    // mind while the app is open - that is the entire point of subscribing to
+    // the portal - and an assignment made once at startup would leave this
     // window the only one on the screen still dark at sunrise.
     Binding {
         target: Theme
@@ -145,7 +145,7 @@ Window {
     }
 
     // Stillness is two unrelated requests that happen to want the same thing.
-    // A still capture holds still so the shutter cannot catch a transition —
+    // A still capture holds still so the shutter cannot catch a transition -
     // --film is exempt, since a contact sheet of eight identical frames is not
     // a review of anything. And a reader who has asked their desktop for less
     // movement has asked this window too; precipitation's standing animation is
@@ -159,15 +159,15 @@ Window {
 
     // ---- what the alert poll is told -----------------------------------------
     //
-    // AlertsData's schedule — three minutes focused, ten idle, stopped when
-    // hidden — is only a schedule if something tells it which of those the
+    // AlertsData's schedule - three minutes focused, ten idle, stopped when
+    // hidden - is only a schedule if something tells it which of those the
     // window is in. Nothing did. The view model's defaults are "visible and
     // focused", so from the day alerts landed the app polled every three
     // minutes from launch to quit, minimised or not: precisely the bill
     // alertsdata.h's arithmetic says it refuses to run up, and in Canada, where
     // nothing revalidates, several megabytes a day for a window in the dock.
     //
-    // Pushed rather than read, for the reason the view model gives — it can be
+    // Pushed rather than read, for the reason the view model gives - it can be
     // tested without a QWindow. Minimised counts as hidden: a window in the
     // dock is a window nobody is looking at, and it is the case that costs.
     readonly property bool exposed:
@@ -178,11 +178,11 @@ Window {
 
     // The page background is painted as an item, not left to Window.color.
     // grabToImage() captures contentItem, which does not include the window's
-    // clear colour — so every headless screenshot came out with a black page
+    // clear colour - so every headless screenshot came out with a black page
     // behind the cards, which is not what is on screen.
     // The starfield is still the phone's alone, and that is a separate question
-    // from which phase the gradient is in. A 1340 px window is mostly cards —
-    // the background is a rim around them — and the reader never sees enough of
+    // from which phase the gradient is in. A 1340 px window is mostly cards -
+    // the background is a rim around them - and the reader never sees enough of
     // it for a constellation to be anything but noise behind a chart. A phone is
     // the opposite: the hero sits directly on the sky with no card at all. So a
     // desktop that has followed the clock into the night gets the night
@@ -198,7 +198,7 @@ Window {
     // The app itself. Two shells, one product: `WeatherPage` is the desktop's
     // single scrolling column, `MobileShell` is the phone's five tabs under a
     // nav bar, and which one runs is a function of the window width and nothing
-    // else — there is no "mobile build".
+    // else - there is no "mobile build".
     //
     // A Loader rather than both in the tree with one hidden. Keeping both would
     // build five phone screens on every desktop launch to show none of them.
@@ -219,7 +219,7 @@ Window {
         // MobileShell's default tab is mobiletabs.js's first entry, and naming
         // that entry a second time out here is how the two come to disagree.
         //
-        // `viewportClass` IS bound, because it is not a starting value — it is
+        // `viewportClass` IS bound, because it is not a starting value - it is
         // the answer to a question the window keeps being asked. Dragging a
         // window from 834 to 1112 px changes it, and so does turning a tablet.
         MobileShell {
@@ -228,8 +228,8 @@ Window {
         }
     }
 
-    // The shutters. Everything it needs is bound — the scene it photographs and
-    // the flags that say what to photograph — so it still points at the right
+    // The shutters. Everything it needs is bound - the scene it photographs and
+    // the flags that say what to photograph - so it still points at the right
     // shell after `--viewport mobile` has swapped one for the other, and so it
     // does not have to know that AppOptions is where this app's flags happen to
     // live. climat-gallery binds the same properties off a different parser.
@@ -275,14 +275,14 @@ Window {
     Component.onCompleted: {
         // The scheme and stillness are not set here. They are Bindings above,
         // which apply during this object's completion and so are in force
-        // before the first frame — and, unlike the assignments they replaced,
+        // before the first frame - and, unlike the assignments they replaced,
         // stay in force when the desktop changes underneath them.
         // The poll schedule's starting state, belt and braces.
         //
         // `onExposedChanged` does in fact fire during this window's own
-        // completion, before this line runs — measured, against the offscreen
+        // completion, before this line runs - measured, against the offscreen
         // platform, after an earlier version of this comment claimed otherwise
-        // — so on this Qt the push has already happened. It is kept because
+        // - so on this Qt the push has already happened. It is kept because
         // that is a property of when Qt happens to evaluate the binding rather
         // than a promise, and the cost of being wrong about it is a poll that
         // never starts.
@@ -290,7 +290,7 @@ Window {
 
         if (win.geometryRemembered && Settings.hasWindowSize) {
             // Size only. Position is stored, and restoring it is a lie on
-            // Wayland — the compositor places windows, and a client that
+            // Wayland - the compositor places windows, and a client that
             // assigns x/y there is assigning to nothing.
             win.width = Settings.windowWidth
             win.height = Settings.windowHeight

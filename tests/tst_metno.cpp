@@ -4,7 +4,7 @@
 // The MET Norway fallback: the symbol vocabulary, the hour shift, and the
 // honest list of what it cannot supply.
 //
-// tests/fixtures/metno/toronto.json is a recorded `compact` response — 90
+// tests/fixtures/metno/toronto.json is a recorded `compact` response - 90
 // timeseries entries, hourly for about two and a half days and then six-hourly
 // out to nine and a half. Toronto rather than Oslo on purpose: this provider is
 // the *global* fallback, and a fixture from Norway would let a bug that assumed
@@ -16,7 +16,7 @@
 //      symbol is a missing icon in one weather condition, on the fallback path,
 //      which is the least-looked-at combination in the app.
 //   2. Precipitation lands on the hour it ends. Get it wrong and every rain bar
-//      is one column out — only when the fallback is serving.
+//      is one column out - only when the fallback is serving.
 //   3. What it does not have is *absent*, not zero. That is the difference
 //      between hiding the gust row and telling somebody in a gale that the wind
 //      is steady.
@@ -179,7 +179,7 @@ void TestMetNo::dayAndNightComeFromTheSuffixAndPolarTwilightIsNeither()
     QCOMPARE(parseSymbolCode(QStringLiteral("clearsky_day")).isDay, std::optional<bool>(true));
     QCOMPARE(parseSymbolCode(QStringLiteral("clearsky_night")).isDay, std::optional<bool>(false));
 
-    // polartwilight is the long dusk above the Arctic circle — neither, and a
+    // polartwilight is the long dusk above the Arctic circle - neither, and a
     // boolean that had to pick would be wrong in MET's own back yard.
     QVERIFY(!parseSymbolCode(QStringLiteral("clearsky_polartwilight")).isDay.has_value());
 
@@ -190,7 +190,7 @@ void TestMetNo::dayAndNightComeFromTheSuffixAndPolarTwilightIsNeither()
 
 void TestMetNo::sleetGetsTheRealMixedPrecipitationCodes()
 {
-    // 68/69 and 83/84 — rain and snow together, steady and showery. Open-Meteo
+    // 68/69 and 83/84 - rain and snow together, steady and showery. Open-Meteo
     // never emits these, which is exactly why they are worth a test: a UI icon
     // table built by reading Open-Meteo's documentation has holes here, and the
     // holes only show when the fallback is serving.
@@ -232,7 +232,7 @@ void TestMetNo::anUnknownSymbolIsNoCodeRatherThanAGuess()
     QVERIFY(!parseSymbolCode(QString()).isValid());
 
     // The variant is still read, because it is structural rather than a guess
-    // about the weather — but there is no code, so nothing draws.
+    // about the weather - but there is no code, so nothing draws.
     QCOMPARE(parseSymbolCode(QStringLiteral("meteorshower_night")).isDay,
              std::optional<bool>(false));
 }
@@ -265,7 +265,7 @@ void TestMetNo::theInstantsBecomeHourlyPointsInOrder()
     for (int i = 1; i < forecast.hourly.size(); ++i)
         QVERIFY(forecast.hourly.at(i).time > forecast.hourly.at(i - 1).time);
 
-    // "Now" is the first timestep — Locationforecast has no separate
+    // "Now" is the first timestep - Locationforecast has no separate
     // observation product, so a second request would be a second forecast.
     QCOMPARE(forecast.current.time, first.time);
     QCOMPARE(forecast.current.temperature, first.temperature);
@@ -300,7 +300,7 @@ void TestMetNo::precipitationLandsOnTheHourItEnds()
     QVERIFY(!forecast.hourly.constFirst().weatherCode.has_value());
 
     // Entry i's next_1_hours block covers [t, t+1h) and therefore belongs to the
-    // point at t+1h — which is entry i+1's timestamp. Checked against the raw
+    // point at t+1h - which is entry i+1's timestamp. Checked against the raw
     // payload rather than against a transcribed number, so this is an assertion
     // about the shift rather than about one value.
     int checked = 0;
@@ -514,7 +514,7 @@ void TestMetNo::nothingIsUndeterminedBecauseNothingHereIsRegional()
     MetNoForecastProvider provider(&client, &m_clock);
 
     // The three-valued capability answer exists for CAMS's pollen. This product
-    // is uniform worldwide, so it never uses the third value — and saying so
+    // is uniform worldwide, so it never uses the third value - and saying so
     // with a test is what stops somebody adding an "undetermined" here out of
     // symmetry.
     for (const Coordinate coord : { kToronto, Coordinate{ 59.9139, 10.7522 },
@@ -546,7 +546,7 @@ void TestMetNo::theRequestUsesLatAndLonTruncatedToFourDecimals()
     const QString      target = QUrl::fromPercentEncoding(sent.target);
 
     // `lat`/`lon`, and four decimals, which MET's terms ask for by name. The
-    // provider does neither of those things itself — HttpRequest carries the
+    // provider does neither of those things itself - HttpRequest carries the
     // parameter names and HttpClient does the rounding, in one place, so a
     // provider cannot forget.
     QVERIFY2(target.contains(QLatin1String("lat=43.7001")), qPrintable(target));
@@ -586,7 +586,7 @@ void TestMetNo::aUnitChangeIsAParseErrorRatherThanAWrongNumber()
 void TestMetNo::forbiddenIsATypedErrorAndTheProviderStopsAsking()
 {
     // Their terms say a generic User-Agent earns a 403. It did not, when this
-    // was tested against the live service — and the hard stop stays anyway,
+    // was tested against the live service - and the hard stop stays anyway,
     // because the difference between a client that is refused and one that is
     // banned is whether it kept asking.
     m_stub.enqueue(StubResponse::withStatus(403));

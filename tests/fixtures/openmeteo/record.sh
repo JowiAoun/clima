@@ -30,7 +30,7 @@ archive="https://archive-api.open-meteo.com/v1/archive"
 # libclimat/providers/openmeteo/openmeteovariables.cpp, with four exceptions
 # that are deliberate: cloud_cover_low/mid/high and snow_depth are recorded but
 # not requested in production. Nothing in app/qml/Climat/ reads them today, so
-# asking for them on every refresh would be waste — but a fixture that already
+# asking for them on every refresh would be waste - but a fixture that already
 # contains them means the day a card wants one, the golden files have the
 # answer and only the production list has to change.
 hourly='temperature_2m,apparent_temperature,dew_point_2m,relative_humidity_2m,precipitation_probability,precipitation,rain,showers,snowfall,snow_depth,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,pressure_msl,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,uv_index,visibility,is_day'
@@ -53,7 +53,7 @@ grab toronto-summer.json \
     "$forecast?latitude=43.6532&longitude=-79.3832&timezone=auto&past_days=1&forecast_days=16&current=$current&hourly=$hourly&daily=$daily"
 
 # One isolated wet hour, which is what makes an off-by-one visible. Found by
-# scanning a dozen cities for a hour above 0.4 mm with dry hours either side —
+# scanning a dozen cities for a hour above 0.4 mm with dry hours either side -
 # models smear precipitation, so these are rarer than you would expect.
 grab kampala-precip-spike.json \
     "$forecast?latitude=0.3152&longitude=32.5816&timezone=auto&forecast_days=2&current=$current&hourly=$hourly&daily=$daily"

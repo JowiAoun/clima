@@ -15,7 +15,7 @@
 //   providerId   a 403 disables a provider, and a provider's answers must not
 //                collide with another's for the same coordinates.
 //   endpoint     "forecast" and "air-quality" at the same place are two rows.
-//   coordinate   ROUNDED FIRST. This is the whole point — see below.
+//   coordinate   ROUNDED FIRST. This is the whole point - see below.
 //   parameters   everything else, hashed, order-insensitive.
 //
 // ---- rounded first, and what happens if it is not ---------------------------
@@ -36,13 +36,13 @@
 // A key is read by a human roughly as often as it is read by a machine: it goes
 // in log lines, and it is the primary key you would sort a cache file by when
 // something is wrong. So the parts that a human recognises stay legible and
-// only the long tail — thirty comma-separated Open-Meteo variable names — is
+// only the long tail - thirty comma-separated Open-Meteo variable names - is
 // collapsed to a digest:
 //
 //     open-meteo/forecast@52.5200,13.4050#9f2c1ab4e70d3c58
 //
 // Sixteen hex characters of SHA-256. Collision resistance is not the property
-// being bought here — the namespace is one user's cache — legibility is, and
+// being bought here - the namespace is one user's cache - legibility is, and
 // sixty-four characters of hex would swamp the readable part.
 
 #pragma once

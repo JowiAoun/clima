@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The sky behind the page: which part of the day it is, and where the stars go.
 //
-// Geometry and phase logic only — the colours are in theme.js, because they
+// Geometry and phase logic only - the colours are in theme.js, because they
 // are tokens like every other colour here.
 //
 // ---- everything in this file is deterministic --------------------------------
@@ -30,7 +30,7 @@ function _hash(i) {
 // and because they are the only ones where the sky is doing something a
 // photograph would be about.
 //
-// The twilight bands are 70 minutes either side of the crossing — near enough
+// The twilight bands are 70 minutes either side of the crossing - near enough
 // to civil twilight at temperate latitudes, and deliberately a constant rather
 // than a solar-depression calculation. The real thing belongs in libclimat with
 // the rest of the ephemeris; here it decides a gradient.
@@ -57,7 +57,7 @@ function phaseAt(nowMin, riseMin, setMin) {
 // The star field
 // ---------------------------------------------------------------------------
 // Positions are normalised, so the field stretches with the window. Stars are
-// points and a stretched point is still a point — which is exactly why the
+// points and a stretched point is still a point - which is exactly why the
 // constellations below are *not* placed this way.
 //
 // `r` is in pixels and `a` is alpha. Both are drawn from the same hash as the
@@ -87,7 +87,7 @@ function field(count) {
 
 // A handful that get a glow rather than a hard dot. §10.1's test for a stacked
 // wash is whether you can trace an edge, and these fade to zero alpha at the
-// rim — which makes them glows and legal. The plain field above is small
+// rim - which makes them glows and legal. The plain field above is small
 // enough that its dots are points, not discs.
 function beacons(count) {
     var out = [];
@@ -109,7 +109,7 @@ function beacons(count) {
 // A constellation is a *shape*, and normalised coordinates would stretch it:
 // the Plough at 390x844 and the same Plough at 1340x762 would be two different
 // figures, and the one thing everybody knows about the Plough is what it looks
-// like. So the anchor is normalised — where on the screen it sits — and the
+// like. So the anchor is normalised - where on the screen it sits - and the
 // points are in a square unit space scaled by one number, which keeps the
 // figure rigid at any aspect ratio.
 //

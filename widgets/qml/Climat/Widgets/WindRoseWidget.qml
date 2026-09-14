@@ -124,7 +124,7 @@ WidgetSurface {
 
         // Two lines and not one. Both are qualifiers on the number above, and
         // a 180 px tile elided "gusting 16 km/h · Gentle breeze" to "· Gentle…"
-        // — which spends the width on the separator and loses the word.
+        // - which spends the width on the separator and loses the word.
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width

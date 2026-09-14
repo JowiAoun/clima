@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Jowi Aoun
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// climat-geocode — look at what geocoding actually returns.
+// climat-geocode - look at what geocoding actually returns.
 //
 //   climat-geocode Kigali                  forward search, over the network
 //   climat-geocode "New York" --count 3    ditto, fewer rows
@@ -110,7 +110,7 @@ int reverse(const Coordinate &at)
           << Qt::endl;
     out() << QStringLiteral("    inside it    ")
           << (found.value().insideFootprint ? QStringLiteral("yes")
-                                            : QStringLiteral("no — nearest, not enclosing"))
+                                            : QStringLiteral("no - nearest, not enclosing"))
           << Qt::endl;
     return 0;
 }

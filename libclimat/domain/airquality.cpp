@@ -70,7 +70,7 @@ const Bands &bandsFor(Pollutant pollutant)
 
 // The argmax, over whichever map the caller decided is authoritative. Factored
 // out so that the published sub-indices and the computed ones cannot be
-// compared against each other by accident — a mixture would rank an ozone value
+// compared against each other by accident - a mixture would rank an ozone value
 // from CAMS against a PM2.5 value we invented, and the twenty-two-point error
 // documented in airquality.h would decide the winner.
 std::optional<Pollutant> argmax(const QMap<Pollutant, double> &indices)
@@ -78,7 +78,7 @@ std::optional<Pollutant> argmax(const QMap<Pollutant, double> &indices)
     std::optional<Pollutant> best;
     double                   bestIndex = -1.0;
 
-    // Enum order breaks a tie, and it is the order a detail card lists —
+    // Enum order breaks a tie, and it is the order a detail card lists -
     // particulates first. Deterministic by construction: a QMap keyed by the
     // enum iterates in that order, so two runs over the same payload name the
     // same pollutant. Determinism is an invariant here rather than a nicety;

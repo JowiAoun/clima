@@ -4,9 +4,9 @@
 // Open-Meteo's geocoding JSON, turned into Places.
 //
 // A free function over bytes, with no network, no client and no state, because
-// that is what makes it a golden-file test — docs/04-architecture.md §4.11:
+// that is what makes it a golden-file test - docs/04-architecture.md §4.11:
 // "Golden-file tests against recorded API responses committed to
-// tests/fixtures/ — no network in CI". A parser that could only be reached
+// tests/fixtures/ - no network in CI". A parser that could only be reached
 // through a provider that could only be reached through an HTTP client is a
 // parser tested through two layers that are not the subject.
 //
@@ -20,7 +20,7 @@
 //
 //     {"generationtime_ms":0.0337}
 //
-// with no `results` key at all — verified against the live service. An empty
+// with no `results` key at all - verified against the live service. An empty
 // array is not what comes back, so a parser that reads `results` and trusts it
 // to be an array gets a null QJsonValue, calls toArray() on it, and reports
 // zero results. Which is right, by accident, and would stay right until
@@ -36,7 +36,7 @@
 //
 // Taken: id, name, latitude, longitude, country_code, country, admin1,
 // timezone, elevation. Those are exactly the fields a Place has, and
-// `admin1` — the first-level division, "Ontario" — is what turns twelve
+// `admin1` - the first-level division, "Ontario" - is what turns twelve
 // Torontos into twelve distinguishable rows in a search popover.
 //
 // Ignored: admin2/3/4 and their ids, feature_code, population, postcodes,
@@ -47,7 +47,7 @@
 // ---- the country name when the response omits it ----------------------------
 //
 // Some rows come back with `country_code` and no `country`. Rather than leave
-// the field empty, it is filled from QLocale — the same mapping the offline
+// the field empty, it is filled from QLocale - the same mapping the offline
 // reverse geocoder uses, so that the two paths cannot produce "Czechia" and
 // "" for the same place and store them as two rows.
 

@@ -24,7 +24,7 @@ QJsonValue number(std::optional<int> value)
 // ISO 8601, moved into the place's own zone.
 //
 // The instant is the same either way, so this is not a correctness fix on its
-// own — it is what makes the offset in the string carry the information. A
+// own - it is what makes the offset in the string carry the information. A
 // widget showing Toronto to a reader in Berlin has to know that 17:00Z is the
 // Toronto afternoon, and the alternative to putting that in the string is
 // every reader doing the conversion and one of them forgetting.
@@ -86,7 +86,7 @@ FieldMask FieldMask::everything()
 
 FieldMask FieldMask::fromFields(const QStringList &fields)
 {
-    // An empty list is "everything", not "nothing" — see the header. A reader
+    // An empty list is "everything", not "nothing" - see the header. A reader
     // that forgot the argument gets a full snapshot rather than a blank tile
     // it will spend an afternoon debugging.
     if (fields.isEmpty())
@@ -350,8 +350,8 @@ QJsonObject buildSnapshot(const SnapshotSource &source, const FieldMask &mask)
             item.insert(QStringLiteral("urgency"), alertUrgencyName(alert.urgency));
 
             // Two different facts that both sound like "issuer", so neither is
-            // called that. `issuerLabel` is the service's own grading —
-            // "yellow warning", and for the NWS simply "Moderate" — which
+            // called that. `issuerLabel` is the service's own grading -
+            // "yellow warning", and for the NWS simply "Moderate" - which
             // domain/alert.h says is shown and never parsed. `sender` is who
             // put it out: "NWS Medford OR".
             //

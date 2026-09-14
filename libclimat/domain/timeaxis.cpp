@@ -27,7 +27,7 @@ QDateTime utcFromNaiveLocal(const QString &naiveLocal, int offsetSeconds)
     // was produced by adding `offsetSeconds` to a UTC instant, so subtracting
     // the same number inverts it exactly. Handing the string to a real zone
     // would ask that zone to resolve a wall-clock time that the zone never
-    // used — and on a fall-back day it would have to pick between two answers.
+    // used - and on a fall-back day it would have to pick between two answers.
     QDateTime local = QDateTime::fromString(naiveLocal, Qt::ISODate);
     if (!local.isValid()) {
         // A bare date. Open-Meteo writes daily.time that way, and it means
