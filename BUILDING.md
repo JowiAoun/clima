@@ -119,7 +119,27 @@ many distributions do not ship. Without installing anything:
 nix shell nixpkgs#flatpak-builder nixpkgs#appstream -c scripts/flatpak.sh build
 ```
 
-[`docs/releasing.md`](docs/releasing.md) covers the rest of the pipeline.
+### Android
+
+```sh
+scripts/android.sh deps      # once: Qt 6.11.1 for Android, the SDK, the NDK, ~4 GB
+scripts/android.sh openssl   # once: the TLS library the package has to carry
+scripts/android.sh apk       # build/android/app/android-build/climat.apk
+scripts/android.sh install   # onto the phone on the cable
+```
+
+`deps` puts the toolchain where Qt's own installer would, under `~/Qt` and
+`~/Android/Sdk`, because nixpkgs has no Qt for Android. The script's header
+lists the variables that point it somewhere else. Run the four inside
+`nix develop`: `openssl` needs the shell's `perl` and `patchelf`.
+
+The package cannot be built without `openssl`, and that is on purpose: Qt for
+Android ships no TLS library, every weather service is HTTPS, and an APK
+without one starts and shows its cache forever. `cmake/ClimatAndroidTls.cmake`
+says so at configure time rather than letting a phone find out.
+
+[`docs/releasing.md`](docs/releasing.md) covers the rest of the pipeline,
+including the Play Store upload.
 
 ## Troubleshooting
 

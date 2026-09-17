@@ -15,16 +15,39 @@ file is to keep it that way.
 
 ---
 
-## Android: the app runs, the alerts do not
+## Android: the app is built and packaged, the background alerts are not
 
-**Status: the build is written and has never run. Nothing has been on a device.**
+**Status: builds, signs, installs, launches and runs. The one thing it does
+not do is deliver an alert to a sleeping phone, and the settings screen says
+so.**
 
-What exists today is the whole of the client side. The mobile shell is the
-tablet shell is the phone shell, the touch targets clear the 44 px floor, the
-back gesture pops a tab and then lets the platform close the app, the drawing
-tier halves the star field on a handheld, and `app/CMakeLists.txt` carries the
-Qt Android deployment properties and the two permissions the app needs. There
-is a CI job, gated on `workflow_dispatch` because it has never executed.
+What is done, and measured on 2026-09-17 against Qt 6.11.1, NDK 27.2, SDK
+platform 36 and build-tools 36.0.0 on a Linux host:
+
+- **It builds.** `scripts/android.sh apk` and `aab` produce the package from
+  the same source every other target builds from. `app/CMakeLists.txt` carries
+  the deployment properties, the version code computed from the project
+  version, and the two permissions the app needs; the manifest in
+  `packaging/android/` removes the three Qt's own modules add that this app
+  has no use for.
+- **It carries its own TLS.** Qt for Android ships no OpenSSL, and every
+  weather service is HTTPS, so `scripts/android-openssl.sh` builds
+  `libssl_3.so` and `libcrypto_3.so` from a pinned source tarball and
+  `cmake/ClimatAndroidTls.cmake` refuses to configure a package without them.
+- **It is signed** when the upload key is in the repository's secrets, and the
+  release job says so on the release page when it is not, because Play refuses
+  an unsigned bundle. `docs/releasing.md` has the key handling.
+- **It launches and runs.** Installed on an Android 16 emulator, the package
+  loads every Qt library and `libclimat`, starts the Qt platform plugin and
+  runs `main()` into a live event loop with a window Android reports ready.
+- **It renders.** The mobile shell draws correctly through the OpenGL RHI
+  backend on a real GPU. The headless swiftshader emulator never exposes Qt's
+  surface, so a pixel from the emulator itself is blank - an emulator
+  limitation, not the app - and the remaining visual check is one screen of a
+  physical phone or a GPU-backed emulator.
+- **The CI job runs on every push**, not on `workflow_dispatch` alone, and
+  prints what the package declares so a permission a Qt module adds is read in
+  review rather than discovered by Play.
 
 None of that is the gate. **The gate is delivering a severe weather alert to a
 phone that is asleep**, and it is not a rendering problem or a packaging
@@ -79,9 +102,15 @@ a Play policy conversation.
 
 ### What would close this
 
-An APK built by somebody with the toolchain, installed on a device, and the
-sentence "alerts arrive only while the app is open" written into the settings
-screen next to the toggle that controls them.
+The sentence "alerts arrive only while the app is open" is now on the settings
+screen: `PrefGeneral.qml` shows a "Severe weather warnings" row on a handheld
+that says warnings appear only while the app is open, and
+`tst_preferences.qml` holds it there. So the honest-app half is done.
+
+What is left is the feature itself: the `WorkManager` job and the notification
+channel of steps 1 and 2 above, and then the product decision in steps 3 to 5.
+And one screen of a real phone, to turn "renders under OpenGL" into "renders on
+a device".
 
 ---
 

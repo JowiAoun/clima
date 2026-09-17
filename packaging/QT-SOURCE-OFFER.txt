@@ -22,6 +22,8 @@ It applies to the builds that carry Qt with them:
 
     * the Windows installer (.msi) and the portable Windows archive (.zip)
     * the Linux AppImage
+    * the Android package, as the app bundle (.aab) uploaded to Google Play
+      and the APK attached to the release
 
 It does NOT apply to the builds that take Qt from the platform underneath
 them, because those do not convey Qt at all:
@@ -58,7 +60,11 @@ application against a modified version of the Qt libraries, which LGPLv3
 section 4(d) requires. Qt is linked DYNAMICALLY in every build of this
 application, and a CI check asserts that on the built binary
 (scripts/check-licences.sh), so relinking requires nothing more than replacing
-the Qt shared libraries that ship beside the executable.
+the Qt shared libraries that ship beside the executable. On Android those
+libraries are the .so files inside the package, and the APK on the release
+page can be repacked with different ones and installed by hand; the same
+source offer covers the OpenSSL libraries in that package, which are built
+from a pinned upstream release by scripts/android-openssl.sh.
 
 To request the source, open an issue at:
 

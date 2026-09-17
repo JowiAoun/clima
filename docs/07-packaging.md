@@ -26,7 +26,8 @@ corresponding Qt source or a written offer from infrastructure we control**.
 | **macOS** | **Notarised DMG** | **not shipped** | Bundled via `macdeployqt` | Needs an Apple Developer ID at $99/yr, which we do not have. Without notarisation Gatekeeper *refuses* rather than warns, so a DMG would be undeliverable. `docs/known-gaps.md`. |
 | macOS | Homebrew cask | - | Bundled | Follows the DMG, so also not shipped. |
 | macOS | Mac App Store | ❌ | - | GPLv3 conflicts with App Store terms (D6) |
-| Android / iOS | - | post-1.0 | - | iOS blocked for a GPLv3 build; MPL-2.0 engine keeps a path open |
+| **Android** | **Google Play** (+ APK on the release) | **P1** | Bundled, dynamic, with the source offer | Built, signed and checked for what the manifest declares since 2026-09-17; `packaging/android/`. Carries its own OpenSSL, because Qt for Android ships none. No background alerts, and the settings screen says so - `docs/known-gaps.md`. |
+| iOS | - | post-1.0 | - | Blocked for a GPLv3 build; MPL-2.0 engine keeps a path open |
 
 ## 7.2 Linux specifics
 

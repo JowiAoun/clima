@@ -56,6 +56,9 @@ the worst moment to notice it.
 | `climat-X.Y.Z-windows-x64.msi` | WiX v5 on `windows-latest` | **never run** |
 | `climat-X.Y.Z-windows-x64.zip` | `Compress-Archive` on the staged install | **never run** |
 | `climat-X.Y.Z-x86_64.AppImage` | `linuxdeploy` on `ubuntu-22.04` | **never run**, `continue-on-error` |
+| `climat-X.Y.Z-android-arm64-v8a.aab` | Qt 6.11.1 for Android, NDK 27.2 | built locally 2026-09-17; signed only when the upload key is in the secrets |
+| `climat-X.Y.Z-android-arm64-v8a.apk` | same build | for a phone on a cable, or F-Droid |
+| `LICENSE-OpenSSL.txt` | `scripts/android-openssl.sh` | the Android package carries OpenSSL |
 | `SHA256SUMS` | `sha256sum` | |
 | `climat.spdx` | `reuse spdx` | SBOM, from the SPDX headers CI already gates |
 | `THIRD-PARTY-LICENCES.txt` | `scripts/licence-bundle.sh` | |
@@ -77,15 +80,58 @@ appears to be GPL and nothing else. Generated from `packaging/linux/copyright`
 and `LICENSES/`, both of which `reuse lint` gates, so it cannot describe a set
 of components that is not the set shipped.
 
-**`QT-SOURCE-OFFER.txt`.** The Windows artefacts and the AppImage bundle Qt,
-which makes them LGPLv3 conveyances. A link to qt.io does not discharge that -
-GPLv3 §6 permits pointing at a third party's server only when the recipient got
-the object code from that same server. The offer is valid three years and the
-`.deb` and Flatpak are explicitly outside it, because they convey no Qt.
+**`QT-SOURCE-OFFER.txt`.** The Windows artefacts, the AppImage and the
+Android package bundle Qt, which makes them LGPLv3 conveyances. A link to
+qt.io does not discharge that - GPLv3 §6 permits pointing at a third party's
+server only when the recipient got the object code from that same server. The
+offer is valid three years and the `.deb` and Flatpak are explicitly outside
+it, because they convey no Qt.
 
 This is also why `cmake/ClimatCPack.cmake` defines no Windows generator. A
 `cpack -G ZIP` would produce a Qt-bundling archive carrying neither file, from
 one command, on anybody's machine.
+
+## Android and Google Play
+
+The release workflow builds the bundle Play takes (`.aab`) and the APK a
+reader installs by hand, from the same `scripts/android.sh` a laptop uses.
+`packaging/android/README.md` says what is in the package and
+`packaging/android/play/` holds the store listing.
+
+### The upload key
+
+Play signs what it ships with a key Google holds. What we hold is the upload
+key, which signs the bundle we send. It is never in this repository. Make it
+once, keep it somewhere that is backed up, and put it in the repository's
+secrets:
+
+1. Run `keytool -genkeypair -keystore upload.keystore -alias upload -keyalg RSA -keysize 2048 -validity 10000`.
+2. Run `base64 -w0 upload.keystore` and paste the output into the secret `ANDROID_UPLOAD_KEYSTORE_BASE64`.
+3. Add `ANDROID_UPLOAD_KEY_ALIAS` (`upload`), `ANDROID_UPLOAD_KEYSTORE_PASSWORD` and `ANDROID_UPLOAD_KEY_PASSWORD`.
+
+Without the first secret the job still runs and the release still carries a
+bundle, marked unsigned in the log and on the release page. Play refuses an
+unsigned bundle, so a release cut without the key is a release that cannot be
+uploaded, and it says so rather than pretending.
+
+Losing the upload key is not fatal: Play App Signing lets you register a new
+one. Losing the Play signing key is not possible, because Google holds it.
+That is the reason to enrol in Play App Signing on the first upload, and the
+console makes it the default.
+
+### The first upload
+
+1. Create the app in the Play Console with the name, package name and
+   category from `packaging/android/play/listing.md`.
+2. Fill in the store listing from the same file, the data safety form from
+   `data-safety.md`, and point the privacy policy at the published
+   `privacy-policy.md`.
+3. Upload `climat-X.Y.Z-android-arm64-v8a.aab` from the GitHub release to an
+   internal testing track first. Install it on a phone from the testing link.
+4. Promote it to production when it has been on a phone.
+
+The version code Play sees is computed from the version in `CMakeLists.txt`
+(`0.1.0` is `100`), so a release bump moves it and nothing has to be typed.
 
 ## Rehearsing without releasing
 
@@ -94,6 +140,9 @@ scripts/deb.sh inspect          # the .deb, in debian:trixie, with its control f
 scripts/flatpak.sh deps         # once: the runtime and SDK
 scripts/flatpak.sh bundle       # the single-file .flatpak
 scripts/licence-bundle.sh       # THIRD-PARTY-LICENCES.txt
+scripts/android.sh deps         # once: Qt for Android, the SDK and the NDK
+scripts/android.sh openssl      # once per OpenSSL bump
+scripts/android.sh aab          # the bundle; unsigned unless the key variables are set
 nix develop --command actionlint
 ```
 
