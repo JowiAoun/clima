@@ -106,6 +106,30 @@ PrefGroup {
         onActivated: Settings.alertNotifications = !Settings.alertNotifications
     }
 
+    // ---- and where there is nothing to post to ------------------------------
+    //
+    // A phone. The row above hides itself there, because this build has no way
+    // to post to Android's shade and never checks for warnings while it is not
+    // on screen - docs/known-gaps.md has the reasons, and the one thing it asks
+    // of the settings screen is that it say so, rather than leave a reader with
+    // an alert switch that quietly means "when you happen to look". So the
+    // screen says it in words. No control, because there is nothing to choose;
+    // `interactive: false` for the reason the theme row gives.
+    //
+    // `handheld` is a property rather than a direct read of Qt.platform.os so
+    // that tst_preferences can put a Linux build in the phone's position.
+    property bool handheld: Qt.platform.os === "android" || Qt.platform.os === "ios"
+
+    PrefRow {
+        title: qsTr("Severe weather warnings")
+        subtitle: qsTr("Shown while Climat is open. This version does not check for "
+                       + "warnings in the background, so it cannot wake a phone "
+                       + "that is asleep.")
+        visible: root.handheld && !Engine.notificationsAvailable
+        height: visible ? implicitHeight : 0
+        interactive: false
+    }
+
     // ---- the clock ----------------------------------------------------------
     //
     // The ids are Settings' own spellings, so nothing here translates between a

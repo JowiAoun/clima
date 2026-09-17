@@ -1177,6 +1177,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Severe weather warnings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shown while Climat is open. This version does not check for warnings in the background, so it cannot wake a phone that is asleep.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Time format</source>
         <translation type="unfinished"></translation>
     </message>

@@ -117,6 +117,43 @@ TestCase {
         compare(Settings.dynamicBackground, true)
     }
 
+    // ---- the phone is told what it will not get -----------------------------
+    //
+    // docs/known-gaps.md's one condition for shipping Android without
+    // background alerts: the settings screen has to say so. On a desktop the
+    // row does not exist, so a picture of the desktop cannot check it, and a
+    // picture of a phone would need a phone.
+    function findRow(group, title) {
+        for (var i = 0; i < group.children.length; ++i) {
+            var col = group.children[i]
+            for (var j = 0; col.children !== undefined && j < col.children.length; ++j)
+                if (col.children[j].title === title)
+                    return col.children[j]
+        }
+        return null
+    }
+
+    function test_aHandheldIsToldWarningsArriveOnlyWhileTheAppIsOpen() {
+        var desktop = build("PrefGeneral", { width: 520, handheld: false })
+        var row = findRow(desktop, "Severe weather warnings")
+        verify(row !== null, "no Severe weather warnings row")
+        compare(row.visible, false)
+        compare(row.height, 0)
+
+        var phone = build("PrefGeneral", { width: 520, handheld: true })
+        row = findRow(phone, "Severe weather warnings")
+        verify(row !== null, "no Severe weather warnings row")
+        // Only where the notification switch is absent. Where it is present the
+        // switch's own subtitle says what happens off screen, and two rows
+        // about the same thing would contradict each other on a build that
+        // had both.
+        compare(row.visible, !Engine.notificationsAvailable)
+        if (row.visible) {
+            verify(row.height > 0)
+            verify(row.subtitle.indexOf("while Climat is open") !== -1, row.subtitle)
+        }
+    }
+
     // ---- the control is bound, not stateful ---------------------------------
     //
     // Written from the outside, the way `applySystem` writes it, and the switch
