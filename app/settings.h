@@ -120,9 +120,9 @@ public:
     // forward if there is one.
     static void prepareStorage();
 
-    // Identities Climat has used and no longer writes to, newest first. Empty
-    // today, because Climat has only ever had one. A rename adds a line here and
-    // nothing else changes.
+    // Identities Climat has used and no longer writes to, newest first. One
+    // today: the app was Clima until September 2026. A rename adds a line here
+    // and nothing else changes.
     static QList<SettingsIdentity> supersededIdentities();
 
     // Copies the first superseded config directory that exists into the current

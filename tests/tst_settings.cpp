@@ -111,7 +111,7 @@ private Q_SLOTS:
     void theFirstIdentityThatExistsWins();
     void anIdentityEqualToTheCurrentOneIsNotCopiedOntoItself();
     void everySubdirectoryComesForwardToo();
-    void theShippedTableIsEmptyAndThatIsTheCorrectAnswer();
+    void theShippedTableNamesTheIdentityClimaWroteUnder();
 
     // ---- defaults on a fresh install ---------------------------------------
     void aFreshInstallReadsTheDocumentedDefaults();
@@ -399,13 +399,17 @@ void TestSettings::everySubdirectoryComesForwardToo()
     QFile::remove(currentDir + QStringLiteral("/.hidden"));
 }
 
-void TestSettings::theShippedTableIsEmptyAndThatIsTheCorrectAnswer()
+void TestSettings::theShippedTableNamesTheIdentityClimaWroteUnder()
 {
-    // Climat has written preferences under exactly one identity. This asserts
-    // the table has not grown a speculative entry - an identity in this list
-    // that never existed is a file probe on every launch, and one that is wrong
-    // is a migration from somebody else's application.
-    QVERIFY(Settings::supersededIdentities().isEmpty());
+    // The one rename so far: Clima became Climat in September 2026, and the
+    // old organisation and application names are what its settings file sits
+    // under. This pins the table to exactly that entry - an identity in this
+    // list that never existed is a file probe on every launch, and one that is
+    // wrong is a migration from somebody else's application.
+    const QList<SettingsIdentity> table = Settings::supersededIdentities();
+    QCOMPARE(table.size(), 1);
+    QCOMPARE(table.first().organization, QStringLiteral("Clima"));
+    QCOMPARE(table.first().application, QStringLiteral("clima"));
 }
 
 // ============================================================================
