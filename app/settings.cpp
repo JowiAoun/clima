@@ -154,12 +154,14 @@ void Settings::prepareStorage()
 
 QList<SettingsIdentity> Settings::supersededIdentities()
 {
-    // One entry, and it is the rename this helper was written for. The app was
-    // called Clima - organisation "Clima", application "clima" - until
-    // September 2026, when it became Climat. A reader who set the old one up
-    // finds their preferences under the new name on the first launch. The old
-    // file is copied, never moved, so a downgrade finds them where it left them.
-    return { { QStringLiteral("Clima"), QStringLiteral("clima") } };
+    // Empty, and correct: Climat has written preferences under exactly one
+    // organisation and application name, the one main() sets today. This is the
+    // list a rename appends to - `{ QStringLiteral("Climat"), QStringLiteral("climat") }`
+    // would be the entry if the identity moved tomorrow - and the reason the
+    // machinery below exists before there is anything for it to do is that a
+    // migration written after the rename has already lost the data it was
+    // supposed to carry.
+    return {};
 }
 
 bool Settings::migrateConfigDirectory(const QList<SettingsIdentity> &superseded)
