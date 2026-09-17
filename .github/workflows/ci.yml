@@ -373,60 +373,83 @@ jobs:
 
   # ---- Android ---------------------------------------------------------------
   #
-  # NOT part of the default run, and the `if` below is the honest reason: this
-  # job has never executed. It was written against Qt's documented Android
-  # deployment properties in an environment with no NDK, no SDK and no Qt for
-  # Android in it - a Nix devshell with desktop Qt - so it is a first draft of a
-  # build, not a check that passed.
+  # The APK, built the way scripts/android.sh builds it on a laptop - from
+  # that script - so that "it builds in CI" and "it builds for me" are one
+  # claim rather than two. First run 2026-09-17 against Qt 6.11.1, NDK 27.2,
+  # platform 36 and build-tools 36.0.0, which are the versions Qt 6.11 names.
   #
-  # A job in that state does not belong on every pull request. Landing it as
-  # `workflow_dispatch` only means the first person with the toolchain can run
-  # it, fix whatever it says, and move it into the matrix in the commit that
-  # makes it green - rather than merging a red X that everyone learns to skip.
-  #
-  # What it does NOT establish, whatever it reports: that the app works on a
-  # phone. An APK that builds is an APK that builds. The gate this track is
-  # actually waiting on is background alert delivery, which is not a build
-  # problem at all - see docs/known-gaps.md.
+  # What it establishes: that the package builds, declares what
+  # app/CMakeLists.txt says it declares, and carries a TLS library. What it
+  # does not: that the app is right on a phone. docs/known-gaps.md has what
+  # has and has not been looked at on a screen.
   android:
     name: build (android, arm64-v8a)
-    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       # The desktop Qt too, and it is not optional: androiddeployqt runs the
       # host's qmlimportscanner and moc, so a cross build needs a host Qt of
-      # exactly the same version beside the target one.
-      - name: Install Qt for Android and its host Qt
+      # exactly the same version beside the target one. Desktop first, kit
+      # second, because the second step's QT_ROOT_DIR is what the build reads
+      # and the host is found as its gcc_64 sibling.
+      - name: Install the host Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.8.3'
+          version: '6.11.1'
           host: linux
+          target: desktop
+          arch: linux_gcc_64
+          modules: 'qtpositioning'
+          cache: true
+
+      - name: Install Qt for Android
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.11.1'
           target: android
           arch: android_arm64_v8a
           modules: 'qtpositioning'
+          cache: true
 
-      - name: Configure
+      # The runner ships an SDK; these are the pieces Qt 6.11 asks for that it
+      # may not. cmake from the SDK rather than the runner's, for the reason
+      # scripts/android.sh gives. patchelf is what gives the OpenSSL libraries
+      # the sonames Qt loads them by.
+      - name: Install the SDK pieces Qt 6.11 wants
         run: |
-          "$QT_ROOT_DIR/bin/qt-cmake" -S . -B build/android -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCLIMAT_BUILD_TESTS=OFF \
-            -DCLIMAT_BUILD_GALLERY=OFF \
-            -DCLIMAT_DEV_TOOLS=OFF \
-            -DQT_ANDROID_ABIS=arm64-v8a
+          sdkmanager="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$sdkmanager" --licenses > /dev/null 2>&1 || true
+          "$sdkmanager" "platforms;android-36" "build-tools;36.0.0" \
+            "ndk;27.2.12479018" "cmake;3.31.6" > /dev/null
+          sudo apt-get update && sudo apt-get install -y patchelf
+
+      - name: OpenSSL for arm64-v8a
+        run: scripts/android-openssl.sh
 
       - name: Build the APK
-        run: cmake --build build/android --target apk
+        env:
+          CLIMAT_QT_ANDROID: ${{ env.QT_ROOT_DIR }}
+          CLIMAT_QT_HOST: ${{ env.QT_ROOT_DIR }}/../gcc_64
+        run: scripts/android.sh apk
+
+      # Into the log, so that a permission Qt's modules added or a target SDK
+      # that moved is something a reviewer reads rather than something Play
+      # tells the publisher about later.
+      - name: Say what the package declares
+        run: |
+          "$ANDROID_SDK_ROOT/build-tools/36.0.0/aapt2" dump badging \
+            build/android/app/android-build/climat.apk \
+            | grep -E '^package|sdkVersion|targetSdk|uses-permission|native-code'
 
       - uses: actions/upload-artifact@v4
         with:
           name: climat-apk
-          path: build/android/app/android-build/build/outputs/apk/**/*.apk
+          path: build/android/app/android-build/climat.apk
           if-no-files-found: error
