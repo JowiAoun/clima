@@ -177,10 +177,14 @@ add_subdirectory(libclimat)
 
 add_subdirectory(app)
 
-# The command-line client. Every platform, because everything it needs is in
+# The command-line client. Every desktop, because everything it needs is in
 # libclimat and Qt Core: a status bar on Windows wants the forecast as much as
-# waybar does. See cli/CMakeLists.txt.
-add_subdirectory(cli)
+# waybar does. See cli/CMakeLists.txt. Not Android, where there is no shell to
+# run it from and where Qt turns every executable into an app package of its
+# own - the APK would have shipped a second, invisible app beside the first.
+if(NOT ANDROID)
+    add_subdirectory(cli)
+endif()
 
 # The daemon that widgets and the tray read from. Gated twice, and both gates
 # are real: the whole thing is a session-bus service, and Windows has no

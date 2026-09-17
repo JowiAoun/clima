@@ -64,6 +64,34 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
+# The Android launcher icon, at five densities, and the two layers of the
+# adaptive icon beside it at each. Same master, same script, same licence as
+# the block above: scripts/android-icon-layers.py cuts the layers out of
+# climat.svg and scripts/icons.sh rasterises all fifteen, and `icons.sh check`
+# is what stops any of them drifting from the drawing.
+[[annotations]]
+path = [
+    "packaging/android/res/mipmap-mdpi/ic_launcher.png",
+    "packaging/android/res/mipmap-mdpi/ic_launcher_background.png",
+    "packaging/android/res/mipmap-mdpi/ic_launcher_foreground.png",
+    "packaging/android/res/mipmap-hdpi/ic_launcher.png",
+    "packaging/android/res/mipmap-hdpi/ic_launcher_background.png",
+    "packaging/android/res/mipmap-hdpi/ic_launcher_foreground.png",
+    "packaging/android/res/mipmap-xhdpi/ic_launcher.png",
+    "packaging/android/res/mipmap-xhdpi/ic_launcher_background.png",
+    "packaging/android/res/mipmap-xhdpi/ic_launcher_foreground.png",
+    "packaging/android/res/mipmap-xxhdpi/ic_launcher.png",
+    "packaging/android/res/mipmap-xxhdpi/ic_launcher_background.png",
+    "packaging/android/res/mipmap-xxhdpi/ic_launcher_foreground.png",
+    "packaging/android/res/mipmap-xxxhdpi/ic_launcher.png",
+    "packaging/android/res/mipmap-xxxhdpi/ic_launcher_background.png",
+    "packaging/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+    "packaging/android/play/feature-graphic.png",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Jowi Aoun"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
 # The Debian copyright file, which is the one file here that cannot carry an
 # SPDX header for a reason other than syntax. It is a machine-readable document
 # in Debian's DEP-5 format whose whole job is to state licensing, and a
@@ -367,6 +395,24 @@ path = [
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Jowi Aoun"
 SPDX-License-Identifier = "CC0-1.0"
+
+# The Play Store phone screenshots. Renderings of the running application, the
+# same as the golden images below and licensed the same way and for the same
+# reason: they are derived from the GPL QML in app/qml/Climat and have no
+# existence apart from it. scripts/play-shots.sh regenerates them and its
+# `check` gates them. PNG has nowhere to put a header.
+[[annotations]]
+path = [
+    "packaging/android/play/screenshots/01-today.png",
+    "packaging/android/play/screenshots/02-hourly.png",
+    "packaging/android/play/screenshots/03-monthly.png",
+    "packaging/android/play/screenshots/04-me.png",
+    "packaging/android/play/screenshots/05-today-light.png",
+    "packaging/android/play/screenshots/06-hourly-light.png",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Jowi Aoun"
+SPDX-License-Identifier = "GPL-3.0-or-later"
 
 # The golden images and the environment fingerprint beside them.
 #

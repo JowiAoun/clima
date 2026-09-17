@@ -472,10 +472,16 @@ set_target_properties(climat PROPERTIES
 # to take, and windeployqt handles it - see packaging/windows/.
 include(GNUInstallDirs)
 
-install(TARGETS climat
-    BUNDLE  DESTINATION .
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+# Not on Android, where `climat` is a shared library the Java side loads and
+# the package is the install: `cmake --build --target apk` (or `aab`) is what
+# puts it anywhere, and an install rule for it would need a LIBRARY
+# destination that nothing would ever read from.
+if(NOT ANDROID)
+    install(TARGETS climat
+        BUNDLE  DESTINATION .
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+endif()
 
 # Windows is where the paragraph above stops applying. There is no platform Qt
 # to link against, so the install has to carry one, and this is the rule that
@@ -499,20 +505,27 @@ endif()
 
 # ---- Android ----------------------------------------------------------------
 #
-# The properties Qt's Android deployment reads, and nothing else. There is
-# deliberately no AndroidManifest.xml in this repository: androiddeployqt
-# generates one, `qt_add_android_permission` puts the two permissions this app
-# needs into it, and a hand-written manifest would be a copy of Qt's own
-# template that has to be re-merged on every Qt release. The moment we need one
-# - an app icon, an adaptive icon, a splash theme - it belongs with the rest of
-# the packaging work, not here.
+# The properties Qt's Android deployment reads. androiddeployqt takes the
+# manifest, the icon resources and anything else that has to sit in the Gradle
+# project from packaging/android/ - see the README there for what each file is
+# and why a hand-written manifest is now worth carrying.
 #
-# NOT VERIFIED ON A DEVICE. This block has never been configured, because the
-# development environment is a Nix devshell with desktop Qt in it and no NDK,
-# no SDK and no Qt for Android. It is written from the documented property
-# names; treat the first `qt-cmake` run against it as the test it has not had.
-# See docs/known-gaps.md.
+# What this block does NOT do is make the package able to talk to anybody:
+# that is cmake/ClimatAndroidTls.cmake, at the bottom, and it is fatal for a
+# reason.
+#
+# First configured and built on 2026-09-17 against Qt 6.11.1, NDK 27.2 and
+# SDK platform 36, on a Linux host. Not yet run on a phone; docs/known-gaps.md
+# has what that leaves open.
 if(ANDROID)
+    # Google Play wants a version code that only ever goes up, and a version
+    # name a person can read. Both come from project(VERSION), which
+    # release-please bumps - 0.1.0 is 100, 1.2.3 is 10203 - so a release moves
+    # this without anybody remembering to. Two digits per part is a promise
+    # that no part reaches 100; a 0.100.0 would collide with 1.0.0.
+    math(EXPR CLIMAT_ANDROID_VERSION_CODE
+        "${PROJECT_VERSION_MAJOR} * 10000 + ${PROJECT_VERSION_MINOR} * 100 + ${PROJECT_VERSION_PATCH}")
+
     set_target_properties(climat PROPERTIES
         # `io.github.JowiAoun.Climat`, which is a legal Java package name - the
         # segments start with a letter and contain only letters and digits -
@@ -521,14 +534,18 @@ if(ANDROID)
         # D-Bus name and the QSettings organisation.
         QT_ANDROID_PACKAGE_NAME "${CLIMAT_APP_ID}"
         QT_ANDROID_APP_NAME "Climat"
+        QT_ANDROID_VERSION_NAME "${PROJECT_VERSION}"
+        QT_ANDROID_VERSION_CODE "${CLIMAT_ANDROID_VERSION_CODE}"
+        QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/packaging/android"
 
         # 28 is Android 9, which is where `QSettings` at AppDataLocation, TLS
-        # 1.3 and the scoped-storage rules the cache relies on all settle. 35 is
-        # the target Play requires as of this writing; it is a claim about what
-        # the app has been tested against, which is why it is not simply the
-        # newest number available.
+        # 1.3 and the scoped-storage rules the cache relies on all settle. 36
+        # is Android 16: what Google Play requires of a new app since August
+        # 2026, and the platform Qt 6.11's own Java side is compiled against.
+        # It is a claim about what the app has been built for, which is why it
+        # is not simply the newest number available.
         QT_ANDROID_MIN_SDK_VERSION 28
-        QT_ANDROID_TARGET_SDK_VERSION 35
+        QT_ANDROID_TARGET_SDK_VERSION 36
     )
 
     # Internet, and a coarse location for "use my location". COARSE and not
@@ -538,4 +555,7 @@ if(ANDROID)
     # weather app.
     qt_add_android_permission(climat NAME android.permission.INTERNET)
     qt_add_android_permission(climat NAME android.permission.ACCESS_COARSE_LOCATION)
+
+    include(ClimatAndroidTls)
+    climat_android_bundle_tls(climat)
 endif()

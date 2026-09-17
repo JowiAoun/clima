@@ -54,6 +54,52 @@ render_one() {
     --output "$dest/climat-$size.png" "$master"
 }
 
+# ---- Android ----------------------------------------------------------------
+#
+# Three images per density: the legacy square launcher icon, and the two
+# layers of the adaptive icon that Android 8 and later compose and mask
+# themselves. scripts/android-icon-layers.py cuts the layers out of the same
+# master, so all of this is still climat.svg and nothing else.
+#
+# Densities and their scale: 48 dp for the launcher icon, 108 dp for a layer.
+android_dir="$root/packaging/android/res"
+android_densities=(mdpi:48:108 hdpi:72:162 xhdpi:96:216 xxhdpi:144:324 xxxhdpi:192:432)
+
+render_android() {
+  local dest="$1" layers
+  layers="$(mktemp -d)"
+  python3 "$here/android-icon-layers.py" "$master" "$layers"
+  local entry density launcher layer dir
+  for entry in "${android_densities[@]}"; do
+    IFS=: read -r density launcher layer <<< "$entry"
+    dir="$dest/mipmap-$density"
+    mkdir -p "$dir"
+    rsvg-convert --width "$launcher" --height "$launcher" --format png \
+      --output "$dir/ic_launcher.png" "$master"
+    rsvg-convert --width "$layer" --height "$layer" --format png \
+      --output "$dir/ic_launcher_background.png" "$layers/background.svg"
+    rsvg-convert --width "$layer" --height "$layer" --format png \
+      --output "$dir/ic_launcher_foreground.png" "$layers/foreground.svg"
+  done
+  # And the Play Store feature graphic, which is the same drawing on a wide
+  # sky. 1024 by 500 is the one size Play accepts.
+  mkdir -p "$dest/../play"
+  rsvg-convert --width 1024 --height 500 --format png \
+    --output "$dest/../play/feature-graphic.png" "$layers/feature.svg"
+  rm -rf "$layers"
+}
+
+android_files() {
+  local entry density
+  for entry in "${android_densities[@]}"; do
+    IFS=: read -r density _ _ <<< "$entry"
+    echo "mipmap-$density/ic_launcher.png"
+    echo "mipmap-$density/ic_launcher_background.png"
+    echo "mipmap-$density/ic_launcher_foreground.png"
+  done
+  echo "../play/feature-graphic.png"
+}
+
 case "$command" in
   render)
     for size in "${sizes[@]}"; do
@@ -64,6 +110,8 @@ case "$command" in
     # built from the rendered sizes rather than from the SVG, so it cannot
     # describe a drawing the PNGs do not.
     python3 "$here/make-ico.py" "$icons_dir" "$icons_dir/climat.ico"
+    render_android "$android_dir"
+    echo "icons: packaging/android/res, 5 densities"
     ;;
 
   check)
@@ -90,11 +138,21 @@ case "$command" in
       drift=1
     fi
 
+    render_android "$tmp/android"
+    while read -r file; do
+      if [ ! -f "$android_dir/$file" ]; then
+        echo "icons: packaging/android/res/$file is missing" >&2
+        drift=1
+      elif ! cmp -s "$tmp/android/$file" "$android_dir/$file"; then
+        echo "icons: packaging/android/res/$file does not match what climat.svg renders to" >&2
+        drift=1
+      fi
+    done < <(android_files)
     if [ "$drift" -ne 0 ]; then
       echo "icons: run \`scripts/icons.sh render\` and commit the result" >&2
       exit 1
     fi
-    echo "icons: ${#sizes[@]} sizes and the .ico match the master"
+    echo "icons: ${#sizes[@]} sizes, the .ico and the Android set match the master"
     ;;
 
   *)

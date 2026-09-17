@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SPDX-FileCopyrightText: 2026 Jowi Aoun
+  SPDX-License-Identifier: CC-BY-SA-4.0
+
+  The adaptive icon: two layers the launcher composes and masks itself. Both
+  PNGs beside this file are cut from packaging/icons/climat.svg by
+  scripts/icons.sh, never by hand.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>
