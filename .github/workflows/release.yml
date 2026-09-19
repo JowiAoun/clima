@@ -149,7 +149,7 @@ jobs:
       - uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.3'
-          modules: 'qtdeclarative qtpositioning'
+          modules: 'qtpositioning'
           cache: true
 
       - name: Install linuxdeploy
@@ -216,7 +216,7 @@ jobs:
       - uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.3'
-          modules: 'qtdeclarative qtpositioning'
+          modules: 'qtpositioning'
           cache: true
 
       - uses: ilammy/msvc-dev-cmd@v1
@@ -301,6 +301,7 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.11.1'
+          host: all_os
           target: android
           arch: android_arm64_v8a
           modules: 'qtpositioning'

@@ -204,10 +204,17 @@ jobs:
       # qtpositioning, and for a while this job did not, so the build CI
       # exercised was not the one the MSI ships: "use my location" was
       # compiled out here and in on the release runner. One list, both places.
+      #
+      # qtdeclarative is not in that list and must not go back into it. Qt Quick
+      # ships inside the base package rather than as an add-on module, so naming
+      # it sends aqtinstall looking for a package that does not exist and the job
+      # dies before it downloads anything: "The packages ['qtdeclarative'] were
+      # not found while parsing XML of package information!". That is what this
+      # job did from the day it was written until 2026-09-19.
       - uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.3'
-          modules: 'qtdeclarative qtpositioning'
+          modules: 'qtpositioning'
           cache: true
 
       - uses: ilammy/msvc-dev-cmd@v1
@@ -245,10 +252,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Modules as in the Windows job above, which says why qtdeclarative is
+      # not among them.
       - uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.3'
-          modules: 'qtdeclarative qtpositioning'
+          modules: 'qtpositioning'
           cache: true
 
       # The Linux jobs get ninja from the devshell or from apt, and the Windows
@@ -409,10 +418,18 @@ jobs:
           modules: 'qtpositioning'
           cache: true
 
+      # `host: all_os` is not decoration. From 6.7 Qt publishes one Android
+      # package for every desktop, so aqtinstall files it under the pseudo-host
+      # `all_os` and looking on `linux` - which is what this action defaults to -
+      # finds nothing: "check that versions of qt exist within the spec
+      # '6.11.1'". That is what this job did on every run until 2026-09-19. The
+      # desktop step above keeps `host: linux`, because a host Qt is a real
+      # Linux build.
       - name: Install Qt for Android
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.11.1'
+          host: all_os
           target: android
           arch: android_arm64_v8a
           modules: 'qtpositioning'
