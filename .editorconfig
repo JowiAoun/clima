@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Indentation, line endings and the final newline, for editors that read this.
+#
+# This is NOT a formatter and it is not a gate. CONTRIBUTING.md and
+# .github/workflows/ci.yml record why there is no clang-format and no qmlformat
+# here: every stock C++ style wanted between 5,585 and 35,380 replacements
+# against this tree, and qmlformat flattens the aligned comment blocks the QML
+# is mostly made of. Nothing below reformats anything. It describes what the
+# files already are, so that a new one arrives matching them rather than
+# carrying whatever an editor happened to default to.
+#
+# Every number here was measured over the tree rather than chosen. There is not
+# one tab character in it and no CRLF in any text file, so those two lines are
+# recording a fact. Where the tree does not agree with itself, this file says
+# nothing - see the shell scripts below.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+# Four, in all 111 .cpp, all 64 .h, all 176 .qml, all 19 CMake files, 23 of the
+# 24 .js and .mjs, and REUSE.toml.
+[*.{cpp,h,qml,js,mjs,cmake,toml}]
+indent_size = 4
+
+[CMakeLists.txt]
+indent_size = 4
+
+# Two, in all eight workflow and manifest files.
+[*.{yml,yaml}]
+indent_size = 2
+
+# Four, which is what the newer of the two scripts uses and what everybody
+# expects of Python anyway.
+[*.py]
+indent_size = 4
+
+# ---- and one place this file deliberately says nothing ----------------------
+#
+# The shell scripts are split down the middle: fifteen indent by two and
+# thirteen by four, and neither group is the older or the newer one. Declaring a
+# winner here would mean an editor reindenting half of them on the next save,
+# which is the reformat commit this repository has already decided against.
+# Match the file you are in.
+
+# Markdown, where two trailing spaces are a hard line break and stripping them
+# silently rewrites the text.
+[*.md]
+indent_size = 2
+trim_trailing_whitespace = false
+
+# Recorded provider payloads, byte for byte as ECCC, the NWS, MET Norway and
+# Open-Meteo sent them. Thirty-three of them end without a newline, and an
+# editor that helpfully adds one changes what the fixture is a fixture of.
+[{tests/fixtures/**,libclimat/providers/fixture/data/**}]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+# Not ours to reformat: Qt writes the translation catalogue, and the licence
+# texts are verbatim copies.
+[app/translations/*.ts]
+trim_trailing_whitespace = false
+insert_final_newline = false
+
+[LICENSES/**]
+trim_trailing_whitespace = false
+insert_final_newline = false
