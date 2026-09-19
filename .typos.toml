@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Configuration for `typos`, which CI runs over the whole tree.
+#
+# A spell checker on a codebase is only worth having if it is silent when
+# nothing is wrong, so everything it reported on the day it was added is
+# recorded here with the reason. It found no real misspelling; what it found was
+# five kinds of thing that are not one, and the value of the check is the next
+# commit rather than this one.
+
+[files]
+# Recorded provider payloads, byte for byte as ECCC, the NWS and Open-Meteo sent
+# them. Several are French and one of them really does say "ajust". Correcting a
+# fixture would make it a fixture of something nobody ever sent.
+extend-exclude = ["tests/fixtures/"]
+
+[default.extend-words]
+# Qt's macros, cut in half by the word splitter: Q_INVOKABLE and Q_PROPERTY.
+INVOKABLE = "INVOKABLE"
+PROPERT = "PROPERT"
+
+# "PNGs", same splitter, 13 times over.
+PN = "PN"
+
+# British spelling, and the one this codebase uses throughout.
+unparseable = "unparseable"
+Unparseable = "Unparseable"
+
+# Names and identifiers that are spelled the way they are spelled: Debian's
+# build daemon, an NWS radar product code, an Inter release hash, and
+# "Environnement et Changement climatique Canada", which is ECCC's own name for
+# itself in French.
+buildd = "buildd"
+daa = "daa"
+beed = "beed"
+Environnement = "Environnement"
+
+# Deliberate misspellings, both of them the subject of the line they are on.
+# app/appoptions explains that `--vieport mobile` used to be accepted silently,
+# and tests/tst_units asserts that "emperial" is refused as a unit system. A
+# checker that corrected these would delete the point of both.
+vieport = "vieport"
+emperial = "emperial"
+
+# `FATAL_ERRORs`, in a sentence about CMake.
+ERRO = "ERRO"

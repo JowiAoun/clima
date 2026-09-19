@@ -100,6 +100,21 @@ pkgs.mkShell {
     # a release and watching it fail.
     actionlint
 
+    # The three checks that read the tree rather than a build of it, and the
+    # reason they are in this list at all is the one above: a lint you cannot
+    # run before pushing is a lint that fails after pushing.
+    #
+    # zizmor reads the workflows for the mistakes actionlint does not look for -
+    # an action named by a tag somebody can move, a token wider than the job
+    # needs, a checkout that leaves its credential on the runner. typos reads
+    # everything, with .typos.toml recording what it is allowed to find. lychee
+    # follows the links in the Markdown; the scheduled job is the one that
+    # follows them off this machine, because a check that needs the network is
+    # not one to put in front of a pull request.
+    typos
+    zizmor
+    lychee
+
     # A compositor to prove the desktop-layer path against, because "it
     # compiles" is not evidence that a surface was ever created.
     #

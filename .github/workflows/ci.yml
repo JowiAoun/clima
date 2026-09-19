@@ -42,6 +42,13 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  # Once a week as well, because this repository can go a fortnight without a
+  # commit and every job here depends on something outside it: a nixpkgs
+  # revision that has to still be in the cache, a runner image, an apt archive,
+  # an aqtinstall mirror. A build that stops working while nobody is pushing is
+  # a build that breaks on the day somebody is in a hurry.
+  schedule:
+    - cron: '17 5 * * 1'
 
 # A second push to a pull request cancels the first. The golden job renders
 # thirty-two scenes and there is nothing to learn from a run against a commit
@@ -350,6 +357,35 @@ jobs:
       # shell script nobody lints.
       - name: actionlint
         run: nix develop --command actionlint
+
+      # What actionlint does not look for: an action named by a tag its owner
+      # can move, a job holding a token wider than its steps need, a checkout
+      # that leaves its credential on the runner. It reported 40 findings
+      # against these three files the day it was added and none now, so this is
+      # a gate rather than a ratchet.
+      - name: zizmor
+        run: nix develop --command zizmor --no-progress .github/workflows
+
+      # Spelling, over the whole tree. .typos.toml records everything it found
+      # on the day it arrived and why each one is not a misspelling, so a
+      # failure here is a new word rather than an old argument.
+      - name: typos
+        run: nix develop --command typos
+
+      # Relative links between the Markdown files, and the anchors inside them.
+      # Offline: the network is not a thing to make a pull request depend on,
+      # and .github/workflows/maintenance.yml follows the external ones weekly.
+      - name: Links between the documents
+        run: nix develop --command bash -c 'git ls-files "*.md" | xargs lychee --offline --no-progress --include-fragments'
+
+      # Every link back to this project, against each other and against the
+      # repository this is running in. A rename leaves a tree that agrees with
+      # itself and disagrees with reality, which is silent everywhere except a
+      # published store page. Not --strict here: a pull request should not go
+      # red over a repository setting nobody in the diff can change. The release
+      # workflow runs it --strict and refuses to publish.
+      - name: Project URLs
+        run: nix develop --command bash scripts/check-urls.sh
 
       # The explicit QML_FILES lists against what is on disk. A globbed module
       # goes stale silently; this is what stops a file being added to the tree
