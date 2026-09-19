@@ -1,0 +1,115 @@
+# SPDX-FileCopyrightText: 2026 Jowi Aoun
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The two checks that go stale on a calendar rather than on a commit.
+#
+# Neither belongs in ci.yml. Both depend on the world outside this repository -
+# what a link still resolves to, what Qt released last month - so both would
+# fail a pull request over something the pull request did not do, which is the
+# fastest way to teach everybody to ignore a red mark. Weekly, and the failure
+# arrives as mail to the maintainer instead.
+#
+# Monday morning, because a maintenance failure is a thing to read at the start
+# of a week rather than the end of one.
+name: maintenance
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maintenance
+  cancel-in-progress: true
+
+jobs:
+  # ---- every link, followed for real ------------------------------------------
+  #
+  # ci.yml checks the links between the documents with --offline, which catches
+  # a renamed file and nothing else. This is the one that notices a data source
+  # that moved, a Qt documentation page that was reorganised, or - the case it
+  # was written for - a store screenshot URL that has never resolved.
+  #
+  # 403 is accepted because several sites refuse a runner outright and that says
+  # nothing about the link. 429 is accepted because being rate limited is not a
+  # broken link either.
+  links:
+    name: links, followed
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      # The metainfo as well as the Markdown: it carries the four store
+      # screenshot URLs and the homepage a software centre shows, which are the
+      # links whose breakage is least visible from inside the repository.
+      - name: lychee
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          nix develop --command bash -c '
+            git ls-files "*.md" "*.xml.in" | xargs lychee \
+              --no-progress \
+              --max-concurrency 4 \
+              --timeout 20 \
+              --accept "100..=103,200..=299,403,429"'
+
+  # ---- the version ceiling ----------------------------------------------------
+  #
+  # docs/07-packaging.md §7.3 has asked for a job that builds against both ends
+  # of the supported Qt range since the plan was written. The floor has one -
+  # `linux-system-qt` in ci.yml, against Debian's 6.8 - and the ceiling never
+  # did, so "develop against 6.9+" was a statement nothing checked.
+  #
+  # `6.*` is a version spec rather than a number, so this follows Qt forward on
+  # its own. That is the whole point: when a Qt release breaks this code, the
+  # project finds out in a scheduled job rather than from the first user on a
+  # rolling distribution.
+  #
+  # Golden images are excluded for the reason ci.yml gives at every other
+  # non-pinned job: a different Qt renders different pixels, which is a fact
+  # about Qt rather than a defect here.
+  qt-latest:
+    name: build (newest Qt)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
+        with:
+          version: '6.*'
+          modules: 'qtpositioning'
+          cache: true
+
+      - name: Install the rest of the toolchain
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libgl1-mesa-dev
+
+      - name: Say which Qt this turned out to be
+        run: qmake6 -query QT_VERSION || echo "qmake6 not on PATH"
+
+      - name: Configure
+        run: |
+          cmake -S . -B build/ceiling -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCLIMAT_BUILD_TESTS=ON \
+            -DCLIMAT_BUILD_GALLERY=ON \
+            -DCLIMAT_DEV_TOOLS=ON
+
+      - name: Build
+        run: cmake --build build/ceiling
+
+      - name: Test, without the golden images
+        run: ctest --test-dir build/ceiling -LE golden --output-on-failure
