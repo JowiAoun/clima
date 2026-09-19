@@ -336,3 +336,33 @@ arrived so that a missing one is stated rather than merely absent.
 
 What closes it: one tagged release, and fixing whatever it says. Move the
 AppImage job into the required set in the commit that makes it green.
+
+## No release has ever been cut
+
+**Status: the pipeline is wired end to end and has never been run end to end.**
+
+There are no tags and no GitHub releases. That was not a decision, and it is
+worth writing down what was actually in the way, because none of it was visible
+from inside the repository:
+
+- `release-please` could not open its pull request. It ran on every push to
+  `main`, worked out the version, pushed its branch, and failed on the last
+  step with *GitHub Actions is not permitted to create or approve pull
+  requests* - a repository setting, not a file. Turned on 2026-09-19.
+- The app did not build against the Qt the floor names. `qmlcachegen` on 6.8
+  refuses a type annotation on a nested JavaScript function, so the Debian job
+  and the `.deb` release job had never once compiled the tree.
+- Three more jobs died at their Qt install step, on an aqtinstall module name
+  and an Android host name.
+- Every published link names the repository `climat`, after the rename, and on
+  GitHub it is still called `clima`. Thirteen dead links, twelve of them from
+  that one difference.
+
+The first four are fixed. The last is one rename away and
+`scripts/check-urls.sh` refuses a release until it is done, because the thing
+it would otherwise publish is a store page whose homepage, bug tracker,
+privacy policy and four screenshots all 404.
+
+What closes this: cutting 0.2.0 and fixing whatever the run says. Until then
+every claim in `docs/releasing.md` about what a release carries is a claim
+about a workflow rather than about a release.

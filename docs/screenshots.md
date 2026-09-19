@@ -13,7 +13,7 @@ taste - one of them gets rejected by Flathub's linter, and another one fails CI.
 |---|---|---|---|
 | **golden** | `scripts/golden.sh` | raw, exact, 50 scenes | byte for byte, every commit |
 | **showcase** | `scripts/shots.sh` | device bezels, composed | byte for byte, every commit |
-| **store** | `climat --grab` | raw, un-bezelled, whole window | not compared |
+| **store** | `scripts/store-shots.sh` | raw, un-bezelled, whole window | not compared |
 
 ## golden - the regression detector
 
@@ -67,20 +67,28 @@ and then `scripts/shots.sh` picks it up automatically.
 Raw grabs from the app itself, with no frame around them:
 
 ```sh
-climat --viewport desktop --scheme dark  --grab desktop-dark.png
-climat --viewport desktop --scheme light --grab desktop-light.png
-climat --viewport mobile  --tab monthly  --grab mobile-daily.png
+scripts/store-shots.sh          # into build/store-shots
 ```
+
+The script renders exactly the four the AppStream component asks for, and it
+reads their names out of that component rather than keeping its own list. Add a
+`<screenshot>` there and the script fails until it is told how to render it; add
+one to the script and it fails until the component asks for it. That is the only
+part of this profile that is checked, and it is the part that was wrong: all
+four URLs were declared when the file was written and nothing produced them, so
+they were dead links for six weeks.
 
 **Do not use the showcase images here.** Flathub's linter reads a marketing
 composite with a device frame around it as excessive whitespace and rejects the
 submission. A store screenshot is meant to be the application's window, nothing
 else.
 
-They are published to `gh-pages` by the release workflow rather than committed,
+They are deployed to GitHub Pages by the release workflow rather than committed,
 because AppStream wants stable absolute URLs and a `raw.githubusercontent` link
 moves with the branch. The URLs are declared in
-`packaging/linux/climat.metainfo.xml.in`.
+`packaging/linux/climat.metainfo.xml.in`, and they only resolve once the
+repository and the URLs in the tree agree on a name - `scripts/check-urls.sh` is
+what refuses a release that would publish them broken.
 
 ## Determinism, for all three
 

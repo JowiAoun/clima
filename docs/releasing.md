@@ -8,6 +8,25 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 How a version of Climat gets from `main` to a download. Most of it is automatic;
 the parts that are not are the parts that should not be.
 
+## Two settings this depends on, outside the repository
+
+Both are one click and neither is in a file, so both are recorded here.
+
+**Actions must be allowed to open pull requests.** Settings, Actions, General,
+Workflow permissions, "Allow GitHub Actions to create and approve pull
+requests". Without it `release-please` runs, works out the version, pushes its
+branch, and then fails on the last step with *GitHub Actions is not permitted to
+create or approve pull requests*. It did that on every push from the day it was
+added until 2026-09-19, which is why there is no release yet.
+
+**The repository name has to match the links in the tree.** Sixteen files carry
+the project URL: the AppStream component a software centre shows, the bug
+tracker in the issue templates, the Play listing, the privacy policy, the
+written offer for Qt's source, the Debian copyright file. They all say the same
+thing, and a release checks that they say what the repository is actually
+called. `scripts/check-urls.sh` is that check, the `preflight` job runs it with
+`--strict`, and a release stops rather than publishing a store page that 404s.
+
 ## The short version
 
 1. Merge work into `main` with conventional-commit messages. You already do.
@@ -63,7 +82,8 @@ the worst moment to notice it.
 | `climat.spdx` | `reuse spdx` | SBOM, from the SPDX headers CI already gates |
 | `THIRD-PARTY-LICENCES.txt` | `scripts/licence-bundle.sh` | |
 | `QT-SOURCE-OFFER.txt` | committed, copied | LGPLv3 obligation |
-| build provenance | `actions/attest-build-provenance` | `gh attestation verify` |
+| build provenance | `actions/attest-build-provenance` | `gh attestation verify`, over everything in `dist/` |
+| the store screenshots | `scripts/store-shots.sh`, deployed to Pages | the four URLs the AppStream component declares |
 
 The publish job prints which artefacts arrived and marks any that did not, into
 both the job summary and the release body. A missing file and a file nobody
@@ -136,6 +156,9 @@ The version code Play sees is computed from the version in `CMakeLists.txt`
 ## Rehearsing without releasing
 
 ```sh
+scripts/preflight.sh            # every gate CI runs, first
+scripts/check-urls.sh --strict  # what the release refuses to publish without
+scripts/store-shots.sh          # the four screenshots a software centre shows
 scripts/deb.sh inspect          # the .deb, in debian:trixie, with its control file
 scripts/flatpak.sh deps         # once: the runtime and SDK
 scripts/flatpak.sh bundle       # the single-file .flatpak
@@ -160,6 +183,6 @@ commit. A published build has to be reproducible from something immutable.
 
 Flathub also runs `appstreamcli validate` and requires screenshots at stable
 URLs. `scripts/check-packaging.sh` runs the same validation locally; the
-screenshots are published by the release workflow to `gh-pages`, un-bezelled,
-because Flathub's linter reads a marketing composite with a device frame around
-it as excessive whitespace.
+screenshots are rendered by `scripts/store-shots.sh` and deployed to GitHub
+Pages by the release workflow, un-bezelled, because Flathub's linter reads a
+marketing composite with a device frame around it as excessive whitespace.
