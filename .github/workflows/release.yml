@@ -272,9 +272,13 @@ jobs:
 
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
-      - name: Version, from the tag
+      # From the tag when there is one, and from CMakeLists.txt when this was
+      # dispatched by hand - otherwise a rehearsal off a branch produces
+      # `climat-main-windows-x64.msi`, which is a file nobody can identify a
+      # week later.
+      - name: Version
         shell: bash
-        run: echo "CLIMAT_RELEASE_VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+        run: bash scripts/release-version.sh >> "$GITHUB_ENV"
 
       # windeployqt runs as part of `cmake --install`, so the staged tree comes
       # out with Qt already beside the executable - see the WIN32 block in
@@ -372,8 +376,8 @@ jobs:
       - name: OpenSSL for arm64-v8a
         run: scripts/android-openssl.sh
 
-      - name: Version, from the tag
-        run: echo "CLIMAT_RELEASE_VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - name: Version
+        run: bash scripts/release-version.sh >> "$GITHUB_ENV"
 
       # The keystore is a file, and a secret is a string, so it travels as
       # base64 and is written to the runner's temp directory - never into the
@@ -612,7 +616,13 @@ jobs:
       # the right thing. Overwriting those notes with our own would throw away
       # the changelog; creating a second release is not possible. So: append if
       # it is there, create if it is not, and upload either way.
+      # Only for a tag. `workflow_dispatch` exists to rehearse this workflow, and
+      # without this condition a rehearsal off main ran `gh release create main`
+      # and left a GitHub Release called "main" behind. Everything above still
+      # runs on a dispatch - the artefacts, the report, the checksums, the
+      # attestation - which is the whole of what a rehearsal is for.
       - name: Publish
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
