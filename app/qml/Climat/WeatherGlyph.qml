@@ -370,6 +370,15 @@ Item {
     //
     // The rounding is not cosmetic. It is what makes a path string identical
     // between two runs, which is the property the golden images rest on.
+    //
+    // It is also why the annotation is HERE and not on the px/py helpers nested
+    // inside the two path functions below. A nested JavaScript function is not
+    // a QML method, and qmlcachegen on Qt 6.8 - the floor D2 sets - refuses a
+    // type annotation on one outright: "Type annotations are not permitted in
+    // function parameters in JavaScript functions". Qt 6.11 compiles it, so the
+    // devshell build stayed green while Debian's Qt could not build the app at
+    // all. The helpers hand their sum to this function, which is where the
+    // number needs a type.
     function fixed2(v: real): string { return v.toFixed(2) }
 
     function cloudPath(w: real, h: real, solo: bool): string {
@@ -379,8 +388,8 @@ Item {
         var uw = 0.92 * w * s;
         var uh = 0.56 * h * s;
 
-        function px(f: real): string { return root.fixed2(ox + f * uw) }
-        function py(f: real): string { return root.fixed2(oy + f * uh) }
+        function px(f) { return root.fixed2(ox + f * uw) }
+        function py(f) { return root.fixed2(oy + f * uh) }
 
         return "M " + px(0.13) + " " + py(1.00)
              + " C " + px(0.04) + " " + py(1.00) + " " + px(0.00) + " " + py(0.79) + " " + px(0.00) + " " + py(0.66)
@@ -400,8 +409,8 @@ Item {
         var ox = 0.30 * w, oy = 0.50 * h;
         var bw = 0.42 * w, bh = 0.50 * h;
 
-        function px(f: real): string { return root.fixed2(ox + f * bw) }
-        function py(f: real): string { return root.fixed2(oy + f * bh) }
+        function px(f) { return root.fixed2(ox + f * bw) }
+        function py(f) { return root.fixed2(oy + f * bh) }
 
         return "M " + px(0.62) + " " + py(0.00)
              + " L " + px(0.16) + " " + py(0.58)
