@@ -138,13 +138,18 @@ leaves beside the originals before assuming the test is wrong.
 ## Before you push
 
 ```sh
-nix develop --command ctest --test-dir build/dev --output-on-failure
-nix develop --command reuse lint
-nix develop --command shellcheck --external-sources scripts/*.sh
-nix develop --command actionlint
-nix develop --command bash scripts/check-qml-files.sh
-CLIMAT_BUILD_DIR=build/lint nix develop --command bash scripts/check-qmllint.sh
+scripts/preflight.sh
 ```
+
+That is every gate CI runs, in one command, in the order that finds a problem
+soonest. It enters the Nix devshell itself, so it works from a plain terminal,
+and it keeps going after a failure so that the summary at the end is the whole
+list rather than the first thing to break. `scripts/preflight.sh --fast` skips
+everything that needs a build, which is about ten seconds and catches most of
+it.
+
+The checks it runs are listed in the script, and two of them are worth knowing
+about before they fail you.
 
 `check-qml-files.sh` is the one people trip over: the QML module lists every
 file explicitly and never globs, so a new `.qml` has to be added to
