@@ -93,31 +93,11 @@ for binary in "$app" "$gallery"; do
     fi
 done
 
-# The pinned capture environment. Identical to scripts/grab.sh's - that file
-# carries the long argument for each line - plus the fontconfig replacement,
-# which is what makes these comparable across machines rather than merely
-# repeatable on one.
-export QT_QPA_PLATFORM=offscreen
-export LIBGL_ALWAYS_SOFTWARE=1
-export GALLIUM_DRIVER=llvmpipe
-unset QT_QUICK_BACKEND QSG_RHI_BACKEND QMLSCENE_DEVICE
-
-# The single-threaded render loop. With the default threaded one, grabToImage()
-# completes on the render thread and the capture races the scene - which is how
-# one run in five came back with the preferences gear missing from two pages.
-# scripts/grab.sh carries the evidence and its limits, and docs/screenshots.md
-# has the ±1 difference this does not fix.
-export QSG_RENDER_LOOP=basic
-export QT_SCALE_FACTOR=1
-export QT_ENABLE_HIGHDPI_SCALING=0
-export QT_SCREEN_SCALE_FACTORS=
-export QT_FONT_DPI=96
-export QT_QPA_PLATFORMTHEME=
-export LC_ALL=C.UTF-8
-export LANG=C.UTF-8
-export TZ=UTC
-export QT_FORCE_STDERR_LOGGING=1
-export FONTCONFIG_FILE="$root/tests/golden/fontconfig.conf"
+# The pinned capture environment, which scripts/shots.sh and
+# scripts/play-shots.sh pin identically because they all read it out of the same
+# file. scripts/grab.sh carries the long argument for each line.
+# shellcheck source=scripts/capture-env.sh
+. "$here/capture-env.sh"
 
 # shellcheck source=scripts/qt-env.sh
 . "$here/qt-env.sh" >/dev/null

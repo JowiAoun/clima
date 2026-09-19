@@ -27,6 +27,12 @@ compile_commands.json
 # supposed to catch.
 tests/golden/images/*.actual.png
 
+# The same convention, from the two other suites that compare images:
+# scripts/shots.sh for the README device images and scripts/play-shots.sh for
+# the Play listing.
+docs/images/*.actual.png
+packaging/android/play/screenshots/*.actual.png
+
 # OS cruft
 .DS_Store
 Thumbs.db

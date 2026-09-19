@@ -57,15 +57,12 @@ if [ ! -x "$widget_binary" ]; then
   exit 1
 fi
 
-# The same pinned environment scripts/golden.sh captures under, and for the same
-# reason: fontconfig decides where glyphs land, and the host's would put them
-# somewhere else. See that script's header, which explains it at length.
-export QT_QPA_PLATFORM=offscreen
-export QT_SCALE_FACTOR=1
-export QT_FONT_DPI=96
-export TZ=UTC
-export FONTCONFIG_FILE="$root/tests/golden/fontconfig.conf"
-export LC_ALL=C.UTF-8
+# The same pinned environment scripts/golden.sh captures under, out of the same
+# file, which is the only way "the same" has ever been true. This script used to
+# keep its own shorter list and the difference cost every CI run from
+# 2026-09-14 on: see scripts/capture-env.sh.
+# shellcheck source=scripts/capture-env.sh
+. "$here/capture-env.sh"
 
 # And the developer's own settings kept out of it, which scripts/golden.sh has
 # always done and this script did not. Units are a QSettings value: somebody who
@@ -150,8 +147,11 @@ case "${1:-render}" in
     ;;
 
   check)
-    tmp="$(mktemp -d)"
-    trap 'rm -rf "$tmp"' EXIT
+    # Inside the scratch directory rather than a second mktemp with a second
+    # EXIT trap: a trap is not a stack, and the one this used to set here
+    # replaced the one guarding the scratch config, leaking a directory per run.
+    tmp="$scratch/render"
+    mkdir -p "$tmp"
     render_all "$tmp" > /dev/null
 
     drift=0
@@ -160,7 +160,12 @@ case "${1:-render}" in
         echo "shots: docs/images/$shot.png is missing" >&2
         drift=1
       elif ! cmp -s "$tmp/$shot.png" "$images_dir/$shot.png"; then
+        # Beside the recorded one, under the name scripts/golden.sh uses for
+        # the same thing, so a failure can be looked at rather than only read
+        # about. .gitignore keeps it out of a commit; CI uploads it.
+        cp "$tmp/$shot.png" "$images_dir/$shot.actual.png"
         echo "shots: docs/images/$shot.png is not what the app renders today" >&2
+        echo "shots:   what it renders is in docs/images/$shot.actual.png" >&2
         drift=1
       fi
     done

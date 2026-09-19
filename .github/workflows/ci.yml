@@ -121,6 +121,18 @@ jobs:
       - name: README device images
         run: CLIMAT_BUILD_DIR=build/ci nix develop --command bash scripts/shots.sh check
 
+      # What the runner actually rendered, when it did not match. The golden
+      # step above has had this since it was written and this one did not, which
+      # is why a red README-image job could only be read about: the comparison
+      # happens in a temporary directory that the run then deletes.
+      - name: Upload the device images that differed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shots-actual
+          path: docs/images/*.actual.png
+          if-no-files-found: ignore
+
       # The desktop widgets, against a real compositor. `WLR_BACKENDS=headless
       # sway` needs no GPU, no seat and no display, and wlroots is the reference
       # implementation of the protocol KWin also speaks - so this is the KDE and

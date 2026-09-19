@@ -23,9 +23,10 @@
 # measurement. So these are the pixels the golden images already vouch for,
 # and a phone shows the store a sharper copy of the same thing.
 #
-# The same pinned environment as scripts/shots.sh and scripts/golden.sh, for
-# the same reason: a fixture at a frozen clock, every animation collapsed to
-# zero, one fontconfig, so `check` can tell a stale image from an edited one.
+# The same pinned environment as scripts/shots.sh and scripts/golden.sh, read
+# out of scripts/capture-env.sh so that it stays the same: a fixture at a frozen
+# clock, every animation collapsed to zero, one fontconfig, so `check` can tell
+# a stale image from an edited one.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -39,12 +40,8 @@ if [ ! -x "$binary" ]; then
   exit 1
 fi
 
-export QT_QPA_PLATFORM=offscreen
-export QT_SCALE_FACTOR=1
-export QT_FONT_DPI=96
-export TZ=UTC
-export FONTCONFIG_FILE="$root/tests/golden/fontconfig.conf"
-export LC_ALL=C.UTF-8
+# shellcheck source=scripts/capture-env.sh
+. "$here/capture-env.sh"
 
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
@@ -93,7 +90,10 @@ case "${1:-render}" in
         echo "play-shots: $name.png is missing" >&2
         drift=1
       elif ! cmp -s "$tmp/$name.png" "$images_dir/$name.png"; then
+        # Beside the recorded one, for scripts/shots.sh's reason.
+        cp "$tmp/$name.png" "$images_dir/$name.actual.png"
         echo "play-shots: $name.png does not match what the app renders" >&2
+        echo "play-shots:   what it renders is in $name.actual.png" >&2
         drift=1
       fi
     done
