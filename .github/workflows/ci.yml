@@ -17,6 +17,23 @@
 # below builds against a distribution's own Qt with no Nix anywhere, because
 # that is what a packager does, and a project that only builds inside its own
 # pinned environment discovers on release day that it depends on it.
+#
+# ---- why every `uses:` is a commit hash -------------------------------------
+#
+# The same argument, one layer out. A tag is a name somebody else can move: the
+# owner of an action, or anyone who takes their account, can point v4 at new
+# code tomorrow and it runs here with a token. A commit hash cannot be moved
+# without changing the hash.
+#
+# The version is in the comment beside it so the line is still readable, and
+# Dependabot updates both together - .github/dependabot.yml says why actions are
+# the one ecosystem this repository watches at all. `zizmor` in the lint job
+# below is what stops an unpinned one arriving.
+#
+# `persist-credentials: false` on every checkout is the other half of that. By
+# default the action writes the job's token into .git/config and leaves it
+# there, where any later step that packages the working tree can carry it off
+# the runner. Nothing in this file pushes, so nothing here needs it.
 
 name: ci
 
@@ -47,9 +64,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: cachix/install-nix-action@v27
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
@@ -76,7 +95,7 @@ jobs:
       # there is nothing here to collect.
       - name: Upload the images that differed
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: golden-actual
           path: tests/golden/images/*.actual.png
@@ -127,7 +146,7 @@ jobs:
       # happens in a temporary directory that the run then deletes.
       - name: Upload the device images that differed
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: shots-actual
           path: docs/images/*.actual.png
@@ -164,7 +183,9 @@ jobs:
     timeout-minutes: 45
     container: debian:trixie
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install the build dependencies
         run: |
@@ -210,7 +231,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # The same modules the release job installs - release.yml adds
       # qtpositioning, and for a while this job did not, so the build CI
@@ -223,13 +246,13 @@ jobs:
       # dies before it downloads anything: "The packages ['qtdeclarative'] were
       # not found while parsing XML of package information!". That is what this
       # job did from the day it was written until 2026-09-19.
-      - uses: jurplel/install-qt-action@v4
+      - uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
         with:
           version: '6.8.3'
           modules: 'qtpositioning'
           cache: true
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Configure
         run: >
@@ -262,11 +285,13 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # Modules as in the Windows job above, which says why qtdeclarative is
       # not among them.
-      - uses: jurplel/install-qt-action@v4
+      - uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
         with:
           version: '6.8.3'
           modules: 'qtpositioning'
@@ -299,9 +324,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: cachix/install-nix-action@v27
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
@@ -408,9 +435,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: '21'
@@ -421,7 +450,7 @@ jobs:
       # second, because the second step's QT_ROOT_DIR is what the build reads
       # and the host is found as its gcc_64 sibling.
       - name: Install the host Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
         with:
           version: '6.11.1'
           host: linux
@@ -438,7 +467,7 @@ jobs:
       # desktop step above keeps `host: linux`, because a host Qt is a real
       # Linux build.
       - name: Install Qt for Android
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
         with:
           version: '6.11.1'
           host: all_os
@@ -477,7 +506,7 @@ jobs:
             build/android/app/android-build/climat.apk \
             | grep -E '^package|sdkVersion|targetSdk|uses-permission|native-code'
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: climat-apk
           path: build/android/app/android-build/climat.apk

@@ -13,6 +13,12 @@
 # Actions are different: a third-party action is code we execute with a token,
 # and a stale one is the realistic supply-chain exposure in a project with no
 # package manager.
+#
+# Every `uses:` is pinned to a commit hash with the version in a comment beside
+# it, so what Dependabot moves here is the hash and the comment together. That
+# is the arrangement it is built for, and it is the only one where the update is
+# reviewable: a bump from one tag to another shows nothing in the diff about
+# what the code became.
 version: 2
 updates:
   - package-ecosystem: github-actions

@@ -40,6 +40,10 @@
 # repository's secrets - and when it is not, the job says so in the log and
 # the report below says so on the release page, because an unsigned bundle is
 # one Play will not take. docs/releasing.md says what the four secrets are.
+#
+# Every `uses:` is a commit hash and every checkout sets
+# `persist-credentials: false`, for the reasons ci.yml gives at length. This
+# file matters more: it is the one that runs with a token that can write.
 name: release
 
 on:
@@ -48,12 +52,18 @@ on:
       - 'v*.*.*'
   workflow_dispatch:
 
+# Read, for every job that only builds something. The one job that writes -
+# `publish` - asks for more where it is declared, which is the only place a
+# reader looking at a step can see what token it had.
+#
+# This was `contents: write` plus `id-token: write` plus `attestations: write`
+# for the whole file, so five jobs that compile code and upload an artefact were
+# each handed a token that can rewrite the repository and mint an attestation.
+# None of them needs it. A release builds third-party code - a KDE tarball, an
+# OpenSSL tarball, linuxdeploy off the internet - and that is exactly the shape
+# of job to hand the smallest possible token.
 permissions:
-  contents: write
-  # The two the provenance attestation needs. id-token to get an OIDC token
-  # from GitHub, attestations to record the result.
-  id-token: write
-  attestations: write
+  contents: read
 
 jobs:
   # ---- Debian and derivatives ------------------------------------------------
@@ -66,7 +76,9 @@ jobs:
     runs-on: ubuntu-latest
     container: debian:trixie
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install the build dependencies
         run: |
@@ -88,7 +100,7 @@ jobs:
       - name: Package
         run: cd build && cpack -G DEB
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: deb
           path: build/*.deb
@@ -104,7 +116,9 @@ jobs:
     name: .flatpak
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install flatpak-builder
         run: |
@@ -119,7 +133,7 @@ jobs:
       - name: Build the bundle
         run: scripts/flatpak.sh bundle
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: flatpak
           path: build/*.flatpak
@@ -144,9 +158,11 @@ jobs:
     runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: jurplel/install-qt-action@v4
+      - uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
         with:
           version: '6.8.3'
           modules: 'qtpositioning'
@@ -194,7 +210,7 @@ jobs:
             --desktop-file AppDir/usr/share/applications/io.github.JowiAoun.Climat.desktop \
             --icon-file packaging/icons/climat-256.png
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: appimage
           path: '*.AppImage'
@@ -211,15 +227,17 @@ jobs:
     name: .msi and .zip (windows x64)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: jurplel/install-qt-action@v4
+      - uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
         with:
           version: '6.8.3'
           modules: 'qtpositioning'
           cache: true
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       - name: Version, from the tag
         shell: bash
@@ -262,7 +280,7 @@ jobs:
             -bindpath "icons=packaging\icons" `
             -o "climat-$env:CLIMAT_RELEASE_VERSION-windows-x64.msi"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: windows
           path: |
@@ -280,15 +298,17 @@ jobs:
     name: .aab and .apk (android, arm64-v8a)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: '21'
 
       - name: Install the host Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
         with:
           version: '6.11.1'
           host: linux
@@ -298,7 +318,7 @@ jobs:
           cache: true
 
       - name: Install Qt for Android
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
         with:
           version: '6.11.1'
           host: all_os
@@ -361,7 +381,7 @@ jobs:
             echo "::warning::android: the bundle is NOT signed"
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: android
           path: |
@@ -375,13 +395,22 @@ jobs:
     name: publish
     runs-on: ubuntu-latest
     needs: [deb, flatpak, appimage, windows, android]
+    permissions:
+      # The release itself.
+      contents: write
+      # The two the provenance attestation needs: id-token to get an OIDC token
+      # from GitHub, attestations to record the result.
+      id-token: write
+      attestations: write
     # always(), so that a failed AppImage - the one job allowed to fail - does
     # not take the release with it. The step below reports what arrived.
     if: always()
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: cachix/install-nix-action@v27
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
@@ -397,7 +426,7 @@ jobs:
           nix develop --command scripts/licence-bundle.sh meta/THIRD-PARTY-LICENCES.txt
           cp packaging/QT-SOURCE-OFFER.txt meta/
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: incoming
 
@@ -432,7 +461,7 @@ jobs:
       - name: Checksums
         run: cd dist && sha256sum -- * > SHA256SUMS && cat SHA256SUMS
 
-      - uses: actions/attest-build-provenance@v2
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: |
             dist/*.deb
