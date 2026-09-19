@@ -65,6 +65,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  # One release at a time. Two tags pushed together would otherwise race to
+  # attach artefacts to two releases through the same `gh release edit`, and
+  # `cancel-in-progress: false` because the loser of that race is a release that
+  # was half-published rather than one nobody wanted.
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   # ---- Debian and derivatives ------------------------------------------------
   #
@@ -461,14 +469,22 @@ jobs:
       - name: Checksums
         run: cd dist && sha256sum -- * > SHA256SUMS && cat SHA256SUMS
 
+      # Everything in dist/, named by one glob that cannot miss.
+      #
+      # It used to be a list of five globs, one per artefact, and that was a
+      # release-breaking bug rather than an untidy one: this action fails when a
+      # subject path matches nothing, the AppImage job is `continue-on-error` by
+      # design, and this step runs before `gh release upload`. So the first
+      # release where the P1 artefact did not build would have attested nothing
+      # and published nothing, over an artefact the file above says is allowed
+      # to be missing.
+      #
+      # Attesting the SBOM, the licence bundle and SHA256SUMS along with the
+      # binaries is not a side effect worth avoiding either. They are published
+      # bytes and they make claims about the rest.
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: |
-            dist/*.deb
-            dist/*.flatpak
-            dist/*.AppImage
-            dist/*.msi
-            dist/*.zip
+          subject-path: dist/*
 
       # release-please creates the GitHub Release itself when its pull request
       # merges, with notes built from the conventional-commit history - so by
