@@ -74,6 +74,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # ---- the one thing worth checking before building anything -----------------
+  #
+  # Seconds, and it runs first because the failure it catches is one that no
+  # artefact can be repaired after the fact: a release whose store page, bug
+  # tracker, privacy policy and screenshots all point at a repository that is
+  # not there. scripts/check-urls.sh says what to do about it. `--strict` here
+  # and not in ci.yml, because a pull request cannot fix a repository name and a
+  # release must not ship around one.
+  #
+  # Needs no Nix and no Qt: bash, git and sed.
+  check:
+    name: preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Project URLs
+        run: bash scripts/check-urls.sh --strict
+
   # ---- Debian and derivatives ------------------------------------------------
   #
   # In the distribution it is for. The Depends field is derived by
@@ -83,6 +104,7 @@ jobs:
     name: .deb (debian 13)
     runs-on: ubuntu-latest
     container: debian:trixie
+    needs: [check]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -123,6 +145,7 @@ jobs:
   flatpak:
     name: .flatpak
     runs-on: ubuntu-latest
+    needs: [check]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -165,6 +188,7 @@ jobs:
     name: .AppImage (glibc 2.35)
     runs-on: ubuntu-22.04
     continue-on-error: true
+    needs: [check]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -234,6 +258,7 @@ jobs:
   windows:
     name: .msi and .zip (windows x64)
     runs-on: windows-latest
+    needs: [check]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -305,6 +330,7 @@ jobs:
   android:
     name: .aab and .apk (android, arm64-v8a)
     runs-on: ubuntu-latest
+    needs: [check]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -397,6 +423,95 @@ jobs:
             *.apk
             LICENSE-OpenSSL.txt
           if-no-files-found: error
+
+  # ---- the screenshots a software centre shows -------------------------------
+  #
+  # The AppStream component has declared four <image> URLs under
+  # https://<owner>.github.io/<repo>/screenshots/ since it was written, and
+  # docs/releasing.md and docs/screenshots.md have both said for as long that
+  # the release workflow published them. Nothing did. So all four have been dead
+  # links from the first day: four broken images in GNOME Software and KDE
+  # Discover, and a Flathub submission that fails its own linter on screenshots
+  # it cannot fetch.
+  #
+  # This is that job. It renders them from the application itself with
+  # scripts/store-shots.sh, which reads the names out of the metainfo so the two
+  # cannot drift, and deploys them as the Pages site.
+  #
+  # Deployed rather than committed because AppStream wants a stable absolute URL
+  # and a raw.githubusercontent link moves with the branch. `enablement: true`
+  # turns Pages on the first time this runs, so there is no setting to remember.
+  #
+  # It is not in `needs:` for publish. A store screenshot that failed to deploy
+  # is worth a red job and is not worth holding up a .deb.
+  screenshots:
+    name: store screenshots (Pages)
+    runs-on: ubuntu-latest
+    needs: [check]
+    permissions:
+      # A job's permissions replace the file's rather than adding to them, so
+      # `contents: read` is spelled out here.
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      # Dev tools ON, unlike every other job in this file, and that is the
+      # point: --grab is a development tool and a shipped binary does not have
+      # it. Tests and the gallery are off - only the app is photographed.
+      - name: Build the app, with its capture harness
+        run: |
+          nix develop --command cmake -S . -B build/shots -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCLIMAT_BUILD_TESTS=OFF \
+            -DCLIMAT_BUILD_GALLERY=OFF \
+            -DCLIMAT_DEV_TOOLS=ON
+          nix develop --command cmake --build build/shots --target climat
+
+      - name: Render them
+        run: |
+          CLIMAT_BUILD_DIR=build/shots nix develop --command \
+            bash scripts/store-shots.sh site/screenshots
+
+      # So the site root is not a 404 for anybody who trims the URL back.
+      - name: A page at the root
+        env:
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          {
+            echo '<!doctype html><meta charset="utf-8">'
+            echo '<title>Climat screenshots</title>'
+            echo '<p>Screenshots for the AppStream component, published by the'
+            echo "release workflow. The project is at <a href=\"$REPO_URL\">$REPO_URL</a>.</p>"
+            echo '<ul>'
+            for shot in site/screenshots/*.png; do
+              name="$(basename "$shot")"
+              echo "<li><a href=\"screenshots/$name\">$name</a></li>"
+            done
+            echo '</ul>'
+          } > site/index.html
+
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
   # ---- publish ---------------------------------------------------------------
   publish:

@@ -96,13 +96,19 @@
   </keywords>
 
   <!--
-    The screenshots are published to gh-pages by the release workflow rather
-    than committed here, because AppStream wants stable absolute URLs and a
-    raw.githubusercontent link moves with the branch. They are un-bezelled
-    grabs on purpose: Flathub's linter reads a marketing composite with a
-    phone frame around it as excessive whitespace and rejects it. The framed
-    versions are for the README, and they are a different capture profile -
-    see docs/screenshots.md.
+    The screenshots are deployed to GitHub Pages by the release workflow
+    rather than committed here, because AppStream wants stable absolute URLs
+    and a raw.githubusercontent link moves with the branch. They are
+    un-bezelled grabs on purpose: Flathub's linter reads a marketing composite
+    with a phone frame around it as excessive whitespace and rejects it. The
+    framed versions are for the README, and they are a different capture
+    profile - see docs/screenshots.md.
+
+    scripts/store-shots.sh reads the names below out of this file and renders
+    exactly those, so a screenshot added here without a rule there is a red
+    job rather than a fifth broken image. That check exists because these four
+    URLs were declared the day this file was written and nothing produced them
+    until the Pages job was added.
   -->
   <screenshots>
     <screenshot type="default">
